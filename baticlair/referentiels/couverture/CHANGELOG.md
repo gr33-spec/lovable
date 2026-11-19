@@ -1,5 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-55 — Tuile à pureau variable : le rampant en rangs entiers
+
+- **§5 Pureau par défaut d'une tuile à pureau variable** (le devis ne le dit pas) : le rampant est partagé en un nombre
+  ENTIER de rangs au pureau le plus long admis par le fabricant : pureau = max(pureau mini, rampant ÷ arrondi au-dessus
+  (rampant ÷ pureau maxi)). C'est la pose réelle (fiche couverture : Edilians, Koramic, Terreal). La fiche HP 10 de
+  février 2026 donne des pentes minimales par zone et par site, sans lien avec le pureau. Avant : pureau mini en
+  zone 3 ou sous 19,3°, sinon maxi. Le rampant (5,5 m par défaut) devient une hypothèse dite de l'ouvrage.
+- Exemple : HP 10, rampant 5,5 m → 15 rangs, pureau 36,7 cm (avant 31 cm en zone 3). 120 m² : 1 258 tuiles (avant
+  1 488) ; 24 m de rives : 66 tuiles de rive (avant 78).
+
 ## roofing-2026.11.19-54 — Ardoise : recouvrement du NF DTU 40.11, lu dans la fiche couverture
 
 - **§3 Recouvrement de l'ardoise au crochet** : le tableau du NF DTU 40.11 (2020, annexe B), relu chez Cupa et Rathscheck

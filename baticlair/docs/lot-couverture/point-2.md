@@ -27,13 +27,13 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces | Valeur par défaut à confirmer |
+| Tuiles HP10 | 1 258 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces (≈ 7 palettes) |  | chiffrable |
+| Tuiles HP10 | 1 258 pièces (≈ 6 palettes) |  | chiffrable |
 | Fenêtre de toit Velux GGL MK04 tout confort | 2 pièces |  | chiffrable |
 
 ## Ardoises et une fenêtre de toit sans taille

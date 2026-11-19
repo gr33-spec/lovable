@@ -1,8 +1,8 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.19-54`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.19-55`.
 
-187 règles de calcul : 72 constantes, 8 tables, 25 valeurs intermédiaires, 82 besoins. Règles sans test qui les cite : 0.
+186 règles de calcul : 71 constantes, 8 tables, 25 valeurs intermédiaires, 82 besoins. Règles sans test qui les cite : 0.
 
 Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à défaut, ceux qui citent sa section (« par §x »).
 
@@ -98,7 +98,6 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `seuil_080` | 0,8 mm | §1, §7, §25, §49.7, §36 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, abergement-cheminee, couverture-zinc-joint-debout | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §36), dernier-recours.test.ts (par §1, §7, §25, §49.7, §36), devis-d2026-020.test.ts (par §1, §7, §25, §49.7, §36) |
 | Constante | `seuil_bobineau` | 6 m | §1, §7, §25, §49.7, §12 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, bandes-cuivre, abergement-cheminee | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §12), dernier-recours.test.ts (par §1, §7, §25, §49.7, §12), devis-d2026-020.test.ts (par §1, §7, §25, §49.7, §12) |
 | Constante | `seuil_pente_ecran` | 16,7 ° | §5, §35, §3, §34, §4 | couverture-tuiles-emboitement, couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | referential.test.ts |
-| Constante | `seuil_pente_pureau` | 19,3 ° | §5, §35 | couverture-tuiles-emboitement | lot-couverture-1.test.ts (par §5, §35), tuiles-canal.test.ts (par §5, §35) |
 | Constante | `seuil_rampant` | 5,5 m | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |
 | Constante | `seuil_rampant_2` | 11 m | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |
 | Constante | `surlongueur_bac` | 0,15 m | §7, §36 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36), lecture-de00000071.test.ts (par §7, §36) |

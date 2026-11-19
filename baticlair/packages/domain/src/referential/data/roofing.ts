@@ -1146,7 +1146,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-54",
+  version: "roofing-2026.11.19-55",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1931,19 +1931,21 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Il change le nombre de tuiles et de liteaux.",
           range: { min: "tuile.pureau_min", max: "tuile.pureau_max" },
           textLabels: ["pureau"],
-          // Référentiel du fondateur : « en zone 3 et pente < 35 % (19,3°), prendre le pureau mini » ; sinon le pureau se cale
-          // selon la pente, le maxi du fabricant pour une pente courante. Dit comme hypothèse, modifiable.
+          // Fiche couverture (2026-11-19 ; Edilians, Koramic, Terreal) : le couvreur partage le rampant en un nombre ENTIER de
+          // rangs, au pureau le plus long admis par le fabricant ; aucune source ne lie le pureau à la zone ou à la pente
+          // (avant : pureau mini en zone 3 ou sous 19,3°, sinon maxi). Dit comme hypothèse, modifiable.
           default: {
-            formula: "si(zone >= regle.zone_littorale, tuile.pureau_min, si(pente < regle.seuil_pente_pureau, tuile.pureau_min, tuile.pureau_max))",
-            source: F,
-            verification: FOUNDER_DOC,
-            version: 1,
-            note: "pureau mini du fabricant en zone littorale ou pente < 19,3° (35 %), sinon pureau maxi",
+            formula: "max(tuile.pureau_min, longueur_rampant / arrondi_sup(longueur_rampant / tuile.pureau_max))",
+            source: FICHE,
+            verification: FICHE_VERIFIEE,
+            version: 2,
+            note: "rampant partagé en rangs entiers, au plus long pureau admis par le fabricant",
           },
         },
         ENTRAXE_PARAM,
         PENTE_PARAM,
         ZONE_PARAM,
+        RAMPANT_PARAM,
         { key: "longueur_rives", label: "Longueur de rives", unit: "m", kind: "site_data", question: "Longueur totale des rives ?", fromLineQuantity: true, forSlots: ["rive"] },
       ],
       slots: [
@@ -1955,7 +1957,6 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       constants: {
         ...ECRAN_CONSTANTS,
-        seuil_pente_pureau: condition("19.3", "°", F, FOUNDER_DOC, "Sous cette pente (35 %, soit 19,3°), pureau mini (nombre de tuiles maxi)."),
         zone_littorale: ZONE_LITTORALE,
       },
       needs: [

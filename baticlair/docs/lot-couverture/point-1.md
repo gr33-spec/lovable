@@ -28,14 +28,14 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces | Valeur par défaut à confirmer |
+| Tuiles HP10 | 1 258 pièces | Valeur par défaut à confirmer |
 | Noue zinc | 8 ml | Façonnage à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces (≈ 7 palettes) |  | chiffrable |
+| Tuiles HP10 | 1 258 pièces (≈ 6 palettes) |  | chiffrable |
 | Arêtiers | 70 pièces |  | chiffrable |
 | Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 8 ml de noue : estimation d'après un développé de 50 cm, ajuste selon ton façonnage | chiffrable |
 

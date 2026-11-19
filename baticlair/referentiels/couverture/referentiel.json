@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-54",
+  "version": "roofing-2026.11.19-55",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -5322,16 +5322,15 @@
             "pureau"
           ],
           "default": {
-            "formula": "si(zone >= regle.zone_littorale, tuile.pureau_min, si(pente < regle.seuil_pente_pureau, tuile.pureau_min, tuile.pureau_max))",
-            "source": "fondateur-referentiel-2026-10-03",
+            "formula": "max(tuile.pureau_min, longueur_rampant / arrondi_sup(longueur_rampant / tuile.pureau_max))",
+            "source": "fiche-couverture",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1,
-            "note": "pureau mini du fabricant en zone littorale ou pente < 19,3° (35 %), sinon pureau maxi"
+            "version": 2,
+            "note": "rampant partagé en rangs entiers, au plus long pureau admis par le fabricant"
           }
         },
         {
@@ -5436,6 +5435,42 @@
             {
               "label": "Bord de mer, ou plus de 500 m",
               "value": "3"
+            }
+          ]
+        },
+        {
+          "key": "longueur_rampant",
+          "label": "Longueur du rampant",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du rampant (de l'égout au faîtage) ?",
+          "textLabels": [
+            "rampant"
+          ],
+          "default": {
+            "value": "5.5",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "rampant courant, jusqu'à 5,5 m"
+          },
+          "choices": [
+            {
+              "label": "Jusqu'à 5,5 m",
+              "value": "5.5"
+            },
+            {
+              "label": "5,5 à 8 m",
+              "value": "8"
+            },
+            {
+              "label": "Plus de 8 m",
+              "value": "10"
             }
           ]
         },
@@ -5555,20 +5590,6 @@
           },
           "version": 1,
           "note": "Pente supérieure au seuil."
-        },
-        "seuil_pente_pureau": {
-          "kind": "installation_condition",
-          "value": "19.3",
-          "unit": "°",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Sous cette pente (35 %, soit 19,3°), pureau mini (nombre de tuiles maxi)."
         },
         "zone_littorale": {
           "kind": "installation_condition",

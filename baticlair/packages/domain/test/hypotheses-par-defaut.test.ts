@@ -89,8 +89,9 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     };
     expect(computeWorkItem(REFERENTIEL_COMPLET, tuiles).needs.map((n) => n.needId)).toEqual(["tuiles", "liteaux", "contre-liteaux", "ecran"]);
     const withRives = computeWorkItem(REFERENTIEL_COMPLET, { ...tuiles, params: { ...tuiles.params, longueur_rives: { value: "24", unit: "m", origin: "devis" } } });
-    // 24 m / 0,31 m (pureau mini, zone littorale par défaut) = 77,42 tuiles de rive → 78.
-    expect(need(withRives, "tuiles-de-rive")).toMatchObject({ status: "calculated", purchase: { order: { count: "78" } } });
+    // Pureau : rampant 5,5 m (hypothèse) partagé en 15 rangs entiers au pureau maxi de 0,376 m → 0,3667 m (fiche couverture,
+    // 2026-11-19 ; avant : pureau mini 0,31 m en zone littorale). 24 m / 0,3667 m = 65,45 tuiles de rive → 66 (avant 78).
+    expect(need(withRives, "tuiles-de-rive")).toMatchObject({ status: "calculated", purchase: { order: { count: "66" } } });
   });
 
   it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
