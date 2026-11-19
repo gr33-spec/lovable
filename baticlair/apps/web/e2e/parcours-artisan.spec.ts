@@ -1833,7 +1833,12 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
     expect(await regler.getByRole("button").count(), `carte orange ${i + 1}`).toBeGreaterThan(0);
     // La question passe avant le reste de la fiche (le nom, la quantité).
     const nom = card.getByRole("button", { name: /^Modifier le nom/ });
-    if (await nom.count()) expect((await regler.boundingBox())!.y).toBeLessThan((await nom.boundingBox())!.y);
+    // La fiche s'ouvre en glissant : sous charge, on attend qu'elle soit posée avant de comparer.
+    if (await nom.count()) {
+      await expect
+        .poll(async () => (await regler.boundingBox())!.y - (await nom.boundingBox())!.y, { message: `question avant le nom, carte orange ${i + 1}`, timeout: 10_000 })
+        .toBeLessThan(0);
+    }
     await closeOpenLine(page);
   }
 });
