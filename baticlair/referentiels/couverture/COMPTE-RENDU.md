@@ -65,18 +65,32 @@ Deux séries de longueurs : bois de France au pas de 0,50 m, bois du Nord au pas
 |---|---|---|
 | pureau + 2,5 mm ; 1 crochet par ardoise ; rang en plus à l'égout et au faîtage ; crochets inox en boîte de 500 ; formats 32×22 / 30×20 ; crochets 9 / 10 / 11 ; zinc 0,65 naturel ; façonné en 2 m ; gouttière en 4 m ; crochets tous les 50 cm ; colliers tous les 2 m + 1 ; liteau sapin ; tuile canal en 2 lignes (1 pour 1) ; rives G/D en 2 lignes | clous : inox ou cuivre, 2 au faîtage aussi ; descente : 2 m en zinc Ø 80, 4 m existe en Ø 100 et en PVC ; 3,70 m → 3,60 m ; rives de tuile plate ÷ (2 × pureau) ; faîtage : à la pièce (2,5 ou 3 au ml), pas en ml | pertes ardoise 10 % (le 5 % a une source) ; + 5 % sur closoir, rives et noues ; écran + 10 % (juste au-dessus de 30 % de pente) ; contre-liteaux à 50 cm ; longueurs de Champagne-Ardenne |
 
-## Ce que tu dois trancher
+## Tranché le 19 novembre (« fais le plus logique »), branché dans le code et testé
 
-1. **Les quatre conflits du code** (ils changent les quantités, rien n'est touché sans toi) :
-   - recouvrement de l'ardoise : la table du code est trop forte de 0 à 7 mm, la remplacer par le tableau du DTU ?
-   - pureau des tuiles par défaut : maximum du fabricant affiché en hypothèse, ou on le demande ?
-   - faîtière à 2,9 au ml : la remplacer par le nombre du modèle (2,5 ou 3) ?
-   - descente : longueur selon la matière et le diamètre ?
-2. **Écran** : + 10 % partout, ou 1,10 / 1,20 selon la pente ? Affiché en m² ou en rouleaux ?
-3. **Limites de la carte** : Lorient (Étel et Belz en zone 3 ?) ; bords d'estuaire (Nantes, Donges) exposés ou non ?
-4. **Points bretons à faire relire par un ardoisier ou un comptoir** :
-   - faîtière Armor au ml ;
-   - palettes d'ardoise hors 32×22 ;
-   - part de crochets à pointe sur liteaux ;
-   - crochets de gouttière à 0,40 m en bord de mer.
-5. **Code** : faut-il brancher maintenant la zone par commune et l'étape Suggestions ? Ce sont les deux prochaines bascules.
+| Sujet | Choix | Pourquoi (source) | Effet sur un exemple |
+|---|---|---|---|
+| Recouvrement ardoise | tableau du NF DTU 40.11, trois bandes de rampant | DTU relu chez Cupa et Rathscheck, 132 valeurs identiques | Brest, 200 m² de 30×22 : 8 925 ardoises (avant 9 271) |
+| Pureau quand le crochet est écrit | (longueur − crochet) ÷ 2 + 2,5 mm | ta règle, manuel CAP, Culture, Cupa | D-2026-020 : 2 122 ardoises (avant 2 052) |
+| Crochet par défaut, crochets | recouvrement + 3 mm arrondi au cm ; 1 par ardoise | Cupa, Frénéhard, DTU ; ta règle | Brest : crochets de 10 cm, 8 925 |
+| Pureau d'une tuile non écrit | rampant partagé en rangs entiers au plus long pureau admis | Edilians, Koramic ; fiche HP 10 2026 : pente mini sans lien avec le pureau | HP 10, 120 m² : 1 258 tuiles (avant 1 488) |
+| Faîtière / arêtier sans modèle | 3 au ml | Edilians, Terreal, Monier | 12 m d'arêtier : 36 (avant 35) |
+| Faîtage et arêtier zinc façonnés | longueurs de 2 m | ta règle, VMZinc, Rheinzink, 3 négoces bretons | 9 ml : 5 longueurs de 2 m |
+| Tubes de descente | 2 m par défaut (zinc et PVC), 4 m si le devis le dit | ta règle ; le 2 m existe dans les deux matières | 2 × 5 m : 6 tubes de 2 m |
+| Écran | surface + 10 % au-dessus de 30 % de pente, + 20 % en dessous ; en rouleaux | ta règle au-dessus de 30 % ; lés recouverts de 20 cm en dessous (DTU 40.29) | 120 m² : 132 m², 2 rouleaux |
+| Zone climatique | par commune (distance à la côte, altitude) | DTU 40.11 et 40.21, données IGN, SHOM | Rennes, Nantes zone 1 ; Grenoble zone 2 ; Brest zone 3 |
+| Limite de Lorient | Lorient et l'ouest en zone 3 ; à l'est, la côte la plus proche | texte du DTU (« de Lorient à… ») | Étel, Belz : zone 2 |
+| Estuaires | exposés près de l'embouchure seulement | DTU 40.11 (« les estuaires ») | Paimbœuf, Donges exposés ; Nantes non |
+
+**Une de tes règles signalée, pas appliquée** : « écran en m², point ». En m², la quantité bouge de 9 % avec la pente, ce
+qui ferait poser une question de plus, et une ligne en m² ne passe pas le test du fournisseur (§40). L'écran reste en
+rouleaux, les m² à couvrir sont dits sur la ligne.
+
+## Reste à faire
+
+1. **L'étape Suggestions** (tranchée : tes Suggestions l'emportent sur le §49.1) : cases décochées + « Continuer »,
+   avec la liste de ton skill (clous, pointes, rives, chatières, accessoires de zinc, fonds, naissances, Velux…).
+   Demande l'écran, l'API et des tests de bout en bout.
+2. **Situation exposée** : la carte la connaît (358 communes bretonnes probables) ; le + 10 mm du DTU 2020 sur
+   l'ardoise reste à brancher, comme hypothèse dite et modifiable.
+3. **À faire relire par un ardoisier ou un comptoir** : faîtière Armor au ml, palettes d'ardoise hors 32×22, part de
+   crochets à pointe sur liteaux, crochets de gouttière à 0,40 m en bord de mer.
