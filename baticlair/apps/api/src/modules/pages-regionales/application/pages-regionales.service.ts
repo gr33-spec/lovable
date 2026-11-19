@@ -1,4 +1,4 @@
-import { departement as departementConnu, estLotV1, lotsComprisV1, metierInscriptionOuvert, TRADES, type LotV1 } from "@baticlair/domain";
+import { departement as departementConnu, estLotV1, lotsComprisV1, metierInscriptionOuvert, PARCOURS_ESSAI, TRADES, zoneDuCodePostal, type LotV1 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 
 /** Les métiers qui peuvent s'inscrire en liste d'attente : tous ceux qui ne sont pas ouverts, « Autre métier » compris. */
@@ -54,6 +54,34 @@ export class PagesRegionalesService {
       create: { email, metier: entree.metier, departement, source },
       update: { ...(departement ? { departement } : {}), ...(source ? { source } : {}) },
     });
+  }
+
+  /**
+   * LE DÉCOMPTE DES INSCRITS (nouvel onboarding, Greg, 19 novembre 2026) : les entreprises par métier et par département
+   * (celui choisi sur la carte, sinon celui de l'adresse). Chiffres d'ensemble seulement, aucun nom.
+   */
+  async inscrits() {
+    const cs = await this.prisma.company.findMany({ select: { trades: true, departement: true, address: true, parcoursInscription: true } });
+    const metiers = new Map<string, { nombre: number; essai: number }>();
+    const deps = new Map<string, { nombre: number; essai: number }>();
+    const ajouter = (m: Map<string, { nombre: number; essai: number }>, k: string, essai: boolean) => {
+      const v = m.get(k) ?? { nombre: 0, essai: 0 };
+      v.nombre += 1;
+      if (essai) v.essai += 1;
+      m.set(k, v);
+    };
+    for (const c of cs) {
+      const essai = c.parcoursInscription === PARCOURS_ESSAI;
+      for (const t of c.trades.length ? c.trades : ["other"]) ajouter(metiers, t, essai);
+      ajouter(deps, departementConnu(c.departement)?.code ?? zoneDuCodePostal(c.address) ?? "", essai);
+    }
+    const trier = <T extends { nombre: number }>(l: T[]) => l.sort((a, b) => b.nombre - a.nombre);
+    return {
+      total: cs.length,
+      essai: cs.filter((c) => c.parcoursInscription === PARCOURS_ESSAI).length,
+      parMetier: trier([...metiers].map(([metier, v]) => ({ metier, libelle: libelleMetier(metier), ...v }))),
+      parDepartement: trier([...deps].map(([code, v]) => ({ code: code || null, nom: code ? (departementConnu(code)?.nom ?? code) : "Non indiqué", ...v }))),
+    };
   }
 
   /** L'espace admin : le décompte par métier et par département, puis les inscrits (les plus récents d'abord). */

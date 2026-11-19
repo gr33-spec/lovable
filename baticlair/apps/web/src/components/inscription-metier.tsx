@@ -4,15 +4,15 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { Button, INPUT } from "@/components/ui";
-import { BADGE_BIENTOT_DISPONIBLE, DEPARTEMENTS_INSCRIPTION, METIERS_INSCRIPTION, type MetierInscription } from "@/lib/metiers-inscription";
+import { DEPARTEMENTS_INSCRIPTION, METIERS_INSCRIPTION, type MetierInscription } from "@/lib/metiers-inscription";
 
-/** Les métiers « Bientôt disponible » montrés d'emblée ; les autres se déplient. */
+/** Les autres métiers montrés d'emblée ; les autres se déplient. */
 const VISIBLES = 8;
 
 /**
  * LE CHOIX DU MÉTIER À L'INSCRIPTION (Greg, 19 novembre 2026) : « Couvreur » est ouvert (choisi d'office, Mobiiz se lance
- * pour les couvreurs) ; tous les autres métiers portent « Bientôt disponible ». En choisir un remplace le formulaire de
- * compte par la liste d'attente (`ListeAttente`) : l'artisan n'entre pas dans l'application.
+ * pour les couvreurs). RÈGLE CHANGÉE (nouvel onboarding, 19 novembre 2026) : les autres métiers entrent aussi, avec le
+ * message « en rodage » ; la liste d'attente (`ListeAttente`) n'est plus montrée (ses données restent dans l'admin).
  */
 export function ChoixMetier({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const [tous, setTous] = useState(false);
@@ -46,7 +46,7 @@ export function ChoixMetier({ value, onChange }: { value: string; onChange: (id:
             </button>
           );
         })}
-        <p className="mt-1 text-[13px] font-semibold text-muted">Les autres métiers arrivent bientôt :</p>
+        <p className="mt-1 text-[13px] font-semibold text-muted">Ou un autre métier :</p>
         <div className="flex flex-wrap gap-2">
           {montres.map((m) => {
             const on = value === m.id;
@@ -55,14 +55,10 @@ export function ChoixMetier({ value, onChange }: { value: string; onChange: (id:
                 key={m.id}
                 type="button"
                 aria-pressed={on}
-                aria-label={`${m.nom}, ${BADGE_BIENTOT_DISPONIBLE.toLowerCase()}`}
                 onClick={() => onChange(m.id)}
                 className={`pressable inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[14px] font-semibold ${on ? "border-ink bg-ink text-white" : "border-line bg-surface text-ink"}`}
               >
                 {m.nom}
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${on ? "bg-white/20 text-white" : "bg-ground text-muted"}`}>
-                  {BADGE_BIENTOT_DISPONIBLE}
-                </span>
               </button>
             );
           })}

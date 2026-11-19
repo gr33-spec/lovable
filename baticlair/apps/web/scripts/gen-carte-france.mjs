@@ -154,3 +154,75 @@ ${lignes.join("\n")}
 const cible = fileURLToPath(new URL("../src/lib/regions/carte-france.ts", import.meta.url));
 writeFileSync(cible, sortie);
 console.log(`${departements.length} départements, ${Math.round(sortie.length / 1024)} Ko, contour ${Math.round(contour.length / 1024)} Ko → ${cible}`);
+
+/*
+ * LA CARTE DE L'ONBOARDING (Greg, 19 novembre 2026, « la carte passe dans l'onboarding ») : avec un second fichier (les
+ * régions du même dépôt), le script écrit aussi `src/lib/carte/france-regions.ts` (les 13 régions de métropole, tracés
+ * moyens, envoyés à la page) et `public/cartes/region-<code>.json` (les départements d'une région, chargés au toucher).
+ * Usage : node scripts/gen-carte-france.mjs departements.geojson regions.geojson
+ */
+const sourceRegions = process.argv[3];
+if (sourceRegions) {
+  const { DEPARTEMENTS } = await import(new URL("../../../packages/domain/dist/groupe/geographie.js", import.meta.url).href);
+  const { mkdirSync } = await import("node:fs");
+  const geoR = JSON.parse(readFileSync(sourceRegions, "utf8"));
+  const parNomDep = new Map(departements.map((d) => [d.code, d]));
+  const regions = geoR.features
+    .map((f) => {
+      const nom = f.properties.nom;
+      const codes = DEPARTEMENTS.filter((d) => d.region === nom).map((d) => d.code);
+      if (!codes.length) throw new Error(`Région sans département : ${nom}`);
+      return { code: f.properties.code, nom, f, codes };
+    })
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const r of regions) {
+    const [a, b, c, d] = boite(r.f);
+    x0 = Math.min(x0, a); y0 = Math.min(y0, b); x1 = Math.max(x1, c); y1 = Math.max(y1, d);
+  }
+  const m = 12;
+  const vue = [x0 - m, y0 - m, x1 - x0 + 2 * m, y1 - y0 + 2 * m].map((n) => Math.round(n));
+  const lignesR = regions.map((r) => `  { code: ${JSON.stringify(r.code)}, nom: ${JSON.stringify(r.nom)}, departements: ${JSON.stringify(r.codes)}, d: ${JSON.stringify(chemin(r.f, 1.1, 0, 4))}, boite: ${JSON.stringify(boite(r.f))}, centre: ${JSON.stringify(centre(r.f))} },`);
+  const outreMer = DEPARTEMENTS.filter((d) => d.code.length === 3).map((d) => ({ code: d.code, nom: d.nom, region: d.region }));
+  const srcR = `// FICHIER GÉNÉRÉ par scripts/gen-carte-france.mjs : ne pas modifier à la main.
+// Tracés : IGN Admin Express (édition 2018) via gregoiredavid/france-geojson, Licence ouverte Etalab 1.0 ; codes et noms INSEE.
+// Même projection que \`carte-france.ts\` (x = longitude × cos 46,5°, 1° de latitude = ${K} unités).
+
+export interface RegionCarte {
+  code: string;
+  nom: string;
+  /** Les départements (codes INSEE) de la région, ceux de \`DEPARTEMENTS\` du moteur. */
+  departements: readonly string[];
+  d: string;
+  boite: readonly [number, number, number, number];
+  centre: readonly [number, number];
+}
+
+/** Le cadre de la France métropolitaine entière (viewBox). */
+export const VUE_FRANCE = ${JSON.stringify(vue)} as const;
+
+/** Les 13 régions de métropole (Corse comprise), par ordre alphabétique. */
+export const REGIONS_CARTE: readonly RegionCarte[] = [
+${lignesR.join("\n")}
+];
+
+/** L'outre-mer : un département par région, choisi dans une liste (pas sur la carte). */
+export const OUTRE_MER = ${JSON.stringify(outreMer)} as const;
+`;
+  mkdirSync(fileURLToPath(new URL("../src/lib/carte/", import.meta.url)), { recursive: true });
+  writeFileSync(fileURLToPath(new URL("../src/lib/carte/france-regions.ts", import.meta.url)), srcR);
+  const dossier = fileURLToPath(new URL("../public/cartes/", import.meta.url));
+  mkdirSync(dossier, { recursive: true });
+  let total = 0;
+  for (const r of regions) {
+    const deps = r.codes.map((c) => {
+      const d = parNomDep.get(c);
+      if (!d) throw new Error(`Département sans tracé : ${c}`);
+      return { code: c, nom: d.nom, d: chemin(d.f, 0.35, 1, 0.5), boite: boite(d.f), centre: centre(d.f) };
+    });
+    const json = JSON.stringify({ region: r.code, nom: r.nom, departements: deps });
+    total += json.length;
+    writeFileSync(`${dossier}region-${r.code}.json`, json);
+  }
+  console.log(`${regions.length} régions (${Math.round(srcR.length / 1024)} Ko), départements par région : ${Math.round(total / 1024)} Ko en tout`);
+}

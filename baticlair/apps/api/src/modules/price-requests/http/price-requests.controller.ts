@@ -26,6 +26,7 @@ import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { assembleQuote, chunkedFields, UploadParts } from "../../documents/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { IdentiteConfirmeeGuard } from "../../../platform/http/identite-confirmee.guard.js";
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
 import { packetDocument, type ZonePdf } from "../application/supplier-packet.js";
 
@@ -162,6 +163,7 @@ export class PriceRequestsController {
   /** Envoi par le serveur (§45) : le mail court, le PDF « Demande de devis » joint, puis « envoyée ». */
   @Throttle({ default: HOURLY(60) })
   @Post("price-request-recipients/:id/send")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   async send(@Tenant() tenant: TenantContext, @Param("id") id: string) {
     return toDto(await this.requests.send(tenant, id));
@@ -222,6 +224,7 @@ export class PriceRequestsController {
   }
 
   @Post("projects/:projectId/price-requests")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(201)
   @Idempotent()
   async create(
@@ -234,6 +237,7 @@ export class PriceRequestsController {
   }
 
   @Post("price-requests/:id/recipients")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   async addSuppliers(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(addBody)) body: z.infer<typeof addBody>) {
     return toDto(await this.requests.addSuppliers(tenant, id, body.supplierIds));
@@ -262,6 +266,7 @@ export class PriceRequestsController {
 
   /** §47.5 : « commandé tel quel » ou « modifié » (bon de commande collé), d'un tap. */
   @Post("price-requests/:id/order")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   async order(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(orderBody)) body: z.infer<typeof orderBody>) {
     return toDto(await this.requests.recordOrder(tenant, id, body));

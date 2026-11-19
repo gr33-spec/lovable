@@ -1,5 +1,5 @@
 import { signalerException } from "../../../platform/supervision/exceptions.js";
-import { identiteComplete, portableLisible, portableValide, prenomDe, PHRASE_IDENTITE } from "@baticlair/domain";
+import { departement as departementConnu, identiteAConfirmer, identiteComplete, libelleActivite, portableLisible, portableValide, prenomDe, PHRASE_IDENTITE, PHRASE_POURQUOI_SIRET, zoneDuCodePostal } from "@baticlair/domain";
 import { siretBienForme } from "../../groupe/index.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
@@ -19,10 +19,28 @@ export class IdentiteService {
   ) {}
 
   async lire(tenant: TenantContext) {
-    const c = await this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, address: true, siret: true, phone: true, prenom: true, siretVerifieLe: true } });
+    const c = await this.prisma.company.findUniqueOrThrow({
+      where: { id: tenant.companyId },
+      select: { name: true, address: true, siret: true, phone: true, prenom: true, siretVerifieLe: true, departement: true, parcoursInscription: true, identiteConfirmeeLe: true },
+    });
     const u = await this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { name: true } });
     const prenom = c.prenom ?? prenomDe(u?.name);
-    return { phrase: PHRASE_IDENTITE, entreprise: c.name, adresse: c.address, siret: c.siret, prenom, telephone: c.phone, complete: identiteComplete({ siret: c.siret, prenom: c.prenom, telephone: c.phone }), siretVerifie: !!c.siretVerifieLe };
+    // Le nouvel onboarding (19 novembre 2026) : une entreprise du parcours « essai » n'est complète qu'une fois confirmée.
+    const aConfirmer = identiteAConfirmer(c);
+    const dep = (code: string | null) => (code ? { code, nom: departementConnu(code)?.nom ?? code } : null);
+    return {
+      phrase: aConfirmer ? PHRASE_POURQUOI_SIRET : PHRASE_IDENTITE,
+      entreprise: c.name,
+      adresse: c.address,
+      siret: c.siret,
+      prenom,
+      telephone: c.phone,
+      complete: identiteComplete({ siret: c.siret, prenom: c.prenom, telephone: c.phone }) && !aConfirmer,
+      siretVerifie: !!c.siretVerifieLe,
+      aConfirmer,
+      departement: dep(c.departement),
+      departementEntreprise: dep(zoneDuCodePostal(c.address)),
+    };
   }
 
   /** Ce que l'annuaire dit d'un SIRET, pour préremplir l'écran (rien n'est enregistré). */
@@ -30,7 +48,7 @@ export class IdentiteService {
     const s = siret.replace(/\s/g, "");
     if (!siretBienForme(s)) throw validationFailed("Invalid SIRET", { reason: "siret_invalide" });
     const f = await this.annuaire.fiche(s);
-    return { trouvee: !!f?.trouvee, active: !!f?.active, entreprise: f?.nom || null, adresse: f?.adresse ?? null, prenomDirigeant: f?.prenomDirigeant ?? null };
+    return { trouvee: !!f?.trouvee, active: !!f?.active, entreprise: f?.nom || null, adresse: f?.adresse ?? null, prenomDirigeant: f?.prenomDirigeant ?? null, activite: libelleActivite(f?.naf) };
   }
 
   async enregistrer(tenant: TenantContext, b: { siret: string; prenom: string; telephone: string }) {
@@ -51,6 +69,8 @@ export class IdentiteService {
         ...(f?.trouvee && f.nom ? { name: f.nom } : {}),
         ...(f?.trouvee && f.adresse ? { address: f.adresse } : {}),
         ...(c.siret !== siret ? { siretVerifieLe: null } : {}),
+        // « C'est bien mon entreprise » : l'écran n'enregistre qu'après ce bouton (nouvel onboarding, 19 novembre 2026).
+        identiteConfirmeeLe: new Date(),
       },
     });
     // Le SIRET vérifié comme avant (achats groupés) ; une panne de l'INSEE n'empêche pas l'envoi à ses négoces.

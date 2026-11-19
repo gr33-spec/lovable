@@ -52,7 +52,7 @@ export function EntetePremium() {
         </nav>
         <div className="nav-right">
           <Link href="/connexion">Se connecter</Link>
-          <Link className="btn btn-yellow" href="/inscription">
+          <Link className="btn btn-yellow" href="/commencer">
             Commencer gratuitement <Fleche />
           </Link>
           <button type="button" className="menu-toggle" aria-label={ouvert ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={ouvert} aria-controls="navMenu" onClick={() => setOuvert((o) => !o)}>
@@ -100,7 +100,7 @@ export function CtaFixePremium({ haut, bas, aussi = [], bouton }: { haut: string
   }, [haut, bas, aussi]);
   return (
     <div className={`sticky-cta${visible ? " visible" : ""}`} aria-hidden={!visible} data-visible={visible ? "" : undefined}>
-      <Link className="btn btn-yellow" href="/inscription" tabIndex={visible ? 0 : -1}>
+      <Link className="btn btn-yellow" href="/commencer" tabIndex={visible ? 0 : -1}>
         {bouton} <Fleche />
       </Link>
       <div className="under">Gratuit · Sans carte bancaire</div>

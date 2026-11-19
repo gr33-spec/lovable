@@ -1,5 +1,7 @@
 "use client";
 
+import { PHRASE_POURQUOI_SIRET } from "../../../../packages/domain/src/inscription/essai";
+
 import { BadgeCheck, ChevronRight, Info, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -182,7 +184,7 @@ export function VerificationEntreprise({ etat, onChange, sansTitre = false }: { 
           </span>
         ) : (
           <span>
-            Ton SIRET n&apos;est pas encore vérifié auprès de l&apos;INSEE.{" "}
+            {PHRASE_POURQUOI_SIRET} Ton SIRET n&apos;est pas encore vérifié.{" "}
             <Link href="/compte/entreprise" className="font-semibold underline underline-offset-4">
               Vérifier mon SIRET
             </Link>

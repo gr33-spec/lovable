@@ -179,6 +179,12 @@ model Company {
   /// PAGES RÉGIONALES (Greg, 19 novembre 2026) : le département choisi à l'inscription (code INSEE, « 22 »). Il sert de
   /// zone aux achats groupés tant que l'adresse n'a pas de code postal ; nul pour les comptes d'avant.
   departement                String?
+  /// LE NOUVEL ONBOARDING (Greg, 19 novembre 2026) : « essai » pour une entreprise créée par la carte (essaie d'abord, SIRET
+  /// plus tard) ; nul pour les comptes d'avant, qui ne sont pas touchés.
+  parcoursInscription        String?   @map("parcours_inscription")
+  /// « C'est bien mon entreprise » : l'entreprise trouvée par le SIRET a été confirmée. Exigé avant tout envoi à un négoce
+  /// pour le parcours « essai » seulement.
+  identiteConfirmeeLe        DateTime? @map("identite_confirmee_le") @db.Timestamptz(3)
   createdAt                  DateTime  @default(now())
   updatedAt                  DateTime  @updatedAt
 

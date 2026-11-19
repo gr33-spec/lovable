@@ -114,7 +114,7 @@ export function DemoGuidee({ onFermer }: { onFermer: () => void }) {
             Suivant
           </button>
         ) : (
-          <Link href="/inscription" className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
+          <Link href="/commencer" className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-semibold text-on-accent hover:bg-accent-hover">
             Créer mon compte gratuit
           </Link>
         )}
