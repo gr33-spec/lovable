@@ -69,7 +69,7 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     expect(long.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "3 pièces"]]);
   });
 
-  it("arêtier sur un toit de tuiles : arêtières 2,9/ml, closoir de 23 cm, un crochet par arêtière, un about par arêtier", () => {
+  it("arêtier sur un toit de tuiles : arêtières 3/ml, closoir de 23 cm, un crochet par arêtière, un about par arêtier", () => {
     const v = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture tuiles HP10 terre cuite", quantity: "120", unit: "m²" },
@@ -79,7 +79,7 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     );
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:aretier_matiere");
     const got = Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
-    expect(got).toMatchObject({ Arêtiers: "35 pièces", "Crochets d'arêtier": "35 pièces", "Abouts d'arêtier": "2 pièces" }); // 12 × 2,9 = 34,8
+    expect(got).toMatchObject({ Arêtiers: "36 pièces", "Crochets d'arêtier": "36 pièces", "Abouts d'arêtier": "2 pièces" }); // 12 × 3 = 36 (fiche couverture, 2026-11-19 ; avant 2,9 : 35)
     expect(v.toBuy.find((b) => b.label === "Closoir d'arêtier")!.quantity).toBe("3 rouleaux de 5 m"); // 12 ml en rouleaux de 5 m
   });
 

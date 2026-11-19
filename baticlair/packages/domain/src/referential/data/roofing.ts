@@ -123,6 +123,11 @@ const tableFiche = (cle: string): LookupTable => {
     note: t.decision,
   };
 };
+/** Une donnée produit lue dans la fiche (caractéristique d'un article générique). */
+const specFiche = (cle: string): Fact => {
+  const k = constanteFiche(cle);
+  return spec(k.valeur, k.unite, FICHE_PRODUITS, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
+};
 /** Une longueur de vente lue dans la fiche (conditionnement d'un produit). */
 const longueurFiche = (cle: string): Fact => {
   const k = constanteFiche(cle);
@@ -1146,7 +1151,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-55",
+  version: "roofing-2026.11.19-56",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1748,7 +1753,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     // ---- Produits génériques (référentiel du fondateur) : utilisés par défaut, dits comme hypothèse.
     generic("faitiere-standard", "ridge_tile", "Faîtière 40 à 42 cm, recouvrement 5 à 7 cm (modèle à préciser)", "Faîtières", {
-      attributes: { pieces_par_ml: spec("2.9", "u/m", F, FOUNDER_DOC, "« ml faîtage / 0,35 ≈ 2,9 pièces/ml ».") },
+      // Fiche couverture (2026-11-19) : 3 au ml sans modèle connu (avant 2,9, « ml ÷ 0,35 »).
+      attributes: { pieces_par_ml: specFiche("faitage.faitieres_par_ml_sans_modele") },
     }),
     generic("closoir-standard-5m", "ridge_closure", "Closoir ventilé de faîtage, rouleau de 5 m (modèle à préciser)", "Closoir", {
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC), primary: true }],
@@ -1835,7 +1841,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
     // §5 : l'arêtier est en général la même pièce que la faîtière (≈ 2,9 pièces/ml), son closoir fait 23 cm de large.
     generic("aretiere-standard", "hip", "Arêtier 40 à 42 cm, recouvrement 5 à 7 cm (modèle de la tuile posée)", "Arêtiers", {
-      attributes: { pieces_par_ml: spec("2.9", "u/m", F, FOUNDER_DOC, "« ml arêtier / 0,35 ≈ 2,9 pièces/ml » (§5).") },
+      // Fiche couverture (2026-11-19) : même pièce que la faîtière, 3 au ml sans modèle connu (avant 2,9).
+      attributes: { pieces_par_ml: specFiche("faitage.faitieres_par_ml_sans_modele") },
     }),
     generic("closoir-aretier-5m", "hip_closure", "Closoir ventilé d'arêtier, largeur 23 cm, rouleau de 5 m", "Closoir d'arêtier", {
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC, "« arêtier : largeur 23 cm », rouleau de 5 m (§5)."), primary: true }],

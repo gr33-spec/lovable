@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-55",
+  "version": "roofing-2026.11.19-56",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -2916,17 +2916,16 @@
       "attributes": {
         "pieces_par_ml": {
           "kind": "manufacturer_spec",
-          "value": "2.9",
+          "value": "3",
           "unit": "u/m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture-produits",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "« ml faîtage / 0,35 ≈ 2,9 pièces/ml »."
+          "note": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml. Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre."
         }
       },
       "sellingUnits": [
@@ -4298,17 +4297,16 @@
       "attributes": {
         "pieces_par_ml": {
           "kind": "manufacturer_spec",
-          "value": "2.9",
+          "value": "3",
           "unit": "u/m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture-produits",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "« ml arêtier / 0,35 ≈ 2,9 pièces/ml » (§5)."
+          "note": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml. Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre."
         }
       },
       "sellingUnits": [

@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-56 — Faîtières et arêtiers sans modèle : 3 au ml
+
+- **§5 Faîtière et arêtier courants (40 à 42 cm), modèle non écrit au devis** : 3 au ml, lu dans la fiche
+  (`faitage.faitieres_par_ml_sans_modele`). Recherche : 3 au ml pour une faîtière 1/2 ronde ou angulaire sans emboîtement
+  (Edilians, Terreal, Monier), 2,5 seulement pour une faîtière à emboîtement grand modèle. Sans modèle, 3 : jamais trop
+  court. Avant : 2,9 au ml (« ml ÷ 0,35 »).
+- Exemples : D-2026-015, faîtières refusées → 30 (avant 29) ; arêtier de 12 m → 36 arêtières et 36 crochets (avant 35).
+
 ## roofing-2026.11.19-55 — Tuile à pureau variable : le rampant en rangs entiers
 
 - **§5 Pureau par défaut d'une tuile à pureau variable** (le devis ne le dit pas) : le rampant est partagé en un nombre

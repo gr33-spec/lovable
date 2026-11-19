@@ -131,6 +131,20 @@
    ],
    "avant": "aucun",
    "statut": "confirme"
+  },
+  {
+   "cle": "faitage.faitieres_par_ml_sans_modele",
+   "famille": "points_singuliers",
+   "libelle": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml",
+   "valeur": "3",
+   "unite": "u/m",
+   "regle": "faîtières = ml de faîtage × 3, arrondi au-dessus",
+   "decision": "Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre.",
+   "preuves": [
+    "faitiere_tc_sans_emboitement_40_pieces_ml"
+   ],
+   "avant": "2,9 au ml (« ml ÷ 0,35 »)",
+   "statut": "confirme"
   }
  ],
  "tables": [

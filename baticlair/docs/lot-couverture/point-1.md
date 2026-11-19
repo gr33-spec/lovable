@@ -36,7 +36,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Tuiles HP10 | 1 258 pièces (≈ 6 palettes) |  | chiffrable |
-| Arêtiers | 70 pièces |  | chiffrable |
+| Arêtiers | 72 pièces |  | chiffrable |
 | Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 8 ml de noue : estimation d'après un développé de 50 cm, ajuste selon ton façonnage | chiffrable |
 
 ## Ardoises, arêtier zinc et noue de 66
