@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-57",
+  "version": "roofing-2026.11.19-58",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -5561,33 +5561,31 @@
           "version": 1,
           "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
         },
-        "recouvrement_faible_pente": {
+        "coef_ecran_faible_pente": {
           "kind": "installation_condition",
-          "value": "0.20",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.20",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+          "note": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %. Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur."
         },
-        "recouvrement_forte_pente": {
+        "coef_ecran_forte_pente": {
           "kind": "installation_condition",
-          "value": "0.10",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente supérieure au seuil."
+          "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
         },
         "zone_littorale": {
           "kind": "installation_condition",
@@ -5658,7 +5656,7 @@
         {
           "id": "ecran",
           "slot": "ecran",
-          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "formula": "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)",
           "unit": "m2",
           "core": true,
           "exclusions": "Hors recouvrements en bout de rouleau (10 cm au droit d'un support), relevés et chutes.",
@@ -6322,33 +6320,31 @@
           "version": 1,
           "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
         },
-        "recouvrement_faible_pente": {
+        "coef_ecran_faible_pente": {
           "kind": "installation_condition",
-          "value": "0.20",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.20",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+          "note": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %. Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur."
         },
-        "recouvrement_forte_pente": {
+        "coef_ecran_forte_pente": {
           "kind": "installation_condition",
-          "value": "0.10",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente supérieure au seuil."
+          "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
         },
         "seuil_rampant": {
           "kind": "installation_condition",
@@ -8083,7 +8079,7 @@
         {
           "id": "ecran-ardoise",
           "slot": "ecran",
-          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "formula": "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)",
           "unit": "m2",
           "core": true,
           "exclusions": "Hors recouvrements en bout de rouleau, relevés et chutes.",
@@ -8349,33 +8345,31 @@
           "version": 1,
           "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
         },
-        "recouvrement_faible_pente": {
+        "coef_ecran_faible_pente": {
           "kind": "installation_condition",
-          "value": "0.20",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.20",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+          "note": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %. Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur."
         },
-        "recouvrement_forte_pente": {
+        "coef_ecran_forte_pente": {
           "kind": "installation_condition",
-          "value": "0.10",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente supérieure au seuil."
+          "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
         },
         "clous_par_ardoise": {
           "kind": "installation_condition",
@@ -8496,7 +8490,7 @@
         {
           "id": "ecran-ardoise",
           "slot": "ecran",
-          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "formula": "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)",
           "unit": "m2",
           "core": true,
           "exclusions": "Hors recouvrements en bout de rouleau, relevés et chutes.",

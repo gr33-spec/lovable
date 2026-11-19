@@ -1,6 +1,6 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.19-57`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.19-58`.
 
 186 règles de calcul : 71 constantes, 8 tables, 25 valeurs intermédiaires, 82 besoins. Règles sans test qui les cite : 0.
 
@@ -24,6 +24,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 |---|---|
 | 2 u | Nombres par pièce sans lien : 2 ardoises (couvert et courant), 2 abouts, 2 fixations par patte, 2 closoirs par plaque, 2 talons par ligne. |
 | 1,05 u | Antivents par ardoise (§4) et marge du zinc linéaire (§7). |
+| 1,1 u | Écran au-dessus de 30 % de pente (surface + 10 %, fiche couverture) et marge des bandes de plomb (ml × 1,1, §12). |
 | 2 m | Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes. |
 | 1 m | Largeur d'une feuille de zinc et largeur utile d'un bac acier 1000. |
 | 6 m | Seuil du bobineau (au-delà de 6 ml) et longueur d'un rouleau de plomb. |
@@ -49,6 +50,8 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `closoirs_par_plaque` | 2 u | §8 | couverture-bac-acier | lot-couverture-4.test.ts (par §8) |
 | Constante | `clous_par_ardoise` | 2,1 u | §4 | couverture-ardoises-fibres-ciment | lot-b-paquet-3.test.ts (par §4), lot-couverture-5.test.ts (par §4) |
 | Constante | `coef_abergement` | 1,3 u | §7 | abergement-cheminee | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
+| Constante | `coef_ecran_faible_pente` | 1,20 u | §5, §35, §3, §34, §4 | couverture-tuiles-emboitement, couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | referential.test.ts |
+| Constante | `coef_ecran_forte_pente` | 1,10 u | §5, §35, §3, §34, §4 | couverture-tuiles-emboitement, couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | referential.test.ts |
 | Constante | `couvert_et_courant` | 2 u | §35.3 | couverture-tuiles-canal | tuiles-canal.test.ts (par §35.3) |
 | Constante | `cuivre_500` | 500 mm | §12 | bandes-cuivre | lot-couverture-8.test.ts (par §12) |
 | Constante | `cuivre_600` | 600 mm | §12 | bandes-cuivre | lot-couverture-8.test.ts (par §12) |
@@ -91,8 +94,6 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `r160` | 160 mm | §5 | couverture-tuiles-canal | lot-couverture-1.test.ts (par §5), tuiles-canal.test.ts (par §5) |
 | Constante | `r170` | 170 mm | §5 | couverture-tuiles-canal | lot-couverture-1.test.ts (par §5), tuiles-canal.test.ts (par §5) |
 | Constante | `rampant_max_bac` | 10 m | §7 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
-| Constante | `recouvrement_faible_pente` | 0,20 m | §5, §35, §3, §34, §4 | couverture-tuiles-emboitement, couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | referential.test.ts |
-| Constante | `recouvrement_forte_pente` | 0,10 m | §5, §35, §3, §34, §4 | couverture-tuiles-emboitement, couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | referential.test.ts |
 | Constante | `rouleau_plomb` | 6 m | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
 | Constante | `seuil_070` | 0,7 mm | §1, §7, §25, §49.7, §36 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, abergement-cheminee, couverture-zinc-joint-debout | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §36), dernier-recours.test.ts (par §1, §7, §25, §49.7, §36), devis-d2026-020.test.ts (par §1, §7, §25, §49.7, §36) |
 | Constante | `seuil_080` | 0,8 mm | §1, §7, §25, §49.7, §36 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, abergement-cheminee, couverture-zinc-joint-debout | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §36), dernier-recours.test.ts (par §1, §7, §25, §49.7, §36), devis-d2026-020.test.ts (par §1, §7, §25, §49.7, §36) |
@@ -138,7 +139,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Valeur intermédiaire | `nb_bacs` | `arrondi_sup(largeur_pan / entraxe_joints)` | §7, §36 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36), lecture-de00000071.test.ts (par §7, §36) |
 | Valeur intermédiaire | `poids_zinc` | `si(epaisseur_zinc >= regle.seuil_080, regle.poids_080, si(epaisseur_zinc >= regle.seuil_070, regle.poids_070, regle.poids_065))` | §7, §36 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36), lecture-de00000071.test.ts (par §7, §36) |
 | Valeur intermédiaire | `poids_zinc_plat` | `si(epaisseur_zinc >= regle.seuil_080, regle.poids_plat_080, si(epaisseur_zinc >= regle.seuil_070, regle.poids_plat_070, regle.poids_plat_065))` | §7, §25 | bandes-zinc, abergement-cheminee | dernier-recours.test.ts (par §7, §25), joint-debout.test.ts (par §7, §25), lecture-de00000071.test.ts (par §7, §25) |
-| Valeur intermédiaire | `recouvrement` | `table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)` | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts, couvreur-ardoises-ouvrages-comptes.test.ts, devis-d2026-020.test.ts, hypotheses-par-defaut.test.ts, jamais-de-quantite-demandee.test.ts, lot-couverture-5.test.ts, referential.test.ts, tuiles-canal.test.ts, infos-chantier.test.ts, quantitatifs.test.ts |
+| Valeur intermédiaire | `recouvrement` | `table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)` | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts, couvreur-ardoises-ouvrages-comptes.test.ts, devis-d2026-020.test.ts, hypotheses-par-defaut.test.ts, jamais-de-quantite-demandee.test.ts, lot-couverture-5.test.ts, tuiles-canal.test.ts, infos-chantier.test.ts, quantitatifs.test.ts |
 | Valeur intermédiaire | `recouvrement_pose` | `ardoise.longueur - 2 * pureau` | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |
 | Besoin | `abouts` | `regle.abouts_par_faitage` | §5 | faitage | lot-couverture-1.test.ts, regle-du-comptoir.test.ts |
 | Besoin | `abouts-aretier` | `nb_aretiers` | §5 | aretier | lot-couverture-1.test.ts (par §5), tuiles-canal.test.ts (par §5) |
@@ -172,8 +173,8 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `dauphins` | `nb_descentes` | §15 | descente | devis-d2026-020.test.ts, lot-couverture-7.test.ts |
 | Besoin | `decapant-gouttiere` | `regle.flacons_decapant` | §7, §25 | gouttiere | regles-sans-test-audit.test.ts |
 | Besoin | `dilatation` | `nb_lignes * (arrondi_sup(longueur_gouttiere / nb_lignes / regle.dilatation_tous_les) - 1)` | §15 | gouttiere-pvc-alu | lot-couverture-3.test.ts |
-| Besoin | `ecran` | `surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))` | §5, §35 | couverture-tuiles-emboitement | carte-lots-reperes.test.ts, comparison.test.ts, confiance-memoire.test.ts, hypotheses-par-defaut.test.ts, lecture-de00000071.test.ts, referential.test.ts, apercu-avant-validation.test.ts, bouton-texte-du-modele.test.ts, boutons-de-la-ligne.test.ts, chaque-bouton-passe.test.ts, chaque-reponse-dans-sa-ligne.test.ts, envoi-fournisseur.test.ts, faconnage-obligatoire.test.ts, fiche-chantier-51.test.ts, habitudes.test.ts, learning.test.ts, lecture-51-5.test.ts, quantitatifs.test.ts, questions-reponse-ecrite.test.ts, ratios-en-validation-52.test.ts, temps-deux.test.ts, ton-chantier-50-7.test.ts, ton-chantier-fiche.test.ts |
-| Besoin | `ecran-ardoise` | `surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))` | §3, §34, §4 | couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | hypotheses-par-defaut.test.ts |
+| Besoin | `ecran` | `surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)` | §5, §35 | couverture-tuiles-emboitement | carte-lots-reperes.test.ts, comparison.test.ts, confiance-memoire.test.ts, hypotheses-par-defaut.test.ts, lecture-de00000071.test.ts, referential.test.ts, apercu-avant-validation.test.ts, bouton-texte-du-modele.test.ts, boutons-de-la-ligne.test.ts, chaque-bouton-passe.test.ts, chaque-reponse-dans-sa-ligne.test.ts, envoi-fournisseur.test.ts, faconnage-obligatoire.test.ts, fiche-chantier-51.test.ts, habitudes.test.ts, learning.test.ts, lecture-51-5.test.ts, quantitatifs.test.ts, questions-reponse-ecrite.test.ts, ratios-en-validation-52.test.ts, temps-deux.test.ts, ton-chantier-50-7.test.ts, ton-chantier-fiche.test.ts |
+| Besoin | `ecran-ardoise` | `surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)` | §3, §34, §4 | couverture-ardoises-crochet, couverture-ardoises-fibres-ciment | hypotheses-par-defaut.test.ts |
 | Besoin | `egout-joint-debout` | `arrondi_sup(largeur_pan * regle.marge_zinc_lineaire / regle.longueur_bande_2m)` | §1 | couverture-zinc-joint-debout | chantier-test-45-5.test.ts (par §1), dernier-recours.test.ts (par §1), document-d2026-018.test.ts (par §1) |
 | Besoin | `embase-sortie` | `nb_sorties` | §25 | sortie-de-toit | regles-sans-test-audit.test.ts |
 | Besoin | `etain-gouttiere` | `(arrondi_sup(longueur_gouttiere / regle.longueur_barre_gouttiere) - 1 + nb_descentes) * regle.etain_par_jonction` | §7, §25 | gouttiere | regles-sans-test-audit.test.ts |

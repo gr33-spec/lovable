@@ -161,6 +161,38 @@
    ],
    "avant": "4 m",
    "statut": "confirme"
+  },
+  {
+   "cle": "ecran.coef_pente_forte",
+   "famille": "ecran",
+   "libelle": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %",
+   "valeur": "1.10",
+   "unite": "u",
+   "regle": "m² d'écran = surface × 1,10 (lés recouverts de 10 cm, abouts et faîtage compris)",
+   "decision": "Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m².",
+   "preuves": [
+    "ecran_recouvrement_lés_pente_sup30",
+    "ecran_recouvrement_abouts",
+    "ecran_seuil_pente"
+   ],
+   "avant": "surface × 1,5 ÷ (1,5 − 0,10) = × 1,071 (recouvrement des lés seul)",
+   "statut": "confirme"
+  },
+  {
+   "cle": "ecran.coef_pente_faible",
+   "famille": "ecran",
+   "libelle": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %",
+   "valeur": "1.20",
+   "unite": "u",
+   "regle": "m² d'écran = surface × 1,20 (lés recouverts de 20 cm, abouts et faîtage compris)",
+   "decision": "Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur.",
+   "preuves": [
+    "ecran_recouvrement_lés_pente_inf30",
+    "ecran_recouvrement_abouts",
+    "ecran_seuil_pente"
+   ],
+   "avant": "surface × 1,5 ÷ (1,5 − 0,20) = × 1,154",
+   "statut": "confirme"
   }
  ],
  "tables": [

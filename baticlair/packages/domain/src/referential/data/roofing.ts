@@ -1124,12 +1124,15 @@ const SURFACE_PARAM: ParamDef = {
 const USUAL_LITEAU_TUILE = { text: "Liteaux 27×40 pour la tuile (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_CONTRE_LITEAU = { text: "Contre-liteaux 27×40 sur chevrons (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_ECRAN = { text: "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).", source: F, productId: "ecran-hpv-standard" };
+// Fiche couverture (2026-11-19) : m² d'écran = surface × 1,10 au-dessus de 30 % de pente (la règle du fondateur), × 1,20 à
+// 30 % et moins (lés recouverts de 20 cm, abouts et faîtage). Avant : recouvrement des lés seul (× 1,071 / × 1,154).
 const ECRAN_CONSTANTS = {
   seuil_pente_ecran: condition("16.7", "°", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."),
-  recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."),
-  recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
+  coef_ecran_faible_pente: deFiche("ecran.coef_pente_faible"),
+  coef_ecran_forte_pente: deFiche("ecran.coef_pente_forte"),
 };
-const ECRAN_FORMULA = "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))";
+const ECRAN_FORMULA = "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)";
+// Le comptoir sert l'écran en rouleaux entiers (§40, test du fournisseur) ; les m² à couvrir se disent sur la ligne.
 
 /** Formats d'ardoise naturelle (hauteur × largeur, cm) du tableau du référentiel du fondateur (§3). */
 const SLATE_FORMATS: [number, number][] = [[40, 25], [40, 22], [35, 25], [35, 22], [33, 23], [32, 22], [30, 22], [30, 20], [30, 18]];
@@ -1151,7 +1154,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-57",
+  version: "roofing-2026.11.19-58",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],

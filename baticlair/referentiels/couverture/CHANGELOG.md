@@ -1,5 +1,17 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-58 — Écran sous toiture : surface + 10 % au-dessus de 30 %, + 20 % en dessous
+
+- **§6 / §28.4 Écran** : m² d'écran = surface × 1,10 au-dessus de 30 % de pente (règle du fondateur, confirmée),
+  × 1,20 à 30 % et moins (lés recouverts de 20 cm, abouts et faîtage : NF DTU 40.29 via Edilians, Siplast, Dörken).
+  Lu dans la fiche (`ecran.coef_pente_forte`, `ecran.coef_pente_faible`). Avant : recouvrement des lés seul,
+  × 1,071 / × 1,154 (abouts et faîtage oubliés).
+- L'écran reste commandé en ROULEAUX de 75 m² (ce que sert le comptoir, §40 test du fournisseur), les m² à couvrir
+  dits sur la ligne. La règle du fondateur « en m², point » est signalée, pas appliquée : en m², la quantité bouge de
+  9 % avec la pente et ferait poser une question de plus (règle des 3 %, §41), et une ligne en m² ne passe pas le
+  test du fournisseur.
+- Exemples : 120 m² à 45 % → 132 m², 2 rouleaux (avant 128,57 m², 2 rouleaux) ; à 30 % → 144 m², 2 rouleaux.
+
 ## roofing-2026.11.19-57 — Tubes de descente en longueurs de 2 m par défaut
 
 - **§7 / §15 Tubes de descente** : longueurs de 2 m par défaut, lues dans la fiche (`evacuation.longueur_tube_descente`).
