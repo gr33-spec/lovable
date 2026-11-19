@@ -637,6 +637,7 @@ Les questions sont dans l'ordre du plus gros levier, et posées **seulement si l
 | 11 | `entraxe_fourrures` | « Entraxe des fourrures ? » | 60 / 50 / 40 cm | plafond | **par défaut** : 60 cm (isolant léger) |
 | 12 | `couches` | « Une ou deux plaques par face ? » | Une (72/48) / Deux (98/48) | cloison, plafond | **par défaut** : une |
 | 13 | `fixation_rail` | « Tes rails au sol et au plafond, tu les fixes comment ? » | Cloueur à gaz / Chevilles à frapper | tout ouvrage à rails | **habitude de l'entreprise** : demandée une fois, puis retenue |
+| 13 bis | `marque_cloueur` | « Ton cloueur à gaz, c'est quelle marque ? » | Spit / Hilti / Paslode / Autre | quand les rails sont cloués | **habitude** : clous et gaz vont avec leur cloueur (relecture du comptoir) |
 | 14 | `enduit_forme` | « Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ? » | En poudre / Prêt à l'emploi | quand l'enduit est écrit ou coché | **habitude** |
 | 15 | `type_plaque` | « Quelles plaques : standard, hydro, feu, phonique ou haute dureté ? » | cinq boutons | plaques | **par défaut** : standard ; lu au devis (« hydro », « EI 60 », « Habito ») |
 | 16 | `longueur_plaque` (plafond) | « Tes plaques de plafond, en quelle longueur ? » | 2,50 m / 3,00 m | plafond | **habitude**, par défaut 2,50 m |
@@ -724,6 +725,32 @@ Exemple PI-01 : 45 m² de 72/48, hauteur 2,50 m.
 | Enduit en poudre | 2 sacs de 25 kg (29,7 kg) |
 
 ---
+
+### 14 bis. Relecture du comptoir (testeur-négoce, `relecture-testeur-negoce.md`)
+
+Trois vendeurs ont « commandé » 9 chantiers et toutes les familles :
+- un généraliste breton ;
+- un spécialiste plâtrerie ;
+- un négoce qui ne tient que Knauf et des marques négoce.
+
+Résultat : 4 bloquants, 13 gênants, 7 détails.
+
+**Corrigé dans cette version :**
+- **Même article sur plusieurs lignes** (bloquant). Le jeu de test additionne maintenant les besoins de tout le chantier avant d'arrondir, comme l'application (§49.5 : « une seule ligne par article identique »). Exemple PI-15 : 1 rouleau de bande, 2 sacs d'enduit, 1 boîte de vis.
+- **Complexe sans son isolant** (bloquant) : la désignation garde ce que le devis écrit (« Complexes de doublage 10+80 1,20 × 2,50 m »).
+- **Clous sans marque de cloueur** (bloquant) : nouvelle question d'habitude « Ton cloueur à gaz, c'est quelle marque ? » (Spit / Hilti / Paslode / Autre). Elle est posée une fois, et la ligne dit « Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz ».
+- **« Sous bois » écrit sur un clou béton** : retiré.
+- **Suspente « longue » ambiguë** : la ligne dit « Suspentes longues 171 (plénum 20 à 150 mm) ».
+- **Salle de bain sous faïence** : « sous faïence » ou « sous carrelage » lu au devis donne des montants à 40 cm.
+- **PI-10** en plaques feu.
+
+**Restent ouverts** (section 16 ou 17) :
+- **Coupe-feu (bloquant) :** un EI ne vaut que dans le système d'un fabricant, avec son PV. « Ou équivalent » ligne par ligne n'est pas recevable. À faire avant l'ouverture : quand le devis dit EI ou PV, la marque du système devient une question, toutes les lignes portent cette marque et partent chez un seul négoce.
+- **Ossature d'un plafond :** fourrures, suspentes et éclisses doivent partir chez un seul négoce, car F530 (Placo) et F47 (Knauf) ne s'emboîtent pas. À faire : grouper ces lignes (envoi par lot).
+- **Laine kraft avec membrane Vario** (Isover associe la Vario à une laine nue) : la fiche suit le devis (règle numéro un). Une question du comptoir est à ajouter quand les deux sont écrits.
+- **Mastic périphérique et manchettes de la membrane, piges et location de souffleuse, bande armée, joint sous rail, renfort de porte :** proposés par le vendeur, mais pas « forcément là ». Ils restent hors des suggestions (consigne stricte) ; Greg décide.
+- **Enduit de la 1re peau en parement double** (≈ 0,15 à 0,2 kg/m², vendeur, non sourcé), **mortier adhésif en rénovation** (2,5 à 3 kg/m²) et **rail haut vissé dans des fourrures** : à trancher par un plaquiste.
+- **Colis d'isolant et sacs de vrac propres à une marque :** la ligne montre aussi le besoin en m² (ou le produit du certificat), pour qu'un négoce d'une autre marque convertisse.
 
 ## 15. Liste des « à confirmer »
 

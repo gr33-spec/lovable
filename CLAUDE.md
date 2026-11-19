@@ -325,3 +325,14 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 - Page `/couvreurs-bretagne` : un MODÈLE piloté par une fiche (`baticlair/apps/web/src/lib/regions/`, une fiche par page, liste `PAGES_LOCALES`) ; route `app/(public)/[pageLocale]` (seules les adresses des fiches existent). Carte de la région (tracés IGN Admin Express, Licence ouverte), département touché retenu sur l'appareil et rempli à l'inscription, regroupements en cours du département (`GET /v1/public/regroupements`, jamais « 0 »). Sources : `baticlair/docs/regions/`. Aucune autre région, aucun menu des régions sur la landing avant validation de Greg.
 - Inscription par métier (RÈGLE CHANGÉE : avant, tous les métiers s'inscrivaient) : « Couvreur » ouvert et choisi d'office, les autres « Bientôt disponible » → liste d'attente (`POST /v1/public/liste-attente`, table `liste_attente_metier`), lue dans `/admin/liste-attente` (par métier et par département). Le département choisi est gardé (`company.departement`, zone des achats groupés quand l'adresse n'a pas de code postal). Comptes existants non touchés.
+
+## Fiche métier plaquiste-isolation (20 novembre 2026) : écrite, PAS BRANCHÉE
+
+- La fiche existe : `baticlair/referentiels/plaquiste-isolation/`. Elle comprend :
+  - `FICHE.md`, classée par familles, systèmes et marques, avec la source de chaque chiffre ;
+  - `referentiel.json`, au schéma de la couverture : il passe `loadReferential` (10 ouvrages, 39 produits) ;
+  - 17 chantiers types calculés par le moteur (`chantiers-types.md`) ;
+  - la recherche brute (`recherche/`) et la relecture du testeur-négoce.
+- Le métier reste fermé : aucun code ne lit ce dossier, et `PLATRERIE_REFERENTIAL` (cloison 72/48 seule) n'a pas bougé.
+- Toutes les valeurs sont `draft` jusqu'à la relecture d'un plaquiste.
+- Avant d'ouvrir : relecture par un plaquiste, décisions de Greg (`FICHE.md` §16), branchement et tests (`FICHE.md` §17).
