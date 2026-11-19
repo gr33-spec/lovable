@@ -48666,8 +48666,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.7 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.7 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.7 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.7 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -48718,8 +48718,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -48806,9 +48806,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.6 km (eau salée, trait de côte Histolitt ; mer ouverte à 43.6 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) VERTOU-VIGNOBLE -> région 3",
@@ -48872,8 +48870,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -48924,8 +48922,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -48974,8 +48972,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -49212,9 +49210,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 2.8 km (eau salée, trait de côte Histolitt ; mer ouverte à 20.7 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) SAVENAY -> région 3",
@@ -49267,9 +49263,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.8 km (eau salée, trait de côte Histolitt ; mer ouverte à 31.6 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) REZE -> région 3",
@@ -49333,8 +49327,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 3.0 km (<= 20 km) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.0 km (<= 20 km) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.0 km (<= 20 km, côte la plus proche) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.0 km (<= 20 km, côte la plus proche) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -49785,8 +49779,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 11.2 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.2 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 11.2 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.2 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -49935,8 +49929,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km, côte la plus proche) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km, côte la plus proche) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.6 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -50137,8 +50131,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 7.3 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.3 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 7.3 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.3 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -50189,8 +50183,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km, côte la plus proche) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km, côte la plus proche) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 18.8 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -50379,9 +50373,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.5 km (eau salée, trait de côte Histolitt ; mer ouverte à 22.3 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) SAINT-ETIENNE-DE-MONTLUC -> région 3",
@@ -50445,8 +50437,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -50483,9 +50475,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.3 km (eau salée, trait de côte Histolitt ; mer ouverte à 26.1 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) SAINT-ETIENNE-DE-MONTLUC -> région 3",
@@ -50599,8 +50589,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -50649,8 +50639,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -50751,8 +50741,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 9.9 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.9 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 9.9 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.9 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -50903,8 +50893,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -51105,8 +51095,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 17.7 km (<= 20 km) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 17.7 km (<= 20 km) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 17.7 km (<= 20 km, côte la plus proche) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 17.7 km (<= 20 km, côte la plus proche) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -51507,8 +51497,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km, côte la plus proche) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km, côte la plus proche) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -51657,8 +51647,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.4 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.4 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.4 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.4 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -51745,9 +51735,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.4 km (eau salée, trait de côte Histolitt ; mer ouverte à 29.3 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) SAINT-HERBLAIN-OUEST-INDRE -> région 3",
@@ -52061,8 +52049,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -52411,8 +52399,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 14.0 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.0 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.0 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.0 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -52561,8 +52549,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.4 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.4 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.4 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.4 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.4 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -52865,8 +52853,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.1 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.1 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.1 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.1 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -52915,8 +52903,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 15.7 km (<= 20 km) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.7 km (<= 20 km) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 15.7 km (<= 20 km, côte la plus proche) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.7 km (<= 20 km, côte la plus proche) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -53053,9 +53041,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.5 km (eau salée, trait de côte Histolitt ; mer ouverte à 27.6 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) PELLERIN -> région 3",
@@ -53169,8 +53155,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km, côte la plus proche) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km, côte la plus proche) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -53321,8 +53307,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -53459,9 +53445,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.7 km (eau salée, trait de côte Histolitt ; mer ouverte à 37.8 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) ? -> région 3",
@@ -53825,8 +53809,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 10.7 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 10.7 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 10.7 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 10.7 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -53975,8 +53959,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.7 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.7 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.7 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.7 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.7 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -54015,9 +53999,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.1 km (eau salée, trait de côte Histolitt ; mer ouverte à 23.8 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) PELLERIN -> région 3",
@@ -54283,8 +54265,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -54335,8 +54317,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -54485,8 +54467,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.2 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.2 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.2 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.2 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.2 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -54589,8 +54571,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -54641,8 +54623,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 8 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -54796,8 +54778,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -54848,8 +54830,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 25 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -54898,8 +54880,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -55186,9 +55168,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.7 km (eau salée, trait de côte Histolitt ; mer ouverte à 35.6 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) ? -> région 3",
@@ -55302,8 +55282,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.5 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.5 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.5 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.5 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -55552,8 +55532,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 5.0 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.0 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 5.0 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.0 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -55706,8 +55686,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -56048,9 +56028,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 1.9 km (eau salée, trait de côte Histolitt ; mer ouverte à 31.2 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) ? -> région 3",
@@ -56162,8 +56140,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -56250,9 +56228,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.3 km (eau salée, trait de côte Histolitt ; mer ouverte à 25.4 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) PELLERIN -> région 3",
@@ -56314,8 +56290,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -56502,9 +56478,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 1.5 km (eau salée, trait de côte Histolitt ; mer ouverte à 44.1 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) CARQUEFOU -> région 3",
@@ -56669,8 +56643,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.8 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.8 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.8 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.8 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -56721,8 +56695,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -56926,8 +56900,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -56978,8 +56952,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -57030,8 +57004,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -57130,8 +57104,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 14.8 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.8 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.8 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.8 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -57180,8 +57154,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.7 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.7 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.7 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.7 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -57280,8 +57254,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -57318,9 +57292,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.6 km (eau salée, trait de côte Histolitt ; mer ouverte à 40.9 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) NANTES-10E-CANTON -> région 3",
@@ -57384,8 +57356,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -57978,9 +57950,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 1.5 km (eau salée, trait de côte Histolitt ; mer ouverte à 48.0 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) CARQUEFOU -> région 3",
@@ -58294,8 +58264,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 4.3 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.3 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 4.3 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.3 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -58346,8 +58316,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -58534,9 +58504,7 @@
    },
    "zone_tuile_dtu_40_21": 1,
    "zone_ardoise_dtu_40_11": 1,
-   "situation_exposee_probable": [
-    "rive d'estuaire ou de ria à 0.5 km (eau salée, trait de côte Histolitt ; mer ouverte à 41.4 km)"
-   ],
+   "situation_exposee_probable": null,
    "vent": {
     "region": 3,
     "regle": "ancien(s) canton(s) VERTOU -> région 3",
@@ -58750,8 +58718,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.7 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.7 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.7 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.7 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59055,8 +59023,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59107,8 +59075,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.0 km (<= 20 km) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.0 km (<= 20 km) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.0 km (<= 20 km, côte la plus proche) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.0 km (<= 20 km, côte la plus proche) ; altitude 32 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59159,8 +59127,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.9 km (<= 20 km) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.9 km (<= 20 km) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.9 km (<= 20 km, côte la plus proche) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.9 km (<= 20 km, côte la plus proche) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59211,8 +59179,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 9 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 40.6 km de la côte, à moins de 2 km de la limite des 40 km (côte générale au 1:10 M)"
@@ -59315,8 +59283,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km, côte la plus proche) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km, côte la plus proche) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59367,8 +59335,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59420,8 +59388,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.2 km (<= 20 km, côte la plus proche) ; altitude 44 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59470,8 +59438,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km, côte la plus proche) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km, côte la plus proche) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59520,8 +59488,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 13.7 km (<= 20 km) ; altitude 63 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 13.7 km (<= 20 km) ; altitude 63 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 13.7 km (<= 20 km, côte la plus proche) ; altitude 63 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 13.7 km (<= 20 km, côte la plus proche) ; altitude 63 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59608,8 +59576,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.5 km (<= 5 km)"
    ],
@@ -59624,8 +59592,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 15.8 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 15.8 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 15.8 km, côte sud à 1.0 km)"
@@ -59726,8 +59694,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 9.6 km (<= 20 km) ; altitude 73 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.6 km (<= 20 km) ; altitude 73 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 9.6 km (<= 20 km, côte la plus proche) ; altitude 73 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.6 km (<= 20 km, côte la plus proche) ; altitude 73 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59828,8 +59796,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km, côte la plus proche) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km, côte la plus proche) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -59964,8 +59932,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": false
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": null,
    "vent": {
     "region": 3,
@@ -59978,8 +59946,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 14.7 km (<= 20 km) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 14.7 km (<= 20 km) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 5.2 km (<= 20 km, côte la plus proche) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.2 km (<= 20 km, côte la plus proche) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 14.7 km, côte sud à 5.2 km)"
@@ -60030,8 +59998,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 12.5 km (<= 20 km) ; altitude 66 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.5 km (<= 20 km) ; altitude 66 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 12.5 km (<= 20 km, côte la plus proche) ; altitude 66 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.5 km (<= 20 km, côte la plus proche) ; altitude 66 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -60082,8 +60050,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km, côte la plus proche) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km, côte la plus proche) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -60334,8 +60302,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km, côte la plus proche) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km, côte la plus proche) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -60370,8 +60338,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": false
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": null,
    "vent": {
     "region": 3,
@@ -60384,8 +60352,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 15.6 km (<= 20 km) ; altitude 105 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 15.6 km (<= 20 km) ; altitude 105 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 10.2 km (<= 20 km, côte la plus proche) ; altitude 105 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 10.2 km (<= 20 km, côte la plus proche) ; altitude 105 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 15.6 km, côte sud à 10.2 km)"
@@ -60438,8 +60406,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 2.6 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.6 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.6 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.6 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -60488,8 +60456,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km) ; altitude 113 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km) ; altitude 113 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km, côte la plus proche) ; altitude 113 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.7 km (<= 20 km, côte la plus proche) ; altitude 113 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -60642,8 +60610,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km, côte la plus proche) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.0 km (<= 20 km, côte la plus proche) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 26.5 km, côte sud à 1.0 km)"
@@ -60730,8 +60698,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 3.2 km (<= 5 km)"
    ],
@@ -60746,8 +60714,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 8.3 km (<= 20 km) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 8.3 km (<= 20 km) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 4.9 km (<= 20 km, côte la plus proche) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.9 km (<= 20 km, côte la plus proche) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -60796,8 +60764,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.3 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.3 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.3 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.3 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.3 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -60954,8 +60922,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.5 km (<= 20 km) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.5 km (<= 20 km) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.5 km (<= 20 km, côte la plus proche) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.5 km (<= 20 km, côte la plus proche) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.5 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -61106,8 +61074,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 18.9 km (<= 20 km) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.9 km (<= 20 km) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 18.9 km (<= 20 km, côte la plus proche) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.9 km (<= 20 km, côte la plus proche) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 18.9 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -61160,8 +61128,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km, côte la plus proche) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km, côte la plus proche) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -61412,8 +61380,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 5 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -61462,8 +61430,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 13.1 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 13.1 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 13.1 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 13.1 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -61498,8 +61466,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 3.2 km (<= 5 km)"
    ],
@@ -61514,8 +61482,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 18.2 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 18.2 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.3 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.3 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 18.2 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)",
@@ -61553,8 +61521,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.2 km (<= 5 km)"
    ],
@@ -61569,8 +61537,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 14.3 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 14.3 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 14.3 km, côte sud à 0.4 km)"
@@ -61723,8 +61691,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 3.1 km (<= 20 km) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.1 km (<= 20 km) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.1 km (<= 20 km, côte la plus proche) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.1 km (<= 20 km, côte la plus proche) ; altitude 38 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -61859,8 +61827,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.1 km (<= 5 km)"
    ],
@@ -61875,8 +61843,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 2.6 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 2.6 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -62077,8 +62045,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 13.4 km (<= 20 km) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 13.4 km (<= 20 km) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 13.4 km (<= 20 km, côte la plus proche) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 13.4 km (<= 20 km, côte la plus proche) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 39.7 km de la côte, à moins de 2 km de la limite des 40 km (côte générale au 1:10 M)"
@@ -62588,8 +62556,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km, côte la plus proche) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.6 km (<= 20 km, côte la plus proche) ; altitude 71 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -62876,8 +62844,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.4 km (<= 5 km)"
    ],
@@ -62892,8 +62860,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 10.5 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 10.5 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.2 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.2 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -62944,8 +62912,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -62997,8 +62965,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -63050,8 +63018,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 27 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -63103,8 +63071,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 41.6 km de la côte, à moins de 2 km de la limite des 40 km (côte générale au 1:10 M)"
@@ -63158,8 +63126,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 14 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -63246,8 +63214,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": false
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "rive d'estuaire ou de ria à 2.6 km (eau salée, trait de côte Histolitt ; mer ouverte à 6.4 km)"
    ],
@@ -63262,8 +63230,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 14.1 km (<= 20 km) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 14.1 km (<= 20 km) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.4 km (<= 20 km, côte la plus proche) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.4 km (<= 20 km, côte la plus proche) ; altitude 70 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 14.1 km, côte sud à 6.4 km)"
@@ -63450,8 +63418,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 3.4 km (<= 5 km)"
    ],
@@ -63466,8 +63434,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 10.3 km (<= 20 km) ; altitude 45 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 10.3 km (<= 20 km) ; altitude 45 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.7 km (<= 20 km, côte la plus proche) ; altitude 45 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.7 km (<= 20 km, côte la plus proche) ; altitude 45 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -63518,11 +63486,10 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 3.7 km (<= 20 km) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.7 km (<= 20 km) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.7 km (<= 20 km, côte la plus proche) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.7 km (<= 20 km, côte la plus proche) ; altitude 43 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
-    "territoire communal à cheval : zone 3 possible sur la partie la plus proche de la mer (nord 16.2 km / sud 0.0 km au plus près)",
     "près de la limite de Lorient (côte nord à 22.3 km, côte sud à 3.7 km)"
    ],
    "statut": "limite"
@@ -63557,8 +63524,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 1.9 km (<= 5 km)"
    ],
@@ -63573,8 +63540,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 19.0 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 19.0 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.8 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.8 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.0 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)",
@@ -63612,8 +63579,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.6 km (<= 5 km)"
    ],
@@ -63628,8 +63595,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 3.4 km (<= 20 km) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 3.4 km (<= 20 km) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km, côte la plus proche) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.7 km (<= 20 km, côte la plus proche) ; altitude 3 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -63766,8 +63733,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": false
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": null,
    "vent": {
     "region": 3,
@@ -63780,8 +63747,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 19.2 km (<= 20 km) ; altitude 69 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 19.2 km (<= 20 km) ; altitude 69 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 9.1 km (<= 20 km, côte la plus proche) ; altitude 69 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.1 km (<= 20 km, côte la plus proche) ; altitude 69 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.2 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)",
@@ -63919,8 +63886,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": false
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": null,
    "vent": {
     "region": 3,
@@ -63933,8 +63900,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 19.7 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 19.7 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 12.6 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.6 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.7 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)",
@@ -64038,8 +64005,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.3 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 38.4 km de la côte, à moins de 2 km de la limite des 40 km (côte générale au 1:10 M)"
@@ -64142,8 +64109,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.1 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64192,8 +64159,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 7.1 km (<= 20 km) ; altitude 47 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.1 km (<= 20 km) ; altitude 47 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 7.1 km (<= 20 km, côte la plus proche) ; altitude 47 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.1 km (<= 20 km, côte la plus proche) ; altitude 47 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64292,8 +64259,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 14.3 km (<= 20 km) ; altitude 76 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.3 km (<= 20 km) ; altitude 76 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.3 km (<= 20 km, côte la plus proche) ; altitude 76 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.3 km (<= 20 km, côte la plus proche) ; altitude 76 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64447,8 +64414,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 51 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 51 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 51 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 51 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64497,8 +64464,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 12.7 km (<= 20 km) ; altitude 84 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.7 km (<= 20 km) ; altitude 84 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 12.7 km (<= 20 km, côte la plus proche) ; altitude 84 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.7 km (<= 20 km, côte la plus proche) ; altitude 84 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64549,8 +64516,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 7 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64635,8 +64602,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.3 km (<= 5 km)"
    ],
@@ -64651,8 +64618,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 2.4 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 2.4 km (<= 20 km) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 13 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64687,8 +64654,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.5 km (<= 5 km)"
    ],
@@ -64703,8 +64670,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 20.0 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 20.0 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.9 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.9 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 20.0 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)",
@@ -64756,8 +64723,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km, côte la plus proche) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km, côte la plus proche) ; altitude 87 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -64908,8 +64875,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km) ; altitude 83 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km) ; altitude 83 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km, côte la plus proche) ; altitude 83 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.6 km (<= 20 km, côte la plus proche) ; altitude 83 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.6 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -65064,8 +65031,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km) ; altitude 48 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km) ; altitude 48 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km, côte la plus proche) ; altitude 48 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km, côte la plus proche) ; altitude 48 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -65252,8 +65219,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 2.6 km (<= 5 km)"
    ],
@@ -65268,8 +65235,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 10.4 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 10.4 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.3 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.3 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -65370,8 +65337,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.5 km (<= 20 km) ; altitude 75 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.5 km (<= 20 km) ; altitude 75 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.5 km (<= 20 km, côte la plus proche) ; altitude 75 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.5 km (<= 20 km, côte la plus proche) ; altitude 75 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -65622,8 +65589,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 92 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km) ; altitude 92 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 92 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 11.3 km (<= 20 km, côte la plus proche) ; altitude 92 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -65826,8 +65793,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 3.4 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.4 km (<= 20 km) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.4 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.4 km (<= 20 km, côte la plus proche) ; altitude 18 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66030,8 +65997,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.9 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.9 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.9 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.9 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66066,8 +66033,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.3 km (<= 5 km)"
    ],
@@ -66082,8 +66049,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 13.9 km (<= 20 km) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 13.9 km (<= 20 km) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 15 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 13.9 km, côte sud à 0.3 km)"
@@ -66134,8 +66101,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km, côte la plus proche) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.0 km (<= 20 km, côte la plus proche) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66237,8 +66204,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66287,8 +66254,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66389,8 +66356,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66489,8 +66456,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km) ; altitude 110 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km) ; altitude 110 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km, côte la plus proche) ; altitude 110 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.2 km (<= 20 km, côte la plus proche) ; altitude 110 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66539,8 +66506,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km, côte la plus proche) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.3 km (<= 20 km, côte la plus proche) ; altitude 50 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -66691,11 +66658,10 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km, côte la plus proche) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 6.5 km (<= 20 km, côte la plus proche) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
-    "territoire communal à cheval : zone 3 possible sur la partie la plus proche de la mer (nord 20.0 km / sud 2.8 km au plus près)",
     "près de la limite de Lorient (côte nord à 23.6 km, côte sud à 6.5 km)"
    ],
    "statut": "limite"
@@ -66850,8 +66816,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 3.6 km (<= 20 km) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.6 km (<= 20 km) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.6 km (<= 20 km, côte la plus proche) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.6 km (<= 20 km, côte la plus proche) ; altitude 54 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 38.5 km de la côte, à moins de 2 km de la limite des 40 km (côte générale au 1:10 M)"
@@ -66938,8 +66904,8 @@
     "riveraine_mer_ou_estuaire": "non",
     "littoral_5km": false
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": null,
    "vent": {
     "region": 3,
@@ -66952,8 +66918,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 19.9 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 19.9 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 14.8 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 14.8 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.9 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)",
@@ -67007,8 +66973,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 2.2 km (<= 20 km) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.2 km (<= 20 km) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.2 km (<= 20 km, côte la plus proche) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.2 km (<= 20 km, côte la plus proche) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -67059,8 +67025,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 23 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 23 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 23 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 23 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 23.5 km, côte sud à 0.1 km)"
@@ -67097,8 +67063,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 2.3 km (<= 5 km)"
    ],
@@ -67113,8 +67079,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 9.2 km (<= 20 km) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 9.2 km (<= 20 km) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.8 km (<= 20 km, côte la plus proche) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.8 km (<= 20 km, côte la plus proche) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -67426,8 +67392,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 9.3 km (<= 20 km) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.3 km (<= 20 km) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 9.3 km (<= 20 km, côte la plus proche) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.3 km (<= 20 km, côte la plus proche) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -67478,8 +67444,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km, côte la plus proche) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 1.4 km (<= 20 km, côte la plus proche) ; altitude 31 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -67528,8 +67494,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 9.5 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.5 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 9.5 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 9.5 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 27.5 km, côte sud à 9.5 km)"
@@ -67834,8 +67800,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km, côte la plus proche) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 15.1 km (<= 20 km, côte la plus proche) ; altitude 100 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -67938,8 +67904,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 10 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -67988,8 +67954,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.9 km (<= 20 km) ; altitude 133 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.9 km (<= 20 km) ; altitude 133 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.9 km (<= 20 km, côte la plus proche) ; altitude 133 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.9 km (<= 20 km, côte la plus proche) ; altitude 133 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 25.7 km, côte sud à 16.9 km)"
@@ -68176,8 +68142,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 0.2 km (<= 5 km)"
    ],
@@ -68192,8 +68158,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 4.6 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 4.6 km (<= 20 km) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.6 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.6 km (<= 20 km, côte la plus proche) ; altitude 4 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -68297,8 +68263,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.8 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -68803,8 +68769,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.7 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -68853,8 +68819,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km, côte la plus proche) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km, côte la plus proche) ; altitude 52 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -69157,8 +69123,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km) ; altitude 46 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km) ; altitude 46 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km, côte la plus proche) ; altitude 46 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 16.4 km (<= 20 km, côte la plus proche) ; altitude 46 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -69259,8 +69225,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.5 km (<= 20 km, côte la plus proche) ; altitude 29 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -69359,8 +69325,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 18.6 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.6 km (<= 20 km) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 18.6 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.6 km (<= 20 km, côte la plus proche) ; altitude 80 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 18.6 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -69500,8 +69466,8 @@
     "riveraine_mer_ou_estuaire": "Mer",
     "littoral_5km": true
    },
-   "zone_tuile_dtu_40_21": 3,
-   "zone_ardoise_dtu_40_11": 3,
+   "zone_tuile_dtu_40_21": 2,
+   "zone_ardoise_dtu_40_11": 2,
    "situation_exposee_probable": [
     "littoral à 1.6 km (<= 5 km)"
    ],
@@ -69516,8 +69482,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte de Lorient à la Belgique à 12.5 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3 (la plus sévère)",
-    "ardoise": "côte de Lorient à la Belgique à 12.5 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 3"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.1 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.1 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "près de la limite de Lorient (côte nord à 12.5 km, côte sud à 2.1 km)"
@@ -70072,8 +70038,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km) ; altitude 77 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km) ; altitude 77 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km, côte la plus proche) ; altitude 77 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 7.9 km (<= 20 km, côte la plus proche) ; altitude 77 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70174,8 +70140,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 12 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70226,8 +70192,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.6 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.6 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.6 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.6 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70480,8 +70446,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 2.4 km (<= 20 km) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.4 km (<= 20 km) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.4 km (<= 20 km, côte la plus proche) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.4 km (<= 20 km, côte la plus proche) ; altitude 30 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70533,8 +70499,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.1 km (<= 20 km, côte la plus proche) ; altitude 19 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 40.1 km de la côte, à moins de 2 km de la limite des 40 km (côte générale au 1:10 M)"
@@ -70639,8 +70605,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 16 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70841,8 +70807,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 10.3 km (<= 20 km) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 10.3 km (<= 20 km) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 10.3 km (<= 20 km, côte la plus proche) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 10.3 km (<= 20 km, côte la plus proche) ; altitude 126 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70893,8 +70859,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 3.9 km (<= 20 km) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.9 km (<= 20 km) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 3.9 km (<= 20 km, côte la plus proche) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 3.9 km (<= 20 km, côte la plus proche) ; altitude 26 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -70993,8 +70959,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 19.8 km (<= 20 km) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.8 km (<= 20 km) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 19.8 km (<= 20 km, côte la plus proche) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 19.8 km (<= 20 km, côte la plus proche) ; altitude 21 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 19.8 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -71047,8 +71013,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 2.7 km (<= 20 km) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.7 km (<= 20 km) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.7 km (<= 20 km, côte la plus proche) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.7 km (<= 20 km, côte la plus proche) ; altitude 17 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71099,8 +71065,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.2 km (<= 20 km, côte la plus proche) ; altitude 11 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71199,8 +71165,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 18.8 km (<= 20 km, côte la plus proche) ; altitude 88 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": [
     "à 18.8 km de la côte, à moins de 2 km de la limite des 20 km (côte générale au 1:10 M)"
@@ -71251,8 +71217,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 8.1 km (<= 20 km) ; altitude 112 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.1 km (<= 20 km) ; altitude 112 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 8.1 km (<= 20 km, côte la plus proche) ; altitude 112 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 8.1 km (<= 20 km, côte la plus proche) ; altitude 112 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71403,8 +71369,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.4 km (<= 20 km, côte la plus proche) ; altitude 6 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71453,8 +71419,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km) ; altitude 34 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km) ; altitude 34 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km, côte la plus proche) ; altitude 34 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 5.7 km (<= 20 km, côte la plus proche) ; altitude 34 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71505,8 +71471,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 2.0 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.0 km (<= 20 km) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 2.0 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 2.0 km (<= 20 km, côte la plus proche) ; altitude 24 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71555,8 +71521,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km) ; altitude 108 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km) ; altitude 108 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km, côte la plus proche) ; altitude 108 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 12.9 km (<= 20 km, côte la plus proche) ; altitude 108 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71607,8 +71573,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 0.3 km (<= 20 km, côte la plus proche) ; altitude 20 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"
@@ -71659,8 +71625,8 @@
     "statut": "confirme"
    },
    "regle_appliquee": {
-    "tuile": "côte atlantique de Lorient à l'Espagne à 4.6 km (<= 20 km) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
-    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.6 km (<= 20 km) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
+    "tuile": "côte atlantique de Lorient à l'Espagne à 4.6 km (<= 20 km, côte la plus proche) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2 (la plus sévère)",
+    "ardoise": "côte atlantique de Lorient à l'Espagne à 4.6 km (<= 20 km, côte la plus proche) ; altitude 49 m (< 200 m) (mairie, IGN RGE ALTI) -> zone 2"
    },
    "alertes": null,
    "statut": "calcule"

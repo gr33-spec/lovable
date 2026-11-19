@@ -107,3 +107,11 @@ Le calcul de la Bretagne prend environ 20 s ; celui de la France, environ 90 s.
 ## France entière
 
 `france.json.gz` (34 739 communes) : le même calcul sur toute la France, compressé (41 Mo non compressé). `gunzip -k france.json.gz` pour le lire.
+
+## Décisions du 19 novembre 2026 (« fais le plus logique »)
+
+- **Limite de Lorient** : Lorient et l'ouest restent sur la côte « de Lorient à la Belgique » (zone 3). À l'est de la
+  mairie de Lorient, à moins de 20 km des deux côtes, c'est la côte la plus proche qui décide. Étel, Belz, Riantec,
+  Lanester, Hennebont et 17 autres communes passent en zone 2 ; Lorient, Port-Louis, Groix restent en zone 3.
+- **Rives d'estuaire et de ria** : situation exposée probable seulement près de l'embouchure (eau salée à 3 km au plus
+  et mer ouverte à 20 km au plus). Paimbœuf et Donges : exposées ; Nantes, Rezé, Saint-Herblain, Vertou : non.

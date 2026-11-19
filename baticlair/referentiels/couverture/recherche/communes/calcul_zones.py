@@ -302,12 +302,20 @@ RHONE = [(4.80, 45.30), (4.81, 45.10), (4.86, 44.93), (4.78, 44.72), (4.70, 44.5
          (4.66, 44.30), (4.70, 44.10), (4.81, 43.95), (4.66, 43.70)]  # tracé simplifié, pointe Isère-Drôme-Ardèche -> Arles
 
 
-def zone_cote(dn, ds, nord_label="côte de Lorient à la Belgique"):
+# Mairie de Lorient (Lambert-93, approximatif) : le DTU fait partir la zone 3 « de Lorient à la Belgique ».
+LORIENT_MAIRIE_X = 223485.0 + 500.0  # mairie de Lorient (47,748 N, 3,366 O) + 500 m
+
+
+def zone_cote(dn, ds, nord_label="côte de Lorient à la Belgique", x=None):
     """Zone due à la mer, identique pour tuile et ardoise sur l'Atlantique, la Manche et la mer du Nord."""
-    if dn is not None and dn <= 20:
+    # Décision du 19/11/2026 (« fais le plus logique ») : Lorient et l'ouest restent sur la côte « de Lorient à la
+    # Belgique » ; à l'EST de Lorient, à moins de 20 km des deux côtes, la côte la PLUS PROCHE décide (Étel, Belz,
+    # Riantec, Port-Louis : côte « de Lorient à l'Espagne », zone 2).
+    est_de_lorient = x is not None and x > LORIENT_MAIRIE_X
+    if dn is not None and dn <= 20 and (not est_de_lorient or ds is None or ds > 20 or dn <= ds):
         return 3, "%s à %.1f km (<= 20 km)" % (nord_label, dn)
     if ds is not None and ds <= 20:
-        return 2, "côte atlantique de Lorient à l'Espagne à %.1f km (<= 20 km)" % ds
+        return 2, "côte atlantique de Lorient à l'Espagne à %.1f km (<= 20 km, côte la plus proche)" % ds
     if dn is not None and dn <= 40:
         return 2, "%s à %.1f km (bande 20-40 km)" % (nord_label, dn)
     return 1, "à plus de 20 km de la côte sud et 40 km de la côte nord"
@@ -427,7 +435,7 @@ def main():
             else:
                 dmed = min(dmed, dr) if dmed is not None else dr
             dmer = min([d for d in (dn, ds, dmed) if d is not None])
-        zc, rc = zone_cote(dn, ds)
+        zc, rc = zone_cote(dn, ds, x=x)
         for d, seuil in ((dn, 20), (dn, 40), (ds, 20)):
             if d is not None and abs(d - seuil) <= 2:
                 flags.append("à %.1f km de la côte, à moins de 2 km de la limite des %d km (côte générale au 1:10 M)" % (d, seuil))
@@ -438,7 +446,7 @@ def main():
         regle_t = [rc, ra + (" (mairie, IGN RGE ALTI)" if z_ign is not None else " (moyenne communale)")]
         # commune à cheval sur une limite de bande
         if dn_min is not None or ds_min is not None:
-            zc_min, _ = zone_cote(dn_min if dn_min is not None else dn, ds_min if ds_min is not None else ds)
+            zc_min, _ = zone_cote(dn_min if dn_min is not None else dn, ds_min if ds_min is not None else ds, x=x)
             if zc_min > zc:
                 flags.append("territoire communal à cheval : zone %d possible sur la partie la plus proche de la mer "
                              "(nord %.1f km / sud %s km au plus près)" % (zc_min, dn_min or -1, ds_min))
@@ -483,7 +491,9 @@ def main():
             expo.append("littoral à %.1f km (<= 5 km)" % dr)
         if ile:
             expo.append("île")
-        if dr is not None and dr <= 3 and (dmer is None or dmer > 5):
+        # Rive d'estuaire ou de ria : exposée près de l'embouchure seulement (mer ouverte à 20 km au plus ; décision du
+        # 19/11/2026 : Donges et Paimbœuf oui, Nantes non).
+        if dr is not None and dr <= 3 and dmer is not None and 5 < dmer <= 20:
             expo.append("rive d'estuaire ou de ria à %.1f km (eau salée, trait de côte Histolitt ; mer ouverte à %s km)"
                         % (dr, dmer))
         lit = litt.get(c)
