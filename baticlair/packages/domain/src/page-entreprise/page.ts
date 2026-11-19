@@ -313,13 +313,16 @@ export const ENGAGEMENTS = ["Devis gratuit", "Déplacement gratuit", "Interventi
 export const engagementsPropres = (v: readonly string[] | null | undefined): string[] => ENGAGEMENTS.filter((e) => v?.includes(e));
 
 /** Les adresses de fiche Google acceptées (Google Maps, fiche d'établissement, liens courts de partage). */
-const HOTES_GOOGLE = /^(?:(?:www|maps|business|search)\.)?google\.(?:com|fr|be|ch|lu|ca|de|es|it|co\.uk)$|^(?:maps\.app\.)?goo\.gl$|^g\.page$|^g\.co$|^share\.google$/;
+const HOTES_GOOGLE = /^(?:(?:www|maps|business|search)\.)?google\.(?:com|fr|be|ch|lu|ca|de|es|it|co\.uk)$|^maps\.app\.goo\.gl$|^g\.page$|^g\.co$|^share\.google$/;
 
 /** Le lien de la fiche Google, propre, ou null s'il ne mène pas chez Google (« Voir nos avis Google »). */
 export function lienGooglePropre(v: string | null | undefined): string | null {
   const propre = siteWebPropre(v);
   if (!propre || !propre.startsWith("https://")) return propre && /^http:\/\//.test(propre) ? lienGooglePropre(propre.replace(/^http:/, "https:")) : null;
   const hote = /^https:\/\/([^/:]+)/.exec(propre)![1]!;
+  // Saboteur et développeur senior (19 novembre 2026) : un lien de redirection Google (« google.com/url?q=… ») ou l'ancien
+  // raccourcisseur « goo.gl » mènent n'importe où ; seuls les vrais liens de fiche passent.
+  if (/^https:\/\/[^/]+\/url(?:[/?#]|$)/i.test(propre)) return null;
   return HOTES_GOOGLE.test(hote) ? propre : null;
 }
 
@@ -377,7 +380,7 @@ export function proposerTextes(p: ProfilPourEcrire, libelles: Record<string, str
     theme.presentation,
     p.creeeEn ? `Entreprise créée en ${p.creeeEn}.` : null,
     p.certifications.length ? `${p.certifications.join(", ")}.` : null,
-    "Appelez-nous ou écrivez-nous : nous vous répondons rapidement avec un devis clair.",
+    "Appelez-nous ou écrivez-nous pour parler de votre projet.",
   ];
   return { accroche, presentation: texteSur(phrases.filter(Boolean).join(" "), LIMITES_PAGE.presentation) };
 }

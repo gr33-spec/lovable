@@ -375,16 +375,21 @@ export class PageEntrepriseService {
     if (!this.stockage.actif) throw new DomainError("forbidden", "Photo storage off", { reason: "stockage_coupe", phrase: "L'envoi de photos n'est pas encore ouvert." });
     const page = await this.pageDe(t.companyId);
     if (!page.photosAccordLe) throw new DomainError("forbidden", "Photo rights not confirmed", { reason: "accord_photos", phrase: "Coche d'abord que tu as le droit de publier ces photos." });
-    if (role === "galerie") {
-      const n = await this.prisma.photoPage.count({ where: { companyId: t.companyId, role: "galerie", statut: { not: "erreur" } } });
-      if (n >= LIMITES_PAGE.photos) throw refus("photos_max", `${LIMITES_PAGE.photos} photos au plus. Retire une photo pour en ajouter une.`);
-    }
     // Le chantier : seulement un des siens (jamais celui d'une autre entreprise).
     if (realisationId && (role !== "galerie" || !isUuid(realisationId) || !(await this.prisma.realisationPage.count({ where: { id: realisationId, companyId: t.companyId } })))) throw notFound("Réalisation");
     const { largeur, hauteur } = await controlerPhoto(octets);
-    const dernier = await this.prisma.photoPage.aggregate({ where: { companyId: t.companyId, role }, _max: { ordre: true } });
-    const photo = await this.prisma.photoPage.create({
-      data: { companyId: t.companyId, role, realisationId: realisationId ?? null, legende: nettoyer(legende, LIMITES_PAGE.legende), ordre: (dernier._max.ordre ?? -1) + 1, largeur, hauteur, octets: octets.length },
+    // DÉVELOPPEUR SENIOR (19 novembre 2026) : 25 photos envoyées au même instant passaient toutes la limite de 20 (compter
+    // puis créer, sans verrou). Un verrou par entreprise, le temps de compter et de créer : la limite tient.
+    const photo = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`photos-page:${t.companyId}`}))`;
+      if (role === "galerie") {
+        const n = await tx.photoPage.count({ where: { companyId: t.companyId, role: "galerie", statut: { not: "erreur" } } });
+        if (n >= LIMITES_PAGE.photos) throw refus("photos_max", `${LIMITES_PAGE.photos} photos au plus. Retire une photo pour en ajouter une.`);
+      }
+      const dernier = await tx.photoPage.aggregate({ where: { companyId: t.companyId, role }, _max: { ordre: true } });
+      return tx.photoPage.create({
+        data: { companyId: t.companyId, role, realisationId: realisationId ?? null, legende: nettoyer(legende, LIMITES_PAGE.legende), ordre: (dernier._max.ordre ?? -1) + 1, largeur, hauteur, octets: octets.length },
+      });
     });
     const travail = this.traiter(photo.id, t.companyId, role, octets).finally(() => this.enCours.delete(travail));
     this.enCours.add(travail);
@@ -433,6 +438,8 @@ export class PageEntrepriseService {
 
   /** Suppression propre : les fichiers du stockage d'abord, puis la ligne. */
   private async effacer(p: PhotoRow): Promise<void> {
+    // Stockage coupé : ses fichiers ne pourraient pas partir ; la photo reste plutôt que de laisser des fichiers orphelins.
+    if (!this.stockage.actif && p.cles.length) throw new DomainError("forbidden", "Photo storage off", { reason: "stockage_coupe", phrase: "Les photos ne peuvent pas être retirées pour l'instant. Réessaie plus tard." });
     await this.stockage.supprimer(p.cles);
     await this.prisma.photoPage.deleteMany({ where: { id: p.id, companyId: p.companyId } });
     await this.prisma.pageEntreprise.updateMany({ where: { companyId: p.companyId, couvertureId: p.id }, data: { couvertureId: null } });
@@ -566,6 +573,9 @@ export class PageEntrepriseService {
     if ("redirection" in p) throw notFound("Page");
     const mienne = p.companyId === t.companyId;
     if (!mienne && (await this.bloquee(t.companyId, p.companyId))) throw notFound("Page");
+    // Saboteur (19 novembre 2026) : un compte connecté mais NON vérifié lisait le bloc. Comme pour contacter en Mission,
+    // seule une entreprise au SIRET vérifié le lit (un négoce inscrit comme artisan ne lit pas les disponibilités).
+    if (!mienne && !(await this.prisma.company.findUnique({ where: { id: t.companyId }, select: { siretVerifieLe: true } }))?.siretVerifieLe) throw notFound("Page");
     const [e, profil, dispo] = await Promise.all([
       this.entreprise(p.companyId),
       this.prisma.profilPublic.findUnique({ where: { companyId: p.companyId }, select: { visible: true, metiers: true, services: true } }),
@@ -580,6 +590,8 @@ export class PageEntrepriseService {
       entrepriseId: p.companyId,
       competences,
       services: profil?.visible && profil.services?.trim() ? libre(profil.services.trim()) : null,
+      /** Des compétences écrites par l'artisan lui-même (pas seulement l'intitulé de son métier). */
+      declarees: declarees.length > 0,
       disponibilite: dispo ? { annonceId: dispo.id, du: dispo.debut.toISOString().slice(0, 10), au: dispo.fin?.toISOString().slice(0, 10) ?? null } : null,
     };
   }
@@ -613,19 +625,30 @@ export class PageEntrepriseService {
   async contacter(adresse: string, m: MessageContact, ip: string | undefined) {
     const p = await this.pagePublique(adresse);
     if ("redirection" in p) throw notFound("Page");
+    if (!m.telephone && !m.email) throw refus("coordonnees", "Laissez un téléphone ou un e-mail pour qu'on vous réponde.", "telephone");
+    // Un nom ou une commune sur plusieurs lignes n'entre jamais tel quel dans l'objet d'un e-mail (développeur senior).
+    const uneLigne = (x: string | null) => (x === null ? null : x.replace(/\s+/g, " ").trim());
+    m = { ...m, nom: uneLigne(m.nom) ?? "", commune: uneLigne(m.commune) };
     const ipHash = this.empreinteIp(ip);
     const heure = new Date(this.now().getTime() - 3_600_000);
     const jour = new Date(this.now().getTime() - 86_400_000);
-    const [parIp, parPage] = await Promise.all([
-      ipHash ? this.prisma.contactPage.count({ where: { ipHash, createdAt: { gte: heure } } }) : 0,
-      this.prisma.contactPage.count({ where: { companyId: p.companyId, createdAt: { gte: jour } } }),
-    ]);
-    if (parIp >= LIMITES_CONTACT.parIpParHeure || parPage >= LIMITES_CONTACT.parPageParJour) {
-      throw new DomainError("too_many_requests", "Too many messages", { reason: "trop_de_messages", phrase: "Trop de messages envoyés. Réessayez plus tard ou appelez directement." });
-    }
-    if (!m.telephone && !m.email) throw refus("coordonnees", "Laissez un téléphone ou un e-mail pour qu'on vous réponde.", "telephone");
+    // DÉVELOPPEUR SENIOR (19 novembre 2026) : dix messages envoyés au même instant passaient tous la limite (compter, puis
+    // noter la trace à la fin). Maintenant : un verrou par visiteur et par page, on compte, et la trace est notée AUSSITÔT,
+    // dans la même transaction ; le message suivant la voit.
+    const permis = await this.prisma.$transaction(async (tx) => {
+      if (ipHash) await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`contact-ip:${ipHash}`}))`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`contact-page:${p.companyId}`}))`;
+      const [parIp, parPage] = await Promise.all([
+        ipHash ? tx.contactPage.count({ where: { ipHash, createdAt: { gte: heure } } }) : 0,
+        tx.contactPage.count({ where: { companyId: p.companyId, createdAt: { gte: jour } } }),
+      ]);
+      if (parIp >= LIMITES_CONTACT.parIpParHeure || parPage >= LIMITES_CONTACT.parPageParJour) return false;
+      await tx.contactPage.create({ data: { companyId: p.companyId, ipHash } });
+      return true;
+    });
+    if (!permis) throw new DomainError("too_many_requests", "Too many messages", { reason: "trop_de_messages", phrase: "Trop de messages envoyés. Réessayez plus tard ou appelez directement." });
+    // Sans adresse où écrire, la demande reste quand même dans l'app (copie et cloche) ; seul l'e-mail ne part pas.
     const dest = await this.destinataire(p.companyId);
-    if (!dest) throw new DomainError("conflict", "No recipient", { reason: "sans_destinataire", phrase: "Ce message ne peut pas partir pour l'instant. Appelez directement." });
     const e = await this.entreprise(p.companyId);
     // Greg, 17 novembre 2026 : la copie du message va dans « Messages et réponses » AVANT l'e-mail ; un e-mail en panne ne
     // perd donc jamais la demande (elle reste dans l'app).
@@ -635,7 +658,7 @@ export class PageEntrepriseService {
     await ecrireAlerte(this.prisma, p.companyId, { categorie: "site", genre: "action", titre: "Nouvelle demande depuis ton site", detail: [m.nom, m.commune].filter(Boolean).join(" · ").slice(0, 120), action: "Lire la demande", href: `/messages/site/${copie.id}`, cle: `site:${copie.id}` }).catch(() => false);
     const reglage = await this.prisma.reglageAlertes.findUnique({ where: { companyId: p.companyId } }).catch(() => null);
     const coupe = (await this.prisma.company.findUnique({ where: { id: p.companyId }, select: { emailsCoupesLe: true } }))?.emailsCoupesLe;
-    if (!coupe && !(reglage && (!reglage.site || !reglage.email))) await this.emails.send({
+    if (dest && !coupe && !(reglage && (!reglage.site || !reglage.email))) await this.emails.send({
       to: dest,
       subject: `Nouveau message depuis votre page Mobiiz : ${m.nom}`,
       text: [
@@ -662,7 +685,6 @@ export class PageEntrepriseService {
       // La demande est déjà dans l'app : le visiteur n'a pas à recommencer ; le journal du serveur note la panne.
       console.error(JSON.stringify({ evenement: "contact_site_email_echec", companyId: p.companyId, erreur: (err as Error).message?.slice(0, 200) }));
     });
-    await this.prisma.contactPage.create({ data: { companyId: p.companyId, ipHash } });
     return { envoye: true };
   }
 
@@ -739,9 +761,12 @@ export class PageEntrepriseService {
     await this.prisma.messageSite.deleteMany({ where: { createdAt: { lt: jours(365) } } });
     const empreintes = await this.prisma.signalementPage.updateMany({ where: { createdAt: { lt: jours(30) }, ipHash: { not: null } }, data: { ipHash: null } });
     const signalements = await this.prisma.signalementPage.deleteMany({ where: { createdAt: { lt: jours(365) } } });
+    // Une photo restée « en traitement » plus de 10 minutes (la fonction a été coupée en route) passe « erreur » : elle ne
+    // compte plus dans les 20, et ses fichiers éventuels partent avec les orphelins ci-dessous.
+    await this.prisma.photoPage.updateMany({ where: { statut: "traitement", createdAt: { lt: new Date(maintenant.getTime() - 10 * 60_000) } }, data: { statut: "erreur", cles: [] } });
     const fichiers = await this.stockage.lister("pages/");
     const ids = [...new Set(fichiers.map((f) => f.cle.split("/")[2]).filter((x): x is string => !!x && isUuid(x)))];
-    const vivantes = new Set((await this.prisma.photoPage.findMany({ where: { id: { in: ids } }, select: { id: true } })).map((p) => p.id));
+    const vivantes = new Set((await this.prisma.photoPage.findMany({ where: { id: { in: ids }, statut: { not: "erreur" } }, select: { id: true } })).map((p) => p.id));
     // Une photo à peine créée peut être en cours de dépôt : on ne touche qu'aux dossiers sans ligne.
     const orphelins = fichiers.filter((f) => !vivantes.has(f.cle.split("/")[2] ?? ""));
     for (let i = 0; i < orphelins.length; i += 500) await this.stockage.supprimer(orphelins.slice(i, i + 500).map((f) => f.url));

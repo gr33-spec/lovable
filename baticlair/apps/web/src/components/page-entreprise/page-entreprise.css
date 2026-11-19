@@ -645,6 +645,10 @@
   transform: translateY(110%);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* Éditeur sur téléphone, un réglage ouvert : le petit aperçu montre la partie réglée, pas la barre d'appel. */
+[data-reglage] .pe-barre-appel {
+  display: none !important;
+}
 .pe[data-defile] .pe-barre-appel {
   transform: none;
 }
@@ -1504,12 +1508,13 @@ body:has(.pe:not(.pe-apercu)) {
 }
 .pe-pied-lien {
   font-weight: 700;
-  min-height: 32px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
 }
 .pe-pied-sep {
-  color: var(--clair);
+  color: var(--doux);
+  opacity: 0.6;
 }
 .pe-mobiiz {
   display: inline-flex;
@@ -1687,6 +1692,11 @@ body:has(.pe:not(.pe-apercu)) {
 }
 
 /* Le retour vers « Mon site » quand l'artisan ouvre sa page depuis l'app */
+/* Spécialiste UI/UX (19 novembre 2026) : le bouton recouvrait le nom de l'entreprise en haut de l'accueil ; l'accueil
+   lui laisse sa place. */
+.pe:has(.pe-retour-app) .pe-accueil-texte {
+  padding-top: 64px;
+}
 .pe-retour-app {
   position: fixed;
   left: 12px;
@@ -1716,7 +1726,13 @@ body:has(.pe:not(.pe-apercu)) {
   align-items: flex-end;
   min-height: max(560px, min(calc(100svh - var(--entete) - 40px), 720px));
 }
-/* Téléphone : chaque garantie en colonne, l'icône au-dessus, rien ne se chevauche. */
+/* Téléphone : chaque garantie en colonne, l'icône au-dessus, rien ne se chevauche. Spécialiste UI/UX (19 novembre 2026) :
+   avec cinq garanties sur 320 px, « Intervention » et « Décennale » se touchaient ; trois colonnes au plus, sur deux
+   lignes s'il le faut, et un mot trop long se coupe proprement. */
+.pe .pe-preuves {
+  grid-template-columns: repeat(var(--pe-preuves, 3), minmax(0, 1fr));
+  row-gap: 10px;
+}
 .pe .pe-preuves li {
   flex-direction: column;
   justify-content: flex-start;
@@ -1724,6 +1740,11 @@ body:has(.pe:not(.pe-apercu)) {
   padding: 4px 6px;
   text-align: center;
   font-size: 12.5px;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.pe .pe-preuves li:nth-child(3n + 1) {
+  border-left: 0;
 }
 .pe .pe-carte-apropos-photo {
   color: #fff;
@@ -1735,6 +1756,13 @@ body:has(.pe:not(.pe-apercu)) {
   color: #fff;
 }
 @container pe (min-width: 640px) {
+  .pe .pe-preuves {
+    grid-template-columns: none;
+    row-gap: 0;
+  }
+  .pe .pe-preuves li:nth-child(3n + 1):not(:first-child) {
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+  }
   .pe .pe-preuves li {
     flex-direction: row;
     text-align: left;
@@ -1971,4 +1999,14 @@ body:has(.pe:not(.pe-apercu)) {
 }
 .pe .pe-lien-google:hover {
   background: rgb(255 255 255 / 0.2);
+}
+
+/* Spécialiste UI/UX (19 novembre 2026) : sur ordinateur, les liens du menu faisaient 24 px de haut ; 44 px au doigt. */
+.pe .pe-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.pe .pe-nav a::after {
+  bottom: 6px;
 }

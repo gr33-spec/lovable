@@ -15,6 +15,8 @@ interface EntreProsVue {
   entrepriseId: string;
   competences: string[];
   services: string | null;
+  /** Des compétences écrites par l'artisan (pas seulement l'intitulé de son métier). */
+  declarees?: boolean;
   disponibilite: { annonceId: string; du: string; au: string | null } | null;
 }
 
@@ -38,6 +40,9 @@ export function EntrePros({ adresse }: { adresse: string }) {
   }, [vue]);
   if (!vue) return null;
   const d = vue.disponibilite;
+  // Spécialiste UI/UX (19 novembre 2026) : sans disponibilité publiée ni compétence ou service écrits par l'artisan, rien
+  // à dire à une autre entreprise : pas de bloc presque vide (l'artisan, lui, le voit pour savoir quoi remplir).
+  if (!vue.mienne && !d && !vue.declarees && !vue.services) return null;
   return (
     <section id="entre-pros" className="pe-entre-pros" aria-labelledby="pe-t-entre-pros">
       <div className="pe-cadre">
@@ -74,11 +79,6 @@ export function EntrePros({ adresse }: { adresse: string }) {
             {!vue.mienne && d ? (
               <Link href={`/missions/${d.annonceId}`} className="pe-btn pe-btn-appel">
                 Proposer une mission
-              </Link>
-            ) : null}
-            {!vue.mienne && !d ? (
-              <Link href="/missions/nouvelle" className="pe-btn pe-btn-appel">
-                Publier une mission
               </Link>
             ) : null}
             <Link href={vue.mienne ? "/compte/profil-public" : "/missions"} className="pe-btn pe-btn-second">

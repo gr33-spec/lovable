@@ -44,8 +44,16 @@ export function RetourMonSite() {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     // Lu après l'affichage : la page est rendue par le serveur, le paramètre ne change rien pour un visiteur.
+    const params = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVisible(new URLSearchParams(window.location.search).get("depuis") === "mon-site");
+    setVisible(params.get("depuis") === "mon-site");
+    // Développeur senior (19 novembre 2026) : le paramètre sort de la barre d'adresse aussitôt lu ; un lien copié et
+    // partagé à un client ne montre jamais « Retour à Mon site ».
+    if (params.has("depuis")) {
+      params.delete("depuis");
+      const q = params.toString();
+      window.history.replaceState(window.history.state, "", `${window.location.pathname}${q ? `?${q}` : ""}${window.location.hash}`);
+    }
   }, []);
   if (!visible) return null;
   return (

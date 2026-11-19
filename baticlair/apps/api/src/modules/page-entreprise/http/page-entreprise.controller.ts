@@ -213,7 +213,7 @@ export class PagesPubliquesController {
     const l = await this.pages.logoPublic(adresse);
     res.setHeader("Content-Type", l.type);
     res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=300, stale-while-revalidate=600");
     res.send(Buffer.from(l.octets));
   }
 

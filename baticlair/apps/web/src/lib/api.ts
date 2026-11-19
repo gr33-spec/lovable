@@ -22,6 +22,9 @@ export class ApiError extends Error {
   /** Les fautes de saisie nommées par le serveur (champ et phrase), quand il en donne. */
   fautes?: { champ: string; message: string }[];
 
+  /** Le champ refusé, quand le serveur le nomme (`field`, ou le premier chemin d'une faute de format). */
+  champ?: string;
+
   get retryable(): boolean {
     return this.code === "network" || this.status >= 500 || this.code === "request_in_progress";
   }
@@ -105,6 +108,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const erreur = new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason, phrase ?? undefined);
   // Missions (10 novembre 2026) : les fautes de saisie nommées par le serveur, champ par champ.
   if (details && typeof details === "object" && "fautes" in details && Array.isArray(details.fautes)) erreur.fautes = details.fautes as { champ: string; message: string }[];
+  const champ = details && typeof details === "object" && "field" in details ? String(details.field) : fieldErrors?.[0]?.path?.split(".")[0];
+  if (champ) erreur.champ = champ;
   throw erreur;
 }
 

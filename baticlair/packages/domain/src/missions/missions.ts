@@ -370,6 +370,22 @@ const TELEPHONE = new RegExp(`(?:\\+|\\b00|\\(?\\b0)(?:${SEP}\\d){8,14}\\b|\\b[6
 const SITE = /\b(?:https?:\/\/|www\.)[^\s]+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:fr|com|net|org|bzh|eu|io|me|be|ch|info|pro)\b(?:\/[^\s]*)?/gi;
 const DATE = /\b\d{1,2}[/.-]\d{1,2}[/.-](?:19|20)\d{2}\b/g;
 const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+// Saboteur (19 novembre 2026) : un e-mail déguisé (« contact (at) perso . fr », « [at] », « arobase », « (dot) »).
+const EMAIL_DEGUISE = /[A-Za-z0-9._%+-]+\s*(?:\(at\)|\[at\]|\{at\}|\barobase\b)\s*[A-Za-z0-9-]+(?:\s*(?:\.|\(dot\)|\[dot\]|\bpoint\b)\s*[A-Za-z0-9-]+)+/gi;
+/**
+ * Saboteur (19 novembre 2026) : un « O » mis à la place d'un zéro (« O6 12 34 56 78 ») se lit comme un vrai numéro. Le numéro
+ * se cherche sur une copie où ces « O » valent 0 (même longueur), et c'est le texte d'origine qui est masqué à cet endroit.
+ */
+function masquerTelephones(t: string): string {
+  const lu = t.replace(/(?<![A-Za-zÀ-ÿ])[Oo](?=[\s./,_()–—-]{0,3}\d)/g, "0").replace(/(?<=\d[\s./,_()–—-]{0,3})[Oo](?![A-Za-zÀ-ÿ])/g, "0");
+  let sortie = "";
+  let fin = 0;
+  for (const m of lu.matchAll(TELEPHONE)) {
+    sortie += t.slice(fin, m.index) + COORDONNEES_MASQUEES;
+    fin = m.index + m[0].length;
+  }
+  return sortie + t.slice(fin);
+}
 export const COORDONNEES_MASQUEES = "[coordonnées masquées jusqu'à l'accord des deux entreprises]";
 /** Tant que les deux entreprises n'ont pas accepté, un numéro ou un e-mail écrit dans un message est masqué à l'affichage. */
 export function masquerCoordonnees(texteMessage: string): string {
@@ -378,8 +394,9 @@ export function masquerCoordonnees(texteMessage: string): string {
   const sansDates = texteMessage.replace(DATE, (d) => `\uE000${dates.push(d) - 1}\uE001`);
   return sansDates
     .replace(EMAIL, COORDONNEES_MASQUEES)
+    .replace(EMAIL_DEGUISE, COORDONNEES_MASQUEES)
     .replace(SITE, COORDONNEES_MASQUEES)
-    .replace(TELEPHONE, COORDONNEES_MASQUEES)
+    .replace(/[^]*/, masquerTelephones)
     .replace(/\uE000(\d+)\uE001/g, (_, i: string) => dates[Number(i)] ?? "");
 }
 /**
