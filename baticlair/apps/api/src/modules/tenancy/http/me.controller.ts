@@ -15,7 +15,7 @@ import { Tenant } from "./tenant.decorator.js";
 import { TenantGuard } from "./tenant.guard.js";
 
 const trades = z.array(z.string().max(40)).max(TRADES.length);
-const createCompanyBody = z.object({ name: z.string(), trades: trades.optional() });
+const createCompanyBody = z.object({ name: z.string(), trades: trades.optional(), departement: z.string().trim().max(3).nullable().optional() });
 const tradesBody = z.object({ trades });
 const field = z.string().max(400).nullable().optional();
 const profileBody = z.object({ name: field, address: field, siret: field, phone: field, email: field });
@@ -42,7 +42,7 @@ export class MeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body(new ZodPipe(createCompanyBody)) body: z.infer<typeof createCompanyBody>,
   ) {
-    const c = await this.tenancy.createCompany(user.userId, body.name, body.trades ?? []);
+    const c = await this.tenancy.createCompany(user.userId, body.name, body.trades ?? [], body.departement ?? null);
     return { id: c.companyId, name: c.companyName, role: c.role, trades: c.trades };
   }
 

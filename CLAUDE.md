@@ -309,3 +309,8 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 - « recette complète » : lancer tous les testeurs (testeur-artisan, testeur-negoce, testeur-mission, saboteur, rush, comptable, relecteur, mauvais-payeur, testeur-terrain), puis rendre UN rapport classé par gravité avec des propositions. Ne rien corriger sans l'accord de Greg.
 - Les testeurs ne travaillent que sur l'environnement de test ou en local.
+
+## Décisions du 19 novembre 2026 : pages régionales, inscription par métier
+
+- Page `/couvreurs-bretagne` : un MODÈLE piloté par une fiche (`baticlair/apps/web/src/lib/regions/`, une fiche par page, liste `PAGES_LOCALES`) ; route `app/(public)/[pageLocale]` (seules les adresses des fiches existent). Carte de la région (tracés IGN Admin Express, Licence ouverte), département touché retenu sur l'appareil et rempli à l'inscription, regroupements en cours du département (`GET /v1/public/regroupements`, jamais « 0 »). Sources : `baticlair/docs/regions/`. Aucune autre région, aucun menu des régions sur la landing avant validation de Greg.
+- Inscription par métier (RÈGLE CHANGÉE : avant, tous les métiers s'inscrivaient) : « Couvreur » ouvert et choisi d'office, les autres « Bientôt disponible » → liste d'attente (`POST /v1/public/liste-attente`, table `liste_attente_metier`), lue dans `/admin/liste-attente` (par métier et par département). Le département choisi est gardé (`company.departement`, zone des achats groupés quand l'adresse n'a pas de code postal). Comptes existants non touchés.

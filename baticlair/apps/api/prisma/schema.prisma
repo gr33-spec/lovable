@@ -176,6 +176,9 @@ model Company {
   /// un changement important : SIRET changé).
   habilitationAg             String?   @map("habilitation_ag")
   habilitationAgLe           DateTime? @map("habilitation_ag_le") @db.Timestamptz(3)
+  /// PAGES RÉGIONALES (Greg, 19 novembre 2026) : le département choisi à l'inscription (code INSEE, « 22 »). Il sert de
+  /// zone aux achats groupés tant que l'adresse n'a pas de code postal ; nul pour les comptes d'avant.
+  departement                String?
   createdAt                  DateTime  @default(now())
   updatedAt                  DateTime  @updatedAt
 
@@ -3216,4 +3219,24 @@ model MessageSite {
 
   @@index([companyId, createdAt])
   @@map("message_site")
+}
+
+/// LISTE D'ATTENTE PAR MÉTIER (Greg, 19 novembre 2026) : à l'inscription, seul « Couvreur » est ouvert ; un artisan d'un
+/// autre métier laisse son e-mail pour être prévenu à l'ouverture. Il n'a pas de compte. Une ligne par e-mail et par métier.
+model ListeAttenteMetier {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  email       String
+  /// L'identifiant du métier (`TRADES` : electrical, plumbing…).
+  metier      String
+  /// Le département choisi (code INSEE), s'il l'a dit.
+  departement String?
+  /// D'où il venait : « inscription », « couvreurs-bretagne »…
+  source      String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([email, metier])
+  @@index([metier])
+  @@index([departement])
+  @@map("liste_attente_metier")
 }

@@ -38,6 +38,7 @@ import { LoggingModule } from "./platform/logging/logging.module.js";
 import { PushModule } from "./platform/push/push.module.js";
 
 import { PageEntrepriseModule } from "./modules/page-entreprise/page-entreprise.module.js";
+import { PagesRegionalesModule } from "./modules/pages-regionales/pages-regionales.module.js";
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { PageEntrepriseModule } from "./modules/page-entreprise/page-entreprise.
     BrouillonsModule,
     CatalogueModule,
     PageEntrepriseModule,
+    PagesRegionalesModule,
   ],
 })
 export class AppModule {}
