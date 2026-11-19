@@ -261,6 +261,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - « Je ne sais pas » à la longueur des bacs : l'ouvrage qui a une valeur courante pour le rampant (les ardoises, dont il ne règle que le recouvrement) la reprend et reste chiffré ; les bacs restent à préciser dans la liste. Test `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts`.
 - Une qualité qui se nomme (« Ardoise d'Angers ») est acceptée même quand sa question n'est plus ouverte au moment où les réponses arrivent d'un coup (avant : refusée « pas un nombre », puis reposée).
 - La discussion des questions n'est jamais fermée en route : les cases « Suggestions » s'affichent dans son fil.
+- Recette en ligne du 19 novembre 2026 (D-2026-024) : la largeur de bobine ne se demande plus (défaut affiché 650, jamais « à confirmer », modifiable) ; une ligne « Fourniture et pose » que le modèle détaille en articles sans quantité d'un même ouvrage (bobine, tasseaux, couvre-joints) donne sa surface au premier : la couverture est chiffrée ; un nombre que le code calcule (rangs de tasseaux, nombre de bacs) n'est jamais demandé. Test `zinc-a-tasseaux.test.ts`.
 - Constat du 18 novembre : trois lectures du même devis donnent trois listes différentes. À faire : D-2026-024 au jeu de test, puis stabiliser (prompt, clés de la fiche).
 
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg

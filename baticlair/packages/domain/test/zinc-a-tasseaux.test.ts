@@ -120,6 +120,37 @@ describe("une ligne « Fourniture et pose » dont l'article est nommé sans quan
     expect(e.purchase.toQuote).toEqual([]);
   });
 
+  // Recette en ligne du 19 novembre 2026 (deux lectures sur trois) : le modèle détaille la ligne en trois articles sans
+  // quantité, tous de l'ouvrage « couverture-zinc-tasseaux » (bobine, tasseaux, couvre-joints) ; la surface était perdue.
+  const detaillee = () =>
+    ({
+      ...lecture(),
+      lignes: [
+        {
+          ...lecture().lignes[0]!,
+          fournitures: [
+            { nom: "Zinc prépatiné anthracite en bobine pour couverture à tasseaux, bacs de 4 m", unite: null, quantite: null, attend: ["epaisseur_zinc", "largeur_bobine_tasseaux"], donnees: { surface: "32", aspect_zinc: "3", longueur_rampant: "4" }, ouvrage: "couverture-zinc-tasseaux", aPreciser: [], precision: null, emplacement: "bobine" },
+            { nom: "Tasseaux bois", unite: null, quantite: null, attend: [], donnees: { surface: "32", longueur_rampant: "4" }, ouvrage: "couverture-zinc-tasseaux", aPreciser: [], precision: null, emplacement: "tasseau" },
+            { nom: "Couvre-joints zinc anthracite", unite: null, quantite: null, attend: ["epaisseur_zinc"], donnees: { surface: "32", aspect_zinc: "3", longueur_rampant: "4" }, ouvrage: "couverture-zinc-tasseaux", aPreciser: [], precision: null, emplacement: "couvre_joint" },
+          ],
+        },
+      ],
+    }) as unknown as LectureDevis;
+
+  it("détaillée en plusieurs articles sans quantité du même ouvrage : le premier prend la quantité de la ligne, la couverture est chiffrée, tasseaux et couvre-joints restent « à chiffrer »", () => {
+    const e = ecran(detaillee(), { "param:epaisseur_zinc": { value: "0.65", unit: "mm" } });
+    expect(liste(e)).toContainEqual(["Bobine Anthra-Zinc 0,65 mm, largeur 650 mm", "54 ml", "13 bacs × 4,15 m"]);
+    expect(e.purchase.toQuote.map((t) => t.label).join(" ")).not.toMatch(/Fourniture et pose couverture/);
+    expect(e.purchase.toBuy.filter((b) => /tasseau|couvre/i.test(b.label) && b.quantity)).toEqual([]);
+  });
+
+  it("la largeur de bobine est un défaut affiché, jamais « à confirmer » ; un nombre que le code calcule (les rangs de tasseaux) n'est jamais demandé", () => {
+    const l = { ...detaillee(), questions: [{ cle: "nb_rangs", ligne: "1", texte: "Combien de rangs de tasseaux sur le toit ?", unite: "u", donnee: "nombre de rangs de tasseaux", boutons: [] }] } as unknown as LectureDevis;
+    const e = ecran(l, { "param:epaisseur_zinc": { value: "0.65", unit: "mm" } });
+    expect(JSON.stringify(e.purchase.questions)).not.toMatch(/rangs/);
+    expect(JSON.stringify(e.purchase)).not.toMatch(/Valeur par défaut à confirmer : largeur de la bobine/);
+  });
+
   it("une ligne de pose seule qui cite un article reste une ligne de pose (rien n'est acheté)", () => {
     const e = ecran(sansQuantite("pose"));
     expect(e.purchase.toBuy.filter((b) => b.quantity)).toEqual([]);

@@ -60,6 +60,8 @@ export interface Assumption {
   fromQuote?: true;
   /** Hypothèse CALCULÉE d'autres données (le pureau d'après la pente) : elle suit ses données, elle n'est pas un défaut en soi. */
   computed?: true;
+  /** Donnée que la fiche interdit de demander (`neverAsk` : le pureau, la largeur de bobine) : un défaut affiché, jamais à confirmer. */
+  shownOnly?: true;
 }
 
 /**
@@ -841,7 +843,7 @@ function computeNeed(
       const prov = provenanceLine(d, sources);
       const note = from?.note ?? d.note;
       trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
       return v;
     }
     /**
