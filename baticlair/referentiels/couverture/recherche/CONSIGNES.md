@@ -63,9 +63,24 @@ Rien de ce dossier n'est lu par le moteur. La base finale est construite à part
 }
 ```
 
-`statut` : `confirme` (deux sources indépendantes au moins, dont un fabricant ou un DTU quand c'est possible) ;
-`une_source` (une seule source sérieuse) ; `a_confirmer` (rien de fiable ou sources contradictoires non
-expliquées).
+`statut` :
+- `confirme` : deux sources indépendantes au moins, dont un fabricant ou un DTU quand c'est possible ;
+- `confirme_fabricant` (décision du fondateur, 19 novembre 2026) : chiffre propre à un modèle, lu sur la fiche
+  officielle du fabricant, sur son propre domaine et datée, ET le modèle passe le contrôle par le calcul
+  (nombre au m² = 1 ÷ (largeur utile × pureau) à 3 % près ou à l'arrondi publié ; liteaux = 1 ÷ pureau).
+  Le contrôle est appliqué par `confirme_fabricant.py`, qui écrit le détail dans `controle`. Une copie de la
+  fiche chez un négoce ne suffit pas : retrouver la fiche sur le site du fabricant ;
+- `une_source` : une seule source sérieuse ;
+- `a_confirmer` : rien de fiable, ou des sources contradictoires non expliquées.
+
+## Décisions du fondateur (19 novembre 2026)
+
+- Chiffres par modèle : fiche officielle + contrôle par le calcul = confirmé (`confirme_fabricant`).
+- Les Suggestions du fondateur l'emportent sur le §49.1 point 5 : un article non dit peut être proposé dans
+  l'étape « Suggestions » (cases décochées + « Continuer »), jamais ajouté d'office.
+- Zone climatique calculée PAR COMMUNE (distance à la côte, altitude), zone ardoise et zone tuile séparées.
+- Bascule du code par étapes : d'abord les données dans la fiche lue par le code, puis les règles famille par
+  famille, tests verts à chaque pas.
 
 ## Règles du fondateur qui restent prioritaires (ne pas les changer, signaler si la recherche les contredit)
 
