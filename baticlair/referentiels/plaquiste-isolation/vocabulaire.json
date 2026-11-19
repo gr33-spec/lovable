@@ -1,0 +1,24 @@
+{
+  "metier": "plaquiste-isolation",
+  "note": "Mots des devis qui rattachent une ligne à un ouvrage de referentiel.json (même rôle que referentiels/<métier>/vocabulaire.json). Non chargé par l'application.",
+  "ouvrages": {
+    "cloison-distributive": { "expressions": ["cloison 72/48", "cloison 98/48", "cloison 100/70", "cloison 120/70", "cloison 140/90", "cloison de distribution", "cloison distributive", "cloison placo", "cloison sur ossature", "placostil", "prégymétal", "metal stud", "cloison ba13", "cloison hydro", "cloison coupe-feu", "cloison phonique"] },
+    "cloison-separative": { "expressions": ["cloison séparative", "séparatif", "saa", "sad", "ossature alternée", "ossature double", "double ossature", "séparatif de logements"] },
+    "doublage-colle": { "expressions": ["doublage collé", "complexe de doublage", "10+80", "10+100", "13+80", "13+100", "13+120", "13+140", "doublissimo", "placomur", "calibel", "prégytherm", "prégymax", "polyplac", "map", "collé au mortier adhésif"] },
+    "doublage-fourrures": { "expressions": ["doublage optima", "doublage sur ossature", "doublage sur fourrures", "doublage sur appuis", "appuis intermédiaires", "fourrures f530 en mur", "clipstar"] },
+    "contre-cloison-montants": { "expressions": ["contre-cloison", "contre cloison", "doublage autoportant", "doublage sur montants", "doublage m48", "doublage m70"] },
+    "plafond-fourrures": { "expressions": ["faux plafond", "plafond suspendu", "plafond placo", "plafond f530", "plafond sur fourrures", "plafond sous solives", "plafond sous dalle", "plafond rampant", "rampants", "sous chevrons"] },
+    "joints-seuls": { "expressions": ["bandes et enduit", "traitement des joints", "jointement", "bandes joints", "finition q2", "finition q3"] },
+    "isolation-rouleaux": { "expressions": ["laine de verre", "laine de roche", "laine de bois", "gr32", "gr 32", "isoconfort", "ibr", "rockmur", "rockplus", "roulrock", "steico", "métisse", "laine déroulée", "2 couches croisées", "isolant entre montants"] },
+    "isolation-soufflee": { "expressions": ["soufflage", "laine soufflée", "laine à souffler", "isolant en vrac", "ouate de cellulose", "ouate soufflée", "comblissimo", "supafil", "jetrock", "thermacell", "igloo", "combles perdus"] },
+    "pare-vapeur": { "expressions": ["pare-vapeur", "pare vapeur", "frein-vapeur", "membrane", "vario", "vario xtra", "étanchéité à l'air", "adhésif de membrane"] }
+  },
+  "sans_fourniture": ["dépose", "évacuation", "protection", "échafaudage", "main-d'œuvre seule", "pose seule", "fourni par le client", "nettoyage", "bandes et enduit sur l'ensemble des ouvrages"],
+  "non_traites": {
+    "coffrage, soffite, habillage d'IPN, gaine technique": "partent tels qu'écrits (aucun quantitatif fabricant sourcé : FICHE.md §5.5)",
+    "cloison alvéolaire, carreaux de plâtre": "hors fiche (DTU 25.31)",
+    "plafond en dalles 60 × 60": "plafonds-suspendus",
+    "ITE sous enduit, ITE sous bardage": "façade, bardage",
+    "trappes, bande armée, cornières d'angle, bande résiliente, mastics, boîtiers": "articles écrits au devis, partis tels quels"
+  }
+}

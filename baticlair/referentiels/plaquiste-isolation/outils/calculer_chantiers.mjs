@@ -63,9 +63,28 @@ for (const c of cas) {
   md += `**Réponses du test** : ${Object.keys(c.reponses).length ? Object.entries(c.reponses).map(([k, v]) => `${k} = ${Array.isArray(v) ? v.join(" ") : v}`).join(" ; ") : "aucune"}\n\n`;
   md += `**Suggestions proposées** : ${sugg.size ? [...sugg].join(" ; ") : "aucune"} — cochées dans le test : ${c.coches.length ? c.coches.join(", ") : "aucune"}\n\n`;
   md += `**Hypothèses dites** : ${hyp.size ? [...hyp].join(" ; ") : "aucune"}\n\n`;
-  md += `### Liste attendue\n\n| Article | Commande | Précision |\n|---|---|---|\n`;
-  const precisions = new Map(resultats.flatMap((r) => r.needs.map((n) => [`${r.workItemId}/${n.needId}`, n.precision])));
-  for (const row of dom.purchaseList(resultats)) md += `| ${row.label} | ${row.quantity ?? "à préciser"} | ${[precisions.get(`${row.workItemId}/${row.needId}`), row.detail].filter(Boolean).join(" ; ")} |\n`;
+  md += `### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)\n\n| Article | Commande | Besoin calculé | Précision |\n|---|---|---|---|\n`;
+  const lignes = new Map();
+  resultats.forEach((r, i) => {
+    const carac = c.devis.filter((l) => l.ouvrage)[i]?.caracteristiques ?? "";
+    for (const n of r.needs) {
+      if (n.status !== "calculated" || !n.purchase) continue;
+      const label = (n.labelWithQuote ?? n.label).replace("\u241F", carac).replace(/\s{2,}/g, " ").trim();
+      const unite = n.purchase.order.unit;
+      const k = `${label}|${unite.many}`;
+      const prod = ref.products.find((p) => p.family === n.family && p.sellingUnits.some((u) => u.primary && u.label.many === unite.many));
+      const contient = prod ? Number(prod.sellingUnits.find((u) => u.primary).contains.value) : 1;
+      const e = lignes.get(k) ?? { label, unite, besoin: 0, unitBesoin: n.quantity.unit, contient, precisions: new Set() };
+      e.besoin += Number(n.quantity.value);
+      if (n.precision) e.precisions.add(n.precision);
+      lignes.set(k, e);
+    }
+  });
+  for (const e of lignes.values()) {
+    const nb = Math.ceil(Math.round((e.besoin / e.contient) * 1000) / 1000);
+    const besoin = `${String(Math.round(e.besoin * 100) / 100).replace(".", ",")} ${e.unitBesoin.replace("m2", "m²").replace(/^u$/, "pièces")}`;
+    md += `| ${e.label} | ${nb} ${nb > 1 ? e.unite.many : e.unite.one} | ${besoin} | ${[...e.precisions].join(" ; ")} |\n`;
+  }
   if (ouv.length) md += `\nReste ouvert : ${ouv.join(", ")}\n`;
   if (c.note) md += `\n> ${c.note}\n`;
   md += "\n";

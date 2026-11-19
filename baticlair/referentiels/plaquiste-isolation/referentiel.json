@@ -1041,7 +1041,7 @@
       "id": "suspente-longue",
       "family": "hanger",
       "label": "Suspente longue 171 pour fourrure F 530 (ou équivalent), plénum 20 à 150 mm",
-      "shortLabel": "Suspentes longues",
+      "shortLabel": "Suspentes longues 171 (plénum 20 à 150 mm)",
       "aliases": [
         "suspente",
         "suspente longue",
@@ -1075,7 +1075,7 @@
       "id": "suspente-secable",
       "family": "hanger",
       "label": "Suspente sécable pour fourrure F 530 (ou équivalent), plénum 80 à 580 mm",
-      "shortLabel": "Suspentes sécables",
+      "shortLabel": "Suspentes sécables (plénum 80 à 580 mm)",
       "aliases": [
         "suspente secable"
       ],
@@ -2249,7 +2249,9 @@
                 "entraxe 40",
                 "entraxe 0,40",
                 "a 40 cm",
-                "e=40"
+                "e=40",
+                "sous faience",
+                "sous carrelage"
               ]
             },
             {
@@ -2440,6 +2442,45 @@
           "display": {
             "1": "cloueur à gaz",
             "2": "chevilles à frapper"
+          }
+        },
+        {
+          "key": "marque_cloueur",
+          "label": "Marque du cloueur",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton cloueur à gaz, c'est quelle marque ?",
+          "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Spit",
+              "value": "1",
+              "dit": [
+                "spit",
+                "pulsa"
+              ]
+            },
+            {
+              "label": "Hilti",
+              "value": "2",
+              "dit": [
+                "hilti",
+                "gx"
+              ]
+            },
+            {
+              "label": "Paslode",
+              "value": "3",
+              "dit": [
+                "paslode"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Spit",
+            "2": "Hilti",
+            "3": "Paslode"
           }
         }
       ],
@@ -3508,7 +3549,11 @@
           "core": true,
           "when": "fixation_rail < 2",
           "short": "fixations de rail",
-          "precision": "une fixation tous les 60 cm de rail",
+          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz",
+          "precisionRequires": [
+            "marque_cloueur"
+          ],
+          "precision": "une fixation tous les 60 cm",
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
@@ -3524,7 +3569,7 @@
           "core": true,
           "when": "fixation_rail >= 2",
           "short": "chevilles de rail",
-          "precision": "une cheville tous les 60 cm de rail",
+          "precision": "une cheville tous les 60 cm",
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
@@ -3856,6 +3901,45 @@
           "display": {
             "1": "cloueur à gaz",
             "2": "chevilles à frapper"
+          }
+        },
+        {
+          "key": "marque_cloueur",
+          "label": "Marque du cloueur",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton cloueur à gaz, c'est quelle marque ?",
+          "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Spit",
+              "value": "1",
+              "dit": [
+                "spit",
+                "pulsa"
+              ]
+            },
+            {
+              "label": "Hilti",
+              "value": "2",
+              "dit": [
+                "hilti",
+                "gx"
+              ]
+            },
+            {
+              "label": "Paslode",
+              "value": "3",
+              "dit": [
+                "paslode"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Spit",
+            "2": "Hilti",
+            "3": "Paslode"
           }
         }
       ],
@@ -4640,7 +4724,11 @@
           "version": 1,
           "when": "fixation_rail < 2",
           "short": "fixations",
-          "precision": "une fixation tous les 60 cm"
+          "precision": "une fixation tous les 60 cm",
+          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz",
+          "precisionRequires": [
+            "marque_cloueur"
+          ]
         },
         {
           "id": "fixations-chevilles",
@@ -5640,6 +5728,45 @@
             "1": "cloueur à gaz",
             "2": "chevilles à frapper"
           }
+        },
+        {
+          "key": "marque_cloueur",
+          "label": "Marque du cloueur",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton cloueur à gaz, c'est quelle marque ?",
+          "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Spit",
+              "value": "1",
+              "dit": [
+                "spit",
+                "pulsa"
+              ]
+            },
+            {
+              "label": "Hilti",
+              "value": "2",
+              "dit": [
+                "hilti",
+                "gx"
+              ]
+            },
+            {
+              "label": "Paslode",
+              "value": "3",
+              "dit": [
+                "paslode"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Spit",
+            "2": "Hilti",
+            "3": "Paslode"
+          }
         }
       ],
       "slots": [
@@ -6435,7 +6562,11 @@
           "version": 1,
           "when": "fixation_rail < 2",
           "short": "fixations",
-          "precision": "une fixation tous les 60 cm"
+          "precision": "une fixation tous les 60 cm",
+          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz",
+          "precisionRequires": [
+            "marque_cloueur"
+          ]
         },
         {
           "id": "fixations-chevilles",
@@ -6826,6 +6957,45 @@
           "display": {
             "1": "cloueur à gaz",
             "2": "chevilles à frapper"
+          }
+        },
+        {
+          "key": "marque_cloueur",
+          "label": "Marque du cloueur",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton cloueur à gaz, c'est quelle marque ?",
+          "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Spit",
+              "value": "1",
+              "dit": [
+                "spit",
+                "pulsa"
+              ]
+            },
+            {
+              "label": "Hilti",
+              "value": "2",
+              "dit": [
+                "hilti",
+                "gx"
+              ]
+            },
+            {
+              "label": "Paslode",
+              "value": "3",
+              "dit": [
+                "paslode"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Spit",
+            "2": "Hilti",
+            "3": "Paslode"
           }
         }
       ],
@@ -7664,7 +7834,11 @@
           "version": 1,
           "when": "fixation_rail < 2",
           "short": "fixations",
-          "precision": "une fixation tous les 60 cm"
+          "precision": "une fixation tous les 60 cm",
+          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz",
+          "precisionRequires": [
+            "marque_cloueur"
+          ]
         },
         {
           "id": "fixations-chevilles",
@@ -8115,6 +8289,45 @@
           "display": {
             "1": "cloueur à gaz",
             "2": "chevilles à frapper"
+          }
+        },
+        {
+          "key": "marque_cloueur",
+          "label": "Marque du cloueur",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton cloueur à gaz, c'est quelle marque ?",
+          "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Spit",
+              "value": "1",
+              "dit": [
+                "spit",
+                "pulsa"
+              ]
+            },
+            {
+              "label": "Hilti",
+              "value": "2",
+              "dit": [
+                "hilti",
+                "gx"
+              ]
+            },
+            {
+              "label": "Paslode",
+              "value": "3",
+              "dit": [
+                "paslode"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Spit",
+            "2": "Hilti",
+            "3": "Paslode"
           }
         }
       ],
@@ -8934,7 +9147,11 @@
           "version": 1,
           "when": "fixation_rail < 2",
           "short": "fixations",
-          "precision": "une fixation tous les 60 cm, {support}"
+          "precision": "une fixation tous les 60 cm",
+          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz",
+          "precisionRequires": [
+            "marque_cloueur"
+          ]
         },
         {
           "id": "fixations-chevilles",
@@ -8950,7 +9167,7 @@
           "version": 1,
           "when": "fixation_rail >= 2",
           "short": "chevilles",
-          "precision": "une cheville tous les 60 cm, {support}"
+          "precision": "une cheville tous les 60 cm"
         },
         {
           "id": "isolant",

@@ -221,10 +221,10 @@ PRODUCTS = [
     produit("corniere-cr2", "perimeter_angle", "Cornière de rive CR2 (ou équivalent), longueur 3,00 m", "Cornières de rive",
             [unite("longueur", "longueur de 3 m", "longueurs de 3 m", "3", "m", "placo-cr2", OK2("3,00 m : fiche Placo CR2 (extrait) et Bricomarché ; botte de 30 : 1 source."))],
             ["corniere", "cr2", "corniere de rive"]),
-    produit("suspente-longue", "hanger", "Suspente longue 171 pour fourrure F 530 (ou équivalent), plénum 20 à 150 mm", "Suspentes longues",
+    produit("suspente-longue", "hanger", "Suspente longue 171 pour fourrure F 530 (ou équivalent), plénum 20 à 150 mm", "Suspentes longues 171 (plénum 20 à 150 mm)",
             [unite("boite", "boîte de 100", "boîtes de 100", "100", "u", "placo-suspentes", OK2("Boîte de 100 : fiche Placo (MAJ 31/03/2026, extrait) et ManoMano / négoces, recherche/02 A.1."))],
             ["suspente", "suspente longue", "suspente 171"]),
-    produit("suspente-secable", "hanger", "Suspente sécable pour fourrure F 530 (ou équivalent), plénum 80 à 580 mm", "Suspentes sécables",
+    produit("suspente-secable", "hanger", "Suspente sécable pour fourrure F 530 (ou équivalent), plénum 80 à 580 mm", "Suspentes sécables (plénum 80 à 580 mm)",
             [unite("boite", "boîte de 50", "boîtes de 50", "50", "u", "placo-suspentes", OK2("Boîte de 50 : fiches Placo suspente sécable et pivot via Samse / BigMat (recherche/02b) et piste interne."))],
             ["suspente secable"]),
     produit("eclisse-f530", "splice", "Éclisse pour fourrure F 530 (ou équivalent)", "Éclisses",
@@ -320,6 +320,15 @@ FIXATION_RAIL = {
     "question": "Tes rails au sol et au plafond, tu les fixes comment ?",
     "choices": [{"label": "Cloueur à gaz", "value": "1", "dit": ["cloueur", "gaz", "pistolet"]}, {"label": "Chevilles à frapper", "value": "2", "dit": ["cheville", "chevilles", "frapper"]}],
     "display": {"1": "cloueur à gaz", "2": "chevilles à frapper"},
+}
+
+CLOUEUR = {
+    "key": "marque_cloueur", "label": "Marque du cloueur", "unit": "u", "kind": "artisan_preference",
+    "question": "Ton cloueur à gaz, c'est quelle marque ?",
+    "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+    "named": True,
+    "choices": [{"label": "Spit", "value": "1", "dit": ["spit", "pulsa"]}, {"label": "Hilti", "value": "2", "dit": ["hilti", "gx"]}, {"label": "Paslode", "value": "3", "dit": ["paslode"]}],
+    "display": {"1": "Spit", "2": "Hilti", "3": "Paslode"},
 }
 
 TYPE_PLAQUE = {
@@ -446,9 +455,9 @@ def cloison():
          "hint": "Au-delà de 2,50 m, une 72/48 ne tient plus en montants simples à 60 cm (DTU 25.41).",
          "choices": [{"label": "Simples à 60 cm", "value": "1"}, {"label": "Simples à 40 cm", "value": "2"}, {"label": "Doublés à 60 cm", "value": "3"}, {"label": "Doublés à 40 cm", "value": "4"}],
          "display": {"1": "montants simples à 60 cm", "2": "montants simples à 40 cm", "3": "montants doublés à 60 cm", "4": "montants doublés à 40 cm"},
-         "textValues": [{"value": "2", "keywords": ["entraxe 40", "entraxe 0,40", "a 40 cm", "e=40"]}, {"value": "3", "keywords": ["montants doubles", "doubles"]}],
+         "textValues": [{"value": "2", "keywords": ["entraxe 40", "entraxe 0,40", "a 40 cm", "e=40", "sous faience", "sous carrelage"]}, {"value": "3", "keywords": ["montants doubles", "doubles"]}],
          "default": {**prov("dtu-2541-2022", hauteurs_ok), "formula": "si(montant > regle.montant_large, 1, si(couches < 2, si(hauteur <= regle.h_7248_s60, 1, si(hauteur <= regle.h_7248_s40, 2, si(hauteur <= regle.h_7248_d60, 3, 4))), si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4)))))", "note": montage_note}},
-        TYPE_PLAQUE, ENDUIT, FIXATION_RAIL,
+        TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR,
     ]
     derived = [
         {"key": "longueur_cloison", "label": "Longueur de cloison", "unit": "m", "formula": "surface / hauteur", "shown": True, **prov("mobiiz-geometrie", OK2("Longueur = surface ÷ hauteur : SNIP et Pladur calculent les rails ainsi (0,84 ml/m² à 2,50 m)."))},
@@ -473,9 +482,10 @@ def cloison():
         {"id": "vis-ttpc-35", "slot": "vis_ext", "formula": f"surface * {vis_ext}", "unit": "u", "core": True, "when": "couches >= 2", "short": "vis TTPC 35", "precision": "2e peau", **prov("snip-fc18", UNE("Ratio SNIP, parement double."))},
         {"id": "vis-trpf", "slot": "trpf", "formula": f"surface * {trpf}", "unit": "u", "core": True, "short": "vis TRPF", **prov("snip-fc18", UNE("Ratio SNIP."))},
         {"id": "fixations-clous", "slot": "fixation", "formula": "arrondi_sup(longueur_cloison * regle.rails_par_cloison * regle.chute_ossature / regle.pas_fixation_rail)", "unit": "u", "core": True, "when": "fixation_rail < 2", "short": "fixations de rail",
-         "precision": "une fixation tous les 60 cm de rail", **prov("siniat-carnet-cloison", DOUTE("Pas de 60 cm confirmé (Siniat, Placo) ; la fixation en bout de chaque rail n'est chiffrée par aucune source lue."))},
+         "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz", "precisionRequires": ["marque_cloueur"],
+         "precision": "une fixation tous les 60 cm", **prov("siniat-carnet-cloison", DOUTE("Pas de 60 cm confirmé (Siniat, Placo) ; la fixation en bout de chaque rail n'est chiffrée par aucune source lue."))},
         {"id": "fixations-chevilles", "slot": "fixation_cheville", "formula": "arrondi_sup(longueur_cloison * regle.rails_par_cloison * regle.chute_ossature / regle.pas_fixation_rail)", "unit": "u", "core": True, "when": "fixation_rail >= 2", "short": "chevilles de rail",
-         "precision": "une cheville tous les 60 cm de rail", **prov("siniat-carnet-cloison", DOUTE("Idem fixations au cloueur."))},
+         "precision": "une cheville tous les 60 cm", **prov("siniat-carnet-cloison", DOUTE("Idem fixations au cloueur."))},
         {"id": "isolant", "slot": "isolant", "formula": "surface * regle.isolant_par_m2", "unit": "m2", "core": False, "short": "isolant", **prov("snip-fc18", OK2("1,05 m²/m² : SNIP et Placo."))},
         *besoins_finitions("surface"),
     ]
@@ -528,7 +538,7 @@ def fixations_rail(base_ml, extra_count="0"):
     f = f"arrondi_sup({base_ml} / regle.pas_fixation_rail + {extra_count})"
     etat = DOUTE("Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue.")
     return [
-        besoin("fixations-clous", "fixation", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail < 2", short="fixations", precision="une fixation tous les 60 cm"),
+        besoin("fixations-clous", "fixation", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail < 2", short="fixations", precision="une fixation tous les 60 cm", designation="Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz", precisionRequires=["marque_cloueur"]),
         besoin("fixations-chevilles", "fixation_cheville", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail >= 2", short="chevilles", precision="une cheville tous les 60 cm"),
     ]
 
@@ -594,7 +604,7 @@ def doublage_fourrures():
               {"key": "epaisseur_isolant", "label": "Épaisseur de l'isolant", "unit": "mm", "kind": "site_data", "question": "Épaisseur de l'isolant derrière le doublage ?",
                "hint": "Elle choisit la longueur des appuis.", "textLabels": ["laine", "isolant", "gr32", "gr 32", "epaisseur"], "bareNumber": True, "textRange": {"min": "40", "max": "300"},
                "choices": [{"label": "75 mm", "value": "75"}, {"label": "100 mm", "value": "100"}, {"label": "120 mm", "value": "120"}, {"label": "140 mm", "value": "140"}, {"label": "160 mm", "value": "160"}]},
-              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL]
+              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR]
     derived = [derive("longueur_mur", "Longueur de mur", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_plaque", "Longueur des plaques", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Plus petite longueur vendue ≥ hauteur − 1 cm."), True),
                derive("nb_fourrures", "Nombre de fourrures", "u", "arrondi_sup((longueur_mur / regle.entraxe + 1) * regle.chute)", "pladur-2019", CONFLIT("Une fourrure par 0,60 m + 1, × 1,05 (≈ 1,75 ml/m², Pladur).", "Placo et SNIP comptent 2,0 à 2,5 ml/m² (fourrure horizontale de départ ou de fixation des appuis).")),
@@ -660,7 +670,7 @@ def contre_cloison():
                "choices": [{"label": "Simples à 60 cm", "value": "1"}, {"label": "Simples à 40 cm", "value": "2"}, {"label": "Doublés à 60 cm", "value": "3"}, {"label": "Doublés à 40 cm", "value": "4"}],
                "display": {"1": "montants simples à 60 cm", "2": "montants simples à 40 cm", "3": "montants doublés à 60 cm", "4": "montants doublés à 40 cm"},
                "default": {**prov("rockwool-murs-2024", hh), "formula": "si(montant > regle.montant_large, si(hauteur <= regle.h70_s60, 1, 3), si(hauteur <= regle.h48_s60, 1, si(hauteur <= regle.h48_s40, 2, si(hauteur <= regle.h48_d60, 3, 4))))", "note": "montage le moins cher qui tient la hauteur (DTU 25.41)"}},
-              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL]
+              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR]
     derived = [derive("longueur_mur", "Longueur de mur", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_plaque", "Longueur des plaques", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Plus petite longueur ≥ hauteur − 1 cm."), True),
                derive("longueur_montant", "Longueur des montants", "m", LONGUEUR_MONTANT, "placo-m48", OK2("Montant = hauteur − 1 cm."), True),
@@ -743,7 +753,7 @@ def plafond():
               {"key": "longueur_plaque", "label": "Longueur des plaques de plafond", "unit": "m", "kind": "artisan_preference", "question": "Tes plaques de plafond, en quelle longueur ?",
                "choices": [{"label": "2,50 m", "value": "2.5"}, {"label": "3,00 m", "value": "3"}],
                "default": {**prov("placo-ba13", UNE("2,50 m : longueur la plus courante (pile de 50) ; ne change pas le nombre de m².")), "value": "2.5", "note": "plaques de 2,50 m, par défaut"}},
-              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL]
+              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR]
     E = "si(entraxe_fourrures >= regle.e60, {a}, si(entraxe_fourrures >= regle.e50, {b}, {c}))"
     derived = [derive("nb_suspentes", "Nombre de suspentes", "u", "arrondi_sup(surface * " + E.format(a="regle.suspentes_e60", b="regle.suspentes_e50", c="regle.suspentes_e40") + ")", "snip-fc18", CONFLIT("Ratio Placo 2023.", "SNIP 1,56 à 0,60."))]
     needs = [
@@ -758,7 +768,7 @@ def plafond():
         besoin("vis-ttpc-25", "vis", "surface * si(couches < 2, " + E.format(a="regle.vis_e60", b="regle.vis_e50", c="regle.vis_e40") + ", regle.vis_int)", "u", "snip-fc18", CONFLIT("SNIP.", "Placo 10."), short="vis"),
         besoin("vis-ttpc-35", "vis_ext", "surface * regle.vis_ext", "u", "snip-fc18", OK2("SNIP 12/m², Placo 10-15."), when="couches >= 2", short="vis 2e peau"),
         besoin("vis-trpf", "trpf", "surface * regle.trpf_par_m2", "u", "snip-fc18", DOUTE("SNIP ; inutile avec des suspentes clipsées."), short="vis TRPF"),
-        *[dict(n, precision=n["precision"] + ", {support}") for n in fixations_rail("surface * table.perimetre * regle.chute_corniere")],
+        *fixations_rail("surface * table.perimetre * regle.chute_corniere"),
         besoin("isolant", "isolant", "surface * regle.isolant_par_m2", "m2", "pladur-2019", OK2("1,05 m²/m²."), core=False, short="isolant"),
         *besoins_finitions("surface"),
     ]
@@ -806,7 +816,7 @@ def separative():
                "choices": [{"label": "SAA (ossature alternée)", "value": "1"}, {"label": "SAD (ossature double)", "value": "2"}],
                "display": {"1": "SAA", "2": "SAD"},
                "textValues": [{"value": "1", "keywords": ["saa", "alternee"]}, {"value": "2", "keywords": ["sad", "ossature double", "double ossature"]}]},
-              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL]
+              TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR]
     derived = [derive("longueur_cloison", "Longueur de cloison", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_plaque", "Longueur des plaques", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Plus petite longueur ≥ hauteur − 1 cm."), True),
                derive("longueur_montant", "Longueur des montants", "m", LONGUEUR_MONTANT, "placo-m48", OK2("Montant = hauteur − 1 cm."), True),

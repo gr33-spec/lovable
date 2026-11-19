@@ -49,7 +49,12 @@ Colonnes : | Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, d
 
 ### 1.4 Isolants minces réfléchissants (statut)
 
-(en cours)
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note (fichier 1re passe, ancien statut) |
+|---|---|---|---|---|---|---|
+| Statut technique (assurance) | procédés « produit mince réfléchissant + lame(s) d'air » = **technique non traditionnelle mise en observation** par la C2P de l'AQC ; « leur performance propre d'isolation thermique est réduite du fait de leur faible épaisseur » ; la performance annoncée dépend de lames d'air non ventilées d'épaisseur constante ; risque vapeur | — | [P13] AQC, Communiqué C2P n° 62 (daté juillet 2005, toujours publié sur qualiteconstruction.com, dossier 2025/12 ; lu 19/11/2026) | [P14] fiche CEE BAR-EN-101 : les isolants réfléchissants sont évalués selon **NF EN ISO 22097** (pas selon NF EN 12667 comme les laines) | confirmé (2 sources) | 04 §A7 « usage en complément uniquement, ne pas afficher de R », à confirmer → confirmé dans l'esprit : **ne jamais afficher un R de mince comme équivalent à une laine** ; un procédé sous Avis Technique sans observation (Liste verte AQC) fait exception |
+| Éligibilité aux aides | un réfléchissant n'est pas exclu des CEE, mais son R installé doit atteindre le seuil (7 / 6 / 3,7) mesuré selon NF EN ISO 22097 | — | [P14] BAR-EN-101 vA64-6 | [P15] BAR-EN-102 vA65-4 | confirmé (2 sources) | en pratique seuls des produits alvéolaires épais (ex. Actis Hybris) peuvent viser ces R : R par épaisseur de Hybris **non lu** (à confirmer sur son certificat ACERMI) |
+| Actis Hybris / Triso : formats, R | — | — | — | — | à confirmer (non recherché ; quota) | |
+| Révision en cours | la « Règle produit n° 12 » ACERMI (produits réfléchissants) est en révision (rapport d'activité ACERMI 2024) | — | [P16] extrait moteur du rapport ACERMI 2024 | — | 1 source (extrait) | |
 
 ## 2. Membranes et adhésifs hors Isover (04-isolants.md § D)
 
@@ -77,7 +82,31 @@ Colonnes : | Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, d
 
 ## 8. Réglementation : RT existant élément par élément, CEE 2026
 
-(en cours)
+Ancien statut (04-isolants.md § C) : « Rénovation élément par élément : à confirmer (valeurs non lues) » ; « Seuils CEE 7 / 6 / 3,7 / 3 : à confirmer (fiches non lues) ».
+
+### 8.1 RT existant « élément par élément » (arrêté du 3 mai 2007 modifié par l'arrêté du 22 mars 2017), R minimal de l'ensemble paroi + isolant, **valeurs depuis le 1er janvier 2023**
+
+| Paroi | H1 | H2 (et H3 > 800 m) | H3 < 800 m | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+|---|---|---|---|---|---|---|---|
+| Mur extérieur, toiture de pente > 60° | 3,2 | 3,2 | 2,2 | [P17] Ministère, fiche « Les exigences réglementaires pour les travaux de rénovation », juillet 2023 (PDF du 21/08/2023, lu 19/11/2026) | [P18] Ministère / DREAL Pays de la Loire, même fiche, édition 2018 : 2,9 / 2,9 / 2,2 « du 1er janvier 2018 au 31 décembre 2022 » et « ces exigences seront renforcées à compter de 2023 » | 1 source pour la valeur 2023 (officielle) ; calendrier confirmé par 2 sources | texte Légifrance non lu (403) ; **2,9 (ancienne valeur) ne doit plus être codé** |
+| Mur sur volume non chauffé | 2,5 | 2,5 | 2,5 | [P17] | [P18] ancien : 2 | 1 source (officielle) | |
+| Plancher bas sur extérieur ou local non chauffé | 3 (*) | 3 (*) | 2,1 (*) | [P17] | [P18] ancien : 2,7 / 2,7 / 2,1 | 1 source (officielle) | (*) R 2,1 admis si la hauteur libre est limitée par une autre exigence |
+| Plancher de combles perdus | 5,2 | 5,2 | 5,2 | [P17] | [P18] ancien : 4,8 | 1 source (officielle) | |
+| Toiture de pente < 60° (rampants) | 5,2 (**) | 4,5 | 4 | [P17] | [P18] ancien : 4,4 / 4,3 / 4 | 1 source (officielle) | (**) R 4 admis si la perte de surface habitable dépasse 5 % |
+| Toiture-terrasse | 4,5 | 4,3 | 4 | [P17] | [P18] ancien : 3,3 | 1 source | hors plaquiste |
+| R à utiliser pour vérifier | seules les valeurs déclarées (CE, Avis Technique, ACERMI, Keymark…) | — | — | [P17] | [P18] | confirmé (2 sources) | |
+
+### 8.2 Fiches CEE (opérations standardisées), état en 2026
+
+| Donnée | Valeur | Unité | Source 1 (URL, date) | Source 2 (URL, date) | Statut | Note |
+|---|---|---|---|---|---|---|
+| BAR-EN-101 (combles ou toiture) : seuil | **R ≥ 7** en comble perdu ; **R ≥ 6** en rampant (isolation existante non comptée) | m²·K/W | [P14] fiche BAR-EN-101 **vA64-6, à compter du 01/01/2025** (ecologie.gouv.fr, lue 19/11/2026) | [P19] catalogue des fiches, 80e arrêté (19/01/2026) : dernière version listée de BAR-EN-101 = A64-6 au 01/01/2025 ; 04-isolants (fiche Isoconfort « aides 200 mm R 6,25 ») | confirmé (2 sources) | 04 §C « à confirmer » → confirmé |
+| BAR-EN-102 (murs) : seuil | **R ≥ 3,7** | m²·K/W | [P15] fiche BAR-EN-102 **vA65-4, à compter du 01/01/2025** | [P19] dernière version listée = A65-4 ; extrait moteur ADEME (« R ≥ 3,7 ») | confirmé (2 sources) | |
+| Fin de validité | les deux fiches sont **abrogées à compter du 1er mai 2027** | — | [P14] | [P15] | confirmé (2 sources) | à revérifier en 2027 |
+| Toujours actives en 2026 | BAR-EN-101 et 102 figurent dans les volumes délivrés de la lettre d'information CEE de juillet 2026 | — | [P20] lettre d'infos CEE 2026-07 (ecologie.gouv.fr) | [P19] | confirmé (2 sources) | |
+| Autres conditions | pare-vapeur si nécessaire ; visite technique avant devis ; 7 jours francs entre acceptation du devis et travaux ; professionnel RGE ; preuve : marque, référence, épaisseur, surface, R | — | [P14] | [P15] | confirmé (2 sources) | BAR-EN-101 : coffrage autour des conduits et spots, rehausse de trappe → **lignes à commander** (voir 04 §B2) |
+| BAR-EN-103 (plancher bas) : seuil R ≥ 3 | non relu | — | — | — | à confirmer | version en vigueur non vérifiée (tableau du catalogue [P19] illisible pour cette ligne) |
+| RE2020 (neuf) | pas de R minimal par paroi | — | — | — | à confirmer (non relu, quota) | inchangé depuis 04 |
 
 ## Bilan
 
