@@ -246,7 +246,7 @@ export function LandingPremium() {
               </h1>
               <p className="mz2-lead">Une seule demande, envoyée jusqu’à 5 négoces. Compare leurs offres et, si tu le souhaites, regroupe tes achats pour négocier plus fort.</p>
               <div className="hero-actions">
-                <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/inscription">
+                <Link id="heroPrimaryCTA" className="btn btn-yellow" href="/commencer">
                   {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
                 </Link>
                 {/* « Voir Mobiiz en images » (Greg, 11 novembre 2026) : une présentation statique, de vraies captures ; la
@@ -328,7 +328,7 @@ export function LandingPremium() {
                     Achète en collectif <span className="mz2-pastille">si tu le souhaites</span>
                   </h2>
                   <p>Regroupe tes besoins avec d’autres artisans de ton métier et de ton département, et négociez ensemble un meilleur prix. Plus on est, moins on paie.</p>
-                  <Link id="collectifCTA" className="mz2-lien-jaune" href="/inscription">
+                  <Link id="collectifCTA" className="mz2-lien-jaune" href="/commencer">
                     {CTA_COLLECTIF.bouton} <Icone id="i-arrow" className="arrow" />
                   </Link>
                 </div>
@@ -383,7 +383,7 @@ export function LandingPremium() {
                   <Icone id="i-lock" />
                   <span>Les échanges restent liés à une mission. Les coordonnées ne sont partagées qu’après l’accord des deux entreprises.</span>
                 </p>
-                <Link id="missionsCTA" className="btn btn-yellow" href="/inscription">
+                <Link id="missionsCTA" className="btn btn-yellow" href="/commencer">
                   Créer mon compte <Icone id="i-arrow" className="arrow" />
                 </Link>
               </div>
@@ -453,7 +453,7 @@ export function LandingPremium() {
                 Le prochain bon prix <span>commence ici.</span>
               </h2>
               <p>Inscris-toi, prépare ta première demande et consulte tes négoces. Le collectif est là quand une commande s’y prête.</p>
-              <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/inscription">
+              <Link id="finalPrimaryCTA" className="btn btn-yellow" href="/commencer">
                 {CTA_PRINCIPAL.bouton} <Icone id="i-arrow" className="arrow" />
               </Link>
               <small>{CTA_PRINCIPAL.sous}</small>

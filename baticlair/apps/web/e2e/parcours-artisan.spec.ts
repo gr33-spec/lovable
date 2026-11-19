@@ -71,8 +71,11 @@ async function signUp(page: Page, email = `artisan-${unique()}@example.fr`) {
   // L'aperçu WhatsApp : écrit dès le serveur avec l'adresse du site, jamais vercel.app.
   const html = await (await page.request.get("/")).text();
   expect(html).toMatch(/<meta property="og:image" content="http:\/\/localhost:3000\/marque\/partage\.png"/);
+  // RÈGLE CHANGÉE (nouvel onboarding, 19 novembre 2026) : « Commencer gratuitement » mène à la carte (`/commencer`, son
+  // parcours a sa série, `onboarding.spec.ts`) ; ces parcours gardent l'inscription complète, toujours servie à `/inscription`.
   await page.getByRole("link", { name: "Commencer gratuitement" }).first().click();
-  await expect(page).toHaveURL(/\/inscription/);
+  await expect(page).toHaveURL(/\/commencer/);
+  await page.goto("/inscription");
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");
   // Seule question métier : un appui (ici un couvreur).
@@ -3149,9 +3152,9 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   await expect(page.locator(".sticky-cta")).not.toHaveAttribute("data-visible", "");
   // Greg, 30 octobre 2026, nuit : « Commencer gratuitement » en haut et en bas ; « Rejoindre le collectif » dans sa section.
   for (const id of ["#heroPrimaryCTA", "#finalPrimaryCTA"]) await expect(page.locator(id)).toHaveText(/^Commencer gratuitement/);
-  await expect(page.locator("#collectif").getByRole("link", { name: "Rejoindre le collectif", exact: true })).toHaveAttribute("href", "/inscription");
+  await expect(page.locator("#collectif").getByRole("link", { name: "Rejoindre le collectif", exact: true })).toHaveAttribute("href", "/commencer");
   // L'en-tête (caché sur téléphone, comme la maquette : le menu et le bouton fixe y suffisent).
-  await expect(page.locator(".nav-right a", { hasText: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
+  await expect(page.locator(".nav-right a", { hasText: "Commencer gratuitement" })).toHaveAttribute("href", "/commencer");
   await expect(page.locator(".nav-right a", { hasText: "Se connecter" })).toHaveAttribute("href", "/connexion");
   const pied = page.getByRole("navigation", { name: "Informations et liens légaux" });
   for (const [nom, href] of <[string, string][]>[["Tarifs", "/tarifs"], ["Mentions légales", "/mentions-legales"], ["CGU", "/cgu"], ["Conditions négoces", "/conditions-negoce"], ["Confidentialité", "/confidentialite"], ["Contact", "/mentions-legales#contact"], ["Accès négoce", "/negoce/connexion"]])
@@ -3567,6 +3570,7 @@ test("Zéro bouton mort (visiteur) : landing, connexion, inscription, mot de pas
     ["démo guidée", "/couvreurs?demo"],
     ["connexion", "/connexion"],
     ["inscription", "/inscription"],
+    ["commencer (carte)", "/commencer"],
     ["mot de passe oublié", "/mot-de-passe-oublie"],
     ["nouveau mot de passe sans jeton", "/nouveau-mot-de-passe"],
     ["mentions légales", "/mentions-legales"],

@@ -53,14 +53,14 @@ describe("pages régionales", { timeout: 120_000 }, () => {
     expect((await ctx.prisma.company.findUniqueOrThrow({ where: { id: companyId } })).departement).toBeNull();
   });
 
-  it("le département de l'inscription sert de zone aux achats groupés quand l'adresse n'a pas de code postal", async () => {
+  it("le département de l'inscription sert de zone aux achats groupés, avant le code postal de l'adresse", async () => {
     const a = await signUp(ctx.app, "a@toitures.fr");
     const c = (await a.post("/v1/companies").send({ name: "Toitures A", trades: ["roofing"], departement: "29" }).expect(201)).body;
     const r = (await a.get("/v1/ag/etat").set("x-company-id", c.id).expect(200)).body;
     expect(r.zone).toEqual({ code: "29", nom: "Finistère" });
-    // Une adresse avec un code postal reste prioritaire.
+    // RÈGLE CHANGÉE (nouvel onboarding, 19 novembre 2026) : le département choisi l'emporte sur le code postal de l'adresse.
     await a.patch("/v1/company/profile").set("x-company-id", c.id).send({ address: "3 rue des Ajoncs, 22300 Lannion" }).expect(200);
-    expect((await a.get("/v1/ag/etat").set("x-company-id", c.id).expect(200)).body.zone).toEqual({ code: "22", nom: "Côtes-d'Armor" });
+    expect((await a.get("/v1/ag/etat").set("x-company-id", c.id).expect(200)).body.zone).toEqual({ code: "29", nom: "Finistère" });
   });
 
   it("la carte : les regroupements ouverts du département et du métier, jamais un achat clos ni d'ailleurs, ni une entreprise", async () => {

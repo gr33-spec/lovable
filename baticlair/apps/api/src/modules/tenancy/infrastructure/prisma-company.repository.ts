@@ -35,11 +35,15 @@ export class PrismaCompanyRepository implements CompanyRepository {
     });
   }
 
-  async createWithOwner(name: string, ownerUserId: string, trades: string[], departement: string | null = null): Promise<CompanyMembershipView> {
+  async createWithOwner(name: string, ownerUserId: string, trades: string[], departement: string | null = null, extra: { phone: string | null; parcoursInscription: string | null } = { phone: null, parcoursInscription: null }): Promise<CompanyMembershipView> {
     const company = await this.prisma.company.create({
-      data: { name, trades, departement, memberships: { create: { userId: ownerUserId, role: "owner" } } },
+      data: { name, trades, departement, phone: extra.phone, parcoursInscription: extra.parcoursInscription, memberships: { create: { userId: ownerUserId, role: "owner" } } },
     });
     return { companyId: company.id, companyName: company.name, role: "owner", trades: company.trades };
+  }
+
+  async setDepartement(companyId: string, departement: string): Promise<void> {
+    await this.prisma.company.update({ where: { id: companyId }, data: { departement } });
   }
 
   async setTrades(companyId: string, trades: string[]): Promise<void> {

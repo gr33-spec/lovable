@@ -1,4 +1,4 @@
-import { departement as departementConnu, normalizeTrades } from "@baticlair/domain";
+import { departement as departementConnu, normalizeTrades, PARCOURS_ESSAI, portableLisible, portableValide } from "@baticlair/domain";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { normalizeCompanyName } from "../domain/company-name.js";
@@ -32,11 +32,31 @@ export class TenancyService {
    * PAGES RÉGIONALES (Greg, 19 novembre 2026) : le département choisi à l'inscription (depuis la carte d'une page régionale
    * ou la liste de l'écran) est gardé s'il est connu ; un code inconnu est ignoré, jamais un refus.
    */
-  async createCompany(userId: string, rawName: string, trades: readonly string[] = [], departement?: string | null): Promise<CompanyMembershipView> {
+  async createCompany(
+    userId: string,
+    rawName: string,
+    trades: readonly string[] = [],
+    departement?: string | null,
+    essai: { telephone: string | null; parcours: string | null } = { telephone: null, parcours: null },
+  ): Promise<CompanyMembershipView> {
     const dep = departement ? (departementConnu(departement)?.code ?? null) : null;
-    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades), dep);
+    // Le nouvel onboarding : le portable est exigé (06 ou 07), il sert ensuite de numéro de l'entreprise.
+    if (essai.parcours === PARCOURS_ESSAI && !portableValide(essai.telephone)) throw new DomainError("validation_failed", "Mobile phone expected", { reason: "portable_invalide" });
+    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades), dep, {
+      phone: essai.telephone && portableValide(essai.telephone) ? portableLisible(essai.telephone) : null,
+      parcoursInscription: essai.parcours === PARCOURS_ESSAI ? PARCOURS_ESSAI : null,
+    });
     await this.apresCreation(vue.companyId).catch(() => undefined);
     return vue;
+  }
+
+  /** Le département choisi par l'artisan (carte ou SIRET) ; un code inconnu est refusé. */
+  async setDepartement(tenant: TenantContext, code: string): Promise<string> {
+    assertCanWrite(tenant);
+    const dep = departementConnu(code);
+    if (!dep) throw new DomainError("validation_failed", "Unknown department", { reason: "departement_inconnu" });
+    await this.companies.setDepartement(tenant.companyId, dep.code);
+    return dep.code;
   }
 
   /** L'artisan change ses métiers (Mon compte) : s'applique aux prochains devis lus. */

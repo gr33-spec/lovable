@@ -145,7 +145,7 @@ export default function TarifsPage() {
         </section>
 
         <section className="flex flex-col items-center gap-4 text-center">
-          <ButtonLink href="/inscription" variant="accent" className="min-h-14 rounded-full px-9 text-[16px] shadow-[0_18px_45px_rgba(254,210,6,0.25)]">
+          <ButtonLink href="/commencer" variant="accent" className="min-h-14 rounded-full px-9 text-[16px] shadow-[0_18px_45px_rgba(254,210,6,0.25)]">
             Commencer gratuitement
           </ButtonLink>
           <Link href="/" className="min-h-11 content-center text-[15px] font-semibold text-[#FBF8F3]/60 underline underline-offset-4 hover:text-[#FBF8F3]">

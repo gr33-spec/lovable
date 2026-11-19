@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Card, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -22,6 +22,11 @@ export interface Identite {
   siretVerifie?: boolean;
   /** Pourquoi un SIRET enregistré n'est pas retenu pour l'achat groupé. */
   siretMessage?: string | null;
+  /** Nouvel onboarding : l'entreprise reste à confirmer avant tout envoi à un négoce. */
+  aConfirmer?: boolean;
+  /** Le département choisi (carte) et celui de l'adresse de l'entreprise. */
+  departement?: { code: string; nom: string } | null;
+  departementEntreprise?: { code: string; nom: string } | null;
 }
 
 export function useIdentite() {
@@ -31,23 +36,33 @@ export function useIdentite() {
 
 export const FORMULAIRE_IDENTITE = "identite-avant-envoi";
 
-/** « Avant d'envoyer » : SIRET, prénom, portable ; le SIRET remplit le nom et l'adresse de l'entreprise. */
+/**
+ * « Avant d'envoyer » : SIRET, prénom, portable ; le SIRET remplit le nom et l'adresse de l'entreprise.
+ *
+ * LA VALIDATION DU SIRET (nouvel onboarding, Greg, 19 novembre 2026) : à quatorze chiffres, l'entreprise trouvée s'affiche
+ * (nom, adresse, activité) avec « C'est bien mon entreprise » (qui enregistre) et « Ce n'est pas la mienne » (qui vide le
+ * numéro). Rien ne part chez un négoce avant. Puis, si le département de l'entreprise n'est pas celui choisi sur la carte,
+ * l'artisan dit lequel garder (il sert aux achats groupés). Pour un compte d'avant sans fiche trouvée, rien ne change.
+ */
 export function EtapeIdentite({ identite, onFait, onPending }: { identite: Identite; onFait: (i: Identite) => void; onPending: (p: boolean) => void }) {
   const [siret, setSiret] = useState(identite.siret ?? "");
   const [prenom, setPrenom] = useState(identite.prenom ?? "");
   const [telephone, setTelephone] = useState(identite.telephone ?? "");
-  const [trouve, setTrouve] = useState<{ siret: string; entreprise: string | null; adresse: string | null } | null>(null);
+  const [trouve, setTrouve] = useState<{ siret: string; trouvee: boolean; entreprise: string | null; adresse: string | null; activite: string | null } | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [enregistree, setEnregistree] = useState<Identite | null>(null);
+  const [garder, setGarder] = useState<string | null>(null);
+  const champSiret = useRef<HTMLInputElement>(null);
   const chiffres = siret.replace(/\s/g, "");
 
-  // Quatorze chiffres : l'annuaire des entreprises dit le nom et l'adresse, et préremplit le prénom du dirigeant.
+  // Quatorze chiffres : l'annuaire des entreprises dit le nom, l'adresse et l'activité, et préremplit le prénom du dirigeant.
   const annuaire = trouve && trouve.siret === chiffres ? trouve : null;
   useEffect(() => {
     if (!/^\d{14}$/.test(chiffres)) return;
     const c = new AbortController();
-    api<{ trouvee: boolean; entreprise: string | null; adresse: string | null; prenomDirigeant: string | null }>(`/v1/company/identite/annuaire?siret=${chiffres}`, { signal: c.signal }).then(
+    api<{ trouvee: boolean; entreprise: string | null; adresse: string | null; prenomDirigeant: string | null; activite?: string | null }>(`/v1/company/identite/annuaire?siret=${chiffres}`, { signal: c.signal }).then(
       (r) => {
-        setTrouve(r.trouvee ? { siret: chiffres, entreprise: r.entreprise, adresse: r.adresse } : null);
+        setTrouve({ siret: chiffres, trouvee: r.trouvee, entreprise: r.entreprise, adresse: r.adresse, activite: r.activite ?? null });
         if (r.prenomDirigeant) setPrenom((p) => p || r.prenomDirigeant!);
       },
       () => setTrouve(null),
@@ -55,27 +70,108 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
     return () => c.abort();
   }, [chiffres]);
 
-  async function enregistrer(e: React.FormEvent) {
+  // La fiche se confirme d'un bouton quand l'annuaire nomme l'entreprise, ou toujours pour le nouveau parcours.
+  const aConfirmer = !!identite.aConfirmer || !!annuaire?.entreprise;
+  const montrerFiche = /^\d{14}$/.test(chiffres) && aConfirmer && (annuaire || identite.aConfirmer);
+
+  async function enregistrer(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErreur(null);
+    const parLeBouton = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("data-confirmer") === "oui";
+    // Le choix du département, après l'enregistrement : celui gardé est envoyé, puis on continue.
+    if (enregistree) {
+      const dep = garder ?? enregistree.departement?.code ?? null;
+      onPending(true);
+      try {
+        if (dep && dep !== enregistree.departement?.code) await api("/v1/company/departement", { method: "PATCH", body: { departement: dep } });
+        onFait({ ...enregistree, departement: dep === enregistree.departementEntreprise?.code ? enregistree.departementEntreprise : enregistree.departement });
+      } catch (x) {
+        setErreur(messageErreur(x));
+      } finally {
+        onPending(false);
+      }
+      return;
+    }
+    if (montrerFiche && !parLeBouton) {
+      setErreur("Dis-nous si c'est bien ton entreprise : « C'est bien mon entreprise » ou « Ce n'est pas la mienne ».");
+      return;
+    }
     onPending(true);
     try {
-      onFait(await api<Identite>("/v1/company/identite", { method: "PUT", body: { siret: chiffres, prenom: prenom.trim(), telephone: telephone.trim() } }));
+      const i = await api<Identite>("/v1/company/identite", { method: "PUT", body: { siret: chiffres, prenom: prenom.trim(), telephone: telephone.trim() } });
+      const choisi = i.departement?.code;
+      const entreprise = i.departementEntreprise?.code;
+      if (choisi && entreprise && choisi !== entreprise) {
+        setEnregistree(i);
+        setGarder(choisi);
+      } else onFait(i);
     } catch (x) {
-      setErreur(messageErreur(x, { portable_invalide: "Il me faut ton portable (06 ou 07), pour que ton négoce puisse t'appeler.", siret_invalide: "Ce SIRET ne va pas : 14 chiffres." }));
+      setErreur(messageErreur(x, { portable_invalide: "Il me faut ton portable (06 ou 07), pour que ton négoce puisse t'appeler.", siret_invalide: "Ce SIRET ne va pas : 14 chiffres.", prenom_requis: "Il me faut ton prénom." }));
     } finally {
       onPending(false);
     }
   }
 
+  function pasLaMienne() {
+    setSiret("");
+    setTrouve(null);
+    setErreur(null);
+    requestAnimationFrame(() => champSiret.current?.focus());
+  }
+
+  if (enregistree?.departement && enregistree.departementEntreprise) {
+    const options = [enregistree.departement, enregistree.departementEntreprise];
+    return (
+      <form id={FORMULAIRE_IDENTITE} onSubmit={(e) => void enregistrer(e)} className="flex flex-col gap-4" noValidate>
+        <p className="text-[16px] font-semibold">
+          Ton entreprise est {enregistree.departementEntreprise.nom ? `dans le département ${enregistree.departementEntreprise.nom}` : "ailleurs"} ({enregistree.departementEntreprise.code}), tu avais choisi {enregistree.departement.nom} ({enregistree.departement.code}). Lequel on garde pour tes achats groupés ?
+        </p>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="sr-only">Le département gardé</legend>
+          {options.map((d, k) => (
+            <label key={d.code} className={`flex min-h-12 items-center gap-3 rounded-xl border px-3 ${garder === d.code ? "border-ink" : "border-line"}`}>
+              <input type="radio" name="departement-garde" value={d.code} checked={garder === d.code} onChange={() => setGarder(d.code)} className="size-5 accent-accent" />
+              <span className="text-[16px]">
+                {d.nom} ({d.code}) <span className="text-muted">· {k === 0 ? "choisi sur la carte" : "celui de mon entreprise"}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        {erreur ? (
+          <p role="alert" className="text-[14px] font-semibold text-danger">
+            {erreur}
+          </p>
+        ) : null}
+      </form>
+    );
+  }
+
   return (
     <form id={FORMULAIRE_IDENTITE} onSubmit={(e) => void enregistrer(e)} className="flex flex-col gap-4" noValidate>
       <p className="text-[16px] font-semibold">{identite.phrase}</p>
-      <Field id="identite-siret" label="SIRET de ton entreprise" inputMode="numeric" autoComplete="off" placeholder="14 chiffres" value={siret} onChange={(e) => setSiret(e.target.value)} />
-      {annuaire?.entreprise ? (
-        <Card className="flex flex-col gap-0.5 p-3 text-[14px]">
-          <span className="font-extrabold">{annuaire.entreprise}</span>
-          {annuaire.adresse ? <span className="text-muted">{annuaire.adresse}</span> : null}
+      <Field ref={champSiret} id="identite-siret" label="SIRET de ton entreprise" inputMode="numeric" autoComplete="off" placeholder="14 chiffres" value={siret} onChange={(e) => setSiret(e.target.value)} />
+      {montrerFiche ? (
+        <Card className="flex flex-col gap-1 p-4 text-[15px]" aria-label="L'entreprise trouvée">
+          {annuaire?.entreprise ? (
+            <>
+              <span className="text-[13px] font-semibold text-muted">L&apos;entreprise trouvée</span>
+              <span className="text-[17px] font-extrabold">{annuaire.entreprise}</span>
+              {annuaire.adresse ? <span>{annuaire.adresse}</span> : null}
+              {annuaire.activite ? <span className="text-muted">Activité : {annuaire.activite}</span> : null}
+            </>
+          ) : annuaire && !annuaire.trouvee ? (
+            <span>On ne trouve pas ce SIRET dans l&apos;annuaire des entreprises. Vérifie le numéro.</span>
+          ) : (
+            <span>L&apos;annuaire des entreprises ne dit pas encore le nom de ce SIRET.{annuaire?.activite ? ` Activité : ${annuaire.activite}.` : ""}</span>
+          )}
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="submit" data-confirmer="oui" className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-extrabold text-on-accent">
+              {annuaire?.entreprise ? "C'est bien mon entreprise" : "C'est bien mon numéro"}
+            </button>
+            <button type="button" onClick={pasLaMienne} className="pressable inline-flex min-h-12 items-center justify-center rounded-full border border-line px-5 text-[15px] font-semibold">
+              Ce n&apos;est pas la mienne
+            </button>
+          </div>
         </Card>
       ) : null}
       <Field id="identite-prenom" label="Ton prénom" autoComplete="given-name" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
