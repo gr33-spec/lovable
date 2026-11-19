@@ -225,3 +225,38 @@ export function tauxConfirme(base: BaseMetier): { total: number; confirmes: numb
   const confirmes = parStatut.confirme + parStatut.confirme_fabricant;
   return { total, confirmes, taux: total ? Math.round((1000 * confirmes) / total) / 10 : 0, parStatut };
 }
+
+/** Zone d'une commune, lue dans la carte des régions d'une base (`zones_communes`). */
+export interface ZoneCommune {
+  insee: string;
+  nom: string;
+  zoneArdoise: number;
+  zoneTuile: number;
+  exposee: boolean;
+  /** Comment la commune a été trouvée : son nom et son code postal, ou le code postal seul (zone la plus forte). */
+  trouvee: "commune" | "code_postal";
+}
+
+const sansAccents = (t: string) =>
+  t.toLowerCase().replace(/œ/g, "oe").replace(/æ/g, "ae").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * La zone du chantier d'après son adresse (décision du fondateur, 2026-11-19 : zone PAR COMMUNE, distance à la côte et
+ * altitude, pas par département). La commune nommée après le code postal ; sinon, la zone la plus forte des communes de
+ * ce code postal (prudent) ; null si la carte n'a pas de table ou que le code postal est inconnu.
+ */
+export function zoneDeLAdresse(carte: CarteRegions | null, adresse: string | null | undefined): ZoneCommune | null {
+  const table = (carte as { zones_communes?: { lignes: [string, string, string, number, number, number][] } } | null)?.zones_communes?.lignes;
+  if (!table || !adresse) return null;
+  const m = /(?:^|[^\d])(\d{5})(?!\d)\s*,?\s*([^,\n]*)/.exec(adresse);
+  if (!m) return null;
+  const cp = m[1]!;
+  const ville = sansAccents(m[2] ?? "").replace(/\bcedex\b.*$/, "").replace(/^(st|ste)\b/, (x) => (x === "st" ? "saint" : "sainte")).trim();
+  const candidates = table.filter((l) => l[2].split(/,\s*/).includes(cp));
+  if (candidates.length === 0) return null;
+  const vers = (l: (typeof table)[number], trouvee: ZoneCommune["trouvee"]): ZoneCommune => ({ insee: l[0], nom: l[1], zoneArdoise: l[3], zoneTuile: l[4], exposee: l[5] === 1, trouvee });
+  const exacte = ville ? candidates.find((l) => l[1] === ville) : undefined;
+  if (exacte) return vers(exacte, "commune");
+  const pire = candidates.reduce((a, b) => (Math.max(b[3], b[4]) > Math.max(a[3], a[4]) ? b : a));
+  return { ...vers(pire, "code_postal"), exposee: candidates.some((l) => l[5] === 1) };
+}

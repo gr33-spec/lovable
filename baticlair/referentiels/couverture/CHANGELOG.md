@@ -1,5 +1,16 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-58 (suite) — Zone du chantier calculée par commune
+
+- **§26 / §32.1 Zone climatique** : lue PAR COMMUNE dans la carte des régions (`carte-regions.json`, `zones_communes`,
+  34 734 communes : distance à la côte au 1:10 M et trait de côte Histolitt, altitude IGN de la mairie, NF DTU 40.11 et
+  40.21). La commune écrite après le code postal ; sinon la zone la plus forte des communes du code postal ; sinon
+  l'ancienne table par département (`zone.ts`). Décision du fondateur (19/11/2026).
+- Exemples : Rennes, Vitré, Nantes, Grenoble passaient en zone 3 (département) : Rennes, Vitré, Nantes en zone 1,
+  Grenoble en zone 2. Brest, Lorient, Saint-Malo restent en zone 3 ; Étel et Belz en zone 2 (côte « de Lorient à
+  l'Espagne »). Grenoble, 200 m² de 30×22 : 8 547 ardoises, crochets de 9 cm (avant 8 925, 10 cm).
+- Le crochet inox 2,7 mm reste d'office par département littoral (NF DTU 40.11 : Ø 2,4 interdit dans le 22, le 29 et le 56).
+
 ## roofing-2026.11.19-58 — Écran sous toiture : surface + 10 % au-dessus de 30 %, + 20 % en dessous
 
 - **§6 / §28.4 Écran** : m² d'écran = surface × 1,10 au-dessus de 30 % de pente (règle du fondateur, confirmée),

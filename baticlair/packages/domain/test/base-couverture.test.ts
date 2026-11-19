@@ -6,7 +6,7 @@
  * contrôle par le calcul (`confirme_fabricant`), contrôle relu ici sur chaque tuile.
  */
 import { describe, expect, it } from "vitest";
-import { BASES_METIER, baseDuMetier, chiffreDe, lireBase, modelesDe, tauxConfirme, tousLesChiffres } from "../src/index.js";
+import { BASES_METIER, baseDuMetier, chiffreDe, lireBase, modelesDe, tauxConfirme, tousLesChiffres, zoneDeLAdresse } from "../src/index.js";
 
 const lue = baseDuMetier("couverture")!;
 
@@ -55,5 +55,24 @@ describe("base de référence couverture", () => {
     const hp10 = modelesDe(lue.base, "tuile_emboitement").find((m) => /^HP ?10/i.test(m.modele.nom))!;
     expect(hp10).toBeDefined();
     expect(chiffreDe(hp10.modele, "tuiles_par_palette")?.valeur).toBeDefined();
+  });
+});
+
+describe("zone du chantier par commune (décision du fondateur, 2026-11-19)", () => {
+  const z = (adresse: string) => zoneDeLAdresse(lue.carte, adresse);
+  it("la commune écrite après le code postal donne sa zone DTU", () => {
+    expect(z("12 rue de Siam, 29200 Brest")).toMatchObject({ zoneArdoise: 3, trouvee: "commune" });
+    expect(z("2 place de la Mairie, 35000 Rennes")).toMatchObject({ zoneArdoise: 1, trouvee: "commune" });
+    expect(z("44000 Nantes")).toMatchObject({ zoneArdoise: 1, exposee: false });
+    // Limite de Lorient : la côte la plus proche à l'est de Lorient (côte « de Lorient à l'Espagne »).
+    expect(z("56410 Étel")).toMatchObject({ zoneArdoise: 2, exposee: true });
+    expect(z("56100 Lorient")).toMatchObject({ zoneArdoise: 3 });
+    // Rive d'estuaire près de l'embouchure : exposée.
+    expect(z("44560 Paimbœuf")).toMatchObject({ zoneArdoise: 2, exposee: true });
+  });
+  it("sans commune reconnue : la zone la plus forte des communes du code postal ; code inconnu : rien", () => {
+    expect(z("29200")).toMatchObject({ zoneArdoise: 3, trouvee: "code_postal" });
+    expect(z("rue sans code")).toBeNull();
+    expect(z("00000 Nulle part")).toBeNull();
   });
 });

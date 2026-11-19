@@ -193,13 +193,15 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect((await agent.get("/v1/projects")).body.items).toHaveLength(0);
   });
 
-  it("hors littoral (Grenoble) : crochet courant 1 mm, 8 925 ardoises (ligne de la table Cupa), toujours au moins autant de crochets", async () => {
+  // Zone par commune (fiche couverture, 2026-11-19) : Grenoble, 212 m d'altitude, loin de la mer → zone 2 (avant : toute
+  // l'Isère en zone 3). 45°, zone 2 : recouvrement 80 mm, table Cupa 40,7/m² → 8 140 + 5 % = 8 547 ; crochet 80 + 3 → 9 cm.
+  it("hors littoral (Grenoble, zone 2 à la commune) : crochet courant 1 mm, 8 547 ardoises (ligne de la table Cupa), toujours au moins autant de crochets", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const res = await agent.post("/v1/quantitatifs").send({ ...RAPPIDOS, adresse: "38000 Grenoble" });
     const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
-    expect(ardoises.quantite).toBe(8925);
+    expect(ardoises.quantite).toBe(8547);
     expect(ardoises.explication.phrase).toMatch(/diamètre du crochet standard/);
-    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 10 cm").quantite).toBe(8925);
+    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 9 cm").quantite).toBe(8547);
   });
 
   it("range le quantitatif dans un chantier existant", async () => {

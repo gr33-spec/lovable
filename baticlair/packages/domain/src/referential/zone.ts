@@ -1,4 +1,8 @@
 /**
+ * REPLI SEULEMENT (2026-11-19) : la zone se lit d'abord PAR COMMUNE dans la carte des régions de la fiche couverture
+ * (`zoneDeLAdresse`, distance à la côte et altitude, NF DTU 40.11 / 40.21). Cette table par département ne sert que
+ * quand la commune n'est pas dans la carte.
+ *
  * ZONE CLIMATIQUE (1 intérieur, 2 intermédiaire, 3 littoral et montagne),
  * déduite du code postal du chantier : elle fixe le recouvrement de l'ardoise
  * et l'espacement des crochets de gouttière. Table par département du

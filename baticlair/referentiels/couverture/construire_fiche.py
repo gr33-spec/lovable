@@ -222,6 +222,33 @@ def construit():
              "avertissements": regions.get("avertissements"),
              "departements": [{**e, "sources": [src.id(s) for s in e.get("sources", [])]} for e in regions["entrees"]],
              "verdict_section26": regions.get("verdict_section26"), "verdict_zone_ts": regions.get("verdict_zone_ts")}
+    # Zones par commune, compactes, lues par le code (décision du fondateur, 19/11/2026 : zone par commune) :
+    # [code INSEE, nom en minuscules sans accents, codes postaux, zone ardoise (DTU 40.11), zone tuile (DTU 40.21),
+    #  situation exposée probable (1/0)]. Bretagne et 44 d'abord (calcul fin), sinon France.
+    fr = os.path.join(RECH, "communes", "france.json.gz")
+    if os.path.exists(fr):
+        import gzip
+        import unicodedata
+        def sans_accents(t):
+            t = t.lower().replace("œ", "oe").replace("æ", "ae")
+            return "".join(ch for ch in unicodedata.normalize("NFD", t) if unicodedata.category(ch) != "Mn")
+        with gzip.open(fr, "rt", encoding="utf-8") as f:
+            communes_fr = json.load(f)["communes"]
+        bzh = os.path.join(RECH, "communes", "bretagne-44.json")
+        fines = {}
+        if os.path.exists(bzh):
+            with open(bzh, encoding="utf-8") as f:
+                fines = {c["code_insee"]: c for c in json.load(f)["communes"]}
+        table = []
+        for c in communes_fr:
+            c = fines.get(c["code_insee"], c)
+            za, zt = c.get("zone_ardoise_dtu_40_11"), c.get("zone_tuile_dtu_40_21")
+            if za is None and zt is None:
+                continue
+            table.append([c["code_insee"], re.sub(r"[^a-z0-9]+", " ", sans_accents(c["nom"])).strip(), c["codes_postaux"],
+                          za or zt, zt or za, 1 if c.get("situation_exposee_probable") else 0])
+        carte["zones_communes"] = {"colonnes": ["insee", "nom", "codes_postaux", "zone_ardoise", "zone_tuile", "exposee"],
+                                   "source": "recherche/communes (calcul_zones.py, README.md)", "lignes": table}
     communes = os.path.join(RECH, "communes")
     if os.path.isdir(communes):
         carte["communes"] = sorted(f for f in os.listdir(communes) if f.endswith((".json", ".json.gz")))
