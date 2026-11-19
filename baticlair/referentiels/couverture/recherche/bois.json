@@ -1,0 +1,2765 @@
+{
+  "famille": "bois_couverture",
+  "generated": "2026-11-19",
+  "regle_arrondi": {
+    "principe": "Les liteaux et voliges s'aboutent sur un appui (chevron). La longueur utile d'une pièce est donc un multiple de l'entraxe.",
+    "formules": [
+      "L_utile = plancher(L_commerciale / entraxe) × entraxe",
+      "pièces = arrondi_sup(ml_nécessaires × (1 + perte) / L_utile)",
+      "choisir parmi les longueurs de la région celle dont L_utile / L_commerciale est la plus proche de 1 (entraxe 0,60 : 3,60 / 4,20 / 4,80 ; entraxe 0,50 : 4,00 / 4,50 / 5,00 ; entraxe 0,45 : 4,50)",
+      "chevrons : plus petite longueur de la région ≥ rampant + débord + 0,10 m de coupe ; au-delà de la plus grande longueur, raccord sur panne (demander)",
+      "volige : m² × (1 + perte), affichée en m² ; en pièces si demandé : arrondi_sup(m² / (L × largeur))"
+    ],
+    "statut": "une_source",
+    "sources": [
+      {
+        "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+        "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+        "type": "guide",
+        "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+        "consulte": "2026-11-19"
+      },
+      {
+        "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+        "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+        "type": "dtu",
+        "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+        "consulte": "2026-11-19"
+      }
+    ],
+    "raison": "L'aboutage sur appui est sourcé (guide Culture, DTU 40.11 : appui mini 35 mm, divisé par deux aux jonctions). La formule d'arrondi est une proposition BatiClair à valider."
+  },
+  "entrees": [
+    {
+      "id": "liteau_ardoise_18x38_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "18×38 sapin/épicéa CL2",
+      "attribut": "section stockée",
+      "valeur": [
+        "18×38"
+      ],
+      "unite": "mm",
+      "condition": "ardoise au crochet sur liteaux",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "BigMat (national) : liteaux sapin/épicéa de France CL2 Groupe Siat (Alsace) 18x38 4 m, 25x38 5 m, 27x32 4,5 m, 18x50 4 m",
+          "url": "https://bigmat.fr/produits/achat-materiaux-bois/bois-de-charpente/liteau-latte-tasseau/3532329317691/latte-liteau-en-sapin-epicea-de-france-traite-classe-2-25x38-l-5-m",
+          "type": "negoce",
+          "extrait": "Latte/liteau en Sapin / Épicéa de France - traité classe 2 - 25x38 - L. 5 m - GROUPE SIAT",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le code dit 18×40 : section très peu stockée en liteau (Chausson la classe en contre-liteau, Central Bois en tasseau). La désignation de négoce est 18×38."
+    },
+    {
+      "id": "liteau_ardoise_18x48_50_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "18×48 / 18×50 CL2",
+      "attribut": "section stockée chez les indépendants bretons",
+      "valeur": [
+        "18×48 (Tanguy 4,00 / 4,20 / 4,80 m)",
+        "50×18 (Quéguiner 4 m)",
+        "18×47 4,50 m et 18×48 5,00 m (Bretagne Matériaux)"
+      ],
+      "unite": "mm",
+      "condition": "ardoise (liteau large, plus raide que 18×38)",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_ardoise_14x38",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "14×38 / 37×14 CL2",
+      "attribut": "section stockée",
+      "valeur": [
+        "14×38 4,00 m",
+        "37×14 4 m"
+      ],
+      "unite": "mm",
+      "condition": "petite section : seulement pour appuis rapprochés (voir entrée section mini)",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_ardoise_portee_dtu4011_ancien",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tableau sections liteaux (ancien DTU 40.11)",
+      "attribut": "écartement maximal entre appuis à 150 daN/m²",
+      "valeur": {
+        "15×38": 0.35,
+        "15×50": 0.45,
+        "15×75": 0.55,
+        "18×50": 0.6,
+        "18×75": 0.7,
+        "25×50": 0.8
+      },
+      "unite": "m",
+      "condition": "charge totale 150 daN/m² ; à 80 daN/m² : 15×38 0,40, 18×50 0,70, 25×50 1,00. Écartement entre appuis = entraxe chevrons moins largeur du chevron.",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Greystones Slate (fabricant d'ardoise espagnole), Guide de mise en œuvre France : tableau section des liteaux et des voliges (reprise de l'ancien NF DTU 40.11)",
+          "url": "https://ardoise-naturelle-espagne.com/pdf/guide-de-mise-en-oeuvre-france.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe maximal des appuis (m) suivant la charge totale 80/100/150/200 daN/m² : 18x50 0.70 0.65 0.60 0.55 ; 18x100 (volige) 0.90 0.85 0.75 0.70",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Tableau d'un fabricant qui reprend l'ancien DTU 40.11 ; les tableaux 1 et 2 de l'édition 2020 n'ont pas pu être lus (images). Le guide Culture confirme seulement la plage 40×15 à 50×27 mm. 18×38/18×40 ne figure pas dans ce tableau : par interpolation de raideur il tiendrait environ 0,50 m entre appuis (calcul BatiClair, non sourcé)."
+    },
+    {
+      "id": "liteau_18x40_portee_tuile_plate",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "18×40",
+      "attribut": "écartement maximal entre appuis",
+      "valeur": 53,
+      "unite": "cm",
+      "condition": "tuile plate, tableau 'majoritairement utilisés' du guide Koramic (DTU 40.23), pureau 80 à 180 mm",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul fabricant ; donne l'ordre de grandeur de portée d'un 18×40 (cohérent avec ~0,50 m calculé plus haut)."
+    },
+    {
+      "id": "liteau_tuile_emboitement_hauteur_min",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tuile à emboîtement",
+      "attribut": "hauteur minimale de liteau",
+      "valeur": 22,
+      "unite": "mm",
+      "condition": "NF DTU 40.21 art. 5.3.1 ; un liteau 18×38 ou 18×40 est donc interdit sous tuile à emboîtement",
+      "regions": [
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.21 P1-1, art. 5.3.1, tableau des entraxes maximaux entre appuis des liteaux (lu dans les guides Koramic et Terreal)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "dtu",
+          "extrait": "valeur et référence seulement (texte AFNOR non recopié)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_tuile_entraxe_dtu4021",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tableau NF DTU 40.21",
+      "attribut": "entraxe maximal entre appuis (cm) zones A1-A2 alt. 200/500/900 m",
+      "valeur": {
+        "22×25": [
+          50,
+          50,
+          45
+        ],
+        "25×32": [
+          70,
+          65,
+          60
+        ],
+        "25×38": [
+          70,
+          70,
+          60
+        ],
+        "25×50": [
+          80,
+          75,
+          65
+        ],
+        "32×32": [
+          90,
+          85,
+          75
+        ],
+        "32×38": [
+          90,
+          90,
+          80
+        ],
+        "38×38": [
+          90,
+          90,
+          90
+        ],
+        "38×50": [
+          90,
+          90,
+          90
+        ]
+      },
+      "unite": "cm",
+      "condition": "bois C24, 3 appuis, flèche 1/300, rangées de liteaux ≤ 0,40 m ; zone E 900 m : 25×38 60, 38×38 80 (la Bretagne est en zone de neige A)",
+      "regions": [
+        "national",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.21 P1-1, art. 5.3.1, tableau des entraxes maximaux entre appuis des liteaux (lu dans les guides Koramic et Terreal)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "dtu",
+          "extrait": "valeur et référence seulement (texte AFNOR non recopié)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_tuile_27x40",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "27×40 sapin/épicéa CL2",
+      "attribut": "section et longueurs",
+      "valeur": [
+        "3,50 m",
+        "4,00 m",
+        "4,50 m",
+        "5,00 m"
+      ],
+      "unite": "m",
+      "condition": "tuile ; Chausson : entraxe maxi 650 mm pour 27×40 minimum",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : liteau 27x40 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-traite-classe-2-l-4-50m-27x40mm-A1881318",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 27x40mm longueur 4,50m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Piveteaubois (scierie, Vendée) vendu par Mr Bricolage : liteau brut CL2 27x40 4 m et 27x27 4 m (lu dans l'extrait du moteur de recherche, page 403)",
+          "url": "https://www.mr-bricolage.fr/liteau-brut-cl2-27x40mm-l-4m.html",
+          "type": "fabricant",
+          "extrait": "27x40 : Chaque paquet contient 12 unités ; 27x27 : 16 unités",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Bretagne Matériaux : 3,50 et 4,50 m vus ; Chausson : 3,50 à 5,00 m ; Piveteaubois : 4 m."
+    },
+    {
+      "id": "liteau_27x38",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "27×38 sapin/épicéa CL2",
+      "attribut": "longueurs",
+      "valeur": [
+        "4,00 m",
+        "4,50 m",
+        "5,00 m",
+        "5,10 m"
+      ],
+      "unite": "m",
+      "condition": "tuile, contre-liteau",
+      "regions": [
+        "Bretagne",
+        "Sud-Ouest",
+        "Centre-IdF",
+        "Auvergne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Houdard (Lucé, Eure-et-Loir ; livre Yvelines, Essonne) : liteaux sapin traités Siat en 4,00 m (14x38 à 27x38, dont 25x38)",
+          "url": "https://www.houdard.fr/bois-de-charpente-et-construction/liteaux-sapin-traites-20x38-400m",
+          "type": "negoce",
+          "extrait": "LITEAUX SAPIN TRAITES 20x38 4,00M (Scierie Siat)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Batiland (groupement, 41 points de vente, Sud-Ouest) : écrans, voliges et liteaux",
+          "url": "https://www.batiland.fr/pa1062/ecrans-voliges-liteaux",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27 x 38 Traité/2 5,10 m ; Volige Pin Maritime mi bois 170 x 16 2,40 m (€/m²) ; Volige Sapin mi bois 185x15 3.60M / 3.90M / 4.20M / 4.50M",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "5,10 m = bois du Nord (Batiland) ; 4,50 m en Bretagne (Bretagne Matériaux)."
+    },
+    {
+      "id": "liteau_longueurs_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "longueurs vendues en Bretagne",
+      "valeur": [
+        "4,00 m (la plus courante)",
+        "4,20 m",
+        "4,50 m",
+        "4,80 m",
+        "5,00 m",
+        "3,50 m (27×40)"
+      ],
+      "unite": "m",
+      "condition": "deux familles : sapin/épicéa de France (pas de 0,50 m) et bois du Nord (pas de 0,30 m)",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_unite_vente_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "unité de vente",
+      "valeur": "ml (prix au ml ou par 100 ml = hectomètre), minimum 1 pièce",
+      "unite": "ml",
+      "condition": "Quéguiner : par 100 ml ; Point.P / Bretagne Matériaux : hectomètre ; Tanguy : TTC/ml, conditionnement = 1 pièce",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Point.P (national, même catalogue que Bretagne Matériaux) : liteaux CL2 prix à l'hectomètre, minimum 1 pièce",
+          "url": "https://www.pointp.fr/p/couverture/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "94,67 € TTC par Hectomètre ; Qté min 1 pièce (extrait moteur de recherche, site 403)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_botte_pieces",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "liteaux 4 m",
+      "attribut": "pièces par botte",
+      "valeur": {
+        "27×38": "12 (Gironde, Isère) ou 10 (Allier)",
+        "27×40": "12 (Piveteaubois)",
+        "18×38": "14 (Allier)",
+        "20×38": "12 (Allier)",
+        "20×40": "15 (Isère)",
+        "25×27": "15 (Allier)",
+        "27×27": "16 (Piveteaubois)",
+        "38×38": "6 (Allier) ou 9 (Isère)"
+      },
+      "unite": "pièces",
+      "condition": "longueur 4 m ; soit 24 à 64 ml par botte",
+      "regions": [
+        "Sud-Ouest",
+        "Auvergne-Rhône-Alpes",
+        "Auvergne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "AC Bois (Le Pian-Médoc, Gironde) : liteau sapin 27x38 CL2 4 m",
+          "url": "https://acbois.fr/produit/bois-de-construction/liteau/liteau-sapin-27x38-traite-cl2-4000mm/",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27x38 traite cl2 4000mm (botte de 12) ; prix au ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Pic Vert Bois Matériaux (Isère / Drôme) : liteau sapin/épicéa CL2 27x38 4 m",
+          "url": "https://picvertboismateriaux.fr/liteaux-pin-traite-classe-2-jaune-27x38-4m",
+          "type": "negoce",
+          "extrait": "Vendu par botte de 12 pièces soit 30 euros",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Scierie Sillat (Isère) : liteaux sapin 4 m en paquets",
+          "url": "https://scieriesillat.com/produit/liteaux-sapin-38-x-38-traite-cl-2-pq-de-9-unites/",
+          "type": "fabricant",
+          "extrait": "38x38 4 m : paquet de 9 ; 20x40 CL2 : 15 ; 28x40 séché : 16",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Piveteaubois (scierie, Vendée) vendu par Mr Bricolage : liteau brut CL2 27x40 4 m et 27x27 4 m (lu dans l'extrait du moteur de recherche, page 403)",
+          "url": "https://www.mr-bricolage.fr/liteau-brut-cl2-27x40mm-l-4m.html",
+          "type": "fabricant",
+          "extrait": "27x40 : Chaque paquet contient 12 unités ; 27x27 : 16 unités",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "27×38 : 12 pièces chez deux négoces (Gironde, Isère), 10 chez un troisième (Allier). La botte dépend du fournisseur : ce n'est pas une contenance fixe en ml."
+    },
+    {
+      "id": "liteau_botte_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "pièces par botte en Bretagne",
+      "valeur": null,
+      "unite": null,
+      "condition": "aucun négoce breton consulté n'affiche de botte : vente au ml / 100 ml / pièce",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Botte non publiée par Quéguiner, Tanguy, Bretagne Matériaux. À demander au comptoir."
+    },
+    {
+      "id": "liteau_ml_par_m2",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "ml de liteaux par m²",
+      "valeur": "1 / pureau (m)",
+      "unite": "ml/m²",
+      "condition": "écartement des liteaux = pureau ; ex. tuile pureau 0,37 m → 2,7 ml/m²",
+      "regions": [
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Cupa Pizarras, FAQ pureau et nombre d'ardoises au m² (reprise dans referentiel-couverture.md §34)",
+          "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/pureau-ardoises-au-m2/",
+          "type": "fabricant",
+          "extrait": "ml de liteaux/m² = 1 / P",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_perte",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "perte (casse, coupes)",
+      "valeur": 5,
+      "unite": "%",
+      "condition": "hors perte d'aboutage due à la longueur (voir règle d'arrondi)",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Nomad Education, révisions CAP couvreur : calcul des quantités (coefficient 1,05 sur liteaux, cité par une recherche)",
+          "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41",
+          "type": "guide",
+          "extrait": "coefficient de 1,05, soit une marge de 5 % pour la casse et les coupes (extrait de recherche, page non ouverte)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Seulement un cours de CAP cité par une recherche ; à faire valider par le fondateur."
+    },
+    {
+      "id": "liteau_traitement",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "traitement",
+      "valeur": "classe 2 (jaune ou incolore) ; classe 3 (vert) existe pour bardage",
+      "unite": null,
+      "condition": "sapin/épicéa",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "liteau_essence",
+      "famille": "bois_couverture",
+      "sous_famille": "liteau",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "essence",
+      "valeur": "sapin/épicéa (de France ou du Nord) ; pin et douglas en marge",
+      "unite": null,
+      "condition": "les tableaux du DTU 40.11 valent pour les résineux sapin/épicéa",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "contre_liteau_epaisseur_min",
+      "famille": "bois_couverture",
+      "sous_famille": "contre-liteau",
+      "marque": null,
+      "modele": "sous écran",
+      "attribut": "épaisseur minimale",
+      "valeur": 20,
+      "unite": "mm",
+      "condition": "avec écran souple (NF DTU 40.29 cité) ; sarking petits éléments : 27 mm mini (Chausson)",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "20 mm : un fabricant citant le DTU 40.29 ; Chausson donne 27 mm mais pour le sarking."
+    },
+    {
+      "id": "contre_liteau_au_droit_chevron",
+      "famille": "bois_couverture",
+      "sous_famille": "contre-liteau",
+      "marque": null,
+      "modele": "sous écran",
+      "attribut": "implantation",
+      "valeur": "une file par chevron ; sous volige, largeur du contre-liteau = largeur du chevron",
+      "unite": null,
+      "condition": "NF DTU 40.11 P1-1 §4.2.1 (renvoi au DTU 40.29)",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Texte DTU (copie non officielle) ; aucune autre source lue ne le formule."
+    },
+    {
+      "id": "contre_liteau_sections_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "contre-liteau",
+      "marque": null,
+      "modele": "CL2/CL3",
+      "attribut": "sections vendues en Bretagne",
+      "valeur": [
+        "27×38 ou 27×40 (liteau)",
+        "22×45 CL3 4,20 / 4,50 / 4,80 m (Tanguy)",
+        "25×50 4,00 / 4,50 / 5,00 m (Bretagne Matériaux)"
+      ],
+      "unite": "mm",
+      "condition": "pas d'article « contre-liteau » à part : on prend un liteau ≥ 20 mm",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : bois d'ossature sapin/épicéa CL3 22x45 en 4,20 / 4,50 / 4,80 m, présenté pour contre-liteaux",
+          "url": "https://www.tanguy.fr/bois/bois-massif/bois-dossature/bois-ossature-mob-sapin-epicea-cl3-22x45-en-4m50",
+          "type": "negoce",
+          "extrait": "idéal pour contre-liteaux, liteaux de toiture (extrait de recherche)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_bretagne_18mm",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "sapin CL2 18×150 / 18×200",
+      "attribut": "longueurs vendues en Bretagne",
+      "valeur": [
+        "3,00 m",
+        "3,60 m",
+        "4,20 m",
+        "4,80 m",
+        "4,00 m (sapin de France)"
+      ],
+      "unite": "m",
+      "condition": "volige sapin du Nord (pas de 0,30 m) ; sapin/épicéa de France en 4,00 m",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_bretagne_25x200",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "sapin CL2 25×200",
+      "attribut": "longueur",
+      "valeur": 4.2,
+      "unite": "m",
+      "condition": "volige épaisse (clouage ardoise, grands entraxes)",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux : volige sapin 25x200 CL2 4,20 m et 18x200 4,20 m",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-25x200-mm-traitement-classe-ii-4m20",
+          "type": "negoce",
+          "extrait": "VOLIGE SAPIN 25X200 MM TRAITEMENT CLASSE II 4M20",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_mi_bois",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "mi-bois sapin du Nord 15/16 × 180/185",
+      "attribut": "longueurs",
+      "valeur": [
+        "3,60 m",
+        "3,90 m",
+        "4,20 m",
+        "4,50 m",
+        "4,80 m",
+        "5,10 m",
+        "5,40 m"
+      ],
+      "unite": "m",
+      "condition": "rainée / mi-bois, une face rabotée",
+      "regions": [
+        "Bretagne",
+        "Sud-Ouest",
+        "Poitou-Charentes"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Batiland (groupement, 41 points de vente, Sud-Ouest) : écrans, voliges et liteaux",
+          "url": "https://www.batiland.fr/pa1062/ecrans-voliges-liteaux",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27 x 38 Traité/2 5,10 m ; Volige Pin Maritime mi bois 170 x 16 2,40 m (€/m²) ; Volige Sapin mi bois 185x15 3.60M / 3.90M / 4.20M / 4.50M",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "B comme Bois (Anglet, Bruges, Rodez, Gaillac – Sud-Ouest) : voliges",
+          "url": "https://www.bcommebois.fr/structure-charpente/sapin-epicea/couverture/voliges.html",
+          "type": "negoce",
+          "extrait": "volige sapin 18 x 200 : 3000 / 4000 / 5000 mm ; pin 15 mm : 2400 mm ; mi-bois 16 x 185 : 3600 à 5400 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Largeur utile d'une mi-bois inférieure à la largeur nominale : surface couverte < surface facturée (valeur non trouvée)."
+    },
+    {
+      "id": "volige_pin",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "pin maritime / pin des Landes CL2",
+      "attribut": "longueurs",
+      "valeur": [
+        "2,00 m",
+        "2,40 m",
+        "3,00 m"
+      ],
+      "unite": "m",
+      "condition": "épaisseurs 15 à 18 mm",
+      "regions": [
+        "Bretagne",
+        "Sud-Ouest",
+        "Poitou-Charentes"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Batiland (groupement, 41 points de vente, Sud-Ouest) : écrans, voliges et liteaux",
+          "url": "https://www.batiland.fr/pa1062/ecrans-voliges-liteaux",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27 x 38 Traité/2 5,10 m ; Volige Pin Maritime mi bois 170 x 16 2,40 m (€/m²) ; Volige Sapin mi bois 185x15 3.60M / 3.90M / 4.20M / 4.50M",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "B comme Bois (Anglet, Bruges, Rodez, Gaillac – Sud-Ouest) : voliges",
+          "url": "https://www.bcommebois.fr/structure-charpente/sapin-epicea/couverture/voliges.html",
+          "type": "negoce",
+          "extrait": "volige sapin 18 x 200 : 3000 / 4000 / 5000 mm ; pin 15 mm : 2400 mm ; mi-bois 16 x 185 : 3600 à 5400 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_peuplier",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "peuplier 18 à 27 mm, toute largeur",
+      "attribut": "longueurs et traitement",
+      "valeur": [
+        "2,00 à 2,50 m",
+        "non traité"
+      ],
+      "unite": "m",
+      "condition": "pose cintrée (tourelles) ; les tableaux du DTU 40.11 ne s'appliquent pas au peuplier",
+      "regions": [
+        "Poitou-Charentes",
+        "Sud-Ouest",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : volige sapin CL2 18 mm 4,00 m largeur variable vendue au m² ; volige peuplier 18 mm 2,00 m",
+          "url": "https://www.chausson.fr/materiaux/volige-sapin-traite-classe-bois-charpente-12mm-300m-p-240313-5",
+          "type": "negoce",
+          "extrait": "Volige en Sapin - Traité Classe 2 - épaisseur 18 MM - Longueur 4,00 M (largeur variable, vendu au m²)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "B comme Bois (Anglet, Bruges, Rodez, Gaillac – Sud-Ouest) : voliges",
+          "url": "https://www.bcommebois.fr/structure-charpente/sapin-epicea/couverture/voliges.html",
+          "type": "negoce",
+          "extrait": "volige sapin 18 x 200 : 3000 / 4000 / 5000 mm ; pin 15 mm : 2400 mm ; mi-bois 16 x 185 : 3600 à 5400 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_unite_vente",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "toutes",
+      "attribut": "unité de vente",
+      "valeur": "m² (minimum 1 pièce = longueur × largeur)",
+      "unite": "m²",
+      "condition": "Tanguy, Quéguiner, Bretagne Matériaux, Chausson, Rullier, Guillon",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : volige sapin CL2 18 mm 4,00 m largeur variable vendue au m² ; volige peuplier 18 mm 2,00 m",
+          "url": "https://www.chausson.fr/materiaux/volige-sapin-traite-classe-bois-charpente-12mm-300m-p-240313-5",
+          "type": "negoce",
+          "extrait": "Volige en Sapin - Traité Classe 2 - épaisseur 18 MM - Longueur 4,00 M (largeur variable, vendu au m²)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Guillon Matériaux (Puy-de-Dôme) : liteaux 20x38 et 27x40 au m, volige 18 mm 3,00 m au m², chevrons 63x75 3 / 4 / 5 m",
+          "url": "https://www.guillon-materiaux.com/liste.php?n=43",
+          "type": "negoce",
+          "extrait": "Volige traité ep 18mm 3m00 (€/m2 HT) ; Chevron 63x75mm traité 3m00 / 4m00 / 5m00",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_portee_dtu4011_ancien",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "tableau sections voliges (ancien DTU 40.11)",
+      "attribut": "écartement maximal entre appuis à 150 / 200 daN/m²",
+      "valeur": {
+        "12×100": [
+          0.5,
+          0.45
+        ],
+        "15×100": [
+          0.6,
+          0.55
+        ],
+        "18×100": [
+          0.75,
+          0.7
+        ],
+        "18×125": [
+          0.8,
+          0.75
+        ],
+        "22×100": [
+          0.9,
+          0.85
+        ],
+        "25×100": [
+          1.05,
+          0.95
+        ]
+      },
+      "unite": "m",
+      "condition": "résineux ; 18 mm suffit pour des chevrons à 60 cm",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Greystones Slate (fabricant d'ardoise espagnole), Guide de mise en œuvre France : tableau section des liteaux et des voliges (reprise de l'ancien NF DTU 40.11)",
+          "url": "https://ardoise-naturelle-espagne.com/pdf/guide-de-mise-en-oeuvre-france.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe maximal des appuis (m) suivant la charge totale 80/100/150/200 daN/m² : 18x50 0.70 0.65 0.60 0.55 ; 18x100 (volige) 0.90 0.85 0.75 0.70",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Ancienne édition reprise par un fabricant ; édition 2020 non lue. Des blogs disent 22 mm dès 60 cm, sans source sérieuse."
+    },
+    {
+      "id": "volige_clouage_ardoise",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "ardoise au clou",
+      "attribut": "épaisseur usuelle",
+      "valeur": [
+        22,
+        27
+      ],
+      "unite": "mm",
+      "condition": "pour la tenue des clous, pas pour la portée",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le stock courant breton est 18 mm, avec du 25 mm en option : l'épaisseur se demande pour l'ardoise au clou."
+    },
+    {
+      "id": "volige_jointive_jeu",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "jointive",
+      "attribut": "jeu entre voliges",
+      "valeur": [
+        5,
+        10
+      ],
+      "unite": "mm",
+      "condition": "au-delà : non jointive ; > 20 mm : tracé préalable",
+      "regions": [
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_bretagne_crochet_sur_volige",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "jointive",
+      "attribut": "usage régional",
+      "valeur": "ardoise au crochet sur voligeage jointif en site venté (Bretagne)",
+      "unite": null,
+      "condition": "la volige sert aussi d'écran rigide",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Cours BTS Charpente (lycée de Mende), Lot 4-2 Couvertures en ardoises",
+          "url": "https://chpbtsmendes.wordpress.com/wp-content/uploads/2015/03/lot-4-2-couvertures-en-ardoises.pdf",
+          "type": "guide",
+          "extrait": "Voliges : technique utilisée dans les sites exposés au vent (montagne, bord de mer…) ; liteaux de l'ordre de 14 x 40",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_sous_metal_essences",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "sous zinc / métal",
+      "attribut": "essences à éviter",
+      "valeur": "douglas, mélèze, chêne, châtaignier, red cedar (pH < 5)",
+      "unite": null,
+      "condition": "volige sous zinc : sapin/épicéa ou peuplier",
+      "regions": [
+        "national"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_traitement",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "sapin, pin",
+      "attribut": "traitement",
+      "valeur": "classe 2 minimum ; peuplier non traité",
+      "unite": null,
+      "condition": "",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "volige_perte",
+      "famille": "bois_couverture",
+      "sous_famille": "volige",
+      "marque": null,
+      "modele": "toutes",
+      "attribut": "perte",
+      "valeur": 5,
+      "unite": "%",
+      "condition": "valeur du fondateur",
+      "regions": [
+        "national"
+      ],
+      "statut": "a_confirmer",
+      "sources": [],
+      "raison": "Aucune source trouvée. Pour une mi-bois, il faut en plus compter l'écart entre largeur nominale et largeur utile."
+    },
+    {
+      "id": "chevron_63x75_longueurs_bretagne",
+      "famille": "bois_couverture",
+      "sous_famille": "chevron",
+      "marque": null,
+      "modele": "63×75 sapin/épicéa CL2",
+      "attribut": "longueurs vendues en Bretagne",
+      "valeur": [
+        "3,50",
+        "3,90 (KD)",
+        "4,00",
+        "4,20",
+        "4,50",
+        "5,10",
+        "5,50",
+        "5,70",
+        "6,00"
+      ],
+      "unite": "m",
+      "condition": "deux familles mêlées : France (pas de 0,50) et Nord (pas de 0,30)",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : chevron sapin de France CL2 63x75 en 4,50 / 5,00 / 6,00 m",
+          "url": "https://www.chausson.fr/materiaux/chevron-sapin-sec-traite-classe-p-279334-5",
+          "type": "negoce",
+          "extrait": "Chevron en sapin de France traité classe 2 - 75 MM x 63 MM - longueur 4,50 M",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Chausson (national) : 4,50 / 5,00 / 6,00 m. Bretagne Matériaux ajoute 3,90 / 4,20 / 5,10 / 5,70."
+    },
+    {
+      "id": "chevron_sections",
+      "famille": "bois_couverture",
+      "sous_famille": "chevron",
+      "marque": null,
+      "modele": "sapin/épicéa CL2",
+      "attribut": "sections courantes",
+      "valeur": [
+        "63×75",
+        "75×75",
+        "75×110",
+        "60×75",
+        "50×75",
+        "75×100"
+      ],
+      "unite": "mm",
+      "condition": "63×75 = « 6/8 »",
+      "regions": [
+        "national",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "60×80 n'a été trouvé chez aucun négoce consulté."
+    },
+    {
+      "id": "chevron_nord_queguiner",
+      "famille": "bois_couverture",
+      "sous_famille": "chevron",
+      "marque": null,
+      "modele": "chevrons bois du Nord",
+      "attribut": "sections et conditionnement",
+      "valeur": [
+        "38×100",
+        "50×50",
+        "50×75",
+        "63×44",
+        "63×58",
+        "75×100"
+      ],
+      "unite": "mm",
+      "condition": "3,00 à 6,60 m au pas de 0,30 m ; vendus par lots de 2 à 5 pièces",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul négoce breton affiche ces sections nordiques et la vente par lot."
+    },
+    {
+      "id": "chevron_unite",
+      "famille": "bois_couverture",
+      "sous_famille": "chevron",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "unité de vente",
+      "valeur": "pièce d'une longueur donnée, prix au ml",
+      "unite": null,
+      "condition": "",
+      "regions": [
+        "Bretagne",
+        "national"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "longueurs_bois_de_france",
+      "famille": "bois_couverture",
+      "sous_famille": "longueurs",
+      "marque": null,
+      "modele": "sapin/épicéa de France (Siat, Jura, Vosges)",
+      "attribut": "série de longueurs",
+      "valeur": [
+        "3,00",
+        "3,50",
+        "4,00",
+        "4,50",
+        "5,00",
+        "5,50",
+        "6,00"
+      ],
+      "unite": "m",
+      "condition": "pas de 0,50 m",
+      "regions": [
+        "Grand Est",
+        "national",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "BigMat (national) : liteaux sapin/épicéa de France CL2 Groupe Siat (Alsace) 18x38 4 m, 25x38 5 m, 27x32 4,5 m, 18x50 4 m",
+          "url": "https://bigmat.fr/produits/achat-materiaux-bois/bois-de-charpente/liteau-latte-tasseau/3532329317691/latte-liteau-en-sapin-epicea-de-france-traite-classe-2-25x38-l-5-m",
+          "type": "negoce",
+          "extrait": "Latte/liteau en Sapin / Épicéa de France - traité classe 2 - 25x38 - L. 5 m - GROUPE SIAT",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Guillon Matériaux (Puy-de-Dôme) : liteaux 20x38 et 27x40 au m, volige 18 mm 3,00 m au m², chevrons 63x75 3 / 4 / 5 m",
+          "url": "https://www.guillon-materiaux.com/liste.php?n=43",
+          "type": "negoce",
+          "extrait": "Volige traité ep 18mm 3m00 (€/m2 HT) ; Chevron 63x75mm traité 3m00 / 4m00 / 5m00",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "longueurs_bois_du_nord",
+      "famille": "bois_couverture",
+      "sous_famille": "longueurs",
+      "marque": null,
+      "modele": "sapin blanc du Nord / import (Scandinavie)",
+      "attribut": "série de longueurs",
+      "valeur": [
+        "3,00",
+        "3,30",
+        "3,60",
+        "3,90",
+        "4,20",
+        "4,50",
+        "4,80",
+        "5,10",
+        "5,40",
+        "5,70",
+        "6,00",
+        "6,30",
+        "6,60"
+      ],
+      "unite": "m",
+      "condition": "pas de 0,30 m",
+      "regions": [
+        "Bretagne",
+        "Sud-Ouest",
+        "Poitou-Charentes"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Batiland (groupement, 41 points de vente, Sud-Ouest) : écrans, voliges et liteaux",
+          "url": "https://www.batiland.fr/pa1062/ecrans-voliges-liteaux",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27 x 38 Traité/2 5,10 m ; Volige Pin Maritime mi bois 170 x 16 2,40 m (€/m²) ; Volige Sapin mi bois 185x15 3.60M / 3.90M / 4.20M / 4.50M",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "B comme Bois (Anglet, Bruges, Rodez, Gaillac – Sud-Ouest) : voliges",
+          "url": "https://www.bcommebois.fr/structure-charpente/sapin-epicea/couverture/voliges.html",
+          "type": "negoce",
+          "extrait": "volige sapin 18 x 200 : 3000 / 4000 / 5000 mm ; pin 15 mm : 2400 mm ; mi-bois 16 x 185 : 3600 à 5400 mm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "longueurs_pin_maritime",
+      "famille": "bois_couverture",
+      "sous_famille": "longueurs",
+      "marque": null,
+      "modele": "pin maritime / des Landes",
+      "attribut": "série de longueurs",
+      "valeur": [
+        "2,00",
+        "2,40",
+        "3,00"
+      ],
+      "unite": "m",
+      "condition": "",
+      "regions": [
+        "Sud-Ouest",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Batiland (groupement, 41 points de vente, Sud-Ouest) : écrans, voliges et liteaux",
+          "url": "https://www.batiland.fr/pa1062/ecrans-voliges-liteaux",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27 x 38 Traité/2 5,10 m ; Volige Pin Maritime mi bois 170 x 16 2,40 m (€/m²) ; Volige Sapin mi bois 185x15 3.60M / 3.90M / 4.20M / 4.50M",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rullier Bois (Poitou-Charentes) : bois de couverture",
+          "url": "https://www.rullier.fr/catalog/category/view/id/105/?product_list_mode=list",
+          "type": "negoce",
+          "extrait": "Volige Peuplier 18mm Toute Largeur De 2000 mm à 2400 mm (€/m²) ; Chevron 63x75 De 3000 à 6000 mm (€/ml) ; Volige Pin CL2 18x200 2000 à 3000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "longueurs_champagne_ardenne_fondateur",
+      "famille": "bois_couverture",
+      "sous_famille": "longueurs",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "longueurs données par le fondateur",
+      "valeur": [
+        "4,00",
+        "4,50",
+        "5,00",
+        "5,50"
+      ],
+      "unite": "m",
+      "condition": "",
+      "regions": [
+        "Champagne-Ardenne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "BigMat (national) : liteaux sapin/épicéa de France CL2 Groupe Siat (Alsace) 18x38 4 m, 25x38 5 m, 27x32 4,5 m, 18x50 4 m",
+          "url": "https://bigmat.fr/produits/achat-materiaux-bois/bois-de-charpente/liteau-latte-tasseau/3532329317691/latte-liteau-en-sapin-epicea-de-france-traite-classe-2-25x38-l-5-m",
+          "type": "negoce",
+          "extrait": "Latte/liteau en Sapin / Épicéa de France - traité classe 2 - 25x38 - L. 5 m - GROUPE SIAT",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Aucun négoce champardennais n'a pu être consulté. La série correspond au bois de France (Siat, Vosges), pas de 0,50 m ; 5,50 m n'existe qu'en chevron dans ce qu'on a lu, pas en liteau."
+    },
+    {
+      "id": "longueurs_bretagne_fondateur",
+      "famille": "bois_couverture",
+      "sous_famille": "longueurs",
+      "marque": null,
+      "modele": "tous",
+      "attribut": "longueurs données par le fondateur",
+      "valeur": [
+        "3,00",
+        "3,70",
+        "4,20"
+      ],
+      "unite": "m",
+      "condition": "",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "3,00 et 4,20 m sont confirmés (voliges, chevrons, liteaux 4,20). 3,70 m ne se trouve nulle part : la longueur du Nord voisine est 3,60 m. Les liteaux bretons sont surtout en 4,00 m."
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Liteau 18 × 40 mm par défaut sous ardoise (naturelle et fibres-ciment)",
+      "origine": "roofing.ts:1537-1548, 2115, 2262",
+      "valeur_actuelle": "18×40",
+      "verdict": "corrige",
+      "bonne_valeur": "18×38 (désignation du négoce) ; en Bretagne, 18×48/18×50 également stocké",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "BigMat (national) : liteaux sapin/épicéa de France CL2 Groupe Siat (Alsace) 18x38 4 m, 25x38 5 m, 27x32 4,5 m, 18x50 4 m",
+          "url": "https://bigmat.fr/produits/achat-materiaux-bois/bois-de-charpente/liteau-latte-tasseau/3532329317691/latte-liteau-en-sapin-epicea-de-france-traite-classe-2-25x38-l-5-m",
+          "type": "negoce",
+          "extrait": "Latte/liteau en Sapin / Épicéa de France - traité classe 2 - 25x38 - L. 5 m - GROUPE SIAT",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "18×40 n'est presque jamais stocké en liteau. Garder « 18x40 » comme alias. Le défaut breton (18×38 ou 18×50) est à trancher."
+    },
+    {
+      "ratio": "Liteau 27 × 40 mm sous tuile",
+      "origine": "roofing.ts:1524-1535, 1079",
+      "valeur_actuelle": "27×40",
+      "verdict": "confirme",
+      "bonne_valeur": "27×40 (ou 27×38), hauteur ≥ 22 mm",
+      "sources": [
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : liteau 27x40 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-traite-classe-2-l-4-50m-27x40mm-A1881318",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 27x40mm longueur 4,50m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Respecte le DTU 40.21 (hauteur ≥ 22 mm) ; vendu en Bretagne en 3,50 et 4,50 m, et chez Chausson de 3,50 à 5,00 m."
+    },
+    {
+      "ratio": "Contre-liteau 27 × 40 sur chevrons",
+      "origine": "roofing.ts:1080",
+      "valeur_actuelle": "27×40",
+      "verdict": "confirme",
+      "bonne_valeur": "≥ 20 mm d'épaisseur ; 27×38, 27×40 ou 22×45",
+      "sources": [
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : bois d'ossature sapin/épicéa CL3 22x45 en 4,20 / 4,50 / 4,80 m, présenté pour contre-liteaux",
+          "url": "https://www.tanguy.fr/bois/bois-massif/bois-dossature/bois-ossature-mob-sapin-epicea-cl3-22x45-en-4m50",
+          "type": "negoce",
+          "extrait": "idéal pour contre-liteaux, liteaux de toiture (extrait de recherche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le minimum est de 20 mm sous écran ; 27 mm convient."
+    },
+    {
+      "ratio": "Botte de 50 ml (liteaux)",
+      "origine": "roofing.ts:77-80",
+      "valeur_actuelle": "50 ml",
+      "verdict": "corrige",
+      "bonne_valeur": "botte = N pièces de 4 m (10 à 16 selon la section, soit 24 à 64 ml) ; en Bretagne : vente au ml, par 100 ml ou à la pièce",
+      "sources": [
+        {
+          "titre": "AC Bois (Le Pian-Médoc, Gironde) : liteau sapin 27x38 CL2 4 m",
+          "url": "https://acbois.fr/produit/bois-de-construction/liteau/liteau-sapin-27x38-traite-cl2-4000mm/",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27x38 traite cl2 4000mm (botte de 12) ; prix au ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Pic Vert Bois Matériaux (Isère / Drôme) : liteau sapin/épicéa CL2 27x38 4 m",
+          "url": "https://picvertboismateriaux.fr/liteaux-pin-traite-classe-2-jaune-27x38-4m",
+          "type": "negoce",
+          "extrait": "Vendu par botte de 12 pièces soit 30 euros",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Scierie Sillat (Isère) : liteaux sapin 4 m en paquets",
+          "url": "https://scieriesillat.com/produit/liteaux-sapin-38-x-38-traite-cl-2-pq-de-9-unites/",
+          "type": "fabricant",
+          "extrait": "38x38 4 m : paquet de 9 ; 20x40 CL2 : 15 ; 28x40 séché : 16",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Point.P (national, même catalogue que Bretagne Matériaux) : liteaux CL2 prix à l'hectomètre, minimum 1 pièce",
+          "url": "https://www.pointp.fr/p/couverture/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "94,67 € TTC par Hectomètre ; Qté min 1 pièce (extrait moteur de recherche, site 403)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Une botte n'a pas de contenance fixe en ml. Unité principale : ml, puis conversion en pièces de la longueur choisie."
+    },
+    {
+      "ratio": "Entraxe supports 60 cm par défaut",
+      "origine": "roofing.ts:1051-1057",
+      "valeur_actuelle": "60 cm",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "à demander ou à lire au devis ; 60 cm = maximum d'un écran R2",
+      "sources": [
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "60 cm est courant sur fermettes, mais aucune source ne fixe de défaut. L'écran R1 limite à 45 cm et R2 à 60 cm."
+    },
+    {
+      "ratio": "Contre-liteaux = surface / entraxe_supports",
+      "origine": "roofing.ts:1931, 2222, 2303",
+      "valeur_actuelle": "surface / entraxe",
+      "verdict": "confirme",
+      "bonne_valeur": "une file par chevron (+1 file par pan en rive)",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le principe est bon. Il manque le chevron de rive : nb files = largeur / entraxe + 1, soit environ +1 rampant par pan."
+    },
+    {
+      "ratio": "Contre-liteaux : entraxe 50 cm par défaut",
+      "origine": "regles-metier SKILL.md, Contre-liteaux",
+      "valeur_actuelle": "50 cm",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "entraxe réel des chevrons",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Contredit le code (60 cm). L'entraxe des contre-liteaux est celui des chevrons, pas une valeur propre : décision à prendre."
+    },
+    {
+      "ratio": "Perte liteaux 5 %",
+      "origine": "roofing.ts:3989 ; referentiel §6",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "5 % + perte d'aboutage selon longueur / entraxe",
+      "sources": [
+        {
+          "titre": "Nomad Education, révisions CAP couvreur : calcul des quantités (coefficient 1,05 sur liteaux, cité par une recherche)",
+          "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41",
+          "type": "guide",
+          "extrait": "coefficient de 1,05, soit une marge de 5 % pour la casse et les coupes (extrait de recherche, page non ouverte)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Une seule source (cours CAP). Une longueur non multiple de l'entraxe perd davantage : 4,00 m sur chevrons à 60 cm n'utilise que 3,60 m, soit 10 %."
+    },
+    {
+      "ratio": "Volige sapin traité 18 mm",
+      "origine": "roofing.ts:1854, 3219, 3966 ; referentiel §28.6",
+      "valeur_actuelle": "18 mm",
+      "verdict": "confirme",
+      "bonne_valeur": "18 mm (stock breton courant) ; 22 à 27 mm pour l'ardoise au clou",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Greystones Slate (fabricant d'ardoise espagnole), Guide de mise en œuvre France : tableau section des liteaux et des voliges (reprise de l'ancien NF DTU 40.11)",
+          "url": "https://ardoise-naturelle-espagne.com/pdf/guide-de-mise-en-oeuvre-france.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe maximal des appuis (m) suivant la charge totale 80/100/150/200 daN/m² : 18x50 0.70 0.65 0.60 0.55 ; 18x100 (volige) 0.90 0.85 0.75 0.70",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §3.3 et 3.4",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "en Bretagne essentiellement, on peut fixer les ardoises avec des crochets sur un voligeage jointif ; liteaux entre 40 x 15 et 50 x 27 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Portée suffisante à 60 cm (ancien tableau DTU 40.11). Pour l'ardoise au clou, demander l'épaisseur."
+    },
+    {
+      "ratio": "Perte volige 5 % (m² × 1,05)",
+      "origine": "roofing.ts:3992 ; referentiel §6",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "5 % (fondateur), plus l'écart de largeur utile pour une mi-bois",
+      "sources": [],
+      "explication": "Aucune source trouvée."
+    },
+    {
+      "ratio": "Liteaux 27×40 (tuile) ou 18×40 / 27×27 (ardoise), botte de 50 ml, barres 4 m",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "botte 50 ml, barres 4 m",
+      "verdict": "corrige",
+      "bonne_valeur": "ml ; longueurs selon la région (4,00 / 4,20 / 4,50 / 4,80 / 5,00 m en Bretagne)",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "La longueur de 4 m domine, mais elle n'est pas la seule ; la botte varie."
+    },
+    {
+      "ratio": "Contre-liteaux : 1,7 à 2,2 ml/m² (entraxe 0,45 à 0,60), +5 %",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "1,7–2,2 ml/m²",
+      "verdict": "confirme",
+      "bonne_valeur": "1 / entraxe chevrons",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020), §4.2.1 (voligeage, liteaunage, sections, appuis), copie en ligne non officielle ; tableaux 1 et 2 en image, non lisibles",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "jointif : écartement moyen des voliges entre 5 et 10 mm ; appui mini 35 mm ; tableaux valables pour résineux, pas pour le peuplier",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Calcul exact : 1/0,60 = 1,67 et 1/0,45 = 2,22."
+    },
+    {
+      "ratio": "Voligeage sapin 15 ou 18 mm ; claire-voie × 0,6",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "15 ou 18 mm ; × 0,6",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "18 ou 25 mm en Bretagne (mi-bois 15/16 mm) ; ratio claire-voie non sourcé",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le ratio 0,6 dépend de l'écartement : aucune source trouvée."
+    },
+    {
+      "ratio": "Planche de rive / bandeau : barre 4 ou 5 m",
+      "origine": "referentiel-couverture.md §6 ; charpente.md S6 (4 m)",
+      "valeur_actuelle": "4 ou 5 m",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "",
+      "sources": [],
+      "explication": "Pas étudié dans cette recherche, faute de temps : à traiter."
+    },
+    {
+      "ratio": "Section de liteau selon entraxe : 27×38 jusqu'à 60 cm, 27×50 à 90 cm, 38×38 au-delà",
+      "origine": "referentiel-couverture.md §28.6",
+      "valeur_actuelle": "27×38 / 27×50 / 38×38",
+      "verdict": "corrige",
+      "bonne_valeur": "Tuile (DTU 40.21, zone A, ≤ 900 m) : 25×38 jusqu'à 60–70 cm ; 25×50 jusqu'à 65–80 cm ; 90 cm demande 32×38 ou 38×38 ; au-delà de 90 cm : calcul",
+      "sources": [
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.21 P1-1, art. 5.3.1, tableau des entraxes maximaux entre appuis des liteaux (lu dans les guides Koramic et Terreal)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "dtu",
+          "extrait": "valeur et référence seulement (texte AFNOR non recopié)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "27×50 ne suffit pas à 90 cm. Ardoise : autre tableau (DTU 40.11)."
+    },
+    {
+      "ratio": "Liteaux en longueur standard 3, 4, 5 m",
+      "origine": "referentiel-couverture.md §28.6",
+      "valeur_actuelle": "3, 4, 5 m",
+      "verdict": "corrige",
+      "bonne_valeur": "selon la région : bois de France 3,50 / 4,00 / 4,50 / 5,00 ; bois du Nord 4,20 / 4,80 / 5,10",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Batiland (groupement, 41 points de vente, Sud-Ouest) : écrans, voliges et liteaux",
+          "url": "https://www.batiland.fr/pa1062/ecrans-voliges-liteaux",
+          "type": "negoce",
+          "extrait": "Liteau sapin 27 x 38 Traité/2 5,10 m ; Volige Pin Maritime mi bois 170 x 16 2,40 m (€/m²) ; Volige Sapin mi bois 185x15 3.60M / 3.90M / 4.20M / 4.50M",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les séries de longueurs dépendent de l'origine du bois."
+    },
+    {
+      "ratio": "Liteaux : ml = rangs × longueur, jamais la surface",
+      "origine": "referentiel-couverture.md §28.6",
+      "valeur_actuelle": "rangs × longueur",
+      "verdict": "confirme",
+      "bonne_valeur": "équivaut à surface / pureau",
+      "sources": [
+        {
+          "titre": "Cupa Pizarras, FAQ pureau et nombre d'ardoises au m² (reprise dans referentiel-couverture.md §34)",
+          "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/pureau-ardoises-au-m2/",
+          "type": "fabricant",
+          "extrait": "ml de liteaux/m² = 1 / P",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Même résultat ; la forme « rangs » gère mieux les pans irréguliers."
+    },
+    {
+      "ratio": "Liteaux en ml, ratio = 1 ÷ pureau",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "1/pureau",
+      "verdict": "confirme",
+      "bonne_valeur": "1/pureau",
+      "sources": [
+        {
+          "titre": "Cupa Pizarras, FAQ pureau et nombre d'ardoises au m² (reprise dans referentiel-couverture.md §34)",
+          "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/pureau-ardoises-au-m2/",
+          "type": "fabricant",
+          "extrait": "ml de liteaux/m² = 1 / P",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Liteau ardoise 18×38",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "18×38",
+      "verdict": "confirme",
+      "bonne_valeur": "18×38",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson Matériaux (national, fort Sud-Ouest), Guide ABC de la construction 2020-2021, charpente-couverture, fiches 34 et 36",
+          "url": "https://media.chausson.fr/catalogues/Guide-ABC-Construction-2020-2021-Chausson-Materiaux-charpente.pdf",
+          "type": "negoce",
+          "extrait": "Chevrons : 63 x 75 - 75 x 75 - 75 x 110 ; Liteaux : 20 x 38 - 27 x 38 - 27 x 32 - 32 x 32 - 38 x 38 ; * sections disponibles suivant régions",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le skill a raison contre le code (18×40)."
+    },
+    {
+      "ratio": "Liteau tuile HP10 27×40",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "27×40",
+      "verdict": "confirme",
+      "bonne_valeur": "27×40",
+      "sources": [
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : liteau 27x40 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-traite-classe-2-l-4-50m-27x40mm-A1881318",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 27x40mm longueur 4,50m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, Guide de pose (article 5.3.1 NF DTU 40.21, tableau des entraxes maximaux entre appuis de liteaux bois, classe C24)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Guide_de_pose_GMN_PM_001.pdf",
+          "type": "fabricant",
+          "extrait": "Les liteaux doivent reposer sur trois appuis au moins ; 25 x 38 : 70 70 60 (zones A1-A2, 200/500/900 m)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Volige au m² + perte",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "m²",
+      "verdict": "confirme",
+      "bonne_valeur": "m², minimum 1 pièce",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Sapin par défaut",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "sapin",
+      "verdict": "confirme",
+      "bonne_valeur": "sapin/épicéa ; voliges bretonnes : sapin du Nord, pin des Landes, peuplier (cintré)",
+      "sources": [
+        {
+          "titre": "Larivière (spécialiste couverture, Angers, agences dans l'Ouest), Catalogue général 2010 p. 166, bois de couverture",
+          "url": "http://flipbooks.lotusbleu.fr/Lariviere/2010/166/",
+          "type": "negoce",
+          "extrait": "Tous nos liteaux sont traités classe 2 ; Toutes nos voliges sont traitées au minimum classe 2 ; pin : 2, 2,40 et 3 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Ne pas mettre de douglas ni de mélèze sous le zinc."
+    },
+    {
+      "ratio": "Chevrons 63×75 de 3,50 à 6,00 m au pas de 0,50 m",
+      "origine": "charpente.md §3-§5, S1",
+      "valeur_actuelle": "3,50…6,00 (pas 0,50)",
+      "verdict": "corrige",
+      "bonne_valeur": "Bretagne : aussi 3,90 / 4,20 / 5,10 / 5,70 m (bois du Nord)",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les boutons de longueur doivent dépendre de la région."
+    },
+    {
+      "ratio": "Introuvable : sections et longueurs commerciales de chevrons chez Point.P et Gedimat",
+      "origine": "charpentier/tiroir.json introuvable[0]",
+      "valeur_actuelle": "introuvable",
+      "verdict": "corrige",
+      "bonne_valeur": "trouvé chez Bretagne Matériaux (catalogue Point.P), Chausson, Quéguiner",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : chevron sapin de France CL2 63x75 en 4,50 / 5,00 / 6,00 m",
+          "url": "https://www.chausson.fr/materiaux/chevron-sapin-sec-traite-classe-p-279334-5",
+          "type": "negoce",
+          "extrait": "Chevron en sapin de France traité classe 2 - 75 MM x 63 MM - longueur 4,50 M",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Questions comptoir : essence, traitement, sections et longueurs",
+      "origine": "charpentier/tiroir.json questions_comptoir",
+      "valeur_actuelle": "3 questions",
+      "verdict": "confirme",
+      "bonne_valeur": "ajouter le séchage (KD ou frais) et, en Bretagne, l'origine France ou Nord",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Longueurs Champagne-Ardenne 4 / 4,50 / 5 / 5,50 m",
+      "origine": "fondateur (consigne de mission)",
+      "valeur_actuelle": "4–5,50",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "série bois de France plausible",
+      "sources": [
+        {
+          "titre": "BigMat (national) : liteaux sapin/épicéa de France CL2 Groupe Siat (Alsace) 18x38 4 m, 25x38 5 m, 27x32 4,5 m, 18x50 4 m",
+          "url": "https://bigmat.fr/produits/achat-materiaux-bois/bois-de-charpente/liteau-latte-tasseau/3532329317691/latte-liteau-en-sapin-epicea-de-france-traite-classe-2-25x38-l-5-m",
+          "type": "negoce",
+          "extrait": "Latte/liteau en Sapin / Épicéa de France - traité classe 2 - 25x38 - L. 5 m - GROUPE SIAT",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : liteau sapin de France CL2 27x38 4,00 m ; section 27x40 en 3,50 / 4,00 / 4,50 / 5,00 m ; vente au ml",
+          "url": "https://www.chausson.fr/materiaux/liteau-sapin-traite-classe2-bois-charpente-p-197266-2",
+          "type": "negoce",
+          "extrait": "entraxe maximal de 650 mm pour une section 27 x 40 mm minimum ; 1,13 € le mètre, soit 4,51 € l'unité de 4 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Pas de négoce champardennais consulté."
+    },
+    {
+      "ratio": "Longueurs Bretagne 3 / 3,70 / 4,20 m",
+      "origine": "fondateur (consigne de mission)",
+      "valeur_actuelle": "3 / 3,70 / 4,20",
+      "verdict": "corrige",
+      "bonne_valeur": "3,00 / 3,60 / 4,20 / 4,80 (Nord) et 4,00 / 4,50 (France) ; liteaux surtout 4,00 m",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "3,70 m introuvable ; probablement 3,60 m."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Liteau",
+      "ce_que_le_vendeur_demande": [
+        "section (épaisseur × largeur, ex. 18×38, 27×40)",
+        "longueur (4,00 / 4,20 / 4,50 / 4,80 m…)",
+        "quantité en ml ou en pièces",
+        "traitement (CL2 jaune ou incolore ; CL3 vert)",
+        "origine ou séchage si l'artisan y tient (France / Nord, KD sec séchoir)"
+      ],
+      "unite_de_vente": "ml (ou 100 ml), minimum 1 pièce ; botte ailleurs",
+      "conditionnement": "pièce ; botte de 10 à 16 pièces hors Bretagne",
+      "sources": [
+        {
+          "titre": "Quéguiner Matériaux : liteaux 37x14 et 50x18 traités CL2, longueur 4 m, vendus par 100 ml",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/accessoires-bois-pour-couverture/liteau-37x14-traite",
+          "type": "negoce",
+          "extrait": "LITEAU 37X14 TRAITE CL2 PAR 100 ML ; Longueur 4 m ; 62,68 € TTC /100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : liteau sapin 18x48 TCL2 en 4,00 / 4,20 / 4,80 m, prix au ml ; aussi 14x38, 14x50, 25x32 en 4,00 m, 25x27, 38x38",
+          "url": "https://www.tanguy.fr/couverture-etancheite/ventilation-toiture/liteau-tasseau/liteau-sapin-18x48-tcl2-en-4m20",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs pratiques de 4,20 mètres et 4,80 mètres ; 0,88 € TTC/ML soit 3,69 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Promomat (Desertines, Allier, Auvergne) : liteaux Bois du Jura traités 4 m, vendus à la botte",
+          "url": "https://www.promomat.fr/categorie/couverture/bois-construction-charpente/liteaux-tasseaux-e01_e12_e23",
+          "type": "negoce",
+          "extrait": "18x38 4 m : 14/botte ; 20x38 : 12 ; 25x27 : 15 ; 27x38 : 10 ; 38x38 : 6",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Contre-liteau",
+      "ce_que_le_vendeur_demande": [
+        "section (≥ 20 mm d'épaisseur sous écran : 27×38, 27×40, 22×45)",
+        "longueur",
+        "quantité en ml ou en pièces"
+      ],
+      "unite_de_vente": "ml / pièce (c'est un liteau)",
+      "conditionnement": "pièce",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux (Saint-Gobain, agences en Bretagne) : liteaux sapin/épicéa CL2 18x38 4,00 m et 4,50 m, 27x38 4,50 m, 27x40 3,50 m et 4,50 m, 20x38 4,00/5,00 m, 25x27 5,00 m, 38x38 4,00 m, 18x47 4,50 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/liteau-sapin-epicea-classe-2-l-4-00-m-18x38-mm-A3549952",
+          "type": "negoce",
+          "extrait": "Liteau Sapin/Epicéa de France traité classe 2 18x38mm longueur 4,00m (fiches lues via moteur de recherche, site 403 en accès direct)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Tanguy Matériaux : bois d'ossature sapin/épicéa CL3 22x45 en 4,20 / 4,50 / 4,80 m, présenté pour contre-liteaux",
+          "url": "https://www.tanguy.fr/bois/bois-massif/bois-dossature/bois-ossature-mob-sapin-epicea-cl3-22x45-en-4m50",
+          "type": "negoce",
+          "extrait": "idéal pour contre-liteaux, liteaux de toiture (extrait de recherche)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Wienerberger / Koramic, Guide de pose Solutions Toiture et Façade (cite NF DTU 40.21, 40.23 et 40.29)",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "L'utilisation de liteaux d'une hauteur inférieure à 22 mm n'est pas admise ; contre-liteaux d'une épaisseur de 20 mm minimum",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Volige",
+      "ce_que_le_vendeur_demande": [
+        "épaisseur × largeur (18×150, 18×200, 25×200, 16×185 mi-bois)",
+        "essence (sapin du Nord, sapin de France, pin des Landes, peuplier)",
+        "brute, rabotée ou mi-bois",
+        "longueur (3,00 / 3,60 / 4,20 / 4,80 m)",
+        "traitement CL2",
+        "surface en m²"
+      ],
+      "unite_de_vente": "m² (minimum 1 pièce)",
+      "conditionnement": "pièce (0,45 à 0,96 m²)",
+      "sources": [
+        {
+          "titre": "Tanguy Matériaux (Pleuven, Finistère) : volige sapin du Nord 18x150 CL2 en 3,00 / 3,60 / 4,20 / 4,80 m, prix au m², conditionnement = 1 pièce",
+          "url": "https://www.tanguy.fr/bois/volige/volige-sapin-du-nord/volige-sapin-18x150-mm-3m60-traitement-classe-ii",
+          "type": "negoce",
+          "extrait": "Disponibles en longueurs de 3m60, 4m20 et 4m80 ; 15,56 € TTC/m², soit 8,41 € TTC le conditionnement",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux (Bretagne, Finistère) : volige sapin CL2 18x150 et 18x200 en 3,00 / 3,60 / 4,20 / 4,80 m, 25x200 4,20 m, volige pin 18x150 3,00 m, volige Nord 12 et 15 mm ; vente au m², conditionnement 1 pièce",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/volige-classe-2",
+          "type": "negoce",
+          "extrait": "Volige sapin 18 x 150 mm - 4,20 ml - traité ; Unité m² ; Minimum de commande = 0.63 m² ; Conditionnement 1 unité 0.63 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bretagne Matériaux : volige sapin blanc du Nord CL2 18x150 4,20 m (vendue au m², mini 1 pièce = 0,63 m²) ; volige sapin/épicéa de France 18x150, 18x175, 18x200 en 4,00 m ; 18x200 4,20 m ; mi-bois 16x180 4,20 m",
+          "url": "https://www.bretagne-materiaux.fr/p/couverture/volige-sapin-epicea-traite-classe-2-l-4-20-m-18x150-mm-A1993076",
+          "type": "negoce",
+          "extrait": "Volige Sapin blanc du Nord traité classe 2 18x150mm longueur 4,20m",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Chevron",
+      "ce_que_le_vendeur_demande": [
+        "section (63×75 « 6/8 », 75×75, 50×75…)",
+        "longueur exacte (3,50 à 6,60 m)",
+        "nombre de pièces",
+        "traitement CL2",
+        "sec séchoir (KD) ou frais"
+      ],
+      "unite_de_vente": "pièce (prix au ml)",
+      "conditionnement": "pièce ; lot de 2 à 5 pièces chez Quéguiner",
+      "sources": [
+        {
+          "titre": "Bretagne Matériaux : chevrons sapin/épicéa CL2 63x75 en 3,50 / 3,90 (KD) / 4,00 / 4,20 / 4,50 / 5,10 / 5,50 / 5,70 / 6,00 m",
+          "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/chevron-sapin-epicea-traite-classe-2-63x75mm-longueur-4-20m-A1793499",
+          "type": "negoce",
+          "extrait": "Chevron sapin/épicéa - traité classe 2 - L. 4,2 m - 63x75 mm ; 4,50 m : 4,07 € / Mètre, Qté min : 1 Pièce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Quéguiner Matériaux : chevrons traités 38x100, 50x50, 50x75, 63x44, 63x58, 75x100… en 3,00 à 6,60 m au pas de 0,30 m, vendus par 2 à 5 unités",
+          "url": "https://www.queguiner.fr/bois-panneaux-mob-bardages/bois-de-charpente/planches-et-chevrons-traites",
+          "type": "negoce",
+          "extrait": "CHEVRON 50X75 DE 4,20ML TRAITE - vendu par 2 unités -",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson : chevron sapin de France CL2 63x75 en 4,50 / 5,00 / 6,00 m",
+          "url": "https://www.chausson.fr/materiaux/chevron-sapin-sec-traite-classe-p-279334-5",
+          "type": "negoce",
+          "extrait": "Chevron en sapin de France traité classe 2 - 75 MM x 63 MM - longueur 4,50 M",
+          "consulte": "2026-11-19"
+        }
+      ]
+    }
+  ]
+}
