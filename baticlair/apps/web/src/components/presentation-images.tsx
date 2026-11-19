@@ -198,7 +198,7 @@ export function PresentationImages({
                     <>
                       <Link
                         className="mz2-pres-nav mz2-pres-plein"
-                        href="/inscription"
+                        href="/commencer"
                       >
                         Commencer gratuitement
                       </Link>

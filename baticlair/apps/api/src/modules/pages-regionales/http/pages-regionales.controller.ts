@@ -51,6 +51,7 @@ export class PagesRegionalesAdminController {
   async liste(@CurrentUser() user: AuthenticatedUser) {
     await this.pilotage.exiger(user);
     await this.pilotage.journal(user, "vue_liste_attente");
-    return this.pages.listeAttente();
+    const [attente, inscrits] = await Promise.all([this.pages.listeAttente(), this.pages.inscrits()]);
+    return { ...attente, inscritsParMetier: inscrits };
   }
 }

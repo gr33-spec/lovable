@@ -6,7 +6,14 @@ import { BackButton, Card, ErrorNotice, PageTitle, Spinner } from "@/components/
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
+interface Inscrits {
+  total: number;
+  essai: number;
+  parMetier: { metier: string; libelle: string; nombre: number; essai: number }[];
+  parDepartement: { code: string | null; nom: string; nombre: number; essai: number }[];
+}
 interface ListeAttente {
+  inscritsParMetier: Inscrits;
   total: number;
   parMetier: { metier: string; libelle: string; nombre: number }[];
   parDepartement: { code: string | null; nom: string; nombre: number }[];
@@ -23,7 +30,7 @@ export default function AdminListeAttente() {
   return (
     <div className="flex flex-col gap-5">
       <BackButton fallback="/admin" />
-      <PageTitle>Liste d&apos;attente des métiers</PageTitle>
+      <PageTitle>Métiers et départements</PageTitle>
       <PorteAdmin>
         <Liste />
       </PorteAdmin>
@@ -56,14 +63,31 @@ function Liste() {
   const { data, error, reload } = useResource(charger);
   if (error) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
-  if (data.total === 0) return <Card className="p-4 text-[15px]">Personne en liste d&apos;attente pour l&apos;instant.</Card>;
+  const i = data.inscritsParMetier;
+  const inscrits = (
+    <>
+      <p className="text-[16px]">
+        <strong className="text-[22px] tabular-nums">{i.total}</strong> entreprise{i.total > 1 ? "s" : ""} inscrite{i.total > 1 ? "s" : ""}, dont{" "}
+        <strong className="tabular-nums">{i.essai}</strong> par la carte (nouvel onboarding).
+      </p>
+      <Decompte id="t-inscrits-metiers" titre="Inscrits par métier" lignes={i.parMetier.map((m) => ({ cle: m.metier, libelle: m.libelle, nombre: m.nombre }))} />
+      <Decompte
+        id="t-inscrits-departements"
+        titre="Inscrits par département"
+        lignes={i.parDepartement.map((d) => ({ cle: d.code ?? "aucun", libelle: d.code ? `${d.code} · ${d.nom}` : d.nom, nombre: d.nombre }))}
+      />
+    </>
+  );
+  if (data.total === 0) return inscrits;
   return (
     <>
+      {inscrits}
+      <h2 className="mt-4 text-[22px] font-extrabold">Ancienne liste d&apos;attente</h2>
       <p className="text-[16px]">
         <strong className="text-[22px] tabular-nums">{data.total}</strong> artisan{data.total > 1 ? "s" : ""} en attente d&apos;un métier.
       </p>
-      <Decompte id="t-metiers" titre="Par métier" lignes={data.parMetier.map((m) => ({ cle: m.metier, libelle: m.libelle, nombre: m.nombre }))} />
-      <Decompte id="t-departements" titre="Par département" lignes={data.parDepartement.map((d) => ({ cle: d.code ?? "aucun", libelle: d.code ? `${d.code} · ${d.nom}` : d.nom, nombre: d.nombre }))} />
+      <Decompte id="t-metiers" titre="En attente, par métier" lignes={data.parMetier.map((m) => ({ cle: m.metier, libelle: m.libelle, nombre: m.nombre }))} />
+      <Decompte id="t-departements" titre="En attente, par département" lignes={data.parDepartement.map((d) => ({ cle: d.code ?? "aucun", libelle: d.code ? `${d.code} · ${d.nom}` : d.nom, nombre: d.nombre }))} />
       <section className="flex flex-col gap-2" aria-labelledby="t-inscrits">
         <h2 id="t-inscrits" className="text-[20px] font-extrabold">
           Les inscrits

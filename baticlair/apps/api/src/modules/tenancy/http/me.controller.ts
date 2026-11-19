@@ -15,7 +15,15 @@ import { Tenant } from "./tenant.decorator.js";
 import { TenantGuard } from "./tenant.guard.js";
 
 const trades = z.array(z.string().max(40)).max(TRADES.length);
-const createCompanyBody = z.object({ name: z.string(), trades: trades.optional(), departement: z.string().trim().max(3).nullable().optional() });
+const createCompanyBody = z.object({
+  name: z.string(),
+  trades: trades.optional(),
+  departement: z.string().trim().max(3).nullable().optional(),
+  /** Le nouvel onboarding (19 novembre 2026) : le portable, et la marque du parcours « essai ». */
+  telephone: z.string().trim().max(30).nullable().optional(),
+  parcours: z.enum(["essai"]).optional(),
+});
+const departementBody = z.object({ departement: z.string().trim().min(2).max(3) });
 const tradesBody = z.object({ trades });
 const field = z.string().max(400).nullable().optional();
 const profileBody = z.object({ name: field, address: field, siret: field, phone: field, email: field });
@@ -42,7 +50,7 @@ export class MeController {
     @CurrentUser() user: AuthenticatedUser,
     @Body(new ZodPipe(createCompanyBody)) body: z.infer<typeof createCompanyBody>,
   ) {
-    const c = await this.tenancy.createCompany(user.userId, body.name, body.trades ?? [], body.departement ?? null);
+    const c = await this.tenancy.createCompany(user.userId, body.name, body.trades ?? [], body.departement ?? null, { telephone: body.telephone ?? null, parcours: body.parcours ?? null });
     return { id: c.companyId, name: c.companyName, role: c.role, trades: c.trades };
   }
 
@@ -97,6 +105,13 @@ export class MeController {
   async removeLogo(@Tenant() tenant: TenantContext) {
     await this.tenancy.setLogo(tenant, null);
     return this.tenancy.profile(tenant);
+  }
+
+  /** Le département de l'entreprise (nouvel onboarding : celui de la carte ou celui du SIRET, au choix de l'artisan). */
+  @Patch("company/departement")
+  @UseGuards(TenantGuard)
+  async setDepartement(@Tenant() tenant: TenantContext, @Body(new ZodPipe(departementBody)) body: z.infer<typeof departementBody>) {
+    return { departement: await this.tenancy.setDepartement(tenant, body.departement) };
   }
 
   /** Change les métiers de l'entreprise active. */

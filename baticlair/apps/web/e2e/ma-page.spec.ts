@@ -19,17 +19,28 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+/** Inscription par métier (19 novembre 2026) : seul « Couvreur » s'inscrit ; un autre métier est posé ensuite sur le compte. */
+const METIERS: Record<string, string> = { Peinture: "painting", "Plâtrerie, isolation": "drywall" };
+
 async function inscrire(page: Page, entreprise: string, metier = "Couverture, charpente, zinguerie") {
   await page.goto("/inscription");
   await page.getByLabel("Prénom et nom").fill("Greg Martin");
   await page.getByLabel("Nom de ton entreprise").fill(entreprise);
-  await page.getByRole("button", { name: metier }).click();
+  await page.getByRole("button", { name: "Couverture, charpente, zinguerie" }).click();
   await page.getByLabel("E-mail professionnel").fill(`artisan-${unique()}@example.fr`);
   await page.getByLabel("Mot de passe").fill("motdepasse-solide");
   await page.getByRole("checkbox", { name: /J'accepte les conditions générales d'utilisation/ }).check();
   await page.getByRole("button", { name: "Créer mon compte" }).click();
   await page.getByRole("button", { name: "C'est compris" }).click();
   await expect(page.getByRole("navigation", { name: "Navigation principale" })).toBeVisible();
+  const autre = METIERS[metier];
+  if (autre) {
+    const statut = await page.evaluate(async (trades) => {
+      const c = localStorage.getItem("baticlair.companyId");
+      return (await fetch("/v1/company/trades", { method: "PATCH", headers: { "content-type": "application/json", ...(c ? { "x-company-id": c } : {}) }, body: JSON.stringify({ trades }) })).status;
+    }, [autre]);
+    expect(statut).toBe(200);
+  }
 }
 
 /** Toucher un réglage du bas de l'éditeur : centré à l'écran d'abord (la barre du menu est figée en bas du téléphone). */

@@ -9,6 +9,7 @@ import {
   classerLigneV1,
   cleProduitV1,
   departement as departementConnu,
+  identiteAConfirmer,
   differencesV1,
   estLotV1,
   lotsComprisV1,
@@ -134,18 +135,20 @@ export class AchatsGroupesV1Service {
 
   private async zone(companyId: string): Promise<{ code: string; nom: string } | null> {
     const c = await this.prisma.company.findUnique({ where: { id: companyId }, select: { address: true, departement: true } });
-    // Le code postal de l'adresse d'abord ; sinon le département choisi à l'inscription (pages régionales, 19 novembre 2026).
-    const code = zoneDuCodePostal(c?.address) ?? (departementConnu(c?.departement)?.code ?? null);
+    // Le département choisi par l'artisan (carte de l'inscription, ou son choix après le SIRET) d'abord ; sinon le code
+    // postal de l'adresse, comme avant (les comptes d'avant n'ont pas de département choisi).
+    const code = departementConnu(c?.departement)?.code ?? zoneDuCodePostal(c?.address);
     if (!code) return null;
     return { code, nom: departementConnu(code)?.nom ?? code };
   }
 
   private async verification(tenant: TenantContext) {
     const [c, u] = await Promise.all([
-      this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, siret: true, siretVerifieLe: true, habilitationAg: true, habilitationAgLe: true } }),
+      this.prisma.company.findUniqueOrThrow({ where: { id: tenant.companyId }, select: { name: true, siret: true, siretVerifieLe: true, habilitationAg: true, habilitationAgLe: true, parcoursInscription: true, identiteConfirmeeLe: true } }),
       this.prisma.user.findUnique({ where: { id: tenant.userId }, select: { email: true, emailVerified: true } }),
     ]);
-    const siretVerifie = !!c.siretVerifieLe;
+    // Nouvel onboarding (19 novembre 2026) : pour le parcours « essai », le SIRET ne compte qu'une fois l'entreprise confirmée.
+    const siretVerifie = !!c.siretVerifieLe && !identiteAConfirmer(c);
     const emailVerifie = !!u?.emailVerified;
     // « Après un changement important » : un SIRET vérifié après la déclaration redemande la déclaration.
     const habilitation = c.habilitationAg && c.habilitationAgLe && (!c.siretVerifieLe || c.habilitationAgLe >= c.siretVerifieLe) ? c.habilitationAg : null;

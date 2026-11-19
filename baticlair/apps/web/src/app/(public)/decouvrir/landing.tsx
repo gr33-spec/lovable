@@ -142,7 +142,7 @@ export function CoupDeMain() {
                 <strong>{CHOIX_LISTE[i]!.titre}</strong>
                 <span>{c}</span>
               </span>
-              <Link href="/inscription" className="mz-fleche" aria-label={`${CHOIX_LISTE[i]!.titre} : ${INSCRIPTION.bouton}`}>
+              <Link href="/commencer" className="mz-fleche" aria-label={`${CHOIX_LISTE[i]!.titre} : ${INSCRIPTION.bouton}`}>
                 <ArrowRight size={18} strokeWidth={2.4} aria-hidden="true" />
               </Link>
             </li>
@@ -162,7 +162,7 @@ export const INSCRIPTION = { bouton: "Créer mon compte gratuit", sous: "Sans ca
 export function BoutonInscription() {
   return (
     <span className="mz-cta">
-      <Link href="/inscription" className="mz-bouton">
+      <Link href="/commencer" className="mz-bouton">
         {INSCRIPTION.bouton} <ArrowRight size={20} strokeWidth={2.6} aria-hidden="true" />
       </Link>
       <span className="mz-cta-sous">{INSCRIPTION.sous}</span>

@@ -60,7 +60,7 @@ export default function ConnexionPage() {
       </Suspense>
       <p className="text-center text-[15px]">
         Pas encore de compte ?{" "}
-        <Link href="/inscription" className="font-semibold text-accent-text">
+        <Link href="/commencer" className="font-semibold text-accent-text">
           Créer un compte
         </Link>
       </p>

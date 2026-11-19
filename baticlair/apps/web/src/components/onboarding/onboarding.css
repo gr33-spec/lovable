@@ -1,0 +1,210 @@
+/*
+ * L'ENTRÉE DANS L'APPLI (nouvel onboarding, Greg, 19 novembre 2026) : la carte au rendu de la carte Bretagne (régions
+ * nettes, reste flouté, jaune Mobiiz pour le choix), au thème de l'app. Tout est borné à `.mzo`.
+ */
+.mzo {
+  --mzo-fond-carte: #151310;
+  --mzo-region: #2b2620;
+  --mzo-region-survol: #3a3329;
+  --mzo-trait: rgba(251, 248, 243, 0.5);
+  --mzo-texte-carte: #fbf8f3;
+  --mzo-fond: #6f655a;
+  min-height: 100dvh;
+}
+.mzo.app-clair {
+  --mzo-fond-carte: #ffffff;
+  --mzo-region: #efeae2;
+  --mzo-region-survol: #e3dbcf;
+  --mzo-trait: rgba(21, 18, 14, 0.45);
+  --mzo-texte-carte: #15120e;
+  --mzo-fond: #c9c0b3;
+}
+.mzo .mzo-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mzo .mzo-carte-cadre {
+  position: relative;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at 50% 45%, rgba(254, 210, 6, 0.07), transparent 65%), var(--mzo-fond-carte);
+  border: 1px solid var(--color-line);
+  overflow: hidden;
+  margin-top: 4px;
+}
+.mzo .mzo-carte-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 0.95;
+  touch-action: manipulation;
+}
+.mzo .mzo-region {
+  fill: var(--mzo-region);
+  stroke: var(--mzo-trait);
+  stroke-linejoin: round;
+  cursor: pointer;
+  outline: none;
+  transition: fill 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mzo .mzo-region:hover,
+.mzo .mzo-region:focus-visible {
+  fill: var(--mzo-region-survol);
+}
+.mzo .mzo-region:focus-visible {
+  stroke: var(--color-accent, #fed206);
+}
+/* Le zoom fait : le reste de la France passe derrière, flouté et estompé. */
+.mzo .mzo-fond .mzo-region {
+  fill: var(--mzo-fond);
+  opacity: 0.45;
+  cursor: default;
+}
+.mzo .mzo-fond .mzo-region.courante {
+  opacity: 0.2;
+}
+.mzo .mzo-nom-region {
+  fill: var(--mzo-texte-carte);
+  font-weight: 800;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.mzo .mzo-dep {
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  animation: mzo-apparait 0.35s ease both;
+}
+.mzo .mzo-dep path {
+  fill: var(--mzo-region);
+  stroke: var(--mzo-trait);
+  stroke-linejoin: round;
+  transition: fill 0.2s ease;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+}
+.mzo .mzo-dep:hover path {
+  fill: var(--mzo-region-survol);
+}
+.mzo .mzo-dep:focus-visible path {
+  stroke: #fed206;
+}
+.mzo .mzo-dep.on path {
+  fill: #fed206;
+  stroke: #15120e;
+}
+.mzo .mzo-dep text {
+  fill: var(--mzo-texte-carte);
+  font-weight: 800;
+  pointer-events: none;
+}
+.mzo .mzo-dep.on text {
+  fill: #15120e;
+}
+.mzo .mzo-dep .mzo-code {
+  opacity: 0.7;
+}
+@keyframes mzo-apparait {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.mzo .mzo-chargement {
+  position: absolute;
+  inset: auto 0 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mzo-texte-carte);
+}
+.mzo .mzo-pastilles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mzo .mzo-pastilles button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 15px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.mzo .mzo-pastilles button span {
+  opacity: 0.6;
+}
+.mzo .mzo-pastilles button[aria-pressed="true"] {
+  background: #fed206;
+  border-color: #fed206;
+  color: #15120e;
+}
+.mzo .mzo-choisi {
+  background: #fed206;
+  border-color: #fed206;
+  color: #15120e;
+}
+.mzo .mzo-barre {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px -16px 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--color-ground);
+  border-top: 1px solid var(--color-line);
+}
+.mzo .mzo-coche {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fed206;
+  color: #15120e;
+  flex-shrink: 0;
+}
+.mzo .mzo-coche-grande {
+  width: 52px;
+  height: 52px;
+}
+.mzo .mzo-rodage {
+  border-radius: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(254, 210, 6, 0.55);
+  background: rgba(254, 210, 6, 0.1);
+  font-size: 15.5px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  /* Sur téléphone, les noms des régions sont trop petits sur la carte : la liste dessous les dit. */
+  .mzo .mzo-nom-region {
+    display: none;
+  }
+  .mzo .mzo-carte-svg {
+    aspect-ratio: 1 / 0.97;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mzo .mzo-dep {
+    animation: none;
+  }
+  .mzo .mzo-region,
+  .mzo .mzo-dep path {
+    transition: none;
+  }
+}

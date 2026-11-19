@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useRef, useState } from "react";
 import { EcranAdresseMobiiz } from "@/components/adresse-mobiiz";
-import { ChampDepartement, ChoixMetier, ListeAttente } from "@/components/inscription-metier";
+import { ChampDepartement, ChoixMetier } from "@/components/inscription-metier";
+import { PHRASE_METIER_EN_RODAGE } from "../../../../../../packages/domain/src/inscription/essai";
 import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
 import { VERSION_CGU } from "@/lib/legal";
@@ -21,8 +22,9 @@ const CODES_DEPARTEMENTS = DEPARTEMENTS_INSCRIPTION.map((d) => d.code);
  * directement sur l'accueil, sans étape supplémentaire (onboarding court).
  *
  * L'INSCRIPTION PAR MÉTIER (Greg, 19 novembre 2026 ; RÈGLE CHANGÉE : avant, un ou plusieurs métiers au choix, tous
- * ouverts) : en haut, « Ton métier ». « Couvreur » est ouvert et choisi d'office ; un autre métier est « Bientôt
- * disponible » : le formulaire de compte laisse place à la liste d'attente (son e-mail seulement). Le métier
+ * ouverts) : en haut, « Ton métier ». « Couvreur » est choisi d'office ; un autre métier entre aussi, avec le
+ * message « en rodage » (RÈGLE CHANGÉE le même jour : avant, liste d'attente sans compte). Cette inscription complète
+ * n'est plus liée depuis la landing (le nouvel onboarding est `/commencer`) ; elle reste servie, parcours de test compris. Le métier
  * (`?metier=`) et le département (`?departement=`, ou celui touché sur la carte d'une page régionale) arrivent déjà
  * remplis. Les comptes déjà créés ne sont pas touchés.
  */
@@ -37,7 +39,6 @@ export default function InscriptionPage() {
 function Inscription() {
   const router = useRouter();
   const params = useSearchParams();
-  const source = (params.get("depuis") ?? "inscription").slice(0, 60);
   const [metier, setMetier] = useState(() => metierInscription(params.get("metier"))?.id ?? METIER_PAR_DEFAUT);
   // Le département : celui de l'adresse (`?departement=`), sinon celui touché sur la carte d'une page régionale (gardé sur
   // l'appareil) ; ce que l'artisan choisit dans la liste l'emporte.
@@ -111,50 +112,47 @@ function Inscription() {
         <p className="text-[17px] leading-relaxed text-muted">Gratuit, sans carte bancaire. Ta liste remise au propre en deux minutes.</p>
       </div>
       <ChoixMetier value={metier} onChange={setMetier} />
+      {/* RÈGLE CHANGÉE (nouvel onboarding, 19 novembre 2026) : un autre métier entre aussi, avec ce message ; avant, liste
+          d'attente sans compte. */}
       {!choisi.ouvert ? (
-        <ListeAttente metier={choisi} departement={departement} onDepartement={setDepartement} source={source} />
-      ) : (
-        <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
-          {error ? <ErrorNotice error={error} /> : null}
-          <Field id="name" name="name" label="Prénom et nom" autoComplete="name" required />
-          <Field id="company" name="company" label="Nom de ton entreprise" autoComplete="organization" required />
-          <ChampDepartement value={departement} onChange={setDepartement} />
-          <Field id="email" name="email" type="email" label="E-mail professionnel" autoComplete="email" inputMode="email" required />
-          <Field
-            id="password"
-            name="password"
-            type="password"
-            label="Mot de passe"
-            hint="10 caractères minimum. Une phrase de plusieurs mots est idéale."
-            autoComplete="new-password"
-            required
-          />
-          <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-snug">
-            <input
-              type="checkbox"
-              name="cgu"
-              checked={cgu}
-              onChange={(e) => setCgu(e.target.checked)}
-              className="mt-0.5 size-5 shrink-0 rounded accent-accent"
-            />
-            <span>
-              J&apos;accepte les{" "}
-              <Link href="/cgu" className="font-semibold text-accent-text underline">
-                conditions générales d&apos;utilisation
-              </Link>{" "}
-              et la{" "}
-              <Link href="/confidentialite" className="font-semibold text-accent-text underline">
-                politique de confidentialité
-              </Link>
-              .
-            </span>
-          </label>
-          <Turnstile onToken={setCaptcha} />
-          <Button type="submit" pending={pending} disabled={!cgu || (TURNSTILE_ACTIF && !captcha)} className="mt-2">
-            Créer mon compte
-          </Button>
-        </form>
-      )}
+        <p role="status" className="rounded-2xl border border-accent/60 bg-accent/10 p-4 text-[15px] leading-relaxed font-semibold">
+          {PHRASE_METIER_EN_RODAGE}
+        </p>
+      ) : null}
+      <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
+        {error ? <ErrorNotice error={error} /> : null}
+        <Field id="name" name="name" label="Prénom et nom" autoComplete="name" required />
+        <Field id="company" name="company" label="Nom de ton entreprise" autoComplete="organization" required />
+        <ChampDepartement value={departement} onChange={setDepartement} />
+        <Field id="email" name="email" type="email" label="E-mail professionnel" autoComplete="email" inputMode="email" required />
+        <Field
+          id="password"
+          name="password"
+          type="password"
+          label="Mot de passe"
+          hint="10 caractères minimum. Une phrase de plusieurs mots est idéale."
+          autoComplete="new-password"
+          required
+        />
+        <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-snug">
+          <input type="checkbox" name="cgu" checked={cgu} onChange={(e) => setCgu(e.target.checked)} className="mt-0.5 size-5 shrink-0 rounded accent-accent" />
+          <span>
+            J&apos;accepte les{" "}
+            <Link href="/cgu" className="font-semibold text-accent-text underline">
+              conditions générales d&apos;utilisation
+            </Link>{" "}
+            et la{" "}
+            <Link href="/confidentialite" className="font-semibold text-accent-text underline">
+              politique de confidentialité
+            </Link>
+            .
+          </span>
+        </label>
+        <Turnstile onToken={setCaptcha} />
+        <Button type="submit" pending={pending} disabled={!cgu || (TURNSTILE_ACTIF && !captcha)} className="mt-2">
+          Créer mon compte
+        </Button>
+      </form>
       <p className="text-center text-[15px]">
         Déjà un compte ?{" "}
         <Link href="/connexion" className="font-semibold text-accent-text">

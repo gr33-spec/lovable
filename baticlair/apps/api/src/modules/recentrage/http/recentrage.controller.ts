@@ -1,3 +1,4 @@
+import { IdentiteConfirmeeGuard } from "../../../platform/http/identite-confirmee.guard.js";
 import { Body, Controller, Get, Headers, HttpCode, Inject, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { BUTS_DEMANDE, MODES_REGROUPEMENT } from "@baticlair/domain";
@@ -82,6 +83,7 @@ export class RecentrageController {
 
   @Throttle({ default: HOURLY(120) })
   @Post("projects/:projectId/demandes-perso")
+  @UseGuards(IdentiteConfirmeeGuard)
   envoyer(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(envoiBody)) body: z.infer<typeof envoiBody>) {
     return this.demandes.envoyer(tenant, projectId, {
       but: body.but,
@@ -99,6 +101,7 @@ export class RecentrageController {
   }
 
   @Post("demandes-perso/:id/commander")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   commander(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(commanderBody)) body: z.infer<typeof commanderBody>) {
     return this.demandes.commander(tenant, id, body.recipientId, { retirerDesGroupes: body.retirerDesGroupes === true, livraisonSouhaitee: body.livraisonSouhaitee ?? null });

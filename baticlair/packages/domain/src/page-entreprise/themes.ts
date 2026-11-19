@@ -69,10 +69,10 @@ const t = (metier: string, nom: string, teinte: TeinteId, accroche: string, pres
 
 /** Un thème par métier du catalogue (`TRADES`, `packages/domain/src/trades/index.ts`). */
 export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
-  roofing: t("roofing", "Couvreur", "ardoise", "Votre toiture entre de bonnes mains{zone}", "Couverture, zinguerie et réparation de toitures : ardoise, tuile et zinc, en neuf comme en rénovation. Devis clair, chantier propre.", [
+  roofing: t("roofing", "Couvreur", "ardoise", "Votre toiture entre de bonnes mains{zone}", "Couverture, zinguerie et réparation de toitures : ardoise, tuile et zinc, en neuf comme en rénovation.", [
     p("Couverture ardoise et tuile", "Réfection complète ou partielle, en ardoise naturelle ou en tuile, dans les règles de l'art."),
     p("Zinguerie", "Gouttières, descentes, noues et habillages en zinc, posés et façonnés sur mesure."),
-    p("Réparation de toiture", "Ardoises ou tuiles cassées, fuites, dégâts après une tempête : nous intervenons rapidement."),
+    p("Réparation de toiture", "Ardoises ou tuiles cassées, fuites, dégâts après une tempête."),
     p("Entretien et démoussage", "Nettoyage, traitement et vérification de la toiture pour la faire durer."),
   ]),
   masonry: t("masonry", "Maçon", "anthracite", "Des murs solides, faits pour durer{zone}", "Maçonnerie générale, extensions, ouvertures de murs et petits ouvrages : du terrassement à la finition.", [
@@ -86,7 +86,7 @@ export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
     p("Isolation des combles", "Combles perdus ou aménagés, pour moins de pertes de chaleur."),
     p("Faux plafonds", "Plafonds suspendus ou rampants, avec spots intégrés si besoin."),
   ]),
-  painting: t("painting", "Peintre", "vert-sapin", "Des finitions nettes, du sol au plafond{zone}", "Peinture intérieure et extérieure, revêtements muraux et finitions soignées. Protection du chantier et nettoyage compris.", [
+  painting: t("painting", "Peintre", "vert-sapin", "Des finitions nettes, du sol au plafond{zone}", "Peinture intérieure et extérieure, revêtements muraux et finitions.", [
     p("Peinture intérieure", "Murs, plafonds et boiseries, avec la préparation des supports et la protection des meubles."),
     p("Façades et ravalement", "Nettoyage, réparation et peinture des façades pour protéger la maison."),
     p("Papiers peints et revêtements", "Pose de papiers peints, toiles de verre et revêtements muraux."),
@@ -102,17 +102,17 @@ export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
     p("Sols souples", "Vinyle, lino et moquette posés sur un support préparé."),
     p("Ponçage et vitrification", "Votre ancien parquet remis à neuf."),
   ]),
-  electrical: t("electrical", "Électricien", "bleu-nuit", "Une installation électrique sûre et aux normes{zone}", "Installation, rénovation et mise en conformité électrique, tableaux, éclairage et dépannage.", [
+  electrical: t("electrical", "Électricien", "bleu-nuit", "Installation et rénovation électrique{zone}", "Installation, rénovation et mise en conformité électrique, tableaux, éclairage et dépannage.", [
     p("Rénovation électrique", "Remise à neuf de l'installation, pièce par pièce ou toute la maison."),
     p("Tableau et mise aux normes", "Remplacement du tableau et mise en sécurité de l'installation."),
     p("Éclairage", "Éclairage intérieur et extérieur, spots, variateurs."),
-    p("Dépannage", "Panne, disjonction, prise qui chauffe : nous intervenons rapidement."),
+    p("Dépannage", "Panne, disjonction, prise qui chauffe."),
   ]),
-  plumbing: t("plumbing", "Plombier", "bleu-nuit", "Plomberie et chauffage sans mauvaise surprise{zone}", "Plomberie, sanitaires et chauffage : installation, rénovation de salles de bains et dépannage.", [
+  plumbing: t("plumbing", "Plombier", "bleu-nuit", "Plomberie, sanitaires et chauffage{zone}", "Plomberie, sanitaires et chauffage : installation, rénovation de salles de bains et dépannage.", [
     p("Salle de bains", "Création ou rénovation complète, douche, baignoire et meubles."),
     p("Chauffe-eau", "Remplacement et entretien de chauffe-eau et ballons."),
     p("Recherche de fuite", "Diagnostic et réparation des fuites, visibles ou encastrées."),
-    p("Dépannage", "Robinetterie, évacuation bouchée, chasse d'eau : intervention rapide."),
+    p("Dépannage", "Robinetterie, évacuation bouchée, chasse d'eau."),
   ]),
   joinery: t("joinery", "Menuisier", "vert-sapin", "Menuiseries sur mesure, posées avec soin{zone}", "Fenêtres, portes, volets et menuiseries sur mesure, en bois, PVC ou aluminium.", [
     p("Fenêtres et portes", "Remplacement et pose de fenêtres, portes-fenêtres et portes d'entrée."),
@@ -136,7 +136,7 @@ export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
   ]),
   cladding: t("cladding", "Bardeur", "vert-sapin", "Des façades habillées avec soin{zone}", "Bardage bois, composite et métallique, isolation par l'extérieur.", [
     p("Bardage bois", "Pose de bardage en bois naturel ou prégrisé."),
-    p("Bardage composite", "Un habillage sans entretien, en lames composites."),
+    p("Bardage composite", "Un habillage en lames composites."),
     p("Isolation par l'extérieur", "Isoler la maison sans perdre de place à l'intérieur."),
   ]),
   facade: t("facade", "Façadier", "ardoise", "Des façades refaites à neuf{zone}", "Ravalement, enduits, nettoyage et isolation des façades.", [
@@ -165,7 +165,7 @@ export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
   ]),
   decking: t("decking", "Poseur de terrasses", "vert-sapin", "Des terrasses bois qui durent{zone}", "Terrasses en bois et composite, pergolas et aménagements extérieurs.", [
     p("Terrasse bois", "Lames en pin, mélèze ou bois exotique, sur plots ou lambourdes."),
-    p("Terrasse composite", "Une terrasse sans entretien."),
+    p("Terrasse composite", "Une terrasse en lames composites."),
     p("Pergolas", "Pergolas en bois ou en aluminium."),
   ]),
   paving: t("paving", "Paveur", "anthracite", "Des allées et des cours pavées avec soin{zone}", "Pavage, dallage extérieur, allées et cours.", [
@@ -173,7 +173,7 @@ export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
     p("Cours et stationnements", "Des surfaces solides, faites pour durer."),
     p("Bordures", "Bordures et caniveaux posés au cordeau."),
   ]),
-  earthworks: t("earthworks", "Terrassier", "anthracite", "Terrassement et VRD, chantier propre{zone}", "Terrassement, réseaux, assainissement et voirie.", [
+  earthworks: t("earthworks", "Terrassier", "anthracite", "Terrassement et VRD{zone}", "Terrassement, réseaux, assainissement et voirie.", [
     p("Terrassement", "Préparation de terrain avant construction."),
     p("Assainissement", "Installation et mise aux normes d'assainissement individuel."),
     p("Réseaux", "Tranchées et raccordements eau, électricité et télécoms."),
@@ -193,7 +193,7 @@ export const THEMES_METIER: Readonly<Record<string, ThemeMetier>> = {
     p("Rénovation", "Rénovation complète, un seul interlocuteur."),
     p("Coordination", "Tous les corps de métier organisés pour vous."),
   ]),
-  other: t("other", "Artisan du bâtiment", "ardoise", "Un artisan à votre écoute{zone}", "Artisan du bâtiment : travaux de rénovation et d'entretien, devis clair et chantier propre.", []),
+  other: t("other", "Artisan du bâtiment", "ardoise", "Un artisan à votre écoute{zone}", "Artisan du bâtiment : travaux de rénovation et d'entretien.", []),
 };
 
 /** Le thème d'un métier ; un métier inconnu ou absent prend celui d'« Autre métier ». */

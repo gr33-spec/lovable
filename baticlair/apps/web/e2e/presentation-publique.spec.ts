@@ -79,7 +79,7 @@ test("« Voir Mobiiz en images » : trois écrans statiques, aucun compte ni ses
   expect(dit).not.toMatch(/€|\b(IA|automatiques?|garanti\w*|économi\w*)\b/i);
   // Le dernier écran : « Commencer gratuitement » vers l'inscription, et « Fermer » ; plus de « Suivant ».
   await expect(dialogue.getByRole("button", { name: "Suivant" })).toHaveCount(0);
-  await expect(dialogue.getByRole("link", { name: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
+  await expect(dialogue.getByRole("link", { name: "Commencer gratuitement" })).toHaveAttribute("href", "/commencer");
   await expect(dialogue.getByRole("button", { name: "Fermer", exact: true })).toBeVisible();
   // « Précédent » revient en arrière ; les flèches du clavier aussi.
   await dialogue.getByRole("button", { name: "Précédent" }).click();
@@ -123,5 +123,5 @@ test("« Commencer gratuitement », au dernier écran de la présentation, mène
   await dialogue.getByRole("button", { name: "Suivant" }).click();
   await dialogue.getByRole("button", { name: "Suivant" }).click();
   await dialogue.getByRole("link", { name: "Commencer gratuitement" }).click();
-  await expect(page).toHaveURL(/\/inscription$/);
+  await expect(page).toHaveURL(/\/commencer$/);
 });

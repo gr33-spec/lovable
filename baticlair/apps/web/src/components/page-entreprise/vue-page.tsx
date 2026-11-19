@@ -43,7 +43,7 @@ function iconeDePreuve(texte: string): LucideIcon {
   if (/v[ée]rifi/i.test(texte)) return BadgeCheck;
   if (/d[ée]cennale|assurance|garantie/i.test(texte)) return ShieldCheck;
   if (/rge|[ée]co|environnement/i.test(texte)) return Leaf;
-  if (/ans d'exp/i.test(texte)) return Award;
+  if (/ans d'exp|depuis \d{4}/i.test(texte)) return CalendarDays;
   return Award;
 }
 
@@ -100,11 +100,15 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   const zone = zoneLisible(c.zone);
   // La barre de confiance sous les prestations : la zone, les horaires et les certifications déclarées (quatre au plus).
   const confiance: { etiquette: string; valeur: string; Icone: LucideIcon }[] = [];
-  if (zone) confiance.push({ etiquette: "Zone d'intervention", valeur: `${zone} et alentours`, Icone: MapPin });
+  // Spécialiste UI/UX (19 novembre 2026) : la zone telle que l'artisan l'a écrite, sans « et alentours » ajouté ; une
+  // certification déjà dans le bandeau n'est pas redite ; une assurance n'est pas une certification ; l'expérience n'est
+  // pas dite deux fois (« 18 ans d'expérience » et « Depuis 2008 »).
+  if (zone) confiance.push({ etiquette: "Zone d'intervention", valeur: zone, Icone: MapPin });
   // « 8 h à 18 h » : jamais un « h » seul en début de ligne.
   if (c.horaires) confiance.push({ etiquette: "Horaires", valeur: c.horaires.replace(/(\d) (h|H)\b/g, "$1\u00a0$2"), Icone: Clock });
-  for (const x of c.certifications) if (confiance.length < 4) confiance.push({ etiquette: "Certification déclarée", valeur: x, Icone: iconeDePreuve(x) });
-  if (confiance.length < 4 && c.creeeEn) confiance.push({ etiquette: "Expérience", valeur: `Depuis ${c.creeeEn}`, Icone: CalendarDays });
+  const dansLeBandeau = new Set(garanties.map((g) => g.texte.toLowerCase()));
+  for (const x of c.certifications) if (confiance.length < 4 && !dansLeBandeau.has(x.toLowerCase())) confiance.push({ etiquette: /assurance|d[ée]cennale/i.test(x) ? "Assurance déclarée" : "Certification déclarée", valeur: x, Icone: iconeDePreuve(x) });
+  if (confiance.length < 4 && c.creeeEn && !garanties.some((g) => /ans d'exp/i.test(g.texte))) confiance.push({ etiquette: "Expérience", valeur: `Depuis ${c.creeeEn}`, Icone: CalendarDays });
   const lien = (href: string) => (apercu ? undefined : href);
 
   return (
@@ -148,7 +152,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
               </a>
             ) : null}
             {garanties.length ? (
-              <ul className="pe-preuves" aria-label="Garanties">
+              <ul className="pe-preuves" aria-label="Garanties" lang="fr" style={{ "--pe-preuves": Math.min(garanties.length, 3) } as React.CSSProperties}>
                 {garanties.map(({ texte, Icone }) => (
                   <li key={texte}>
                     <span className="pe-preuve-icone" aria-hidden="true">
@@ -161,9 +165,6 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
             ) : null}
           </div>
         </section>
-
-        {/* Le niveau « pros » : rien pour un visiteur, rien dans l'aperçu ; une entreprise connectée le voit ici. */}
-        {apercu ? null : <EntrePros adresse={c.adresse} />}
 
         {visibles.includes("prestations") ? (
           <section id="prestations" className="pe-section pe-section-prestations" aria-labelledby="pe-t-prestations">
@@ -236,6 +237,10 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
             </div>
           </section>
         ) : null}
+
+        {/* Le niveau « pros » : rien pour un visiteur, rien dans l'aperçu ; une entreprise connectée le voit ici, après les
+            prestations (spécialiste UI/UX, 19 novembre 2026 : avant, il passait devant elles). */}
+        {apercu ? null : <EntrePros adresse={c.adresse} />}
 
         {visibles.includes("realisations") ? (
           <section id="realisations" className="pe-section pe-section-realisations" aria-labelledby="pe-t-realisations">

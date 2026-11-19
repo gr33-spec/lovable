@@ -7,6 +7,7 @@ import { Button, Card, ErrorNotice, Field, INPUT, PageTitle, Skeleton } from "@/
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { phraseCompteARebours } from "../../../../../../../packages/domain/src/groupe/ton";
 import { dateFr, eurosHt, quantite, type LectureExcel, type PageNegoceAchat, type RecapOffreNegoce } from "@/lib/achat-groupe";
+import Link from "next/link";
 
 const lireNombre = (s: string) => (s.trim() === "" ? null : Number(s.replace(/\s/g, "").replace(",", ".")));
 const RESUME = "flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[16px] font-extrabold";
@@ -354,8 +355,7 @@ export default function ReponseAchatGroupePage() {
           <label className="flex items-start gap-3 rounded-xl bg-ground p-3 text-[15px]">
             <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)} className="mt-1 size-5 accent-accent" />
             <span>
-              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
-              J&apos;accepte les conditions de cette demande et les <a href="/conditions-negoce" className="underline">conditions négoces</a>.
+              J&apos;accepte les conditions de cette demande et les <Link href="/conditions-negoce" className="underline">conditions négoces</Link>.
             </span>
           </label>
           {alerte}
