@@ -1259,8 +1259,11 @@ export function EditeurMaPage() {
             {reglages}
           </aside>
           <section className="sticky top-4 grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2" aria-label="Aperçu de mon site">
-            <div className="flex min-h-11 items-center gap-3">
-              <Statut etat={etat} erreur={erreur} />
+            {/* Tablette : l'état sur sa propre ligne, les boutons dessous (rien ne se chevauche). */}
+            <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="flex min-w-0 max-lg:basis-full lg:flex-1">
+                <Statut etat={etat} erreur={erreur} />
+              </div>
               <ChoixEcran ecran={ecran} onChange={setEcran} />
               <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-accent px-4 text-[14px] font-extrabold text-on-accent">
                 <Maximize2 size={16} aria-hidden="true" /> Voir mon site
