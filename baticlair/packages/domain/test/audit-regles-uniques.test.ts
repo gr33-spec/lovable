@@ -205,5 +205,6 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
       "",
     ].join("\n");
     await expect(doc).toMatchFileSnapshot("../../../docs/audit-referentiel-regles.md");
-  });
+    // Ce test relit tous les fichiers de test du dépôt : sur une machine qui vient de démarrer, 5 secondes ne suffisent pas.
+  }, 30_000);
 });
