@@ -109,7 +109,7 @@ def valeur(e, src):
 
 MOTS_FAMILLE = [("tuile_canal", r"canal|bardelis|courant|couvert"), ("tuile_plate", r"plate"),
                 ("tuile_romane", r"romane"), ("tuile_beton", r"b[ée]ton|monier"),
-                ("etancheite", r"[ée]tanch|membrane|bitum|primaire|isolant|epdm|pvc|sbs|relev|terrasse|pare-vapeur|autoprot|[ée]querre|2e couche"),
+                ("etancheite", r"[ée]tanch|membrane|bitum|primaire|isolant|epdm|pvc|sbs|relev|terrasse|pare-vapeur|autoprot|[ée]querre|2e couche|eep|eaux pluviales|trop-plein|crapaudine"),
                 ("ecran", r"[ée]cran|hpv|contre-liteau|adh[ée]sif|larmier")]
 
 

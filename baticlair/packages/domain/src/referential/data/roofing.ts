@@ -100,12 +100,19 @@ const F = "fondateur-referentiel-2026-10-03";
  * prouvée par des chiffres confirmés de `fiche-couverture.json`) se lit ici par sa clé, jamais recopiée.
  */
 const FICHE = "fiche-couverture";
+/** Données produit de la fiche (longueurs vendues, conditionnements) : relevées chez les fabricants et les négoces. */
+const FICHE_PRODUITS = "fiche-couverture-produits";
 const FICHE_VERIFIEE = {
   status: "verified",
   verifiedAt: "2026-11-19",
   verifiedBy: "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026",
 } as const;
 const constanteFiche = (cle: string) => constanteDe(baseDuMetier("couverture")!.base, cle);
+/** Une longueur de vente lue dans la fiche (conditionnement d'un produit). */
+const longueurFiche = (cle: string): Fact => {
+  const k = constanteFiche(cle);
+  return packaging(k.valeur, k.unite, FICHE_PRODUITS, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
+};
 const deFiche = (cle: string): Fact => {
   const k = constanteFiche(cle);
   return condition(k.valeur, k.unite, FICHE, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
@@ -1124,7 +1131,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-52",
+  version: "roofing-2026.11.19-53",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1138,6 +1145,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       documentRef: "referentiels/couverture/fiche-couverture.json, constantes.json",
       retrievedAt: "2026-11-19",
       note: "Chaque constante renvoie aux chiffres confirmés de la recherche du 19/11/2026 qui la prouvent (règle du fondateur ou deux sources).",
+    },
+    {
+      id: FICHE_PRODUITS,
+      kind: "retailer",
+      title: "Fiche couverture Mobiiz : données produit relevées chez les fabricants et les négoces",
+      documentRef: "referentiels/couverture/fiche-couverture.json (sources de chaque chiffre)",
+      retrievedAt: "2026-11-19",
+      note: "Longueurs vendues et conditionnements confirmés par un fabricant et des négoces (bretons d'abord).",
     },
     {
       id: "edilians-canal",
@@ -1798,8 +1813,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("tube-descente-standard", "downpipe", "Tube de descente (longueur du chantier)", "Tubes de descente"),
     generic("dauphin-standard", "downpipe_shoe", "Dauphin de pied de descente, 1 m", "Dauphins"),
     generic("coude-descente-standard", "downpipe_elbow", "Coude de descente (modèle à préciser)", "Coudes"),
-    generic("bande-faitage-zinc-standard", "zinc_ridge", "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 3 m", "Faîtage zinc (bande)", {
-      sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
+    // Fiche couverture (2026-11-19) : faîtage et arêtier zinc façonnés vendus en longueurs de 2 m (avant 3 m, §3).
+    generic("bande-faitage-zinc-standard", "zinc_ridge", "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 2 m", "Faîtage zinc (bande)", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: longueurFiche("zinguerie.longueur_faitage_aretier_faconne"), primary: true }],
     }),
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
     // §5 : l'arêtier est en général la même pièce que la faîtière (≈ 2,9 pièces/ml), son closoir fait 23 cm de large.
@@ -1810,8 +1826,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC, "« arêtier : largeur 23 cm », rouleau de 5 m (§5)."), primary: true }],
     }),
     generic("crochet-aretier-standard", "hip_fixing", "Crochet d'arêtier à sec (modèle de l'arêtier)", "Crochets d'arêtier"),
-    generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m", "Arêtier zinc (bande)", {
-      sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
+    generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 2 m", "Arêtier zinc (bande)", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: longueurFiche("zinguerie.longueur_faitage_aretier_faconne"), primary: true }],
     }),
     generic("raccord-fenetre-toit", "roof_window_flashing", "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre", "Raccords d'étanchéité"),
     generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
@@ -2424,12 +2440,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] },
         DEVELOPPE_PARAM,
         // §48.6 : « tu le façonnes toi-même ? », pour le faîtage seul.
-        { ...FACONNAGE_BANDES_PARAM, question: "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?", hint: "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 3 m." },
+        { ...FACONNAGE_BANDES_PARAM, question: "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?", hint: "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 2 m." },
         EPAISSEUR_ZINC_PARAM,
         ASPECT_ZINC_PARAM,
       ],
       slots: [
-        { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
+        { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre.", source: F, productId: "patte-zinc-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).", source: F, productId: "feuille-zinc-2x1" }, formOf: "bande" },
       ],
@@ -2564,7 +2580,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "closoir", family: "hip_closure", label: "Closoir d'arêtier", usual: { text: "Closoir ventilé d'arêtier, 23 cm, rouleau de 5 m (§5).", source: F, productId: "closoir-aretier-5m" } },
         { key: "crochet", family: "hip_fixing", label: "Crochets d'arêtier", keywords: ["crochet"], usual: { text: "Pose à sec : un crochet par arêtier (§5).", source: F, productId: "crochet-aretier-standard" } },
         { key: "about", family: "hip_end", label: "Abouts d'arêtier", usual: { text: "Un about par arêtier (§5).", source: F, productId: "about-aretier-standard" } },
-        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).", source: F, productId: "bande-aretier-zinc-standard" } },
+        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).", source: F, productId: "bande-aretier-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre (§3).", source: F, productId: "patte-zinc-standard" } },
       ],
       constants: { pattes_par_metre: PATTES_PAR_METRE },
@@ -3245,7 +3261,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "patte_fixe", family: "seam_clip_fixed", label: "Pattes fixes", keywords: ["patte fixe", "pattes fixes", "fixes"], usual: { text: "Pattes fixes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-fixe-joint-debout" } },
         { key: "fixation_patte", family: "clip_fixing", label: "Fixations des pattes", keywords: ["pointe", "pointes"], usual: { text: "Pointes annelées 2,5 × 28 mm sur volige 18 mm, 2 par patte (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "pointe-annelee-2-5x28" } },
         { key: "egout", family: "eaves_strip", label: "Bandes d'égout", keywords: ["egout"], usual: { text: "Bande d'égout à ourlet, développé 33 cm, longueurs de 2 m (§7).", source: F, productId: "bande-egout-zinc-330" } },
-        { key: "faitage", family: "zinc_ridge", label: "Faîtage zinc", usual: { text: "Bande de faîtage zinc en longueurs de 3 m (§7).", source: F, productId: "bande-faitage-zinc-standard" } },
+        { key: "faitage", family: "zinc_ridge", label: "Faîtage zinc", usual: { text: "Bande de faîtage zinc en longueurs de 2 m (fiche couverture).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "volige", family: "sheathing", label: "Voliges", keywords: ["volige"], usual: { text: "Volige sapin 18 mm sous le zinc (§7).", source: F, productId: "volige-sapin-standard" } },
       ],
       constants: {
@@ -4020,7 +4036,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       : []),
     { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
     { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
-    { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes de 3 m." },
+    { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes façonnées." },
     { family: "hip_strip", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Zinc en bande (faîtage, noue, rive) : 5 % » (§2), arêtier « ml × 1,05 » (§3)." },
     { family: "sheathing", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Support voligeage : m² rampant × 1,05 » (§7)." },
   ],

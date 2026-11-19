@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-52",
+  "version": "roofing-2026.11.19-53",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -33,6 +33,14 @@
       "documentRef": "referentiels/couverture/fiche-couverture.json, constantes.json",
       "retrievedAt": "2026-11-19",
       "note": "Chaque constante renvoie aux chiffres confirmés de la recherche du 19/11/2026 qui la prouvent (règle du fondateur ou deux sources)."
+    },
+    {
+      "id": "fiche-couverture-produits",
+      "kind": "retailer",
+      "title": "Fiche couverture Mobiiz : données produit relevées chez les fabricants et les négoces",
+      "documentRef": "referentiels/couverture/fiche-couverture.json (sources de chaque chiffre)",
+      "retrievedAt": "2026-11-19",
+      "note": "Longueurs vendues et conditionnements confirmés par un fabricant et des négoces (bretons d'abord)."
     },
     {
       "id": "edilians-canal",
@@ -4220,7 +4228,7 @@
     {
       "id": "bande-faitage-zinc-standard",
       "family": "zinc_ridge",
-      "label": "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 3 m",
+      "label": "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 2 m",
       "shortLabel": "Faîtage zinc (bande)",
       "aliases": [],
       "generic": true,
@@ -4229,21 +4237,21 @@
         {
           "id": "longueur",
           "label": {
-            "one": "longueur de 3 m",
-            "many": "longueurs de 3 m"
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
           },
           "contains": {
             "kind": "packaging",
-            "value": "3",
+            "value": "2",
             "unit": "m",
-            "source": "fondateur-referentiel-2026-10-03",
+            "source": "fiche-couverture-produits",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1
+            "version": 1,
+            "note": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m. Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage."
           },
           "primary": true
         }
@@ -4393,7 +4401,7 @@
     {
       "id": "bande-aretier-zinc-standard",
       "family": "hip_strip",
-      "label": "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m",
+      "label": "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 2 m",
       "shortLabel": "Arêtier zinc (bande)",
       "aliases": [],
       "generic": true,
@@ -4402,21 +4410,21 @@
         {
           "id": "longueur",
           "label": {
-            "one": "longueur de 3 m",
-            "many": "longueurs de 3 m"
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
           },
           "contains": {
             "kind": "packaging",
-            "value": "3",
+            "value": "2",
             "unit": "m",
-            "source": "fondateur-referentiel-2026-10-03",
+            "source": "fiche-couverture-produits",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1
+            "version": 1,
+            "note": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m. Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage."
           },
           "primary": true
         }
@@ -8468,7 +8476,7 @@
           "unit": "u",
           "kind": "artisan_preference",
           "question": "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?",
-          "hint": "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 3 m.",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 2 m.",
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
@@ -8637,7 +8645,7 @@
           "family": "zinc_ridge",
           "label": "Faîtage zinc (bande)",
           "usual": {
-            "text": "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).",
+            "text": "Bande zinc en longueurs de 2 m (développé 25 à 33 cm).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-faitage-zinc-standard"
           }
@@ -9935,7 +9943,7 @@
           "family": "hip_strip",
           "label": "Arêtier zinc (bande)",
           "usual": {
-            "text": "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).",
+            "text": "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-aretier-zinc-standard"
           }
@@ -13711,7 +13719,7 @@
           "family": "zinc_ridge",
           "label": "Faîtage zinc",
           "usual": {
-            "text": "Bande de faîtage zinc en longueurs de 3 m (§7).",
+            "text": "Bande de faîtage zinc en longueurs de 2 m (fiche couverture).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-faitage-zinc-standard"
           }
@@ -16950,7 +16958,7 @@
         "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
       },
       "version": 1,
-      "note": "Recouvrements des bandes de 3 m."
+      "note": "Recouvrements des bandes façonnées."
     },
     {
       "family": "hip_strip",

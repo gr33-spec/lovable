@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-53 — Faîtage et arêtier zinc façonnés en longueurs de 2 m (fiche couverture)
+
+- **§3 / §7 Faîtage et arêtier zinc commandés façonnés** : longueurs de 2 m, lues dans la fiche
+  (`zinguerie.longueur_faitage_aretier_faconne`). Règle du fondateur (« zinc façonné en 2 m »), confirmée par
+  VMZinc, Rheinzink et trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) : aucune pièce de 3 m vue.
+  Avant : longueurs de 3 m. Exemple : 9 ml d'arêtier zinc → 5 longueurs de 2 m (avant 4 longueurs de 3 m).
+- La marge × 1,05 du zinc linéaire ne change pas ici (sans source : à trancher par le fondateur).
+
 ## roofing-2026.11.19-52 — Ardoise : trois constantes lues dans la fiche couverture (mission du fondateur, 2026-11-19)
 
 Première étape de la bascule « le code lit la fiche et rien d'autre » : ces constantes viennent de

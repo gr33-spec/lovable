@@ -9,7 +9,9 @@
    "unite": "mm",
    "regle": "pureau = (longueur de l'ardoise − crochet) ÷ 2 + 2,5 mm",
    "decision": "Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa.",
-   "preuves": ["ardoise_crochet_recouvrement_depuis_longueur"],
+   "preuves": [
+    "ardoise_crochet_recouvrement_depuis_longueur"
+   ],
    "avant": "10 mm (« crochet − 1 cm », roofing.ts marge_crochet)"
   },
   {
@@ -20,7 +22,9 @@
    "unite": "mm",
    "regle": "longueur de crochet = arrondi au cm supérieur (recouvrement + 3 mm)",
    "decision": "Recherche du 19/11/2026 : Cupa, Frénéhard (fabricant de crochets), NF DTU 40.11 (2020) cité par un guide. Sert seulement quand le devis ne dit pas le crochet.",
-   "preuves": ["ardoise_crochet_longueur_depuis_recouvrement"],
+   "preuves": [
+    "ardoise_crochet_longueur_depuis_recouvrement"
+   ],
    "avant": "10 mm (« recouvrement + 1 cm »)"
   },
   {
@@ -31,8 +35,24 @@
    "unite": "%",
    "regle": "crochets = ardoises commandées (pertes comprises) × 1",
    "decision": "Règle du fondateur (« 1 crochet par ardoise, partout »), confirmée par la recherche du 19/11/2026 : Cupa, Rathscheck, NF DTU 40.11 via guides.",
-   "preuves": ["ardoise_crochet_par_ardoise"],
+   "preuves": [
+    "ardoise_crochet_par_ardoise"
+   ],
    "avant": "2 % (« crochets = ardoises × 1,02 »)"
+  },
+  {
+   "cle": "zinguerie.longueur_faitage_aretier_faconne",
+   "famille": "zinguerie",
+   "libelle": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m",
+   "valeur": "2",
+   "unite": "m",
+   "regle": "bandes de faîtage et d'arêtier = ml ÷ 2 m, arrondi au-dessus",
+   "decision": "Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage.",
+   "preuves": [
+    "faitage_zinc_longueur",
+    "zinguerie_longueurs_bretagne"
+   ],
+   "avant": "3 m (« longueurs 3 m », §3)"
   }
  ]
 }

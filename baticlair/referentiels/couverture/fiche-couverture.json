@@ -82,6 +82,21 @@
    ],
    "avant": "2 % (« crochets = ardoises × 1,02 »)",
    "statut": "confirme"
+  },
+  {
+   "cle": "zinguerie.longueur_faitage_aretier_faconne",
+   "famille": "zinguerie",
+   "libelle": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m",
+   "valeur": "2",
+   "unite": "m",
+   "regle": "bandes de faîtage et d'arêtier = ml ÷ 2 m, arrondi au-dessus",
+   "decision": "Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage.",
+   "preuves": [
+    "faitage_zinc_longueur",
+    "zinguerie_longueurs_bretagne"
+   ],
+   "avant": "3 m (« longueurs 3 m », §3)",
+   "statut": "confirme"
   }
  ],
  "familles": [
@@ -81747,17 +81762,6 @@
      "explication": "Voir la sous-couche du tiroir."
     },
     {
-     "ratio": "EEP : Ø 80 ≤ 70 m², Ø 100 ≤ 130 m², 1 par 100 à 150 m², trop-plein 1 par EEP (obligatoire)",
-     "origine": "referentiel-couverture.md §9",
-     "valeur_actuelle": "Ø80 ≤ 70 m² ; Ø100 ≤ 130 m²",
-     "verdict": "a_confirmer",
-     "bonne_valeur": "non trouvé dans une source lisible ; contredit la règle « 1 cm²/m² » d'etancheur.md (Ø 80 = 50 cm² → 50 m² ; Ø 100 = 78 cm² → 78 m²)",
-     "sources": [
-      "S303"
-     ],
-     "explication": "Les deux règles internes se contredisent ; la forme (tronconique) change le résultat. Le nombre d'EEP se lit au devis."
-    },
-    {
      "ratio": "Bouteille de propane 13 kg pour 60 à 80 m² de bicouche",
      "origine": "referentiel-couverture.md §9",
      "valeur_actuelle": "60-80 m²",
@@ -81835,20 +81839,6 @@
      "sources": [
       "S200"
      ]
-    },
-    {
-     "article": "Entrée d'eaux pluviales (EEP), trop-plein, crapaudine",
-     "ce_que_le_vendeur_demande": [
-      "Ø de la descente",
-      "matière (bitume, plomb, PVC, alu)",
-      "platine à souder ou à coller",
-      "avec ou sans crapaudine"
-     ],
-     "unite_de_vente": "pièce",
-     "conditionnement": "à l'unité",
-     "sources": [
-      "S303"
-     ]
     }
    ],
    "perimetre": "Écrans souples de sous-toiture (NF DTU 40.29), contre-lattage, adhésifs ; étanchéité de toiture-terrasse (NF DTU 43.1, 43.3, 43.4, 43.5) : membranes bitume SBS, EIF, isolants, relevés, évacuations, EPDM, PVC."
@@ -81868,8 +81858,8 @@
        "statut": "confirme",
        "sources": [
         "S301",
-        "S304",
-        "S305"
+        "S303",
+        "S304"
        ],
        "libelle_source": "recouvrement longitudinal (galon)",
        "condition": "bicouche soudé, NF DTU 43.1 / 43.3 / 43.4 ; 10 à 12 cm pour une 1re couche fixée mécaniquement (fixations dans le recouvrement)",
@@ -81883,11 +81873,11 @@
          "extrait": "Largeur du galon de recouvrement ≥ 60 mm"
         },
         {
-         "source": "S304",
+         "source": "S303",
          "extrait": "Largeur minimale du recouvrement longitudinal (cm) … 6"
         },
         {
-         "source": "S305",
+         "source": "S304",
          "extrait": "recouvrement longitudinal de 6 cm"
         }
        ]
@@ -81905,7 +81895,7 @@
        "unite": "cm",
        "statut": "a_confirmer",
        "sources": [
-        "S305"
+        "S304"
        ],
        "libelle_source": "recouvrement en about de lé",
        "condition": "feuille autoadhésive Adepar JS (Siplast) ; about soudé : valeur non trouvée",
@@ -81915,7 +81905,7 @@
        "raison": "Une seule fiche (autoadhésif). Pour la feuille soudée, etancheur.md retient 10 cm par défaut sans source ; à lire dans le DTU 43.1 ou un cahier des prescriptions de pose.",
        "preuves": [
         {
-         "source": "S305",
+         "source": "S304",
          "extrait": "recouvrement en about de lé de 15 cm"
         }
        ]
@@ -81942,8 +81932,8 @@
            "statut": "confirme",
            "sources": [
             "S301",
-            "S306",
-            "S307"
+            "S305",
+            "S306"
            ],
            "libelle_source": "format de rouleau",
            "condition": "ELASTOPHENE FLAM 25 : 7 × 1 m, ≈ 25 kg ; FLAM S 25, FLAM 180-25, 70-25, ELASTOPHENE 25 : aussi 7 × 1 m",
@@ -81957,11 +81947,11 @@
              "extrait": "Dimensions du rouleau* 7mx1m ; Poids du rouleau Environ 25 kg"
             },
             {
-             "source": "S306",
+             "source": "S305",
              "extrait": "7mx1m … Environ 25 kg"
             },
             {
-             "source": "S307",
+             "source": "S306",
              "extrait": "Sous-couche d'étanchéité Soprema 7m²"
             }
            ]
@@ -82016,8 +82006,8 @@
        "unite": "m²",
        "statut": "une_source",
        "sources": [
-        "S304",
-        "S308"
+        "S303",
+        "S307"
        ],
        "libelle_source": "format de rouleau",
        "condition": "Paradiene FM R4, Parastyrene FM JS, Paracier G VV 100 : 10 × 1 m (32 à 43 kg) ; Paradiene FM : 7,5 × 1 m",
@@ -82028,11 +82018,11 @@
        "raison": "Deux notices du même fabricant en désaccord.",
        "preuves": [
         {
-         "source": "S304",
+         "source": "S303",
          "extrait": "Paradiene FM R4 10 x 1 m 32 kg* ; * Les rouleaux doivent être portés par deux personnes"
         },
         {
-         "source": "S308",
+         "source": "S307",
          "extrait": "Paradiene FM / FM R4 1 x 7,5 m 25 kg 40"
         }
        ],
@@ -82051,10 +82041,10 @@
        "unite": "m²",
        "statut": "confirme",
        "sources": [
-        "S309",
+        "S308",
         "S302",
-        "S310",
-        "S311"
+        "S309",
+        "S310"
        ],
        "libelle_source": "format de rouleau",
        "condition": "ELASTOPHENE FLAM 25 AR : 6 × 1 m, ≈ 25 kg",
@@ -82065,7 +82055,7 @@
        "ecart": "Sopralène Flam 180 AR existe en 6 × 1 et 8 × 1 m ; Paradiene 40.1 GS 6 × 1 m 32 kg (ancienne notice : 8 × 1 m) ; Paradiene 30.1 GS 10 × 1 m sur catalogue ancien.",
        "preuves": [
         {
-         "source": "S309",
+         "source": "S308",
          "extrait": "Dimensions du rouleau* 6mx1m ; Environ 25 kg"
         },
         {
@@ -82073,11 +82063,11 @@
          "extrait": "Paradiene 30.1 GS 6mx1m 25 kg"
         },
         {
-         "source": "S310",
+         "source": "S309",
          "extrait": "SBS 6x1m"
         },
         {
-         "source": "S311",
+         "source": "S310",
          "extrait": "ardoisée 6 x 1 m"
         }
        ]
@@ -82095,8 +82085,8 @@
        "unite": "l/m²",
        "statut": "confirme",
        "sources": [
-        "S312",
-        "S313"
+        "S311",
+        "S312"
        ],
        "condition": "Elastocol 500 : 0,15 à 0,25 l/m² en une couche ; béton absorbant ≈ 0,25 l/m² (30 l ≈ 120 m²) ; métal ≈ 0,15 l/m² (30 l ≈ 200 m²)",
        "regions": [
@@ -82105,11 +82095,11 @@
        "ecart": "Soprema en litres (0,15-0,25 l/m², masse volumique ≈ 0,95 kg/l, soit 0,14-0,24 kg/m²) ; Siplast en masse, plage plus large (0,10-0,35 kg/m²). Les deux s'accordent sur ≈ 0,25 l/m² sur béton.",
        "preuves": [
         {
-         "source": "S312",
+         "source": "S311",
          "extrait": "Consommations indicatives en une couche : 0,15 à 0,25 l/m²"
         },
         {
-         "source": "S313",
+         "source": "S312",
          "extrait": "consommation comprise entre 100 g/m² et 350 g/m² selon la porosité du support"
         }
        ]
@@ -82121,8 +82111,8 @@
        "unite": "l",
        "statut": "confirme",
        "sources": [
-        "S312",
-        "S313"
+        "S311",
+        "S312"
        ],
        "condition": "Soprema Elastocol 500 : bidons de 5 et 30 l ; Siplast Primer : 2, 10 ou 25 l ; Impression Veral : 10 ou 25 l ; Eco-Activ Primer : 1, 10 ou 20 l",
        "regions": [
@@ -82130,11 +82120,11 @@
        ],
        "preuves": [
         {
-         "source": "S312",
+         "source": "S311",
          "extrait": "Bidons de 5 et 30 litres"
         },
         {
-         "source": "S313",
+         "source": "S312",
          "extrait": "Siplast Primer : bidons de 2, 10 ou 25 l"
         }
        ]
@@ -82160,8 +82150,8 @@
            "unite": "m²",
            "statut": "une_source",
            "sources": [
-            "S314",
-            "S315"
+            "S313",
+            "S314"
            ],
            "libelle_source": "format de panneau",
            "condition": "EFIGREEN ALU+ : 600 × 600 mm (format standard) ; version XL 1 200 × 1 000 ou 2 500 × 1 200 mm",
@@ -82172,11 +82162,11 @@
            "raison": "Le DTA Chausson n'a été vu que dans un extrait de recherche, pas lu.",
            "preuves": [
             {
-             "source": "S314",
+             "source": "S313",
              "extrait": "Longueur x largeur 600 mm x 600 mm"
             },
             {
-             "source": "S315",
+             "source": "S314",
              "extrait": "600 x 600 mm (d'après la recherche, non téléchargé)"
             }
            ]
@@ -82205,8 +82195,8 @@
            "unite": "m²",
            "statut": "confirme",
            "sources": [
-            "S316",
-            "S317"
+            "S315",
+            "S316"
            ],
            "libelle_source": "format de panneau",
            "condition": "Rockacier B nu / B Soudable : 1 200 × 1 000 mm, 40 à 80 mm (Soudable)",
@@ -82215,11 +82205,11 @@
            ],
            "preuves": [
             {
-             "source": "S316",
+             "source": "S315",
              "extrait": "Dimensions (mm) 1200 x 1000"
             },
             {
-             "source": "S317",
+             "source": "S316",
              "extrait": "Longueur : 120 cm … Largeur : 100 cm"
             }
            ]
@@ -82240,8 +82230,8 @@
        "unite": "cm",
        "statut": "confirme",
        "sources": [
-        "S318",
-        "S319"
+        "S317",
+        "S318"
        ],
        "libelle_source": "hauteur minimale au-dessus de la protection",
        "condition": "valeur courante ; 10, 15 ou 25 cm selon la nature de la protection (NF DTU 43.1)",
@@ -82251,11 +82241,11 @@
        "ecart": "La valeur dépend de la protection (autoprotégée, gravillons, dalles) et de la pente : l'AQC donne 100 / 150 / 250 mm ; 15 cm reste le cas courant.",
        "preuves": [
         {
-         "source": "S318",
+         "source": "S317",
          "extrait": "H 100 150 250 mm … Selon nature de la protection … Selon NF DTU 43.1"
         },
         {
-         "source": "S319",
+         "source": "S318",
          "extrait": "hauteur conforme au DTU 0,15 m (schéma)"
         }
        ]
@@ -82273,8 +82263,8 @@
        "unite": "cm",
        "statut": "confirme",
        "sources": [
-        "S320",
-        "S321"
+        "S319",
+        "S320"
        ],
        "libelle_source": "largeur de bande",
        "condition": "bande de 0,25 m en rouleau de 10 m (Soprema) ; 25 ou 33 cm (Derbigum, 33 cm sur pare-vapeur si isolant > 130 mm)",
@@ -82283,11 +82273,11 @@
        ],
        "preuves": [
         {
-         "source": "S320",
+         "source": "S319",
          "extrait": "Équerre d'étanchéité Soprema 0,25 x 10 m"
         },
         {
-         "source": "S321",
+         "source": "S320",
          "extrait": "Le DERBISTRIP (25 cm) est utilisé pour réaliser les équerres de renfort des relevés"
         }
        ]
@@ -82341,7 +82331,7 @@
            "unite": "m²",
            "statut": "a_confirmer",
            "sources": [
-            "S322"
+            "S321"
            ],
            "libelle_source": "format de rouleau",
            "condition": "V-Gard : 50 × 1,08 m (fiche Batiproduits) ; Sd 1 500 m",
@@ -82352,7 +82342,7 @@
            "raison": "Une seule fiche, surface ambiguë.",
            "preuves": [
             {
-             "source": "S322",
+             "source": "S321",
              "extrait": "Longueur : 50 m - Largeur : 1.08 m - Surface : 50 m² / rouleau"
             }
            ]
@@ -82381,7 +82371,7 @@
            "unite": "m²",
            "statut": "une_source",
            "sources": [
-            "S323"
+            "S322"
            ],
            "libelle_source": "format de rouleau",
            "condition": "Soprema Elastovap : 7 × 1 m, ≈ 25 kg (pare-vapeur courant sur maçonnerie)",
@@ -82391,7 +82381,7 @@
            "raison": "Format lu dans un extrait de recherche, fiche non téléchargée.",
            "preuves": [
             {
-             "source": "S323",
+             "source": "S322",
              "extrait": "1 x 7 m (d'après la recherche)"
             }
            ]
@@ -82412,8 +82402,8 @@
        "unite": "m de large",
        "statut": "a_confirmer",
        "sources": [
-        "S324",
-        "S325"
+        "S323",
+        "S324"
        ],
        "libelle_source": "format de rouleau",
        "condition": "RubberCover 1,1-1,14 mm : 3,05 × 7,62 m (23,2 m²) en France ; 3,05 × 30,5 m (93 m²) chez un négoce anglais ; bâche sur mesure",
@@ -82423,11 +82413,11 @@
        "raison": "Formats différents selon le pays ; la colle (BA-2012) varie de 2,35 à 12 m²/l selon les sources : non tranché.",
        "preuves": [
         {
-         "source": "S324",
+         "source": "S323",
          "extrait": "93.03 m2 Per Roll (30.5 x 3.05m)"
         },
         {
-         "source": "S325",
+         "source": "S324",
          "extrait": "rouleaux de 3,05 m x 7,62 m (d'après la recherche)"
         }
        ]
@@ -82445,7 +82435,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S303",
+        "S325",
         "S326"
        ],
        "libelle_source": "règle de dimensionnement",
@@ -82456,7 +82446,7 @@
        "raison": "Tableau FFB réservé aux adhérents, DTU non lu ; la règle 1 cm²/m² et l'obligation du trop-plein ne viennent que de forums et du référentiel interne. De toute façon le nombre d'EEP se lit au devis (règle numéro un).",
        "preuves": [
         {
-         "source": "S303",
+         "source": "S325",
          "extrait": "La formule de Bazin … conservée pour les gouttières, les naissances et les descentes d'une toiture avec revêtement d'étanchéité"
         },
         {
@@ -82526,7 +82516,7 @@
        "statut": "une_source",
        "sources": [
         "S301",
-        "S309"
+        "S308"
        ],
        "libelle_source": "surface de membrane par m² de terrasse (recouvrements seuls)",
        "condition": "rouleau 1 m, galon 6 cm, about 10 cm : 7 × 1 → 0,94 × 6,9 = 6,49 m² utiles (×1,079) ; 6 × 1 → 0,94 × 5,9 = 5,55 (×1,081) ; hors chutes et relevés",
@@ -82540,7 +82530,7 @@
          "extrait": "Largeur du galon de recouvrement ≥ 60 mm"
         },
         {
-         "source": "S309",
+         "source": "S308",
          "extrait": "Dimensions du rouleau* 6mx1m"
         }
        ]
@@ -82580,8 +82570,8 @@
      "verdict": "corrige",
      "bonne_valeur": "bidons en LITRES : 5 ou 30 l (Soprema Elastocol 500), 2, 10 ou 25 l (Siplast Primer)",
      "sources": [
-      "S312",
-      "S313"
+      "S311",
+      "S312"
      ],
      "explication": "Aucun EIF trouvé vendu en kg ; la contenance dépend de la marque, à demander ou lire au devis."
     },
@@ -82592,8 +82582,8 @@
      "verdict": "corrige",
      "bonne_valeur": "0,25 l/m² sur béton (0,15 l/m² sur métal)",
      "sources": [
-      "S312",
-      "S313"
+      "S311",
+      "S312"
      ],
      "explication": "0,3 kg/m² est dans la plage Siplast mais au-dessus du haut de plage Soprema ; 0,25 l/m² s'accorde avec les deux et avec l'unité de vente (litres)."
     },
@@ -82616,9 +82606,9 @@
      "verdict": "confirme",
      "bonne_valeur": "6 m² (Soprema Flam 25 AR, Siplast 30.1 GS) ; 8 × 1 m chez Sopralène Flam 180 AR",
      "sources": [
-      "S309",
+      "S308",
       "S302",
-      "S310"
+      "S309"
      ],
      "explication": "Trois sources dont deux fabricants."
     },
@@ -82630,7 +82620,7 @@
      "bonne_valeur": "×1,08 pour les recouvrements seuls (galon 6 cm + about 10 cm), plus chutes ; relevés à compter à part (ml × développé)",
      "sources": [
       "S301",
-      "S309"
+      "S308"
      ],
      "explication": "Mêler relevés et partie courante dans un seul coefficient fausse les petites terrasses très bordées ; about soudé de 10 cm non sourcé."
     },
@@ -82641,8 +82631,8 @@
      "verdict": "a_confirmer",
      "bonne_valeur": "format à lire ou demander : Efigreen Alu+ standard 600 × 600 (0,36 m²) ; 1 200 × 1 000 en Efigreen Alu+ XL / Acier, Rockacier",
      "sources": [
-      "S314",
-      "S316"
+      "S313",
+      "S315"
      ],
      "explication": "Le défaut 1,2 m² divise par 3,3 le nombre de panneaux si l'artisan prend du 600 × 600."
     },
@@ -82662,8 +82652,8 @@
      "verdict": "corrige",
      "bonne_valeur": "galon 6 cm ; rouleau 6 × 1 m le plus courant (8 × 1 m existe)",
      "sources": [
-      "S309",
-      "S304"
+      "S308",
+      "S303"
      ],
      "explication": "Le galon des autoprotégées est le même que celui des sous-couches."
     },
@@ -82674,8 +82664,8 @@
      "verdict": "corrige",
      "bonne_valeur": "≈ 0,25 l/m² béton ; bidons 5/10/25/30 l",
      "sources": [
-      "S312",
-      "S313"
+      "S311",
+      "S312"
      ],
      "explication": "Unité de vente en litres."
     },
@@ -82686,8 +82676,8 @@
      "verdict": "confirme",
      "bonne_valeur": "15 cm courant ; 10, 15 ou 25 cm selon la protection",
      "sources": [
-      "S318",
-      "S319"
+      "S317",
+      "S318"
      ],
      "explication": "La part « 10 cm en bac acier » n'a pas été vérifiée."
     },
@@ -82698,10 +82688,21 @@
      "verdict": "confirme",
      "bonne_valeur": "équerre 0,25 m (rouleau 10 m) ; 33 cm quand l'isolant dépasse 130 mm (Derbigum)",
      "sources": [
-      "S320",
-      "S321"
+      "S319",
+      "S320"
      ],
      "explication": ""
+    },
+    {
+     "ratio": "EEP : Ø 80 ≤ 70 m², Ø 100 ≤ 130 m², 1 par 100 à 150 m², trop-plein 1 par EEP (obligatoire)",
+     "origine": "referentiel-couverture.md §9",
+     "valeur_actuelle": "Ø80 ≤ 70 m² ; Ø100 ≤ 130 m²",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "non trouvé dans une source lisible ; contredit la règle « 1 cm²/m² » d'etancheur.md (Ø 80 = 50 cm² → 50 m² ; Ø 100 = 78 cm² → 78 m²)",
+     "sources": [
+      "S325"
+     ],
+     "explication": "Les deux règles internes se contredisent ; la forme (tronconique) change le résultat. Le nombre d'EEP se lit au devis."
     }
    ],
    "comptoir": [
@@ -82730,7 +82731,7 @@
      "unite_de_vente": "rouleau",
      "conditionnement": "1 × 6 m courant (1 × 8 m Sopralène Flam 180 AR)",
      "sources": [
-      "S309",
+      "S308",
       "S302"
      ]
     },
@@ -82744,8 +82745,8 @@
      "unite_de_vente": "bidon (litres)",
      "conditionnement": "5 / 30 l Soprema ; 2 / 10 / 25 l Siplast",
      "sources": [
-      "S312",
-      "S313"
+      "S311",
+      "S312"
      ]
     },
     {
@@ -82760,8 +82761,8 @@
      "unite_de_vente": "colis ou panneau",
      "conditionnement": "PIR Efigreen Alu+ 600 × 600 ; Rockacier 1 200 × 1 000",
      "sources": [
-      "S314",
-      "S316"
+      "S313",
+      "S315"
      ]
     },
     {
@@ -82773,8 +82774,22 @@
      "unite_de_vente": "rouleau",
      "conditionnement": "0,25 × 10 m",
      "sources": [
-      "S320",
-      "S321"
+      "S319",
+      "S320"
+     ]
+    },
+    {
+     "article": "Entrée d'eaux pluviales (EEP), trop-plein, crapaudine",
+     "ce_que_le_vendeur_demande": [
+      "Ø de la descente",
+      "matière (bitume, plomb, PVC, alu)",
+      "platine à souder ou à coller",
+      "avec ou sans crapaudine"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "à l'unité",
+     "sources": [
+      "S325"
      ]
     }
    ]
@@ -87153,163 +87168,163 @@
   },
   {
    "id": "S303",
-   "titre": "FFB, dimensionnement des évacuations des eaux pluviales (NF DTU 60.11 P3)",
-   "url": "https://www.ffbatiment.fr/techniques-batiment/equipements-techniques/plomberie-sanitaire/dossier/le-dimensionnement-des-evacuations-des-eaux-pluviales",
-   "type": "guide",
-   "consulte": "2026-11-19"
-  },
-  {
-   "id": "S304",
    "titre": "Siplast, notice gamme Paracier, bicouche sur bac acier (Samse, n° 1166309)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1166309.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S305",
+   "id": "S304",
    "titre": "Siplast, notice Adepar JS / JS R4 (Samse, n° 869978)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_869978.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S306",
+   "id": "S305",
    "titre": "Soprema, fiche WPBFR211/b ELASTOPHENE FLAM 180-25 (Samse, n° 908847)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908847.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S307",
+   "id": "S306",
    "titre": "Castorama, sous-couche d'étanchéité Soprema 7 m²",
    "url": "https://www.castorama.fr/sous-couche-d-etancheite-soprema-7m-/3434550464741_CAFR.prd",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S308",
+   "id": "S307",
    "titre": "Siplast, notice Paradiene FM / FM R4 (Samse, n° 1053977)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1053977.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S309",
+   "id": "S308",
    "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
    "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S310",
+   "id": "S309",
    "titre": "Bricomarché, Chape Alu Mammouth SBS 6 × 1 m (source du tiroir)",
    "url": "https://www.bricomarche.com/p/couche-de-finition-alu-chape-alu-mammouth-sbs-6x1m/3434550871617",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S311",
+   "id": "S310",
    "titre": "Brico Dépôt, couche d'étanchéité supérieure ardoisée 6 × 1 m",
    "url": "https://www.bricodepot.fr/p/3434550464697/couche-d-etancheite-superieure-ardoisee-6-x-1-m-noire",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S312",
+   "id": "S311",
    "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S313",
+   "id": "S312",
    "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
    "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S314",
+   "id": "S313",
    "titre": "Soprema, fiche INSFR005-1/d EFIGREEN ALU+ (Samse, n° 1159160)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1159160.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S315",
+   "id": "S314",
    "titre": "Chausson, DTA Efigreen Alu+",
    "url": "https://cdn.chausson.fr/catalog-document/02605c60-6ea5-4f60-a577-09507634543a/dtadocumenttechniquedapplication-776183.pdf",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S316",
+   "id": "S315",
    "titre": "Rockwool, fiche Rockacier B nu (Samse, n° 766222)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_766222.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S317",
+   "id": "S316",
    "titre": "Batiproduits, Rockacier B Soudable (Rockwool)",
    "url": "https://www.batiproduits.com/fiche/produits/isolant-en-laine-de-roche-revetue-de-bitume-pour-p68902958.html",
    "type": "autre",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S318",
+   "id": "S317",
    "titre": "AQC, Mémo chantier relevés d'étanchéité non isolés, terrasses béton (2021, cite le NF DTU 43.1)",
    "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Releves-Etancheite-Non-Isoles-Terrasses-Beton-AQC.pdf",
    "type": "guide",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S319",
+   "id": "S318",
    "titre": "Siplast, fiche Supracoating RLV (Ciffréo Bona)",
    "url": "https://www.ciffreobona.fr/userfiles/file/PDF/5/136/451/10792/supracoating_rlv.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S320",
+   "id": "S319",
    "titre": "Castorama, Équerre d'étanchéité Soprema 0,25 × 10 m",
    "url": "https://www.castorama.fr/equerre-d-etancheite-soprema-0-25-x-10-m/3434550871785_CAFR.prd",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S321",
+   "id": "S320",
    "titre": "Derbigum, fiche DERBISTRIP 25 / 33 cm (diffusée par Chausson)",
    "url": "https://cdn.chausson.fr/catalog-document/e0f8851b-e2f6-4f22-92d9-5ed13c262acc/tds-fr-948-derbistrip.pdf",
    "type": "fabricant",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S322",
+   "id": "S321",
    "titre": "Batiproduits, V-Gard (Holcim Elevate) pare-vapeur toiture-terrasse",
    "url": "https://www.batiproduits.com/amp/fiche/produits/ecran-pare-vapeur-en-systeme-de-toiture-terrasse-p322700310.html",
    "type": "autre",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S323",
+   "id": "S322",
    "titre": "Quincaillerie Angles, Elastovap Soprema 1 × 7 m",
    "url": "https://www.quincaillerie-angles.fr/pdf-product/view/index/id/94779",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S324",
+   "id": "S323",
    "titre": "Huws Gray (négoce UK), Elevate RubberCover EPDM 1,14 mm, rouleau 30,5 × 3,05 m",
    "url": "https://www.huwsgray.co.uk/epdm-rubber-roofing/firestone-epdm-045(114mm)-fsrcr3m-per-m2-9303-m2-per-roll-(-305m-x-305m-)-100011308-5008989",
    "type": "negoce",
    "consulte": "2026-11-19"
   },
   {
-   "id": "S325",
+   "id": "S324",
    "titre": "Holcim Elevate, brochure RubberCover EPDM (FR)",
    "url": "https://holcimelevate.com/content/dam/elevateemea/documents/fr/roofing/rubbercover-epdm/product-literature/rc-lit-bro-fr-02779-secured.pdf",
    "type": "fabricant",
+   "consulte": "2026-11-19"
+  },
+  {
+   "id": "S325",
+   "titre": "FFB, dimensionnement des évacuations des eaux pluviales (NF DTU 60.11 P3)",
+   "url": "https://www.ffbatiment.fr/techniques-batiment/equipements-techniques/plomberie-sanitaire/dossier/le-dimensionnement-des-evacuations-des-eaux-pluviales",
+   "type": "guide",
    "consulte": "2026-11-19"
   },
   {
