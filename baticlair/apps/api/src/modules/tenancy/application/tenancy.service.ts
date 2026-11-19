@@ -1,4 +1,4 @@
-import { normalizeTrades } from "@baticlair/domain";
+import { departement as departementConnu, normalizeTrades } from "@baticlair/domain";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { normalizeCompanyName } from "../domain/company-name.js";
@@ -28,8 +28,13 @@ export class TenancyService {
   }
 
   /** Onboarding : crée l'entreprise et en fait l'utilisateur propriétaire. */
-  async createCompany(userId: string, rawName: string, trades: readonly string[] = []): Promise<CompanyMembershipView> {
-    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades));
+  /**
+   * PAGES RÉGIONALES (Greg, 19 novembre 2026) : le département choisi à l'inscription (depuis la carte d'une page régionale
+   * ou la liste de l'écran) est gardé s'il est connu ; un code inconnu est ignoré, jamais un refus.
+   */
+  async createCompany(userId: string, rawName: string, trades: readonly string[] = [], departement?: string | null): Promise<CompanyMembershipView> {
+    const dep = departement ? (departementConnu(departement)?.code ?? null) : null;
+    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades), dep);
     await this.apresCreation(vue.companyId).catch(() => undefined);
     return vue;
   }

@@ -133,8 +133,9 @@ export class AchatsGroupesV1Service {
   /* --------------------------------------------------------------------------------- l'entreprise */
 
   private async zone(companyId: string): Promise<{ code: string; nom: string } | null> {
-    const c = await this.prisma.company.findUnique({ where: { id: companyId }, select: { address: true } });
-    const code = zoneDuCodePostal(c?.address);
+    const c = await this.prisma.company.findUnique({ where: { id: companyId }, select: { address: true, departement: true } });
+    // Le code postal de l'adresse d'abord ; sinon le département choisi à l'inscription (pages régionales, 19 novembre 2026).
+    const code = zoneDuCodePostal(c?.address) ?? (departementConnu(c?.departement)?.code ?? null);
     if (!code) return null;
     return { code, nom: departementConnu(code)?.nom ?? code };
   }

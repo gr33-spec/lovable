@@ -103,6 +103,7 @@ function Accueil() {
             { href: "/admin/pilotage", texte: "Tableau de bord détaillé" },
             { href: "/admin/signalements", texte: "Signalements" },
             { href: "/admin/pages-publiques", texte: "Pages publiques" },
+            { href: "/admin/liste-attente", texte: "Liste d'attente des métiers" },
             { href: "/admin/supervision", texte: "Supervision" },
             { href: "/admin/promos", texte: "Codes promo" },
             { href: "/admin/corrections", texte: "Corrections les plus fréquentes" },
