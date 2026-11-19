@@ -294,3 +294,4 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 - « recette complète » : lancer tous les testeurs (testeur-artisan, testeur-negoce, testeur-mission, saboteur, rush, comptable, relecteur, mauvais-payeur, testeur-terrain), puis rendre UN rapport classé par gravité avec des propositions. Ne rien corriger sans l'accord de Greg.
 - Les testeurs ne travaillent que sur l'environnement de test ou en local.
+- Deux agents de plus (Greg, 19 novembre 2026) : `specialiste-ui-ux` (lisibilité, contraste, toucher, mots, clair et sombre) et `developpeur-senior` (revue de code, cas limites, tests manquants). Comme les autres, ils proposent et ne corrigent rien.
