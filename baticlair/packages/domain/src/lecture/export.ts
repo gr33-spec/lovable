@@ -27,6 +27,9 @@ export function exportPourLecture(ref: Referential): string {
           p.default && typeof p.default.value === "string" ? `défaut ${p.default.value}` : null,
           choices ? `choix : ${choices}` : null,
           written ? `valeurs écrites : ${written}` : null,
+          // Les mots du devis qui disent cette donnée (« bacs de 4 m » : la longueur du rampant). Greg, 18 novembre 2026 :
+          // « Si l'information fait partie du devis, il ne faut évidemment pas poser la question ».
+          p.textLabels?.length ? `le devis peut la dire : ${p.textLabels.slice(0, 6).map((t) => `« ${t} »`).join(", ")}` : null,
           // Une seule réponse pour tout le devis (`groupe`) : la question du groupe, posée une fois, jamais une par pièce.
           p.groupe ? `UNE SEULE question pour tout le devis, jamais une par pièce ni par ligne : « ${p.groupe.question} »` : p.question ? `question : « ${p.question} »` : null,
         ].filter(Boolean);

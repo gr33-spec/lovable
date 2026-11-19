@@ -268,11 +268,15 @@ export function ProjectTakeoff({
       setRecap(true);
       marquerAssistantOuvert(projectId);
     });
-  // Étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cases, « Continuer », dès qu'il y a une suggestion,
-  // avant les questions de précision et même s'il n'en reste aucune (alors avant la liste). Un devis de plusieurs lots
+  // Étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cases, « Continuer », dès qu'il y a une suggestion.
+  // Règle changée (Greg, 18 novembre 2026, soir) : elle arrive À LA FIN, après les questions et juste avant le quantitatif.
+  // Avant : après la lecture, avant les questions. Tant qu'une question reste à poser, la discussion la pose et montre les
+  // cases après la dernière réponse ; sans aucune question, la carte seule, avant la liste. Un devis de plusieurs lots
   // passe d'abord par sa carte « Parties du devis ».
   const suggestions = takeoff.status === "draft" && !archived && phase !== "calcul" && !lotsAConfirmer(takeoff) ? suggestionsAProposer(takeoff) : null;
-  if (suggestions) return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
+  // Pendant les questions, c'est la discussion qui montre les cases (sans jamais se fermer) ; ici, seulement une liste déjà
+  // calculée dont l'étape n'est pas passée.
+  if (suggestions && phase !== "questions") return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
     // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
     if (lotsAConfirmer(takeoff)) {

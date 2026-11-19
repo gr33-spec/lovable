@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.18-56",
+  "version": "roofing-2026.11.19-58",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -101,6 +101,23 @@
       "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       "retrievedAt": "2026-10-04",
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
+    },
+    {
+      "id": "fondateur-reponses-2026-11-18",
+      "kind": "trade_practice",
+      "title": "Réponses du fondateur (couvreur) : couverture zinc à tasseaux",
+      "documentRef": "Message du fondateur dans la conversation de travail, 2026-11-18, après son devis D-2026-024",
+      "retrievedAt": "2026-11-18",
+      "note": "« En général : bobine de 65 cm de largeur, hauteur de tasseau 50 mm, entraxe 62, les pattes sont souvent faites avec des chutes de zinc (4 cm par 15 cm environ). Parfois les bacs sont faits dans des bobines de 50 cm de large. »"
+    },
+    {
+      "id": "vmzinc-tasseaux",
+      "kind": "manufacturer",
+      "title": "VMZINC, « Couverture à tasseaux », descriptif type (DTU 40.41)",
+      "publisher": "VMZINC",
+      "url": "https://www.vmzinc.com/getmedia/53fd3606-92a5-440e-9110-1377f96be36e/couv-tasseau-14-03-2022.doc",
+      "retrievedAt": "2026-11-18",
+      "note": "Largeur développée 650 mm : entraxe des tasseaux 630 mm (tasseaux de 40) ou 620 mm (tasseaux de 50) ; 500 mm : 480 ou 470 mm, imposée en région 3 site exposé et en région 4. Tasseaux de 40 mm si la projection horizontale du rampant est inférieure à 8 m, de 50 mm sinon. Reliefs latéraux 35 / 45 mm. Pattes à tasseaux en zinc de 40 mm de large, tous les 50 cm. Couvre-joints en éléments de 1 m, recouvrement de 50 mm au moins. Pointes Ø 3,4 ou vis Ø 4, longueur 70 mm (tasseaux de 40) ou 80 mm (tasseaux de 50)."
     },
     {
       "id": "fondateur-reponses-2026-10-05",
@@ -311,6 +328,45 @@
         "couverture zinc",
         "zinc a joint debout",
         "jdb"
+      ]
+    },
+    {
+      "code": "batten_seam",
+      "label": "Couverture zinc à tasseaux",
+      "needUnit": "m2",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "zinc a tasseaux",
+        "couverture a tasseaux",
+        "zinc sur tasseaux",
+        "a tasseaux",
+        "sur tasseaux"
+      ]
+    },
+    {
+      "code": "zinc_batten",
+      "label": "Tasseau bois pour couverture zinc",
+      "needUnit": "m",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "tasseau trapezoidal",
+        "tasseaux trapezoidaux",
+        "tasseau zinc",
+        "tasseaux bois"
+      ]
+    },
+    {
+      "code": "batten_cap",
+      "label": "Couvre-joint zinc de tasseau",
+      "needUnit": "m",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "couvre-joint de tasseau",
+        "couvre-joints de tasseaux",
+        "couvre joint tasseau"
       ]
     },
     {
@@ -4939,6 +4995,68 @@
             "verification": {
               "status": "verified",
               "verifiedAt": "2026-10-04",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tasseau-zinc-50",
+      "family": "zinc_batten",
+      "label": "Tasseau bois trapézoïdal de 50 mm pour couverture zinc, au mètre linéaire",
+      "shortLabel": "Tasseaux bois trapézoïdaux de 50 mm",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "ml",
+          "label": {
+            "one": "ml",
+            "many": "ml"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "m",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "couvre-joint-tasseau-zinc",
+      "family": "batten_cap",
+      "label": "Couvre-joint zinc pour tasseau de 50 mm, au mètre linéaire (aspect et épaisseur du chantier)",
+      "shortLabel": "Couvre-joints zinc de tasseaux",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "ml",
+          "label": {
+            "one": "ml",
+            "many": "ml"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "m",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
@@ -13584,6 +13702,452 @@
       ]
     },
     {
+      "id": "couverture-zinc-tasseaux",
+      "trade": "roofing",
+      "section": "principal",
+      "label": "Couverture zinc à tasseaux",
+      "triggers": [
+        "batten_seam"
+      ],
+      "params": [
+        {
+          "key": "surface",
+          "label": "Surface de toiture",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface du toit ?",
+          "fromLineQuantity": true,
+          "choices": [
+            {
+              "label": "50 m²",
+              "value": "50"
+            },
+            {
+              "label": "100 m²",
+              "value": "100"
+            },
+            {
+              "label": "150 m²",
+              "value": "150"
+            },
+            {
+              "label": "200 m²",
+              "value": "200"
+            }
+          ]
+        },
+        {
+          "key": "epaisseur_zinc",
+          "label": "Épaisseur du zinc",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Épaisseur du zinc ?",
+          "textLabels": [
+            "epaisseur",
+            "ep"
+          ],
+          "default": {
+            "value": "0.65",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "0,65 mm standard (§7)"
+          },
+          "choices": [
+            {
+              "label": "0,65 mm",
+              "value": "0.65"
+            },
+            {
+              "label": "0,70 mm",
+              "value": "0.7"
+            },
+            {
+              "label": "0,80 mm",
+              "value": "0.8"
+            }
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "named": true,
+          "onlyFromPrincipal": true
+        },
+        {
+          "key": "longueur_rampant",
+          "label": "Longueur du rampant",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur des bacs (le rampant, de l'égout au faîtage) ?",
+          "textLabels": [
+            "rampant",
+            "longueur des bacs",
+            "longueur de bac",
+            "longueur bac",
+            "bac"
+          ]
+        },
+        {
+          "key": "largeur_bobine_tasseaux",
+          "label": "Largeur de la bobine",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+          "neverAsk": true,
+          "textLabels": [
+            "largeur de bobine",
+            "largeur bobine",
+            "bobine",
+            "largeur developpee",
+            "developpe des bacs"
+          ],
+          "default": {
+            "value": "650",
+            "source": "fondateur-reponses-2026-11-18",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-18",
+              "verifiedBy": "Fondateur (couvreur)"
+            },
+            "version": 1,
+            "note": "bobine de 65 cm en général ; parfois 50 cm"
+          },
+          "choices": [
+            {
+              "label": "Bobine de 650 mm",
+              "value": "650"
+            },
+            {
+              "label": "Bobine de 500 mm",
+              "value": "500"
+            }
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "key": "couverture",
+          "family": "batten_seam",
+          "label": "Couverture zinc à tasseaux",
+          "measureOnly": true
+        },
+        {
+          "key": "bobine",
+          "family": "zinc_coil",
+          "label": "Zinc en bobine",
+          "keywords": [
+            "bobine"
+          ],
+          "usual": {
+            "text": "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.",
+            "source": "fondateur-reponses-2026-11-18",
+            "productId": "bobine-zinc-standard"
+          },
+          "formOf": "couverture"
+        },
+        {
+          "key": "tasseau",
+          "family": "zinc_batten",
+          "label": "Tasseaux bois",
+          "keywords": [
+            "tasseau",
+            "tasseaux"
+          ],
+          "usual": {
+            "text": "Tasseaux de bois trapézoïdaux de 50 mm, un rang entre deux bacs.",
+            "source": "fondateur-reponses-2026-11-18",
+            "productId": "tasseau-zinc-50"
+          }
+        },
+        {
+          "key": "couvre_joint",
+          "family": "batten_cap",
+          "label": "Couvre-joints zinc",
+          "keywords": [
+            "couvre-joint",
+            "couvre-joints",
+            "couvre joint",
+            "couvre joints"
+          ],
+          "usual": {
+            "text": "Un couvre-joint zinc sur chaque rang de tasseaux, en éléments de 1 m (VMZINC).",
+            "source": "vmzinc-tasseaux",
+            "productId": "couvre-joint-tasseau-zinc"
+          }
+        }
+      ],
+      "constants": {
+        "largeur_etroite": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "vmzinc-tasseaux",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Bobine de 500 : « parfois » (Greg) ; imposée en région 3 site exposé et en région 4 (VMZINC)."
+        },
+        "entraxe_650": {
+          "kind": "installation_condition",
+          "value": "620",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "« entraxe 62 » (Greg) ; VMZINC : 620 mm pour une bobine de 650 et des tasseaux de 50."
+        },
+        "entraxe_500": {
+          "kind": "installation_condition",
+          "value": "470",
+          "unit": "mm",
+          "source": "vmzinc-tasseaux",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "VMZINC : 470 mm pour une bobine de 500 et des tasseaux de 50."
+        },
+        "seuil_070": {
+          "kind": "installation_condition",
+          "value": "0.7",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "surlongueur_bac": {
+          "kind": "installation_condition",
+          "value": "0.15",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Comme le joint debout : « 15 cm par bac (10 en égout, 5 en faîtage) » (réponse du fondateur, 2026-10-04)."
+        }
+      },
+      "derived": [
+        {
+          "key": "entraxe_tasseaux",
+          "label": "Entraxe des tasseaux",
+          "unit": "mm",
+          "formula": "si(largeur_bobine_tasseaux <= regle.largeur_etroite, regle.entraxe_500, regle.entraxe_650)",
+          "shown": true,
+          "source": "vmzinc-tasseaux",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "largeur_pan",
+          "label": "Largeur du pan",
+          "unit": "m",
+          "formula": "surface / longueur_rampant",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "key": "nb_bacs",
+          "label": "Nombre de bacs",
+          "unit": "u",
+          "formula": "arrondi_sup(largeur_pan / entraxe_tasseaux)",
+          "source": "vmzinc-tasseaux",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "longueur_bac",
+          "label": "Longueur de bobine par bac",
+          "unit": "m",
+          "formula": "longueur_rampant + regle.surlongueur_bac",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "nb_rangs",
+          "label": "Rangs de tasseaux",
+          "unit": "u",
+          "formula": "nb_bacs + 1",
+          "source": "definition",
+          "verification": {
+            "status": "draft"
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "zinc-bobine-tasseaux",
+          "slot": "bobine",
+          "formula": "nb_bacs * longueur_bac * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          "unit": "m",
+          "core": true,
+          "exclusions": "Une longueur de rampant par bac plus 15 cm de surlongueur ; hors couvre-joints, bandes d'égout, de rive et de faîtage, comptés à part. Les pattes à tasseaux se font dans les chutes.",
+          "precision": "{nb_bacs} bacs × {longueur_bac|m}",
+          "designation": "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine_tasseaux|mm}",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "source": "fondateur-reponses-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "id": "tasseaux-zinc",
+          "slot": "tasseau",
+          "formula": "nb_rangs * longueur_rampant",
+          "unit": "m",
+          "core": true,
+          "exclusions": "Un rang de tasseaux de chaque côté de chaque bac, sur la longueur du rampant. Pointes ou vis de 80 mm à part.",
+          "precision": "{nb_rangs} rangs × {longueur_rampant|m}",
+          "source": "definition",
+          "verification": {
+            "status": "draft"
+          },
+          "version": 1
+        },
+        {
+          "id": "couvre-joints-tasseaux",
+          "slot": "couvre_joint",
+          "formula": "nb_rangs * longueur_rampant",
+          "unit": "m",
+          "core": true,
+          "exclusions": "Un couvre-joint par rang de tasseaux ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
+          "precision": "{nb_rangs} rangs × {longueur_rampant|m}",
+          "designation": "Couvre-joints {aspect_zinc} {epaisseur_zinc} mm pour tasseaux de 50 mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "source": "definition",
+          "verification": {
+            "status": "draft"
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
       "id": "couverture-zinc-joint-debout",
       "trade": "roofing",
       "section": "principal",
@@ -13805,35 +14369,13 @@
           "label": "Longueur du rampant",
           "unit": "m",
           "kind": "site_data",
-          "question": "Longueur du rampant (de l'égout au faîtage) ?",
+          "question": "Longueur des bacs (le rampant, de l'égout au faîtage) ?",
           "textLabels": [
-            "rampant"
-          ],
-          "default": {
-            "value": "5.5",
-            "source": "fondateur-referentiel-2026-10-03",
-            "verification": {
-              "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-            },
-            "version": 1,
-            "note": "rampant courant, jusqu'à 5,5 m"
-          },
-          "choices": [
-            {
-              "label": "Jusqu'à 5,5 m",
-              "value": "5.5"
-            },
-            {
-              "label": "5,5 à 8 m",
-              "value": "8"
-            },
-            {
-              "label": "Plus de 8 m",
-              "value": "10"
-            }
+            "rampant",
+            "longueur des bacs",
+            "longueur de bac",
+            "longueur bac",
+            "bac"
           ]
         },
         {

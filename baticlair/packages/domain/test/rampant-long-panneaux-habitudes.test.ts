@@ -13,7 +13,8 @@ const A = (v: Record<string, string>) => Object.fromEntries(Object.entries(v).ma
 
 describe("3) joint debout : rampant de plus de 10 m", () => {
   it("rampant 5,5 m : pas de question « bacs longs », 39 bacs comme avant", () => {
-    const v = readQuote(JOINT_DEBOUT, A({ faconnage: "2" }));
+    // Règle changée le 18 novembre 2026 : le rampant des bacs est écrit ou répondu, jamais supposé à 5,5 m.
+    const v = readQuote(JOINT_DEBOUT, A({ faconnage: "2", longueur_rampant: "5.5" }));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:bacs_longs");
     expect(v.toBuy.find((b) => b.needIds.includes("zinc-bacs"))?.quantity).toBe("39 bacs");
   });
@@ -66,11 +67,11 @@ describe("5) habitude « je façonne » : apprise à la deuxième confirmation",
     expect(readQuote(JOINT_DEBOUT, {}, [], enginePreferences(m, now)).questions.map((q) => q.question?.key)).toContain("param:faconnage");
     m = choose(m, "1", "chantier-2");
     expect(enginePreferences(m, now).params).toEqual({ faconnage: "1" });
-    const v = readQuote(JOINT_DEBOUT, {}, [], enginePreferences(m, now));
+    const v = readQuote(JOINT_DEBOUT, A({ longueur_rampant: "5.5" }), [], enginePreferences(m, now));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:faconnage");
     expect(v.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.quantity).toBe("221 ml");
     // La réponse de CE chantier passe devant l'habitude.
-    expect(readQuote(JOINT_DEBOUT, A({ faconnage: "2" }), [], enginePreferences(m, now)).toBuy.find((b) => b.needIds.includes("zinc-bacs"))?.quantity).toBe("39 bacs");
+    expect(readQuote(JOINT_DEBOUT, A({ faconnage: "2", longueur_rampant: "5.5" }), [], enginePreferences(m, now)).toBuy.find((b) => b.needIds.includes("zinc-bacs"))?.quantity).toBe("39 bacs");
   });
 
   it("un choix contraire sur un nouveau chantier : l'habitude est reproposée, pas appliquée en silence", () => {

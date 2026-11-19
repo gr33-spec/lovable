@@ -345,7 +345,10 @@ export class QuantitatifsService {
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: `reponses.${i}.valeur`, message: r.question }]);
       let value: EngineAnswer;
       // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
-      const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named);
+      // Comme pour l'unité : une qualité qui se nomme (l'ardoise) dont la question n'est plus ouverte au moment où sa réponse
+      // arrive (les réponses partent d'un coup ; une autre vient de changer l'état) reste une qualité qui se nomme, d'après
+      // sa fiche. Avant (18 novembre 2026) : « Ardoise d'Angers » était refusée « Not a number » et la question reposée.
+      const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named) || donneeDeLaFiche(reviewed.takeoff.trade, key)?.named === true;
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
       else if (named && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) {
         const text = r.valeur.trim();
@@ -628,8 +631,11 @@ export class QuantitatifsService {
 }
 
 /** L'unité qu'une donnée (« param:nb_descentes », « param:faconnage@noue ») porte dans la fiche de son métier, ou d'un autre. */
-function uniteDeLaFiche(trade: string, key: string): string | undefined {
+function donneeDeLaFiche(trade: string, key: string) {
   const name = key.replace(/^param:/, "").split("@")[0]!;
   const own = referentialFor(trade);
-  return [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((d) => d.key === name)?.unit || undefined;
+  return [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((d) => d.key === name);
+}
+function uniteDeLaFiche(trade: string, key: string): string | undefined {
+  return donneeDeLaFiche(trade, key)?.unit || undefined;
 }

@@ -14,7 +14,10 @@ export const calculerMaListe = (page: Page) => page.getByRole("button", { name: 
 /** Le nom du bouton à toucher ; `true` : la fonction a répondu elle-même (au clavier) ; rien : le choix par défaut. */
 type Choix = string | RegExp | Locator | true | null | undefined;
 
-/** L'étape « Suggestions » (Greg, 17 novembre 2026) : la carte à cases qui passe avant les questions. */
+/**
+ * L'étape « Suggestions » (Greg, 17 novembre 2026) : la carte à cases. Règle changée le 18 novembre 2026 : elle arrive à la
+ * fin, après la dernière question et avant « Calculer ma liste » (avant : après la lecture, avant les questions).
+ */
 export const carteSuggestions = (page: Page) => page.getByRole("group", { name: "Suggestions", exact: true });
 
 /**
@@ -25,20 +28,27 @@ export async function passerLesSuggestions(page: Page, cocher: readonly (string 
   const carte = carteSuggestions(page);
   if (!(await carte.isVisible())) return;
   for (const nom of cocher) {
+    // Comme l'artisan : on touche la ligne (large), pas la case elle-même.
     const c = carte.getByRole("checkbox", { name: nom });
-    if ((await c.count()) > 0) await c.first().check({ force: true });
+    if ((await c.count()) > 0 && !(await c.first().isChecked())) await carte.locator("label").filter({ hasText: nom }).first().click();
   }
   await carte.getByRole("button", { name: "Continuer", exact: true }).click();
   await expect(carte).toBeHidden({ timeout: 15_000 });
 }
 
-export async function repondreAuxQuestions(page: Page, choisir: (question: string, boutons: Locator) => Choix | Promise<Choix> = () => null): Promise<string[]> {
+export async function repondreAuxQuestions(
+  page: Page,
+  choisir: (question: string, boutons: Locator) => Choix | Promise<Choix> = () => null,
+  // `true` : s'arrête dès que la carte « Suggestions » est là, sans y toucher (pour la regarder).
+  arretAuxSuggestions = false,
+): Promise<string[]> {
   const boutons = boutonsDeLaQuestion(page);
   const calculer = calculerMaListe(page);
   const posees: string[] = [];
   for (let i = 0; i < 60; i++) {
     await expect(calculer.or(boutons).or(carteSuggestions(page)).first()).toBeVisible({ timeout: 15_000 });
     if (await carteSuggestions(page).isVisible()) {
+      if (arretAuxSuggestions) return posees;
       await passerLesSuggestions(page);
       continue;
     }

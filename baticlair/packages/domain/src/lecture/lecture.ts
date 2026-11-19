@@ -2,7 +2,7 @@ import { Decimal } from "../shared/decimal.js";
 import { parseUnit, type UnitCode } from "../quantity/unit.js";
 import { paramsFromContext, type ChantierContext, type SiteFact } from "../referential/context.js";
 import { CONSUMABLES_KEY, CONSUMABLES_QUESTION, type CompanyPreferences, type EngineOptions, type ParamValue, type Question, type WorkItemInput } from "../referential/engine.js";
-import { FICHE_PARAMS_CHANTIER, ficheFacts, parseFiche, parseFicheEnregistree, type FicheChantier } from "../referential/fiche.js";
+import { FICHE_PARAMS_CHANTIER, ficheFacts, paramOfDonnee, paramParNom, parseFiche, parseFicheEnregistree, type FicheChantier } from "../referential/fiche.js";
 import type { LineRole, RoleProposal } from "../referential/line-roles.js";
 import { baseOf, INSTANCE_SEP, type Referential, type Slot, type WorkItemType } from "../referential/model.js";
 import { readDimension, type LinePlan, type QuotePlan } from "../referential/plan.js";
@@ -197,6 +197,9 @@ export function parseLecture(raw: unknown): LectureDevis | null {
   };
 }
 
+/** Une ligne qui commence par « Pose », « Dépose », « Main-d'œuvre »… n'achète rien, même si le modèle l'a mal rangée. */
+const SANS_ACHAT = /^(?:pose|repose|depose|demontage|main d ?oeuvre|installation|location|evacuation|nettoyage|echafaudage|transport|deplacement|mise en oeuvre)\b/;
+
 /** Une ligne du quantitatif issue de la lecture : une fourniture (sa ligne du devis), ou une ligne sans fourniture. */
 export interface LigneLecture {
   id: string;
@@ -225,15 +228,20 @@ export function lignesDeLecture(lecture: LectureDevis, ids?: ReadonlyMap<string,
     // Une fourniture écrite avec sa quantité est une ligne du quantitatif ; une fourniture citée sans quantité sur la même
     // ligne (« et crochets de 11 ») suit la ligne écrite : le calcul la compte. Une ligne qui ne fait que citer (une ligne de
     // pose : « soudures ») garde chaque fourniture citée comme ligne, sans quantité.
-    const written = ligne.fournitures.filter((f) => f.quantite !== null);
+    // « Fourniture et pose couverture zinc à tasseaux, 32 m² » (recette en ligne du 19 novembre 2026, D-2026-024) : le
+    // modèle nomme l'article SANS quantité, puisque la quantité est celle de la ligne. Seul sur sa ligne, il la prend : c'est
+    // l'article écrit. Avant : la ligne restait « sans fourniture », et la couverture n'était jamais chiffrée.
+    const seul = ligne.role === "fourniture_et_pose" && !SANS_ACHAT.test(normalizeText(ligne.designation)) && ligne.fournitures.length === 1 && ligne.fournitures[0]!.quantite === null && ligne.quantite !== null;
+    const fournitures = seul ? [{ ...ligne.fournitures[0]!, quantite: ligne.quantite, unite: ligne.fournitures[0]!.unite ?? ligne.unite }] : ligne.fournitures;
+    const written = fournitures.filter((f) => f.quantite !== null);
     // Une ligne de pose qui ne fait que citer (« soudures » : l'étain) reste une ligne sans fourniture, avec ce qu'elle cite.
     if (written.length === 0 && (ligne.role === "pose" || ligne.role === "fourniture_et_pose")) {
       const id = ids?.get(ligne.ref) ?? ligne.ref;
       out.push({ id, ligne, fourniture: null, designation: ligne.designation, quantity: ligne.quantite, unit: ligne.unite, cites: ligne.fournitures });
       continue;
     }
-    const listed = written.length > 0 ? written : ligne.fournitures;
-    const cites = written.length > 0 ? ligne.fournitures.filter((f) => f.quantite === null) : [];
+    const listed = written.length > 0 ? written : fournitures;
+    const cites = written.length > 0 ? fournitures.filter((f) => f.quantite === null) : [];
     listed.forEach((f, i) => {
       const key = listed.length === 1 ? ligne.ref : `${ligne.ref}.${i + 1}`;
       const id = ids?.get(key) ?? key;
@@ -386,13 +394,14 @@ export function planDeLecture(
     // Les données écrites sur la ligne, telles que le modèle les a lues (« taille_fenetre » : « 114x118 »).
     for (const [key, raw] of Object.entries(f.donnees)) {
       if (key === "produit") continue;
-      const def = work.params.find((p) => p.key === key);
+      // La clé de la fiche, ou le mot du devis qui la nomme (« longueur_bac » : la longueur du rampant d'un joint debout).
+      const def = work.params.find((p) => p.key === key) ?? paramParNom(work.params, key);
       if (!def) continue;
       const found = readValue(def, raw);
       if (!found) continue;
       const value: ParamValue = { value: found.value, unit: found.unit, origin: "devis", evidence: `Devis, ${l.id} (« ${raw} »)` };
-      input.params[key] = value;
-      if (!facts.some((x) => x.key === key && x.workItemId === wid)) facts.push({ key, value: found.value, unit: found.unit, evidence: value.evidence!, origin: "devis", workItemId: wid });
+      input.params[def.key] = value;
+      if (!facts.some((x) => x.key === def.key && x.workItemId === wid)) facts.push({ key: def.key, value: found.value, unit: found.unit, evidence: value.evidence!, origin: "devis", workItemId: wid });
     }
     // Les fournitures citées sur la même ligne : des emplacements de plus que le calcul compte (les crochets des ardoises).
     const mentions: string[] = [];
@@ -451,6 +460,20 @@ export function planDeLecture(
  */
 export function rattacherQuestion(ref: Referential, plan: QuotePlan, q: LectureQuestion, lignes?: readonly LigneLecture[]): LectureQuestion {
   if (q.cle.startsWith("produit_") || q.cle === CONSUMABLES_KEY || ref.workItems.some((w) => w.params.some((p) => p.key === q.cle))) return q;
+  // Retour de Greg du 18 novembre 2026 : le modèle a demandé « rampant » (son mot) ; la réponse allait à la donnée du calcul
+  // (« longueur_rampant ») et sa question restait ouverte, reposée sans fin. Une donnée DU TOIT nommée par un de ses mots
+  // (la clé du modèle, ou le nom qu'il donne à la donnée) EST cette donnée : une seule question, une seule réponse.
+  const duToit = paramOfDonnee(ref, q.cle) ?? (q.donnee ? paramOfDonnee(ref, q.donnee) : null);
+  if (duToit) return { ...q, cle: duToit.key };
+  // Et une donnée de l'OUVRAGE de la ligne visée, nommée par un de ses mots (« largeur de bobine » sur la ligne d'une
+  // couverture à tasseaux, 19 novembre 2026) : quand la ligne n'a qu'un ouvrage, c'est sa donnée.
+  if (q.ligne) {
+    const ids = [q.ligne, ...(lignes ?? []).filter((l) => l.ligne.ref === q.ligne).map((l) => l.id)];
+    const ouvragesDeLaLigne = [...new Set(plan.lines.flatMap((l) => (l.status === "planned" && ids.some((id) => l.ref === id || l.ref.startsWith(`${id}.`)) ? [baseOf(l.workItemId)] : [])))];
+    const work = ouvragesDeLaLigne.length === 1 ? ref.workItems.find((w) => w.id === ouvragesDeLaLigne[0]) : undefined;
+    const sienne = work ? (paramParNom(work.params, q.cle) ?? (q.donnee ? paramParNom(work.params, q.donnee) : null)) : null;
+    if (sienne) return { ...q, cle: sienne.key };
+  }
   const param = [...new Set(ref.workItems.flatMap((w) => w.params.filter((p) => (p.choices?.length ?? 0) > 0 && q.cle.startsWith(`${p.key}_`)).map((p) => p.key)))].sort((a, b) => b.length - a.length)[0];
   if (!param) return q;
   const suite = q.cle.slice(param.length + 1).replace(/_/g, "-");
@@ -645,6 +668,8 @@ const unitWord = (unit: string | null) => (unit === "u" ? "pièces" : unit === "
  * Cinq au plus ; aucune : pas d'étape. La réponse : les clés cochées séparées par des virgules, ou « aucune ».
  * RÈGLE CHANGÉE : §49.1 point 5 et point 3. Avant : aucune suggestion, et la naissance d'une gouttière ajoutée d'office.
  */
+/** La raison dite sur une ligne de fourniture que la lecture n'a pas su traduire en articles. */
+export const LIGNE_NON_CHIFFREE = "Je n'ai pas su en tirer les articles : ajoute ce qu'il te faut, ou retire la ligne.";
 export const SUGGESTIONS_KEY = "suggestions:choisies";
 export const SUGGESTIONS_AUCUNE = "aucune";
 export const SUGGESTIONS_MAX = 5;
@@ -735,6 +760,14 @@ export function ecranDeLecture(input: {
   const consoEnAttente = conso === null && (tous.some(estConso) || (fiche !== null && lignesPoint.some((l) => fiche.ratios.some((r) => r.ouvrage === l.fourniture?.ouvrage && consoDeLaFiche.has(r.fourniture)))));
   const points = tous.filter((a) => !estConso(a) || Number(conso) >= 1);
   const plan = planDeLecture(ref, lecture, generiques(), input.extraFacts, suggestionsChoisies(answers[SUGGESTIONS_KEY]));
+  // « JE NE SAIS PAS » À UNE DONNÉE DU TOIT (18 novembre 2026) : l'ouvrage qui a une valeur courante pour elle la reprend (le
+  // rampant d'une couverture en ardoises, qui ne règle que son recouvrement) ; celui qui n'en a pas reste à préciser (la
+  // longueur des bacs d'un joint debout). Avant : la question, posée pour les bacs, bloquait aussi les ardoises.
+  for (const i of plan.inputs) {
+    const work = ref.workItems.find((w) => w.id === baseOf(i.workItemId));
+    const rendues = (i.askInstead ?? []).filter((cle) => answers[`param:${cle}`] === null && work?.params.find((p) => p.key === cle)?.default !== undefined);
+    if (rendues.length > 0) i.askInstead = i.askInstead!.filter((cle) => !rendues.includes(cle));
+  }
   const validation = validationDeLecture(ref.trade, generiques(), plan, new Set([...(input.lines ?? new Map())].filter(([, v]) => v.confirmed).map(([k]) => k)));
   const roles = new Map<string, RoleProposal>();
   for (const l of lignes) {
@@ -760,6 +793,8 @@ export function ecranDeLecture(input: {
   // Les consommables se cochent à l'étape « Suggestions » : la question oui / non du modèle n'est plus posée.
   const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q0) => {
     const q = rattacherQuestion(ref, plan, q0, lignes);
+    // Posée sous un mot du modèle (« largeur de bobine »), c'est la même donnée interdite : écartée aussi.
+    if (interdites.has(q.cle)) return [];
     const question = questionDeLecture(ref, plan, q, lignes);
     // L'habitude de l'entreprise (« je façonne », apprise sur deux chantiers) répond d'avance à la question du modèle :
     // elle ne se pose plus, la réponse est dite dans le calcul et reste modifiable d'un tap.
@@ -927,8 +962,19 @@ export function ecranDeLecture(input: {
     return [...parNom].map(([label, cles]) => ({ key: cles.join("+"), label }));
   };
   const suggestions = answers[SUGGESTIONS_KEY] === undefined ? [...suggestionsDuPlan(ref, plan), ...consommables()].slice(0, SUGGESTIONS_MAX) : [];
-  const sansFourniture = lignes.filter((l) => !l.fourniture).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ") || null }));
-  return { plan, validation, roles, view, purchase: final, questions, lignes, sansFourniture, suggestions };
+  // UN ARTICLE ÉCRIT NE DISPARAÎT JAMAIS (§49.1 ; retour de Greg du 18 novembre 2026, D-2026-024 : « tout ce qui fait partie
+  // du devis doit être pris en considération, l'analyse doit être complète »). Une ligne que le devis dit « fourniture »
+  // (ou « fourniture et pose ») et dont la lecture n'a tiré aucun article n'est pas une ligne « sans fourniture » : elle
+  // reste dans la liste, « à chiffrer », avec ses mots et sa mesure. Avant : rangée avec la pose et la main-d'œuvre, repliée
+  // sous « N lignes sans fourniture », donc oubliée.
+  const mesureDe = (l: (typeof lignes)[number]) => [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ");
+  // Ni une ligne dont un article a bien été lu et attend seulement une réponse (recette en ligne du 19 novembre 2026).
+  const aUnArticle = (l: (typeof lignes)[number]) => lignes.some((o) => o.fourniture && o.ligne.ref === l.ligne.ref);
+  const oubliees = lignes.filter((l) => !l.fourniture && !aUnArticle(l) && (l.ligne.role === "fourniture" || l.ligne.role === "fourniture_et_pose") && !SANS_ACHAT.test(normalizeText(l.designation)) && !final.toQuote.some((t) => t.lineIds.includes(l.id)) && !final.toBuy.some((b) => b.lineIds.includes(l.id)));
+  const complet = oubliees.length === 0 ? final : { ...final, toQuote: [...final.toQuote, ...oubliees.map((l) => ({ key: `line:${l.id}`, label: l.designation.trim(), measure: mesureDe(l), reason: LIGNE_NON_CHIFFREE, lineIds: [l.id] }))] };
+  const dites = new Set(oubliees.map((l) => l.id));
+  const sansFourniture = lignes.filter((l) => !l.fourniture && !dites.has(l.id)).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: mesureDe(l) || null }));
+  return { plan, validation, roles, view, purchase: complet, questions, lignes, sansFourniture, suggestions };
 }
 
 interface Asked {
@@ -1110,6 +1156,16 @@ function finishPurchase(
     const value = typeof v === "string" ? v : v.value;
     return a.q.boutons.find((b) => b.valeur === value)?.label ?? value;
   };
+  // Une donnée du toit que CET article prend par défaut (le rampant d'une couverture en ardoises, qui ne règle que son
+  // recouvrement) et qui n'est demandée que parce qu'un AUTRE ouvrage ne peut pas s'en passer (la longueur des bacs d'un
+  // joint debout, 18 novembre 2026) : l'article ne l'attend pas. « Je ne sais pas » aux bacs ne bloque pas les ardoises.
+  const demandeePourUnAutre = (item: PurchaseItem, cle: string) => {
+    const mine = new Set(ctx.engine.filter((n) => item.needIds.includes(n.needId)).map((n) => baseOf(n.workItemId)));
+    const defautIci = mine.size > 0 && [...mine].every((id) => ctx.ref.workItems.find((w) => w.id === id)?.params.find((p) => p.key === cle)?.default !== undefined);
+    // Un autre ouvrage du devis porte cette donnée SANS valeur courante : c'est pour lui que la question est posée.
+    const ailleurs = new Set(ctx.plan.lines.flatMap((l) => (l.status === "planned" && !mine.has(baseOf(l.workItemId)) ? [baseOf(l.workItemId)] : [])));
+    return defautIci && [...ailleurs].some((id) => ctx.ref.workItems.find((w) => w.id === id)?.params.some((p) => p.key === cle && p.default === undefined));
+  };
   const reasons = new Map<string, string>();
   const decisions: Decision[] = [];
   const toBuy: PurchaseItem[] = raw.toBuy.map((item) => {
@@ -1125,7 +1181,7 @@ function finishPurchase(
       const works = [...new Set(own.map((n) => baseOf(n.workItemId)))];
       const named = !estimated && /\?/.test(item.label) ? asked.filter((a) => unresolved(a) && ctx.ref.workItems.some((w) => works.includes(w.id) && w.params.some((p) => p.key === a.q.cle))).map((a) => a.q.cle) : [];
       // Une donnée prise par défaut (la pente à 45°) que le modèle demande encore : la quantité attend la réponse.
-      const assumed = estimated ? [] : asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
+      const assumed = estimated ? [] : asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`) && !demandeePourUnAutre(item, a.q.cle)).map((a) => a.q.cle);
       // Ce que le calcul attend pour compter l'article (le nombre de descentes d'une naissance) a aussi ses boutons sur la
       // ligne : la question posée, même laissée sans réponse (« je ne sais pas »), jamais une ligne orange sans réglage.
       const duCalcul = (item.waitsOn ?? []).map((k) => asked.find((a) => a.key === k && unresolved(a))).filter((a): a is Asked => !!a);
@@ -1134,7 +1190,7 @@ function finishPurchase(
       if (waits.length > 0) reasons.set(item.key, raisonCourte(waits.map((a) => a.q.donnee)));
       // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.
       const source = item.lineIds.map((id) => byLine.get(id)).find((l): l is LigneLecture => !!l?.fourniture);
-      const nomCalcule = item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim() || item.label;
+      const nomCalcule = item.label.replace(/\s*(?:d[ée]v\.\s*)?\S*\?\S*/g, "").replace(/\s{2,}/g, " ").trim().replace(/\s+(?:à|de|du|en)$/i, "") || item.label;
       const lues = source ? reponsesDeLaLigne(ctx.posees, ctx.answers, source, source.fourniture!, lignes).filter((r) => source.fourniture!.aPreciser.some((t) => tranche(r.a, t)) && !normalizeText(`${nomCalcule} ${item.precision ?? ""}`).includes(normalizeText(r.valeur))).map((r) => reponseLue(r.a.q.donnee, r.valeur)) : [];
       return {
         ...item,
@@ -1145,7 +1201,7 @@ function finishPurchase(
     }
     const estimated = (item.rules ?? []).some((r) => r.key.startsWith("estimation:"));
     const strictWaits = ctx.engine.filter((n) => item.needIds.includes(n.needId)).map((n) => ctx.precisionWaits.get(`${n.workItemId}/${n.needId}`)).filter((c): c is string => !!c);
-    const assumed = asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`)).map((a) => a.q.cle);
+    const assumed = asked.filter((a) => a.q.ligne === null && unresolved(a) && item.assumptionKeys.includes(`param:${a.q.cle}`) && !demandeePourUnAutre(item, a.q.cle)).map((a) => a.q.cle);
     // Retour du fondateur (2026-10-12) : « Crochets de gouttière ? dév. ? » ne sort jamais vert ; une donnée restée en « ? »
     // dans l'article calculé attend la question du modèle sur cette donnée, comme la ligne qui l'écrit (§49.2).
     const blanked = /\?/.test(item.label) ? ctx.engine.filter((n) => item.needIds.includes(n.needId)).flatMap((n) => n.unknownParams ?? []) : [];

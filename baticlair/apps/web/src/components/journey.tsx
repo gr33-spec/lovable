@@ -582,7 +582,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   const courante = restantes[0] ?? null;
   // Catalogue métier (Greg, 31 octobre 2026) : sur une question de modèle, ce qui se tape propose ses références.
   const references = useReferencesCatalogue(champ.saisie, Boolean(courante && QUESTION_DE_MODELE.test(courante.text)));
-  const { fil, enBas } = useFil([messages.length, reflexion, courante?.key, pending]);
+  // Les cases « Suggestions », quand elles arrivent après la dernière question : le fil descend jusqu'à elles.
+  const aSuggerer = suggestionsAProposer(takeoff);
+  const { fil, enBas } = useFil([messages.length, reflexion, courante?.key, pending, Boolean(aSuggerer)]);
   const zone = useZoneVisible(enBas);
 
   // Un refus du serveur nomme la réponse fautive (`reponses.N`) : sa question revient dans le fil, avec la phrase.
@@ -811,6 +813,16 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
                 )}
               </div>
             </>
+          ) : aSuggerer && onReponses ? (
+            // Greg, 18 novembre 2026 : « J'aimerais que les suggestions arrivent à la fin, avant le quantitatif ». Une fois
+            // toutes les questions répondues, la carte à cases ; « Continuer », puis « Calculer ma liste » (ou, si une case
+            // cochée demande une précision, sa question d'abord).
+            <>
+              <Bulle de="mobiiz" label="Message de MOBIIZ">
+                <TexteMobiiz>Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+              </Bulle>
+              <CasesSuggestions options={aSuggerer} pending={pending || verification} error={null} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />
+            </>
           ) : (
             <>
               <Bulle de="mobiiz" label="Message de MOBIIZ">
@@ -929,14 +941,8 @@ export function suggestionsAProposer(takeoff: Takeoff): { label: string; value: 
   return s.length > 0 ? s.map((x) => ({ label: x.label, value: x.key })) : null;
 }
 
-/**
- * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 14 à 17) : après la lecture et avant les questions de précision,
- * une seule étape dans la discussion. Des cases larges, faciles à toucher, un seul bouton « Continuer ». Ce qui est coché
- * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
- * serveur), cinq au plus ; aucune proposition : pas d'étape.
- */
-export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
-  const router = useRouter();
+/** Les cases de l'étape « Suggestions » : dans la carte seule (aucune question) ou dans le fil, après la dernière question. */
+function CasesSuggestions({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
   const [cochees, setCochees] = useState<ReadonlySet<string>>(() => new Set());
   const basculer = (v: string) =>
     setCochees((prev) => {
@@ -947,57 +953,70 @@ export function SuggestionsCard({ options, pending, error, onContinuer }: { opti
     });
   const n = cochees.size;
   return (
+    <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
+      <legend className="sr-only">Suggestions</legend>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-[18px] leading-tight font-extrabold tracking-[-0.01em]">Suggestions</p>
+        <p className="text-[15px] leading-snug text-[var(--chat-texte)]/75">Coche ce qu&apos;il te faut, on l&apos;ajoute à ta liste.</p>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {options.map((o) => {
+          const on = cochees.has(o.value);
+          return (
+            <li key={o.value}>
+              <label
+                className="pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[16px] leading-snug font-semibold"
+                style={{ borderColor: on ? COULEURS_CHAT.jaune : COULEURS_CHAT.trait, backgroundColor: on ? "color-mix(in srgb, #FED206 14%, transparent)" : "var(--chat-voile)" }}
+              >
+                <input type="checkbox" checked={on} onChange={() => basculer(o.value)} className="peer sr-only" />
+                <span
+                  aria-hidden="true"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+                  style={{ borderColor: on ? COULEURS_CHAT.jaune : "color-mix(in srgb, var(--chat-texte) 45%, transparent)", backgroundColor: on ? COULEURS_CHAT.jaune : "transparent" }}
+                >
+                  {on ? <Check size={18} strokeWidth={3} className="text-[#111111]" /> : null}
+                </span>
+                <span className="min-w-0 grow break-words">{o.label}</span>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+      <p aria-live="polite" className="text-[13px] text-[var(--chat-texte)]/70">
+        {n === 0 ? "Rien de coché : ta liste reste telle que ton devis la dit." : n === 1 ? "1 article sera ajouté à ta liste." : `${n} articles seront ajoutés à ta liste.`}
+      </p>
+      {error ? <ErrorNotice error={error} /> : null}
+      <button
+        type="button"
+        onClick={() => onContinuer(n > 0 ? options.filter((o) => cochees.has(o.value)).map((o) => o.value).join(",") : AUCUNE_SUGGESTION)}
+        disabled={pending}
+        className="pressable flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-5 text-[17px] font-extrabold text-[#111111] disabled:opacity-60"
+        style={{ backgroundColor: COULEURS_CHAT.jaune }}
+      >
+        {pending ? <Loader2 size={18} aria-hidden="true" className="animate-spin" /> : null}
+        Continuer
+      </button>
+    </fieldset>
+  );
+}
+
+/**
+ * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 14 à 17) : après la lecture et avant les questions de précision,
+ * une seule étape dans la discussion. Des cases larges, faciles à toucher, un seul bouton « Continuer ». Ce qui est coché
+ * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
+ * serveur), cinq au plus ; aucune proposition : pas d'étape.
+ */
+export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+  const router = useRouter();
+  return (
     <div role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
       <EnTeteChat onFermer={() => router.push("/chantiers")} />
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           <Bulle de="mobiiz" label="Message de MOBIIZ">
-            <TexteMobiiz>J&apos;ai lu ton devis. Un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+            <TexteMobiiz>J&apos;ai lu ton devis. Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
           </Bulle>
-          <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
-            <legend className="sr-only">Suggestions</legend>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-[18px] leading-tight font-extrabold tracking-[-0.01em]">Suggestions</p>
-              <p className="text-[15px] leading-snug text-[var(--chat-texte)]/75">Coche ce qu&apos;il te faut, on l&apos;ajoute à ta liste.</p>
-            </div>
-            <ul className="flex flex-col gap-2">
-              {options.map((o) => {
-                const on = cochees.has(o.value);
-                return (
-                  <li key={o.value}>
-                    <label
-                      className="pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[16px] leading-snug font-semibold"
-                      style={{ borderColor: on ? COULEURS_CHAT.jaune : COULEURS_CHAT.trait, backgroundColor: on ? "color-mix(in srgb, #FED206 14%, transparent)" : "var(--chat-voile)" }}
-                    >
-                      <input type="checkbox" checked={on} onChange={() => basculer(o.value)} className="peer sr-only" />
-                      <span
-                        aria-hidden="true"
-                        className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
-                        style={{ borderColor: on ? COULEURS_CHAT.jaune : "color-mix(in srgb, var(--chat-texte) 45%, transparent)", backgroundColor: on ? COULEURS_CHAT.jaune : "transparent" }}
-                      >
-                        {on ? <Check size={18} strokeWidth={3} className="text-[#111111]" /> : null}
-                      </span>
-                      <span className="min-w-0 grow break-words">{o.label}</span>
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
-            <p aria-live="polite" className="text-[13px] text-[var(--chat-texte)]/70">
-              {n === 0 ? "Rien de coché : ta liste reste telle que ton devis la dit." : n === 1 ? "1 article sera ajouté à ta liste." : `${n} articles seront ajoutés à ta liste.`}
-            </p>
-            {error ? <ErrorNotice error={error} /> : null}
-            <button
-              type="button"
-              onClick={() => onContinuer(n > 0 ? options.filter((o) => cochees.has(o.value)).map((o) => o.value).join(",") : AUCUNE_SUGGESTION)}
-              disabled={pending}
-              className="pressable flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-5 text-[17px] font-extrabold text-[#111111] disabled:opacity-60"
-              style={{ backgroundColor: COULEURS_CHAT.jaune }}
-            >
-              {pending ? <Loader2 size={18} aria-hidden="true" className="animate-spin" /> : null}
-              Continuer
-            </button>
-          </fieldset>
+          <CasesSuggestions options={options} pending={pending} error={error} onContinuer={onContinuer} />
         </section>
       </div>
     </div>
@@ -1079,14 +1098,22 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
 /** L'étape des questions : sans aucune question à poser, le calcul part tout seul (rien à valider pour rien). */
 export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
   // Décidé à l'ouverture : une discussion commencée reste ouverte quand ses réponses, enregistrées, ne laissent plus de
-  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul).
-  const [none] = useState(() => counterQuestions(takeoff).length === 0);
+  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul). Elle n'est jamais démontée en route : ses
+  // réponses écrites et ses « Je ne sais pas » vivent en elle jusqu'au calcul.
+  const [commencee, setCommencee] = useState(() => counterQuestions(takeoff).length > 0);
+  // Une question née après coup (une case cochée dans les suggestions qui demande une précision) ouvre la discussion.
+  if (!commencee && counterQuestions(takeoff).length > 0) setCommencee(true);
+  // Sans aucune question : les suggestions d'abord (Greg, 18 novembre 2026 : à la fin, avant le quantitatif), puis le calcul.
+  const aSuggerer = onReponses ? suggestionsAProposer(takeoff) : null;
   const started = useRef(false);
   useEffect(() => {
-    if (!none || started.current) return;
+    if (commencee || aSuggerer || started.current) return;
     started.current = true;
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
-  }, [none, onSubmit]);
-  if (none) return error ? <ErrorNotice error={error} /> : <CalculScreen />;
+  }, [commencee, aSuggerer, onSubmit]);
+  if (!commencee) {
+    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
+    return error ? <ErrorNotice error={error} /> : <CalculScreen />;
+  }
   return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;
 }

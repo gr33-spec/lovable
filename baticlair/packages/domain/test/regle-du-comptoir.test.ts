@@ -146,7 +146,7 @@ describe("la règle du comptoir (§47.8)", () => {
   });
 
   it("l'aspect du zinc : lu au devis (quartz, anthra), naturel quand rien n'est dit (hypothèse), demandé quand le devis dit « prépatiné » sans la teinte", () => {
-    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1") });
+    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1"), "param:longueur_rampant": { value: "5.5", unit: "m" } });
     expect(zinc("Couverture zinc joint debout anthra-zinc").toBuy[0]!.label).toBe("Bobine Anthra-Zinc 0,65 mm, largeur 500 mm");
     const nature = zinc("Couverture zinc joint debout");
     expect(nature.toBuy[0]!.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");

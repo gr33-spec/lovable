@@ -26,7 +26,7 @@ const MEME_VALEUR_AUTRE_REGLE: Record<string, string> = {
   "2 m": "Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes.",
   "1 m": "Largeur d'une feuille de zinc et largeur utile d'un bac acier 1000.",
   "6 m": "Seuil du bobineau (au-delà de 6 ml) et longueur d'un rouleau de plomb.",
-  "500 mm": "Bobineau 500 (bandes), bobine 500 du joint debout (bacs), bobine de cuivre 500 : trois produits.",
+  "500 mm": "Bobineau 500 (bandes), bobine 500 du joint debout (bacs), bobine de cuivre 500, bobine étroite du zinc à tasseaux : quatre produits.",
   "650 mm": "Bobineau 650 (bandes) et bobine 650 du joint debout (bacs).",
   "3 u/m": "Pattes de bande zinc (§1, §3) et vis de rive du bac acier (§8).",
   "4 m": "Barre de gouttière zinc (§25.2) et profil PVC ou alu (§15).",
@@ -59,6 +59,8 @@ const SECTION_OUVRAGE: Record<string, string> = {
   "abergement-cheminee": "§7",
   "sortie-de-toit": "§25",
   "couverture-zinc-joint-debout": "§7, §36",
+  // Le zinc à tasseaux n'a pas encore sa section dans le référentiel du fondateur : ses réponses du 18 novembre 2026.
+  "couverture-zinc-tasseaux": "§7",
   "couverture-bac-acier": "§8",
   gouttiere: "§7, §25",
   "gouttiere-pvc-alu": "§15",
@@ -203,5 +205,6 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
       "",
     ].join("\n");
     await expect(doc).toMatchFileSnapshot("../../../docs/audit-referentiel-regles.md");
-  });
+    // Ce test relit tous les fichiers de test du dépôt : sur une machine qui vient de démarrer, 5 secondes ne suffisent pas.
+  }, 30_000);
 });

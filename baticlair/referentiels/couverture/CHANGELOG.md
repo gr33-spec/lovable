@@ -1,5 +1,20 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-58 — Zinc à tasseaux : la largeur de bobine ne se demande jamais (recette en ligne, 2026-11-19)
+
+- **Zinc à tasseaux** : la largeur de la bobine (`largeur_bobine_tasseaux`) est `neverAsk`. Sur le site de test, deux lectures sur trois du devis D-2026-024 posaient « bobine de 650 ou de 500 ? » ; la couverture restait en attente. La valeur courante de Greg (650 mm) est dite et se change dans la liste ; écrite au devis, elle est prise.
+- Une question que le modèle pose avec ses mots sur la donnée d'un ouvrage (« largeur de bobine », sur la ligne de la couverture) est cette donnée : écartée comme elle quand elle ne se demande jamais.
+- Une ligne dont un article a été lu et attend seulement une réponse n'est plus dite « je n'ai pas su en tirer les articles ».
+
+## roofing-2026.11.18-57 — Zinc à tasseaux ; une information écrite n'est jamais demandée (Greg, 2026-11-18, devis D-2026-024)
+
+- **Nouvel ouvrage « Couverture zinc à tasseaux »** (`couverture-zinc-tasseaux`). Avant : absent de la fiche ; « couverture zinc à tasseaux, 32 m² » sortait sans aucune fourniture, ou était prise pour du joint debout. Maintenant : de la bobine au mètre linéaire, nombre de bacs = largeur du pan ÷ entraxe des tasseaux, longueur d'un bac = rampant + 15 cm (comme le joint debout, réponse du 2026-10-04).
+- Chiffres de Greg (2026-11-18), retrouvés dans le descriptif type VMZINC « Couverture à tasseaux » : bobine de 650 mm par défaut (500 mm « parfois », au choix), tasseaux de 50 mm, entraxe 620 mm (470 mm pour une bobine de 500). Les pattes à tasseaux se font dans les chutes de zinc : aucune ligne à commander.
+- Tasseaux de bois et couvre-joints : seulement quand le devis les écrit (règle numéro un). Leur quantité (rangs = bacs + 1, sur la longueur du rampant) n'est PAS encore validée : la ligne reste « à chiffrer », sans quantité. À confirmer par Greg.
+- **§7, §36 Règle changée** : le rampant d'une couverture en bacs (joint debout, tasseaux) n'est plus supposé à 5,5 m quand le devis ne le dit pas. Il est pris au devis (« bacs de 4 m », « rampant de 7 m »), sinon demandé, en mètres : « Longueur des bacs (le rampant, de l'égout au faîtage) ? ». Avant : 5,5 m par défaut, avec des boutons « Jusqu'à 5,5 m », « 5,5 à 8 m », « Plus de 8 m ». L'ardoise garde son défaut (il ne règle que le recouvrement).
+- **§49.4 Règle renforcée** : une donnée du toit écrite au devis avec un autre mot (« longueur des bacs » pour le rampant) est cette donnée : jamais demandée. Une question que le modèle pose sous son propre mot (« rampant ») est LA question de la donnée : une seule question, fermée par la réponse. Les mots sont dans la fiche (`textLabels`) et sont donnés au modèle.
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
 ## roofing-2026.11.18-56 — Consommables en cases, unité de vente des tubes, plus de « développé ? » (Greg, 2026-11-18)
 
 - **§49.1 point 4, Règle changée** : les consommables de pose (silicone, vis, pattes, étain, décapant…) ne sont plus jamais ajoutés d'office et la question « Consommables de pose : je les ajoute à la liste ? » n'est plus posée. Ils sont proposés en cases à l'étape « Suggestions », une case par article (le silicone de deux pièces : une seule case) ; cochés, ils valent des articles écrits. L'habitude de l'entreprise ne les ajoute plus. Un « oui » déjà donné sur un ancien chantier garde ses consommables. Vaut pour tous les métiers calculés par un tiroir. Avant : question oui / non, ou habitude.
