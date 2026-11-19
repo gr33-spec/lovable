@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, ErrorNotice, Field } from "@/components/ui";
 import { api, ApiError, messageErreur } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -48,11 +48,12 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
   const [siret, setSiret] = useState(identite.siret ?? "");
   const [prenom, setPrenom] = useState(identite.prenom ?? "");
   const [telephone, setTelephone] = useState(identite.telephone ?? "");
-  const [trouve, setTrouve] = useState<{ siret: string; trouvee: boolean; entreprise: string | null; adresse: string | null; activite: string | null } | null>(null);
+  const [trouve, setTrouve] = useState<{ siret: string; trouvee: boolean; entreprise: string | null; adresse: string | null; activite: string | null } | null>(
+    null,
+  );
   const [erreur, setErreur] = useState<string | null>(null);
   const [enregistree, setEnregistree] = useState<Identite | null>(null);
   const [garder, setGarder] = useState<string | null>(null);
-  const champSiret = useRef<HTMLInputElement>(null);
   const chiffres = siret.replace(/\s/g, "");
 
   // Quatorze chiffres : l'annuaire des entreprises dit le nom, l'adresse et l'activité, et préremplit le prénom du dirigeant.
@@ -60,7 +61,10 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
   useEffect(() => {
     if (!/^\d{14}$/.test(chiffres)) return;
     const c = new AbortController();
-    api<{ trouvee: boolean; entreprise: string | null; adresse: string | null; prenomDirigeant: string | null; activite?: string | null }>(`/v1/company/identite/annuaire?siret=${chiffres}`, { signal: c.signal }).then(
+    api<{ trouvee: boolean; entreprise: string | null; adresse: string | null; prenomDirigeant: string | null; activite?: string | null }>(
+      `/v1/company/identite/annuaire?siret=${chiffres}`,
+      { signal: c.signal },
+    ).then(
       (r) => {
         setTrouve({ siret: chiffres, trouvee: r.trouvee, entreprise: r.entreprise, adresse: r.adresse, activite: r.activite ?? null });
         if (r.prenomDirigeant) setPrenom((p) => p || r.prenomDirigeant!);
@@ -106,7 +110,13 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
         setGarder(choisi);
       } else onFait(i);
     } catch (x) {
-      setErreur(messageErreur(x, { portable_invalide: "Il me faut ton portable (06 ou 07), pour que ton négoce puisse t'appeler.", siret_invalide: "Ce SIRET ne va pas : 14 chiffres.", prenom_requis: "Il me faut ton prénom." }));
+      setErreur(
+        messageErreur(x, {
+          portable_invalide: "Il me faut ton portable (06 ou 07), pour que ton négoce puisse t'appeler.",
+          siret_invalide: "Ce SIRET ne va pas : 14 chiffres.",
+          prenom_requis: "Il me faut ton prénom.",
+        }),
+      );
     } finally {
       onPending(false);
     }
@@ -116,7 +126,7 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
     setSiret("");
     setTrouve(null);
     setErreur(null);
-    requestAnimationFrame(() => champSiret.current?.focus());
+    requestAnimationFrame(() => document.getElementById("identite-siret")?.focus());
   }
 
   if (enregistree?.departement && enregistree.departementEntreprise) {
@@ -124,13 +134,21 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
     return (
       <form id={FORMULAIRE_IDENTITE} onSubmit={(e) => void enregistrer(e)} className="flex flex-col gap-4" noValidate>
         <p className="text-[16px] font-semibold">
-          Ton entreprise est {enregistree.departementEntreprise.nom ? `dans le département ${enregistree.departementEntreprise.nom}` : "ailleurs"} ({enregistree.departementEntreprise.code}), tu avais choisi {enregistree.departement.nom} ({enregistree.departement.code}). Lequel on garde pour tes achats groupés ?
+          Ton entreprise est enregistrée en {enregistree.departementEntreprise.nom} ({enregistree.departementEntreprise.code}), tu avais choisi{" "}
+          {enregistree.departement.nom} ({enregistree.departement.code}). Lequel on garde pour tes achats groupés ?
         </p>
         <fieldset className="flex flex-col gap-2">
           <legend className="sr-only">Le département gardé</legend>
           {options.map((d, k) => (
             <label key={d.code} className={`flex min-h-12 items-center gap-3 rounded-xl border px-3 ${garder === d.code ? "border-ink" : "border-line"}`}>
-              <input type="radio" name="departement-garde" value={d.code} checked={garder === d.code} onChange={() => setGarder(d.code)} className="size-5 accent-accent" />
+              <input
+                type="radio"
+                name="departement-garde"
+                value={d.code}
+                checked={garder === d.code}
+                onChange={() => setGarder(d.code)}
+                className="size-5 accent-accent"
+              />
               <span className="text-[16px]">
                 {d.nom} ({d.code}) <span className="text-muted">· {k === 0 ? "choisi sur la carte" : "celui de mon entreprise"}</span>
               </span>
@@ -149,7 +167,15 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
   return (
     <form id={FORMULAIRE_IDENTITE} onSubmit={(e) => void enregistrer(e)} className="flex flex-col gap-4" noValidate>
       <p className="text-[16px] font-semibold">{identite.phrase}</p>
-      <Field ref={champSiret} id="identite-siret" label="SIRET de ton entreprise" inputMode="numeric" autoComplete="off" placeholder="14 chiffres" value={siret} onChange={(e) => setSiret(e.target.value)} />
+      <Field
+        id="identite-siret"
+        label="SIRET de ton entreprise"
+        inputMode="numeric"
+        autoComplete="off"
+        placeholder="14 chiffres"
+        value={siret}
+        onChange={(e) => setSiret(e.target.value)}
+      />
       {montrerFiche ? (
         <Card className="flex flex-col gap-1 p-4 text-[15px]" aria-label="L'entreprise trouvée">
           {annuaire?.entreprise ? (
@@ -165,17 +191,35 @@ export function EtapeIdentite({ identite, onFait, onPending }: { identite: Ident
             <span>L&apos;annuaire des entreprises ne dit pas encore le nom de ce SIRET.{annuaire?.activite ? ` Activité : ${annuaire.activite}.` : ""}</span>
           )}
           <div className="mt-2 flex flex-wrap gap-2">
-            <button type="submit" data-confirmer="oui" className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-extrabold text-on-accent">
+            <button
+              type="submit"
+              data-confirmer="oui"
+              className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-5 text-[15px] font-extrabold text-on-accent"
+            >
               {annuaire?.entreprise ? "C'est bien mon entreprise" : "C'est bien mon numéro"}
             </button>
-            <button type="button" onClick={pasLaMienne} className="pressable inline-flex min-h-12 items-center justify-center rounded-full border border-line px-5 text-[15px] font-semibold">
+            <button
+              type="button"
+              onClick={pasLaMienne}
+              className="pressable inline-flex min-h-12 items-center justify-center rounded-full border border-line px-5 text-[15px] font-semibold"
+            >
               Ce n&apos;est pas la mienne
             </button>
           </div>
         </Card>
       ) : null}
       <Field id="identite-prenom" label="Ton prénom" autoComplete="given-name" value={prenom} onChange={(e) => setPrenom(e.target.value)} />
-      <Field id="identite-portable" label="Ton portable" type="tel" inputMode="tel" autoComplete="tel" placeholder="06 12 34 56 78" value={telephone} onChange={(e) => setTelephone(e.target.value)} hint="Ton négoce peut t'appeler s'il a un doute. Ton e-mail, lui, n'est jamais donné." />
+      <Field
+        id="identite-portable"
+        label="Ton portable"
+        type="tel"
+        inputMode="tel"
+        autoComplete="tel"
+        placeholder="06 12 34 56 78"
+        value={telephone}
+        onChange={(e) => setTelephone(e.target.value)}
+        hint="Ton négoce peut t'appeler s'il a un doute. Ton e-mail, lui, n'est jamais donné."
+      />
       {erreur ? (
         <p role="alert" className="text-[14px] font-semibold text-danger">
           {erreur}
@@ -216,7 +260,11 @@ export function EtapeApercu({
 
   useEffect(() => {
     const c = new AbortController();
-    api<Apercu>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/preview`, { method: "POST", body: { supplierId, message, ...(tutoie === null ? {} : { tutoie }) }, signal: c.signal }).then(
+    api<Apercu>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/preview`, {
+      method: "POST",
+      body: { supplierId, message, ...(tutoie === null ? {} : { tutoie }) },
+      signal: c.signal,
+    }).then(
       (a) => {
         setApercu(a);
         setErreur(null);
@@ -264,7 +312,11 @@ export function EtapeApercu({
             >
               Garder ce message
             </button>
-            <button type="button" onClick={() => setModifier(false)} className="inline-flex min-h-11 items-center px-3 text-[14px] font-semibold text-muted underline">
+            <button
+              type="button"
+              onClick={() => setModifier(false)}
+              className="inline-flex min-h-11 items-center px-3 text-[14px] font-semibold text-muted underline"
+            >
               Annuler
             </button>
           </div>
@@ -281,7 +333,11 @@ export function EtapeApercu({
           >
             Modifier le message
           </button>
-          <button type="button" onClick={() => onTutoie(!apercu.tutoie)} className="pressable inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-[14px] font-bold">
+          <button
+            type="button"
+            onClick={() => onTutoie(!apercu.tutoie)}
+            className="pressable inline-flex min-h-11 items-center rounded-full border border-line bg-surface px-4 text-[14px] font-bold"
+          >
             {apercu.tutoie ? "Le vouvoyer" : "Le tutoyer"}
           </button>
         </div>
@@ -309,15 +365,28 @@ export function CarteIdentite() {
               setOuverte(false);
             }}
           />
-          <button type="submit" form={FORMULAIRE_IDENTITE} disabled={pending} className="pressable inline-flex min-h-12 items-center justify-center self-start rounded-full bg-accent px-6 text-[15px] font-extrabold text-on-accent disabled:opacity-60">
+          <button
+            type="submit"
+            form={FORMULAIRE_IDENTITE}
+            disabled={pending}
+            className="pressable inline-flex min-h-12 items-center justify-center self-start rounded-full bg-accent px-6 text-[15px] font-extrabold text-on-accent disabled:opacity-60"
+          >
             Enregistrer
           </button>
         </>
       ) : (
         <>
           <span className="text-[16px] font-extrabold">{data.complete ? `${data.prenom}, ${data.entreprise}` : "À compléter au premier envoi"}</span>
-          {data.complete ? <span className="text-sm text-muted">SIRET {data.siret} · {data.telephone}</span> : null}
-          <button type="button" onClick={() => setOuverte(true)} className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
+          {data.complete ? (
+            <span className="text-sm text-muted">
+              SIRET {data.siret} · {data.telephone}
+            </span>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setOuverte(true)}
+            className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
+          >
             Modifier
           </button>
         </>

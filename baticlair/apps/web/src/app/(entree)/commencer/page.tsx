@@ -41,6 +41,7 @@ export default function Commencer() {
   const [departement, setDepartement] = useState<{ code: string; nom: string } | null>(null);
   const [metier, setMetier] = useState<string>(METIERS_INSCRIPTION[0]!.id);
   const [email, setEmail] = useState("");
+  const [zoom, setZoom] = useState(false);
 
   // Déjà connecté : l'app directement.
   useEffect(() => {
@@ -66,7 +67,11 @@ export default function Commencer() {
       {numero >= 0 ? (
         <div className="flex items-center gap-3">
           {numero > 0 ? (
-            <button type="button" onClick={() => setEtape(ETAPES[numero - 1]!)} className="pressable inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line px-4 text-[14px] font-semibold">
+            <button
+              type="button"
+              onClick={() => setEtape(ETAPES[numero - 1]!)}
+              className="pressable inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line px-4 text-[14px] font-semibold"
+            >
               <ArrowLeft size={16} aria-hidden="true" /> Retour
             </button>
           ) : null}
@@ -82,13 +87,14 @@ export default function Commencer() {
             On commence par chez toi.
           </h1>
           <CarteFrance
+            onZoom={setZoom}
             departement={departement?.code ?? null}
             onDepartement={(code, nom) => {
               setDepartement({ code, nom });
               retenirDepartement(code);
             }}
           />
-          {departement ? (
+          {departement && zoom ? (
             <div className="mzo-barre">
               <p className="flex items-center gap-2 text-[16px] font-bold">
                 <span className="mzo-coche" aria-hidden="true">
@@ -120,7 +126,17 @@ export default function Commencer() {
   );
 }
 
-function EtapeMetier({ metier, onMetier, onContinuer, choisi }: { metier: string; onMetier: (id: string) => void; onContinuer: () => void; choisi: MetierInscription }) {
+function EtapeMetier({
+  metier,
+  onMetier,
+  onContinuer,
+  choisi,
+}: {
+  metier: string;
+  onMetier: (id: string) => void;
+  onContinuer: () => void;
+  choisi: MetierInscription;
+}) {
   const [tous, setTous] = useState(false);
   const [premier, ...autres] = METIERS_INSCRIPTION;
   const montres = tous ? autres : autres.filter((m, i) => i < 9 || m.id === metier);
@@ -158,7 +174,11 @@ function EtapeMetier({ metier, onMetier, onContinuer, choisi }: { metier: string
           </button>
         ))}
         {!tous && autres.length > montres.length ? (
-          <button type="button" onClick={() => setTous(true)} className="pressable inline-flex min-h-11 items-center rounded-full border border-dashed border-line px-4 text-[15px] font-semibold text-accent-text">
+          <button
+            type="button"
+            onClick={() => setTous(true)}
+            className="pressable inline-flex min-h-11 items-center rounded-full border border-dashed border-line px-4 text-[15px] font-semibold text-accent-text"
+          >
             Voir les {autres.length - montres.length} autres
           </button>
         ) : null}
@@ -198,10 +218,18 @@ function EtapeCompte({ departement, metier, onFait }: { departement: string; met
     try {
       if (!compteCree.current) {
         motDePasse.current ??= motDePasseAleatoire();
-        await api("/v1/auth/sign-up/email", { method: "POST", body: { name: "", email: email.trim(), password: motDePasse.current, callbackURL: APRES_VERIFICATION }, captcha });
+        await api("/v1/auth/sign-up/email", {
+          method: "POST",
+          body: { name: "", email: email.trim(), password: motDePasse.current, callbackURL: APRES_VERIFICATION },
+          captcha,
+        });
         compteCree.current = true;
       }
-      const c = await api<{ id: string }>("/v1/companies", { method: "POST", body: { name: "Mon entreprise", trades: [metier], departement, telephone: telephone.trim(), parcours: "essai" }, idempotencyKey: cle.current });
+      const c = await api<{ id: string }>("/v1/companies", {
+        method: "POST",
+        body: { name: "Mon entreprise", trades: [metier], departement, telephone: telephone.trim(), parcours: "essai" },
+        idempotencyKey: cle.current,
+      });
       setActiveCompanyId(c.id);
       await api("/v1/me/cgu", { method: "POST", body: { version: VERSION_CGU } });
       // Le premier essai d'abord : le guide ne s'ouvre pas par-dessus (il reste dans le menu, « Revoir le guide »).
@@ -219,7 +247,9 @@ function EtapeCompte({ departement, metier, onFait }: { departement: string; met
       <h1 id="t-compte" className="text-[30px] leading-tight font-extrabold tracking-tight">
         Et on essaie.
       </h1>
-      <p className="text-[16px] leading-relaxed text-muted">Ton e-mail et ton portable, rien d&apos;autre. Ton SIRET ne te sera demandé qu&apos;au moment d&apos;envoyer une liste à tes négoces.</p>
+      <p className="text-[16px] leading-relaxed text-muted">
+        Ton e-mail et ton portable, rien d&apos;autre. Ton SIRET ne te sera demandé qu&apos;au moment d&apos;envoyer une liste à tes négoces.
+      </p>
       <form onSubmit={(e) => void envoyer(e)} className="flex flex-col gap-4" noValidate>
         {erreur ? <ErrorNotice error={erreur} /> : null}
         {erreur?.code === "USER_ALREADY_EXISTS" || erreur?.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL" ? (
@@ -308,16 +338,24 @@ function EtapeEmail({ email }: { email: string }) {
         Vérifie ton e-mail.
       </h1>
       <p className="text-[16px] leading-relaxed">
-        On vient d&apos;envoyer un lien à <strong className="break-all">{email}</strong>. Ouvre-le : tu arrives directement sur ton premier quantitatif, prêt à déposer ton devis, une photo ou ta liste.
+        On vient d&apos;envoyer un lien à <strong className="break-all">{email}</strong>. Ouvre-le : tu arrives directement sur ton premier quantitatif, prêt à
+        déposer ton devis, une photo ou ta liste.
       </p>
       <p className="text-[15px] text-muted">La vérification protège tes analyses de devis. Tu peux déjà saisir une liste à la main en attendant.</p>
       <Button variant="secondary" onClick={() => router.replace(APRES_VERIFICATION)}>
         Commencer sans attendre
       </Button>
-      <button type="button" onClick={() => void renvoyer()} disabled={renvoye} className="min-h-11 self-start text-[15px] font-semibold text-accent-text underline disabled:no-underline disabled:opacity-70">
+      <button
+        type="button"
+        onClick={() => void renvoyer()}
+        disabled={renvoye}
+        className="min-h-11 self-start text-[15px] font-semibold text-accent-text underline disabled:no-underline disabled:opacity-70"
+      >
         {renvoye ? "Lien renvoyé." : "Je n'ai rien reçu : renvoyer le lien"}
       </button>
-      <p className="text-[13px] text-muted">Pour te reconnecter sur un autre appareil : « Mot de passe oublié » sur la page de connexion t&apos;envoie un lien.</p>
+      <p className="text-[13px] text-muted">
+        Pour te reconnecter sur un autre appareil : « Mot de passe oublié » sur la page de connexion t&apos;envoie un lien.
+      </p>
     </section>
   );
 }

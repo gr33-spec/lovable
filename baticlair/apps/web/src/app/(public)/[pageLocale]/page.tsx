@@ -14,6 +14,13 @@ import "@/components/page-locale/page-locale.css";
  * à la demande (le nonce de la page et l'adresse du site sont lus sur la requête).
  */
 export const dynamicParams = false;
+
+/**
+ * MISE DE CÔTÉ (Greg, 19 novembre 2026, « la carte passe dans l'onboarding ») : la page Bretagne n'est liée nulle part et
+ * ne part PAS en production. En production (`VERCEL_ENV=production`), toute page locale répond « Page introuvable » ; sur
+ * le site de test, elle reste visible, hors des moteurs de recherche.
+ */
+const enProduction = () => process.env.VERCEL_ENV === "production";
 export function generateStaticParams() {
   return PAGES_LOCALES.map((p) => ({ pageLocale: p.slug }));
 }
@@ -22,7 +29,7 @@ type Props = { params: Promise<{ pageLocale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const fiche = pageLocale((await params).pageLocale);
-  if (!fiche) return {};
+  if (!fiche || enProduction()) return {};
   const base = metadonneesPubliques(fiche.seo.titre, fiche.seo.description);
   const image = {
     url: fiche.emblematique.photo.src,
@@ -35,12 +42,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: `/${fiche.slug}` },
     openGraph: { ...base.openGraph, url: `/${fiche.slug}`, images: [image] },
     twitter: { ...base.twitter, images: [image.url] },
+    robots: { index: false, follow: false },
   };
 }
 
 export default async function Page({ params }: Props) {
   const fiche = pageLocale((await params).pageLocale);
-  if (!fiche) notFound();
+  if (!fiche || enProduction()) notFound();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return <PageLocale fiche={fiche} origine={await origineDuSite()} nonce={nonce} />;
 }
