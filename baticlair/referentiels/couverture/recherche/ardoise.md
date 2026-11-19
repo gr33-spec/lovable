@@ -6,9 +6,12 @@ Ce fichier résume `ardoise.json`. Rien ici n'est lu par le moteur : le fondateu
 
 - 741 entrées, 20 formats d'ardoise naturelle calculés, 5 formats de fibres-ciment, 29 verdicts sur les ratios
   existants, 4 fiches « ce que demande le comptoir ».
-- 616 entrées confirmées par deux sources indépendantes (83 %), 116 à une seule source, 9 à confirmer.
+- Après la seconde passe : 712 entrées confirmées par deux sources indépendantes (96 %), 19 confirmées sur la fiche
+  du fabricant avec contrôle par le calcul (`confirme_fabricant`), 10 à une seule source, 0 à confirmer. Première
+  passe : 616 / 0 / 116 / 9.
 - Le recouvrement de l'ardoise vient du tableau 7 du NF DTU 40.11. Il a été relu chez deux fabricants qui le
-  recopient : Cupa (tableau CSV téléchargé) et Rathscheck (brochure 2023). Les 132 valeurs communes sont identiques.
+  recopient : Cupa (tableau CSV téléchargé) et Rathscheck (brochure 2023). Les 169 valeurs sont identiques, y
+  compris les pentes sous 35 % et à partir de 300 % (mal relues à la première passe).
 - **Règle du fondateur (+ 2,5 mm) : confirmée.** C'est la formule du manuel CAP. **Règle du code (+ 5 mm) : à
   corriger.** Elle se dit tirée de Cupa, mais Cupa ne l'écrit nulle part.
 - **Le tableau de recouvrement du code est trop fort**, de 0 à 7 mm. Il raisonne en longueur de rampant alors que
@@ -24,6 +27,8 @@ Sources principales :
 - Guide « Ardoises » du Ministère de la Culture.
 - Cedral (Etex, ex-Eternit), cahier de pose des ardoises fibres-ciment.
 - Tanguy Matériaux, négoce breton.
+- Seconde passe : Pizarras Samaca (fiches FR 2026), Cembrit (Dolmen et Bravan, 2016), ArcelorMittal TE Pointes
+  (catalogue 2021), Swisspearl (Suisse, 2026), fiche de révision CAP couvreur (Nomad Education).
 - Le texte du NF DTU 40.11 de 2020, relu sur une copie non officielle. Ses tableaux y sont en image.
 
 ## 1. Comment on calcule (pose au crochet, à pureau entier)
@@ -37,7 +42,7 @@ Sources principales :
 | Format admis | hauteur ≥ 3 × R | Rathscheck, Cupa, DTU §5.1.1.3 |
 | Crochet | R + 3 mm, arrondi au cm supérieur | Cupa, Frénéhard, DTU 2020 (cité par hmonp) |
 | Crochet ≥ 12 cm | crochet à tige ondulée (crosinus) ; crochet droit au-delà de 11 cm : hors DTU | Frénéhard, Cupa |
-| Site exposé (littoral ≤ 5 km, falaises, îles, estuaires) | + 10 mm en zone III selon le DTU 2020 ; « + 10 % » selon Cupa et Rathscheck | **à confirmer** (écart d'édition) |
+| Site exposé (littoral ≤ 5 km, falaises, îles, estuaires) | + 10 mm en zone III selon le DTU 2020 ; « + 10 % » selon Cupa et Rathscheck (ancien texte) ; même crochet en Bretagne | une source (DTU, copie non officielle) |
 
 **Les zones du DTU (annexe B, inchangées en 2020).** Elles suivent la distance à la côte, pas le département.
 
@@ -82,7 +87,8 @@ Points à retenir pour la Bretagne :
   55 %, 70 % et 80 %. Une pente de « 45 % » lue au devis exclut ces formats partout en Bretagne : c'est une erreur
   probable à confirmer.
 - **Site exposé en zone 3** (moins de 5 km de la mer, îles, presqu'îles, estuaires) : + 10 mm de recouvrement.
-  Exemple : 32×22 à 45°, R 99, crochet 11, pureau 110,5, 40,6/m². Règle **à confirmer** dans le texte AFNOR.
+  Exemple : 32×22 à 45°, R 99, crochet 11, pureau 110,5, 40,6/m². Avec le « + 10 % » de Cupa et Rathscheck : R 98,
+  même crochet de 11, pureau à 0,5 mm près. Le + 10 mm reste à relire dans le texte AFNOR.
 - **Crochets** : Ø 2,4 interdit dans le 22, le 29 et le 56 (zones de vent 3 et 4). Prendre du 2,7 au minimum,
   et du 3,0 pour les formats au-delà de 40×22 en zone 3.
 - **Nuance de l'inox** : 18/10 à moins de 20 km de la mer, 316Ti à moins de 3 km (sauf dérogation écrite du
@@ -176,8 +182,10 @@ C − 5 = 95, qui est sous 97 ; on garde donc 97.
   lignolet) sont en inox ou en cuivre.
 - **Nombre** : 2 par ardoise en pose clouée. Sont toujours fixés à 2 clous : les ardoises de rive, le doublis et le
   premier rang à l'égout, le dernier rang au faîtage.
-- **Vente** : au kg, en boîtes de 1 kg (cuivre, Rivierre) ou de 5 kg (galva 2,7×30, Tanguy). **Nombre au kg : non
-  trouvé** (à confirmer).
+- **Vente** : au kg, en boîtes de 1 kg (cuivre, Rivierre) ou de 5 kg (galva 2,7×30, Tanguy).
+- **Nombre au kg** (catalogue ArcelorMittal TE Pointes, confirmé sur fiche fabricant et par le calcul de masse) :
+  galva tête extra-large 2,7×30 = environ 653 ; 2,4×27 = 919 ; 2,7×27 = 726 ; 2,7×40 = 433. Cuivre carrée crantée
+  3,0×30 = 420. Une autre marque peut différer d'environ 10 % : la commande reste au kg.
 
 ## 7. Rangs en plus et pertes
 
@@ -186,25 +194,30 @@ C − 5 = 95, qui est sous 97 ; on garde donc 97.
 | Égout | 1 rang de doublis (ardoise raccourcie : pureau + R), soit ml d'égout ÷ (largeur + 3 mm) ardoises. Plus-value CAP : pureau × longueur, ce qui fait exactement 1 rang | confirmé (DTU, Ministère, CAP) |
 | Faîtage | 1 rang de doublage (rang de rencontre) | confirmé (DTU, Ministère) |
 | Rive | CAP : + 0,16 m² par ml (tranchis droit), 0,25 (biais), 0,33 (circulaire). Ardoises entières et demies, à 2 clous | une source |
-| Pertes | 5 % toit simple, 10 % toit compliqué (fondateur) | **à confirmer** : aucun chiffre de fabricant ni de guide |
+| Pertes | 5 % toit simple, 10 % toit compliqué (fondateur) | une source : le 5 % est écrit dans une fiche de révision CAP ; le 10 % n'a aucune source |
 
 ## 8. Ardoises fibres-ciment
 
-Source : Cedral (Etex France, ex-Eternit), une seule table pour la France. Swisspearl et Cembrit ne publient pas de
-table DTU 40.13 en français.
+Sources : Cedral (Etex France, ex-Eternit, manuel d'avril 2026) et Cembrit (Dolmen et Bravan, 2016). Les deux
+publient les mêmes nombres au m² pour le 40×24, le 45×30 et le 60×30 (joint de 6 mm entre ardoises), et le même
+tableau de recouvrement. Le 33×23 et la Kergoat ronde 40×22 sont propres à Cedral (`confirme_fabricant`).
 
-- **Formats en couverture** : 33×23, 40×22 (Kergoat ronde), 40×24, 45×30, 60×30. Le 40×27 et le 60×40 du
-  référentiel ne figurent pas dans la gamme couverture France (**à confirmer**).
+- **Formats en couverture** : Cedral 33×23, 40×22 (Kergoat ronde), 40×24, 45×30, 60×30 ; Cembrit 32×23, 33×24,
+  40×24, 44×29, 45×30, 60×30. **Le 40×27 et le 60×40 du référentiel n'existent chez aucun des deux** (confirmé). Le
+  600×400 existe chez Swisspearl en Suisse (norme SIA, 9,5 à 10,3 au m²) : c'est sans doute l'origine du 10/m² du code.
 - **Fixation : un seul mode par chantier.**
   - 1 crochet, pour tous les formats. Crochet = R + 10 mm.
   - Ou 2 clous, pour les formats jusqu'au 40×24.
   - Ou 2 clous + 1 crampon tempête, pour les formats à partir du 45×30.
+  - Crochet = R + 10 mm chez Cedral et chez Cembrit (confirmé).
   - En claire-voie : 2 crochets.
 - **Ardoises au m²** à R 100 (pose au crochet) : 40×24 = 27,10 ; 45×30 = 18,67 ; 60×30 = 13,08 ; 33×23 = 36,85. En
   pose clouée, le 40×24 = 27,33.
 - **Recouvrement du 40×24 au crochet, à 45-50°** : zone III = 100 mm (110 au-delà de 8 m de projection) ; zone II =
   90 ; zone I = 80 (25,41/m²).
-- **Palettes** : 40×24 = 1 980 ; 45×30 = 1 440 ; 60×30 = 1 080.
+- **Zone III exposée** : + 10 mm (Cedral, Cembrit : 40×24 à 45°, 100 → 110).
+- **Palettes** (propres à la marque) : Cedral 33×23 = 3 000 ; 40×24 = 1 980 ; 45×30 = 1 440 ; 60×30 = 1 080
+  (poids × nombre = poids de la palette) ; Cembrit 40×24 = 1 800 ; 45×30 = 1 200 ; 60×30 = 1 000.
 
 ## 9. Origines et qualités
 
@@ -218,8 +231,13 @@ table DTU 40.13 en français.
 - **Marque NF** : codes D1 et D2 (depuis 2017), obligatoires sur les palettes. Chez Cupa : Excellence = D1,
   Ardoisier = D2, Naturelle = hors NF.
 - **Épaisseur** : 3,5 à 5 mm couramment (7-8 mm pour les épaisses) ; 4,5 mm minimum en Monuments historiques.
-- **Poids**, en 3,5 mm (Cupa) : 32×22 = 0,69 kg ; 30×20 = 0,59 kg ; 27×18 = 0,48 kg. Le chiffre du Ministère pour
-  le 325×220 de 2,7 mm (540 kg le mille) est cohérent.
+- **Poids**, en 3,5 mm (Cupa, FAQ de février 2026 ; volume × 2,8 g/cm³) : 32×22 = 0,69 kg ; 30×20 = 0,59 kg ;
+  27×18 = 0,48 kg ; 33×23 = 0,744 ; 35×22 = 0,755 ; 40×20 = 0,784 ; 40×22 = 0,862 ; 40×25 = 0,98. Le chiffre du
+  Ministère pour le 325×220 de 2,7 mm (540 kg le mille) est cohérent.
+- **Longueur réelle du 32×22** : 320 mm chez Cupa et Rathscheck (confirmé par leurs pureaux). Le 325×220 du
+  Ministère est l'ancien « modèle ordinaire » français de 2,7 mm, pas le 32×22 vendu aujourd'hui.
+- **Samaca** (Valdeorras) : fiches FR 2026 ; le Samaca 29 et le 55 existent en 60×30, ce qui confirme ce format en
+  ardoise naturelle (seule Rathscheck en donnait la table).
 
 ## 10. Ce que demande le comptoir
 
@@ -252,7 +270,7 @@ table DTU 40.13 en français.
 | Zones par département (zone.ts) | **corrigé** | zones du DTU par distance à la côte (§1) |
 | Pente minimale 24° / 31° (référentiel §3) | **corrigé** | dépend du format (32×22 : 50 / 60 / 70 %) |
 | Pente par défaut 45 % (ratios-a-valider) | à confirmer | 45° pour l'ardoise |
-| Pertes 5 % / 10 % (skill, code) | à confirmer | pratique du fondateur, sans source |
+| Pertes 5 % / 10 % (skill, code) | à confirmer | 5 % écrit aussi dans une fiche de révision CAP ; 10 % sans source |
 | + 1 rang égout, + 1 rang faîtage (skill) | **confirmé** | doublis et rang de doublage |
 | Rives dans la perte (skill) | à confirmer | CAP : + 0,16 m² par ml |
 | Clous : 1 au faîtage, 2 ailleurs, galva (skill) | **corrigé** | 2 au faîtage aussi ; clous apparents en inox ou cuivre |
@@ -260,27 +278,34 @@ table DTU 40.13 en français.
 | Formats courants 32×22 et 30×20 (skill) | **confirmé** | une source écrite (Cupa) |
 | Crochets courants 90, 100, 110 (skill) | **confirmé** | de 8 à 11 cm en Bretagne selon la pente |
 | Part de crochets à pointe (skill, référentiel §25.1) | à confirmer | 1/5 (CAP seul) ; 100 % sur volige |
-| Fibres-ciment au m² : 27,8 / 24,7 / 13,3 / 10 (roofing.ts:1711) | **corrigé** | Cedral R 100 : 40×24 = 27,10 ; 60×30 = 13,08 ; 40×27 et 60×40 hors gamme |
+| Fibres-ciment au m² : 27,8 / 24,7 / 13,3 / 10 (roofing.ts:1711) | **corrigé** | Cedral et Cembrit R 100 : 40×24 = 27,10 ; 60×30 = 13,08 ; 40×27 et 60×40 hors gamme France |
 | Fibres-ciment : 2 clous + 1 antivent par ardoise (roofing.ts:2245) | **corrigé** | 1 crochet, ou 2 clous, ou 2 clous + crampon, selon le format |
 | Qualité « Espagne 1er choix » ou « NF » (roofing.ts:537) | à confirmer | carrière + sélection (D1/D2) + épaisseur |
 
-## 12. À confirmer, et pourquoi
+## 12. Ce qui reste à une seule source, et pourquoi
 
-1. **Site exposé : + 10 mm ou + 10 %.** Le DTU 2020 (copie non officielle) dit + 10 mm en zone III ; Cupa et
-   Rathscheck reprennent « + 10 % » de l'ancienne édition. À relire dans le texte AFNOR.
-2. **Zone de chaque commune bretonne.** Le DTU définit les zones par la distance à la côte (20 et 40 km) et par
-   l'altitude, sans liste de communes. Il faut construire la table.
-3. **Nuances d'inox selon la distance à la mer** : seule la fiche Frénéhard résume le tableau B.1 du DTU.
-4. **Ø 3,0 mm pour les formats > 40×22 en zone 3** : lu seulement dans le texte du DTU.
-5. **Pertes de 5 % et 10 %** : pratique du fondateur, aucun chiffre écrit trouvé.
-6. **Part de crochets à pointe** : seul le manuel CAP donne 1/5.
-7. **Nombre de clous au kg** : introuvable. Il faut le demander au négoce, ou faire dire l'unité à l'artisan.
-8. **Longueur réelle du « 32×22 »** : 320 mm (Cupa, Rathscheck) ou 325 mm (Ministère). Le pureau change de 2,5 mm.
-9. **Formats introuvables** dans les tables de fabricant : 40×24 naturel (c'est un format fibres-ciment), 32×20,
-   24×16 et 22×18. Si un devis en écrit un, appliquer les formules ou demander « il en faut combien au m² ? ».
-10. **Fibres-ciment** : une seule table (Cedral). Le 40×27 et le 60×40 sont hors gamme couverture France.
-11. **Lignes du DTU hors de la brochure Rathscheck** (pentes sous 35 % ou à partir de 300 %) : une seule source
-    (Cupa).
+Aucune entrée n'est plus `a_confirmer`. Dix restent `une_source` :
+
+1. **Site exposé : + 10 mm.** Lu seulement dans une copie non officielle du NF DTU 40.11 de 2020 ; Cupa (catalogues
+   2023-2024) et Rathscheck (2023) écrivent encore « + 10 % » (ancien texte). Écart compris : en Bretagne zone 3 les
+   deux règles donnent le même crochet (R 89 → 98 ou 99, crochet 11). À relire dans le texte AFNOR.
+2. **Ø 3,0 mm au-delà de 40×22 en zone 3** : lu seulement dans le texte du DTU (copie). Aucun fabricant d'ardoise
+   naturelle ne le reprend ; la règle Cembrit (fil Ø 3 mm en zone 2 exposée et zone 3) vaut pour les fibres-ciment.
+3. **Nuances d'inox selon la distance à la mer** : seule la fiche Frénéhard (2021) résume le tableau B.1 du DTU ; la
+   copie du DTU ne donne que son titre.
+4. **Part de crochets à pointe (1/5)** : seul le manuel CAP.
+5. **Crochets par boîte de 5 kg** : seul le manuel CAP ; Frénéhard ne donne que des poids bruts.
+6. **Plus-value de rive (0,16 m² par ml)** : seul le manuel CAP.
+7. **Pertes** : le 5 % a maintenant une source écrite (fiche de révision CAP) ; le 10 % n'en a aucune.
+8. **Origines, négoce breton, formats courants en Bretagne** : une source chacune (Batiweb, Tanguy, Cupa). Point P et
+   l'Asturienne refusent la lecture automatique.
+
+Hors entrées, il reste à construire la **zone de chaque commune bretonne** : le DTU définit les zones par la distance
+à la côte (20 et 40 km) et l'altitude, sans liste de communes.
+
+Les quatre formats absents (40×24, 32×20, 24×16 et 22×18 en ardoise naturelle) sont maintenant confirmés absents
+(Cupa, Rathscheck, Samaca, Ministère) : si un devis en écrit un, appliquer les formules ou demander « il en faut combien
+au m² ? ».
 
 ## 13. Décisions pour le fondateur
 
