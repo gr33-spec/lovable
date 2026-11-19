@@ -119,11 +119,13 @@ const CIBLE_APERCU: Record<Onglet, string> = { couleurs: ".pe-actions", photos: 
 function useOrdinateur(): boolean {
   return useSyncExternalStore(
     (rappel) => {
-      const m = window.matchMedia("(min-width: 1024px)");
+      // Spécialiste UI/UX (19 novembre 2026, validé par Greg) : dès la tablette (768 px), la disposition de l'ordinateur ;
+      // avant, la tablette gardait celle du téléphone (petits onglets, beaucoup de vide).
+      const m = window.matchMedia("(min-width: 768px)");
       m.addEventListener("change", rappel);
       return () => m.removeEventListener("change", rappel);
     },
-    () => window.matchMedia("(min-width: 1024px)").matches,
+    () => window.matchMedia("(min-width: 768px)").matches,
     () => false,
   );
 }
@@ -1246,7 +1248,8 @@ export function EditeurMaPage() {
   return (
     <>
       {ordinateur ? (
-        <div className="grid grid-cols-[minmax(340px,27%)_minmax(0,1fr)] items-start gap-6">
+        // Tablette : la colonne de l'app est étroite (672 px) ; l'éditeur prend toute la largeur de l'écran.
+        <div className="grid grid-cols-[minmax(320px,27%)_minmax(0,1fr)] items-start gap-6 max-lg:mx-[calc(50%_-_50vw_+_1rem)] max-lg:gap-4">
           <aside className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4" aria-label="Réglages">
             <div>
               <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>

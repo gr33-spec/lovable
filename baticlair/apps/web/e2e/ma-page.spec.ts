@@ -582,3 +582,23 @@ test("Mon site : la barre du bas (Accueil · Demandes · ＋ · Groupés · Mess
     await ctx.close();
   }
 });
+
+test("Mon site sur tablette (768 px) : la disposition de l'ordinateur, sur toute la largeur, sans défilement de côté (Greg, 19 novembre 2026)", async ({ browser }) => {
+  test.skip(test.info().project.name !== "ordinateur", "une tablette suffit");
+  test.setTimeout(120_000);
+  const ctx = await browser.newContext({ viewport: { width: 768, height: 1024 }, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
+    await page.getByRole("button", { name: "Passer le guide" }).click();
+  });
+  await inscrire(page, `Toits Martin ${unique()}`);
+  await page.goto("/mon-site");
+  const onglets = page.getByRole("tablist", { name: "Réglages du site" });
+  await expect(onglets).toHaveAttribute("aria-orientation", "horizontal");
+  await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();
+  const aperçu = (await page.getByRole("region", { name: "Aperçu de mon site" }).boundingBox())!;
+  expect(aperçu.x + aperçu.width).toBeGreaterThan(700);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+  await page.screenshot({ path: "/tmp/claude-0/-home-user-lovable/10a62de8-1d08-5abd-a98e-c3824ee0a600/scratchpad/tablette-768.png" });
+  await ctx.close();
+});

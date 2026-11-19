@@ -86,4 +86,17 @@ describe("Mon site : la revue du 19 novembre 2026", () => {
     }
     await a.agent.patch("/v1/ma-page").send({ lienGoogle: "https://maps.app.goo.gl/AbCd123" }).expect(200);
   });
+
+  it("l'adresse du site d'une entreprise supprimée n'est jamais redonnée (un QR code imprimé ne mène jamais chez un autre)", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    expect((await a.agent.get("/v1/ma-page").expect(200)).body.reglages.adresse).toBe("toits-martin");
+    await a.agent.put("/v1/ma-page/adresse").send({ adresse: "martin-couverture" }).expect(200);
+    await ctx.prisma.company.delete({ where: { id: a.companyId } });
+    expect((await ctx.prisma.adressePageReservee.findMany({ orderBy: { adresse: "asc" } })).map((x) => x.adresse)).toEqual(["martin-couverture", "toits-martin"]);
+    // Une nouvelle entreprise du même nom prend une autre adresse, et ne peut pas demander l'ancienne.
+    const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Toits Martin", ["roofing"]);
+    expect((await b.agent.get("/v1/ma-page").expect(200)).body.reglages.adresse).not.toMatch(/^(toits-martin|martin-couverture)$/);
+    expect((await b.agent.put("/v1/ma-page/adresse").send({ adresse: "toits-martin" }).expect(409)).body.error.details.reason).toBe("adresse_prise");
+    await anon().get("/v1/public/pages/toits-martin").expect(404);
+  });
 });

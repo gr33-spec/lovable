@@ -3171,6 +3171,15 @@ model AncienneAdressePage {
 }
 
 /// « Signaler cette page » : lu par l'admin seul, jamais montré à l'entreprise. L'IP n'est gardée que hachée.
+/// L'adresse du site d'une entreprise supprimée (Greg, 19 novembre 2026) : jamais redonnée à une autre (un QR code imprimé
+/// ne mène jamais chez quelqu'un d'autre). Remplie par un déclencheur avant la suppression de l'entreprise.
+model AdressePageReservee {
+  adresse   String   @id
+  libereeLe DateTime @default(now()) @map("liberee_le") @db.Timestamptz(3)
+
+  @@map("adresse_page_reservee")
+}
+
 model SignalementPage {
   id        String    @id @default(uuid(7)) @db.Uuid
   companyId String    @map("company_id") @db.Uuid
