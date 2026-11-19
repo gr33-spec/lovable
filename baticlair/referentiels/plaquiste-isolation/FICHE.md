@@ -72,7 +72,10 @@ Les autres fichiers du dossier :
 10. **« 10+80 » est un complexe d'un seul bloc :** ni ossature, ni laine à part.
 11. **La hauteur décide de la plaque et du montant, pas le m².** 2,55 m sous plafond demande des plaques de 2,60 m et des montants de 2,59 m.
 
-> Point à trancher par Greg (section 16, point 1) : le 18 novembre 2026, la règle de la couverture a mis TOUS les consommables (vis, pattes…) en cases « Suggestions ». Pour le plaquiste, cette fiche sort les vis TTPC, les vis TRPF et les fixations de rail d'office, parce qu'aucune cloison ne tient sans elles (c'est la consigne « ce qui est forcément là »). Si Greg préfère la règle de la couverture, il suffit d'un mot par emplacement (`formOf` → `suggested`). Mais une cloison proposerait alors cinq cases à elle seule (vis 25, TRPF, fixations, bande, enduit), et la limite de cinq serait atteinte dès le premier ouvrage.
+> **Décisions de Greg (20 novembre 2026)** :
+> 1. **Vis et fixations : sorties d'office.** Une cloison ne tient pas sans elles, c'est un « obligatoire si ». Cela vaut pour les vis TTPC, les vis TRPF, les fixations de rail et la fixation des suspentes. Règle changée pour ce métier : la couverture met ses consommables en cases « Suggestions » (18 novembre).
+> 2. **Bande et enduit : en cases à cocher**, parce que certains plaquistes sous-traitent les joints.
+> 3. **Coupe-feu : tout le système d'une seule marque, avec son procès-verbal.** Mobiiz pose une seule question, « Quelle marque ? » (Placo, Knauf, Siniat), et toute la liste suit cette marque, sans « ou équivalent ». Les systèmes coupe-feu courants par marque sont en section 5.8.
 
 ---
 
@@ -790,8 +793,9 @@ Ils sont classés par effet sur une commande, le plus gros d'abord. Le détail e
 
 ## 16. À trancher par Greg ou par un plaquiste avant l'ouverture
 
-1. **Vis, TRPF et fixations de rail d'office** (constitution du système) ou en cases « Suggestions » (règle couverture du 18/11) : voir section 1. Avec la règle couverture, une cloison remplit à elle seule la limite de cinq cases.
-2. **Bande et enduit en suggestions** : est-ce le bon choix ? Les plaquistes font presque toujours leurs joints : les cocher d'office est possible.
+1. ~~Vis, TRPF et fixations de rail~~ : **tranché par Greg le 20/11** : sorties d'office.
+2. ~~Bande et enduit~~ : **tranché par Greg le 20/11** : en cases à cocher.
+2 bis. ~~Coupe-feu~~ : **tranché par Greg le 20/11** : système complet d'une seule marque, une question « Quelle marque ? » (section 5.8).
 3. **Mortier adhésif** : 1,8 ou 2,5 kg/m² par défaut.
 4. **Montants d'huisserie** : faut-il ajouter 2 montants (ou plus) par porte écrite au devis ?
 5. **Montage par défaut tiré de la hauteur** (DTU 25.41) : simples à 40 cm avant doublés à 60 cm (moins cher). Le plaquiste peut préférer les doublés ; dans ce cas, en faire une habitude d'entreprise.
