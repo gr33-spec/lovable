@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **94.4 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -39,7 +39,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | rangs_supplementaires_faitage | 1 rang de doublage (ou rang de rencontre) au dernier rang rang | faîtage terre cuite, métallique ou lignolet ; rive de tête | confirme |
 | plus_value_rive | tranchis droit 0,16 m²/ml ; biais 0,25 ; circulaire 0,33 m2/ml | rive latérale (manuel CAP) ; DTU : rive droite en ardoises entières et demies, toutes à 2 clous | une_source |
 | perte | 5 % (casse et coupes, toit simple) ; 10 % toit compliqué : pratique du fondateur seule % | casse et coupes | une_source |
-| majoration_site_expose | +10 mm en zone III situation exposée (NF DTU 40.11 2020) ; « majorer de 10 % » conseillé par Cupa et Rathscheck mm | situation exposée : littoral sur ~5 km, sommets de falaises, îles, presqu'îles étroites, estuaires | une_source |
+| majoration_site_expose | +10 mm en zone III situation exposée (NF DTU 40.11 de 2020) ; Cupa et Rathscheck conseillent encore « majorer de 10 % » (texte de 1993) ; lignes « zone 3 exposée » : la plus forte des deux mm | situation exposée : littoral sur ~5 km, sommets de falaises, îles, presqu'îles étroites, estuaires | confirme |
 | pente_minimale_32x22 | zone 1 : 50 % (26,6°) ; zone 2 : 60 % (31°) ; zone 3 : 70 % (35°) % | pose au crochet, projection ≤ 5,50 m, situation normale (R ≤ 106 mm = H/3) | confirme |
 | selections | Excellence (= NF D1), Ardoisier (= NF D2), Naturelle (hors marque NF), Modèle flamand  | Cupa Pizarras | confirme_fabricant |
 | classes_exigees | NF EN 12326-1 + W1 (absorption ≤ 0,6 %), T1, S1, carbone non carbonaté ≤ 2 %  | NF DTU 40.11 P1-2 §3.1 | confirme |
@@ -54,27 +54,53 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Toutes marques 50×25** (confirme 27) : ardoises_par_m2 19.4 u/m2; ardoises_par_m2 19.1 u/m2; ardoises_par_m2 18.8 u/m2; ardoises_par_m2 18.7 u/m2; ardoises_par_m2 18.5 u/m2; ardoises_par_m2 18.3 u/m2; ardoises_par_m2 18.2 u/m2; ardoises_par_m2 18.2 u/m2; ardoises_par_m2 18.1 u/m2; ardoises_par_m2 19.9 u/m2; ardoises_par_m2 19.5 u/m2; ardoises_par_m2 19.2 u/m2; ardoises_par_m2 19.1 u/m2; ardoises_par_m2 18.8 u/m2; ardoises_par_m2 18.7 u/m2; ardoises_par_m2 18.5 u/m2; ardoises_par_m2 18.3 u/m2; ardoises_par_m2 18.3 u/m2; ardoises_par_m2 20.4 u/m2; ardoises_par_m2 20.1 u/m2; ardoises_par_m2 19.6 u/m2; ardoises_par_m2 19.4 u/m2; ardoises_par_m2 19.2 u/m2; ardoises_par_m2 19.0 u/m2; ardoises_par_m2 18.8 u/m2; ardoises_par_m2 18.7 u/m2; ardoises_par_m2 18.5 u/m2
 - **Toutes marques 46×30** (confirme 27) : ardoises_par_m2 17.9 u/m2; ardoises_par_m2 17.7 u/m2; ardoises_par_m2 17.4 u/m2; ardoises_par_m2 17.2 u/m2; ardoises_par_m2 17.1 u/m2; ardoises_par_m2 16.9 u/m2; ardoises_par_m2 16.7 u/m2; ardoises_par_m2 16.7 u/m2; ardoises_par_m2 16.6 u/m2; ardoises_par_m2 18.5 u/m2; ardoises_par_m2 18.0 u/m2; ardoises_par_m2 17.8 u/m2; ardoises_par_m2 17.7 u/m2; ardoises_par_m2 17.4 u/m2; ardoises_par_m2 17.2 u/m2; ardoises_par_m2 17.1 u/m2; ardoises_par_m2 16.9 u/m2; ardoises_par_m2 16.8 u/m2; ardoises_par_m2 19.0 u/m2; ardoises_par_m2 18.6 u/m2; ardoises_par_m2 18.2 u/m2; ardoises_par_m2 17.9 u/m2; ardoises_par_m2 17.8 u/m2; ardoises_par_m2 17.5 u/m2; ardoises_par_m2 17.4 u/m2; ardoises_par_m2 17.2 u/m2; ardoises_par_m2 17.1 u/m2
 - **Toutes marques 46×25** (confirme 27) : ardoises_par_m2 21.5 u/m2; ardoises_par_m2 21.2 u/m2; ardoises_par_m2 20.8 u/m2; ardoises_par_m2 20.6 u/m2; ardoises_par_m2 20.4 u/m2; ardoises_par_m2 20.2 u/m2; ardoises_par_m2 20.0 u/m2; ardoises_par_m2 20.0 u/m2; ardoises_par_m2 19.9 u/m2; ardoises_par_m2 22.1 u/m2; ardoises_par_m2 21.6 u/m2; ardoises_par_m2 21.3 u/m2; ardoises_par_m2 21.2 u/m2; ardoises_par_m2 20.8 u/m2; ardoises_par_m2 20.6 u/m2; ardoises_par_m2 20.4 u/m2; ardoises_par_m2 20.2 u/m2; ardoises_par_m2 20.1 u/m2; ardoises_par_m2 22.8 u/m2; ardoises_par_m2 22.3 u/m2; ardoises_par_m2 21.8 u/m2; ardoises_par_m2 21.5 u/m2; ardoises_par_m2 21.3 u/m2; ardoises_par_m2 21.0 u/m2; ardoises_par_m2 20.8 u/m2; ardoises_par_m2 20.6 u/m2; ardoises_par_m2 20.4 u/m2
-- **Toutes marques 40×25** (confirme 27, confirme_fabricant 1) : ardoises_par_m2 25.7 u/m2; ardoises_par_m2 25.3 u/m2; ardoises_par_m2 24.7 u/m2; ardoises_par_m2 24.5 u/m2; ardoises_par_m2 24.2 u/m2; ardoises_par_m2 23.9 u/m2; ardoises_par_m2 23.6 u/m2; ardoises_par_m2 23.6 u/m2; ardoises_par_m2 23.5 u/m2; ardoises_par_m2 26.6 u/m2; ardoises_par_m2 25.8 u/m2; ardoises_par_m2 25.4 u/m2; ardoises_par_m2 25.3 u/m2; ardoises_par_m2 24.7 u/m2; ardoises_par_m2 24.5 u/m2; ardoises_par_m2 24.2 u/m2; ardoises_par_m2 23.9 u/m2; ardoises_par_m2 23.7 u/m2; ardoises_par_m2 27.5 u/m2; ardoises_par_m2 26.9 u/m2; ardoises_par_m2 26.1 u/m2; ardoises_par_m2 25.7 u/m2; ardoises_par_m2 25.4 u/m2; ardoises_par_m2 24.9 u/m2; ardoises_par_m2 24.7 u/m2; ardoises_par_m2 24.5 u/m2; ardoises_par_m2 24.2 u/m2; poids_unitaire 0.98 kg
-- **Toutes marques 40×22** (confirme 27, confirme_fabricant 1) : ardoises_par_m2 29.1 u/m2; ardoises_par_m2 28.7 u/m2; ardoises_par_m2 28.0 u/m2; ardoises_par_m2 27.8 u/m2; ardoises_par_m2 27.4 u/m2; ardoises_par_m2 27.1 u/m2; ardoises_par_m2 26.8 u/m2; ardoises_par_m2 26.8 u/m2; ardoises_par_m2 26.6 u/m2; ardoises_par_m2 30.2 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 28.8 u/m2; ardoises_par_m2 28.7 u/m2; ardoises_par_m2 28.0 u/m2; ardoises_par_m2 27.8 u/m2; ardoises_par_m2 27.4 u/m2; ardoises_par_m2 27.1 u/m2; ardoises_par_m2 26.9 u/m2; ardoises_par_m2 31.2 u/m2; ardoises_par_m2 30.5 u/m2; ardoises_par_m2 29.6 u/m2; ardoises_par_m2 29.1 u/m2; ardoises_par_m2 28.8 u/m2; ardoises_par_m2 28.3 u/m2; ardoises_par_m2 28.0 u/m2; ardoises_par_m2 27.8 u/m2; ardoises_par_m2 27.4 u/m2; poids_unitaire 0.862 kg
+- **Toutes marques 40×25** (confirme 36, confirme_fabricant 1) : ardoises_par_m2 25.7 u/m2; ardoises_par_m2 25.3 u/m2; ardoises_par_m2 24.7 u/m2; ardoises_par_m2 24.5 u/m2; ardoises_par_m2 24.2 u/m2; ardoises_par_m2 23.9 u/m2; ardoises_par_m2 23.6 u/m2; ardoises_par_m2 23.6 u/m2; ardoises_par_m2 23.5 u/m2; ardoises_par_m2 26.6 u/m2; ardoises_par_m2 25.8 u/m2; ardoises_par_m2 25.4 u/m2; ardoises_par_m2 25.3 u/m2; ardoises_par_m2 24.7 u/m2; ardoises_par_m2 24.5 u/m2; ardoises_par_m2 24.2 u/m2; ardoises_par_m2 23.9 u/m2; ardoises_par_m2 23.7 u/m2; ardoises_par_m2 27.5 u/m2; ardoises_par_m2 26.9 u/m2; ardoises_par_m2 26.1 u/m2; ardoises_par_m2 25.7 u/m2; ardoises_par_m2 25.4 u/m2; ardoises_par_m2 24.9 u/m2; ardoises_par_m2 24.7 u/m2; ardoises_par_m2 24.5 u/m2; ardoises_par_m2 24.2 u/m2; ardoises_par_m2 28.7 u/m2; ardoises_par_m2 27.9 u/m2; ardoises_par_m2 27.0 u/m2; ardoises_par_m2 26.5 u/m2; ardoises_par_m2 26.3 u/m2; ardoises_par_m2 25.7 u/m2; ardoises_par_m2 25.5 u/m2; ardoises_par_m2 25.3 u/m2; pente_minimale_zone3_exposee 60 % (31.0°) %; poids_unitaire 0.98 kg
+- **Toutes marques 40×22** (confirme 36, confirme_fabricant 1) : ardoises_par_m2 29.1 u/m2; ardoises_par_m2 28.7 u/m2; ardoises_par_m2 28.0 u/m2; ardoises_par_m2 27.8 u/m2; ardoises_par_m2 27.4 u/m2; ardoises_par_m2 27.1 u/m2; ardoises_par_m2 26.8 u/m2; ardoises_par_m2 26.8 u/m2; ardoises_par_m2 26.6 u/m2; ardoises_par_m2 30.2 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 28.8 u/m2; ardoises_par_m2 28.7 u/m2; ardoises_par_m2 28.0 u/m2; ardoises_par_m2 27.8 u/m2; ardoises_par_m2 27.4 u/m2; ardoises_par_m2 27.1 u/m2; ardoises_par_m2 26.9 u/m2; ardoises_par_m2 31.2 u/m2; ardoises_par_m2 30.5 u/m2; ardoises_par_m2 29.6 u/m2; ardoises_par_m2 29.1 u/m2; ardoises_par_m2 28.8 u/m2; ardoises_par_m2 28.3 u/m2; ardoises_par_m2 28.0 u/m2; ardoises_par_m2 27.8 u/m2; ardoises_par_m2 27.4 u/m2; ardoises_par_m2 32.6 u/m2; ardoises_par_m2 31.7 u/m2; ardoises_par_m2 30.6 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.8 u/m2; ardoises_par_m2 29.2 u/m2; ardoises_par_m2 28.9 u/m2; ardoises_par_m2 28.7 u/m2; pente_minimale_zone3_exposee 60 % (31.0°) %; poids_unitaire 0.862 kg
 - **Toutes marques 40×20** (confirme 27, confirme_fabricant 1) : ardoises_par_m2 32.0 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 30.8 u/m2; ardoises_par_m2 30.5 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.8 u/m2; ardoises_par_m2 29.4 u/m2; ardoises_par_m2 29.4 u/m2; ardoises_par_m2 29.2 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.2 u/m2; ardoises_par_m2 31.7 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 30.8 u/m2; ardoises_par_m2 30.5 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.8 u/m2; ardoises_par_m2 29.6 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.5 u/m2; ardoises_par_m2 32.5 u/m2; ardoises_par_m2 32.0 u/m2; ardoises_par_m2 31.7 u/m2; ardoises_par_m2 31.1 u/m2; ardoises_par_m2 30.8 u/m2; ardoises_par_m2 30.5 u/m2; ardoises_par_m2 30.1 u/m2; poids_unitaire 0.784 kg
-- **Toutes marques 35×25** (confirme 27) : ardoises_par_m2 30.6 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 29.0 u/m2; ardoises_par_m2 28.5 u/m2; ardoises_par_m2 28.1 u/m2; ardoises_par_m2 27.7 u/m2; ardoises_par_m2 27.7 u/m2; ardoises_par_m2 27.5 u/m2; ardoises_par_m2 32.0 u/m2; ardoises_par_m2 30.9 u/m2; ardoises_par_m2 30.3 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 29.0 u/m2; ardoises_par_m2 28.5 u/m2; ardoises_par_m2 28.1 u/m2; ardoises_par_m2 27.9 u/m2; ardoises_par_m2 33.4 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 31.2 u/m2; ardoises_par_m2 30.6 u/m2; ardoises_par_m2 30.3 u/m2; ardoises_par_m2 29.6 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 29.0 u/m2; ardoises_par_m2 28.5 u/m2
-- **Toutes marques 35×22** (confirme 27, confirme_fabricant 1) : ardoises_par_m2 34.8 u/m2; ardoises_par_m2 34.1 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 31.9 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 31.2 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 35.0 u/m2; ardoises_par_m2 34.4 u/m2; ardoises_par_m2 34.1 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 31.9 u/m2; ardoises_par_m2 31.7 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 36.8 u/m2; ardoises_par_m2 35.4 u/m2; ardoises_par_m2 34.8 u/m2; ardoises_par_m2 34.4 u/m2; ardoises_par_m2 33.6 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; poids_unitaire 0.755 kg
+- **Toutes marques 35×25** (confirme 34) : ardoises_par_m2 30.6 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 29.0 u/m2; ardoises_par_m2 28.5 u/m2; ardoises_par_m2 28.1 u/m2; ardoises_par_m2 27.7 u/m2; ardoises_par_m2 27.7 u/m2; ardoises_par_m2 27.5 u/m2; ardoises_par_m2 32.0 u/m2; ardoises_par_m2 30.9 u/m2; ardoises_par_m2 30.3 u/m2; ardoises_par_m2 30.1 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 29.0 u/m2; ardoises_par_m2 28.5 u/m2; ardoises_par_m2 28.1 u/m2; ardoises_par_m2 27.9 u/m2; ardoises_par_m2 33.4 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 31.2 u/m2; ardoises_par_m2 30.6 u/m2; ardoises_par_m2 30.3 u/m2; ardoises_par_m2 29.6 u/m2; ardoises_par_m2 29.3 u/m2; ardoises_par_m2 29.0 u/m2; ardoises_par_m2 28.5 u/m2; ardoises_par_m2 32.5 u/m2; ardoises_par_m2 31.9 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 30.8 u/m2; ardoises_par_m2 30.4 u/m2; ardoises_par_m2 30.1 u/m2; pente_minimale_zone3_exposee 80 % (38.7°) %
+- **Toutes marques 35×22** (confirme 34, confirme_fabricant 1) : ardoises_par_m2 34.8 u/m2; ardoises_par_m2 34.1 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 31.9 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 31.5 u/m2; ardoises_par_m2 31.2 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 35.0 u/m2; ardoises_par_m2 34.4 u/m2; ardoises_par_m2 34.1 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 31.9 u/m2; ardoises_par_m2 31.7 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 36.8 u/m2; ardoises_par_m2 35.4 u/m2; ardoises_par_m2 34.8 u/m2; ardoises_par_m2 34.4 u/m2; ardoises_par_m2 33.6 u/m2; ardoises_par_m2 33.2 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.2 u/m2; ardoises_par_m2 35.7 u/m2; ardoises_par_m2 34.9 u/m2; ardoises_par_m2 34.5 u/m2; ardoises_par_m2 34.1 u/m2; pente_minimale_zone3_exposee 80 % (38.7°) %; poids_unitaire 0.755 kg
 - **Toutes marques 35×20** (confirme 27) : ardoises_par_m2 38.2 u/m2; ardoises_par_m2 37.5 u/m2; ardoises_par_m2 36.5 u/m2; ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.6 u/m2; ardoises_par_m2 35.1 u/m2; ardoises_par_m2 34.6 u/m2; ardoises_par_m2 34.6 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 39.9 u/m2; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 37.7 u/m2; ardoises_par_m2 37.5 u/m2; ardoises_par_m2 36.5 u/m2; ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.6 u/m2; ardoises_par_m2 35.1 u/m2; ardoises_par_m2 34.8 u/m2; ardoises_par_m2 41.6 u/m2; ardoises_par_m2 40.4 u/m2; ardoises_par_m2 38.9 u/m2; ardoises_par_m2 38.2 u/m2; ardoises_par_m2 37.7 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.5 u/m2; ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.6 u/m2
-- **Toutes marques 33×23** (confirme 26, confirme_fabricant 1) : ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.3 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.9 u/m2; ardoises_par_m2 33.4 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 32.1 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 36.4 u/m2; ardoises_par_m2 35.6 u/m2; ardoises_par_m2 35.3 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.9 u/m2; ardoises_par_m2 33.4 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.6 u/m2; ardoises_par_m2 38.3 u/m2; ardoises_par_m2 36.8 u/m2; ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.6 u/m2; ardoises_par_m2 34.8 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.9 u/m2; ardoises_par_m2 33.4 u/m2; poids_unitaire 0.744 kg
-- **Toutes marques 32×22** (confirme 27) : ardoises_par_m2 39.3 u/m2; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 37.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 35.7 u/m2; ardoises_par_m2 35.2 u/m2; ardoises_par_m2 35.2 u/m2; ardoises_par_m2 34.9 u/m2; ardoises_par_m2 41.3 u/m2; ardoises_par_m2 39.7 u/m2; ardoises_par_m2 38.8 u/m2; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 37.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 35.7 u/m2; ardoises_par_m2 35.4 u/m2; ardoises_par_m2 41.9 u/m2; ardoises_par_m2 40.2 u/m2; ardoises_par_m2 39.3 u/m2; ardoises_par_m2 38.8 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 37.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.3 u/m2; poids_unitaire 0.69 kg
+- **Toutes marques 33×23** (confirme 33, confirme_fabricant 1) : ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.3 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.9 u/m2; ardoises_par_m2 33.4 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 32.4 u/m2; ardoises_par_m2 32.1 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 36.4 u/m2; ardoises_par_m2 35.6 u/m2; ardoises_par_m2 35.3 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.9 u/m2; ardoises_par_m2 33.4 u/m2; ardoises_par_m2 32.9 u/m2; ardoises_par_m2 32.6 u/m2; ardoises_par_m2 38.3 u/m2; ardoises_par_m2 36.8 u/m2; ardoises_par_m2 36.1 u/m2; ardoises_par_m2 35.6 u/m2; ardoises_par_m2 34.8 u/m2; ardoises_par_m2 34.3 u/m2; ardoises_par_m2 33.9 u/m2; ardoises_par_m2 33.4 u/m2; poids_unitaire 0.744 kg; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 37.6 u/m2; ardoises_par_m2 37.2 u/m2; ardoises_par_m2 36.2 u/m2; ardoises_par_m2 35.8 u/m2; ardoises_par_m2 35.3 u/m2; pente_minimale_zone3_exposee 80 % (38.7°) %
+- **Toutes marques 32×22** (confirme 33, a_confirmer 1) : ardoises_par_m2 39.3 u/m2; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 37.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 35.7 u/m2; ardoises_par_m2 35.2 u/m2; ardoises_par_m2 35.2 u/m2; ardoises_par_m2 34.9 u/m2; ardoises_par_m2 41.3 u/m2; ardoises_par_m2 39.7 u/m2; ardoises_par_m2 38.8 u/m2; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 37.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 35.7 u/m2; ardoises_par_m2 35.4 u/m2; ardoises_par_m2 41.9 u/m2; ardoises_par_m2 40.2 u/m2; ardoises_par_m2 39.3 u/m2; ardoises_par_m2 38.8 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 37.4 u/m2; ardoises_par_m2 36.9 u/m2; ardoises_par_m2 36.3 u/m2; ardoises_par_m2 41.1 u/m2; ardoises_par_m2 40.6 u/m2; ardoises_par_m2 39.5 u/m2; ardoises_par_m2 39.0 u/m2; ardoises_par_m2 38.5 u/m2; pente_minimale_zone3_exposee 90 % (42.0°) %; poids_unitaire 0.69 kg
 - **Toutes marques 30×22** (confirme 24) : ardoises_par_m2 43.1 u/m2; ardoises_par_m2 42.1 u/m2; ardoises_par_m2 40.8 u/m2; ardoises_par_m2 40.2 u/m2; ardoises_par_m2 39.5 u/m2; ardoises_par_m2 38.8 u/m2; ardoises_par_m2 38.2 u/m2; ardoises_par_m2 38.2 u/m2; ardoises_par_m2 37.8 u/m2; ardoises_par_m2 43.5 u/m2; ardoises_par_m2 42.5 u/m2; ardoises_par_m2 42.1 u/m2; ardoises_par_m2 40.8 u/m2; ardoises_par_m2 40.2 u/m2; ardoises_par_m2 39.5 u/m2; ardoises_par_m2 38.8 u/m2; ardoises_par_m2 38.5 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.1 u/m2; ardoises_par_m2 42.5 u/m2; ardoises_par_m2 41.3 u/m2; ardoises_par_m2 40.8 u/m2; ardoises_par_m2 40.2 u/m2; ardoises_par_m2 39.5 u/m2
-- **Toutes marques 30×20** (confirme 25) : ardoises_par_m2 47.4 u/m2; ardoises_par_m2 46.3 u/m2; ardoises_par_m2 44.8 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.4 u/m2; ardoises_par_m2 42.7 u/m2; ardoises_par_m2 41.9 u/m2; ardoises_par_m2 41.9 u/m2; ardoises_par_m2 41.6 u/m2; ardoises_par_m2 47.8 u/m2; ardoises_par_m2 46.7 u/m2; ardoises_par_m2 46.3 u/m2; ardoises_par_m2 44.8 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.4 u/m2; ardoises_par_m2 42.7 u/m2; ardoises_par_m2 42.3 u/m2; ardoises_par_m2 48.5 u/m2; ardoises_par_m2 47.4 u/m2; ardoises_par_m2 46.7 u/m2; ardoises_par_m2 45.4 u/m2; ardoises_par_m2 44.8 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.4 u/m2; poids_unitaire 0.588 kg
+- **Toutes marques 30×20** (confirme 29, une_source 1) : ardoises_par_m2 47.4 u/m2; ardoises_par_m2 46.3 u/m2; ardoises_par_m2 44.8 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.4 u/m2; ardoises_par_m2 42.7 u/m2; ardoises_par_m2 41.9 u/m2; ardoises_par_m2 41.9 u/m2; ardoises_par_m2 41.6 u/m2; ardoises_par_m2 47.8 u/m2; ardoises_par_m2 46.7 u/m2; ardoises_par_m2 46.3 u/m2; ardoises_par_m2 44.8 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.4 u/m2; ardoises_par_m2 42.7 u/m2; ardoises_par_m2 42.3 u/m2; ardoises_par_m2 48.5 u/m2; ardoises_par_m2 47.4 u/m2; ardoises_par_m2 46.7 u/m2; ardoises_par_m2 45.4 u/m2; ardoises_par_m2 44.8 u/m2; ardoises_par_m2 44.2 u/m2; ardoises_par_m2 43.4 u/m2; ardoises_par_m2 49.0 u/m2; ardoises_par_m2 47.6 u/m2; ardoises_par_m2 46.9 u/m2; ardoises_par_m2 46.3 u/m2; pente_minimale_zone3_exposee 100 % (45.0°) %; poids_unitaire 0.588 kg
 - **Toutes marques 30×18** (confirme 24) : ardoises_par_m2 52.5 u/m2; ardoises_par_m2 51.3 u/m2; ardoises_par_m2 49.7 u/m2; ardoises_par_m2 49.0 u/m2; ardoises_par_m2 48.1 u/m2; ardoises_par_m2 47.3 u/m2; ardoises_par_m2 46.5 u/m2; ardoises_par_m2 46.5 u/m2; ardoises_par_m2 46.1 u/m2; ardoises_par_m2 53.1 u/m2; ardoises_par_m2 51.8 u/m2; ardoises_par_m2 51.3 u/m2; ardoises_par_m2 49.7 u/m2; ardoises_par_m2 49.0 u/m2; ardoises_par_m2 48.1 u/m2; ardoises_par_m2 47.3 u/m2; ardoises_par_m2 46.9 u/m2; ardoises_par_m2 53.8 u/m2; ardoises_par_m2 52.5 u/m2; ardoises_par_m2 51.8 u/m2; ardoises_par_m2 50.4 u/m2; ardoises_par_m2 49.7 u/m2; ardoises_par_m2 49.0 u/m2; ardoises_par_m2 48.1 u/m2
-- **Toutes marques 27×18** (confirme 21) : ardoises_par_m2 59.7 u/m2; ardoises_par_m2 57.5 u/m2; ardoises_par_m2 56.6 u/m2; ardoises_par_m2 55.5 u/m2; ardoises_par_m2 54.4 u/m2; ardoises_par_m2 53.3 u/m2; ardoises_par_m2 53.3 u/m2; ardoises_par_m2 52.8 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 59.7 u/m2; ardoises_par_m2 57.5 u/m2; ardoises_par_m2 56.6 u/m2; ardoises_par_m2 55.5 u/m2; ardoises_par_m2 54.4 u/m2; ardoises_par_m2 53.8 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 58.4 u/m2; ardoises_par_m2 57.5 u/m2; ardoises_par_m2 56.6 u/m2; ardoises_par_m2 55.5 u/m2; poids_unitaire 0.476 kg
+- **Toutes marques 27×18** (confirme 22, une_source 2) : ardoises_par_m2 59.7 u/m2; ardoises_par_m2 57.5 u/m2; ardoises_par_m2 56.6 u/m2; ardoises_par_m2 55.5 u/m2; ardoises_par_m2 54.4 u/m2; ardoises_par_m2 53.3 u/m2; ardoises_par_m2 53.3 u/m2; ardoises_par_m2 52.8 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 59.7 u/m2; ardoises_par_m2 57.5 u/m2; ardoises_par_m2 56.6 u/m2; ardoises_par_m2 55.5 u/m2; ardoises_par_m2 54.4 u/m2; ardoises_par_m2 53.8 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 58.4 u/m2; ardoises_par_m2 57.5 u/m2; ardoises_par_m2 56.6 u/m2; ardoises_par_m2 55.5 u/m2; ardoises_par_m2 60.7 u/m2; ardoises_par_m2 59.7 u/m2; pente_minimale_zone3_exposee 140 % (54.5°) %; poids_unitaire 0.476 kg
 - **Toutes marques 27×16** (confirme 20) : ardoises_par_m2 67.0 u/m2; ardoises_par_m2 64.6 u/m2; ardoises_par_m2 63.6 u/m2; ardoises_par_m2 62.3 u/m2; ardoises_par_m2 61.0 u/m2; ardoises_par_m2 59.9 u/m2; ardoises_par_m2 59.9 u/m2; ardoises_par_m2 59.3 u/m2; ardoises_par_m2 67.8 u/m2; ardoises_par_m2 67.0 u/m2; ardoises_par_m2 64.6 u/m2; ardoises_par_m2 63.6 u/m2; ardoises_par_m2 62.3 u/m2; ardoises_par_m2 61.0 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 67.8 u/m2; ardoises_par_m2 65.6 u/m2; ardoises_par_m2 64.6 u/m2; ardoises_par_m2 63.6 u/m2; ardoises_par_m2 62.3 u/m2
 - **Toutes marques 25×18** (confirme 16) : ardoises_par_m2 64.3 u/m2; ardoises_par_m2 63.2 u/m2; ardoises_par_m2 61.7 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 59.1 u/m2; ardoises_par_m2 59.1 u/m2; ardoises_par_m2 58.4 u/m2; ardoises_par_m2 64.3 u/m2; ardoises_par_m2 63.2 u/m2; ardoises_par_m2 61.7 u/m2; ardoises_par_m2 60.4 u/m2; ardoises_par_m2 59.7 u/m2; ardoises_par_m2 65.4 u/m2; ardoises_par_m2 64.3 u/m2; ardoises_par_m2 63.2 u/m2; ardoises_par_m2 61.7 u/m2
 - **Toutes marques 25×15** (confirme 16) : ardoises_par_m2 76.9 u/m2; ardoises_par_m2 75.6 u/m2; ardoises_par_m2 73.9 u/m2; ardoises_par_m2 72.2 u/m2; ardoises_par_m2 70.7 u/m2; ardoises_par_m2 70.7 u/m2; ardoises_par_m2 69.9 u/m2; ardoises_par_m2 76.9 u/m2; ardoises_par_m2 75.6 u/m2; ardoises_par_m2 73.9 u/m2; ardoises_par_m2 72.2 u/m2; ardoises_par_m2 71.4 u/m2; ardoises_par_m2 78.3 u/m2; ardoises_par_m2 76.9 u/m2; ardoises_par_m2 75.6 u/m2; ardoises_par_m2 73.9 u/m2
 - **Toutes marques 22×16** (confirme 9) : ardoises_par_m2 83.5 u/m2; ardoises_par_m2 81.3 u/m2; ardoises_par_m2 79.2 u/m2; ardoises_par_m2 79.2 u/m2; ardoises_par_m2 78.2 u/m2; ardoises_par_m2 83.5 u/m2; ardoises_par_m2 81.3 u/m2; ardoises_par_m2 80.2 u/m2; ardoises_par_m2 83.5 u/m2
-- **Toutes marques 40×24** (confirme 1) : format_dans_les_tables_fabricant absent des tables et des gammes des fabricants relevés
+- **Toutes marques 40×24 (format fibres-ciment, pas un modèle d'ardoise naturelle)** (a_confirmer 1) : format_dans_les_tables_fabricant format fibres-ciment (Cedral, Cembrit) ; absent des gammes et des tables d'ardoise naturelle relevées (Cupa, Rathscheck, Samaca, InterSIN, Ministère)
 - **Toutes marques 32×20** (confirme 1) : format_dans_les_tables_fabricant absent des tables et des gammes des fabricants relevés
 - **Toutes marques 24×16** (confirme 1) : format_dans_les_tables_fabricant absent des tables et des gammes des fabricants relevés
 - **Toutes marques 22×18** (confirme 1) : format_dans_les_tables_fabricant absent des tables et des gammes des fabricants relevés
+- **Toutes marques 30×20, 33×23, 35×22, 35×25, 40×22, 40×25, 27×18** (a_confirmer 1) : ardoises_par_palette None u/palette
 - **ArcelorMittal Périgueux (TE Pointes) pointe tête extra-large galvanisée 2,70 × 30** (confirme_fabricant 1) : clous_par_kg 653 u/kg
+- **Cupa Pizarras Cupa 2** (confirme_fabricant 1) : carriere_et_epaisseurs carrière souterraine de Riodolas, Carballeda de Valdeorras (Ourense), depuis 1972 ; épaisseurs nominales 3,5 à 6 mm
+- **Cupa Pizarras Cupa 3** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Solana de Forcadas (León), zone San Pedro, depuis 1892 ; épaisseur moyenne 3,5 mm, 7 à 8 mm en « Heavy »
+- **Cupa Pizarras Cupa 4** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Armadilla, zone Benuza (León), depuis 1968 ; 3,5 à 4 mm, jusqu'à 8 mm (modèles épais) ; gamme Monument historique
+- **Cupa Pizarras Cupa 5** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Valdacal, zone Pusmazán (Ourense), depuis 1971 ; 3,5 à 5 mm, 7-8 mm (épais, Pyrineas) ; gris clair
+- **Cupa Pizarras Cupa 6** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Los Campos, zone San Pedro (León), depuis 1968 ; 3,5 à 5 mm
+- **Cupa Pizarras Cupa 7** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Las Arcas Prada, zone San Pedro (León), depuis 1983 ; 3,5 à 5 mm
+- **Cupa Pizarras Cupa 9** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Anabel, Abejera de Aliste (Zamora), depuis 2001 ; 4, 5 et jusqu'à 8 mm ; noire
+- **Cupa Pizarras Cupa 10** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Las Arcas, zone San Pedro (León), depuis 1983 ; 3,5 à 5 mm
+- **Cupa Pizarras Cupa 13** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Sotillo, zone Benuza (León), depuis 1992 ; 3,5 à 5 mm
+- **Cupa Pizarras Cupa 17** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Trevinca, Casayo, zone Rozadais (Ourense), depuis 1960 ; 3,5 mm, 8 mm en « Heavy »
+- **Cupa Pizarras Cupa 30** (confirme_fabricant 1) : carriere_et_epaisseurs carrière La Invencible (Proinor), Sobradelo (Ourense), depuis 1968 ; 5, 6,5 et 7,5 mm
+- **Cupa Pizarras Cupa 37** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Paraje de Rozadais (Ourense), depuis 1985 ; 3,5, 4 et 7,5 mm ; gris clair
+- **Cupa Pizarras Cupa Sélection Plus (Plus / Plus NF)** (confirme_fabricant 1) : carriere_et_formats carrière Los Campos, San Pedro (León) ; formats 27×18, 30×20, 32×22, 40×22 ; épaisseur 3,5 mm
+- **Cupa Pizarras Cupa 10 Excellence 32×22** (une_source 1) : ardoises_par_palette 1950 u/palette
+- **Pizarras Samaca Samaca 29** (confirme_fabricant 1) : carriere_et_formats carrière María del Carmen, La Baña (León) ; noire ; formats rectangulaires 60×30, 50×30, 50×25, 40×25, 40×22, 40×20, 35×25, 35×22, 35×20, 32×22, 30×20
+- **Pizarras Samaca Samaca 33** (confirme_fabricant 1) : carriere_et_formats carrière Os Follos, O Alto da Cova, Carballeda de Valdeorras (Ourense) ; formats rectangulaires 40×25, 40×22, 40×20, 35×22, 32×22, 30×20, 27×18
+- **Pizarras Samaca Samaca 44** (confirme_fabricant 1) : carriere_et_formats carrière Vianzola, Lardeira, Carballeda de Valdeorras (Ourense) ; formats rectangulaires 40×25, 40×22, 40×20, 35×22, 32×22, 30×20, 27×18
+- **Pizarras Samaca Samaca 47** (confirme_fabricant 1) : carriere_et_formats site de Rozadais (Ourense), exploité depuis 1985 ; formats rectangulaires 40×25, 40×22, 40×20, 35×22, 32×22, 30×20, 27×18
+- **Pizarras Samaca Samaca 55** (confirme_fabricant 1) : carriere_et_formats carrière Juanita, Los Molinos, Carballeda de Valdeorras (Ourense), depuis les années 1960 ; formats rectangulaires 60×30, 50×30, 50×25, 40×25, 40×22, 40×20, 35×25, 35×22, 35×20, 32×22, 30×20
+- **Rathscheck Schiefer (InterSIN) SIN 120** (confirme_fabricant 1) : carriere_formats_epaisseurs carrière A Fraguiña, Carballeda de Valdeorras (Ourense) ; Primera : 60×30 à 27×18, 3,5 à 6 mm (32×22 en 3,5 / 5) ; Standard : 46×30 à 40×20
+- **Rathscheck Schiefer (InterSIN) SIN 150** (confirme_fabricant 1) : carriere_formats_epaisseurs carrière Valdemiguel ; Primera : 60×30 à 27×18 ; 32×22 en 4 / 5 / 6-8 mm, 30×20 en 5 / 6-8 mm, 27×18 en 5 mm
+- **Rathscheck Schiefer (InterSIN) SIN 240** (confirme_fabricant 1) : carriere_formats_epaisseurs carrière Rozadais III, Casaio (Ourense) ; Primera : 40×22, 35×22, 32×22 (4/5 mm), 30×20, 27×18 (4 mm) ; Standard 40×22 à 30×20
+- **Rathscheck Schiefer (InterSIN) SIN 340** (confirme_fabricant 1) : carriere_formats_epaisseurs carrière Fuidemalo Amable, La Baña (León) ; Primera : 40×22, 35×22, 32×22, 30×22 (3,5 mm) ; Standard : 40×22 (3,5), 32×22 et 30×20 (3,5 / 5), 27×18 (3,5)
+- **Rathscheck Schiefer (InterSIN) SIN 340 Fine 32×22 NF** (une_source 1) : ardoises_par_palette 1700 u/palette
+- **Minardoises (marque négoce) K08 Star 32×22** (une_source 1) : ardoises_par_palette 2200 u/palette
 
 ### ardoise fibres-ciment
 
@@ -108,24 +134,24 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Koramic Kanal 10** (confirme_fabricant 9) : tuiles_par_m2 10 u/m2; pureau_min 362 mm; pureau_max 392 mm; largeur_utile 235-250 mm; poids_unitaire 4.7 kg; tuiles_par_palette 180 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code
 - **Koramic Romane 1.2** (confirme_fabricant 10) : tuiles_par_m2_min 11.5 u/m2; tuiles_par_m2_max 12 u/m2; pureau_min 347 mm; pureau_max 372 mm; largeur_utile 237 mm; poids_unitaire 3.9 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code
 - **Terreal Val de Saône** (confirme_fabricant 9) : tuiles_par_m2 10 u/m2; pureau_min 395 mm; pureau_max 415 mm; largeur_utile 210-245 mm; poids_unitaire 4.6 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G2 classe; famille_pente C code
-- **Monier Gallo-Romane** (confirme_fabricant 12) : tuiles_par_m2_min 12.4 u/m2; tuiles_par_m2_max 13 u/m2; pureau_min 358 mm; pureau_max 368 mm; largeur_utile 217 mm; liteaux_ml_par_m2 2.8 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 3.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 19 % / 10°76' (zone 1, site protégé, avec écran, rampant < 6,5 m) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Pays de la Loire (lieu de fabrication probable, pas une zone de vente). texte
-- **Monier Romane (Monier)** (confirme_fabricant 12) : tuiles_par_m2_min 13 u/m2; tuiles_par_m2_max 13.6 u/m2; pureau_min 358 mm; pureau_max 366 mm; largeur_utile 208 mm; liteaux_ml_par_m2 2.8 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 3.2 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 30 % / 16°70' (fiche) ; 19 % / 10°76' (page produit) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Occitanie (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Gallo-Romane** (confirme_fabricant 13) : tuiles_par_m2_min 12.4 u/m2; tuiles_par_m2_max 13 u/m2; pureau_min 358 mm; pureau_max 368 mm; largeur_utile 217 mm; liteaux_ml_par_m2 2.8 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 3.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 19 % / 10°76' (zone 1, site protégé, avec écran, rampant < 6,5 m) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Pays de la Loire (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Romane (Monier)** (confirme_fabricant 13) : tuiles_par_m2_min 13 u/m2; tuiles_par_m2_max 13.6 u/m2; pureau_min 358 mm; pureau_max 366 mm; largeur_utile 208 mm; liteaux_ml_par_m2 2.8 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 3.2 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 30 % / 16°70' (fiche) ; 19 % / 10°76' (page produit) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Occitanie (lieu de fabrication probable, pas une zone de vente). texte
 
 ### grand moule fortement galbé (aspect canal)
 
 - **Edilians Canal S Poudenx** (confirme_fabricant 15, a_confirmer 1) : tuiles_par_m2_min 11.1 u/m2; tuiles_par_m2_max 11.8 u/m2; pureau 375 mm; largeur_utile 233 mm; poids_unitaire 4.45 kg; tuiles_par_palette 200 u; dtu 40.21 NF DTU; classe_galbe G3 classe; famille_pente C* code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier à pureau variable 2,5 à 3/ml ; faîtière sans emboîtement 2,5/ml ; tuile d'égout 4,3/ml texte; note Tableau de pentes propre au modèle (valeurs plus hautes que la famille C), à relire sur la fiche. texte; tuiles_par_m2 11.4 u/m2; pureau_min 369 mm; pureau_max 381 mm
-- **Monier Galleane 10** (confirme_fabricant 12) : tuiles_par_m2_min 9.9 u/m2; tuiles_par_m2_max 11.3 u/m2; pureau_min 353 mm; pureau_max 383 mm; largeur_utile 250-265 mm; liteaux_ml_par_m2 2.8 (pureau mini) / 2.6 (pureau maxi) ml/m2; poids_unitaire 4.5 kg; tuiles_par_palette 144 u; dtu 40.21 NF DTU; classe_galbe G2 classe; pente_minimale 19 % / 10°76' % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Grand Est (lieu de fabrication probable, pas une zone de vente). texte
-- **Monier Abeille** (confirme_fabricant 12) : tuiles_par_m2_min 9.5 u/m2; tuiles_par_m2_max 10.1 u/m2; pureau_min 400 mm; pureau_max 414 mm; largeur_utile 252 mm; liteaux_ml_par_m2 2.5 (pureau mini) / 2.4 (pureau maxi) ml/m2; poids_unitaire 4.6 kg; tuiles_par_palette 144 u; dtu 40.21 NF DTU; classe_galbe G2 classe; pente_minimale 19 % / 10°76' % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Auvergne-Rhône-Alpes (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Galleane 10** (confirme_fabricant 13) : tuiles_par_m2_min 9.9 u/m2; tuiles_par_m2_max 11.3 u/m2; pureau_min 353 mm; pureau_max 383 mm; largeur_utile 250-265 mm; liteaux_ml_par_m2 2.8 (pureau mini) / 2.6 (pureau maxi) ml/m2; poids_unitaire 4.5 kg; tuiles_par_palette 144 u; dtu 40.21 NF DTU; classe_galbe G2 classe; pente_minimale 19 % / 10°76' % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Grand Est (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Abeille** (confirme_fabricant 13) : tuiles_par_m2_min 9.5 u/m2; tuiles_par_m2_max 10.1 u/m2; pureau_min 400 mm; pureau_max 414 mm; largeur_utile 252 mm; liteaux_ml_par_m2 2.5 (pureau mini) / 2.4 (pureau maxi) ml/m2; poids_unitaire 4.6 kg; tuiles_par_palette 144 u; dtu 40.21 NF DTU; classe_galbe G2 classe; pente_minimale 19 % / 10°76' % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Auvergne-Rhône-Alpes (lieu de fabrication probable, pas une zone de vente). texte
 
 ### grand moule à pureau plat
 
 - **Edilians Alpha 10 Ste Foy** (confirme_fabricant 14, a_confirmer 1) : tuiles_par_m2_min 10 u/m2; tuiles_par_m2_max 11.2 u/m2; pureau_min 330 mm; pureau_max 370 mm; largeur_utile 270 mm; poids_unitaire 4.43 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A* code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier 1/2 rond 3 ou 2,5/ml selon modèle ; angulaire 3/ml ; à bourrelet 2,5/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.0 (pureau mini) / 2.7 (pureau maxi) ml/m2; note Avec écran, pentes propres au modèle : 35/35/40 (protégé et normal), plus basses que la famille A. texte
-- **Edilians HP 10 Huguenot** (confirme_fabricant 14) : tuiles_par_m2_min 9.9 u/m2; tuiles_par_m2_max 12 u/m2; pureau_min 310 mm; pureau_max 376 mm; largeur_utile 268 mm; poids_unitaire 4.3 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier angulaire 710 3/ml ; losangée 716 et 1/2 rond 717 2,5/ml ; arêtier 758 2,5/ml ; faîtière Shed 3/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.22 (pureau mini) / 2.66 (pureau maxi) ml/m2
+- **Edilians HP 10 Huguenot** (confirme_fabricant 21) : tuiles_par_m2_min 9.9 u/m2; tuiles_par_m2_max 12 u/m2; pureau_min 310 mm; pureau_max 376 mm; largeur_utile 268 mm; poids_unitaire 4.3 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier angulaire 710 3/ml ; losangée 716 et 1/2 rond 717 2,5/ml ; arêtier 758 2,5/ml ; faîtière Shed 3/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.22 (pureau mini) / 2.66 (pureau maxi) ml/m2; demi_tuile 1/2 tuile HP 10 Huguenot référence; chatiere_section_ventilation 50 cm²; tuile_a_douille tuile à douille HP 10 Huguenot Ø 160, conforme VMC (réf. 205.32) ; lanterne bi-section Ø 126 et Ø 160, section d'aération 259 cm² (réf. 1007) ; kit VMC Mangouste 160 référence; tuiles_de_rive_references tuile de rive à rabat D 205.72 / G 205.73 (2,7/ml) ; 1/2 tuile de rive à rabat D 205.74 / G 205.75 (2,7/ml) ; rive universelle 1050 (3/ml) ; rive individuelle PV 13 Huguenot D 215.41 / G 215.42 (2,7/ml au pureau de 368 mm) référence; abouts_references about de faîtière losangée 824 ; about d'arêtier angulaire 859 ; about d'arêtier à emboîtement 863 ; about de faîtière/arêtier 1/2 rond 869 ; about de rive universelle G 1070 / D 1071 ; frontons 801 (angulaire), 805/806 (Shed), 807 (1/2 rond), 809 (losangée), 1080 (rive universelle) référence; tuile_de_finition tuile de finition 205.80 (sur commande) ; 1/2 tuile de finition 205.86 référence; tuile_en_verre réf. VER205 ; pose limitée à 3 unités et 2 rangs successifs référence
 - **Edilians HP 13 Évolutive Huguenot** (confirme_fabricant 14) : tuiles_par_m2_min 13.3 u/m2; tuiles_par_m2_max 16.6 u/m2; pureau_min 280 mm; pureau_max 350 mm; largeur_utile 215 mm; poids_unitaire 3.7 kg; tuiles_par_palette 300 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code; rives_par_ml_et_par_cote 2.9 u/ml; faitieres_par_ml faîtière/arêtier angulaire 3/ml ; losangée et 1/2 rond 2,5/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.57 (pureau mini) / 2.85 (pureau maxi) ml/m2
 - **Koramic Nueva** (confirme_fabricant 9) : tuiles_par_m2 9.5 u/m2; pureau_min 345 mm; pureau_max 370 mm; largeur_utile 282 mm; poids_unitaire 4.7 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code
-- **Koramic Actua (ex-Actua de Migeon)** (confirme_fabricant 11, a_confirmer 1) : tuiles_par_m2 10 u/m2; pureau_min 310 mm; pureau_max 380 mm; largeur_utile 262 mm; poids_unitaire 4.2 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A (DTA : plus bas avec écran) code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière ventilée Lantenne 2,5/ml ; ventilée angulaire 3/ml ; tige de botte 3/ml ; Shed 2,4/ml texte; note Fiche Actua 2026 : « Nombre de tuiles au m2 : environ 10 », « 240 tuiles ≈ 24 m² ». Au lattage mini 310 mm : 12,3/m² (calcul). Ancien catalogue Migeon : 10,5/m². texte
+- **Koramic Actua (ex-Actua de Migeon)** (confirme_fabricant 12, a_confirmer 1) : tuiles_par_m2 10 u/m2; pureau_min 310 mm; pureau_max 380 mm; largeur_utile 262 mm; poids_unitaire 4.2 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A (DTA : plus bas avec écran) code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière ventilée Lantenne 2,5/ml ; ventilée angulaire 3/ml ; tige de botte 3/ml ; Shed 2,4/ml texte; note Fiche Actua 2026 : « Nombre de tuiles au m2 : environ 10 », « 240 tuiles ≈ 24 m² ». Au lattage mini 310 mm : 12,3/m² (calcul). Ancien catalogue Migeon : 10,5/m². texte
 - **Koramic Actua Duplex** (confirme_fabricant 9) : tuiles_par_m2 10 u/m2; pureau_min 310 mm; pureau_max 380 mm; largeur_utile 262 mm; poids_unitaire 4.4 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code
-- **Monier Signy** (confirme_fabricant 14) : tuiles_par_m2_min 9.5 u/m2; tuiles_par_m2_max 11.8 u/m2; pureau_min 300 mm; pureau_max 375 mm; largeur_utile 283 mm; poids_unitaire 4.9 kg; tuiles_par_palette 210 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code; pente_minimale 35 % / 19°29' (zone 1, site protégé et normal, rampant < 8 m en projection horizontale) % du support; tuiles_de_rive tuile de rive G/D + demi-tuile de rive, ou rive à rabat G/D + demi-tuile, ou rive universelle de 33 G/D texte; liteaux_ml_par_m2 3.3 (pureau mini) / 2.7 (pureau maxi) ml/m2; note Signy est une tuile TERRE CUITE (DTU 40.211), pas une tuile béton. texte
+- **Monier Signy** (confirme_fabricant 15) : tuiles_par_m2_min 9.5 u/m2; tuiles_par_m2_max 11.8 u/m2; pureau_min 300 mm; pureau_max 375 mm; largeur_utile 283 mm; poids_unitaire 4.9 kg; tuiles_par_palette 210 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A code; pente_minimale 35 % / 19°29' (zone 1, site protégé et normal, rampant < 8 m en projection horizontale) % du support; tuiles_de_rive tuile de rive G/D + demi-tuile de rive, ou rive à rabat G/D + demi-tuile, ou rive universelle de 33 G/D texte; liteaux_ml_par_m2 3.3 (pureau mini) / 2.7 (pureau maxi) ml/m2; note Signy est une tuile TERRE CUITE (DTU 40.211), pas une tuile béton. texte
 
 ### grand moule à pureau plat (double tuile)
 
@@ -150,8 +176,8 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Edilians Rhôna 10 Ste Foy** (confirme_fabricant 14, a_confirmer 1) : tuiles_par_m2_min 9.3 u/m2; tuiles_par_m2_max 10.1 u/m2; pureau_min 360 mm; pureau_max 390 mm; largeur_utile 276 mm; poids_unitaire 4.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C* code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier 1/2 rond 2,5/ml ; à emboîtement 3/ml ; angulaire 3/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 2.77 (pureau mini) / 2.56 (pureau maxi) ml/m2; note Avec écran : valeurs propres plus basses que la table C (à relire sur la fiche). texte
 - **Edilians Standard 9 Jacob** (confirme_fabricant 14) : tuiles_par_m2_min 9.8 u/m2; tuiles_par_m2_max 10.8 u/m2; pureau_min 340 mm; pureau_max 375 mm; largeur_utile 273 mm; poids_unitaire 4.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier 1/2 rond 3 ou 2,5/ml ; à bourrelet 2,5/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 2.94 (pureau mini) / 2.67 (pureau maxi) ml/m2
 - **Edilians Standard 14 Vario Jacob** (confirme_fabricant 14) : tuiles_par_m2_min 14 u/m2; tuiles_par_m2_max 17 u/m2; pureau_min 285 mm; pureau_max 350 mm; largeur_utile 205 mm; poids_unitaire 3.1 kg; tuiles_par_palette 300 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente B code; rives_par_ml_et_par_cote 3.0 u/ml; faitieres_par_ml faîtière/arêtier 1/2 rond 2,5/ml ; à emboîtement 3/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.5 (pureau mini) / 2.86 (pureau maxi) ml/m2
-- **Koramic Jura Nova** (confirme_fabricant 12) : tuiles_par_m2 10 u/m2; pureau_min 335 mm; pureau_max 390 mm; largeur_utile 263 mm; poids_unitaire 4.25 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; rives_par_ml_et_par_cote 2.6 u/ml; faitieres_par_ml faîtière 1/2 ronde Seltz 2,5/ml ; Shed 2,4/ml texte; note Rive à rabat « 2,6 à 3,0 au ml » selon pureau. texte
-- **Koramic Alegra** (confirme_fabricant 9) : tuiles_par_m2 10.5 u/m2; pureau_min 345 mm; pureau_max 375 mm; largeur_utile 251 mm; poids_unitaire 4.3 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code
+- **Koramic Jura Nova** (confirme_fabricant 13) : tuiles_par_m2 10 u/m2; pureau_min 335 mm; pureau_max 390 mm; largeur_utile 263 mm; poids_unitaire 4.25 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; rives_par_ml_et_par_cote 2.6 u/ml; faitieres_par_ml faîtière 1/2 ronde Seltz 2,5/ml ; Shed 2,4/ml texte; note Rive à rabat « 2,6 à 3,0 au ml » selon pureau. texte
+- **Koramic Alegra** (confirme_fabricant 10) : tuiles_par_m2 10.5 u/m2; pureau_min 345 mm; pureau_max 375 mm; largeur_utile 251 mm; poids_unitaire 4.3 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code
 - **Koramic VHV V** (confirme_fabricant 8) : tuiles_par_m2 15 u/m2; pureau_min 288 mm; pureau_max 308 mm; largeur_utile 216-222 mm; poids_unitaire 2.75 kg; tuiles_par_palette 384 u; dtu 40.21 NF DTU; famille_pente B code
 - **Koramic Optima** (confirme_fabricant 9) : tuiles_par_m2 9 u/m2; pureau_min 335 mm; pureau_max 405 mm; largeur_utile 278 mm; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; famille_pente C code; note Lattage maxi 405 mm lu dans le guide de pose (2016). texte
 - **Koramic Méga** (confirme_fabricant 10) : tuiles_par_m2 10 u/m2; pureau_min 335 mm; pureau_max 393 mm; largeur_utile 261 mm; poids_unitaire 4.35 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; note Lattage maxi 393 mm lu dans le guide de pose (2016). texte
@@ -171,7 +197,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### grand moule faiblement galbé À RELIEF (tuile à côte)
 
-- **Edilians PV 10 Huguenot** (confirme_fabricant 15) : tuiles_par_m2_min 9.9 u/m2; tuiles_par_m2_max 12 u/m2; pureau_min 310 mm; pureau_max 376 mm; largeur_utile 268 mm; poids_unitaire 4.3 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier angulaire 3/ml ; 1/2 rond et losangée 2,5/ml ; Shed 3/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.22 (pureau mini) / 2.66 (pureau maxi) ml/m2; note « PV » = pureau variable (66 mm). Marque NF Montagne et Faible Pente, donc table C ; ce n'est PAS la famille HP 10 (40.211). texte
+- **Edilians PV 10 Huguenot** (confirme_fabricant 22) : tuiles_par_m2_min 9.9 u/m2; tuiles_par_m2_max 12 u/m2; pureau_min 310 mm; pureau_max 376 mm; largeur_utile 268 mm; poids_unitaire 4.3 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; rives_par_ml_et_par_cote 2.7 u/ml; faitieres_par_ml faîtière/arêtier angulaire 3/ml ; 1/2 rond et losangée 2,5/ml ; Shed 3/ml ; rive universelle 3/ml texte; liteaux_ml_par_m2 3.22 (pureau mini) / 2.66 (pureau maxi) ml/m2; note « PV » = pureau variable (66 mm). Marque NF Montagne et Faible Pente, donc table C ; ce n'est PAS la famille HP 10 (40.211). Mêmes dimensions que la HP 10 sur les deux fiches officielles : ce n'est pas une copie (voir differences_avec_hp10). texte; demi_tuile 1/2 tuile PV 10 Huguenot référence; chatiere_section_ventilation 50 cm²; tuile_a_douille tuile à douille PV 10 Huguenot Ø 160, conforme VMC (réf. 214.32) ; lanterne bi-section Ø 126 et Ø 160, 259 cm² (réf. 1007) ; kit VMC Mangouste 160 référence; tuiles_de_rive_references rive individuelle à emboîtement PV 13 Huguenot D 215.41 / G 215.42 (2,7/ml au pureau de 368 mm) ; rive universelle 1050 (3/ml) ; grande rive universelle Patrimoine 1048 (2,5/ml) ; pas de tuile de rive à rabat propre au PV 10 référence; abouts_references about de faîtière losangée 824 ; about d'arêtier angulaire 859 ; about d'arêtier à emboîtement 863 ; about de faîtière/arêtier 1/2 rond 869 ; about de rive universelle G 1070 / D 1071 ; about de rive universelle Patrimoine G 1078 / D 1079 ; frontons 801, 805/806, 807, 809, 816, 816.10, 1080 référence; tuile_en_verre réf. VER214 ; pose limitée à 3 unités et 2 rangs successifs référence; differences_avec_hp10 même moule de base que la HP 10 (460 × 306 mm, largeur utile 268, pureau 310-376, 9,9 à 12/m², 4,3 kg, 240/palette : chiffres identiques sur les deux fiches) ; diffèrent : relief à côte, DTU 40.21 (HP 10 : 40.211), classe de galbe G1 (HP 10 : G0), joints droits ou croisés (HP 10 : croisés), NF Montagne et Faible Pente (pentes dès 25 % sans écran, HP 10 : 45 %), 4 coloris (HP 10 : 6), rive PV 13 au lieu des tuiles de rive à rabat 205.72-75
 
 ### petit moule à pureau plat
 
@@ -184,8 +210,8 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Koramic Lisséa** (confirme_fabricant 11) : tuiles_par_m2_min 17 u/m2; pureau_min 225 mm; pureau_max 295 mm; poids_unitaire 2.7 kg; tuiles_par_palette 350 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente PM_PLAT code; note Guide 2026 : « 17 à 22 » au m², palette de 350 « ≃ 20,6 m² » (≈ 17 /m², au lattage maxi). Calcul 1/(0,201 × 0,295) = 16,9 et 1/(0,201 × 0,225) = 22,1. texte; tuiles_par_m2_max 22 u/m2; largeur_utile 201 mm
 - **Koramic Vauban 2 Droite** (confirme_fabricant 9) : tuiles_par_m2 22 u/m2; pureau_min 258 mm; pureau_max 273 mm; largeur_utile 169 mm; poids_unitaire 2.25 kg; tuiles_par_palette 350 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente PM_PLAT code
 - **Koramic Vauban 2 Écaille** (confirme_fabricant 9) : tuiles_par_m2 22 u/m2; pureau_min 258 mm; pureau_max 273 mm; largeur_utile 169 mm; poids_unitaire 2.3 kg; tuiles_par_palette 350 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente PM_PLAT code
-- **Monier Régence** (confirme_fabricant 11) : tuiles_par_m2_min 19.2 u/m2; tuiles_par_m2_max 20.3 u/m2; pureau_min 266 mm; pureau_max 276 mm; poids_unitaire 2.3 kg; tuiles_par_palette 510 u; dtu 40.211 NF DTU; famille_pente PM_PLAT code; pente_minimale 45 % / 24°23' (site protégé, avec écran) % du support; liteaux_ml_par_m2 3.7 (pureau mini) / 3.7 (pureau maxi) ml/m2; largeur_utile 187 mm
-- **Monier Fontenelle** (confirme_fabricant 12) : tuiles_par_m2_min 19.7 u/m2; tuiles_par_m2_max 20.8 u/m2; pureau_min 240 mm; pureau_max 255 mm; largeur_utile 200 mm; liteaux_ml_par_m2 4.2 (pureau mini) / 4 (pureau maxi) ml/m2; poids_unitaire 2.6 kg; tuiles_par_palette 420 u; dtu 40.211 NF DTU; classe_galbe G0 classe; pente_minimale 45 % / 24°23' (site protégé, avec écran) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Régence** (confirme_fabricant 12) : tuiles_par_m2_min 19.2 u/m2; tuiles_par_m2_max 20.3 u/m2; pureau_min 266 mm; pureau_max 276 mm; poids_unitaire 2.3 kg; tuiles_par_palette 510 u; dtu 40.211 NF DTU; famille_pente PM_PLAT code; pente_minimale 45 % / 24°23' (site protégé, avec écran) % du support; liteaux_ml_par_m2 3.7 (pureau mini) / 3.7 (pureau maxi) ml/m2; largeur_utile 187 mm
+- **Monier Fontenelle** (confirme_fabricant 13) : tuiles_par_m2_min 19.7 u/m2; tuiles_par_m2_max 20.8 u/m2; pureau_min 240 mm; pureau_max 255 mm; largeur_utile 200 mm; liteaux_ml_par_m2 4.2 (pureau mini) / 4 (pureau maxi) ml/m2; poids_unitaire 2.6 kg; tuiles_par_palette 420 u; dtu 40.211 NF DTU; classe_galbe G0 classe; pente_minimale 45 % / 24°23' (site protégé, avec écran) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
 
 ### petit moule à relief
 
@@ -197,8 +223,8 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Koramic Tempête 18** (confirme_fabricant 9, a_confirmer 1) : tuiles_par_m2_min 17.1 u/m2; tuiles_par_m2_max 18.9 u/m2; pureau_min 235 mm; pureau_max 260 mm; largeur_utile 225 mm; poids_unitaire 2.32 kg; tuiles_par_palette 576 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente à confirmer code
 - **Koramic Tempête 993** (confirme_fabricant 8) : tuiles_par_m2 19 u/m2; pureau 248 mm; largeur_utile 210 mm; poids_unitaire 1.99 kg; tuiles_par_palette 576 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente PM_RELIEF code
 - **Koramic Tempête 44** (confirme_fabricant 8) : tuiles_par_m2 20.5 u/m2; pureau 248 mm; largeur_utile 195 mm; poids_unitaire 1.71 kg; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente PM_RELIEF code; note Palette « selon coloris ». texte
-- **Monier Postel 20** (confirme_fabricant 12) : tuiles_par_m2_min 19.8 u/m2; tuiles_par_m2_max 21 u/m2; pureau_min 235 mm; pureau_max 250 mm; largeur_utile 202 mm; liteaux_ml_par_m2 4.3 (pureau mini) / 4 (pureau maxi) ml/m2; poids_unitaire 2 kg; tuiles_par_palette 600 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 35 % / 19°29' (zone 1, site protégé, avec écran) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
-- **Monier Chartreuse** (confirme_fabricant 12) : tuiles_par_m2_min 19.1 u/m2; tuiles_par_m2_max 20.2 u/m2; pureau_min 266 mm; pureau_max 276 mm; largeur_utile 188 mm; liteaux_ml_par_m2 3.7 (pureau mini) / 3.6 (pureau maxi) ml/m2; poids_unitaire 2.2 kg; tuiles_par_palette 510 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 35 % / 19°29' (zone 1, site protégé, avec écran) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Postel 20** (confirme_fabricant 13) : tuiles_par_m2_min 19.8 u/m2; tuiles_par_m2_max 21 u/m2; pureau_min 235 mm; pureau_max 250 mm; largeur_utile 202 mm; liteaux_ml_par_m2 4.3 (pureau mini) / 4 (pureau maxi) ml/m2; poids_unitaire 2 kg; tuiles_par_palette 600 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 35 % / 19°29' (zone 1, site protégé, avec écran) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Chartreuse** (confirme_fabricant 13) : tuiles_par_m2_min 19.1 u/m2; tuiles_par_m2_max 20.2 u/m2; pureau_min 266 mm; pureau_max 276 mm; largeur_utile 188 mm; liteaux_ml_par_m2 3.7 (pureau mini) / 3.6 (pureau maxi) ml/m2; poids_unitaire 2.2 kg; tuiles_par_palette 510 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 35 % / 19°29' (zone 1, site protégé, avec écran) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
 
 ### petit moule à relief (panne)
 
@@ -210,7 +236,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### grand moule à relief (double tuile du Nord)
 
-- **Koramic Opalys** (confirme_fabricant 11) : tuiles_par_m2 9.5 u/m2; pureau_min 254 mm; pureau_max 266 mm; largeur_utile 403 mm; poids_unitaire 3.8 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente B code; rives_par_ml_et_par_cote 3.9 u/ml; faitieres_par_ml faîtière 1/2 ronde Seltz 2,5/ml ; Shed 2,4/ml texte
+- **Koramic Opalys** (confirme_fabricant 12) : tuiles_par_m2 9.5 u/m2; pureau_min 254 mm; pureau_max 266 mm; largeur_utile 403 mm; poids_unitaire 3.8 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente B code; rives_par_ml_et_par_cote 3.9 u/ml; faitieres_par_ml faîtière 1/2 ronde Seltz 2,5/ml ; Shed 2,4/ml texte
 
 ### grand moule à onde douce
 
@@ -218,7 +244,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### petit moule à relief (panne du Nord)
 
-- **Koramic Vieille Panne 451** (confirme_fabricant 8) : tuiles_par_m2 18.5 u/m2; pureau 277 mm; largeur_utile 194 mm; poids_unitaire 2.33 kg; tuiles_par_palette 432 u; dtu 40.21 NF DTU; famille_pente PM_RELIEF code; note Guide de pose 2016 : 281 mm = 19/m² (édition plus ancienne). texte
+- **Koramic Vieille Panne 451** (confirme_fabricant 9) : tuiles_par_m2 18.5 u/m2; pureau 277 mm; largeur_utile 194 mm; poids_unitaire 2.33 kg; tuiles_par_palette 432 u; dtu 40.21 NF DTU; famille_pente PM_RELIEF code; note Guide de pose 2016 : 281 mm = 19/m² (édition plus ancienne). texte
 
 ### grand moule du Sud, à ressaut
 
@@ -253,14 +279,14 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### grand moule à côte
 
-- **Terreal Santenay** (confirme_fabricant 12) : tuiles_par_m2 10 u/m2; pureau_min 345 mm; pureau_max 418 mm; largeur_utile 249 mm; poids_unitaire 4.0 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; pente_minimale 19 % % du support; rives_par_ml_et_par_cote 2.5 u/ml; faitieres_par_ml faîtière ronde ventilée 2,5/ml ; angulaire 2,5/ml ; arêtier large ou élégant 2,6/ml texte
+- **Terreal Santenay** (confirme_fabricant 13) : tuiles_par_m2 10 u/m2; pureau_min 345 mm; pureau_max 418 mm; largeur_utile 249 mm; poids_unitaire 4.0 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; pente_minimale 19 % % du support; rives_par_ml_et_par_cote 2.5 u/ml; faitieres_par_ml faîtière ronde ventilée 2,5/ml ; angulaire 2,5/ml ; arêtier large ou élégant 2,6/ml texte
 - **Terreal Côte de Beaune** (confirme_fabricant 10) : tuiles_par_m2 10 u/m2; pureau_min 345 mm; pureau_max 418 mm; largeur_utile 248 mm; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente C code; pente_minimale 19 % / 10,76° % du support
 - **Terreal Montagny** (confirme_fabricant 10, a_confirmer 1) : tuiles_par_m2 9.5 u/m2; pureau_min 375 mm; pureau_max 422 mm; largeur_utile 251 mm; poids_unitaire 4.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente à confirmer code; pente_minimale 25 % / 14,04° (zone 1, protégé, avec écran) % du support; note Titulaire de la marque NF sans option FP affichée ; pente de 25 % qui ne tombe ni en B ni en C. texte
 - **Terreal Jura PV** (confirme_fabricant 10) : tuiles_par_m2 14.5 u/m2; pureau_min 285 mm; pureau_max 345 mm; largeur_utile 203 mm; poids_unitaire 3.0 kg; tuiles_par_palette 300 u; dtu 40.21 NF DTU; famille_pente B code; pente_minimale 30 % / 16,70° % du support; note Liteaux 2,9 ml/m² (fiche). texte
 
 ### grand moule d'aspect plat
 
-- **Terreal Volnay PV** (confirme_fabricant 8, a_confirmer 1) : tuiles_par_m2 10 u/m2; pureau_min 340 mm; pureau_max 408 mm; largeur_utile 251 mm; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A (sous DTA avec écran) code
+- **Terreal Volnay PV** (confirme_fabricant 9, a_confirmer 1) : tuiles_par_m2 10 u/m2; pureau_min 340 mm; pureau_max 408 mm; largeur_utile 251 mm; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A (sous DTA avec écran) code
 - **Terreal Volnay PV Tandem** (confirme_fabricant 9, a_confirmer 1) : tuiles_par_m2 10 u/m2; pureau_min 340 mm; pureau_max 408 mm; largeur_utile 251 mm; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.211 NF DTU; classe_galbe G0 classe; famille_pente A (sous DTA) code; pente_minimale 35 % / 19,29° % du support
 
 ### petit moule d'aspect plat, format paysage
@@ -277,11 +303,11 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### grand moule faible relief, simple emboîtement
 
-- **Monier Losangée Héritage** (confirme_fabricant 13) : tuiles_par_m2_min 11.6 u/m2; tuiles_par_m2_max 13.1 u/m2; pureau_min 336 mm; pureau_max 376 mm; largeur_utile 228 mm; poids_unitaire 3.4 kg; tuiles_par_palette 300 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente B code; pente_minimale 30 % / 16°70' (zone 1, site protégé, avec écran) % du support; tuiles_de_rive rive standard G/D, rive universelle de 33 G/D (+ about de rive), demi-tuile texte; liteaux_ml_par_m2 3.0 (pureau mini) / 2.6 (pureau maxi) ml/m2
+- **Monier Losangée Héritage** (confirme_fabricant 14) : tuiles_par_m2_min 11.6 u/m2; tuiles_par_m2_max 13.1 u/m2; pureau_min 336 mm; pureau_max 376 mm; largeur_utile 228 mm; poids_unitaire 3.4 kg; tuiles_par_palette 300 u; dtu 40.21 NF DTU; classe_galbe G1 classe; famille_pente B code; pente_minimale 30 % / 16°70' (zone 1, site protégé, avec écran) % du support; tuiles_de_rive rive standard G/D, rive universelle de 33 G/D (+ about de rive), demi-tuile texte; liteaux_ml_par_m2 3.0 (pureau mini) / 2.6 (pureau maxi) ml/m2
 
 ### grand moule fort galbe, aspect canal
 
-- **Monier Galleane 12** (confirme_fabricant 12) : tuiles_par_m2_min 11.4 u/m2; tuiles_par_m2_max 13.2 u/m2; pureau_min 350 mm; pureau_max 380 mm; largeur_utile 215-230 mm; poids_unitaire 3.8 kg; tuiles_par_palette 180 u; dtu 40.21 NF DTU; famille_pente C code; pente_minimale 19 % / 10°76' % du support; liteaux_ml_par_m2 2.8 (pureau mini) / 2.6 (pureau maxi) ml/m2; note Fiche 2019 (Chausson) revérifiée sur la fiche BMI en ligne (PDF du 08/04/2026) : mêmes valeurs ; DTA n° 5/09-2078. texte
+- **Monier Galleane 12** (confirme_fabricant 13) : tuiles_par_m2_min 11.4 u/m2; tuiles_par_m2_max 13.2 u/m2; pureau_min 350 mm; pureau_max 380 mm; largeur_utile 215-230 mm; poids_unitaire 3.8 kg; tuiles_par_palette 180 u; dtu 40.21 NF DTU; famille_pente C code; pente_minimale 19 % / 10°76' % du support; liteaux_ml_par_m2 2.8 (pureau mini) / 2.6 (pureau maxi) ml/m2; note Fiche 2019 (Chausson) revérifiée sur la fiche BMI en ligne (PDF du 08/04/2026) : mêmes valeurs ; DTA n° 5/09-2078. texte
 
 ### règle générale
 
@@ -289,8 +315,8 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### grand moule à pureau plat (faible galbe)
 
-- **Monier Belmont** (confirme_fabricant 12) : tuiles_par_m2_min 9.7 u/m2; tuiles_par_m2_max 11.9 u/m2; pureau_min 300 mm; pureau_max 375 mm; largeur_utile 282 mm; liteaux_ml_par_m2 3.3 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 19 % / 10°76' % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
-- **Monier Maizières** (confirme_fabricant 12) : tuiles_par_m2_min 9.5 u/m2; tuiles_par_m2_max 11.9 u/m2; pureau_min 300 mm; pureau_max 375 mm; largeur_utile 280 mm; liteaux_ml_par_m2 3.3 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 4.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 30 % / 16°70' (fiche) ; 19 % / 10°76' (page produit) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Belmont** (confirme_fabricant 13) : tuiles_par_m2_min 9.7 u/m2; tuiles_par_m2_max 11.9 u/m2; pureau_min 300 mm; pureau_max 375 mm; largeur_utile 282 mm; liteaux_ml_par_m2 3.3 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 4.5 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 19 % / 10°76' % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
+- **Monier Maizières** (confirme_fabricant 13) : tuiles_par_m2_min 9.5 u/m2; tuiles_par_m2_max 11.9 u/m2; pureau_min 300 mm; pureau_max 375 mm; largeur_utile 280 mm; liteaux_ml_par_m2 3.3 (pureau mini) / 2.7 (pureau maxi) ml/m2; poids_unitaire 4.4 kg; tuiles_par_palette 240 u; dtu 40.21 NF DTU; classe_galbe G1 classe; pente_minimale 30 % / 16°70' (fiche) ; 19 % / 10°76' (page produit) % du support; note Modèle ajouté le 19/11/2026 depuis le catalogue BMI Monier en ligne. Région affichée par BMI : Hauts-de-France (lieu de fabrication probable, pas une zone de vente). texte
 
 ### modèle de la liste du fondateur
 
@@ -310,16 +336,16 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Edilians Plate 17x27 Doyet (réf. 520)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 275 × 170 (utile 170) mm; poids_unitaire 1.2 kg; tuiles_par_palette 720 u
 - **Edilians Plate Tradition 17x27 Doyet (réf. 523)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 275 × 170 (utile 170) mm; poids_unitaire 1.38 kg; tuiles_par_palette 720 u
 - **Edilians Monument Historique Doyet 17x27 (réf. 522)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 275 × 170 (utile 170) mm; poids_unitaire 1.5 kg; tuiles_par_palette 600 u
-- **Edilians Plate Tradition 17x27 Phalempin (réf. 507)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 268 × 168 (utile 168) mm; poids_unitaire 1.2 kg; tuiles_par_palette 960 u
+- **Edilians Plate Tradition 17x27 Phalempin (réf. 507)** (confirme_fabricant 10) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 268 × 168 (utile 168) mm; poids_unitaire 1.2 kg; tuiles_par_palette 960 u
 - **Edilians Monument Historique 16x27 (réf. 503)** (confirme_fabricant 9) : tuiles_par_m2 73.5 u/m2; liteaux_ml_par_m2 11.76 ml/m2; tuiles_par_m2 69 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 66 u/m2; liteaux_ml_par_m2 10.53 ml/m2; dimensions_et_largeur_utile 260 × 160 (utile 160) mm; poids_unitaire 1.5 kg; tuiles_par_palette 750 u
 - **Edilians Restauration 16x27 (réf. 502)** (confirme_fabricant 9) : tuiles_par_m2 73.5 u/m2; liteaux_ml_par_m2 11.76 ml/m2; tuiles_par_m2 69 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 66 u/m2; liteaux_ml_par_m2 10.53 ml/m2; dimensions_et_largeur_utile 260 × 160 (utile 160) mm; poids_unitaire 1.2 kg; tuiles_par_palette 900 u
-- **Edilians Plate 16x24 Phalempin (réf. 505)** (confirme_fabricant 9) : tuiles_par_m2 83.3 u/m2; liteaux_ml_par_m2 13.33 ml/m2; tuiles_par_m2 78 u/m2; liteaux_ml_par_m2 12.5 ml/m2; tuiles_par_m2 73.5 u/m2; liteaux_ml_par_m2 11.76 ml/m2; dimensions_et_largeur_utile 240 × 160 (utile 160) mm; poids_unitaire 0.9 kg; tuiles_par_palette 1088 u
+- **Edilians Plate 16x24 Phalempin (réf. 505)** (confirme_fabricant 10) : tuiles_par_m2 83.3 u/m2; liteaux_ml_par_m2 13.33 ml/m2; tuiles_par_m2 78 u/m2; liteaux_ml_par_m2 12.5 ml/m2; tuiles_par_m2 73.5 u/m2; liteaux_ml_par_m2 11.76 ml/m2; dimensions_et_largeur_utile 240 × 160 (utile 160) mm; poids_unitaire 0.9 kg; tuiles_par_palette 1088 u
 - **Edilians Plate 16x24 Doyet (réf. 521)** (confirme_fabricant 9) : tuiles_par_m2 83.3 u/m2; liteaux_ml_par_m2 13.33 ml/m2; tuiles_par_m2 78 u/m2; liteaux_ml_par_m2 12.5 ml/m2; tuiles_par_m2 73.5 u/m2; liteaux_ml_par_m2 11.76 ml/m2; dimensions_et_largeur_utile 240 × 160 (utile 160) mm; poids_unitaire 1.0 kg; tuiles_par_palette 900 u
 - **Edilians Plate Stretto Huguenot (réf. 530)** (confirme_fabricant 9) : tuiles_par_m2 26,95 u/m2; liteaux_ml_par_m2 7.14 ml/m2; tuiles_par_m2 ≈ 26 u/m2; liteaux_ml_par_m2 6.9 ml/m2; tuiles_par_m2 25,15 u/m2; liteaux_ml_par_m2 6.67 ml/m2; dimensions_et_largeur_utile 370 × 265 (utile 265) mm; poids_unitaire 2.8 kg; tuiles_par_palette 288 u
-- **Edilians Plate 20x30 Huguenot (réf. 510)** (confirme_fabricant 9) : tuiles_par_m2 47.6 u/m2; liteaux_ml_par_m2 9.52 ml/m2; tuiles_par_m2 45.5 u/m2; liteaux_ml_par_m2 9.09 ml/m2; tuiles_par_m2 43.5 u/m2; liteaux_ml_par_m2 8.7 ml/m2; dimensions_et_largeur_utile 300 × 200 (utile 200) mm; poids_unitaire 1.6 kg; tuiles_par_palette 660 u
+- **Edilians Plate 20x30 Huguenot (réf. 510)** (confirme_fabricant 10) : tuiles_par_m2 47.6 u/m2; liteaux_ml_par_m2 9.52 ml/m2; tuiles_par_m2 45.5 u/m2; liteaux_ml_par_m2 9.09 ml/m2; tuiles_par_m2 43.5 u/m2; liteaux_ml_par_m2 8.7 ml/m2; dimensions_et_largeur_utile 300 × 200 (utile 200) mm; poids_unitaire 1.6 kg; tuiles_par_palette 660 u
 - **Edilians Plate écaille pressée 17x27 Ste Foy (réf. 551)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 272 × 170 (utile 170) mm; poids_unitaire 1.1 kg; tuiles_par_palette 780 u
-- **Edilians Plate pressée 17x27 Ste Foy (réf. 501)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 272 × 170 (utile 170) mm; poids_unitaire 1.2 kg; tuiles_par_palette 720 u
-- **Edilians Plate 17x27 Phalempin (réf. 500)** (confirme_fabricant 9) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 268 × 168 (utile 168) mm; poids_unitaire 1.1 kg; tuiles_par_palette 1088 u
+- **Edilians Plate pressée 17x27 Ste Foy (réf. 501)** (confirme_fabricant 10) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 272 × 170 (utile 170) mm; poids_unitaire 1.2 kg; tuiles_par_palette 720 u
+- **Edilians Plate 17x27 Phalempin (réf. 500)** (confirme_fabricant 10) : tuiles_par_m2 65 u/m2; liteaux_ml_par_m2 11.11 ml/m2; tuiles_par_m2 62 u/m2; liteaux_ml_par_m2 10.53 ml/m2; tuiles_par_m2 59 u/m2; liteaux_ml_par_m2 10.0 ml/m2; dimensions_et_largeur_utile 268 × 168 (utile 168) mm; poids_unitaire 1.1 kg; tuiles_par_palette 1088 u
 - **Edilians arêtier « tige de botte »** (une_source 1) : pieces_au_ml 3 u/ml
 - **Edilians Plate Stretto Huguenot (grand format)** (une_source 1) : pente_minimale_avec_ecran 40 % (zone 1 protégé, X ≥ 80 mm) à 75 % %
 - **Terreal Rustique 17x27** (confirme_fabricant 6) : tuiles_par_m2 59 / 62 / 65 u/m2; dimensions_hors_tout 17 × 27 × 1,2 cm; liteaux_ml_par_m2 10 / 10,5 / 11,1 ml/m2; poids_unitaire 1.1 kg; tuiles_par_palette 960 u; pente_minimale 70 % / 35° (zone 1, situation normale, avec écran) %
@@ -328,7 +354,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Terreal Ségala Vieux Pays 20x29** (confirme_fabricant 6) : tuiles_par_m2 45 / 48 / 50 u/m2; dimensions_hors_tout 20 × 29 × 1,6 cm; liteaux_ml_par_m2 9 / 9,6 / 10 ml/m2; poids_unitaire 1.7 kg; tuiles_par_palette 576 u; pente_minimale 60 % / 31° (zone 1, situation protégée) %
 - **Terreal Rully (tuile d'aspect plat à emboîtement, DTU 40.21)** (confirme_fabricant 5) : tuiles_par_m2 20 u/m2; pente_minimale 45 % / 24,23° %; pureau_min 152 mm; pureau_max 168 mm; largeur_utile 315 mm
 - **Wienerberger Plate 301 17x27** (confirme_fabricant 8) : tuiles_par_m2 59 / 62 / 65 u/m2; dimensions_hors_tout 17 × 27 × 1,2 cm; liteaux_ml_par_m2 11.1 (pureau mini) / 10 (pureau maxi) ml/m2; poids_unitaire 1.02 kg; tuiles_par_palette 1152 u; pureau_min 90 mm; pureau_max 100 mm; largeur_utile 170 mm
-- **Monier Plate de Pays terre cuite** (confirme_fabricant 9) : tuiles_par_m2 59 à 65 (≈ 62) u/m2; dimensions_hors_tout ≈ 17 × 27 cm; poids_unitaire 1.18 kg; tuiles_par_palette 864 u; pente_minimale 60 % (zone 1, site protégé, avec écran, recouvrement mini 8 cm) %; pureau_min 90 mm; pureau_max 100 mm; largeur_utile 172 mm; liteaux_ml_par_m2 11 (pureau mini) / 10 (pureau maxi) ml/m2
+- **Monier Plate de Pays terre cuite** (confirme_fabricant 10) : tuiles_par_m2 59 à 65 (≈ 62) u/m2; dimensions_hors_tout ≈ 17 × 27 cm; poids_unitaire 1.18 kg; tuiles_par_palette 864 u; pente_minimale 60 % (zone 1, site protégé, avec écran, recouvrement mini 8 cm) %; pureau_min 90 mm; pureau_max 100 mm; largeur_utile 172 mm; liteaux_ml_par_m2 11 (pureau mini) / 10 (pureau maxi) ml/m2
 - **Toutes marques plate 17 × 27 cm** (confirme 1) : tuiles_par_m2 59 / 62 / 65 u/m2
 - **Toutes marques plate 16 × 27 cm** (confirme 1) : tuiles_par_m2 73,5 / 69 / 66 u/m2
 - **Toutes marques plate 16 × 24 cm** (confirme 1) : tuiles_par_m2 83,3 / 78 / 73,5 u/m2
@@ -343,7 +369,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### tuile canal
 
-- **Edilians Canal 50 Poudenx (couvert 414 / courant à tenons 454)** (confirme_fabricant 11) : couverts_par_m2 10.3 u/m2; liteaux_ml_par_m2 2.78 ml/m2; couverts_par_m2 11.1 u/m2; liteaux_ml_par_m2 2.86 ml/m2; couverts_par_m2 11.8 u/m2; liteaux_ml_par_m2 2.94 ml/m2; couverts_par_m2 12.6 u/m2; liteaux_ml_par_m2 3.03 ml/m2; longueur_hors_tout 500 mm; poids_unitaire 414 : 2,5 kg ; 454 : 2,7 kg kg; tuiles_par_palette 414 : 225 ; 454 : 200 u
+- **Edilians Canal 50 Poudenx (couvert 414 / courant à tenons 454)** (confirme_fabricant 12) : couverts_par_m2 10.3 u/m2; liteaux_ml_par_m2 2.78 ml/m2; couverts_par_m2 11.1 u/m2; liteaux_ml_par_m2 2.86 ml/m2; couverts_par_m2 11.8 u/m2; liteaux_ml_par_m2 2.94 ml/m2; couverts_par_m2 12.6 u/m2; liteaux_ml_par_m2 3.03 ml/m2; longueur_hors_tout 500 mm; poids_unitaire 414 : 2,5 kg ; 454 : 2,7 kg kg; tuiles_par_palette 414 : 225 ; 454 : 200 u
 - **Edilians Canal 50 Réabilis Poudenx (couvert 421 / courant 454)** (confirme_fabricant 11) : couverts_par_m2 10.3 u/m2; liteaux_ml_par_m2 2.78 ml/m2; couverts_par_m2 11.1 u/m2; liteaux_ml_par_m2 2.86 ml/m2; couverts_par_m2 11.8 u/m2; liteaux_ml_par_m2 2.94 ml/m2; couverts_par_m2 12.6 u/m2; liteaux_ml_par_m2 3.03 ml/m2; longueur_hors_tout 500 mm; poids_unitaire 421 : 2,6 kg ; 454 : 2,7 kg kg; tuiles_par_palette 200 u
 - **Edilians Canal 50 Restauration Poudenx (couvert 418 / courant 454)** (confirme_fabricant 11) : couverts_par_m2 10.3 u/m2; liteaux_ml_par_m2 2.78 ml/m2; couverts_par_m2 11.1 u/m2; liteaux_ml_par_m2 2.86 ml/m2; couverts_par_m2 11.8 u/m2; liteaux_ml_par_m2 2.94 ml/m2; couverts_par_m2 12.6 u/m2; liteaux_ml_par_m2 3.03 ml/m2; longueur_hors_tout 500 mm; poids_unitaire 418 : 2,5 kg ; 454 : 2,7 kg kg; tuiles_par_palette 200 u
 - **Edilians Canal Gironde 50 Poudenx (couvert 406 / courant à tenons 456)** (confirme_fabricant 11) : couverts_par_m2 12.4 u/m2; liteaux_ml_par_m2 2.83 ml/m2; couverts_par_m2 12.7 u/m2; liteaux_ml_par_m2 2.92 ml/m2; couverts_par_m2 13.1 u/m2; liteaux_ml_par_m2 3.01 ml/m2; couverts_par_m2 13.5 u/m2; liteaux_ml_par_m2 3.1 ml/m2; longueur_hors_tout 492 mm; poids_unitaire 406 : 2 kg ; 456 : 2,1 kg kg; tuiles_par_palette 406 : 336 ; 456 : 384 u
@@ -372,7 +398,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 - **Toutes marques tuile canal** (une_source 1) : recouvrement_reduit_admis 10 cm (zones 1-2 site protégé) ; 12 cm (zones 1-2 site normal) cm
 - **Toutes marques bardelis (rive) gauche ou droit** (confirme 1) : bardelis_au_ml_de_rive_par_cote 2.7 u/ml
 - **Toutes marques faîtière canal 50 cm (sans emboîtement ou à pureau variable)** (confirme 1) : faitieres_par_ml 2,5 (sans emboîtement) ; 2,5 à 3 (pureau variable Edilians) ; 2,2 à 2,7 (pureau variable Terreal) u/ml
-- **Monier Canal de 40** (confirme_fabricant 10) : tuiles_par_m2_min 16.7 u/m2; tuiles_par_m2_max 21.7 u/m2; pureau_min 230 mm; pureau_max 260 mm; largeur_utile 200-230 mm; liteaux_ml_par_m2 4.4 (pureau mini) / 3.9 (pureau maxi) ml/m2; poids_unitaire 1.5 kg; tuiles_par_palette 720 u; pente_minimale 24 % / 13°50' (zone 1, site protégé, avec écran) %; dtu NF P 31-201 [DTU 40.22] -
+- **Monier Canal de 40** (confirme_fabricant 11) : tuiles_par_m2_min 16.7 u/m2; tuiles_par_m2_max 21.7 u/m2; pureau_min 230 mm; pureau_max 260 mm; largeur_utile 200-230 mm; liteaux_ml_par_m2 4.4 (pureau mini) / 3.9 (pureau maxi) ml/m2; poids_unitaire 1.5 kg; tuiles_par_palette 720 u; pente_minimale 24 % / 13°50' (zone 1, site protégé, avec écran) %; dtu NF P 31-201 [DTU 40.22] -
 
 ### plaque support sous tuile
 
@@ -396,12 +422,12 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### tuile béton grand moule
 
-- **Monier Double Romane** (confirme_fabricant 10) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire_et_au_m2 4.3 kg ; 41,3 à 48,6 kg/m² kg; tuiles_par_palette 160 u; pente_minimale 29 % / 16°17' (site protégé, avec écran) %; dtu NF P 31-207 [DTU 40.24] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm
-- **Monier Plein Ciel** (confirme_fabricant 10) : tuiles_par_m2_min 9.6 u/m2; pureau_min 315 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.2 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire_et_au_m2 4.2 kg ; 40,3 à 44,5 kg/m² kg; tuiles_par_palette 160 u; pente_minimale 25 % / 14°04' %; dtu NF P 31-207 [DTU 40.24] -; tuiles_par_m2_max 10.6 u/m2; pureau_max 345 mm
-- **Monier Perspective** (confirme_fabricant 10) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire_et_au_m2 4.6 kg ; 44,2 à 52 kg/m² kg; tuiles_par_palette 160 u; pente_minimale 25 % / 14°04' (site protégé, avec écran) %; dtu NF P 31-207 [DTU 40.24] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm
-- **Monier Innotech** (confirme_fabricant 10) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 300 mm; poids_unitaire_et_au_m2 4.6 kg ; 44 à 52 kg/m² kg; tuiles_par_palette 140 u; pente_minimale 40 % / 21°80' (site protégé, avec écran) %; dtu NF P 31-205 [DTU 40.241] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2
-- **Monier Nobilée** (confirme_fabricant 10) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 299-301 mm; poids_unitaire_et_au_m2 4.6 kg ; 44 à 52 kg/m² kg; tuiles_par_palette 140 u; pente_minimale 40 % / 21°80' (site protégé, avec écran) %; dtu NF P 31-205 [DTU 40.241] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2
-- **Monier Tradipanne** (confirme_fabricant 10) : tuiles_par_m2_min 9.6 u/m2; tuiles_par_m2_max 11.3 u/m2; pureau_min 295 mm; pureau_max 345 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire 4.1 kg; tuiles_par_palette 144 u; pente_minimale 25 % / 14°04' (site protégé, avec écran) %; dtu NF P 31-207 [DTU 40.24] -
+- **Monier Double Romane** (confirme_fabricant 14) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire_et_au_m2 4.3 kg ; 41,3 à 48,6 kg/m² kg; tuiles_par_palette 160 u; pente_minimale 29 % / 16°17' (site protégé, avec écran) %; dtu NF P 31-207 [DTU 40.24] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm; rives_par_ml_et_par_cote 3,2 u/ml; faitieres_par_ml 2.8 u/ml; chatiere_section_ventilation 18 cm²
+- **Monier Plein Ciel** (confirme_fabricant 14) : tuiles_par_m2_min 9.6 u/m2; pureau_min 315 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.2 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire_et_au_m2 4.2 kg ; 40,3 à 44,5 kg/m² kg; tuiles_par_palette 160 u; pente_minimale 25 % / 14°04' %; dtu NF P 31-207 [DTU 40.24] -; tuiles_par_m2_max 10.6 u/m2; pureau_max 345 mm; rives_par_ml_et_par_cote 3,2 u/ml; faitieres_par_ml 2.8 u/ml; chatiere_section_ventilation 18 cm²
+- **Monier Perspective** (confirme_fabricant 14) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire_et_au_m2 4.6 kg ; 44,2 à 52 kg/m² kg; tuiles_par_palette 160 u; pente_minimale 25 % / 14°04' (site protégé, avec écran) %; dtu NF P 31-207 [DTU 40.24] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm; rives_par_ml_et_par_cote 3,2 u/ml; faitieres_par_ml 2.8 u/ml; chatiere_section_ventilation 25 cm²
+- **Monier Innotech** (confirme_fabricant 14) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 300 mm; poids_unitaire_et_au_m2 4.6 kg ; 44 à 52 kg/m² kg; tuiles_par_palette 140 u; pente_minimale 40 % / 21°80' (site protégé, avec écran) %; dtu NF P 31-205 [DTU 40.241] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; rives_par_ml_et_par_cote 1,5 à 1,7 + 1,5 à 1,7 u/ml; faitieres_par_ml 2.8 u/ml; chatiere_section_ventilation 25 cm²
+- **Monier Nobilée** (confirme_fabricant 14) : tuiles_par_m2_min 9.6 u/m2; pureau_min 295 mm; largeur_utile 299-301 mm; poids_unitaire_et_au_m2 4.6 kg ; 44 à 52 kg/m² kg; tuiles_par_palette 140 u; pente_minimale 40 % / 21°80' (site protégé, avec écran) %; dtu NF P 31-205 [DTU 40.241] -; tuiles_par_m2_max 11.3 u/m2; pureau_max 345 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; rives_par_ml_et_par_cote 1,5 à 1,7 + 1,5 à 1,7 u/ml; faitieres_par_ml 2.8 u/ml; chatiere_section_ventilation 25 cm²
+- **Monier Tradipanne** (confirme_fabricant 14) : tuiles_par_m2_min 9.6 u/m2; tuiles_par_m2_max 11.3 u/m2; pureau_min 295 mm; pureau_max 345 mm; largeur_utile 300 mm; liteaux_ml_par_m2 3.4 (pureau mini) / 2.9 (pureau maxi) ml/m2; poids_unitaire 4.1 kg; tuiles_par_palette 144 u; pente_minimale 25 % / 14°04' (site protégé, avec écran) %; dtu NF P 31-207 [DTU 40.24] -; rives_par_ml_et_par_cote 3,2 u/ml; faitieres_par_ml 2.8 u/ml; chatiere_section_ventilation 18 cm²
 - **Toutes marques tuile béton grand moule 42 × 33 cm (Monier)** (une_source 1) : tuiles_par_m2 9,6 à 11,3 u/m2
 
 ### tuile plate béton
@@ -426,15 +452,17 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 |---|---|---|---|
 | types | lignolet ; faîtière terre cuite scellée au mortier bâtard ; faîtière terre cuite à sec (Armor, Ardoise) ; faîtage zinc à pinces ou à ourlets  |  | confirme |
 
-- **Edilians Faîtière Armor à emboîtement universelle (pour toiture ardoise)** (a_confirmer 1) : longueur_piece 37 cm
-- **Toutes marques lignolet** (confirme 1, a_confirmer 1) : definition ardoises du versant au vent débordant sur l'autre versant, sans métal ni mortier ; site normal ou protégé seulement; ardoises_par_ml ml ÷ largeur ardoise × 1,2 (référentiel §3) u/ml
+- **Edilians Faîtière Armor 33 (réf. 729), faîtière terre cuite à emboîtement pour toiture ardoise** (confirme 1) : longueur_piece 370 mm
+- **Edilians Faîtière Armor 33 (réf. 729)** (une_source 1, confirme 1, a_confirmer 1) : conditionnement 184 u/palette; pieces_par_ml None u/ml
+- **Edilians Faîtière ardoise de 40 Ouverture 17 (réf. 720)** (une_source 1) : longueur_piece 445 mm
+- **Toutes marques lignolet** (confirme 1, une_source 1) : definition ardoises du versant au vent débordant sur l'autre versant, sans métal ni mortier ; site normal ou protégé seulement; ardoises_par_ml 2 × 1 000 ÷ (largeur d'ardoise en mm + 3) ardoises par ml de faîtage (un rang de doublage par versant), + 2 clous par ardoise sur les deux derniers rangs ardoises par ml de faîtage (les deux versants)
 
 ### closoir de faîtage / arêtier
 
 - **Monier Metalroll, Figaroll Plus** (confirme 1) : longueur_rouleau 5 m
 - **Toutes marques Airtec Duo/Alu Roll, Dryroll, bi-composant** (confirme 1) : longueur_rouleau 10 m ou dévidoir 50 m m
 - **Toutes marques closoir souple ou rigide** (confirme 1) : recouvrement 5 cm
-- **Toutes marques closoirs souples** (confirme 1) : largeur 240 à 400 mm selon la classe de galbe de la tuile (G0 à G3) mm
+- **Toutes marques closoirs souples** (confirme 1) : 
 - **Toutes marques closoirs souples ventilés** (confirme 1) : usage le même closoir sert au faîtage et à l'arêtier
 - **Toutes marques closoirs ventilés** (confirme 1) : section_ventilation 70 à 200 cm²/ml
 - **Terreal LAHE-PRO (rigide ventilé)** (une_source 1) : longueur_element 2 m
@@ -458,7 +486,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### mortier de faîtage
 
-- **Toutes marques mortier de couverture prêt à gâcher** (confirme 1) : consommation 5 à 10 kg/ml
+- **Toutes marques mortier de couverture prêt à gâcher** (confirme 1, a_confirmer 1) : consommation 5 à 10 kg/ml
 - **Toutes marques sac de 25 kg** (confirme 1) : conditionnement sac 25 kg ; palette 48 sacs (1 200 kg) Weber et PRB, 56 sacs VPI
 - **Toutes marques mortier de couverture** (confirme 1) : usages faîtières, arêtiers, égouts, rives, solins, crêtes de coq, souches
 
@@ -531,10 +559,17 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes_vendus | [160, 250, 330, 400] mm | appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK écrit 333 mm pour la « 33 » | confirme |
+| developpes_vendus | [160, 250, 330, 400] mm | appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 » | confirme |
 | section_d_ecoulement | {'160': 20, '250': 57, '330': 113, '400': 174} cm2 |  | confirme |
 | surface_en_plan_desservie_par_sortie_pente_5_mm_m | {'250': 35, '330': 95, '400': 180} m2 | surface en projection horizontale, par sens d'écoulement vers une naissance ; une naissance au milieu reçoit les deux côtés | confirme |
 
+- **VMZINC Gouttière pendante de 16** (confirme_fabricant 1) : 
+- **VMZINC Gouttière demi-ronde de 25** (confirme_fabricant 1) : 
+- **VMZINC Gouttière demi-ronde de 33** (confirme_fabricant 1) : 
+- **VMZINC Gouttière pendante de 40** (confirme_fabricant 1) : 
+- **RHEINZINK Gouttière demi-ronde 166 / 250 / 333 (boudin 14)** (confirme_fabricant 1) : 
+- **Edilians Gouttière demi-ronde NATZINC (boudin 14)** (confirme_fabricant 1) : 
+- **NedZink Gouttière ½ ronde (types 250 à 500)** (confirme_fabricant 1) : 
 
 ### gouttière zinc
 
@@ -568,24 +603,30 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes | [250, 330, 400] mm | la nantaise de 33 est confirmée (VMZINC + trois négoces) ; 25 et 40 n'ont que la source VMZINC | confirme |
+| developpes | [330, 400] mm | « de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul | confirme |
 
+- **VMZINC Gouttière nantaise (ou laval) de 33** (confirme_fabricant 1) : 
+- **VMZINC Gouttière nantaise (ou laval) de 40 et de 50** (confirme_fabricant 1) : 
+- **RHEINZINK Gouttière nantaise 333 et 400 (avec pince)** (confirme_fabricant 1) : 
+- **Edilians Gouttière nantaise et havraise NATZINC (avec pince)** (confirme_fabricant 1) : 
 
 ### gouttière zinc nantaise
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
 | longueur_vendue | 4 m |  | confirme |
-| hauteur_de_releve_choix_au_comptoir | [80, 100] mm | les deux sources sont VMZINC : une seule source indépendante | confirme |
-| surface_desservie_selon_pente_du_toit_releve_80_100_dev_333 | {'27°': [35, 65], '35°': [23, 45], '45°': [15, 30], '60°': [None, 20]} m2 | la section d'une gouttière rampante baisse quand la pente du toit monte : une nantaise sur ardoise à 45° dessert peu de surface | une_source |
+| hauteur_de_releve_choix_au_comptoir | [80, 100] mm | 80 mm (« R8 ») courant en Bretagne ; 100 mm (« R10 ») surtout en 40, en 33 chez VMZINC et RHEINZINK | confirme |
+| surface_desservie_selon_pente_du_toit_releve_80_100_dev_330 | {'27°': [35, 65], '35°': [23, 45], '45°': [15, 30], '60°': [None, 20]} m2 | la section d'une gouttière rampante baisse quand la pente du toit monte : une nantaise sur ardoise à 45° dessert peu de surface ; le tableau VMZINC écrit 333 mm pour la nantaise de 33 | une_source |
 
 
 ### gouttière zinc havraise / ardennaise (rampante)
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes | [250, 330, 400] mm | la havraise de 33 est la plus courante ; longueurs 2 m ou 4 m (fiche VMZINC Batiproduits) | une_source |
+| developpes | [330, 400] mm | 33 (333 mm sur les fiches) et 40 ; longueurs 2 m ou 4 m ; la havraise de 25 n'est dans aucun catalogue 2024-2026 | confirme |
 
+- **VMZINC Gouttière havraise (ou ardennaise) de 33 et de 40** (confirme_fabricant 1) : 
+- **RHEINZINK Gouttière havraise 333 et 400 (avec pince)** (confirme_fabricant 1) : 
 
 ### gouttière rampante (nantaise, havraise)
 
@@ -600,6 +641,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 |---|---|---|---|
 | profil_regional_breton_existant | Quimper nom | VMZINC zinc naturel, ép. 0,65 mm, développé 400 mm, hauteur 95 mm, longueur 4 m ; crochet équerre propre (Frénéhard) ; se pose sur une bande de doublis | confirme |
 
+- **VMZINC Gouttière Quimper** (confirme_fabricant 1) : 
 
 ### crochet de gouttière pendante
 
@@ -608,6 +650,9 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | espacement_maximal | 0.5 m | gouttière pendante zinc, toutes régions ; à réduire selon charges climatiques (neige) d'après le DTU 40.5 | confirme |
 | espacement_reduit_neige_vent_bord_de_mer | 0.4 m |  | a_confirmer |
 
+- **VMZINC Crochet discret PLUVIAZINC (gouttière demi-ronde à pince)** (confirme_fabricant 1) : 
+- **RHEINZINK Crochets de gouttière demi-ronde (emboutis, Rouen, Toulouse)** (confirme_fabricant 1) : 
+- **NedZink Crochets et accessoires de gouttière ½ ronde** (une_source 1) : 
 
 ### crochet de gouttière à l'anglaise
 
@@ -630,7 +675,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 |---|---|---|---|
 | types_vendus_pose | ['sur chevron / volige (Rouen, Toulouse, Montpellier…)', 'bandeau (à visser en façade)', 'à queue (sous la couverture)', 'sur hampe', 'crochet nantais / havrais (gouttière rampante)', 'crochet discret (PLUVIAZINC)'] liste |  | confirme |
 | matieres | ['acier galvanisé', 'inox', 'cuivre', 'galvanisé laqué'] liste |  | confirme |
-| conditionnement_fabricant | {'dev_250': 100, 'dev_333': 50} u/carton | le négoce vend aussi à la pièce ; la règle du skill (nombre exact, sans arrondi à la boîte) reste valable | confirme |
+| conditionnement_fabricant | {'dev_250': 100, 'dev_330': 50} u/carton | crochet discret PLUVIAZINC (VMZINC) ; le conditionnement dépend du modèle : voir les modèles VMZINC, RHEINZINK, NedZink. Le négoce vend aussi à la pièce ; la règle du skill (nombre exact, sans arrondi à la boîte) reste valable | confirme |
 
 
 ### talon (fond) de gouttière
@@ -639,27 +684,36 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 |---|---|---|---|
 | conditionnement_pose | soudé ou emboîtable, gauche/droite ou universel texte |  | confirme |
 
+- **VMZINC Talon symétrique et embouts à talon (demi-ronde)** (confirme_fabricant 1) : 
+- **RHEINZINK Talons, embouts à talon et équerres (demi-ronde)** (confirme_fabricant 1) : 
 
 ### talon de gouttière rampante
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| fourniture | façonné par le couvreur texte | nantaise, havraise ; des talons nantais gauche/droite existent aussi en négoce (Edilians, Brico Dépôt) | une_source |
+| fourniture | façonné par le couvreur, ou fond nantais / havrais emboîtable (Edilians) texte | nantaise, havraise : VMZINC fait façonner les accessoires (pentes différentes à chaque versant) ; Edilians vend des fonds nantais emboîtables gauche / droite en dév. 333, relevé 8 ou 10, et des fonds havrais gauche / droite | confirme |
 
+- **Edilians Fonds, naissances et crochets nantais / havrais NATZINC** (confirme_fabricant 1) : 
 
 ### équerre (angle) de gouttière
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| types | ['extérieure', 'intérieure'] liste |  | confirme |
+| types | ['extérieure 90°', 'intérieure 90°'] liste | 90° au catalogue des trois fabricants français ; 135° en zinc : non catalogué (voir equerre_135_zinc) | confirme |
+| equerre_zinc_a_135_au_catalogue | non trouvée  | VMZINC 2026 : équerres 90° seulement ; RHEINZINK 2026 : équerres sans angle indiqué (90° d'usage) ; Edilians 2024 : équerres zinc sans angle, angles à 135° seulement en aluminium Aqualu | a_confirmer |
 
+- **VMZINC Équerre 90° demi-ronde de 25** (confirme_fabricant 1) : 
+- **VMZINC Équerre 90° demi-ronde de 33** (confirme_fabricant 1) : 
 
 ### naissance / moignon
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| types_et_diametres | {'dev_250': 'Ø80', 'dev_333': 'Ø80 ou Ø100'} mm | naissance agrafable (libre dilatation) ou moignon tronconique à souder ; le comptoir demande développé + Ø de descente | confirme |
+| types_et_diametres | {'dev_250': 'Ø80', 'dev_330': 'Ø80 ou Ø100'} mm | naissance agrafable (libre dilatation) ou moignon tronconique à souder ; le comptoir demande développé + Ø de descente ; RHEINZINK, Edilians et NedZink écrivent 333 pour la « 33 » ; dév. 166 → Ø 60 et dév. 400 → Ø 120 (Edilians, RHEINZINK) | confirme |
 
+- **VMZINC Naissance agrafable et moignons (demi-ronde)** (confirme_fabricant 1) : 
+- **RHEINZINK Naissances (agrafables, cylindriques à souder, tronconiques)** (confirme_fabricant 1) : 
+- **Edilians Naissances NATZINC (demi-ronde et lyonnaise)** (confirme_fabricant 1) : 
 
 ### gouttière (toutes matières)
 
@@ -680,8 +734,11 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
 | diametres_ronds_vendus | [60, 80, 100, 120] mm | Ø 80 et Ø 100 couvrent la maison individuelle ; carrés existent (VMZINC tuyaux carrés, dimensions non relevées) | confirme |
-| longueurs_vendues | [2, 3] m | 2 m = longueur standard du zinc ; 3 m existe (RHEINZINK Ø100, NedZink). Aucun tuyau zinc de 4 m trouvé. | confirme |
+| longueurs_vendues | [2, 3, 4] m | 2 m = longueur standard du zinc ; 3 m en Ø 80 et Ø 100 ; 4 m en Ø 100 seulement (VMZINC, RHEINZINK, Edilians) | confirme |
 
+- **VMZINC Tuyau de descente zinc (cylindrique bord à bord et tronconique)** (confirme_fabricant 1) : 
+- **RHEINZINK Tuyaux de descente (tulipe, soudés, tronconiques)** (confirme_fabricant 1) : 
+- **Edilians Descentes, coudes, colliers et dauphins NATZINC** (confirme_fabricant 1) : 
 
 ### descente EP PVC
 
@@ -697,14 +754,18 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | espacement_maximal_et_nombre | {'espacement_max_m': 2, 'mini_par_element': 1} m | zinc et PVC : 2 m ; fonte 2,70 m ; cuivre 2,50 m ; écart au mur ≥ 2 cm | confirme |
 | types_et_conditionnement | ['collier à embase (à visser, tige)', 'bague autobloquante (VMZINC)', 'bague simple + collier mural', 'collier PVC (Nicoll)'] liste | le comptoir demande Ø, type (embase / à bague / à cheviller) et longueur de tige selon l'isolation de façade | confirme |
 
+- **VMZINC Bagues de descente zinc** (confirme_fabricant 1) : 
+- **RHEINZINK Colliers et bagues de descente** (confirme_fabricant 1) : 
 
 ### coude de descente
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| angles_vendus | {'zinc': [40, 72, 76, 90], 'pvc': [67.5, 87.5]} degre |  | confirme |
+| angles_vendus | {'zinc': [36, 40, 60, 70, 72, 76, 85, 90], 'pvc': [67.5, 87.5]} degre | zinc courant : 72° ; 40° et 90° (VMZINC), 76° « Paris » et 60° en Ø 60 (RHEINZINK), 85° (Edilians), 70° angle vif et 36° rotule (VMZINC) | confirme |
 | nombre_usuel_par_descente_devoiement_sous_la_gouttiere | 2 u | débord de toit : naissance → coude → coude → tube ; 0 si la naissance tombe à l'aplomb ; +1 en pied si raccord au regard sans dauphin | confirme |
 
+- **VMZINC Coudes de descente zinc** (confirme_fabricant 1) : 
+- **RHEINZINK Coudes de descente zinc** (confirme_fabricant 1) : 
 
 ### dauphin
 
@@ -712,6 +773,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 |---|---|---|---|
 | longueur_standard | 1 m | fonte ou acier, droit ou coudé, Ø80 / Ø100 ; existe en 2 m (Pil, Achard) et 0,5 m en acier galva (Frénéhard) | confirme |
 
+- **RHEINZINK Dauphins fonte (cylindriques droits ou coudés)** (confirme_fabricant 1) : 
 
 ### cuvette / boîte à eau / crapaudine
 
@@ -728,6 +790,9 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | longueur_maxi_alimentant_une_naissance_dispositif_de_dilatation | 12 m |  | confirme |
 | surface_desservie_par_naissance | {'LG16': 20, 'LG25': 65, 'LG33': '100 / 160'} m2 | Nicoll, naissance recevant les deux côtés | une_source |
 
+- **Nicoll Demi-ronde LG25** (confirme_fabricant 1) : 
+- **Nicoll Demi-ronde LG33** (une_source 1) : 
+- **First Plast Gouttière PVC 16 / 25 / 33** (une_source 1) : 
 
 ### gouttière aluminium continue
 
@@ -828,6 +893,23 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | longueurs_vendues_en_bretagne | {'gouttiere': 4, 'tuyau_descente': 2, 'tuyau_descente_variante': 3, 'bandes_doublis_rive_egout_noue_faitage': 2} m | zinc 0,65 mm (0,80 en nantaise de 40) ; naturel, quartz, anthra, Granum ; descentes Ø 60 / 80 / 100 et carrées 80 × 80 | confirme |
 
 
+### joint de dilatation de gouttière
+
+- **VMZINC Joint de dilatation VMZINC type 26 / type 39** (confirme_fabricant 1) : 
+- **RHEINZINK Joints et éléments de dilatation** (confirme_fabricant 1) : 
+
+### manchon de descente
+
+- **VMZINC Manchon pour tuyau cylindrique Ø 80 / Ø 100** (confirme_fabricant 1) : conditionnement 5 u/carton
+
+### crochet de gouttière rampante
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| espacement_maximal | 0.5 m | gouttières havraises, rouennaises et nantaises : crochets de même métal, 0,50 m au plus (NF DTU 40.5) ; aucun fabricant (VMZINC, RHEINZINK, Edilians) ne donne d'écartement propre aux crochets nantais | une_source |
+
+- **RHEINZINK Crochets nantais et havrais** (confirme_fabricant 1) : 
+
 ## Écrans sous toiture
 
 ### écran souple de sous-toiture
@@ -856,11 +938,22 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
 | format_de_rouleau | 75 m² | 1,50 × 50 m, format courant de toutes les marques | confirme |
-| rouleaux_par_palette | 25 rouleaux | varie de 12 à 39 selon marque | confirme |
+| rouleaux_par_palette | 12 à 39 rouleaux | dépend du modèle, à lire sur la fiche du modèle : DELTA-MAXX PLUS 18, DELTA-XX PLUS UNIVERSAL 22, Edilians AERO 24, Spirtech 300 20, DELTA-NEO VENT 25, Divoroll Ecotech 200FR 25, Ondutiss 39, iNDi R2 12 ; sans effet sur la commande d'un chantier (vente au rouleau) | confirme |
 | valeur_sd_d_un_ecran_hpv | 0.18 m | HPV = Sd ≤ 0,18 m (perméance ≥ 0,5 g/m².h.mmHg) ; classe Sd1 ≤ 0,10 m ; produits courants 0,02 à 0,03 m | confirme |
 | pose_au_contact_de_l_isolant | 0 cm | Sd1, E1, support discontinu ≤ 60 cm (TR2/TR3) ; obligatoire avec laine minérale sous rampant (CPT 3560, 2009) | confirme |
 
 - **Monier Spirtech 110** (une_source 1) : format_de_rouleau 150 m²
+- **Monier Divoroll Spirtech 200** (une_source 1) : 
+- **Monier Divoroll Spirtech 300** (une_source 1) : 
+- **Monier Divoroll Ecotech 200FR** (une_source 1) : rouleaux_par_palette 25 rouleaux
+- **Dörken DELTA-MAXX PLUS** (confirme_fabricant 2) : valeur_sd 0.17 m
+- **Dörken DELTA-XX PLUS UNIVERSAL** (confirme_fabricant 1) : 
+- **Dörken DELTA-FOXX PLUS** (confirme_fabricant 1) : 
+- **Dörken DELTA-NEO VENT** (une_source 1) : rouleaux_par_palette 25 rouleaux
+- **Edilians AERO 1 / AERO 1 DBA** (confirme_fabricant 1) : 
+- **Edilians AERO 2 / AERO 2 DBA** (confirme_fabricant 1) : 
+- **Edilians AERO 3 / AERO 3 DBA** (confirme_fabricant 1) : 
+- **Ubbink Multivap 300XS** (confirme_fabricant 1) : 
 
 ### écran HPV petit format (GSB)
 
@@ -928,7 +1021,7 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### 1re couche (sous-couche) SBS
 
-- **Soprema Elastophène Flam 25** (confirme 1) : format_de_rouleau 7 m²
+- **Soprema Elastophène Flam 25** (confirme 1, confirme_fabricant 1) : format_de_rouleau 7 m²
 - **Siplast Paradiene S VV / S R4** (une_source 1) : format_de_rouleau 7.5 m²
 
 ### 1re couche sur bac acier
@@ -940,10 +1033,10 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 
 ### 2e couche autoprotégée SBS (paillettes d'ardoise)
 
-| Règle | Valeur | Condition | Statut |
-|---|---|---|---|
-| format_de_rouleau | 6 m² | ELASTOPHENE FLAM 25 AR : 6 × 1 m, ≈ 25 kg | confirme |
-
+- **Soprema Elastophène Flam 25 AR** (confirme 1, confirme_fabricant 1) : format_de_rouleau 6 m²
+- **Soprema Sopralène Flam 180 AR** (confirme_fabricant 1) : 
+- **Soprema Nuancier paillettes d'ardoise** (confirme_fabricant 1) : 
+- **Siplast Paradiene 30.1 GS** (une_source 1) : 
 
 ### primaire EIF
 
@@ -1014,6 +1107,10 @@ Taux de chiffres confirmés : **94.7 %**. Règle : confirme : deux sources indé
 |---|---|---|---|
 | surface_de_membrane_par_m2_de_terrasse_recouvrements_seuls | 1.08 m²/m² | rouleau 1 m, galon 6 cm, about 10 cm : 7 × 1 → 0,94 × 6,9 = 6,49 m² utiles (×1,079) ; 6 × 1 → 0,94 × 5,9 = 5,55 (×1,081) ; hors chutes et relevés | une_source |
 
+
+### monocouche SBS autoprotégée
+
+- **Siplast Parafor Solo GS** (une_source 1) : 
 
 ## Bois de couverture
 
