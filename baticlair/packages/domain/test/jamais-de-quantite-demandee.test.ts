@@ -20,9 +20,10 @@ const bought = (v: PurchaseView) => Object.fromEntries(v.toBuy.map((b) => [b.lab
 // Formule Cupa (§34), crochet 1 mm : 9 271 ardoises ; crochets = ardoises commandées × 1,02. RÈGLE NUMÉRO UN : les
 // crochets sortent parce que la ligne les écrit (« crochets compris ») ; les liteaux, non écrits, ne sortent pas.
 const COMPLETE = {
-  "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces",
-  // Fiche couverture (2026-11-19) : crochet = recouvrement 95 + 3 mm → 10 cm, un par ardoise (avant 11 cm, 9 457).
-  "Crochets d'ardoise inox standard, longueur 10 cm": "9 271 pièces",
+  "Ardoises naturelles Espagne 1er choix 30×22": "8 925 pièces",
+  // Fiche couverture (2026-11-19) : NF DTU 40.11, 45°, région III → recouvrement 89 mm, crochet 89 + 3 mm → 10 cm, un par ardoise
+  // (avant : recouvrement 95 mm, 9 271 ardoises, crochets 11 cm, 9 457).
+  "Crochets d'ardoise inox standard, longueur 10 cm": "8 925 pièces",
 };
 
 describe("jamais de quantité demandée à l'artisan", () => {
@@ -35,7 +36,7 @@ describe("jamais de quantité demandée à l'artisan", () => {
     const v = one(designation, quantity, unit);
     expect(v.questions).toEqual([]);
     // « Fourniture et pose ardoises » n'écrit pas de crochets : des ardoises, rien d'autre.
-    expect(bought(v)).toEqual(/crochet/i.test(designation) ? COMPLETE : { "Ardoises naturelles Espagne 1er choix 30×22": "9 271 pièces" });
+    expect(bought(v)).toEqual(/crochet/i.test(designation) ? COMPLETE : { "Ardoises naturelles Espagne 1er choix 30×22": "8 925 pièces" });
     // Hypothèses dites, en tête la pente (45°) et la zone (3).
     expect(v.assumptions.slice(0, 2).map((a) => [a.key, a.value, a.unit])).toEqual([
       ["param:pente", "45", "°"],
@@ -45,22 +46,18 @@ describe("jamais de quantité demandée à l'artisan", () => {
   });
 
   it("autres formats du référentiel (§3) : 32×22 calculé comme 30×22", () => {
-    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises naturelles Espagne 1er choix 32×22": "8 447 pièces", "Crochets d'ardoise inox standard, longueur 10 cm": "8 447 pièces" });
+    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises naturelles Espagne 1er choix 32×22": "8 148 pièces", "Crochets d'ardoise inox standard, longueur 10 cm": "8 148 pièces" });
   });
 
-  it("exemple du §3 (32×22, 45°, région III, rampant 6 m) : recouvrement 105 mm, au-delà du maximum Cupa (103 mm) → le devis fait foi, 8 840 ardoises en estimation, le 33×23 conseillé", () => {
+  // NF DTU 40.11 (fiche couverture, 2026-11-19) : un rampant de 6 m prend la table « 5,50 à 11 m » : 94 mm à 45° en région III,
+  // dans la plage Cupa du 32×22 (69 à 103 mm). Avant : ancien tableau + 10 mm = 105 mm, hors table, 8 840 en estimation.
+  it("exemple du §3 (32×22, 45°, région III, rampant 6 m) : table du DTU de 5,50 à 11 m, recouvrement 94 mm, 8 316 ardoises, aucune question", () => {
     const v = read([{ ref: "1", designation: "Ardoises 32x22 crochets compris", quantity: "200", unit: "m2" } as unknown as BenchLine], {
       "param:longueur_rampant": { value: "6", unit: "m" },
     });
-    // R = 95 + 10 = 105 mm ; formule Cupa : 200 / (0,1075 × 0,221) = 8 418,4 ; + 5 % = 8 839,3. Aucune question.
-    expect(bought(v)["Ardoises naturelles Espagne 1er choix 32×22"]).toBe("8 840 pièces");
-    // Crochet = 105 + 3 mm → 11 cm, un par ardoise (fiche couverture ; avant 12 cm, 9 017).
-    expect(bought(v)["Crochets d'ardoise inox standard, longueur 11 cm"]).toBe("8 840 pièces");
+    expect(bought(v)["Ardoises naturelles Espagne 1er choix 32×22"]).toBe("8 316 pièces");
+    expect(bought(v)["Crochets d'ardoise inox standard, longueur 10 cm"]).toBe("8 316 pièces");
     expect(v.questions.some((d) => d.question?.key === "product:ardoise")).toBe(false);
-    // Le conseil (33×23, la plage Cupa la plus proche qui admet 105 mm) : une hypothèse à boutons, pas une question.
-    const conseil = v.assumptions.find((a) => a.key === "product:ardoise")!;
-    expect(conseil.value).toBe("Ardoises 32×22");
-    expect(conseil.choices!.map((c) => c.label)).toEqual(["Ardoises 32×22 (devis)", "Ardoises 33×23 (conseillé)", "Ardoises 35×22", "Ardoises 35×25", "Ardoises 40×22"]);
     expect(v.canValidate).toBe(true);
   });
 

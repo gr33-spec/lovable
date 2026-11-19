@@ -32,8 +32,10 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
       ["Pente du toit", "45", "°"],
       // Pour l'ardoise, la région ardoise (DTU 40.11), pas la zone climatique des tuiles.
       ["Région ardoise", "3", "u"],
+      // Le rampant choisit la table du DTU (≤ 5,50 m, 5,50 à 11 m, au-delà).
       ["Longueur du rampant", "5,5", "m"],
-      ["Pureau", "10,25", "cm"],
+      // NF DTU 40.11 (fiche couverture) : 45°, région III → recouvrement 89 mm → pureau (300 − 89) / 2.
+      ["Pureau", "10,55", "cm"],
       // Formule Cupa (§34) : crochet courant 1 mm sans département littoral connu.
       ["Diamètre du crochet", "1", "mm"],
     ]);
@@ -47,8 +49,9 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
   it("une réponse de l'artisan remplace l'hypothèse, et seulement elle", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: "100", unit: "%", origin: "artisan" }, zone: { value: "1", unit: "u", origin: "artisan" } } });
     const ardoises = need(r, "ardoises");
-    // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 80 mm, dans la table Cupa : 40,7/m² × 200 = 8 140 + 5 %.
-    expect(ardoises.quantity).toEqual({ value: "8547", unit: "u" });
+    // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 73 mm (NF DTU 40.11), dans la table Cupa :
+    // 39,5/m² × 200 = 7 900 + 5 % = 8 295 (avant, ancien tableau : 80 mm, 8 547).
+    expect(ardoises.quantity).toEqual({ value: "8295", unit: "u" });
     expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
     expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "45", unit: "°" });
   });
@@ -56,12 +59,14 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
   it("table de recouvrement : la cellule des plus grands seuils atteints ; sous la pente minimale, rien n'est deviné", () => {
     const at = (pente: string, zone: string) => need(computeWorkItem(REFERENTIEL_COMPLET, { ...ARDOISE, params: { ...ARDOISE.params, pente: { value: pente, unit: "°", origin: "artisan" }, zone: { value: zone, unit: "u", origin: "artisan" } } }), "ardoises");
     const recouvrement = (pente: string, zone: string) => at(pente, zone).trace.find((t) => t.label === "Recouvrement")!.value;
-    expect([recouvrement("25", "1"), recouvrement("26", "1"), recouvrement("29.9", "1"), recouvrement("30", "1"), recouvrement("80", "3")]).toEqual(["110", "110", "110", "100", "90"]);
-    // Rampant de 6 m (45°, zone 3 : 95 mm) : +10 mm, arrondi aux 5 mm supérieurs.
+    // NF DTU 40.11 (fiche couverture) : 25° et 26° prennent la ligne 45 % (24,23°), 29,9° et 30° la ligne 55 % (28,81°),
+    // 80° la dernière ligne (375 %, 75,07°).
+    expect([recouvrement("25", "1"), recouvrement("26", "1"), recouvrement("29.9", "1"), recouvrement("30", "1"), recouvrement("80", "3")]).toEqual(["107", "107", "97", "97", "69"]);
+    // Rampant de 6 m (45°, zone 3) : table de 5,50 à 11 m du DTU, 94 mm (au lieu de 89).
     const long = need(computeWorkItem(REFERENTIEL_COMPLET, { ...ARDOISE, params: { ...ARDOISE.params, longueur_rampant: { value: "6", unit: "m", origin: "artisan" } } }), "ardoises");
-    expect(long.trace.find((t) => t.label === "Recouvrement")!.value).toBe("105");
+    expect(long.trace.find((t) => t.label === "Recouvrement")!.value).toBe("94");
     // Pente 20° (et 5°) : sous le premier seuil, l'ouvrage n'est pas calculé, et la raison est dite.
-    expect(at("20", "3")).toMatchObject({ status: "unknown", reason: "Pente du toit trop faible pour cet ouvrage (minimum 25 °)." });
+    expect(at("20", "3")).toMatchObject({ status: "unknown", reason: "Pente du toit trop faible pour cet ouvrage (minimum 24.23 °)." });
     expect(at("5", "1")).toMatchObject({ status: "unknown" });
   });
 
@@ -110,9 +115,9 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     const broken: Referential = structuredClone(REFERENTIEL_COMPLET);
     const ardoise = broken.workItems.find((w) => w.id === "couverture-ardoises-crochet")!;
     ardoise.params.find((p) => p.key === "pente")!.default = { value: "45", formula: "1", source: "fondateur-referentiel-2026-10-03", verification: { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "test" }, version: 1 };
-    ardoise.tables!.recouvrement!.values[0] = ["110", "120"];
+    ardoise.tables!.recouvrement_a!.values[0] = ["110", "120"];
     const errors = checkReferential(broken);
     expect(errors.some((e) => e.includes("pente (hypothèse)") && e.includes("une valeur OU une formule"))).toBe(true);
-    expect(errors.some((e) => e.includes("table recouvrement") && e.includes("lignes de 3 valeurs"))).toBe(true);
+    expect(errors.some((e) => e.includes("table recouvrement_a") && e.includes("lignes de 3 valeurs"))).toBe(true);
   });
 });

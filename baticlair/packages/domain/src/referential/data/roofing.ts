@@ -1,7 +1,8 @@
 import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.js";
 import { rule, todo } from "./kit.js";
 import { WITHOUT_SUPPLY_UNITS } from "../../takeoff/supply.js";
-import { baseDuMetier, constanteDe } from "../base/index.js";
+import { baseDuMetier, constanteDe, tableDe } from "../base/index.js";
+import type { LookupTable } from "../model.js";
 
 /**
  * Référentiel COUVERTURE.
@@ -108,6 +109,20 @@ const FICHE_VERIFIEE = {
   verifiedBy: "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026",
 } as const;
 const constanteFiche = (cle: string) => constanteDe(baseDuMetier("couverture")!.base, cle);
+/** Une table de calcul lue dans la fiche (axes : données du chantier ; valeurs prouvées par des chiffres confirmés). */
+const tableFiche = (cle: string): LookupTable => {
+  const t = tableDe(baseDuMetier("couverture")!.base, cle);
+  return {
+    label: t.libelle,
+    unit: t.unite,
+    axes: t.axes.map((a) => ({ param: a.donnee, thresholds: a.seuils })),
+    values: t.valeurs,
+    source: FICHE,
+    verification: FICHE_VERIFIEE,
+    version: 1,
+    note: t.decision,
+  };
+};
 /** Une longueur de vente lue dans la fiche (conditionnement d'un produit). */
 const longueurFiche = (cle: string): Fact => {
   const k = constanteFiche(cle);
@@ -1131,7 +1146,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-53",
+  version: "roofing-2026.11.19-54",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2145,6 +2160,7 @@ export const ROOFING_REFERENTIAL: Referential = {
             { label: "Jusqu'à 5,5 m", value: "5.5" },
             { label: "5,5 à 8 m", value: "8" },
             { label: "Plus de 8 m", value: "10" },
+            { label: "Plus de 11 m", value: "12" },
           ],
         },
       ],
@@ -2163,36 +2179,19 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       constants: {
         ...ECRAN_CONSTANTS,
-        seuil_rampant: condition("5.5", "m", F, FOUNDER_DOC, "Au-delà, +10 mm de recouvrement."),
-        supplement_rampant: condition("10", "mm", F, FOUNDER_DOC),
-        supplement_nul: condition("0", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
-        pas_recouvrement: condition("5", "mm", F, FOUNDER_DOC, "Recouvrement arrondi aux 5 mm supérieurs."),
+        seuil_rampant: deFiche("ardoise.seuil_projection_1"),
+        seuil_rampant_2: deFiche("ardoise.seuil_projection_2"),
         marge_crochet: deFiche("ardoise.marge_choix_crochet"),
         jeu_tete_crochet: deFiche("ardoise.jeu_de_tete_crochet"),
         pas_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."),
       },
       points: { ardoises_m2: CUPA_ARDOISES_M2 },
       tables: {
-        recouvrement: {
-          label: "Recouvrement de l'ardoise",
-          unit: "mm",
-          axes: [
-            { param: "pente", thresholds: ["25", "30", "35", "40", "45", "50"] },
-            { param: "zone", thresholds: ["1", "2", "3"] },
-          ],
-          values: [
-            ["110", "120", "130"],
-            ["100", "110", "120"],
-            ["90", "100", "110"],
-            ["85", "90", "100"],
-            ["80", "85", "95"],
-            ["70", "80", "90"],
-          ],
-          source: F,
-          verification: FOUNDER_DOC,
-          version: 1,
-          note: "Pose au crochet, rampant ≤ 5,5 m. Lignes 25°, 30°, 35°, 40°, 45°, ≥ 50° du référentiel (§3) ; la première ligne vaut dès la pente minimale de l'ardoise (24°, arrondie à 25°). Sous 25° : hors table, l'ouvrage n'est pas calculé.",
-        },
+        // NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck : une table par bande de projection horizontale du
+        // rampant, lue dans la fiche couverture (2026-11-19). Le rampant tient lieu de projection (prudent : il est plus long).
+        recouvrement_a: tableFiche("ardoise.recouvrement_dtu_a"),
+        recouvrement_b: tableFiche("ardoise.recouvrement_dtu_b"),
+        recouvrement_c: tableFiche("ardoise.recouvrement_dtu_c"),
       },
       derived: [
         {
@@ -2209,7 +2208,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           key: "recouvrement",
           label: "Recouvrement",
           unit: "mm",
-          formula: "arrondi_sup((table.recouvrement + si(longueur_rampant > regle.seuil_rampant, regle.supplement_rampant, regle.supplement_nul)) / regle.pas_recouvrement) * regle.pas_recouvrement",
+          // La pente et la zone d'abord (elles disent la ligne), puis le rampant (il choisit la table).
+          formula: "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
           shown: true,
           source: F,
           verification: FOUNDER_DOC,

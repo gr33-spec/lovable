@@ -29,13 +29,13 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const ardoises = couverture.needs.find((n) => n.slot === "ardoise")!;
     const crochets = couverture.needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
-    // Pente 45°, zone 3, rampant ≤ 5,5 m → recouvrement 95 mm → pureau (300 − 95) / 2 = 102,5 mm.
-    // Formule Cupa (§34), crochet 1 mm : 200 / (0,1025 × 0,221) = 8 829,05 ardoises + 5 % = 9 270,50, soit 9 271 commandées ;
-    // crochets = un par ardoise commandée, 9 271 (fiche couverture, 2026-11-19 ; avant × 1,02) ; 200 / 0,1025 = 1 951,22 ml + 5 % = 2 048,78 ml.
-    expect(ardoises.need).toEqual({ value: "9270.5", unit: "u" });
-    expect(crochets.need).toEqual({ value: "9271", unit: "u" });
-    expect(liteaux.need).toEqual({ value: "2048.78", unit: "ml" });
-    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "derived:recouvrement=95", "param:pureau=10,25", "param:diametre_crochet=standard"]);
+    // Pente 45°, zone 3, rampant ≤ 5,5 m → recouvrement 89 mm (NF DTU 40.11, fiche couverture) → pureau (300 − 89) / 2 = 105,5 mm.
+    // Table Cupa (§34) : 42,5/m² × 200 = 8 500 ardoises + 5 % = 8 925 ; crochets = un par ardoise commandée, 8 925 ;
+    // 200 / 0,1055 = 1 895,73 ml + 5 % = 1 990,52 ml. (Avant, ancien tableau : recouvrement 95 mm, 9 271 ardoises.)
+    expect(ardoises.need).toEqual({ value: "8925", unit: "u" });
+    expect(crochets.need).toEqual({ value: "8925", unit: "u" });
+    expect(liteaux.need).toEqual({ value: "1990.52", unit: "ml" });
+    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "derived:recouvrement=89", "param:pureau=10,55", "param:diametre_crochet=standard"]);
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");
     expect(liteaux.assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40", note: expect.stringMatching(/18×40 par défaut/) }));

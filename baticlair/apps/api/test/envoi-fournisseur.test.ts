@@ -54,7 +54,7 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });
     // Bloc 1 : les lignes prêtes à charger (ardoises, crochets, liteaux, gouttière…), jamais une mesure en m².
     expect(packet.articles).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 200 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 10 cm : 9 200 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 u/)]),
+      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 8 925 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 10 cm : 8 925 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 u/)]),
     );
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
     // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.

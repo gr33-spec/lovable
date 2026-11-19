@@ -6,7 +6,7 @@ import { REFERENTIEL_COMPLET } from "./support/complet.js";
 /**
  * ARDOISE AU CROCHET, données fabricant (référentiel §34, Cupa) :
  *  - ardoises/m² = 1 / [pureau × (largeur + Ø crochet)], Ø 1 mm, inox 2,7 mm en département littoral ;
- *  - crochets = ardoises COMMANDÉES (après leur marge) × 1,02 : jamais moins de crochets que d'ardoises ;
+ *  - crochets = un par ardoise COMMANDÉE (après sa marge) : jamais moins de crochets que d'ardoises (fiche couverture) ;
  *  - le recouvrement se lit par région ardoise (I / II / III), pas par zone climatique des tuiles.
  */
 const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
@@ -21,16 +21,30 @@ const input = (params: WorkItemInput["params"] = {}, format = "ardoise-30x22", w
 });
 const littoral = { diametre_crochet: { value: "2.7", unit: "mm", origin: "devis" as const, evidence: "Département littoral (29200)" } };
 
-describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
-  it("200 m² en 30×22, 45°, région III, crochet 1 mm : 9 271 ardoises (et non plus 9 313)", () => {
+// Pureau donné : il fixe le recouvrement posé (hauteur − 2 × pureau), quelle que soit la pente.
+const pureau = (cm: string) => ({ pureau: { value: cm, unit: "cm", origin: "artisan" as const } });
+
+describe("recouvrement du NF DTU 40.11 (fiche couverture, 2026-11-19)", () => {
+  it("par défaut (45°, région III, rampant ≤ 5,50 m) : recouvrement 89 mm, pureau 10,55 cm, 42,5 ardoises/m² (table Cupa) → 8 925", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, input());
+    expect(need(r, "ardoises").trace.find((t) => t.label === "Recouvrement")?.value).toBe("89");
+    expect(need(r, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (table Cupa Pizarras)", value: "42,5" }));
+    // 200 × 42,5 = 8 500 + 5 % = 8 925 (avant, ancien tableau : recouvrement 95 mm, 9 271).
+    expect(order(r, "ardoises")).toBe(8925);
+    expect(order(r, "crochets-ardoise")).toBe(8925);
+  });
+});
+
+describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
+  it("200 m² en 30×22, recouvrement posé 95 mm (pureau 10,25 cm), crochet 1 mm : 9 271 ardoises", () => {
+    const r = computeWorkItem(REFERENTIEL_COMPLET, input(pureau("10.25")));
     // Pureau (300 − 95) / 2 = 102,5 mm ; 200 / (0,1025 × 0,221) = 8 829,05 ; + 5 % = 9 270,50.
     expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")?.value).toBe("8 829,05");
     expect(order(r, "ardoises")).toBe(9271);
   });
 
-  it("département littoral (Brest) : crochet inox 2,7 mm, 9 200 ardoises", () => {
-    const r = computeWorkItem(REFERENTIEL_COMPLET, input(littoral));
+  it("département littoral (Brest), recouvrement posé 95 mm : crochet inox 2,7 mm, 9 200 ardoises", () => {
+    const r = computeWorkItem(REFERENTIEL_COMPLET, input({ ...littoral, ...pureau("10.25") }));
     // 200 / (0,1025 × 0,2227) = 8 761,65 ; + 5 % = 9 199,73.
     expect(order(r, "ardoises")).toBe(9200);
     // Un crochet par ardoise commandée (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 384).
@@ -51,6 +65,9 @@ describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
 });
 
 describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table", () => {
+  // Une ligne précise de la table Cupa : par le pureau (recouvrement posé = hauteur − 2 × pureau).
+  const atR = (r: number, diametre = "1", format = "ardoise-30x22", hauteur = 300) =>
+    computeWorkItem(REFERENTIEL_COMPLET, input({ ...pureau(String((hauteur - r) / 20)), diametre_crochet: { value: diametre, unit: "mm", origin: "artisan" } }, format));
   const at = (pente: string, zone: string, diametre = "1", format = "ardoise-30x22") =>
     computeWorkItem(
       REFERENTIEL_COMPLET,
@@ -61,26 +78,26 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
       }, format),
     );
 
-  it("30×22 à R 100 (40°, région III) : 44,8 ardoises/m² lues dans la table, 8 960 + 5 % = 9 408", () => {
-    const r = at("40", "3");
+  it("30×22 à R 100 : 44,8 ardoises/m² lues dans la table, 8 960 + 5 % = 9 408", () => {
+    const r = atR(100);
     expect(need(r, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (table Cupa Pizarras)", value: "44,8", unit: "u/m2" }));
     expect(order(r, "ardoises")).toBe(9408);
   });
 
   it("sur une ligne de la table, le diamètre du crochet reste affiché et modifiable, mais ne change pas le nombre", () => {
-    const fin = at("40", "3", "1");
-    const inox = at("40", "3", "2.7");
+    const fin = atR(100, "1");
+    const inox = atR(100, "2.7");
     expect(order(fin, "ardoises")).toBe(order(inox, "ardoises"));
     expect(need(inox, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Diamètre du crochet", value: "2,7" }));
   });
 
   it("32×22 à R 100 : 40,7/m² (et non plus 41,3 de l'ancien §3)", () => {
-    expect(need(at("40", "3", "1", "ardoise-32x22"), "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (table Cupa Pizarras)", value: "40,7" }));
+    expect(need(atR(100, "1", "ardoise-32x22", 320), "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (table Cupa Pizarras)", value: "40,7" }));
   });
 
   it("hors table (30×22 à R 95) : la formule Cupa, dite « hors table », avec le diamètre du crochet", () => {
-    const fin = at("45", "3", "1");
-    const inox = at("45", "3", "2.7");
+    const fin = atR(95, "1");
+    const inox = atR(95, "2.7");
     expect(need(fin, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (formule Cupa Pizarras, hors table)" }));
     expect(order(fin, "ardoises")).toBe(9271);
     expect(order(inox, "ardoises")).toBe(9200);
@@ -95,7 +112,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     expect(work.points!.ardoises_m2!.rows).toEqual(fromDoc);
   });
 
-  it("format écrit sur le devis, hors plage Cupa (30×22 à 30°, région III : R 120, maximum 100) : gardé, calculé par la formule, dit « estimation », le 40×22 en conseil", () => {
+  it("format écrit sur le devis, hors plage Cupa (30×22 à 30°, région III : R 119 au DTU, maximum 100) : gardé, calculé par la formule, dit « estimation », le 40×22 en conseil", () => {
     const r = at("30", "3");
     const ardoises = need(r, "ardoises");
     // Pas de question bloquante : le devis fait foi sur le format.
@@ -104,7 +121,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     expect(ardoises.trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (formule Cupa Pizarras, hors table)" }));
     const estimation = ardoises.trace.find((t) => t.label === "Estimation")!;
     expect(estimation).toMatchObject({ estimation: true, from: "Format écrit sur le devis, gardé" });
-    expect(estimation.value).toBe("Recouvrement posé 120 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
+    expect(estimation.value).toBe("Recouvrement posé 119 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
     // Le conseil : une hypothèse à boutons, le devis en premier, puis les formats admis du plus proche au plus éloigné.
     const conseil = ardoises.assumptions.find((a) => a.key === "product:ardoise")!;
     expect(conseil).toMatchObject({ value: "Ardoises 30×22", note: expect.stringMatching(/Format conseillé : Ardoises 40×22\./) });
@@ -124,7 +141,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     });
     const ardoises = need(r, "ardoises");
     expect(ardoises).toMatchObject({ status: "question", question: { key: "product:ardoise", kind: "choose_product" } });
-    expect(ardoises.question!.text).toBe("Ardoises 30×22 non admis ici : recouvrement posé 120 mm, au-delà du maximum de 100 mm pour ce format (Cupa Pizarras). Quel format ?");
+    expect(ardoises.question!.text).toBe("Ardoises 30×22 non admis ici : recouvrement posé 119 mm, au-delà du maximum de 100 mm pour ce format (Cupa Pizarras). Quel format ?");
     expect(ardoises.question!.options![0]).toEqual({ label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" });
     // Les crochets attendent la même réponse ; rien n'est inventé entre-temps.
     expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: "product:ardoise" } });

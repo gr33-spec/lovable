@@ -124,6 +124,56 @@ def famille_de(texte, soeurs):
     return soeurs[0]
 
 
+def tables_de_calcul(familles):
+    """Tables lues par le code, tirées des chiffres CONFIRMÉS de la fiche (jamais recopiées à la main).
+
+    ardoise.recouvrement_dtu_<bande> : recouvrement minimal de l'ardoise au crochet (NF DTU 40.11, annexe B, recoupé
+    Cupa et Rathscheck), par pente (seuils en degrés, plus petite pente admise dans les trois zones) et par zone, une
+    table par bande de projection horizontale du rampant (≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m).
+    """
+    import math
+    ard = next(f for f in familles if f["code"] == "ardoise")
+    lignes = [a for s in ard["sous_familles"] for m in s["marques"] for mo in m["modeles"]
+              if mo["nom"].startswith("pose au crochet") for a in mo["attributs"] if a["attribut"] == "recouvrement_minimal"]
+    bandes = {"a": ("≤ 5,50", "projection horizontale ≤ 5,50 m"), "b": ("5,50 à 11", "projection horizontale de 5,50 à 11 m"),
+              "c": ("11 à 16,50", "projection horizontale de 11 à 16,50 m")}
+    tables, brutes = [], []
+    for b, (motif, libelle) in bandes.items():
+        cellules, preuves = {}, {}
+        for a in lignes:
+            c = a.get("condition", "")
+            if "expos" in c.lower() or motif not in c:
+                continue
+            z, p = re.search(r"zone (\d)", c), re.search(r"pente ([\d,]+) ?%", c)
+            if not (z and p) or a["statut"] not in CONFIRME:
+                continue
+            cle = (float(p.group(1).replace(",", ".")), z.group(1))
+            cellules[cle] = a["valeur"]
+            preuves[cle] = a["id"]
+        brutes.append((b, libelle, cellules, preuves))
+    # Une même pente minimale pour les trois bandes (le moteur lit les trois tables) : la plus forte des pentes
+    # admises partout (45 %, 24,23°). En dessous : hors table, l'ouvrage n'est pas calculé (comme avant : 25°).
+    def completes(c):
+        return {p for p, z in c if all((p, zz) in c for zz in "123")}
+    plancher = max(min(completes(c)) for _, _, c, _ in brutes)
+    for b, libelle, cellules, preuves in brutes:
+        pentes = sorted(p for p in completes(cellules) if p >= plancher)
+        tables.append({
+            "cle": f"ardoise.recouvrement_dtu_{b}", "famille": "ardoise",
+            "libelle": f"Recouvrement DTU, {libelle.replace('projection horizontale ', 'rampant ')}",
+            "unite": "mm",
+            "axes": [{"donnee": "pente", "unite": "°", "seuils": [f"{math.degrees(math.atan(p / 100)):.2f}" for p in pentes]},
+                     {"donnee": "zone", "unite": "u", "seuils": ["1", "2", "3"]}],
+            "valeurs": [[str(cellules[(p, z)]) for z in "123"] for p in pentes],
+            "decision": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). "
+                        "Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous "
+                        "(recouvrement plus fort).",
+            "preuves": [preuves[(p, z)] for p in pentes for z in "123"],
+            "statut": "confirme",
+        })
+    return tables
+
+
 def construit():
     src = Sources()
     familles, stats = [], collections.Counter()
@@ -198,6 +248,8 @@ def construit():
                 raise SystemExit(f"constante {c['cle']} : la preuve {p} n'est pas confirmée ({ids[p]['statut']})")
         c["statut"] = "confirme"
 
+    tables = tables_de_calcul(familles)
+
     total = sum(stats.values())
     conf = sum(n for (c, s), n in stats.items() if s in CONFIRME)
     fiche = {
@@ -211,6 +263,7 @@ def construit():
         "taux_confirme": round(100 * conf / total, 1),
         "comptes": {f"{c}:{s}": n for (c, s), n in sorted(stats.items())},
         "constantes": constantes,
+        "tables": tables,
         "familles": familles,
         "sources": src.liste,
     }

@@ -26,15 +26,15 @@ const ardoises = (q: Q) => q.lignes.find((l) => l.libelle === "Ardoises naturell
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
 
 describe("la note de l'artisan entre dans le calcul", () => {
-  it("« Pente 35°, rampant 6 m » envoyé avec le devis : plus d'hypothèse de pente ni de rampant, origine artisan, 200 m² à Brest = 10 478 ardoises", async () => {
+  it("« Pente 35°, rampant 6 m » envoyé avec le devis : plus d'hypothèse de pente ni de rampant, origine artisan, 200 m² à Brest = 9 927 ardoises", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const res = await agent.post("/v1/quantitatifs").send({ ...BREST, infos: "Rénovation complète. Pente 35°. Rampant 6 m. Les Velux sont conservés." });
     expect(res.status).toBe(201);
     const q = res.body as Q;
     expect(q.infos.texte).toBe("Rénovation complète. Pente 35°. Rampant 6 m. Les Velux sont conservés.");
-    // Sans note : 45° et rampant 5,5 m par défaut, 9 200 ardoises (test de la porte). À 35° et 6 m de rampant, le
-    // recouvrement Cupa (§34) monte à 110 mm : 10 478 ardoises.
-    expect(ardoises(q).quantite).toBe(10478);
+    // Sans note : 45° et rampant 5,5 m par défaut, 8 925 ardoises (test de la porte). À 35° et 6 m de rampant, le
+    // recouvrement du NF DTU 40.11 (table de 5,50 à 11 m, fiche couverture) monte : 9 927 ardoises (avant 10 478).
+    expect(ardoises(q).quantite).toBe(9927);
     expect(ardoises(q).explication.morceaux).toContainEqual({ texte: "pente du toit 35°", cle: "param:pente", valeur: "35", unite: "°", confiance: "artisan" });
     expect(ardoises(q).explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:longueur_rampant", valeur: "6", confiance: "artisan" }));
     expect(q.hypotheses.map((h) => h.cle)).not.toContain("param:pente");
@@ -45,18 +45,18 @@ describe("la note de l'artisan entre dans le calcul", () => {
   it("la note se change après coup (chat) : elle est gardée et montrée ; le calcul ne bouge pas sans relecture (aucune règle de lecture en code, §51.5)", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const q = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
-    expect(ardoises(q).quantite).toBe(9200);
+    expect(ardoises(q).quantite).toBe(8925);
     expect((await agent.put(`/v1/projects/${q.projetId}/infos`).send({ texte: "Pente 35°" })).status).toBe(204);
     const after = (await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q;
     expect(after.infos.texte).toBe("Pente 35°");
     // La lecture est faite une fois, par le modèle : une note tapée ensuite ne change le calcul que par la fiche (§51.4).
-    expect(ardoises(after).quantite).toBe(9200);
+    expect(ardoises(after).quantite).toBe(8925);
     expect(after.hypotheses.map((h) => h.cle)).toContain("param:pente");
     expect((await agent.put(`/v1/projects/${q.projetId}/infos`).send({ texte: null })).status).toBe(204);
     expect(((await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q).infos.texte).toBeNull();
     // Une quantité d'article dans la note n'est jamais lue comme une donnée.
     await agent.put(`/v1/projects/${q.projetId}/infos`).send({ texte: "Prévoir 9 000 ardoises" });
-    expect(ardoises((await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q).quantite).toBe(9200);
+    expect(ardoises((await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q).quantite).toBe(8925);
   });
 
   it("un croquis avec commentaire : la photo est gardée (jamais lue par l'IA), le commentaire rejoint la note", async () => {

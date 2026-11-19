@@ -101,6 +101,530 @@
    ],
    "avant": "3 m (« longueurs 3 m », §3)",
    "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.seuil_projection_1",
+   "famille": "ardoise",
+   "libelle": "Ardoise : au-delà de 5,50 m de projection horizontale du rampant, table de recouvrement suivante",
+   "valeur": "5.5",
+   "unite": "m",
+   "decision": "NF DTU 40.11 (2020), annexe B : colonnes ≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m (relu chez Cupa et Rathscheck).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente40",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente40",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente40"
+   ],
+   "avant": "5,5 m, + 10 mm de recouvrement",
+   "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.seuil_projection_2",
+   "famille": "ardoise",
+   "libelle": "Ardoise : au-delà de 11 m de projection horizontale du rampant, dernière table de recouvrement",
+   "valeur": "11",
+   "unite": "m",
+   "decision": "NF DTU 40.11 (2020), annexe B (relu chez Cupa et Rathscheck).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente45"
+   ],
+   "avant": "aucun",
+   "statut": "confirme"
+  }
+ ],
+ "tables": [
+  {
+   "cle": "ardoise.recouvrement_dtu_a",
+   "famille": "ardoise",
+   "libelle": "Recouvrement DTU, rampant ≤ 5,50 m",
+   "unite": "mm",
+   "axes": [
+    {
+     "donnee": "pente",
+     "unite": "°",
+     "seuils": [
+      "24.23",
+      "26.57",
+      "28.81",
+      "30.96",
+      "34.99",
+      "38.66",
+      "41.99",
+      "45.00",
+      "50.19",
+      "54.46",
+      "59.53",
+      "63.43",
+      "68.20",
+      "71.57",
+      "75.07"
+     ]
+    },
+    {
+     "donnee": "zone",
+     "unite": "u",
+     "seuils": [
+      "1",
+      "2",
+      "3"
+     ]
+    }
+   ],
+   "valeurs": [
+    [
+     "107",
+     "119",
+     "133"
+    ],
+    [
+     "103",
+     "113",
+     "127"
+    ],
+    [
+     "97",
+     "107",
+     "119"
+    ],
+    [
+     "92",
+     "103",
+     "113"
+    ],
+    [
+     "87",
+     "94",
+     "106"
+    ],
+    [
+     "80",
+     "89",
+     "97"
+    ],
+    [
+     "77",
+     "87",
+     "92"
+    ],
+    [
+     "73",
+     "80",
+     "89"
+    ],
+    [
+     "69",
+     "77",
+     "83"
+    ],
+    [
+     "65",
+     "73",
+     "80"
+    ],
+    [
+     "65",
+     "69",
+     "77"
+    ],
+    [
+     "63",
+     "67",
+     "73"
+    ],
+    [
+     "60",
+     "65",
+     "73"
+    ],
+    [
+     "60",
+     "63",
+     "73"
+    ],
+    [
+     "60",
+     "63",
+     "69"
+    ]
+   ],
+   "decision": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj0-5.5_pente375",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj0-5.5_pente375",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj0-5.5_pente375"
+   ],
+   "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.recouvrement_dtu_b",
+   "famille": "ardoise",
+   "libelle": "Recouvrement DTU, rampant de 5,50 à 11 m",
+   "unite": "mm",
+   "axes": [
+    {
+     "donnee": "pente",
+     "unite": "°",
+     "seuils": [
+      "24.23",
+      "26.57",
+      "28.81",
+      "30.96",
+      "34.99",
+      "38.66",
+      "41.99",
+      "45.00",
+      "50.19",
+      "54.46",
+      "59.53",
+      "63.43",
+      "68.20",
+      "71.57",
+      "75.07"
+     ]
+    },
+    {
+     "donnee": "zone",
+     "unite": "u",
+     "seuils": [
+      "1",
+      "2",
+      "3"
+     ]
+    }
+   ],
+   "valeurs": [
+    [
+     "116",
+     "130",
+     "147"
+    ],
+    [
+     "110",
+     "123",
+     "137"
+    ],
+    [
+     "103",
+     "116",
+     "127"
+    ],
+    [
+     "100",
+     "110",
+     "123"
+    ],
+    [
+     "92",
+     "103",
+     "110"
+    ],
+    [
+     "87",
+     "94",
+     "103"
+    ],
+    [
+     "83",
+     "89",
+     "100"
+    ],
+    [
+     "80",
+     "87",
+     "94"
+    ],
+    [
+     "73",
+     "80",
+     "87"
+    ],
+    [
+     "73",
+     "77",
+     "83"
+    ],
+    [
+     "67",
+     "73",
+     "80"
+    ],
+    [
+     "65",
+     "73",
+     "77"
+    ],
+    [
+     "63",
+     "69",
+     "77"
+    ],
+    [
+     "63",
+     "69",
+     "77"
+    ],
+    [
+     "63",
+     "67",
+     "73"
+    ]
+   ],
+   "decision": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente375",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente375",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente375"
+   ],
+   "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.recouvrement_dtu_c",
+   "famille": "ardoise",
+   "libelle": "Recouvrement DTU, rampant de 11 à 16,50 m",
+   "unite": "mm",
+   "axes": [
+    {
+     "donnee": "pente",
+     "unite": "°",
+     "seuils": [
+      "24.23",
+      "26.57",
+      "28.81",
+      "30.96",
+      "34.99",
+      "38.66",
+      "41.99",
+      "45.00",
+      "50.19",
+      "54.46",
+      "59.53",
+      "63.43",
+      "68.20",
+      "71.57",
+      "75.07"
+     ]
+    },
+    {
+     "donnee": "zone",
+     "unite": "u",
+     "seuils": [
+      "1",
+      "2",
+      "3"
+     ]
+    }
+   ],
+   "valeurs": [
+    [
+     "127",
+     "142",
+     "153"
+    ],
+    [
+     "117",
+     "130",
+     "142"
+    ],
+    [
+     "113",
+     "123",
+     "137"
+    ],
+    [
+     "106",
+     "117",
+     "130"
+    ],
+    [
+     "100",
+     "107",
+     "117"
+    ],
+    [
+     "92",
+     "100",
+     "110"
+    ],
+    [
+     "87",
+     "94",
+     "103"
+    ],
+    [
+     "83",
+     "92",
+     "97"
+    ],
+    [
+     "80",
+     "87",
+     "92"
+    ],
+    [
+     "77",
+     "83",
+     "87"
+    ],
+    [
+     "73",
+     "77",
+     "87"
+    ],
+    [
+     "69",
+     "77",
+     "83"
+    ],
+    [
+     "67",
+     "73",
+     "80"
+    ],
+    [
+     "67",
+     "73",
+     "80"
+    ],
+    [
+     "65",
+     "73",
+     "77"
+    ]
+   ],
+   "decision": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente50",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente55",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente60",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente70",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente80",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente90",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente100",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente120",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente140",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente170",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente200",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente250",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente300",
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente375",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente375",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente375"
+   ],
+   "statut": "confirme"
   }
  ],
  "familles": [

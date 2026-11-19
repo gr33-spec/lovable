@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-53",
+  "version": "roofing-2026.11.19-54",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -6218,6 +6218,10 @@
             {
               "label": "Plus de 8 m",
               "value": "10"
+            },
+            {
+              "label": "Plus de 11 m",
+              "value": "12"
             }
           ]
         }
@@ -6331,54 +6335,27 @@
           "kind": "installation_condition",
           "value": "5.5",
           "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Au-delà, +10 mm de recouvrement."
+          "note": "Ardoise : au-delà de 5,50 m de projection horizontale du rampant, table de recouvrement suivante. NF DTU 40.11 (2020), annexe B : colonnes ≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m (relu chez Cupa et Rathscheck)."
         },
-        "supplement_rampant": {
+        "seuil_rampant_2": {
           "kind": "installation_condition",
-          "value": "10",
-          "unit": "mm",
-          "source": "fondateur-referentiel-2026-10-03",
+          "value": "11",
+          "unit": "m",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1
-        },
-        "supplement_nul": {
-          "kind": "installation_condition",
-          "value": "0",
-          "unit": "mm",
-          "source": "definition",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "BatiClair (définition)"
-          },
-          "version": 1
-        },
-        "pas_recouvrement": {
-          "kind": "installation_condition",
-          "value": "5",
-          "unit": "mm",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Recouvrement arrondi aux 5 mm supérieurs."
+          "note": "Ardoise : au-delà de 11 m de projection horizontale du rampant, dernière table de recouvrement. NF DTU 40.11 (2020), annexe B (relu chez Cupa et Rathscheck)."
         },
         "marge_crochet": {
           "kind": "installation_condition",
@@ -7621,19 +7598,28 @@
         }
       },
       "tables": {
-        "recouvrement": {
-          "label": "Recouvrement de l'ardoise",
+        "recouvrement_a": {
+          "label": "Recouvrement DTU, rampant ≤ 5,50 m",
           "unit": "mm",
           "axes": [
             {
               "param": "pente",
               "thresholds": [
-                "25",
-                "30",
-                "35",
-                "40",
-                "45",
-                "50"
+                "24.23",
+                "26.57",
+                "28.81",
+                "30.96",
+                "34.99",
+                "38.66",
+                "41.99",
+                "45.00",
+                "50.19",
+                "54.46",
+                "59.53",
+                "63.43",
+                "68.20",
+                "71.57",
+                "75.07"
               ]
             },
             {
@@ -7647,45 +7633,327 @@
           ],
           "values": [
             [
+              "107",
+              "119",
+              "133"
+            ],
+            [
+              "103",
+              "113",
+              "127"
+            ],
+            [
+              "97",
+              "107",
+              "119"
+            ],
+            [
+              "92",
+              "103",
+              "113"
+            ],
+            [
+              "87",
+              "94",
+              "106"
+            ],
+            [
+              "80",
+              "89",
+              "97"
+            ],
+            [
+              "77",
+              "87",
+              "92"
+            ],
+            [
+              "73",
+              "80",
+              "89"
+            ],
+            [
+              "69",
+              "77",
+              "83"
+            ],
+            [
+              "65",
+              "73",
+              "80"
+            ],
+            [
+              "65",
+              "69",
+              "77"
+            ],
+            [
+              "63",
+              "67",
+              "73"
+            ],
+            [
+              "60",
+              "65",
+              "73"
+            ],
+            [
+              "60",
+              "63",
+              "73"
+            ],
+            [
+              "60",
+              "63",
+              "69"
+            ]
+          ],
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort)."
+        },
+        "recouvrement_b": {
+          "label": "Recouvrement DTU, rampant de 5,50 à 11 m",
+          "unit": "mm",
+          "axes": [
+            {
+              "param": "pente",
+              "thresholds": [
+                "24.23",
+                "26.57",
+                "28.81",
+                "30.96",
+                "34.99",
+                "38.66",
+                "41.99",
+                "45.00",
+                "50.19",
+                "54.46",
+                "59.53",
+                "63.43",
+                "68.20",
+                "71.57",
+                "75.07"
+              ]
+            },
+            {
+              "param": "zone",
+              "thresholds": [
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "116",
+              "130",
+              "147"
+            ],
+            [
               "110",
-              "120",
-              "130"
+              "123",
+              "137"
+            ],
+            [
+              "103",
+              "116",
+              "127"
             ],
             [
               "100",
               "110",
-              "120"
+              "123"
             ],
             [
-              "90",
-              "100",
+              "92",
+              "103",
               "110"
             ],
             [
-              "85",
-              "90",
+              "87",
+              "94",
+              "103"
+            ],
+            [
+              "83",
+              "89",
               "100"
             ],
             [
               "80",
-              "85",
-              "95"
+              "87",
+              "94"
             ],
             [
-              "70",
+              "73",
               "80",
-              "90"
+              "87"
+            ],
+            [
+              "73",
+              "77",
+              "83"
+            ],
+            [
+              "67",
+              "73",
+              "80"
+            ],
+            [
+              "65",
+              "73",
+              "77"
+            ],
+            [
+              "63",
+              "69",
+              "77"
+            ],
+            [
+              "63",
+              "69",
+              "77"
+            ],
+            [
+              "63",
+              "67",
+              "73"
             ]
           ],
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pose au crochet, rampant ≤ 5,5 m. Lignes 25°, 30°, 35°, 40°, 45°, ≥ 50° du référentiel (§3) ; la première ligne vaut dès la pente minimale de l'ardoise (24°, arrondie à 25°). Sous 25° : hors table, l'ouvrage n'est pas calculé."
+          "note": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort)."
+        },
+        "recouvrement_c": {
+          "label": "Recouvrement DTU, rampant de 11 à 16,50 m",
+          "unit": "mm",
+          "axes": [
+            {
+              "param": "pente",
+              "thresholds": [
+                "24.23",
+                "26.57",
+                "28.81",
+                "30.96",
+                "34.99",
+                "38.66",
+                "41.99",
+                "45.00",
+                "50.19",
+                "54.46",
+                "59.53",
+                "63.43",
+                "68.20",
+                "71.57",
+                "75.07"
+              ]
+            },
+            {
+              "param": "zone",
+              "thresholds": [
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "127",
+              "142",
+              "153"
+            ],
+            [
+              "117",
+              "130",
+              "142"
+            ],
+            [
+              "113",
+              "123",
+              "137"
+            ],
+            [
+              "106",
+              "117",
+              "130"
+            ],
+            [
+              "100",
+              "107",
+              "117"
+            ],
+            [
+              "92",
+              "100",
+              "110"
+            ],
+            [
+              "87",
+              "94",
+              "103"
+            ],
+            [
+              "83",
+              "92",
+              "97"
+            ],
+            [
+              "80",
+              "87",
+              "92"
+            ],
+            [
+              "77",
+              "83",
+              "87"
+            ],
+            [
+              "73",
+              "77",
+              "87"
+            ],
+            [
+              "69",
+              "77",
+              "83"
+            ],
+            [
+              "67",
+              "73",
+              "80"
+            ],
+            [
+              "67",
+              "73",
+              "80"
+            ],
+            [
+              "65",
+              "73",
+              "77"
+            ]
+          ],
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort)."
         }
       },
       "derived": [
@@ -7707,7 +7975,7 @@
           "key": "recouvrement",
           "label": "Recouvrement",
           "unit": "mm",
-          "formula": "arrondi_sup((table.recouvrement + si(longueur_rampant > regle.seuil_rampant, regle.supplement_rampant, regle.supplement_nul)) / regle.pas_recouvrement) * regle.pas_recouvrement",
+          "formula": "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
           "shown": true,
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {

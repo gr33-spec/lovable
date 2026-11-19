@@ -52,9 +52,10 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
 });
 
 describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le reste suit", () => {
-  it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 8 cm → crochet 9 cm)", () => {
+  // NF DTU 40.11 (fiche couverture) : zone 1, 45° → recouvrement 73 mm → crochet 73 + 3 = 76 mm, soit 8 cm (avant 9).
+  it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 73 mm → crochet 8 cm)", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
-    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 9 cm");
+    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 8 cm");
   });
   // Règle du fondateur, confirmée le 2026-11-19 (fiche couverture, ardoise.jeu_de_tete_crochet) : recouvrement = crochet − 5 mm,
   // pureau = (320 − 105) ÷ 2 = 107,5 mm. Avant : crochet − 1 cm, pureau 11 cm.
@@ -74,7 +75,7 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
   });
   it("« Ø 2,7 mm » n'est pas une longueur de crochet", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], {}, ZONE_1);
-    expect(crochets(v)?.label).toMatch(/longueur 9 cm/);
+    expect(crochets(v)?.label).toMatch(/longueur 8 cm/);
   });
 });
 

@@ -1,5 +1,22 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-54 — Ardoise : recouvrement du NF DTU 40.11, lu dans la fiche couverture
+
+- **§3 Recouvrement de l'ardoise au crochet** : le tableau du NF DTU 40.11 (2020, annexe B), relu chez Cupa et Rathscheck
+  (132 valeurs identiques), par pente et région, une table par bande de rampant (≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m ;
+  le rampant tient lieu de projection horizontale, ce qui est prudent). Les trois tables sont construites par
+  `construire_fiche.py` à partir des chiffres confirmés de la fiche (`tables` de `fiche-couverture.json`).
+  Avant : tableau du référentiel (25° à 50°), + 10 mm au-delà de 5,5 m de rampant, arrondi aux 5 mm supérieurs.
+- Exemples :
+  - 45°, région III, rampant ≤ 5,50 m : 89 mm (avant 95). Brest, 200 m² de 30×22 : 8 925 ardoises (avant 9 271), ligne de
+    la table Cupa 42,5/m².
+  - 45°, région I : 73 mm (avant 80) ; crochet 8 cm (avant 9).
+  - 45°, région III, rampant 6 m : 94 mm (avant 105).
+  - 30°, région III : 119 mm (avant 120).
+- Pente minimale de la table : 24,23° (45 %, la plus forte des pentes admises dans les trois régions et les trois
+  bandes ; avant : 25°). En dessous, l'ouvrage n'est pas calculé et la raison est dite.
+- Rampant : un choix « Plus de 11 m » est ajouté.
+
 ## roofing-2026.11.19-53 — Faîtage et arêtier zinc façonnés en longueurs de 2 m (fiche couverture)
 
 - **§3 / §7 Faîtage et arêtier zinc commandés façonnés** : longueurs de 2 m, lues dans la fiche

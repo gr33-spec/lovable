@@ -55,6 +55,18 @@ const constante = z.object({
   avant: z.string().optional(),
   statut: z.enum(STATUTS),
 });
+/** Table de calcul lue par le code (recouvrement de l'ardoise par pente et zone), tirée des chiffres confirmés de la fiche. */
+const tableBase = z.object({
+  cle: str,
+  famille: str,
+  libelle: str,
+  unite: str,
+  axes: z.array(z.object({ donnee: str, unite: str, seuils: z.array(str).min(1) })).min(1).max(2),
+  valeurs: z.array(z.array(str).min(1)).min(1),
+  decision: str,
+  preuves: z.array(str).min(1),
+  statut: z.enum(STATUTS),
+});
 const source = z.object({ id: str, titre: z.string().nullable().optional(), url: z.string().nullable().optional(), type: z.string().nullable().optional(), consulte: z.string().nullable().optional() });
 
 export const baseSchema = z.object({
@@ -67,6 +79,7 @@ export const baseSchema = z.object({
   carte_regions: z.string().optional(),
   taux_confirme: z.number(),
   constantes: z.array(constante).default([]),
+  tables: z.array(tableBase).default([]),
   familles: z.array(famille).min(1),
   sources: z.array(source).min(1),
 }).loose();
@@ -80,6 +93,7 @@ export type ModeleBase = z.infer<typeof modele>;
 export type ChiffreBase = z.infer<typeof chiffre>;
 export type CarteRegions = z.infer<typeof carteSchema>;
 export type ConstanteBase = z.infer<typeof constante>;
+export type TableBase = z.infer<typeof tableBase>;
 
 export class BaseFileError extends Error {}
 
@@ -114,7 +128,24 @@ export function lireBase(texte: string): BaseMetier {
       if (!estConfirme(c)) throw new BaseFileError(`base de référence invalide : la constante « ${k.cle} » repose sur ${p}, qui n'est pas confirmé`);
     }
   }
+  for (const t of base.tables) {
+    const [a, b] = t.axes;
+    if (t.valeurs.length !== a!.seuils.length || t.valeurs.some((l) => l.length !== (b?.seuils.length ?? 1))) {
+      throw new BaseFileError(`base de référence invalide : la table « ${t.cle} » n'a pas une valeur par case`);
+    }
+    for (const p of t.preuves) {
+      const c = ids.get(p);
+      if (!c || !estConfirme(c)) throw new BaseFileError(`base de référence invalide : la table « ${t.cle} » repose sur ${p}, absent ou non confirmé`);
+    }
+  }
   return base;
+}
+
+/** Une table de calcul de la base, ou une erreur qui la nomme. */
+export function tableDe(base: BaseMetier, cle: string): TableBase {
+  const t = base.tables.find((x) => x.cle === cle);
+  if (!t) throw new BaseFileError(`table absente de la base ${base.fiche} : « ${cle} »`);
+  return t;
 }
 
 /** Une constante de calcul de la base, ou une erreur qui la nomme : le code ne devine jamais un chiffre absent. */
