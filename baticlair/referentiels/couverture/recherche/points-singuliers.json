@@ -1,0 +1,2452 @@
+{
+  "famille": "points_singuliers",
+  "generated": "2026-11-19",
+  "entrees": [
+    {
+      "id": "faitiere_tc_sans_emboitement_40_pieces_ml",
+      "sous_famille": "faîtage tuile",
+      "marque": "générique (Edilians, Terreal)",
+      "modele": "faîtière 1/2 ronde ou angulaire 40-42 cm",
+      "attribut": "pieces_par_ml",
+      "valeur": 3,
+      "unite": "u/ml",
+      "condition": "faîtière 1/2 ronde sans emboîtement, féodale ou angulaire (40 à 42 cm) ; à remplacer par la valeur de la fiche du modèle quand elle est connue",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles plates",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/plates-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière féodale (3 par ml) … Faîtière/Arêtier épi (3 par ml)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Arêtier ventilation 3 au ml / 2,5 kg ; Arêtier à sceller 3 au ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Faîtière/arêtier angulaire à emboîtement (3 par ml)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le 2,9 du référentiel (ml ÷ 0,35) correspond à un pas de 35 cm ; les fiches donnent 3 pour ces modèles.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "faitiere_tc_emboitement_grand_modele_pieces_ml",
+      "sous_famille": "faîtage tuile",
+      "marque": "Edilians, Terreal",
+      "modele": "faîtière/arêtier 1/2 rond ou conique à emboîtement, grand modèle (≈ 45-50 cm)",
+      "attribut": "pieces_par_ml",
+      "valeur": 2.5,
+      "unite": "u/ml",
+      "condition": "faîtières à emboîtement grand modèle ; certaines à pureau variable vont de 2,2 à 2,7 au ml",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière/arêtier 1/2 rond à emboîtement grand modèle (2,5 par ml) Réf. 702",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière ventilation + clip 2,5 au ml / 3,5 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (site export), « Ornamental interlocking ridge, 2.5 per m »",
+          "url": "https://edilians.eu/ornamental-interlocking-ridge-2-5-per-m.html",
+          "type": "fabricant",
+          "extrait": "Ornamental interlocking ridge 2.5 per m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Terreal donne aussi 2,8 (faîteau conique) et 2,2 à 2,7 (faîtière à pureau variable, fiche Romane Réno) : le chiffre dépend du modèle.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "faitiere_demi_ronde_50_pieces_ml",
+      "sous_famille": "faîtage tuile",
+      "marque": "Monier",
+      "modele": "faîtière/arêtier demi-ronde de 50",
+      "attribut": "pieces_par_ml",
+      "valeur": 2,
+      "unite": "u/ml",
+      "condition": "faîtière demi-ronde de 50 cm (Monier)",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Castorama, fiche faîtière (Monier) conique / demi-ronde de 50",
+          "url": "https://media.castorama.fr/is/content/Castorama/3561340231143_ran_FR_CFpdf",
+          "type": "negoce",
+          "extrait": "Faîtière/arêtier demi-ronde de 50* (2 au ml) ; conique de 50* (2,4 au ml)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Seule la fiche Monier relayée par Castorama ; à recouper sur monier.fr.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "faitiere_armor_ardoise_longueur",
+      "sous_famille": "faîtage ardoise",
+      "marque": "Edilians",
+      "modele": "Faîtière Armor à emboîtement universelle (pour toiture ardoise)",
+      "attribut": "longueur_piece",
+      "valeur": 37,
+      "unite": "cm",
+      "condition": "faîtière terre cuite pour couverture ardoise (Bretagne) ; nombre au ml non publié",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "Avec les faîtières terre cuite Ardoise et Armor … Fait Armor PC184 VM / U VM",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "CMESMAT (négoce), Faîtière Armor à emboîtement universelle terre cuite rouge, long. 37 cm",
+          "url": "https://www.cmesmat.fr/couverture/tuiles/tuiles-terre-cuite/accessoires/2778524-faitiere-armor-a-emboitement-universelle-terre-cuite-rouge-long-37-cm.html",
+          "type": "negoce",
+          "extrait": "Faîtière armor à emboîtement universelle … long. 37 cm (titre de la fiche, page 403 à la lecture)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Longueur 37 cm lue dans le titre de la fiche négoce seulement ; le nombre au ml (probablement ≈ 3) n'est publié nulle part : demander à Edilians (hot.line@edilians.com) ou au négoce breton.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitiere_unite_de_vente",
+      "sous_famille": "faîtage tuile",
+      "marque": "générique",
+      "modele": "faîtière, arêtier, about, rencontre",
+      "attribut": "unite_de_vente",
+      "valeur": "pièce",
+      "unite": "",
+      "condition": "les fiches donnent un nombre « au ml » pour convertir la longueur en pièces ; la vente se fait à l'unité",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtières-arêtiers … Arêtier ventilation 3 au ml / 2,5 kg (référence et poids par pièce)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Faîtière/arêtier 1/2 rond à emboîtement grand modèle (2,5 par ml) Réf. 702 (référence par pièce)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Les fiches donnent un poids et une référence par pièce et un « au ml » pour convertir. Contredit le skill (« faîtage en ml, pas de conversion en faîtières »).",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_souple_monier_longueur_rouleau",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "BMI Monier",
+      "modele": "Metalroll, Figaroll Plus",
+      "attribut": "longueur_rouleau",
+      "valeur": 5,
+      "unite": "m",
+      "condition": "rouleaux ; même produit en faîtage et en arêtier",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur rouleau (ml) 5 … Nombre de rouleaux par carton 4",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Monier, notice FIGAROLL PLUS réf. 327, novembre 2014 (hébergée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus[1].pdf",
+          "type": "fabricant",
+          "extrait": "Longueur : 5 ml … Carton de 5 rouleaux",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Atout Pro (groupe SAMSE), fiche Closoir alu 320 / 290 mm × 5 ml, 11/07/2025",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1840137.pdf",
+          "type": "negoce",
+          "extrait": "Les dimensions du rouleau sont de 290 à 320 mm de largeur sur 5 mètres de longueur",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Carton de 5 rouleaux (notice 2014) contre 4 rouleaux (brochure récente) : l'édition a changé ; ne pas compter en cartons.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_souple_autres_longueurs",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "Ubbink, Monier, Atout Pro",
+      "modele": "Airtec Duo/Alu Roll, Dryroll, bi-composant",
+      "attribut": "longueur_rouleau",
+      "valeur": "10 m ou dévidoir 50 m",
+      "unite": "m",
+      "condition": "closoirs d'entrée de gamme ou en carton dévidoir",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur des rouleaux 10 m (ou carton de 50 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Dryroll … Longueur (ml) 10 … 50 … Dévidoir",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Atout Pro (groupe SAMSE), fiche Closoir souple bi-composant, 11/07/2025",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1839876.pdf",
+          "type": "negoce",
+          "extrait": "En carton dévidoir : 300 mm X 50M ; Le rouleau : 300mm X 5M",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "5 m n'est pas universel : Ubbink vend en 10 m, Dryroll en 10 m ou 50 m.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_rigide_terreal_longueur",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "Terreal",
+      "modele": "LAHE-PRO (rigide ventilé)",
+      "attribut": "longueur_element",
+      "valeur": 2,
+      "unite": "m",
+      "condition": "closoir rigide, carton de 6 éléments = 12 ml",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Terreal, brochure LAHE-PRO closoir rigide ventilé (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/209672",
+          "type": "fabricant",
+          "extrait": "le closoir se présente en longueur de 2 mètres … carton de 6, soit 12 mètres linéaires",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Une seule fiche (Terreal) pour le rigide.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_recouvrement_entre_rouleaux",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "générique",
+      "modele": "closoir souple ou rigide",
+      "attribut": "recouvrement",
+      "valeur": 5,
+      "unite": "cm",
+      "condition": "entre deux morceaux de closoir",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Monier, notice FIGAROLL PLUS réf. 327, novembre 2014 (hébergée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus[1].pdf",
+          "type": "fabricant",
+          "extrait": "S'assurer d'un recouvrement de 5 cm entre deux morceaux de FIGAROLL PLUS",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Le recouvrement doit être de 5 cm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, brochure LAHE-PRO closoir rigide ventilé (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/209672",
+          "type": "fabricant",
+          "extrait": "Prévoir un recouvrement de 5 cm entre chaque closoir",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_largeur_selon_galbe",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "Monier, Ubbink, Terreal",
+      "modele": "closoirs souples",
+      "attribut": "largeur",
+      "valeur": "240 à 400 mm selon la classe de galbe de la tuile (G0 à G3)",
+      "unite": "mm",
+      "condition": "la largeur se choisit avec le galbe de la tuile, pas selon faîtage ou arêtier",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur rouleau (cm) 26-32 / 32-38 / 28-32 / 34-38 / 29,5 / 36,5",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur 240 mm TP ; 310 mm TG ; 360 mm MG ; 400 mm FG",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Lahe-Roll Closoirs souples ventilés … Largeurs 290 / 320 / 370 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le 240 mm Ubbink est pour tuiles plates (TP) : c'est sans doute l'origine du « 23 cm », mais ce n'est pas une largeur d'arêtier.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_meme_produit_faitage_aretier",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "Monier, Ubbink, Atout Pro",
+      "modele": "closoirs souples ventilés",
+      "attribut": "usage",
+      "valeur": "le même closoir sert au faîtage et à l'arêtier",
+      "unite": "",
+      "condition": "",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Peuvent être utilisés en faîtage et en arêtier",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "En se plaçant sous les tuiles faîtières ou d'arêtiers",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Atout Pro (groupe SAMSE), fiche Closoir alu 320 / 290 mm × 5 ml, 11/07/2025",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1840137.pdf",
+          "type": "negoce",
+          "extrait": "destiné à la ventilation des faîtages et des arêtiers",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_section_ventilation",
+      "sous_famille": "closoir de faîtage / arêtier",
+      "marque": "Monier, Ubbink, Terreal",
+      "modele": "closoirs ventilés",
+      "attribut": "section_ventilation",
+      "valeur": "70 à 200",
+      "unite": "cm²/ml",
+      "condition": "Dryroll 70 ; Lahe-Pro 100 ; Figaroll Plus 103 ; Metalroll 111 ; Airtec Alu 150 ; Airtec Duo 200",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Figaroll Plus V103 … Metalroll V111 … Capacité de ventilation de 70 cm2/ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur 310 mm 200 cm²/ml … Largeur 300 mm 150 cm²/ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, brochure LAHE-PRO closoir rigide ventilé (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/209672",
+          "type": "fabricant",
+          "extrait": "capacité de ventilation de 100 cm2 par mètre linéaire",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le « faîtage ventilé ≈ 85 cm²/ml » du référentiel §25.1 est dans la fourchette basse ; prendre la valeur du produit.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "closoir_obligatoire_pose_a_sec",
+      "sous_famille": "faîtage à sec",
+      "marque": "BMI Monier, Terreal",
+      "modele": "système faîtage à sec",
+      "attribut": "composition",
+      "valeur": "closoir + lisse de rehausse + supports de lisse + clips (ou vis) de faîtière",
+      "unite": "",
+      "condition": "faîtage et arêtier posés à sec ; en scellé, le mortier remplace closoir, lisse et supports",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Monier, notice FIGAROLL PLUS réf. 327, novembre 2014 (hébergée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus[1].pdf",
+          "type": "fabricant",
+          "extrait": "système faîtage composé de : Faîtières adaptées … Closoir souple ventilé … Support de lisse de réhausse GRAFIMETAL … Clips de faîtage",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, brochure LAHE-PRO closoir rigide ventilé (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/209672",
+          "type": "fabricant",
+          "extrait": "Préparation des faîtages et arêtiers : étriers support de lisse, clips de faîtière",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Contredit le skill (« supports de panne faîtière et agrafes de faîtière : jamais proposés ») : ils font partie du système à sec. Décision du fondateur.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "clip_faitiere_par_piece",
+      "sous_famille": "fixation de faîtière",
+      "marque": "Monier, Terreal, Ubbink, Edilians",
+      "modele": "clip / crochet de faîtière",
+      "attribut": "nombre",
+      "valeur": 1,
+      "unite": "u par faîtière",
+      "condition": "faîtage ou arêtier à sec ; le clip est propre au modèle de faîtière (Edilians CRP702, CRP703…)",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "le clip adapté à la faîtière permet par vissage de fixer, en une seule opération, le nez d'une faîtière et l'autre extrémité de la faîtière suivante",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Le crochet de faîtage se cloue sur la lisse de réhausse ou d'arêtier et vient bloquer la tuile faîtière",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Crochet F1 Faîtière 1/2 Ronde … Réf. CRP702 (crochet dédié à la faîtière 702)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Exception : petits arêtiers de tuiles plates, crochet de faîtière angulaire « 9 à 10 par ml » chez Edilians (un par pièce aussi).",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "support_lisse_espacement",
+      "sous_famille": "fixation de faîtière",
+      "marque": "E.u.r.o.Tec, Simpson Strong-Tie, Monier",
+      "modele": "support de lisse / porte-liteau de faîtage",
+      "attribut": "espacement",
+      "valeur": "1 par chevron ou fermette (50 à 80 cm), soit ≈ 1,5 à 2 au ml",
+      "unite": "u/ml",
+      "condition": "fixé sur chaque chevron ou fermette, de chaque côté si le modèle est à pattes",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "E.u.r.o.Tec (distribué avec Klöber), instructions de montage Support d'arêtier et de latte faîtière 50, 03/2022",
+          "url": "https://app.nextpim.de/Cloud/61190c19ea64fa72a352dee4/a3ba70a2-990d-432c-fb8c-08d79e6bb09c/Montageanleitung_Grat_und_Firstlattenhalter_50_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Choisir un écartement approprié (env. 500 – 800 mm) en fonction de l'écartement des chevrons",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Simpson Strong-Tie, fiche Support de faîtage TOL (2024, groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1308158.pdf",
+          "type": "fabricant",
+          "extrait": "Le TOL se fixe sur chaque fermette. L'entraxe est donc de 50 ou 60 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Positionner les supports de lisse en les fixant sur les chevrons ou sur les liteaux",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le référentiel §5 dit « supports de liteau 1/ml » : trop bas pour des fermettes à 60 cm (≈ 1,7/ml).",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "support_lisse_conditionnement",
+      "sous_famille": "fixation de faîtière",
+      "marque": "E.u.r.o.Tec",
+      "modele": "Support d'arêtier et de latte faîtière 50",
+      "attribut": "conditionnement",
+      "valeur": 100,
+      "unite": "u",
+      "condition": "lattes 30 × 50 à plat ou 40 × 60 debout",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "E.u.r.o.Tec, fiche de données Support d'arêtier et de latte faîtière 50, 03/2022",
+          "url": "https://app.nextpim.de/Cloud/61190c19ea64fa72a352dee4/a3ba70a2-990d-432c-fb8c-08d79e6bb09c/Fiche_de_donnees_produit_Grat-und_Firstlattenhalter_50_FR.pdf",
+          "type": "fabricant",
+          "extrait": "954223 Support d'arêtier et de latte faîtière 50 30 x 50 UE 100",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Autres marques (Grafimetal, Ubbink à clou 180 à 310 mm) : conditionnement non trouvé.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "porte_liteau_hauteurs",
+      "sous_famille": "fixation de faîtière",
+      "marque": "Ubbink, Terreal",
+      "modele": "porte-liteau pour pose à sec",
+      "attribut": "hauteur",
+      "valeur": "180 à 310 mm (Ubbink) ; réglable 30 à 45 mm ou 210 mm à clouer (Terreal)",
+      "unite": "mm",
+      "condition": "le vendeur demande la hauteur ou le type (à clou, à pattes, pivotant)",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Porte liteau pour pose à sec … À CLOU … 180, 210, 230, 260 ou 310 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Porte liteau à clouer … Longueur 210 mm, largeur 40 mm ; Porte liteau à tête pivotante réglable de 30 à 45 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "about_faitage_par_extremite",
+      "sous_famille": "abouts",
+      "marque": "générique (Edilians, Terreal)",
+      "modele": "about de faîtière / fronton",
+      "attribut": "nombre",
+      "valeur": "1 par extrémité de faîtage sur pignon ; 0 côté croupe (rencontre ou poinçon)",
+      "unite": "u",
+      "condition": "faîtage entre deux pignons = 2 ; faîtage entre deux croupes = 0 about, 2 rencontres ; un pignon et une croupe = 1 + 1",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles plates",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/plates-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "About de faîtière 1/2 ronde … About de faîtière angulaire (pièces distinctes des rencontres)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "About de faîtière ventilation … Fronton de rive équerre … Raccord 3 branches",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Règle géométrique déduite des gammes ; aucune fiche ne donne « 2 par faîtage ». La forme du toit (pignon ou croupe) n'est pas dans le devis : à demander.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "about_aretier_par_aretier",
+      "sous_famille": "abouts",
+      "marque": "Edilians, Terreal",
+      "modele": "about d'arêtier",
+      "attribut": "nombre",
+      "valeur": 1,
+      "unite": "u par arêtier",
+      "condition": "au pied de l'arêtier (côté égout), du même modèle que l'arêtier",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "About d'arêtier 1/2 rond à emboîtement … About d'arêtier conique",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "About d'arêtier ventilation 2,45 kg ; About d'arêtier à sceller 2,65 kg",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "rencontre_poincon",
+      "sous_famille": "abouts",
+      "marque": "Edilians, Terreal",
+      "modele": "rencontre / porte-poinçon 3 ou 4 branches",
+      "attribut": "nombre",
+      "valeur": "1 par jonction faîtage-arêtiers",
+      "unite": "u",
+      "condition": "3 branches : faîtage + 2 arêtiers ; 4 branches : pavillon",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Rencontre porte-poinçon 4 petites ouvertures rondes … 3 grandes ouvertures rondes",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Porte-poinçon 3 branches universel / 3,75 kg ; Porte-poinçon 4 branches universel",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "mortier_faitage_scelle_kg_ml",
+      "sous_famille": "mortier de faîtage",
+      "marque": "Weber, PRB, VPI",
+      "modele": "mortier de couverture prêt à gâcher",
+      "attribut": "consommation",
+      "valeur": "5 à 10",
+      "unite": "kg/ml",
+      "condition": "faîtage tuiles terre cuite scellé ; PRB monte à 20 kg/ml selon la tuile (canal, fort galbe)",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "Consommation : environ 5 à 10 kg/ml de faîtage. Un sac de 25 kg représente environ 15 l",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "PRB, fiche PRB Pose Tuiles (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+          "type": "fabricant",
+          "extrait": "Environ 5 à 20 kg/ml de faîtage suivant types de tuiles",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite, édition 2023-2024 (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+          "type": "fabricant",
+          "extrait": "5 kg/m linéaire de faîtage ou lit de maçonnerie (20 cm de large)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "PRB Mortier bâtard donne « scellement de tuile : 12 à 25 kg/ml » (produit généraliste). Le 8 kg/ml du référentiel est dans la fourchette, le 12 kg/ml canal reste une valeur du fondateur.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "mortier_couverture_sac_palette",
+      "sous_famille": "mortier de faîtage",
+      "marque": "Weber, PRB, VPI",
+      "modele": "sac de 25 kg",
+      "attribut": "conditionnement",
+      "valeur": "sac 25 kg ; palette 48 sacs (1 200 kg) Weber et PRB, 56 sacs VPI",
+      "unite": "",
+      "condition": "sac de 5 kg aussi (Weber, VPI)",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "Unité de vente : sac de 25 kg (palette filmée complète de 48 sacs, soit 1200 kg)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "PRB, fiche PRB Pose Tuiles (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+          "type": "fabricant",
+          "extrait": "Palette de 1,2 t soit 48 sacs de 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite, édition 2023-2024 (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+          "type": "fabricant",
+          "extrait": "Sac de 25 kg - Palette de 56 sacs ; Sac de 5 kg - Pack de 4 sacs",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "mortier_usages_points_singuliers",
+      "sous_famille": "mortier de faîtage",
+      "marque": "Weber, PRB",
+      "modele": "mortier de couverture",
+      "attribut": "usages",
+      "valeur": "faîtières, arêtiers, égouts, rives, solins, crêtes de coq, souches",
+      "unite": "",
+      "condition": "un seul produit pour tous les scellements de couverture",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "scellement des tuiles faîtières, crêtes de coq, arêtiers, égoûts, génoises, rives, filets, solins",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "PRB, fiche PRB Pose Tuiles (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+          "type": "fabricant",
+          "extrait": "Scellement des tuiles de faîtage, arêtiers, égouts, génoises, rives, solin, souches",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "mortier_rive_arete_kg_ml",
+      "sous_famille": "mortier de rive / arêtier",
+      "marque": "",
+      "modele": "",
+      "attribut": "consommation",
+      "valeur": null,
+      "unite": "kg/ml",
+      "condition": "rive scellée, arêtier scellé, ruellée",
+      "statut": "a_confirmer",
+      "sources": [],
+      "raison": "Aucune fiche ne donne une consommation propre aux rives ou aux arêtiers (seulement « au ml de faîtage »). Les 2-3 kg/ml (rive) et 6-10 kg/ml (arêtier) du référentiel §25.4 restent des valeurs du fondateur.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "mortier_solin_kg_ml",
+      "sous_famille": "mortier de solin",
+      "marque": "Technichem",
+      "modele": "B304 Sperrmörtel",
+      "attribut": "consommation",
+      "valeur": "1,5 à 2",
+      "unite": "kg/ml",
+      "condition": "solin triangulaire 5 cm × 5 cm (mur-sol) ; transposé au solin de toiture",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Technichem, fiche B304 Sperrmörtel, mortier pour solins (groupe Gobert)",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/TECHNICHEM%20FT%20B304%20SPERRMORTEL.pdf",
+          "type": "fabricant",
+          "extrait": "Solins: pour des flancs de 5 cm sur le sol et 5 cm sur le mur, la consommation est d'environ de 1,5 à 2 kg par mètre linéaire",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Le chiffre Remmers ≈ 1,7 kg/ml cité au §49.7 n'a pas été retrouvé (fiches TM Remmers consultées : barrières d'humidité, pas de solin). Le solin Technichem est un solin mur/sol de cuvelage, pas un solin de couverture.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "faitage_zinc_longueur_vente",
+      "sous_famille": "faîtage zinc",
+      "marque": "VMZINC, Edilians, CMESMAT",
+      "modele": "faîtage simple à pinces ou à ourlets",
+      "attribut": "longueur_piece",
+      "valeur": 2,
+      "unite": "m",
+      "condition": "pièces façonnées ; VMZINC fait aussi 1 m ; Edilians n'a pas de 3 m en faîtage",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "VMZINC, fiche Bandes de faîtage (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/bandes-de-faitage-en-zinc-bandes-de-faitage-p68907858.html",
+          "type": "fabricant",
+          "extrait": "longueur de 1 m ou 2 m, et largeur de 333 mm pour la bande de faîtage simple 3 bourrelets",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTAGE SIMPLE À PINCES … Dimensions 333 x 0,65 mm - Longueur 2 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "CMESMAT (négoce), fiche Faîtage simple à pince zinc naturel L 2000 mm l 333 mm ép. 0,65",
+          "url": "https://www.cmesmat.fr/couverture/zinguerie/zinc/2126833-faitage-simple-a-pince-zinc-naturel-l-2000-mm-l-333-mm-ep-0-65-mm.html",
+          "type": "negoce",
+          "extrait": "faitage simple a pince zinc naturel L 2000 mm l 333 mm ep 0,65 mm (désignation)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le code (bande-faitage-zinc-standard, bande-aretier-zinc-standard) et le §3/§5 disent « longueurs de 3 m » : non trouvé pour le faîtage.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitage_zinc_developpes",
+      "sous_famille": "faîtage zinc",
+      "marque": "Edilians, VMZINC",
+      "modele": "faîtage simple à pinces / à ourlets",
+      "attribut": "developpe",
+      "valeur": "250, 333, 400",
+      "unite": "mm",
+      "condition": "épaisseur 0,65 ; zinc naturel ou prépatiné noir (ardoise)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions 250 x 0,65 … 333 x 0,65 … 400 x 0,65 mm - Longueur 2 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Bandes de faîtage (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/bandes-de-faitage-en-zinc-bandes-de-faitage-p68907858.html",
+          "type": "fabricant",
+          "extrait": "333 mm - Bande de faîtage simple 3 bourrelets … 0,65 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitage_zinc_fixation",
+      "sous_famille": "faîtage zinc",
+      "marque": "",
+      "modele": "",
+      "attribut": "pattes_par_ml",
+      "valeur": 3,
+      "unite": "u/ml",
+      "condition": "pattes ou clous de faîtage zinc",
+      "statut": "a_confirmer",
+      "sources": [],
+      "raison": "Aucune fiche fabricant ni guide trouvé ne donne un nombre de pattes au ml pour un faîtage ou une rive zinc (renvoi au DTU 40.41 sans valeur). Valeur du fondateur.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "faitage_lignolet",
+      "sous_famille": "faîtage ardoise",
+      "marque": "",
+      "modele": "lignolet",
+      "attribut": "definition",
+      "valeur": "ardoises du versant au vent débordant sur l'autre versant, sans métal ni mortier ; site normal ou protégé seulement",
+      "unite": "",
+      "condition": "Morbihan et Finistère nord : lignolet en ardoises triangulaires",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Faîtage en lignolet. Uniquement réalisé avec l'ardoise, sans métal ni mortier, en débordement sur l'autre versant. Peut être réalisé uniquement en site normal ou protégé.",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Maisons Paysannes de France (Loiret), « Toitures n° 4 : l'ardoise de l'Ouest »",
+          "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+          "type": "guide",
+          "extrait": "faîtage en lignolet, ou en rangs de rencontre recouverts par une faîtière scellée au mortier bâtard",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitage_lignolet_quantite",
+      "sous_famille": "faîtage ardoise",
+      "marque": "",
+      "modele": "lignolet",
+      "attribut": "ardoises_par_ml",
+      "valeur": "ml ÷ largeur ardoise × 1,2 (référentiel §3)",
+      "unite": "u/ml",
+      "condition": "",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [],
+      "raison": "Aucune source ne chiffre les ardoises d'un lignolet (rangs de rencontre doublés + rang débordant). À faire valider par un couvreur breton.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitage_ardoise_options_bretagne",
+      "sous_famille": "faîtage ardoise",
+      "marque": "",
+      "modele": "",
+      "attribut": "types",
+      "valeur": "lignolet ; faîtière terre cuite scellée au mortier bâtard ; faîtière terre cuite à sec (Armor, Ardoise) ; faîtage zinc à pinces ou à ourlets",
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Maisons Paysannes de France (Loiret), « Toitures n° 4 : l'ardoise de l'Ouest »",
+          "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+          "type": "guide",
+          "extrait": "faîtage en lignolet, ou en rangs de rencontre recouverts par une faîtière scellée au mortier bâtard",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Faîtage simple à ourlets ; Faîtage métallique en 3 pièces ; Faîtage en lignolet ; Exemple de faîtage scellé en terre cuite",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "Avec les faîtières terre cuite Ardoise et Armor … FAÎTAGE SIMPLE À PINCES … À OURLETS",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "tuile_rive_grand_moule_pieces_ml",
+      "sous_famille": "rive tuile",
+      "marque": "Edilians, Terreal",
+      "modele": "rive individuelle à emboîtement, grand moule",
+      "attribut": "pieces_par_ml",
+      "valeur": "2,6 à 2,8 (= 1 ÷ pureau)",
+      "unite": "u/ml par côté",
+      "condition": "une ligne rive gauche, une ligne rive droite",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Rive équerre gauche 2,6 au ml / 2,8 kg ; Rive équerre droite 2,6 au ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Rive individuelle à emboîtement OMEGA 13 Ste Foy (2,7 par ml) Gauche Réf. 105.40 Droite Réf. 105.41",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le §5 dit « ≈ 3/ml » : les fiches donnent 2,6 à 2,8 (c'est 1 ÷ pureau de la tuile).",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "tuile_rive_plate_pieces_ml",
+      "sous_famille": "rive tuile",
+      "marque": "Edilians",
+      "modele": "rive individuelle tuile plate",
+      "attribut": "pieces_par_ml",
+      "valeur": "4,6 à 5 (au pureau de 110 à 100 mm)",
+      "unite": "u/ml par côté",
+      "condition": "tuiles plates ; = 1 ÷ pureau",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles plates",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/plates-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Rive individuelle (5 par ml au pureau de 100 mm) … (4,6 par ml au pureau de 110 mm)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul fabricant ; la règle 1 ÷ pureau est la même que pour le grand moule.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "bande_rive_zinc_longueur",
+      "sous_famille": "rive zinc",
+      "marque": "RHEINZINK, VMZINC",
+      "modele": "bande de rive (à biseau, à cheval, astragale, à pli, lyonnaise)",
+      "attribut": "longueur_piece",
+      "valeur": 2,
+      "unite": "m",
+      "condition": "développés courants 166 à 400 ; Rheinzink en paquets de 10",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche Bande de rive à biseau 2000 × 166 × 0,65 (groupe SAMSE, 18/06/2025)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1223390.pdf",
+          "type": "fabricant",
+          "extrait": "Développé : 166 mm ; Longueur : 2000 mm … Conditionnement 1 : 10 PCE",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Bandes de rive et bandes à ourlet (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/cinq-profils-de-bande-de-rive-et-trois-profils-de-p68907888.html",
+          "type": "fabricant",
+          "extrait": "Cinq types de bande de rive de 92 à 220 mm de hauteur … longueur 2 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le §5 dit « barre 3 m » pour la rive zinc : non trouvé.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "rive_ardoise_bretagne",
+      "sous_famille": "rive ardoise",
+      "marque": "",
+      "modele": "rive à tranchis (ardoise et demi-ardoise alternées)",
+      "attribut": "mise_en_oeuvre",
+      "valeur": "rang d'ardoise alterné d'un demi-rang, à l'aplomb d'un chevron de rive saillant ; fixation 1 clou de tête + 1 crochet (entière), 2 clous (demi)",
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Maisons Paysannes de France (Loiret), « Toitures n° 4 : l'ardoise de l'Ouest »",
+          "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+          "type": "guide",
+          "extrait": "une pose d'un rang d'ardoise alterné d'un demi-rang, à l'aplomb d'un chevron de rive légèrement saillant du pignon",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Rive droite Fixation : 1 clou de tête et 1 clou de milieu pour la demi-ardoise. 1 clou de tête et 1 crochet pour l'entière.",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le terme « rive à approche » n'a été trouvé dans aucune source écrite consultée.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "noue_nook_longueur_recouvrement",
+      "sous_famille": "noue préformée",
+      "marque": "Edilians",
+      "modele": "NOOK (autoportante)",
+      "attribut": "longueur_utile",
+      "valeur": 1.85,
+      "unite": "m par élément de 2 m",
+      "condition": "élément 2 ml, recouvrement 15 cm sans soudure ; développés 400 et 500",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique Noues autoportantes NOOK (2024)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_noues_autoportantes.pdf",
+          "type": "fabricant",
+          "extrait": "2 développés : 400 et 500 mm. Recouvrement de 15 cm … Unité 2ml … Unité de vente unité",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "15 cm vient d'Edilians seul ; une fiche SOBAT (négoce SAMSE) parle d'un recouvrement de 10 cm minimum croissant avec la pente : la longueur utile dépend du produit.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "noue_zinc_vmz_dimensions",
+      "sous_famille": "noue préformée",
+      "marque": "VMZINC",
+      "modele": "Noue 100 % zinc pour tuiles",
+      "attribut": "dimensions",
+      "valeur": "largeur 400 ou 500 mm ; longueur 2 ou 3 m (naturel), 2 m (laqué) ; 0,65 mm (naturel), 0,70 (laqué)",
+      "unite": "",
+      "condition": "toutes couvertures en tuiles",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "VMZINC, fiche Noues 100 % zinc pour couvertures en tuiles (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/noues-100-zinc-pour-couvertures-en-tuiles-p68908038.html",
+          "type": "fabricant",
+          "extrait": "(page lue via un outil de synthèse) Longueur : 2 ou 3 m (VM Zinc naturel) ; 2 m (VM Zinc laqué brun tuilé) … Largeur : 400 ou 500 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique Noues autoportantes NOOK (2024)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_noues_autoportantes.pdf",
+          "type": "fabricant",
+          "extrait": "2 développés : 400 et 500 mm … Unité 2ml",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "noue_ardoise_a_pince_developpes",
+      "sous_famille": "noue préformée",
+      "marque": "Edilians",
+      "modele": "Noue à pinces (toiture ardoise)",
+      "attribut": "developpe",
+      "valeur": "250 (2 ml), 333 (2 ou 3 ml), 400 (2 ou 3 ml)",
+      "unite": "mm",
+      "condition": "zinc naturel ou prépatiné noir",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "NOUE À PINCES … Développé 250 mm - Longueur 2 ml … Développé 333 mm - Longueur 3 ml … Développé 400 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul catalogue ; sur ardoise la noue est souvent façonnée sur place (développé du chantier).",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "noue_ardoise_types",
+      "sous_famille": "noue ardoise",
+      "marque": "",
+      "modele": "",
+      "attribut": "types",
+      "valeur": "noue métallique ouverte (sur voligeage, recouvrement ardoise ≥ 6 cm) ; noue fermée à noquets (pente ≥ 40 %, 1 noquet tous les 2 pureaux) ; noue ronde en ardoise",
+      "unite": "",
+      "condition": "NF DTU 40.11 illustré par la CAPEB",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Noue métallique ouverte … 6 cm minimum de recouvrement … Noue fermée à noquets … 1 noquet tous les 2 pureaux … pente minimale … 40 %",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Guide CAPEB illustrant le DTU 40.11 (texte DTU non consulté).",
+      "ecart": "Le §25.1 dit « 1 noquet par rang » ; la CAPEB dit 1 noquet tous les 2 pureaux en noue fermée : à trancher.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "peigne_closoir_egout_longueur",
+      "sous_famille": "égout",
+      "marque": "Ubbink, Terreal",
+      "modele": "closoir peigne pare-moineaux, closoir d'égout acier",
+      "attribut": "longueur_piece",
+      "valeur": 1,
+      "unite": "m",
+      "condition": "hauteur de dent selon le galbe (50, 80, 90, 110 mm) ; peigne inutile si la tuile d'égout est auto-ventilée",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Closoir peigne pare-moineaux Longueur 1m … Hauteur 50 mm / 90 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Closoir d'égoût acier … Hauteur 110 mm, Longueur 1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "larmier_egout_ecran",
+      "sous_famille": "égout",
+      "marque": "Terreal",
+      "modele": "Larmier zinc",
+      "attribut": "dimensions",
+      "valeur": "zinc 0,6 mm, longueur 2 m, développé 166 mm",
+      "unite": "",
+      "condition": "évacuation de l'écran de sous-toiture à l'égout (DTU 40.29)",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier Zinc 0,6 mm - Longueur 2 m Développé 166 mm … Conforme DTU 40.29",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Une seule fiche.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "bande_egout_doublis_zinc",
+      "sous_famille": "égout",
+      "marque": "RHEINZINK, VMZINC, Edilians",
+      "modele": "bande de doublis / bande à ourlet",
+      "attribut": "longueur_piece",
+      "valeur": 2,
+      "unite": "m",
+      "condition": "développés 100 à 400 mm ; 0,65 mm",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche technique Bande de doublis (déc. 2022, hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/10e8e2d6-e81c-473d-82c7-87eefae6d9d9/fiche-technique-bande-doublis-rheinzink.pdf",
+          "type": "fabricant",
+          "extrait": "Développé (mm) 100 120 140 166 180 200 220 250 333 400 … Longueur (m) 2",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Bandes de rive et bandes à ourlet (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/cinq-profils-de-bande-de-rive-et-trois-profils-de-p68907888.html",
+          "type": "fabricant",
+          "extrait": "Trois types de bande à ourlet de 70 à 585 mm de largeur … longueur 2 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "DOUBLIS / BANDES À OURLETS … 120 x 0,65 … 200 x 0,65",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le §5 dit « bande 3 m » : non trouvé. Le développé 33 cm retenu par défaut dans le code n'est qu'un des développés possibles.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "ventilation_egout_lineaire",
+      "sous_famille": "égout",
+      "marque": "Ubbink",
+      "modele": "liteau de ventilation H14, liteau A-U 20",
+      "attribut": "section_ventilation",
+      "valeur": "80 (H14) ; 200 à 300 (A-U 20)",
+      "unite": "cm²/ml",
+      "condition": "longueurs de 1 m",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Liteau de ventilation H 14 Longueur 1 m 80 cm²/mètre … Liteau A-U 20 Longueur 1 m sans patte 200 cm²/ml, avec pattes 300 cm²/ml",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul fabricant ; le « bande d'égout ventilée ≈ 70 cm²/ml » du §25.1 est sous ces valeurs.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "ventilation_sections_dtu",
+      "sous_famille": "ventilation",
+      "marque": "",
+      "modele": "",
+      "attribut": "section_totale",
+      "valeur": "tuiles, comble perdu sans écran : 1/5000 ; comble aménagé sans écran : 1/3000 ; avec écran ventilé en sous-face : 1/5000 au-dessus + 1/3000 sous l'écran ; ardoise comble perdu 1/5000, aménagé 1/3000",
+      "unite": "de la surface projetée (tuiles)",
+      "condition": "moitié en partie basse, moitié en partie haute ; DTU série 40.1 / 40.2 cités par la FFB",
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+          "type": "guide",
+          "extrait": "(résumé de la page, lue via un outil de synthèse) moitié à l'égout, moitié près du faîtage ; 1/5000 comble perdu, 1/3000 rampant isolé, + 1/3000 sous écran ventilé ; tuiles : surface projetée",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Guide FFB seul (texte DTU non consulté) ; les fiches closoirs renvoient aux « DTU de la série 40 » sans valeur.",
+      "ecart": "Le §28.5 ne retient que 1/3000 : c'est le cas comble aménagé ; en comble perdu le DTU demande 1/5000.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "chatiere_tuile_section",
+      "sous_famille": "ventilation",
+      "marque": "Edilians, Terreal",
+      "modele": "tuile chatière",
+      "attribut": "section_ventilation",
+      "valeur": "13 à 55",
+      "unite": "cm² par tuile",
+      "condition": "selon le modèle de tuile (Terreal Romane Canal 18 ; Edilians Oméga 13 21 ; Panne H2 50)",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Tuile chatière (section de ventilation 18 cm²) / 3,7 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Tuile de ventilation OMEGA 13 Ste Foy (section de ventilation de 21 cm2)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Avec 1/3000 et 20 cm² par chatière, il en faut ≈ 8 par 100 m² en bas et 8 en haut : la règle « 1 pour 20 à 25 m² » du §3 et du §5 sous-estime pour une tuile chatière.",
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    },
+    {
+      "id": "chatiere_ardoise_section",
+      "sous_famille": "ventilation",
+      "marque": "Ubbink",
+      "modele": "chatière discrète VEPAC 70 / 140 ardoises",
+      "attribut": "section_ventilation",
+      "valeur": "70 ou 140",
+      "unite": "cm²",
+      "condition": "ardoises naturelles ou fibres-ciment ; VEPAC 140 pente mini 22°",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Chatière discrète VEPAC 70 ardoises … VEPAC 140 140 cm2 … pentes minimum de 22°",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Un seul fabricant pour la chatière ardoise ; Edilians vend une chatière plate zinc prépatiné (section non lue).",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "tuile_douille_diametres",
+      "sous_famille": "ventilation",
+      "marque": "Edilians, Terreal",
+      "modele": "tuile à douille + lanterne / chapeau",
+      "attribut": "diametre",
+      "valeur": "Ø 100, 126, 150 ou 160 selon modèle",
+      "unite": "mm",
+      "condition": "1 par sortie (VMC, hotte) ; kit de raccordement VMC à part",
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Tuile à douille … Ø 126 (Conforme VMC) … Lanterne bi-section Ø 126 et Ø 160",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Tuile à douille Ø 150 / 3,8 kg … Lanterne (chapiteau) Ø 150 … Connecteur aéraulique … Ø 125 mm ou Ø 160 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "regions": [
+        "France"
+      ]
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Faîtière 1/2 ronde ou angulaire : ml faîtage / 0,35 ≈ 2,9 pièces/ml",
+      "origine": "referentiel-couverture.md §5 ; roofing.ts faitiere-standard (pieces_par_ml 2.9) et aretiere-standard",
+      "valeur_actuelle": "2,9 u/ml",
+      "verdict": "corrige",
+      "bonne_valeur": "3 u/ml par défaut (40-42 cm sans emboîtement ou angulaire) ; 2,5 u/ml pour une faîtière à emboîtement grand modèle ; toujours la valeur de la fiche du modèle quand il est connu",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles plates",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/plates-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière féodale (3 par ml)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Arêtier ventilation 3 au ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière/arêtier 1/2 rond à emboîtement grand modèle (2,5 par ml)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Aucune fiche ne donne 2,9 ; les valeurs publiées sont 2, 2,4, 2,5, 2,8 ou 3 selon le modèle. 2,9 sous-compte d'environ 3 % les modèles à 3/ml."
+    },
+    {
+      "ratio": "About de faîtage : 2 par faîtage (abouts_par_faitage = 2)",
+      "origine": "roofing.ts ouvrage faitage, constants.abouts_par_faitage ; §5 « 2 par faîtage »",
+      "valeur_actuelle": "2",
+      "verdict": "corrige",
+      "bonne_valeur": "1 about par extrémité de faîtage arrivant sur un pignon ; 0 côté croupe (une rencontre à la place). 2 seulement pour un toit à deux pignons.",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles plates",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/plates-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "About de faîtière 1/2 ronde (pièce)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "About de faîtière ventilation … Raccord 3 branches",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les gammes séparent about et rencontre ; un faîtage entre deux croupes n'a aucun about. La forme du toit n'est pas lue dans le devis : la demander ou garder 2 en « à vérifier »."
+    },
+    {
+      "ratio": "Closoir ventilé de faîtage en rouleau de 5 m",
+      "origine": "roofing.ts closoir-standard-5m ; §5",
+      "valeur_actuelle": "rouleau 5 m",
+      "verdict": "confirme",
+      "bonne_valeur": "5 m (Monier Figaroll Plus / Metalroll, Atout Pro) ; mais Ubbink et Dryroll en 10 m, dévidoirs 50 m, Lahe-Pro rigide en 2 m : le vendeur sert ce qu'il a en rayon. Recouvrement 5 cm entre morceaux.",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur rouleau (ml) 5",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Atout Pro (groupe SAMSE), fiche Closoir alu 320 / 290 mm × 5 ml, 11/07/2025",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1840137.pdf",
+          "type": "negoce",
+          "extrait": "290 à 320 mm de largeur sur 5 mètres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur des rouleaux 10 m (ou carton de 50 m)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Bon défaut ; la quantité doit rester en ml de faîtage + arêtiers et la conversion en rouleaux dépend de la marque."
+    },
+    {
+      "ratio": "Closoir d'arêtier largeur 23 cm, rouleau de 5 m",
+      "origine": "roofing.ts closoir-aretier-5m ; §5 « arêtier : largeur 23 cm »",
+      "valeur_actuelle": "23 cm",
+      "verdict": "corrige",
+      "bonne_valeur": "même closoir que le faîtage ; largeur choisie selon le galbe de la tuile (240 mm tuiles plates, 280-320 faible galbe, 340-400 fort galbe)",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Peuvent être utilisés en faîtage et en arêtier",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur 240 mm TP",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Atout Pro (groupe SAMSE), fiche Closoir alu 320 / 290 mm × 5 ml, 11/07/2025",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1840137.pdf",
+          "type": "negoce",
+          "extrait": "ventilation des faîtages et des arêtiers",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Aucun fabricant ne vend un closoir « d'arêtier » de 23 cm. Faîtage et arêtiers peuvent faire une seule ligne de closoir."
+    },
+    {
+      "ratio": "Crochet de faîtière à sec : 1 par faîtière",
+      "origine": "roofing.ts crochets-faitiere ; §5",
+      "valeur_actuelle": "1 par faîtière",
+      "verdict": "confirme",
+      "bonne_valeur": "1 clip par faîtière (clip du modèle de faîtière)",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "le clip … fixer, en une seule opération, le nez d'une faîtière et l'autre extrémité de la faîtière suivante",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "vient bloquer la tuile faîtière",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le clip dépend du modèle de faîtière (réf. Edilians CRP702, CRP703…)."
+    },
+    {
+      "ratio": "Supports de liteau de faîtage : 1/ml ; liteau de faîtage ml × 1,05",
+      "origine": "referentiel-couverture.md §5",
+      "valeur_actuelle": "1 support/ml",
+      "verdict": "corrige",
+      "bonne_valeur": "1 support par chevron ou fermette (entraxe 50 à 80 cm), soit ≈ 1,7/ml pour des fermettes à 60 cm",
+      "sources": [
+        {
+          "titre": "E.u.r.o.Tec (distribué avec Klöber), instructions de montage Support d'arêtier et de latte faîtière 50, 03/2022",
+          "url": "https://app.nextpim.de/Cloud/61190c19ea64fa72a352dee4/a3ba70a2-990d-432c-fb8c-08d79e6bb09c/Montageanleitung_Grat_und_Firstlattenhalter_50_FR.pdf",
+          "type": "fabricant",
+          "extrait": "env. 500 – 800 mm en fonction de l'écartement des chevrons",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Simpson Strong-Tie, fiche Support de faîtage TOL (2024, groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1308158.pdf",
+          "type": "fabricant",
+          "extrait": "se fixe sur chaque fermette. L'entraxe est donc de 50 ou 60 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le nombre suit la charpente, pas le mètre de faîtage."
+    },
+    {
+      "ratio": "Mortier bâtard (solin) 2 kg/ml, sacs de 25 kg",
+      "origine": "roofing.ts MORTIER_SOLIN_PAR_ML ; §49.7",
+      "valeur_actuelle": "2 kg/ml",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "1,5 à 2 kg/ml (une seule source, solin mur-sol 5 × 5 cm)",
+      "sources": [
+        {
+          "titre": "Technichem, fiche B304 Sperrmörtel, mortier pour solins (groupe Gobert)",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/TECHNICHEM%20FT%20B304%20SPERRMORTEL.pdf",
+          "type": "fabricant",
+          "extrait": "Solins … flancs de 5 cm … environ de 1,5 à 2 kg par mètre linéaire",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Chiffre plausible mais une seule fiche, pour un solin de cuvelage ; Remmers 1,7 kg/ml non retrouvé. À valider sur un solin de couverture réel (largeur du cordon)."
+    },
+    {
+      "ratio": "Mortier faîtage tuiles scellé : 5 à 10 kg/ml, défaut 8 kg/ml (12 kg/ml canal)",
+      "origine": "referentiel-couverture.md §25.4",
+      "valeur_actuelle": "8 kg/ml",
+      "verdict": "confirme",
+      "bonne_valeur": "5 à 10 kg/ml (Weber, VPI 5, PRB 5 à 20) ; 8 kg/ml est un défaut prudent ; 12 kg/ml canal reste du fondateur",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "environ 5 à 10 kg/ml de faîtage",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "PRB, fiche PRB Pose Tuiles (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+          "type": "fabricant",
+          "extrait": "Environ 5 à 20 kg/ml de faîtage suivant types de tuiles",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite, édition 2023-2024 (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+          "type": "fabricant",
+          "extrait": "5 kg/m linéaire de faîtage",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Fourchette confirmée par trois fabricants."
+    },
+    {
+      "ratio": "Rives scellées 2 à 3 kg/ml ; arêtier scellé 6 à 10 kg/ml",
+      "origine": "referentiel-couverture.md §25.4",
+      "valeur_actuelle": "2-3 / 6-10 kg/ml",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "aucune valeur publiée",
+      "sources": [],
+      "explication": "Les fiches ne chiffrent que le faîtage."
+    },
+    {
+      "ratio": "Noue façonnée en éléments de 2 m, longueur utile 1,85 m (recouvrement 15 cm)",
+      "origine": "roofing.ts longueur_utile_noue ; §25.2",
+      "valeur_actuelle": "1,85 m",
+      "verdict": "confirme",
+      "bonne_valeur": "1,85 m pour la noue Edilians NOOK (2 ml, recouvrement 15 cm) ; pour une noue d'une autre marque, prendre son recouvrement",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique Noues autoportantes NOOK (2024)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_noues_autoportantes.pdf",
+          "type": "fabricant",
+          "extrait": "Recouvrement de 15 cm, sans soudure … Unité 2ml",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Confirmé par le fabricant de la seule noue préformée dont la fiche donne le recouvrement ; VMZINC ne le publie pas."
+    },
+    {
+      "ratio": "Noue de 50 par défaut (question « noue de 50 ou de 66 »)",
+      "origine": "roofing.ts DEVELOPPE_NOUE_PARAM",
+      "valeur_actuelle": "500 mm ; choix 500 / 660",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "tuile : 400 ou 500 (VMZINC, Edilians) ; ardoise : noue à pinces 250, 333 ou 400 (Edilians) ou façonnée ; 660 introuvable en préformé",
+      "sources": [
+        {
+          "titre": "VMZINC, fiche Noues 100 % zinc pour couvertures en tuiles (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/noues-100-zinc-pour-couvertures-en-tuiles-p68908038.html",
+          "type": "fabricant",
+          "extrait": "Largeur : 400 ou 500 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique Noues autoportantes NOOK (2024)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_noues_autoportantes.pdf",
+          "type": "fabricant",
+          "extrait": "2 développés : 400 et 500 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "NOUE À PINCES … Développé 250 … 333 … 400 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "50 est le plus grand préformé pour tuile, mais le 40 existe aussi ; sur ardoise le défaut 50 n'est pas le produit du catalogue. Le bouton « De 66 » ne correspond à aucune pièce vendue toute faite."
+    },
+    {
+      "ratio": "Faîtage zinc / arêtier zinc en longueurs de 3 m",
+      "origine": "roofing.ts bande-faitage-zinc-standard, bande-aretier-zinc-standard ; §3",
+      "valeur_actuelle": "3 m",
+      "verdict": "corrige",
+      "bonne_valeur": "longueurs de 2 m (1 m aussi chez VMZINC)",
+      "sources": [
+        {
+          "titre": "VMZINC, fiche Bandes de faîtage (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/bandes-de-faitage-en-zinc-bandes-de-faitage-p68907858.html",
+          "type": "fabricant",
+          "extrait": "longueur de 1 m ou 2 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTAGE SIMPLE À PINCES … Longueur 2 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "CMESMAT (négoce), fiche Faîtage simple à pince zinc naturel L 2000 mm l 333 mm ép. 0,65",
+          "url": "https://www.cmesmat.fr/couverture/zinguerie/zinc/2126833-faitage-simple-a-pince-zinc-naturel-l-2000-mm-l-333-mm-ep-0-65-mm.html",
+          "type": "negoce",
+          "extrait": "L 2000 mm l 333 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le 3 m n'existe que pour certaines noues."
+    },
+    {
+      "ratio": "Rive en bande zinc et bande d'égout : bande 3 m",
+      "origine": "referentiel-couverture.md §5",
+      "valeur_actuelle": "3 m",
+      "verdict": "corrige",
+      "bonne_valeur": "2 m",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche Bande de rive à biseau 2000 × 166 × 0,65 (groupe SAMSE, 18/06/2025)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1223390.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur : 2000 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK, fiche technique Bande de doublis (déc. 2022, hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/10e8e2d6-e81c-473d-82c7-87eefae6d9d9/fiche-technique-bande-doublis-rheinzink.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur (m) 2",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Bandes de rive et bandes à ourlet (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/cinq-profils-de-bande-de-rive-et-trois-profils-de-p68907888.html",
+          "type": "fabricant",
+          "extrait": "longueur 2 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le code (bande-egout-zinc-330) dit déjà 2 m ; c'est la doc qu'il faut corriger."
+    },
+    {
+      "ratio": "Tuile de rive grand moule ≈ 3/ml par côté ; petit moule ≈ 4/ml",
+      "origine": "referentiel-couverture.md §5",
+      "valeur_actuelle": "3 / 4",
+      "verdict": "corrige",
+      "bonne_valeur": "1 ÷ pureau de la tuile : 2,6 à 2,8/ml grand moule ; ≈ 4/ml petit moule ; 4,6 à 5/ml tuile plate",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Rive équerre gauche 2,6 au ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Rive individuelle à emboîtement (2,7 par ml)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "3/ml surcompte de 10 % environ."
+    },
+    {
+      "ratio": "Chatière : 1 pour 20 à 25 m², en bas et en haut",
+      "origine": "referentiel-couverture.md §3 et §5",
+      "valeur_actuelle": "1 / 20-25 m²",
+      "verdict": "corrige",
+      "bonne_valeur": "nombre = (surface × 1/3000 ou 1/5000 ÷ 2) ÷ section de la chatière du modèle (13 à 55 cm² en tuile, 70 ou 140 cm² en ardoise Ubbink)",
+      "sources": [
+        {
+          "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+          "type": "guide",
+          "extrait": "(résumé) 1/5000 comble perdu, 1/3000 rampant isolé, moitié en bas, moitié en haut",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Tuile chatière (section de ventilation 18 cm²)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "VEPAC 140 140 cm2",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "1 pour 20-25 m² ne vaut que pour une chatière de 70 cm² environ ; avec une tuile chatière de 20 cm² il en faut 3 à 4 fois plus."
+    },
+    {
+      "ratio": "Ventilation : 1/3000 de la surface projetée",
+      "origine": "referentiel-couverture.md §28.5",
+      "valeur_actuelle": "1/3000",
+      "verdict": "corrige",
+      "bonne_valeur": "1/5000 comble perdu ; 1/3000 comble aménagé ; + 1/3000 sous un écran ventilé en sous-face",
+      "sources": [
+        {
+          "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+          "type": "guide",
+          "extrait": "(résumé) comble non aménagé 1/5000 ; rampant isolé 1/3000 ; + 1/3000 sous écran ventilé",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Une source (guide FFB) ; le principe moitié bas / moitié haut est confirmé."
+    },
+    {
+      "ratio": "Peigne / grille anti-oiseaux d'égout : barres de 1 m",
+      "origine": "referentiel-couverture.md §5",
+      "valeur_actuelle": "1 m",
+      "verdict": "confirme",
+      "bonne_valeur": "1 m",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Closoir peigne pare-moineaux Longueur 1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Closoir d'égoût acier … Longueur 1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Faîtage : en ml + 5 % (pas de conversion en faîtières)",
+      "origine": "regles-metier SKILL.md, Faîtage",
+      "valeur_actuelle": "ml + 5 %",
+      "verdict": "corrige",
+      "bonne_valeur": "faîtières en pièces (ml × pièces au ml du modèle) ; le comptoir sert des pièces",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "3 au ml / 2,5 kg (pièce)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "(2,5 par ml) Réf. 702",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les fiches donnent le « au ml » justement pour passer en pièces. Le + 5 % de casse n'a aucune source."
+    },
+    {
+      "ratio": "Closoir : ml de faîtage + 5 %",
+      "origine": "regles-metier SKILL.md, Faîtage",
+      "valeur_actuelle": "+ 5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "ml de faîtage (+ arêtiers), arrondi au rouleau ; recouvrement 5 cm par raccord",
+      "sources": [
+        {
+          "titre": "Monier, notice FIGAROLL PLUS réf. 327, novembre 2014 (hébergée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus[1].pdf",
+          "type": "fabricant",
+          "extrait": "recouvrement de 5 cm entre deux morceaux",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le seul surplus documenté est 5 cm par raccord ; l'arrondi au rouleau couvre déjà largement. 5 % est une habitude, pas une donnée."
+    },
+    {
+      "ratio": "Rives + 5 % ; noues + 5 %",
+      "origine": "regles-metier SKILL.md ; roofing.ts MARGE_ZINC_LINEAIRE",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "pas de source ; pour des pièces de 2 m, l'arrondi à la pièce et le recouvrement du produit (15 cm NOOK) suffisent",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique Noues autoportantes NOOK (2024)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_noues_autoportantes.pdf",
+          "type": "fabricant",
+          "extrait": "Recouvrement de 15 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Double compte possible : le code calcule déjà la noue avec la longueur utile 1,85 m ; ajouter 5 % en plus surcompte."
+    },
+    {
+      "ratio": "Coupes le long des rives, arêtiers, noues : dans la perte du toit (rien en plus)",
+      "origine": "regles-metier SKILL.md, Noues",
+      "valeur_actuelle": "dans la perte",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "le référentiel §3/§25.1 ajoute des plus-values (rive 0,16 à 0,33 m²/ml, arêtier 0,66 m²/ml, noue 1,50 m²/ml, manuel CAP)",
+      "sources": [],
+      "explication": "Conflit interne référentiel / skill, pas de source externe : décision du fondateur."
+    },
+    {
+      "ratio": "Noquets : 1 par rang (noue, arêtier à noquets)",
+      "origine": "referentiel-couverture.md §25.1",
+      "valeur_actuelle": "1 par rang",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "CAPEB : noue fermée à noquets, 1 noquet tous les 2 pureaux",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, calepin Couverture ardoises (illustrations NF DTU 40.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "1 noquet tous les 2 pureaux",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les deux sources ne disent pas la même chose ; à faire trancher par un couvreur ardoisier."
+    },
+    {
+      "ratio": "Pattes de fixation de faîtage / arêtier zinc : 3/ml ; clous calotins bandes de rive 4/ml",
+      "origine": "roofing.ts PATTES_PAR_METRE ; §25.3",
+      "valeur_actuelle": "3/ml ; 4/ml",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "aucune valeur publiée trouvée",
+      "sources": [],
+      "explication": "Les fiches renvoient au DTU 40.41 sans chiffre."
+    },
+    {
+      "ratio": "Mortier : sac 25 kg, palette 48 sacs = 1 200 kg",
+      "origine": "referentiel-couverture.md §25.4",
+      "valeur_actuelle": "48 sacs",
+      "verdict": "confirme",
+      "bonne_valeur": "48 sacs (Weber, PRB) ; 56 sacs chez VPI",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "palette filmée complète de 48 sacs, soit 1200 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "PRB, fiche PRB Pose Tuiles (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+          "type": "fabricant",
+          "extrait": "48 sacs de 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite, édition 2023-2024 (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+          "type": "fabricant",
+          "extrait": "Palette de 56 sacs",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "Faîtage à sec : ne jamais commander mortier et closoir ensemble",
+      "origine": "referentiel-couverture.md §25.4",
+      "valeur_actuelle": "exclusifs",
+      "verdict": "confirme",
+      "bonne_valeur": "exclusifs pour le faîtage ; l'about ou le fronton peut rester scellé (abouts « à sceller » au catalogue)",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "POSE À SEC … Le clip adapté à la faîtière",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "About d'arêtier à sceller ; Arêtier à sceller",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les gammes ont des pièces « à sceller » et « ventilation » distinctes : le mode de pose se choisit pour tout le faîtage."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Faîtières / arêtiers terre cuite",
+      "ce_que_le_vendeur_demande": [
+        "marque et modèle de la tuile posée (la faîtière suit la tuile)",
+        "type : 1/2 ronde, conique, angulaire, à bourrelet",
+        "à emboîtement ou non",
+        "teinte",
+        "pose à sec (ventilée + clip) ou à sceller",
+        "nombre de pièces"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité, palette selon fabricant",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Arêtier ventilation … Arêtier à sceller",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière/arêtier 1/2 rond à emboîtement grand modèle",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Abouts de faîtage / d'arêtier, frontons, rencontres",
+      "ce_que_le_vendeur_demande": [
+        "modèle de la faîtière",
+        "about de faîtière ou fronton (pignon) / about d'arêtier (égout)",
+        "rencontre 3 ou 4 branches",
+        "ventilé ou à sceller",
+        "teinte"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "About de faîtière ventilation ; Porte-poinçon 3 branches / 4 branches",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Rencontre porte-poinçon 4 … 3 grandes ouvertures",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Closoir ventilé de faîtage / arêtier",
+      "ce_que_le_vendeur_demande": [
+        "largeur (selon le galbe de la tuile : 240 à 400 mm)",
+        "couleur (rouge, brun, ardoise, anthracite…)",
+        "souple ou rigide",
+        "nombre de ml ou de rouleaux"
+      ],
+      "unite_de_vente": "rouleau (5 m Monier, 10 m Ubbink) ou dévidoir 50 m ; élément 2 m en rigide",
+      "conditionnement": "carton de 4 ou 5 rouleaux (Monier), carton de 6 × 2 m (Lahe-Pro)",
+      "sources": [
+        {
+          "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur rouleau … Longueur rouleau (ml) 5 … 4 rouleaux par carton",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
+          "type": "fabricant",
+          "extrait": "Largeurs 240/310/360/400 … 10 m (ou carton de 50 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, brochure LAHE-PRO closoir rigide ventilé (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/209672",
+          "type": "fabricant",
+          "extrait": "carton de 6, soit 12 mètres linéaires",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Clips / crochets de faîtière",
+      "ce_que_le_vendeur_demande": [
+        "modèle de faîtière (le clip lui est propre)",
+        "inox ou galva laqué",
+        "nombre"
+      ],
+      "unite_de_vente": "pièce ou lot (ex. lot de 50)",
+      "conditionnement": "sachet / lot",
+      "sources": [
+        {
+          "titre": "Monier, notice FIGAROLL PLUS réf. 327, novembre 2014 (hébergée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus[1].pdf",
+          "type": "fabricant",
+          "extrait": "Clips de faîtage adaptés au modèle de tuile (inox ou galva laqué)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Brico Dépôt, Lot de 50 clips pour faîtière à pureau variable",
+          "url": "https://www.bricodepot.fr/produits/materiau-et-gros-oeuvre/toiture-et-facade/couverture-et-toiture/tuile-et-ardoise/2",
+          "type": "negoce",
+          "extrait": "Lot de 50 clips pour faîtière à pureau variable",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Supports de lisse (porte-liteau de faîtage) et lisse de rehausse",
+      "ce_que_le_vendeur_demande": [
+        "type : à clou (sur panne faîtière) ou à pattes / à visser (sur chevrons)",
+        "hauteur ou plage de réglage",
+        "section de la lisse (30 × 50, 40 × 60…)",
+        "nombre (un par chevron)",
+        "ml de lisse"
+      ],
+      "unite_de_vente": "pièce ; lisse au ml ou en botte",
+      "conditionnement": "boîte de 100 (Eurotec)",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "deux types de fixation sont disponibles : à clou ou à pattes … 180, 210, 230, 260 ou 310 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "E.u.r.o.Tec, fiche de données Support d'arêtier et de latte faîtière 50, 03/2022",
+          "url": "https://app.nextpim.de/Cloud/61190c19ea64fa72a352dee4/a3ba70a2-990d-432c-fb8c-08d79e6bb09c/Fiche_de_donnees_produit_Grat-und_Firstlattenhalter_50_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Pour les lattes de 30 et 50 à plat ou pour les lattes de 40 et 60 debout … UE 100",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Mortier de couverture (faîtage, rives, solins scellés)",
+      "ce_que_le_vendeur_demande": [
+        "marque ou « mortier de couverture prêt à gâcher »",
+        "teinte (blanc cassé, gris clair, ou à teinter)",
+        "nombre de sacs de 25 kg"
+      ],
+      "unite_de_vente": "sac de 25 kg (5 kg aussi)",
+      "conditionnement": "palette 48 sacs (Weber, PRB) ou 56 (VPI)",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "Deux teintes : blanc cassé et gris clair … sac de 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite, édition 2023-2024 (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+          "type": "fabricant",
+          "extrait": "Sac de 25 kg - Palette de 56 sacs ; Sac de 5 kg",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Faîtage zinc (à pinces / à ourlets)",
+      "ce_que_le_vendeur_demande": [
+        "profil : à pinces ou à ourlets",
+        "développé (250, 333, 400)",
+        "épaisseur (0,65)",
+        "aspect : naturel ou prépatiné (noir pour ardoise)",
+        "nombre de longueurs de 2 m"
+      ],
+      "unite_de_vente": "pièce de 2 m (1 m aussi chez VMZINC)",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTAGE SIMPLE À PINCES … Dimensions 333 x 0,65 mm - Longueur 2 ml … Zinc prépatiné noir",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Bandes de faîtage (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/bandes-de-faitage-en-zinc-bandes-de-faitage-p68907858.html",
+          "type": "fabricant",
+          "extrait": "Modèles à ourlets ou à pince ; longueur de 1 m ou 2 m",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Bande de rive zinc",
+      "ce_que_le_vendeur_demande": [
+        "profil (à biseau, à cheval, astragale, à pli, lyonnaise)",
+        "développé ou hauteur",
+        "épaisseur",
+        "aspect",
+        "nombre de longueurs de 2 m"
+      ],
+      "unite_de_vente": "pièce de 2 m",
+      "conditionnement": "paquet de 10 (Rheinzink)",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche Bande de rive à biseau 2000 × 166 × 0,65 (groupe SAMSE, 18/06/2025)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1223390.pdf",
+          "type": "fabricant",
+          "extrait": "Forme du profilé : à biseau ; Développé : 166 mm ; Longueur : 2000 mm ; Conditionnement 1 : 10 PCE",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Bandes de rive et bandes à ourlet (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/cinq-profils-de-bande-de-rive-et-trois-profils-de-p68907888.html",
+          "type": "fabricant",
+          "extrait": "astragale, à cheval, à biseau, à pli ou lyonnaise",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Bande d'égout / doublis / larmier zinc",
+      "ce_que_le_vendeur_demande": [
+        "développé (100 à 400)",
+        "épaisseur",
+        "aspect",
+        "nombre de longueurs de 2 m"
+      ],
+      "unite_de_vente": "pièce de 2 m",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche technique Bande de doublis (déc. 2022, hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/10e8e2d6-e81c-473d-82c7-87eefae6d9d9/fiche-technique-bande-doublis-rheinzink.pdf",
+          "type": "fabricant",
+          "extrait": "Développé (mm) 100 … 400 ; Longueur (m) 2",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier Zinc 0,6 mm - Longueur 2 m Développé 166 mm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Noue préformée",
+      "ce_que_le_vendeur_demande": [
+        "matière (zinc naturel, prépatiné, alu, acier laqué, cuivre)",
+        "développé (400 ou 500 en tuile ; 250, 333, 400 à pinces en ardoise)",
+        "couleur si laquée",
+        "longueur 2 ou 3 m",
+        "nombre d'éléments"
+      ],
+      "unite_de_vente": "élément de 2 m (3 m possible en zinc naturel)",
+      "conditionnement": "unité",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique Noues autoportantes NOOK (2024)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_noues_autoportantes.pdf",
+          "type": "fabricant",
+          "extrait": "4 métaux disponibles en 9 déclinaisons. 2 développés : 400 et 500 mm … Unité 2ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche Noues 100 % zinc pour couvertures en tuiles (Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/noues-100-zinc-pour-couvertures-en-tuiles-p68908038.html",
+          "type": "fabricant",
+          "extrait": "Longueur : 2 ou 3 m … Largeur : 400 ou 500 mm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Closoir d'égout / peigne pare-moineaux",
+      "ce_que_le_vendeur_demande": [
+        "hauteur de peigne (selon le galbe de la tuile : 50 à 110 mm)",
+        "couleur",
+        "nombre de barres de 1 m"
+      ],
+      "unite_de_vente": "barre de 1 m",
+      "conditionnement": "à l'unité ou carton",
+      "sources": [
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 1m … Hauteur 50 mm / 90 mm … Couleur Noir, Brun, Ocre",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Closoir d'égoût acier … Hauteur 110 mm, Longueur 1m",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Chatières / tuiles de ventilation",
+      "ce_que_le_vendeur_demande": [
+        "modèle de tuile (la chatière en est un accessoire) ou chatière pour ardoise (modèle, taille d'ardoise)",
+        "teinte",
+        "nombre"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Tuile chatière (section de ventilation 18 cm²)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (hébergé par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "Chatière discrète VEPAC 70 ardoises",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Tuile à douille et lanterne (sortie VMC)",
+      "ce_que_le_vendeur_demande": [
+        "modèle de tuile",
+        "diamètre (100, 126, 150, 160)",
+        "lanterne ou chapeau",
+        "kit de raccordement VMC",
+        "teinte"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "Edilians, encyclopédie tuiles, chapitre tuiles fortement galbées",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
+          "type": "fabricant",
+          "extrait": "Tuile à douille … Ø 126 (Conforme VMC) ; Lanterne bi-section Ø 126 et Ø 160",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Connecteur aéraulique de VMC pour tuile à douille … Ø 125 mm ou Ø 160 mm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "article": "Tuiles de rive gauche / droite",
+      "ce_que_le_vendeur_demande": [
+        "modèle de tuile",
+        "rive gauche et rive droite séparées",
+        "type (équerre, ronde à ressaut, bardelis)",
+        "teinte",
+        "nombre de chaque"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "Terreal, fiche produit Romane Canal, accessoires (hébergée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Rive équerre gauche … Rive équerre droite … Rive bardelis gauche",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, Encyclopédie des tuiles 2024 (PDF complet consulté en copie de travail ; ses chapitres sont publiés sous edilians.com/media/wysiwyg/Encyclopedie/)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/",
+          "type": "fabricant",
+          "extrait": "Rive individuelle … Gauche Réf. 105.40 Droite Réf. 105.41",
+          "consulte": "2026-11-19"
+        }
+      ]
+    }
+  ]
+}
