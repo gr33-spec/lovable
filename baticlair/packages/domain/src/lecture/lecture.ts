@@ -197,6 +197,9 @@ export function parseLecture(raw: unknown): LectureDevis | null {
   };
 }
 
+/** Une ligne qui commence par « Pose », « Dépose », « Main-d'œuvre »… n'achète rien, même si le modèle l'a mal rangée. */
+const SANS_ACHAT = /^(?:pose|repose|depose|demontage|main d ?oeuvre|installation|location|evacuation|nettoyage|echafaudage|transport|deplacement|mise en oeuvre)\b/;
+
 /** Une ligne du quantitatif issue de la lecture : une fourniture (sa ligne du devis), ou une ligne sans fourniture. */
 export interface LigneLecture {
   id: string;
@@ -225,15 +228,20 @@ export function lignesDeLecture(lecture: LectureDevis, ids?: ReadonlyMap<string,
     // Une fourniture écrite avec sa quantité est une ligne du quantitatif ; une fourniture citée sans quantité sur la même
     // ligne (« et crochets de 11 ») suit la ligne écrite : le calcul la compte. Une ligne qui ne fait que citer (une ligne de
     // pose : « soudures ») garde chaque fourniture citée comme ligne, sans quantité.
-    const written = ligne.fournitures.filter((f) => f.quantite !== null);
+    // « Fourniture et pose couverture zinc à tasseaux, 32 m² » (recette en ligne du 19 novembre 2026, D-2026-024) : le
+    // modèle nomme l'article SANS quantité, puisque la quantité est celle de la ligne. Seul sur sa ligne, il la prend : c'est
+    // l'article écrit. Avant : la ligne restait « sans fourniture », et la couverture n'était jamais chiffrée.
+    const seul = ligne.role === "fourniture_et_pose" && !SANS_ACHAT.test(normalizeText(ligne.designation)) && ligne.fournitures.length === 1 && ligne.fournitures[0]!.quantite === null && ligne.quantite !== null;
+    const fournitures = seul ? [{ ...ligne.fournitures[0]!, quantite: ligne.quantite, unite: ligne.fournitures[0]!.unite ?? ligne.unite }] : ligne.fournitures;
+    const written = fournitures.filter((f) => f.quantite !== null);
     // Une ligne de pose qui ne fait que citer (« soudures » : l'étain) reste une ligne sans fourniture, avec ce qu'elle cite.
     if (written.length === 0 && (ligne.role === "pose" || ligne.role === "fourniture_et_pose")) {
       const id = ids?.get(ligne.ref) ?? ligne.ref;
       out.push({ id, ligne, fourniture: null, designation: ligne.designation, quantity: ligne.quantite, unit: ligne.unite, cites: ligne.fournitures });
       continue;
     }
-    const listed = written.length > 0 ? written : ligne.fournitures;
-    const cites = written.length > 0 ? ligne.fournitures.filter((f) => f.quantite === null) : [];
+    const listed = written.length > 0 ? written : fournitures;
+    const cites = written.length > 0 ? fournitures.filter((f) => f.quantite === null) : [];
     listed.forEach((f, i) => {
       const key = listed.length === 1 ? ligne.ref : `${ligne.ref}.${i + 1}`;
       const id = ids?.get(key) ?? key;
@@ -960,8 +968,6 @@ export function ecranDeLecture(input: {
   // reste dans la liste, « à chiffrer », avec ses mots et sa mesure. Avant : rangée avec la pose et la main-d'œuvre, repliée
   // sous « N lignes sans fourniture », donc oubliée.
   const mesureDe = (l: (typeof lignes)[number]) => [l.quantity?.trim(), l.unit?.trim()].filter(Boolean).join(" ");
-  // Une ligne qui commence par « Pose », « Dépose », « Main-d'œuvre »… n'achète rien, même si le modèle l'a mal rangée.
-  const SANS_ACHAT = /^(?:pose|repose|depose|demontage|main d ?oeuvre|installation|location|evacuation|nettoyage|echafaudage|transport|deplacement)\b/;
   // Ni une ligne dont un article a bien été lu et attend seulement une réponse (recette en ligne du 19 novembre 2026).
   const aUnArticle = (l: (typeof lignes)[number]) => lignes.some((o) => o.fourniture && o.ligne.ref === l.ligne.ref);
   const oubliees = lignes.filter((l) => !l.fourniture && !aUnArticle(l) && (l.ligne.role === "fourniture" || l.ligne.role === "fourniture_et_pose") && !SANS_ACHAT.test(normalizeText(l.designation)) && !final.toQuote.some((t) => t.lineIds.includes(l.id)) && !final.toBuy.some((b) => b.lineIds.includes(l.id)));

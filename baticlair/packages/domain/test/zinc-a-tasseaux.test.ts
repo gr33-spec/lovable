@@ -104,3 +104,24 @@ describe("un article écrit ne disparaît jamais : une ligne de fourniture dont 
     expect(e.sansFourniture.map((l) => l.label)).toEqual(["Dépose ancienne couverture", "Installation et location échafaudage"]);
   });
 });
+
+describe("une ligne « Fourniture et pose » dont l'article est nommé sans quantité (recette en ligne du 19 novembre 2026)", () => {
+  // Sur trois lectures réelles du devis D-2026-024, le modèle nommait la couverture sans quantité (la quantité est celle de la
+  // ligne) : l'article était jeté et la couverture sortait « je n'ai pas su en tirer les articles ».
+  const sansQuantite = (role: string) =>
+    ({
+      ...lecture(),
+      lignes: [{ ...lecture().lignes[0]!, role, fournitures: [{ ...lecture().lignes[0]!.fournitures[0]!, quantite: null, unite: null }] }],
+    }) as unknown as LectureDevis;
+
+  it("seul sur sa ligne, l'article prend la quantité de la ligne : la couverture est chiffrée", () => {
+    const e = ecran(sansQuantite("fourniture_et_pose"));
+    expect(liste(e)).toEqual([["Bobine Anthra-Zinc 0,65 mm, largeur 650 mm", "54 ml", "13 bacs × 4,15 m"]]);
+    expect(e.purchase.toQuote).toEqual([]);
+  });
+
+  it("une ligne de pose seule qui cite un article reste une ligne de pose (rien n'est acheté)", () => {
+    const e = ecran(sansQuantite("pose"));
+    expect(e.purchase.toBuy.filter((b) => b.quantity)).toEqual([]);
+  });
+});
