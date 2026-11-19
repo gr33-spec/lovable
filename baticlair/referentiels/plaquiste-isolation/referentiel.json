@@ -1275,7 +1275,7 @@
     {
       "id": "clous-gaz-beton",
       "family": "anchor",
-      "label": "Clous pour cloueur à gaz, béton, 20 mm (boîte de 500 avec 1 cartouche de gaz ; marque du cloueur à préciser)",
+      "label": "Clous pour cloueur à gaz avec cartouche de gaz (type et longueur selon le support : béton C6 20 mm, bois CW6 ; marque du cloueur à préciser)",
       "shortLabel": "Clous + gaz béton",
       "aliases": [
         "clous",
@@ -2152,7 +2152,17 @@
                 "parement simple"
               ]
             }
-          ]
+          ],
+          "default": {
+            "source": "capeb-dtu-2541",
+            "verification": {
+              "status": "draft",
+              "note": "Recherche du 2026-11-19 — 2 sources : Logement (cas A du DTU 25.41 2022) : une plaque par face suffit, c'est la 72/48 courante (CAPEB, Siniat carnet cloison)."
+            },
+            "version": 1,
+            "value": "1",
+            "note": "une plaque par face (72/48), par défaut"
+          }
         },
         {
           "key": "montant",
@@ -8924,7 +8934,7 @@
           "version": 1,
           "when": "fixation_rail < 2",
           "short": "fixations",
-          "precision": "une fixation tous les 60 cm"
+          "precision": "une fixation tous les 60 cm, {support}"
         },
         {
           "id": "fixations-chevilles",
@@ -8940,7 +8950,7 @@
           "version": 1,
           "when": "fixation_rail >= 2",
           "short": "chevilles",
-          "precision": "une cheville tous les 60 cm"
+          "precision": "une cheville tous les 60 cm, {support}"
         },
         {
           "id": "isolant",

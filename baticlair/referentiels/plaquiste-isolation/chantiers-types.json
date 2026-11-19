@@ -1,0 +1,110 @@
+[
+  {
+    "id": "PI-01", "titre": "Maison neuve : cloisons de distribution",
+    "devis": [{ "designation": "Cloison de distribution type Placostil 72/48, BA13 standard, hauteur 2,50 m", "quantite": 45, "unite": "m²", "ouvrage": "cloison-distributive", "lu": { "hauteur": [2.5, "m"] }, "ecrits": ["cloison"] }],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-02", "titre": "Rénovation : cloison isolée, hauteur 2,60 m",
+    "devis": [{ "designation": "Cloison 72/48 isolée laine de verre GR32 45 mm", "quantite": 32, "unite": "m²", "ouvrage": "cloison-distributive", "lu": {}, "ecrits": ["cloison", "isolant"] }],
+    "reponses": { "hauteur": [2.6, "m"], "fixation_rail": 2, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-03", "titre": "ERP : cloison coupe-feu EI 60 en parement double, hauteur 3,00 m",
+    "devis": [{ "designation": "Cloison 98/48 EI60, 2 BA13 feu par face, laine 45 mm, hauteur 3,00 m", "quantite": 60, "unite": "m²", "ouvrage": "cloison-distributive", "lu": { "hauteur": [3, "m"], "couches": [2, "u"], "type_plaque": [3, "u"] }, "ecrits": ["cloison", "isolant"] }],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-04", "titre": "Salle de bain : cloison et plafond hydro",
+    "devis": [
+      { "designation": "Cloison 72/48 en plaques hydrofuges H1, HSP 2,50 m", "quantite": 12, "unite": "m²", "ouvrage": "cloison-distributive", "lu": { "hauteur": [2.5, "m"], "type_plaque": [2, "u"] }, "ecrits": ["cloison"] },
+      { "designation": "Plafond BA13 hydro sur ossature F530 sous solives", "quantite": 6, "unite": "m²", "ouvrage": "plafond-fourrures", "lu": { "type_plaque": [2, "u"], "support": [1, "u"] }, "ecrits": ["plafond"] }
+    ],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1, "entraxe_fourrures": [40, "cm"] }, "coches": ["bande", "enduit"],
+    "note": "Plaque hydro en plafond : entraxe des fourrures 0,40 m (Placo 2023) ; la question d'entraxe le corrige (défaut 0,60)."
+  },
+  {
+    "id": "PI-05", "titre": "Doublage collé PSE 10+80 sur murs béton",
+    "devis": [{ "designation": "Doublage collé Placomur 10+80 PSE, hauteur 2,50 m", "quantite": 30, "unite": "m²", "ouvrage": "doublage-colle", "lu": { "hauteur": [2.5, "m"] }, "ecrits": ["doublage", "complexe"] }],
+    "reponses": { "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-06", "titre": "Doublage collé Doublissimo 13+100, HSP 2,60 m",
+    "devis": [{ "designation": "Doublage Doublissimo 13+100 R 3,40 collé au MAP", "quantite": 45, "unite": "m²", "ouvrage": "doublage-colle", "lu": {}, "ecrits": ["doublage", "complexe", "map"] }],
+    "reponses": { "hauteur": [2.6, "m"], "enduit_forme": 2 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-07", "titre": "Doublage sur ossature Optima avec laine GR32 100 mm et pare-vapeur",
+    "devis": [
+      { "designation": "Doublage sur ossature métallique type Optima, BA13, laine de verre GR32 kraft 100 mm", "quantite": 40, "unite": "m²", "ouvrage": "doublage-fourrures", "lu": { "epaisseur_isolant": [100, "mm"] }, "ecrits": ["doublage", "isolant"] },
+      { "designation": "Membrane pare-vapeur hygro-régulante Vario Xtra avec adhésifs", "quantite": 40, "unite": "m²", "ouvrage": "pare-vapeur", "lu": {}, "ecrits": ["membrane", "adhesif"] }
+    ],
+    "reponses": { "hauteur": [2.5, "m"], "fixation_rail": 2, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-08", "titre": "Contre-cloison M48 devant mur humide, HSP 2,40 m",
+    "devis": [{ "designation": "Contre-cloison sur montants M48 autoportante, BA13, hauteur 2,40 m", "quantite": 20, "unite": "m²", "ouvrage": "contre-cloison-montants", "lu": { "hauteur": [2.4, "m"] }, "ecrits": ["contre_cloison"] }],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-09", "titre": "Plafond sous solives avec isolant IBR 200 posé dessus",
+    "devis": [
+      { "designation": "Faux plafond BA13 sur fourrures F530 et suspentes, sous solivage bois", "quantite": 25, "unite": "m²", "ouvrage": "plafond-fourrures", "lu": { "support": [1, "u"] }, "ecrits": ["plafond"] },
+      { "designation": "Isolation laine de verre IBR kraft 200 mm R 5 déroulée sur plafond", "quantite": 25, "unite": "m²", "ouvrage": "isolation-rouleaux", "lu": {}, "ecrits": ["isolant"], "produit": "ibr-200" }
+    ],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-10", "titre": "Plafond coupe-feu sous dalle béton, 2 BA13, plénum 30 cm",
+    "devis": [{ "designation": "Plafond suspendu 2 BA13 sous dalle béton, plénum 30 cm", "quantite": 40, "unite": "m²", "ouvrage": "plafond-fourrures", "lu": { "support": [2, "u"], "couches": [2, "u"], "plenum": [2, "u"] }, "ecrits": ["plafond"] }],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"]
+  },
+  {
+    "id": "PI-11", "titre": "Combles perdus : soufflage laine de verre R 7",
+    "devis": [{ "designation": "Isolation des combles perdus par soufflage de laine de verre Comblissimo R = 7", "quantite": 80, "unite": "m²", "ouvrage": "isolation-soufflee", "lu": { "produit_vrac": [1, "u"], "r_vise": [7, "u"] }, "ecrits": ["combles"] }],
+    "reponses": {}, "coches": []
+  },
+  {
+    "id": "PI-12", "titre": "Combles perdus : ouate de cellulose R 8",
+    "devis": [{ "designation": "Soufflage ouate de cellulose en combles perdus, R 8", "quantite": 60, "unite": "m²", "ouvrage": "isolation-soufflee", "lu": { "r_vise": [8, "u"] }, "ecrits": ["combles"] }],
+    "reponses": { "produit_vrac": 5 }, "coches": []
+  },
+  {
+    "id": "PI-13", "titre": "Combles aménagés : rampants isolés, membrane, plafond",
+    "devis": [
+      { "designation": "Isolation des rampants Isoconfort 35 kraft 220 mm R 6,25", "quantite": 50, "unite": "m²", "ouvrage": "isolation-rouleaux", "lu": {}, "ecrits": ["isolant"], "produit": "isoconfort35-220" },
+      { "designation": "Membrane Vario Xtra et adhésifs", "quantite": 50, "unite": "m²", "ouvrage": "pare-vapeur", "lu": {}, "ecrits": ["membrane", "adhesif"] },
+      { "designation": "Plafond rampant BA13 sur fourrures et suspentes sous chevrons", "quantite": 50, "unite": "m²", "ouvrage": "plafond-fourrures", "lu": { "support": [1, "u"] }, "ecrits": ["plafond"] }
+    ],
+    "reponses": { "plenum": 2, "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"],
+    "note": "Sous rampants avec 220 mm de laine entre et sous chevrons : la suspente doit descendre plus bas que 15 cm (réponse « 15 à 58 cm »). Les suspentes Intégra (Isover) ne sont pas encore dans la fiche : à confirmer."
+  },
+  {
+    "id": "PI-14", "titre": "Séparatif de logements SAD 160",
+    "devis": [{ "designation": "Cloison séparative SAD 160, 2 BA13 par face, double ossature M48, laine 45 mm, HSP 2,50 m", "quantite": 22, "unite": "m²", "ouvrage": "cloison-separative", "lu": { "hauteur": [2.5, "m"], "type_separative": [2, "u"] }, "ecrits": ["separative", "isolant"] }],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"],
+    "note": "Quantités de la séparative : déduites de la constitution, à confirmer (aucun quantitatif fabricant SAA / SAD lu). La 2e couche de laine se lit au devis (ligne à part)."
+  },
+  {
+    "id": "PI-15", "titre": "Rénovation d'appartement : cloisons, doublage collé, plafond béton",
+    "devis": [
+      { "designation": "Cloison 72/48 BA13", "quantite": 18, "unite": "m²", "ouvrage": "cloison-distributive", "lu": {}, "ecrits": ["cloison"] },
+      { "designation": "Doublage collé 10+80", "quantite": 26, "unite": "m²", "ouvrage": "doublage-colle", "lu": {}, "ecrits": ["doublage", "complexe"] },
+      { "designation": "Faux plafond BA13 sous dalle béton", "quantite": 15, "unite": "m²", "ouvrage": "plafond-fourrures", "lu": { "support": [2, "u"] }, "ecrits": ["plafond"] },
+      { "designation": "Bandes et enduit sur l'ensemble des ouvrages", "quantite": 1, "unite": "ens", "ouvrage": null, "lu": {}, "ecrits": [] }
+    ],
+    "reponses": { "hauteur": [2.5, "m"], "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"],
+    "note": "« Bandes et enduit sur l'ensemble » : déjà compris dans chaque ouvrage, jamais recompté (piège n° 4 de l'ancien référentiel). La ligne « ens » n'est pas une fourniture."
+  },
+  {
+    "id": "PI-16", "titre": "Finition seule : bandes et enduit prêt à l'emploi",
+    "devis": [{ "designation": "Traitement des joints bandes et enduit prêt à l'emploi", "quantite": 120, "unite": "m²", "ouvrage": "joints-seuls", "lu": { "enduit_forme": [2, "u"] }, "ecrits": ["joints"] }],
+    "reponses": {}, "coches": []
+  },
+  {
+    "id": "PI-17", "titre": "Maison ancienne : cloison 72/48 en 3,00 m de haut",
+    "devis": [{ "designation": "Cloison 72/48 BA13 hauteur 3,00 m", "quantite": 24, "unite": "m²", "ouvrage": "cloison-distributive", "lu": { "hauteur": [3, "m"] }, "ecrits": ["cloison"] }],
+    "reponses": { "fixation_rail": 1, "enduit_forme": 1 }, "coches": ["bande", "enduit"],
+    "note": "À 3,00 m, une 72/48 en M48 demande des montants doublés à 60 cm (DTU 25.41 : 3,05 m) : dit par défaut, modifiable."
+  }
+]
