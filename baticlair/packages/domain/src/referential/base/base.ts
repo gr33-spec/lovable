@@ -42,6 +42,19 @@ const famille = z.object({
   verdicts: z.array(z.record(z.string(), z.unknown())).optional(),
   comptoir: z.array(z.record(z.string(), z.unknown())).optional(),
 }).loose();
+/** Constante de calcul lue par le code (« ardoise.jeu_de_tete_crochet ») : sa valeur, et les chiffres confirmés qui la prouvent. */
+const constante = z.object({
+  cle: str,
+  famille: str,
+  libelle: str,
+  valeur: str,
+  unite: str,
+  regle: z.string().optional(),
+  decision: str,
+  preuves: z.array(str).min(1),
+  avant: z.string().optional(),
+  statut: z.enum(STATUTS),
+});
 const source = z.object({ id: str, titre: z.string().nullable().optional(), url: z.string().nullable().optional(), type: z.string().nullable().optional(), consulte: z.string().nullable().optional() });
 
 export const baseSchema = z.object({
@@ -53,6 +66,7 @@ export const baseSchema = z.object({
   regle_confirmation: str,
   carte_regions: z.string().optional(),
   taux_confirme: z.number(),
+  constantes: z.array(constante).default([]),
   familles: z.array(famille).min(1),
   sources: z.array(source).min(1),
 }).loose();
@@ -65,6 +79,7 @@ export type FamilleBase = z.infer<typeof famille>;
 export type ModeleBase = z.infer<typeof modele>;
 export type ChiffreBase = z.infer<typeof chiffre>;
 export type CarteRegions = z.infer<typeof carteSchema>;
+export type ConstanteBase = z.infer<typeof constante>;
 
 export class BaseFileError extends Error {}
 
@@ -88,7 +103,25 @@ export function lireBase(texte: string): BaseMetier {
       if (!sources.has(s)) throw new BaseFileError(`base de référence invalide : « ${c.chiffre.id} » cite la source inconnue ${s}`);
     }
   }
+  const ids = new Map([...tousLesChiffres(base)].map((c) => [c.chiffre.id, c.chiffre]));
+  const cles = new Set<string>();
+  for (const k of base.constantes) {
+    if (cles.has(k.cle)) throw new BaseFileError(`base de référence invalide : constante en double « ${k.cle} »`);
+    cles.add(k.cle);
+    for (const p of k.preuves) {
+      const c = ids.get(p);
+      if (!c) throw new BaseFileError(`base de référence invalide : la constante « ${k.cle} » cite la preuve inconnue ${p}`);
+      if (!estConfirme(c)) throw new BaseFileError(`base de référence invalide : la constante « ${k.cle} » repose sur ${p}, qui n'est pas confirmé`);
+    }
+  }
   return base;
+}
+
+/** Une constante de calcul de la base, ou une erreur qui la nomme : le code ne devine jamais un chiffre absent. */
+export function constanteDe(base: BaseMetier, cle: string): ConstanteBase {
+  const k = base.constantes.find((c) => c.cle === cle);
+  if (!k) throw new BaseFileError(`constante absente de la base ${base.fiche} : « ${cle} »`);
+  return k;
 }
 
 export function lireCarte(texte: string): CarteRegions {

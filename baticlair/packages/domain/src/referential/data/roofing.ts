@@ -1,6 +1,7 @@
 import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.js";
 import { rule, todo } from "./kit.js";
 import { WITHOUT_SUPPLY_UNITS } from "../../takeoff/supply.js";
+import { baseDuMetier, constanteDe } from "../base/index.js";
 
 /**
  * Référentiel COUVERTURE.
@@ -92,6 +93,23 @@ const generic = (id: string, family: string, label: string, shortLabel: string, 
   ...extra,
 });
 const F = "fondateur-referentiel-2026-10-03";
+
+/**
+ * BASCULE VERS LA FICHE COUVERTURE (décision du fondateur, 2026-11-19 : « le code lit cette fiche et rien d'autre »,
+ * par étapes, tests verts à chaque pas). Une constante passée dans la fiche (`referentiels/couverture/constantes.json`,
+ * prouvée par des chiffres confirmés de `fiche-couverture.json`) se lit ici par sa clé, jamais recopiée.
+ */
+const FICHE = "fiche-couverture";
+const FICHE_VERIFIEE = {
+  status: "verified",
+  verifiedAt: "2026-11-19",
+  verifiedBy: "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026",
+} as const;
+const constanteFiche = (cle: string) => constanteDe(baseDuMetier("couverture")!.base, cle);
+const deFiche = (cle: string): Fact => {
+  const k = constanteFiche(cle);
+  return condition(k.valeur, k.unite, FICHE, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
+};
 
 /** Hypothèses par défaut du référentiel du fondateur : dites à l'artisan, modifiables d'un geste. */
 const PENTE_PARAM: ParamDef = {
@@ -1106,13 +1124,21 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.11-51",
+  version: "roofing-2026.11.19-52",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
+    {
+      id: FICHE,
+      kind: "baticlair_rule",
+      title: "Fiche couverture Mobiiz (base de référence, constantes de calcul)",
+      documentRef: "referentiels/couverture/fiche-couverture.json, constantes.json",
+      retrievedAt: "2026-11-19",
+      note: "Chaque constante renvoie aux chiffres confirmés de la recherche du 19/11/2026 qui la prouvent (règle du fondateur ou deux sources).",
+    },
     {
       id: "edilians-canal",
       kind: "manufacturer",
@@ -2054,10 +2080,11 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Il change le nombre d'ardoises, de crochets et de liteaux.",
           textLabels: ["pureau"],
           // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur). Des crochets
-          // écrits au devis disent le recouvrement de l'artisan : crochet − 1 cm (Cupa, §34), jamais contredits (D-2026-020).
+          // écrits au devis disent le recouvrement de l'artisan : crochet − 5 mm de jeu de tête (règle du fondateur, confirmée
+          // le 2026-11-19 : manuel CAP, ministère de la Culture, Cupa ; fiche couverture), jamais contredits (D-2026-020).
           default: {
             formula: "(ardoise.longueur - recouvrement) / 2",
-            whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.marge_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 1 cm)" },
+            whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.jeu_tete_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 5 mm, jeu de tête)" },
             source: F,
             verification: FOUNDER_DOC,
             version: 1,
@@ -2065,7 +2092,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           },
         },
         {
-          // Le comptoir sert un crochet à sa longueur : celle du devis s'il l'écrit, sinon recouvrement + 1 cm (Cupa, §34).
+          // Le comptoir sert un crochet à sa longueur : celle du devis s'il l'écrit, sinon recouvrement + 3 mm arrondi au cm
+          // supérieur (fiche couverture, 2026-11-19 : Cupa, Frénéhard, NF DTU 40.11).
           key: "longueur_crochet",
           label: "Longueur de crochet",
           unit: "cm",
@@ -2081,7 +2109,7 @@ export const ROOFING_REFERENTIAL: Referential = {
             source: "cupa-pureau-ardoises-m2",
             verification: FOUNDER_DOC,
             version: 1,
-            note: "recouvrement + 1 cm (Cupa)",
+            note: "recouvrement + 3 mm, arrondi au cm (Cupa, Frénéhard, NF DTU 40.11)",
           },
         },
         ENTRAXE_PARAM,
@@ -2123,7 +2151,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         supplement_rampant: condition("10", "mm", F, FOUNDER_DOC),
         supplement_nul: condition("0", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
         pas_recouvrement: condition("5", "mm", F, FOUNDER_DOC, "Recouvrement arrondi aux 5 mm supérieurs."),
-        marge_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "« Longueur de crochet = R + 1 cm environ » (Cupa, §34)."),
+        marge_crochet: deFiche("ardoise.marge_choix_crochet"),
+        jeu_tete_crochet: deFiche("ardoise.jeu_de_tete_crochet"),
         pas_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."),
       },
       points: { ardoises_m2: CUPA_ARDOISES_M2 },
@@ -2192,13 +2221,14 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "crochets-ardoise",
           slot: "crochet",
-          // « Commander crochets = ardoises × 1,02 » : les ardoises COMMANDÉES (après leur marge), puis +2 %.
+          // Un crochet par ardoise COMMANDÉE (après sa marge), sans perte en plus (règle du fondateur, confirmée le 2026-11-19 :
+          // fiche couverture, ardoise.perte_crochets).
           formula: "commande.ardoises",
           unit: "u",
           core: true,
-          exclusions: "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
-          precision: "un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)",
-          // Le comptoir sert un crochet à sa longueur (Cupa, §34 : recouvrement + 1 cm) et à son diamètre.
+          exclusions: "Un crochet par ardoise commandée (règle du fondateur) : jamais moins de crochets que d'ardoises.",
+          precision: "un par ardoise commandée",
+          // Le comptoir sert un crochet à sa longueur (recouvrement + 3 mm arrondi au cm, fiche couverture) et à son diamètre.
           designation: "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
@@ -3984,7 +4014,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     // Pertes du référentiel du fondateur (pan simple) : appliquées après le calcul, avant l'arrondi au conditionnement.
     { family: "roof_slate", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Casse et coupes de rive, pans rectangulaires simples." },
     { family: "roof_slate_fc", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Comme l'ardoise naturelle (§4 : « mêmes formules »)." },
-    { family: "slate_hook", rate: "2", source: F, verification: FOUNDER_DOC, version: 1, note: "« Commander crochets = ardoises × 1,02 »." },
+    // Un crochet par ardoise commandée (fiche couverture, ardoise.perte_crochets) : une perte nulle n'est pas une marge à dire.
+    ...(Number(constanteFiche("ardoise.perte_crochets").valeur) > 0
+      ? [{ family: "slate_hook", rate: constanteFiche("ardoise.perte_crochets").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 2, note: "Perte sur les crochets (fiche couverture)." }]
+      : []),
     { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
     { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
     { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes de 3 m." },

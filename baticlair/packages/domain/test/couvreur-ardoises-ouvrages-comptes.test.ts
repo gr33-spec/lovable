@@ -31,9 +31,9 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pente 45°, zone 3, rampant ≤ 5,5 m → recouvrement 95 mm → pureau (300 − 95) / 2 = 102,5 mm.
     // Formule Cupa (§34), crochet 1 mm : 200 / (0,1025 × 0,221) = 8 829,05 ardoises + 5 % = 9 270,50, soit 9 271 commandées ;
-    // crochets = 9 271 × 1,02 = 9 456,42 ; 200 / 0,1025 = 1 951,22 ml + 5 % = 2 048,78 ml.
+    // crochets = un par ardoise commandée, 9 271 (fiche couverture, 2026-11-19 ; avant × 1,02) ; 200 / 0,1025 = 1 951,22 ml + 5 % = 2 048,78 ml.
     expect(ardoises.need).toEqual({ value: "9270.5", unit: "u" });
-    expect(crochets.need).toEqual({ value: "9456.42", unit: "u" });
+    expect(crochets.need).toEqual({ value: "9271", unit: "u" });
     expect(liteaux.need).toEqual({ value: "2048.78", unit: "ml" });
     expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "derived:recouvrement=95", "param:pureau=10,25", "param:diametre_crochet=standard"]);
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
@@ -48,9 +48,9 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pureau 110 mm sur 30×22 = recouvrement posé 80 mm : ligne de la table Cupa (40,7/m²) → 8 140 + 5 % = 8 547 ;
-    // crochets 8 547 × 1,02 = 8 717,94 ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
+    // crochets = un par ardoise commandée, 8 547 (avant × 1,02) ; 200 / 0,11 = 1 818,18 ml + 5 % = 1 909,09.
     expect(ardoises.need).toEqual({ value: "8547", unit: "u" });
-    expect(crochets.need).toEqual({ value: "8717.94", unit: "u" });
+    expect(crochets.need).toEqual({ value: "8547", unit: "u" });
     expect(liteaux.need).toEqual({ value: "1909.09", unit: "ml" });
     expect(ardoises.assumptions.some((a) => a.key === "param:pureau" || a.key === "derived:recouvrement")).toBe(false);
     for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });

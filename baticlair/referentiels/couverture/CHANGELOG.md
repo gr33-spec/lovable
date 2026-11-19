@@ -1,5 +1,21 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.19-52 — Ardoise : trois constantes lues dans la fiche couverture (mission du fondateur, 2026-11-19)
+
+Première étape de la bascule « le code lit la fiche et rien d'autre » : ces constantes viennent de
+`referentiels/couverture/constantes.json`, chacune prouvée par des chiffres confirmés de `fiche-couverture.json`.
+
+- **Pureau quand le devis donne le crochet** : recouvrement = crochet − 5 mm (jeu de tête), soit pureau =
+  (longueur − crochet) ÷ 2 + 2,5 mm. Règle du fondateur (18/11), confirmée par le manuel CAP, le guide du
+  ministère de la Culture et Cupa. Avant : crochet − 1 cm (+ 5 mm). D-2026-020 (32×22, crochet 11) : pureau
+  10,75 cm (avant 11), 42,09 ardoises/m² (avant 40,7), 2 122 ardoises (avant 2 052).
+- **Crochet par défaut** (devis sans longueur) : recouvrement + 3 mm, arrondi au cm supérieur (Cupa, Frénéhard,
+  NF DTU 40.11 2020). Avant : recouvrement + 1 cm. Brest (30×22, 45°, zone 3, R 95 mm) : crochet 10 cm (avant 11).
+- **Crochets** : un par ardoise commandée, sans perte en plus. Règle du fondateur, confirmée par Cupa,
+  Rathscheck et le DTU 40.11 via guides. Avant : ardoises × 1,02. Brest : 9 271 crochets (avant 9 457).
+- Aucune autre quantité ne change : seules les lignes de crochets et le pureau au crochet écrit bougent dans
+  les comptes rendus (`docs/lot-*`, tableau de Brest).
+
 ## roofing-2026.10.11-51 — Deux fenêtres de toit, deux tailles (retour du fondateur, 2026-10-11)
 
 - **§11 Fenêtres de toit** : l'ouvrage se prend ligne par ligne (`perLine`), comme les pièces de zinc (§48.6). Deux fenêtres écrites sur deux lignes (« Fenêtre de toit 114x118 », « Fenêtre de toit Velux MK04 ») gardent chacune leur taille, leur nombre et leur raccord. Avant : une seule fenêtre pour tout le devis, et une fausse question « Taille de la fenêtre de toit : 114118 u (…), ou 7898 u (…) ? ». Aucun ratio ne change.

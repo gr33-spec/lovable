@@ -130,6 +130,26 @@ def construit():
     rst = collections.Counter(e["statut"] for e in regions["entrees"])
     carte["taux_confirme"] = round(100 * sum(n for st, n in rst.items() if st in CONFIRME) / max(1, len(regions["entrees"])), 1)
 
+    # Constantes de calcul lues par le code : chacune prouvée par des chiffres CONFIRMÉS de la fiche.
+    ids = {}
+    for fa in familles:
+        for so in fa["sous_familles"]:
+            for r in so["regles"]:
+                ids[r["id"]] = r
+            for m in so["marques"]:
+                for mo in m["modeles"]:
+                    for a in mo["attributs"]:
+                        ids[a["id"]] = a
+    with open(os.path.join(ICI, "constantes.json"), encoding="utf-8") as f:
+        constantes = json.load(f)["constantes"]
+    for c in constantes:
+        for p in c["preuves"]:
+            if p not in ids:
+                raise SystemExit(f"constante {c['cle']} : preuve inconnue {p}")
+            if ids[p]["statut"] not in CONFIRME:
+                raise SystemExit(f"constante {c['cle']} : la preuve {p} n'est pas confirmée ({ids[p]['statut']})")
+        c["statut"] = "confirme"
+
     total = sum(stats.values())
     conf = sum(n for (c, s), n in stats.items() if s in CONFIRME)
     fiche = {
@@ -142,6 +162,7 @@ def construit():
         "carte_regions": "carte-regions.json",
         "taux_confirme": round(100 * conf / total, 1),
         "comptes": {f"{c}:{s}": n for (c, s), n in sorted(stats.items())},
+        "constantes": constantes,
         "familles": familles,
         "sources": src.liste,
     }

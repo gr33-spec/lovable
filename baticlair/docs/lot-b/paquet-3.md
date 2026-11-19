@@ -124,15 +124,15 @@ Questions du comptoir :
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
 | Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 9 271 pièces | Qualité à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 9 271 pièces | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

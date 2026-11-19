@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.10.11-51",
+  "version": "roofing-2026.11.19-52",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -25,6 +25,14 @@
       "kind": "definition",
       "title": "Définition",
       "retrievedAt": "2026-10-01"
+    },
+    {
+      "id": "fiche-couverture",
+      "kind": "baticlair_rule",
+      "title": "Fiche couverture Mobiiz (base de référence, constantes de calcul)",
+      "documentRef": "referentiels/couverture/fiche-couverture.json, constantes.json",
+      "retrievedAt": "2026-11-19",
+      "note": "Chaque constante renvoie aux chiffres confirmés de la recherche du 19/11/2026 qui la prouvent (règle du fondateur ou deux sources)."
     },
     {
       "id": "edilians-canal",
@@ -5943,8 +5951,8 @@
             "formula": "(ardoise.longueur - recouvrement) / 2",
             "whenGiven": {
               "param": "longueur_crochet",
-              "formula": "(ardoise.longueur - (longueur_crochet - regle.marge_crochet)) / 2",
-              "note": "recouvrement des crochets du devis (crochet − 1 cm)"
+              "formula": "(ardoise.longueur - (longueur_crochet - regle.jeu_tete_crochet)) / 2",
+              "note": "recouvrement des crochets du devis (crochet − 5 mm, jeu de tête)"
             },
             "source": "fondateur-referentiel-2026-10-03",
             "verification": {
@@ -5982,7 +5990,7 @@
               "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
             },
             "version": 1,
-            "note": "recouvrement + 1 cm (Cupa)"
+            "note": "recouvrement + 3 mm, arrondi au cm (Cupa, Frénéhard, NF DTU 40.11)"
           }
         },
         {
@@ -6366,17 +6374,29 @@
         },
         "marge_crochet": {
           "kind": "installation_condition",
-          "value": "10",
+          "value": "3",
           "unit": "mm",
-          "source": "cupa-pureau-ardoises-m2",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "« Longueur de crochet = R + 1 cm environ » (Cupa, §34)."
+          "note": "Crochet par défaut = recouvrement + 3 mm, arrondi au centimètre supérieur. Recherche du 19/11/2026 : Cupa, Frénéhard (fabricant de crochets), NF DTU 40.11 (2020) cité par un guide. Sert seulement quand le devis ne dit pas le crochet."
+        },
+        "jeu_tete_crochet": {
+          "kind": "installation_condition",
+          "value": "5",
+          "unit": "mm",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm. Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa."
         },
         "pas_crochet": {
           "kind": "installation_condition",
@@ -7719,8 +7739,8 @@
           "formula": "commande.ardoises",
           "unit": "u",
           "core": true,
-          "exclusions": "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
-          "precision": "un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)",
+          "exclusions": "Un crochet par ardoise commandée (règle du fondateur) : jamais moins de crochets que d'ardoises.",
+          "precision": "un par ardoise commandée",
           "designation": "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
           "source": "baticlair-geometrie-ardoise",
           "verification": {
@@ -16892,19 +16912,6 @@
       },
       "version": 1,
       "note": "Comme l'ardoise naturelle (§4 : « mêmes formules »)."
-    },
-    {
-      "family": "slate_hook",
-      "rate": "2",
-      "source": "fondateur-referentiel-2026-10-03",
-      "verification": {
-        "status": "verified",
-        "verifiedAt": "2026-10-03",
-        "verifiedBy": "Fondateur (couvreur)",
-        "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-      },
-      "version": 1,
-      "note": "« Commander crochets = ardoises × 1,02 »."
     },
     {
       "family": "roof_tile",

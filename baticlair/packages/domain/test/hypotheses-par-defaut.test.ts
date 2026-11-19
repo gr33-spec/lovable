@@ -88,14 +88,14 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(withRives, "tuiles-de-rive")).toMatchObject({ status: "calculated", purchase: { order: { count: "78" } } });
   });
 
-  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 2 %, tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
+  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, { ...ARDOISE, params: { ...ARDOISE.params, pureau: { value: "10", unit: "cm", origin: "artisan" } } });
     // Pureau 100 mm sur 30×22 = recouvrement 100 mm : la table Cupa fait foi (44,8/m²) → 8 960 ardoises.
     expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")!.value).toBe("8 960");
     expect(need(r, "ardoises")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "9408" } } });
     expect(need(r, "ardoises").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5", unit: "%" });
-    // Crochets = ardoises commandées (9 408) × 1,02 = 9 596,16.
-    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9596.16" }, purchase: { order: { count: "9597" } } });
+    // Crochets = un par ardoise commandée, 9 408 (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 597).
+    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "9408" } } });
     expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2100" } });
   });
 

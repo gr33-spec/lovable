@@ -33,8 +33,8 @@ describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, input(littoral));
     // 200 / (0,1025 × 0,2227) = 8 761,65 ; + 5 % = 9 199,73.
     expect(order(r, "ardoises")).toBe(9200);
-    // Crochets = 9 200 × 1,02 = 9 384.
-    expect(order(r, "crochets-ardoise")).toBe(9384);
+    // Un crochet par ardoise commandée (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 384).
+    expect(order(r, "crochets-ardoise")).toBe(9200);
     expect(need(r, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Diamètre du crochet", value: "2,7", unit: "mm", origin: "devis" }));
   });
 

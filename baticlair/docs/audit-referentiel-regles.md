@@ -1,8 +1,8 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.10.11-51`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.19-52`.
 
-186 règles de calcul : 73 constantes, 6 tables, 25 valeurs intermédiaires, 82 besoins. Règles sans test qui les cite : 0.
+187 règles de calcul : 74 constantes, 6 tables, 25 valeurs intermédiaires, 82 besoins. Règles sans test qui les cite : 0.
 
 Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à défaut, ceux qui citent sa section (« par §x »).
 
@@ -23,7 +23,8 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Valeur | Pourquoi ce n'est pas la même règle |
 |---|---|
 | 2 u | Nombres par pièce sans lien : 2 ardoises (couvert et courant), 2 abouts, 2 fixations par patte, 2 closoirs par plaque, 2 talons par ligne. |
-| 10 mm | Supplément de recouvrement au-delà de 5,5 m de rampant, marge de crochet (R + 1 cm), pas de vente des crochets. |
+| 10 mm | Supplément de recouvrement au-delà de 5,5 m de rampant, pas de vente des crochets. |
+| 5 mm | Recouvrement arrondi aux 5 mm, et jeu de tête du crochet (recouvrement = crochet − 5 mm, fiche couverture 2026-11-19). |
 | 0 mm | Supplément nul (rampant court) et diamètre de VMC non écrit : deux zéros. |
 | 1,05 u | Antivents par ardoise (§4) et marge du zinc linéaire (§7). |
 | 2 m | Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes. |
@@ -67,6 +68,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `faitiere` | 2 m | §8 | couverture-bac-acier | dernier-recours.test.ts, test-du-fournisseur.test.ts, isolation-toutes-routes.test.ts |
 | Constante | `fixations_par_patte` | 2 u | §36.2 | couverture-zinc-joint-debout | document-d2026-018.test.ts (par §36.2) |
 | Constante | `flacons_decapant` | 1 u | §25.3, §25.7 | gouttiere | regles-sans-test-audit.test.ts |
+| Constante | `jeu_tete_crochet` | 5 mm | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |
 | Constante | `largeur_courante` | 650 mm | §7, §36 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36), lecture-de00000071.test.ts (par §7, §36) |
 | Constante | `largeur_feuille` | 1 m | §48.6 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, bandes-cuivre, abergement-cheminee | bobineau.test.ts (par §48.6), chantier-test-45-5.test.ts (par §48.6), dernier-recours.test.ts (par §48.6) |
 | Constante | `largeur_littoral` | 500 mm | §7, §36 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36), lecture-de00000071.test.ts (par §7, §36) |
@@ -77,7 +79,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `longueur_profil` | 4 m | §15 | gouttiere-pvc-alu | lot-couverture-3.test.ts (par §15) |
 | Constante | `longueur_utile_noue` | 1,85 m | §25.2 | noue | dernier-recours.test.ts (par §25.2), lot-couverture-1.test.ts (par §25.2) |
 | Constante | `marge_bandes` | 1,1 u | §7, §12 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, bandes-plomb, bandes-cuivre, abergement-cheminee | dernier-recours.test.ts (par §7, §12), joint-debout.test.ts (par §7, §12), lecture-de00000071.test.ts (par §7, §12) |
-| Constante | `marge_crochet` | 10 mm | §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §34), hypotheses-par-defaut.test.ts (par §34) |
+| Constante | `marge_crochet` | 3 mm | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |
 | Constante | `marge_zinc_lineaire` | 1,05 u | §7 | noue, couverture-zinc-joint-debout | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
 | Constante | `mortier_solin_par_ml` | 2 kg/m | §49.7 | bandes-zinc, bande-porte-solin | devis-d2026-020.test.ts (par §49.7) |
 | Constante | `pas_crochet` | 10 mm | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |

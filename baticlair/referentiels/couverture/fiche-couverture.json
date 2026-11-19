@@ -40,6 +40,50 @@
   "zinguerie:confirme": 53,
   "zinguerie:une_source": 11
  },
+ "constantes": [
+  {
+   "cle": "ardoise.jeu_de_tete_crochet",
+   "famille": "ardoise",
+   "libelle": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm",
+   "valeur": "5",
+   "unite": "mm",
+   "regle": "pureau = (longueur de l'ardoise − crochet) ÷ 2 + 2,5 mm",
+   "decision": "Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa.",
+   "preuves": [
+    "ardoise_crochet_recouvrement_depuis_longueur"
+   ],
+   "avant": "10 mm (« crochet − 1 cm », roofing.ts marge_crochet)",
+   "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.marge_choix_crochet",
+   "famille": "ardoise",
+   "libelle": "Crochet par défaut = recouvrement + 3 mm, arrondi au centimètre supérieur",
+   "valeur": "3",
+   "unite": "mm",
+   "regle": "longueur de crochet = arrondi au cm supérieur (recouvrement + 3 mm)",
+   "decision": "Recherche du 19/11/2026 : Cupa, Frénéhard (fabricant de crochets), NF DTU 40.11 (2020) cité par un guide. Sert seulement quand le devis ne dit pas le crochet.",
+   "preuves": [
+    "ardoise_crochet_longueur_depuis_recouvrement"
+   ],
+   "avant": "10 mm (« recouvrement + 1 cm »)",
+   "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.perte_crochets",
+   "famille": "ardoise",
+   "libelle": "Un crochet par ardoise commandée, sans perte en plus",
+   "valeur": "0",
+   "unite": "%",
+   "regle": "crochets = ardoises commandées (pertes comprises) × 1",
+   "decision": "Règle du fondateur (« 1 crochet par ardoise, partout »), confirmée par la recherche du 19/11/2026 : Cupa, Rathscheck, NF DTU 40.11 via guides.",
+   "preuves": [
+    "ardoise_crochet_par_ardoise"
+   ],
+   "avant": "2 % (« crochets = ardoises × 1,02 »)",
+   "statut": "confirme"
+  }
+ ],
  "familles": [
   {
    "code": "ardoise",

@@ -77,11 +77,12 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // formule Cupa (§34) 200 / (0,1025 × 0,2227) = 8 761,65 + 5 % = 9 200 ardoises.
     const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
     expect(ardoises).toMatchObject({ quantite: 9200, unite: "pièces", origine: "calcul" });
-    // Jamais moins de crochets que d'ardoises : 9 200 commandées × 1,02 = 9 384.
-    const crochets = ligne(res.body, "Crochets d'ardoise inox Ø 2,7, longueur 11 cm");
-    expect(crochets.quantite).toBe(9384);
+    // Un crochet par ardoise commandée (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 384), longueur recouvrement + 3 mm
+    // arrondie au cm (avant + 1 cm : 11 cm).
+    const crochets = ligne(res.body, "Crochets d'ardoise inox Ø 2,7, longueur 10 cm");
+    expect(crochets.quantite).toBe(9200);
     expect(crochets.quantite!).toBeGreaterThanOrEqual(ardoises.quantite!);
-    expect(crochets.explication.phrase).toMatch(/^9 384 pièces = ardoises après marge 9 200 · marge recommandée 2 %$/);
+    expect(crochets.explication.phrase).toMatch(/^9 200 pièces = ardoises après marge 9 200 · marge 0 %$/);
     // Le prix de la ligne de devis (85 €/m² de couverture) n'est pas celui d'une ardoise.
     expect(ardoises.prix).toBeUndefined();
     expect(res.body.devis).toEqual([
@@ -197,7 +198,7 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
     expect(ardoises.quantite).toBe(9271);
     expect(ardoises.explication.phrase).toMatch(/diamètre du crochet standard/);
-    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 11 cm").quantite).toBe(9457);
+    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 10 cm").quantite).toBe(9271);
   });
 
   it("range le quantitatif dans un chantier existant", async () => {
