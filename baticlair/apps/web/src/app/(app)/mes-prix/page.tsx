@@ -27,6 +27,7 @@ export default function MesPrixPage() {
       {!data && !error ? <Skeleton lines={4} label="Chargement de tes prix…" /> : null}
       {data && data.formule === "gratuit" ? (
         <p className="rounded-xl bg-accent-soft p-4 text-[15px] text-ink">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
           En gratuit, tu vois tes 3 derniers mois. <a href="/abonnement" className="font-bold underline">Abonne-toi</a> pour tout ton historique.
         </p>
       ) : null}

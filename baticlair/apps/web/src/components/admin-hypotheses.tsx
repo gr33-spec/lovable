@@ -199,6 +199,7 @@ export function ModeRegroupementCarte() {
           ))}
         </div>
         <p className="text-[14px] text-muted">Une personne : un chasseur d&apos;opportunités appelle les négoces. L&apos;app : elle envoie la demande à tous les négoces de la zone à chaque cycle.</p>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
         <a href="/admin/chasseur" className="min-h-11 self-start py-2 text-[14px] font-semibold text-accent-text underline">
           Ouvrir l&apos;écran du chasseur
         </a>

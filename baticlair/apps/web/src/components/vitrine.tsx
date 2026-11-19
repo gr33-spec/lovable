@@ -47,6 +47,7 @@ export function PiedVitrine({ sansEditeur = false }: { sansEditeur?: boolean }) 
           ))}
           <Link href="/tarifs">Tarifs</Link>
           <Link href="/negoce/connexion">Accès négoce</Link>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
           <a href="/couvreurs?demo">Revoir la démo</a>
         </nav>
       </div>

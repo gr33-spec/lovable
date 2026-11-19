@@ -354,6 +354,7 @@ export default function ReponseAchatGroupePage() {
           <label className="flex items-start gap-3 rounded-xl bg-ground p-3 text-[15px]">
             <input type="checkbox" checked={accepte} onChange={(e) => setAccepte(e.target.checked)} className="mt-1 size-5 accent-accent" />
             <span>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
               J&apos;accepte les conditions de cette demande et les <a href="/conditions-negoce" className="underline">conditions négoces</a>.
             </span>
           </label>

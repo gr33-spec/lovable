@@ -89,6 +89,7 @@ export function MyData({ onDeleted, avecEmails = true }: { onDeleted: () => void
         En PDF
       </a>
       {avecEmails ? <EmailsActifs /> : null}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
       <a
         href="/confidentialite"
         className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"

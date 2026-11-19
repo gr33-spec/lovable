@@ -49,6 +49,7 @@ export function RetourMonSite() {
   }, []);
   if (!visible) return null;
   return (
+    // eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé
     <a href="/mon-site" className="pe-retour-app">
       <ArrowLeft size={18} strokeWidth={2.4} aria-hidden="true" /> Retour à Mon site
     </a>

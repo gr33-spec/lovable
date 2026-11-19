@@ -93,6 +93,7 @@ export function ContactPage({ adresse, nom, apercu = false }: { adresse: string;
       ) : null}
       <p className="pe-note">
         Votre message et vos coordonnées sont envoyés à {nom} seulement, pour vous répondre : par e-mail et dans son espace Mobiiz, où ils sont gardés 12 mois. Pour bloquer les abus, nous gardons 30 jours l&apos;heure de l&apos;envoi et une empreinte chiffrée de votre adresse IP.{" "}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- la page /[pageLocale] (19 nov.) fait passer tout lien pour une page ; lien inchangé */}
         {apercu ? "En savoir plus" : <a href="/confidentialite">En savoir plus</a>}.
       </p>
     </form>
