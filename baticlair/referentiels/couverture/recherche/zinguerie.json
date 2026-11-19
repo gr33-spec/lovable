@@ -14,7 +14,7 @@
         400
       ],
       "unite": "mm",
-      "condition": "appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK écrit 333 mm pour la « 33 »",
+      "condition": "appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 »",
       "regions": [
         "Bretagne",
         "France"
@@ -371,12 +371,11 @@
       "sous_famille": "gouttière zinc nantaise (rampante, sur rampant)",
       "attribut": "développés",
       "valeur": [
-        250,
         330,
         400
       ],
       "unite": "mm",
-      "condition": "la nantaise de 33 est confirmée (VMZINC + trois négoces) ; 25 et 40 n'ont que la source VMZINC",
+      "condition": "« de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul",
       "regions": [
         "Bretagne",
         "Pays de la Loire",
@@ -385,31 +384,24 @@
       "statut": "confirme",
       "sources": [
         {
-          "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
-          "url": "https://uploads.gedimat.fr/DOCUMENT/TYPE2/0000226475998.pdf",
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
           "type": "fabricant",
-          "extrait": "Gouttières nantaises VMZINC® (ou laval) Développé (mm) 250 330 ; tableau des cotes : 333 mm, 400 mm",
+          "extrait": "Gouttières nantaises ou laval … 33 80 205 30° ; 40 100 255 30° ; 50 80 375 15°",
           "consulte": "2026-11-19"
         },
         {
-          "titre": "Castorama, gouttière zinc (liste)",
-          "url": "https://www.castorama.fr/vb/gouttiere-zinc",
-          "type": "negoce",
-          "extrait": "Gouttière Nantaise en zinc développement 33 L.4 m (relevé via moteur de recherche)",
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières nantaises 0.65 333 4000 14 8 avec ; 0.80 400 4000 14 10 avec",
           "consulte": "2026-11-19"
         },
         {
-          "titre": "Mr Bricolage, gouttière nantaise dév 33 zinc 4 ml Edilians",
-          "url": "https://www.mr-bricolage.fr/gouttiere-nantaise-dev-33-zinc-4ml-edilians.html",
-          "type": "negoce",
-          "extrait": "Gouttière nantaise DEV 33 zinc 4ml - EDILIANS (titre de la fiche)",
-          "consulte": "2026-11-19"
-        },
-        {
-          "titre": "Brico Dépôt, naissance nantaise zinc pour gouttière de 33 et descente de 100",
-          "url": "https://www.bricodepot.fr/p/3416710011019/naissance-nantaise-en-zinc-pour-relier-une-gouttiere-de-33-a-une-descente-de-100",
-          "type": "negoce",
-          "extrait": "Naissance nantaise en zinc pour relier une gouttière de 33 à une descente de 100 (titre)",
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières nantaises … 33/12 333 x 0,65 R8 ; 40/12 400 x 0,65 R10",
           "consulte": "2026-11-19"
         },
         {
@@ -434,7 +426,7 @@
           "consulte": "2026-11-19"
         }
       ],
-      "ecart": "33 et 40 : deux fabricants (VMZINC, RHEINZINK) et trois négoces bretons (Tanguy, Quéguiner, Bretagne Matériaux), en 4 m. 25 : VMZINC seul, non vu en rayon en Bretagne."
+      "ecart": "Trois fabricants indépendants (VMZINC 2026, RHEINZINK 2026, Edilians 2024) et trois négoces bretons (Tanguy, Quéguiner, Bretagne Matériaux). Le dév. 25 du guide VMZINC 2014 n'existe plus dans aucun des trois catalogues."
     },
     {
       "id": "gouttiere_nantaise_33_longueur",
@@ -483,7 +475,7 @@
         100
       ],
       "unite": "mm",
-      "condition": "les deux sources sont VMZINC : une seule source indépendante",
+      "condition": "80 mm (« R8 ») courant en Bretagne ; 100 mm (« R10 ») surtout en 40, en 33 chez VMZINC et RHEINZINK",
       "regions": [
         "Bretagne",
         "Pays de la Loire",
@@ -492,17 +484,24 @@
       "statut": "confirme",
       "sources": [
         {
-          "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
-          "url": "https://uploads.gedimat.fr/DOCUMENT/TYPE2/0000226475998.pdf",
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
           "type": "fabricant",
-          "extrait": "Relevé 80 mm / Relevé 100 mm ; 333 mm A 80 L 205 ; 333 mm A 100 L 185",
+          "extrait": "h=relevé (mm) … 33 80 … 33 100 … 40 80 … 40 100",
           "consulte": "2026-11-19"
         },
         {
-          "titre": "VMZINC, fiche Batiproduits « Gouttières nantaises »",
-          "url": "https://www.batiproduits.com/fiche/produits/gouttieres-nantaises-a-ourlet-en-zinc-avec-ou-sa-p68908068.html",
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
           "type": "fabricant",
-          "extrait": "80 mm avec pince, 80 mm sans pince, 100 mm avec pince",
+          "extrait": "Gouttières nantaises … Relevé (cm) 10 … 8",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Relevé (cm) R8 … R10",
           "consulte": "2026-11-19"
         },
         {
@@ -527,13 +526,13 @@
           "consulte": "2026-11-19"
         }
       ],
-      "ecart": "80 mm : VMZINC et RHEINZINK, vendu en Bretagne (Tanguy « R8 », Quéguiner « relevé de 8 », Bretagne Matériaux « H. 80 mm »). 100 mm : VMZINC seul, non vu en rayon en Bretagne."
+      "ecart": "80 et 100 mm chez les trois fabricants (VMZINC, RHEINZINK, Edilians) ; en rayon en Bretagne on voit surtout le R8 (Tanguy « R8 », Quéguiner « relevé de 8 », Bretagne Matériaux « H. 80 mm »)."
     },
     {
       "id": "gouttiere_nantaise_surface_selon_pente",
       "famille": "zinguerie",
       "sous_famille": "gouttière zinc nantaise",
-      "attribut": "surface desservie selon pente du toit (relevé 80 / 100, dév. 333)",
+      "attribut": "surface desservie selon pente du toit (relevé 80 / 100, dév. 330)",
       "valeur": {
         "27°": [
           35,
@@ -553,7 +552,7 @@
         ]
       },
       "unite": "m2",
-      "condition": "la section d'une gouttière rampante baisse quand la pente du toit monte : une nantaise sur ardoise à 45° dessert peu de surface",
+      "condition": "la section d'une gouttière rampante baisse quand la pente du toit monte : une nantaise sur ardoise à 45° dessert peu de surface ; le tableau VMZINC écrit 333 mm pour la nantaise de 33",
       "regions": [
         "Bretagne",
         "Pays de la Loire"
@@ -575,31 +574,37 @@
       "sous_famille": "gouttière zinc havraise / ardennaise (rampante)",
       "attribut": "développés",
       "valeur": [
-        250,
         330,
         400
       ],
       "unite": "mm",
-      "condition": "la havraise de 33 est la plus courante ; longueurs 2 m ou 4 m (fiche VMZINC Batiproduits)",
+      "condition": "33 (333 mm sur les fiches) et 40 ; longueurs 2 m ou 4 m ; la havraise de 25 n'est dans aucun catalogue 2024-2026",
       "regions": [
         "Normandie",
         "Bretagne",
         "France"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
-          "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
-          "url": "https://uploads.gedimat.fr/DOCUMENT/TYPE2/0000226475998.pdf",
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
           "type": "fabricant",
-          "extrait": "Gouttières havraises VMZINC® (ou ardennaises) Développé 250 330 ; 333 mm R 48 α 35° ; 400 mm R 54 α 29°",
+          "extrait": "Gouttières havraises ou ardennaises … 33 170 48 35° ; 40 220 54 29°",
           "consulte": "2026-11-19"
         },
         {
-          "titre": "Bricoman, crochet acier galvanisé havrais dév. 333 mm RHEINZINK",
-          "url": "https://www.bricoman.fr/produits/crochet-acier-galvanise-havrais-dev-333-mm-rheinzink-1386000.html",
-          "type": "negoce",
-          "extrait": "Crochet acier galvanisé Havrais Dev.333 mm - RHEINZINK (titre)",
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières havraises 0.65 333 4000 ; 0.80 400 4000",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières havraises avec pinces 33/12 333 x 0,65 2 ; 4",
           "consulte": "2026-11-19"
         }
       ]
@@ -840,10 +845,17 @@
           "type": "autre",
           "extrait": "50 cm au maximum en conditions normales, réduit à 40 cm en zone venteuse ou neigeuse (résumé moteur)",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Progineer, synthèse du NF DTU 40.5 (cite le texte du DTU, § support et fixation)",
+          "url": "https://progineer.fr/workspace/regulation/dtu-40-5/",
+          "type": "guide",
+          "extrait": "Les crochets sont placés à un écartement qui est fonction des charges climatiques du lieu d'application",
+          "consulte": "2026-11-19"
         }
       ],
       "ecart": "VMZINC Belgique : 450 mm maximum (règles belges) ; Nicoll PVC : 0,60 m maximum (ATec) ; First Plast PVC : 50 cm.",
-      "raison": "le DTU 40.5 lie la réduction aux charges climatiques (neige surtout) sans chiffre public ; aucune source ne dit « 40 cm en bord de mer ». Les 2,5/m VMZINC valent pour le crochet discret PLUVIAZINC. Deuxième passe : aucune fiche fabricant ni guide ne donne 35 ou 40 cm pour la neige ou le bord de mer ; les fiches Frénéhard demandent un raidisseur ou un tirant neige pour les crochets légers, sans entraxe."
+      "raison": "le DTU 40.5 lie la réduction aux charges climatiques (neige surtout) sans chiffre public ; aucune source ne dit « 40 cm en bord de mer ». Les 2,5/m VMZINC valent pour le crochet discret PLUVIAZINC. Deuxième passe : aucune fiche fabricant ni guide ne donne 35 ou 40 cm pour la neige ou le bord de mer ; les fiches Frénéhard demandent un raidisseur ou un tirant neige pour les crochets légers, sans entraxe. Troisième passe : le DTU 40.5 (lu via Progineer) dit seulement « fonction des charges climatiques du lieu », 0,50 m au plus, pour les pendantes comme pour les nantaises ; il ne parle ni de mer ni de chiffre réduit. Catalogues VMZINC 2026, RHEINZINK 2026, Edilians 2024 : aucun écartement par zone ; Edilians et RHEINZINK vendent un tirant neige. Le seul 0,40 m chiffré par un fabricant reste les 2,5 crochets/m du crochet discret VMZINC (1 / 2,5 = 0,40 m)."
     },
     {
       "id": "crochet_gouttiere_pvc_entraxe",
@@ -1010,10 +1022,10 @@
       "attribut": "conditionnement fabricant",
       "valeur": {
         "dev_250": 100,
-        "dev_333": 50
+        "dev_330": 50
       },
       "unite": "u/carton",
-      "condition": "le négoce vend aussi à la pièce ; la règle du skill (nombre exact, sans arrondi à la boîte) reste valable",
+      "condition": "crochet discret PLUVIAZINC (VMZINC) ; le conditionnement dépend du modèle : voir les modèles VMZINC, RHEINZINK, NedZink. Le négoce vend aussi à la pièce ; la règle du skill (nombre exact, sans arrondi à la boîte) reste valable",
       "regions": [
         "France"
       ],
@@ -1040,7 +1052,8 @@
           "extrait": "Conditionnement 1 : 100 PCE",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "ecart": "RHEINZINK 2026 : crochets emboutis par 100 en 250 comme en 333 ; Rouen, Toulouse, havrais par 50 ; nantais 333 par 100, nantais 400 par 50. NedZink : 50 (sans queue) ou 25 (avec queue)."
     },
     {
       "id": "talon_gouttiere",
@@ -1082,15 +1095,15 @@
       "famille": "zinguerie",
       "sous_famille": "talon de gouttière rampante",
       "attribut": "fourniture",
-      "valeur": "façonné par le couvreur",
+      "valeur": "façonné par le couvreur, ou fond nantais / havrais emboîtable (Edilians)",
       "unite": "texte",
-      "condition": "nantaise, havraise ; des talons nantais gauche/droite existent aussi en négoce (Edilians, Brico Dépôt)",
+      "condition": "nantaise, havraise : VMZINC fait façonner les accessoires (pentes différentes à chaque versant) ; Edilians vend des fonds nantais emboîtables gauche / droite en dév. 333, relevé 8 ou 10, et des fonds havrais gauche / droite",
       "regions": [
         "Bretagne",
         "Normandie",
         "Pays de la Loire"
       ],
-      "statut": "une_source",
+      "statut": "confirme",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -1098,8 +1111,30 @@
           "type": "fabricant",
           "extrait": "La pente des versants étant à chaque fois différente, les accessoires sont à réaliser par l'entreprise",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Fonds nantais emboîtables Dvp 333 gauche R8 089245 ; droit R10 091791",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Calepin de chantier « Évacuation des eaux pluviales » (CAPEB, se réfère au DTU 40.5 et DTU 60.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Evacuation_eaux_pluviales.pdf",
+          "type": "guide",
+          "extrait": "Gouttières sur versant (nantaises ou laval etc…) … 10 Façonnage et soudure des talons",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Brico Dépôt, fond de gouttière nantais gauche 33, en zinc (titre de la fiche, relevé via moteur de recherche)",
+          "url": "https://www.bricodepot.fr/p/3416710407638/fond-de-gouttiere-nantais-gauche-33-en-zinc",
+          "type": "negoce",
+          "extrait": "Fond de gouttière nantais gauche 33, en zinc",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "ecart": "Les deux sont vrais : talon façonné (VMZINC, guide) ou fond emboîtable tout fait (Edilians). Au comptoir : demander « talon façonné ou fond emboîtable, gauche ou droit, relevé 8 ou 10 »."
     },
     {
       "id": "equerre_gouttiere",
@@ -1107,8 +1142,8 @@
       "sous_famille": "équerre (angle) de gouttière",
       "attribut": "types",
       "valeur": [
-        "extérieure",
-        "intérieure"
+        "extérieure 90°",
+        "intérieure 90°"
       ],
       "unite": "liste",
       "regions": [
@@ -1129,8 +1164,16 @@
           "type": "fabricant",
           "extrait": "angles extérieurs … DVPT 285 … DVPT 333",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche produit « Équerre 90° » (juillet 2022, lien depuis vmzinc.com/fr-fr/documentation)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Collecte%20des%20eaux%20pluviales/EQUERRE%20A%2090.pdf",
+          "type": "fabricant",
+          "extrait": "Fiche Produit Équerre 90° ; Equerres extérieure / intérieure",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "condition": "90° au catalogue des trois fabricants français ; 135° en zinc : non catalogué (voir equerre_135_zinc)"
     },
     {
       "id": "naissance_gouttiere",
@@ -1139,10 +1182,10 @@
       "attribut": "types et diamètres",
       "valeur": {
         "dev_250": "Ø80",
-        "dev_333": "Ø80 ou Ø100"
+        "dev_330": "Ø80 ou Ø100"
       },
       "unite": "mm",
-      "condition": "naissance agrafable (libre dilatation) ou moignon tronconique à souder ; le comptoir demande développé + Ø de descente",
+      "condition": "naissance agrafable (libre dilatation) ou moignon tronconique à souder ; le comptoir demande développé + Ø de descente ; RHEINZINK, Edilians et NedZink écrivent 333 pour la « 33 » ; dév. 166 → Ø 60 et dév. 400 → Ø 120 (Edilians, RHEINZINK)",
       "regions": [
         "Bretagne",
         "France"
@@ -1359,10 +1402,11 @@
       "attribut": "longueurs vendues",
       "valeur": [
         2,
-        3
+        3,
+        4
       ],
       "unite": "m",
-      "condition": "2 m = longueur standard du zinc ; 3 m existe (RHEINZINK Ø100, NedZink). Aucun tuyau zinc de 4 m trouvé.",
+      "condition": "2 m = longueur standard du zinc ; 3 m en Ø 80 et Ø 100 ; 4 m en Ø 100 seulement (VMZINC, RHEINZINK, Edilians)",
       "regions": [
         "Bretagne",
         "France"
@@ -1403,8 +1447,30 @@
           "type": "guide",
           "extrait": "Assemblage du 1er tuyau de deux mètres avec sa bague",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220021783 Naturel 100 0,65 4 5/80",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Tuyaux de descente tulipe 0.65 100 4000 5 Pce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Tuyaux de descente bord à bord Ø 100 4 087427",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "ecart": "Deuxième passe : « aucun tuyau zinc de 4 m » était faux ; le 4 m existe en Ø 100 chez les trois fabricants français."
     },
     {
       "id": "descente_pvc_longueur",
@@ -1543,9 +1609,13 @@
       "attribut": "angles vendus",
       "valeur": {
         "zinc": [
+          36,
           40,
+          60,
+          70,
           72,
           76,
+          85,
           90
         ],
         "pvc": [
@@ -1593,9 +1663,31 @@
           "type": "negoce",
           "extrait": "Coude ff 87°30 o80 sable Nicoll (titre)",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Coudes cintrés à 40° ; Coudes cintrés à 72° ; Coude à angle vif 70° ; Coudes rotule à 36°",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Coudes tulipés grand rayon 60 60 25 Pce ; Coudes soudés « Paris » 80 76",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Coudes 72° … Coudes 85° Ø 80 087653",
+          "consulte": "2026-11-19"
         }
       ],
-      "ecart": "Le 60° n'a été trouvé qu'en coude à étage (RHEINZINK « écartement 60 mm », ce n'est pas un angle). Les 87° du brief correspondent au PVC 87°30."
+      "ecart": "Le 60° existe en coude tulipé grand rayon Ø 60 chez RHEINZINK (la deuxième passe ne l'avait vu qu'en coude à étage). Le 87° n'existe qu'en PVC (87°30) ; en zinc, le plus proche est le 85° Edilians.",
+      "condition": "zinc courant : 72° ; 40° et 90° (VMZINC), 76° « Paris » et 60° en Ø 60 (RHEINZINK), 85° (Edilians), 70° angle vif et 36° rotule (VMZINC)"
     },
     {
       "id": "coude_par_descente",
@@ -2537,6 +2629,1667 @@
         }
       ],
       "ecart": "Trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux), plusieurs marques (VMZINC, RHEINZINK, elZinc, Edilians, Amelux, HILD) : mêmes longueurs que la gamme nationale. Pas de pièce de 3 m vue en faîtage ni en bande. Comptoirs non consultés en ligne : Le Comptoir des Fers, Gédimat Bretagne, Asturienne (pas de catalogue lisible)."
+    },
+    {
+      "id": "vmz_demironde_16",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "VMZINC",
+      "modele": "Gouttière pendante de 16",
+      "attribut": "longueur × épaisseur par finition",
+      "valeur": {
+        "naturel": "2 m × 0,65 mm, sans pince"
+      },
+      "unite": "m / mm",
+      "condition": "développé 166 mm, boudin Ø 14, section 20 cm² ; carton de 5",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "204658000 Naturel 0,65 2000 sans 5 ; Développement de 166 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "204658000"
+    },
+    {
+      "id": "vmz_demironde_25",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "VMZINC",
+      "modele": "Gouttière demi-ronde de 25",
+      "attribut": "longueur × épaisseur par finition",
+      "valeur": {
+        "naturel": [
+          "2 m × 0,65 sans pince",
+          "4 m × 0,65 sans ou avec pince",
+          "6 m × 0,65 sans pince",
+          "4 m × 0,80 sans pince"
+        ],
+        "Quartz-Zinc": [
+          "4 m × 0,65 sans pince"
+        ],
+        "Anthra-Zinc": [
+          "4 m × 0,65 sans pince"
+        ],
+        "Pigmento (vert, rouge, bleu, brun, nuit d'été)": [
+          "3 m × 0,70 avec pince"
+        ]
+      },
+      "unite": "m / mm",
+      "condition": "section 57 cm² ; conditionnement : carton de 5 (palette de 250 en 4 m naturel et Anthra), 6 m par 100, Pigmento par 3",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "204665000 Naturel 0,65 4000 sans 5/250 ; 220022614 QUARTZ-ZINC 0,65 4000 sans 5 ; PIGMENTO 0,70 3000 avec 3",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée",
+        "5/250 = 50 cartons de 5 par palette"
+      ],
+      "reference": "204661000, 204665000, 204696000, 211666000, 204679000, 220022614, 220007938"
+    },
+    {
+      "id": "vmz_demironde_33",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "VMZINC",
+      "modele": "Gouttière demi-ronde de 33",
+      "attribut": "longueur × épaisseur par finition",
+      "valeur": {
+        "naturel": [
+          "2 m × 0,65 sans pince",
+          "4 m × 0,65 sans ou avec pince",
+          "6 m × 0,65 sans pince",
+          "4 m × 0,80 sans pince"
+        ],
+        "Quartz-Zinc": [
+          "4 m × 0,65 sans pince"
+        ],
+        "Anthra-Zinc": [
+          "4 m × 0,65 sans pince",
+          "4 m × 0,80 sans pince"
+        ],
+        "Azengar": [
+          "4 m × 0,65 sans pince"
+        ],
+        "Pigmento (vert, rouge, bleu, brun, nuit d'été)": [
+          "3 m × 0,70 avec pince"
+        ]
+      },
+      "unite": "m / mm",
+      "condition": "section 113 cm² ; carton de 5 (palette de 150 en 4 m × 0,65 naturel), 6 m par 85, Pigmento par 3",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "204670000 Naturel 0,65 4000 sans 5/150 ; 220022613 QUARTZ-ZINC 0,65 4000 ; 220007940 ANTHRA-ZINC 0,80 4000",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée",
+        "5/150 = 30 cartons de 5 par palette"
+      ],
+      "reference": "204668000, 204670000, 204700000, 211668000, 204683000, 220022613, 220007939, 220007940"
+    },
+    {
+      "id": "vmz_pendante_40",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "VMZINC",
+      "modele": "Gouttière pendante de 40",
+      "attribut": "longueur × épaisseur par finition",
+      "valeur": {
+        "naturel": "4 m × 0,80 mm avec pince"
+      },
+      "unite": "m / mm",
+      "condition": "développé 400 mm, boudin Ø 18, section 174 cm² ; carton de 5 ; moignons Ø 60 et Ø 120 au même chapitre",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "209830000 Naturel 0,80 4000 avec 5 ; Développement de 400 mm ; Section : 174 cm2",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "209830000"
+    },
+    {
+      "id": "vmz_nantaise_33",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc nantaise (rampante, sur rampant)",
+      "marque": "VMZINC",
+      "modele": "Gouttière nantaise (ou laval) de 33",
+      "attribut": "relevé × épaisseur × longueur par finition",
+      "valeur": {
+        "naturel sans pince": [
+          "R80 × 0,65 × 4 m",
+          "R80 × 0,80 × 4 m"
+        ],
+        "naturel avec pince": [
+          "R80 × 0,65 × 2 m",
+          "R80 × 0,65 × 4 m",
+          "R100 × 0,65 × 4 m",
+          "R80 × 0,80 × 4 m"
+        ],
+        "Quartz-Zinc avec pince": [
+          "R80 × 0,65 × 4 m"
+        ],
+        "Anthra-Zinc avec pince": [
+          "R80 × 0,65 × 4 m",
+          "R80 × 0,80 × 4 m"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "pente mini du toit : 27° (sans pince, R80), 30° (avec pince, R80), 43° (R100) ; boudin Ø 14 ; carton de 5, palette de 120",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220021384 Naturel 33 80 205 30° 0,65 4000 5/120 ; 220003056 Naturel 33 100 185 43° 0,65 4000 5",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée",
+        "5/120 = 24 cartons de 5 par palette"
+      ],
+      "reference": "204903000, 204906000, 204893000, 220021384, 220003056, 220021381, 220022615, 220021382, 205065000"
+    },
+    {
+      "id": "vmz_nantaise_40_50",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc nantaise (rampante, sur rampant)",
+      "marque": "VMZINC",
+      "modele": "Gouttière nantaise (ou laval) de 40 et de 50",
+      "attribut": "relevé × épaisseur × longueur par finition",
+      "valeur": {
+        "40 naturel": [
+          "R100 × 0,80 × 4 m sans pince",
+          "R80 × 0,80 × 4 m avec pince",
+          "R100 × 0,80 × 4 m avec pince"
+        ],
+        "40 Anthra-Zinc": [
+          "R100 × 0,80 × 4 m avec pince"
+        ],
+        "50 naturel": [
+          "R80 × 0,80 × 4 m avec pince"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "pente mini du toit : 40 R80 21°, 40 R100 27° à 30°, 50 R80 15° ; carton de 5 (palette 100 à 120)",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "204910000 Naturel 40 80 275 21° 0,80 4000 5/100 ; 220031358 Naturel 50 80 375 15° 0,80 4000",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "204909000, 204910000, 204899000, 205072000, 220031358"
+    },
+    {
+      "id": "vmz_havraise",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc havraise / ardennaise (rampante)",
+      "marque": "VMZINC",
+      "modele": "Gouttière havraise (ou ardennaise) de 33 et de 40",
+      "attribut": "épaisseur × longueur par finition",
+      "valeur": {
+        "33 naturel sans pince": [
+          "0,65 × 4 m",
+          "0,80 × 4 m"
+        ],
+        "40 naturel sans pince": [
+          "0,80 × 4 m"
+        ],
+        "33 naturel avec pince": [
+          "0,65 × 2 m",
+          "0,65 × 4 m",
+          "0,80 × 4 m"
+        ],
+        "40 naturel avec pince": [
+          "0,80 × 4 m"
+        ],
+        "33 Quartz-Zinc / Anthra-Zinc avec pince": [
+          "0,65 × 4 m"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "pente mini du toit : 33 sans pince 35°, avec pince 40° ; 40 : 29° / 32° ; carton de 5 (palette de 120)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220021383 Naturel 33 155 48 40° 0,65 4000 5/120 ; 204795000 Naturel 40 220 54 29° 0,80 4000 5",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "204787000, 204793000, 204795000, 204781000, 220021383, 204792000, 204794000, 220022616, 205000000"
+    },
+    {
+      "id": "vmz_quimper",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc Quimper",
+      "marque": "VMZINC",
+      "modele": "Gouttière Quimper",
+      "attribut": "relevé × épaisseur × longueur",
+      "valeur": {
+        "naturel": "relevé 95 mm × 0,65 mm × 4 m"
+      },
+      "unite": "mm / m",
+      "condition": "seule finition au catalogue : naturel ; carton de 5 ; le développé n'est pas écrit dans le tableau (400 mm d'après la fiche négoce de la même référence)",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttière Quimper 220021971 Naturel 95 0,65 4000 5",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220021971"
+    },
+    {
+      "id": "vmz_crochet_discret",
+      "famille": "zinguerie",
+      "sous_famille": "crochet de gouttière pendante",
+      "marque": "VMZINC",
+      "modele": "Crochet discret PLUVIAZINC (gouttière demi-ronde à pince)",
+      "attribut": "conditionnement",
+      "valeur": {
+        "de 25": 100,
+        "de 33": 50
+      },
+      "unite": "u/carton",
+      "condition": "galvanisé mat ; recommandation fabricant : 2,5 crochets par mètre de gouttière posée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220003063 Crochet discret pour gouttière à pince Galvanisé mat 100 ; 220006268 … 50",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, Le Catalogue 2022-2023, page PLUVIAZINC (p. 104-105)",
+          "url": "https://vmzinc.com/getmedia/21de194a-fc6f-4184-8826-af3478fb2533/PLUVIAZINC.pdf",
+          "type": "fabricant",
+          "extrait": "Recommandation 2,5 crochets pour 1 m de gouttière posée",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée",
+        "2,5 crochets/m ⇒ entraxe 1 / 2,5 = 0,40 m (sous le maximum de 0,50 m du DTU 40.5)"
+      ],
+      "reference": "220003063, 220006268"
+    },
+    {
+      "id": "vmz_equerres_25",
+      "famille": "zinguerie",
+      "sous_famille": "équerre (angle) de gouttière",
+      "marque": "VMZINC",
+      "modele": "Équerre 90° demi-ronde de 25",
+      "attribut": "conditionnement par type et finition",
+      "valeur": {
+        "naturel extérieure (sans ou avec pince)": 20,
+        "naturel intérieure": 4,
+        "Quartz-Zinc / Anthra-Zinc ext. ou int.": 4,
+        "Pigmento": 3,
+        "longues branches 500 mm naturel": 4
+      },
+      "unite": "u/carton",
+      "condition": "angle 90° (fiche produit « Équerre 90° ») ; aucune équerre zinc à 135° au catalogue 2026",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220030914 Naturel extérieure sans 20 ; 220030921 Naturel intérieure sans 4",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche produit « Équerre 90° » (juillet 2022, lien depuis vmzinc.com/fr-fr/documentation)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Collecte%20des%20eaux%20pluviales/EQUERRE%20A%2090.pdf",
+          "type": "fabricant",
+          "extrait": "Fiche Produit Équerre 90° ; Equerres extérieure / intérieure ; Avec et sans pinces",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220030914, 220030911, 220030921, 220030918, 220030915, 220030922, 220030913, 220030920"
+    },
+    {
+      "id": "vmz_equerres_33",
+      "famille": "zinguerie",
+      "sous_famille": "équerre (angle) de gouttière",
+      "marque": "VMZINC",
+      "modele": "Équerre 90° demi-ronde de 33",
+      "attribut": "conditionnement par type et finition",
+      "valeur": {
+        "naturel extérieure (sans ou avec pince)": 20,
+        "naturel intérieure": 4,
+        "Quartz-Zinc / Anthra-Zinc / Azengar ext. ou int.": 4,
+        "Pigmento": 3,
+        "longues branches 500 mm naturel": 4
+      },
+      "unite": "u/carton",
+      "condition": "angle 90°",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220030928 Naturel extérieure sans 20 ; 220030940 Naturel intérieure sans 4",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, fiche produit « Équerre 90° » (juillet 2022, lien depuis vmzinc.com/fr-fr/documentation)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Collecte%20des%20eaux%20pluviales/EQUERRE%20A%2090.pdf",
+          "type": "fabricant",
+          "extrait": "Fiche Produit Équerre 90° ; Gouttières demi-rondes de 33",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220030928, 220030925, 220030940, 220030937, 220030929, 220030941, 220030927, 220030939"
+    },
+    {
+      "id": "vmz_naissances",
+      "famille": "zinguerie",
+      "sous_famille": "naissance / moignon",
+      "marque": "VMZINC",
+      "modele": "Naissance agrafable et moignons (demi-ronde)",
+      "attribut": "Ø, hauteur et conditionnement",
+      "valeur": {
+        "naissance agrafable de 25": "Ø 80, H 105, carton de 10 (naturel, Quartz, Anthra ; Pigmento par 4)",
+        "naissance agrafable de 33": "Ø 100, H 115, carton de 10 (Azengar, Pigmento par 4)",
+        "moignon Ø 60": "H 80, 10",
+        "moignon Ø 80": "H 85, 50",
+        "moignon Ø 100": "H 85, 20",
+        "moignon Ø 120": "H 140, 10",
+        "types PAU / TOULOUSE": "Ø 80 (25) ou Ø 100 (33), 10"
+      },
+      "unite": "mm / u",
+      "condition": "la naissance agrafable de 25 sort en Ø 80, celle de 33 en Ø 100",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Naissance agrafable 220010739 Naturel 80 105 10 ; 220010743 Naturel 100 115 10 ; 220011968 Naturel 80 85 50",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220010739, 220010740, 220010741, 220010743, 220010744, 220010745, 205836000, 220011968, 220011967, 205835000"
+    },
+    {
+      "id": "vmz_talons",
+      "famille": "zinguerie",
+      "sous_famille": "talon (fond) de gouttière",
+      "marque": "VMZINC",
+      "modele": "Talon symétrique et embouts à talon (demi-ronde)",
+      "attribut": "conditionnement",
+      "valeur": {
+        "talon symétrique de 25": {
+          "naturel": 100,
+          "Quartz-Zinc": 24,
+          "Anthra-Zinc": 50,
+          "Pigmento": 6
+        },
+        "talon symétrique de 33": {
+          "naturel": 100,
+          "Quartz-Zinc": 24,
+          "Anthra-Zinc": 24,
+          "Azengar / Pigmento": 6
+        },
+        "embout à talon + moignon Ø 80 (25) ou Ø 100 (33), droite ou gauche, 0,50 m": 10
+      },
+      "unite": "u/carton",
+      "condition": "talon symétrique « à gorge » (sert à gauche comme à droite) ; l'embout à talon existe en droite et en gauche",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Talons symétriques 211962000 Naturel à gorge 100 ; 205869000 Naturel à droite 14 0,50 10",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "211962000, 220019346, 211963000, 211663000, 220019347, 220019348, 205869000, 205865000, 205870000, 205866000"
+    },
+    {
+      "id": "vmz_dilatation",
+      "famille": "zinguerie",
+      "sous_famille": "joint de dilatation de gouttière",
+      "marque": "VMZINC",
+      "modele": "Joint de dilatation VMZINC type 26 / type 39",
+      "attribut": "formats, conditionnement et distance maximale entre joints",
+      "valeur": {
+        "rouleau type 26": "260 mm × 3 m, carton de 5",
+        "rouleau type 39": "390 mm × 6 m, à l'unité",
+        "prédécoupé gouttière de 25": "218 mm, carton de 20",
+        "prédécoupé gouttière de 33": "300 mm, carton de 20",
+        "distance maxi, gouttière pendante (D ≤ 500)": "15 m",
+        "distance maxi, gouttière régionale nantaise / havraise (D ≤ 500)": "12 m"
+      },
+      "unite": "mm / m",
+      "condition": "Avis technique 5.1/19-2580 ; D = développé",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220027748 Naturel 26 218 pour gouttière de 25 20 ; Gouttière pendante 1/2 ronde 15 m (type 26)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220027747, 220023331, 220027748, 220027749"
+    },
+    {
+      "id": "vmz_tuyaux",
+      "famille": "zinguerie",
+      "sous_famille": "descente EP zinc",
+      "marque": "VMZINC",
+      "modele": "Tuyau de descente zinc (cylindrique bord à bord et tronconique)",
+      "attribut": "Ø × longueur par finition",
+      "valeur": {
+        "cylindrique naturel": [
+          "Ø 76 × 2 m",
+          "Ø 80 × 2 et 3 m",
+          "Ø 100 × 2, 3 et 4 m"
+        ],
+        "cylindrique Quartz-Zinc / Anthra-Zinc": [
+          "Ø 80 × 2 et 3 m",
+          "Ø 100 × 2 et 3 m",
+          "Ø 120 × 2 m (0,70)"
+        ],
+        "cylindrique Azengar / Pigmento / Blanc pierre / Rouge tuilé": [
+          "Ø 80 et Ø 100 × 2 m (0,70)"
+        ],
+        "tronconique soudé naturel": [
+          "Ø 50, 60, 80, 100 (0,65), 120 (0,70), 140, 160 (0,80) × 2 m"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "épaisseur 0,65 (0,70 à 0,80 au-delà de Ø 100) ; carton de 5 (palette de 150 en Ø 80, 100 en Ø 100, 80 en Ø 100 × 4 m)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220021783 Naturel 100 0,65 4 5/80 ; 220002010 Naturel 80 0,65 3 5/150",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220002008, 220002010, 220002028, 220002030, 220021783, 204026000, 204028000"
+    },
+    {
+      "id": "vmz_manchons",
+      "famille": "zinguerie",
+      "sous_famille": "manchon de descente",
+      "marque": "VMZINC",
+      "modele": "Manchon pour tuyau cylindrique Ø 80 / Ø 100",
+      "attribut": "conditionnement",
+      "valeur": 5,
+      "unite": "u/carton",
+      "condition": "naturel, Quartz-Zinc, Anthra-Zinc, Pigmento, Blanc pierre, Rouge tuilé",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "220021756 Naturel pour tuyau de 80 5 ; 220021760 Naturel pour tuyau de 100 5",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220021756, 220021760, 220021757, 220021761, 220021758, 220021762"
+    },
+    {
+      "id": "vmz_coudes",
+      "famille": "zinguerie",
+      "sous_famille": "coude de descente",
+      "marque": "VMZINC",
+      "modele": "Coudes de descente zinc",
+      "attribut": "angles, Ø et conditionnement",
+      "valeur": {
+        "cintré 90°": "Ø 50 à 160 ; naturel Ø 80 et Ø 100 par 50 (Quartz/Anthra 10 à 20)",
+        "cintré 72°": "Ø 80 et Ø 100 ; naturel par 25 (palette 400), Quartz/Anthra par 10",
+        "cintré 40°": "Ø 80 et Ø 100, par 10",
+        "angle vif 70°": "Ø 100 naturel par 10 ; Pigmento Ø 80 / 100 par 2",
+        "rotule 36°": "Ø 80 (20) et Ø 100 (10)",
+        "coude ajustable « lyonnais »": "Ø 80 et Ø 100, par 40"
+      },
+      "unite": "° / mm / u",
+      "condition": "pas de coude à 60° ni à 87° au catalogue VMZINC 2026",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Coudes cintrés à 40° 220029520 Naturel 80 10 ; Coudes cintrés à 72° 220029332 Naturel 80 25/400",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "220007726, 220007780, 220029520, 220029522, 220029332, 220029333, 220021870, 220002157, 220002158"
+    },
+    {
+      "id": "vmz_bagues",
+      "famille": "zinguerie",
+      "sous_famille": "collier de descente",
+      "marque": "VMZINC",
+      "modele": "Bagues de descente zinc",
+      "attribut": "types, Ø et conditionnement",
+      "valeur": {
+        "bague autobloquante (double bague zinc + clé acier galvanisé)": "Ø 80 / Ø 100, par 10 (Azengar, Pigmento par 5)",
+        "bague simple": "Ø 60 (50), Ø 80 et Ø 100 avec bord (100), Ø 120 (50), Ø 140 (25)",
+        "bague spirale": "Ø 80 avec bord 40 / sans bord 60 ; Ø 100 avec bord 24 / sans bord 45",
+        "bague ajustable simple ou double": "Ø 80, 100 (120 en double), par 10",
+        "crapaudine extensible": "Ø 80 / 100 galvanisé, par 50"
+      },
+      "unite": "mm / u",
+      "condition": "VMZINC ne vend pas de collier à embase : à prendre dans le commerce (RHEINZINK, Edilians)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Bagues autobloquantes 211908000 Naturel 80 10 ; Bagues simples 205930000 Naturel 80 avec 100",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "211908000, 211909000, 205930000, 205931000, 211670000, 220005035"
+    },
+    {
+      "id": "rz_demironde",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "RHEINZINK",
+      "modele": "Gouttière demi-ronde 166 / 250 / 333 (boudin 14)",
+      "attribut": "longueur × épaisseur par finition",
+      "valeur": {
+        "CLASSIC naturel 166": [
+          "2 m × 0,65 sans pince"
+        ],
+        "CLASSIC naturel 250": [
+          "2 m, 4 m (sans ou avec pince), 6 m × 0,65",
+          "4 m × 0,80"
+        ],
+        "CLASSIC naturel 333": [
+          "2 m, 4 m (sans ou avec pince), 6 m × 0,65",
+          "4 m × 0,80"
+        ],
+        "prePATINA clair 250 / 333": [
+          "4 m × 0,65 sans pince"
+        ]
+      },
+      "unite": "m / mm",
+      "condition": "RHEINZINK écrit 333 mm pour la « 33 » ; carton de 5, palette de 260 (250) ou 160 (333) en 4 m ; finitions du chapitre : CLASSIC naturel, prePATINA clair (RAL ≈ 7045) et ardoise (≈ 7043), GRANUM EXTRA granite et basalte (≈ 7021)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "0.65 333 4000 14 avec 5 Pce 160 Pce 11009526 ST ; prePATINA clair 0.65 333 4000 14 sans 5 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée",
+        "palette 160 = 32 cartons de 5 ; 260 = 52 cartons de 5"
+      ],
+      "reference": "11009538, 11009539, 11009541, 11009525, 11009546, 11009547, 11009548, 11009526, 11009553, 11009554, 11009556, 11009544, 11009551"
+    },
+    {
+      "id": "rz_nantaise",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc nantaise (rampante, sur rampant)",
+      "marque": "RHEINZINK",
+      "modele": "Gouttière nantaise 333 et 400 (avec pince)",
+      "attribut": "relevé × épaisseur × longueur par finition",
+      "valeur": {
+        "CLASSIC naturel 333": [
+          "R10 × 0,65 × 4 m",
+          "R8 × 0,65 × 4 m",
+          "R8 × 0,80 × 4 m"
+        ],
+        "CLASSIC naturel 400": [
+          "R10 × 0,80 × 4 m",
+          "R8 × 0,80 × 4 m"
+        ],
+        "prePATINA ardoise": [
+          "333 R8 × 0,65 (stock)",
+          "333 R8 × 0,80, 400 R8 × 0,80 (sur demande)"
+        ],
+        "prePATINA clair": [
+          "333 R8 / R10 × 0,65, 400 R8 / R10 × 0,80 (sur demande)"
+        ],
+        "GRANUM EXTRA granite / basalte": [
+          "333 R8 × 0,65 (stock)",
+          "400 R8 / R10 × 0,80 (sur demande)"
+        ]
+      },
+      "unite": "cm / mm / m",
+      "condition": "relevé en cm (8 = 80 mm, 10 = 100 mm) ; boudin 14 ; carton de 5, palette de 125",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières nantaises 0.65 333 4000 14 8 avec 5 Pce 125 Pce 11009837 ST",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée",
+        "palette 125 = 25 cartons de 5"
+      ],
+      "reference": "11009827, 11009837, 11009842, 11009830, 11009844, 11009841, 11024327"
+    },
+    {
+      "id": "rz_havraise",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc havraise / ardennaise (rampante)",
+      "marque": "RHEINZINK",
+      "modele": "Gouttière havraise 333 et 400 (avec pince)",
+      "attribut": "épaisseur × longueur par finition",
+      "valeur": {
+        "CLASSIC naturel": [
+          "333 × 0,65 × 4 m",
+          "333 × 0,80 × 4 m (sur demande)",
+          "400 × 0,80 × 4 m"
+        ],
+        "prePATINA ardoise / GRANUM EXTRA": [
+          "333 × 0,65 × 4 m",
+          "400 × 0,80 × 4 m (sur demande)"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "boudin 14 ; carton de 5, palette de 125 (333) ou 90 (400)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières havraises 0.65 333 4000 14 avec 5 Pce 125 Pce 11009811 ST",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11009811, 11009816, 11009817, 11009815"
+    },
+    {
+      "id": "rz_crochets_rampants",
+      "famille": "zinguerie",
+      "sous_famille": "crochet de gouttière rampante",
+      "marque": "RHEINZINK",
+      "modele": "Crochets nantais et havrais",
+      "attribut": "conditionnement",
+      "valeur": {
+        "nantais 333 relevé 8, sur chevron / volige": 100,
+        "nantais 400 relevé 10": 50,
+        "nantais sécurité 333 relevé 8 (languette)": 25,
+        "havrais 333, tige 17, fourchette": 50,
+        "havrais 400, tige 22, fourchette": 50
+      },
+      "unite": "u/carton",
+      "condition": "le catalogue ne donne pas d'écartement ; tirants 250 (50), 333 (100), 400 (50) au même chapitre",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Crochets nantais 333 14 8 100 Pce 11008512 ; 400 14 10 50 Pce 11008510 ; Crochets havrais 333 14 17 50 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11008512, 11008510, 11008514, 11008623, 11008620"
+    },
+    {
+      "id": "rz_crochets_pendants",
+      "famille": "zinguerie",
+      "sous_famille": "crochet de gouttière pendante",
+      "marque": "RHEINZINK",
+      "modele": "Crochets de gouttière demi-ronde (emboutis, Rouen, Toulouse)",
+      "attribut": "conditionnement",
+      "valeur": {
+        "embouti sur hampe ou bandeau, 166 / 250 / 333": 100,
+        "embouti 400 boudin 18": 50,
+        "Rouen sur chevron / volige (166, 250, 333 ; tige 17 ou 25)": 50,
+        "Toulouse 250 / 333": 50,
+        "Montpellier 250": 20,
+        "Alsace 333": 50,
+        "hampes nervurées 160 à 700 mm": 50
+      },
+      "unite": "u/carton",
+      "condition": "galvanisé (non teinté)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Crochets emboutis 333 14 sur hampe nervuré rapportée 100 Pce 11008356 ; Crochets Rouen 333 14 17 droit 50 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11008477, 11008480, 11008366, 11008356, 11008367, 11008445, 11008386, 11008536, 11008537"
+    },
+    {
+      "id": "rz_naissances",
+      "famille": "zinguerie",
+      "sous_famille": "naissance / moignon",
+      "marque": "RHEINZINK",
+      "modele": "Naissances (agrafables, cylindriques à souder, tronconiques)",
+      "attribut": "Ø et conditionnement",
+      "valeur": {
+        "agrafable 250 Ø 80": 25,
+        "agrafable 333 Ø 80": 25,
+        "agrafable 333 Ø 100": 25,
+        "cylindrique à souder 166 Ø 60": 1,
+        "cylindrique à souder 250 Ø 80": 50,
+        "cylindrique à souder 333 Ø 80": 50,
+        "cylindrique à souder 333 Ø 100": 40,
+        "cylindrique à souder 400 Ø 120": 1,
+        "tronconique 250 Ø 80": 20,
+        "tronconique 333 Ø 100": 15
+      },
+      "unite": "u/carton",
+      "condition": "CLASSIC naturel",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Naissances cylindriques à souder 100 333 40 Pce 1440 Pce 11008015 ; Naissances agrafables 100 333 14 25 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11007935, 11007969, 11007941, 11008006, 11008008, 11008013, 11008015, 11008020, 11008003, 11008004"
+    },
+    {
+      "id": "rz_talons_equerres",
+      "famille": "zinguerie",
+      "sous_famille": "talon (fond) de gouttière",
+      "marque": "RHEINZINK",
+      "modele": "Talons, embouts à talon et équerres (demi-ronde)",
+      "attribut": "conditionnement",
+      "valeur": {
+        "embout à talon droite ou gauche 250": 10,
+        "embout à talon droite ou gauche 333": 5,
+        "embout à talon et naissance Ø 80 (250) / Ø 100 (333)": "10 / 5",
+        "talon à souder universel 250 / 333": "100 / 50",
+        "talon emboîtable universel 250 / 333": "100 / 50",
+        "talon à oreille 333 droite ou gauche (boudin 18)": 50,
+        "équerre emboutie ext. ou int. 250 / 333": 5,
+        "équerre soudée 300 mm 250 : ext. / int.": "10 / 5",
+        "équerre soudée 300 mm 333 : ext. / int.": "8 / 5"
+      },
+      "unite": "u/carton",
+      "condition": "CLASSIC naturel ; équerres sans mention d'angle (90° d'usage), aucune équerre à 135° au catalogue",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Embouts à talon 333 14 Droite 5 Pce 11008803 ; Équerres soudées 333 300 14 extérieure sans 8 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11008802, 11008798, 11008803, 11008799, 11007728, 11007731, 11007794, 11007803, 11007537, 11007538, 11007526, 11007577"
+    },
+    {
+      "id": "rz_dilatation",
+      "famille": "zinguerie",
+      "sous_famille": "joint de dilatation de gouttière",
+      "marque": "RHEINZINK",
+      "modele": "Joints et éléments de dilatation",
+      "attribut": "formats et conditionnement",
+      "valeur": {
+        "joint de dilatation 200 / 260 / 390 mm × 3 m": "1 (palette de 5)",
+        "élément de dilatation avec baguette 250 / 333, boudin 14 ou 18": 10
+      },
+      "unite": "mm / u",
+      "condition": "CLASSIC naturel",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Joints de dilatation 260 3000 1 Pce 5 Pce 11008750 ; Éléments de dilatation avec baguette 333 14 10 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11008747, 11008750, 11008752, 11008705, 11008706, 11008707, 11008708"
+    },
+    {
+      "id": "rz_tuyaux",
+      "famille": "zinguerie",
+      "sous_famille": "descente EP zinc",
+      "marque": "RHEINZINK",
+      "modele": "Tuyaux de descente (tulipe, soudés, tronconiques)",
+      "attribut": "Ø × longueur et conditionnement",
+      "valeur": {
+        "tulipe Ø 60 / 76 / 80 × 2 m": 10,
+        "tulipe Ø 80 × 3 m": 5,
+        "tulipe Ø 100 × 2 m": 10,
+        "tulipe Ø 100 × 3 m": 5,
+        "tulipe Ø 100 × 4 m": 5,
+        "tulipe Ø 120 / 150 × 2 m (0,70)": 10,
+        "soudé ou tronconique Ø 80 × 2 m": 8,
+        "soudé ou tronconique Ø 100 / 120 × 2 m": 6,
+        "carré 80 × 80 / 100 × 100 × 2 m": 10
+      },
+      "unite": "u/botte",
+      "condition": "épaisseur 0,65 (0,70 à 0,80 au-delà de Ø 100) ; CLASSIC naturel",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Tuyaux de descente tulipe 0.65 100 4000 5 Pce 132 Pce 11009941 ; 0.65 80 3000 5 Pce 110 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11009868, 11009872, 11009875, 11009879, 11009882, 11009941, 11009965, 11009966, 11009956, 11009957"
+    },
+    {
+      "id": "rz_coudes",
+      "famille": "zinguerie",
+      "sous_famille": "coude de descente",
+      "marque": "RHEINZINK",
+      "modele": "Coudes de descente zinc",
+      "attribut": "angles, Ø et conditionnement",
+      "valeur": {
+        "tulipé grand rayon 60°": "Ø 60, par 25",
+        "tulipé grand rayon 72°": "Ø 76 / 80 / 100 par 25 ; Ø 120 par 10",
+        "soudé haute fréquence 72°": "Ø 80 / 100, par 25",
+        "deux pièces tulipé 72°": "Ø 76 / 100, par 20",
+        "soudé « Paris » 76°": "Ø 80 / 100, par 20",
+        "à onglets 90°": "Ø 100 à 160, par 10",
+        "lyonnais": "Ø 80 / 100, par 50",
+        "à étage cintré (écartement 60 mm)": "Ø 80 / 100, par 25"
+      },
+      "unite": "° / mm / u",
+      "condition": "pas de coude à 40° ni à 87° chez RHEINZINK",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Coudes tulipés grand rayon 60 60 25 Pce 11008968 ; Coudes soudés « Paris » 80 76 20 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11008968, 11008992, 11008998, 11009034, 11009022, 11009094, 11009095, 11009088, 11009081"
+    },
+    {
+      "id": "rz_colliers",
+      "famille": "zinguerie",
+      "sous_famille": "collier de descente",
+      "marque": "RHEINZINK",
+      "modele": "Colliers et bagues de descente",
+      "attribut": "types, Ø et conditionnement",
+      "valeur": {
+        "collier rond à embase": "Ø 60, 80, 100, 120, 153, 162 ; par 25",
+        "collier rond à pointe": "Ø 80 / 100, par 25",
+        "collier carré à embase": "80 × 80 / 100 × 100, par 25",
+        "manchon": "Ø 80 par 12, Ø 100 par 18",
+        "bague extensible simple": "Ø 80 par 50, Ø 100 par 40",
+        "bague extensible double": "Ø 80 par 25, Ø 100 par 20",
+        "bague à souder": "Ø 80 / 100, par 50 (avec bord) ou 100 (sans bord)"
+      },
+      "unite": "mm / u",
+      "condition": "colliers non teintés",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Colliers ronds à embase 80 25 Pce 11009144 ; Colliers ronds à pointe 100 25 Pce 11009169 ; Manchons 100 105 18 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11009174, 11009144, 11009145, 11009183, 11009167, 11009169, 11009355, 11009363"
+    },
+    {
+      "id": "rz_dauphins",
+      "famille": "zinguerie",
+      "sous_famille": "dauphin",
+      "marque": "RHEINZINK",
+      "modele": "Dauphins fonte (cylindriques droits ou coudés)",
+      "attribut": "Ø × longueur et conditionnement",
+      "valeur": {
+        "Ø 80": "1 m ou 2 m",
+        "Ø 100": "1 m ou 2 m",
+        "Ø 120": "1 m ou 2 m",
+        "teintes": "rouge, blanc",
+        "vente": "à la pièce ; palette de 30 (Ø 80), 24 (Ø 100), 21 (Ø 120)"
+      },
+      "unite": "mm / m",
+      "condition": "dauphin carré droit 80 et 100 × 1 m en rouge",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Dauphins cylindriques droits 100 1000 1 Pce 24 Pce 11009299 ; 120 2000 1 Pce 21 Pce",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "11009272, 11009274, 11009297, 11009299, 11009288, 11009290, 11009306"
+    },
+    {
+      "id": "edz_demironde",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "Edilians",
+      "modele": "Gouttière demi-ronde NATZINC (boudin 14)",
+      "attribut": "développé × épaisseur × longueur",
+      "valeur": {
+        "sans pince": [
+          "166 × 0,65 × 2 m",
+          "250 × 0,65 × 2 / 3 / 4 / 6 m",
+          "333 × 0,65 × 2 / 3 / 4 / 6 m",
+          "400 × 0,65 × 4 m"
+        ],
+        "avec pince": [
+          "250 × 0,65 × 4 m",
+          "333 × 0,65 × 4 m"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "NATZINC = zinc naturel (Squalzinc et Najazinc : « hors gouttières ») ; le catalogue ne donne pas de conditionnement",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "33/12 333 x 0,65 4 086659 ; 25/12 250 x 0,65 6 086696 ; 40/12 400 x 0,65 4 086687",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "086652, 086653, 086654, 086655, 086696, 086657, 086658, 086659, 086660, 086687, 086694, 086661"
+    },
+    {
+      "id": "edz_nantaise_havraise",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc nantaise (rampante, sur rampant)",
+      "marque": "Edilians",
+      "modele": "Gouttière nantaise et havraise NATZINC (avec pince)",
+      "attribut": "développé × épaisseur × relevé × longueur",
+      "valeur": {
+        "nantaise 333 × 0,65 R8": [
+          "2 m",
+          "3 m",
+          "4 m"
+        ],
+        "nantaise 333 × 0,80 R8": [
+          "4 m"
+        ],
+        "nantaise 400 × 0,65 R8 ou R10": [
+          "4 m"
+        ],
+        "nantaise 400 × 0,80 R8 ou R10": [
+          "4 m"
+        ],
+        "havraise 333 × 0,65": [
+          "2 m",
+          "4 m"
+        ]
+      },
+      "unite": "mm / cm / m",
+      "condition": "zinc naturel seulement",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Gouttières nantaises boudin Ø 14 avec pince 33/12 333 x 0,65 R8 4 086679 ; 40/14 400 x 0,80 R10 4 086683",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "086698, 086680, 086679, 086681, 086682, 086690, 086693, 086683, 086699, 086684"
+    },
+    {
+      "id": "edz_accessoires_nantais",
+      "famille": "zinguerie",
+      "sous_famille": "talon de gouttière rampante",
+      "marque": "Edilians",
+      "modele": "Fonds, naissances et crochets nantais / havrais NATZINC",
+      "attribut": "références disponibles",
+      "valeur": {
+        "fond nantais emboîtable dév. 333": "gauche ou droit, relevé 8 ou 10",
+        "fond havrais emboîtable dév. 333": "gauche ou droit",
+        "naissance centrale nantaise": "dév. 333 / Ø 80",
+        "naissance centrale havraise": "dév. 333 / Ø 80",
+        "crochet nantais": "simple dév. 333 R8, limonier dév. 333 R8, simple dév. 400 R10",
+        "crochet havrais": "simple et limonier dév. 333, simple dév. 400",
+        "tirant neige": "universel"
+      },
+      "unite": "liste",
+      "condition": "Edilians vend talons (fonds) et naissances nantaises tout faits ; VMZINC et RHEINZINK n'en ont pas au catalogue (façonnés)",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Fonds nantais emboîtables Dvp 333 gauche R8 089245 ; Naissance centrale nantaise Dvp 333 / Ø 80 089933",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "089245, 091790, 089247, 091791, 089246, 089244, 089933, 089931, 089351, 089352, 089370, 089353, 089364, 089354, 089727"
+    },
+    {
+      "id": "edz_naissances",
+      "famille": "zinguerie",
+      "sous_famille": "naissance / moignon",
+      "marque": "Edilians",
+      "modele": "Naissances NATZINC (demi-ronde et lyonnaise)",
+      "attribut": "développé / Ø disponibles",
+      "valeur": {
+        "agrafable demi-ronde (boudin 14)": [
+          "166 / Ø 60",
+          "250 / Ø 80",
+          "333 / Ø 80",
+          "333 / Ø 100"
+        ],
+        "agrafable lyonnaise (boudin 18)": [
+          "250 / Ø 80",
+          "333 / Ø 80",
+          "333 / Ø 100",
+          "400 / Ø 120"
+        ],
+        "à souder": [
+          "250 / Ø 80",
+          "333 / Ø 80",
+          "333 / Ø 100",
+          "400 / Ø 120"
+        ],
+        "tronconique": [
+          "Ø 80",
+          "Ø 100"
+        ],
+        "plate": [
+          "Ø 80",
+          "Ø 100",
+          "Ø 120"
+        ],
+        "embout talon + naissance G/D": [
+          "166 / Ø 60",
+          "250 / Ø 80",
+          "333 / Ø 100"
+        ]
+      },
+      "unite": "mm",
+      "condition": "pas de conditionnement au catalogue",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Naissances agrafables … Dvp 166 / Ø 60 088864 ; Dvp 333 / Ø 100 088860",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "088864, 088858, 088859, 088860, 088879, 088865, 088866, 088867, 088868, 088869, 088870"
+    },
+    {
+      "id": "edz_descentes",
+      "famille": "zinguerie",
+      "sous_famille": "descente EP zinc",
+      "marque": "Edilians",
+      "modele": "Descentes, coudes, colliers et dauphins NATZINC",
+      "attribut": "formats disponibles",
+      "valeur": {
+        "tuyau bord à bord": [
+          "Ø 60 × 2 m",
+          "Ø 80 × 2 et 3 m",
+          "Ø 100 × 2, 3 et 4 m",
+          "Ø 120 × 2 m"
+        ],
+        "tuyau tronconique soudé étain": [
+          "Ø 80, 100, 140, 160 × 2 m"
+        ],
+        "coude 72°": [
+          "Ø 60, 80, 100, 120"
+        ],
+        "coude 85°": [
+          "Ø 80, 100"
+        ],
+        "coude soudé Paris / à onglets / lyonnais / à étage (dévoiement 50 mm)": [
+          "Ø 80, 100"
+        ],
+        "collier à embase 7/150": [
+          "Ø 60, 80, 100"
+        ],
+        "collier à embase 8/125": [
+          "Ø 120, 140, 150, 160, 200"
+        ],
+        "collier à pointe": [
+          "Ø 80, 100"
+        ],
+        "dauphin fonte droit ou coudé à peindre (sable ou rouge)": [
+          "Ø 80, 100 × 1 m et 2 m",
+          "Ø 120 × 1 m et 2 m (sable)"
+        ]
+      },
+      "unite": "mm / m",
+      "condition": "dauphins livrés avec un apprêt, « à repeindre aux couleurs de la façade »",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Tuyaux de descente bord à bord Ø 100 4 087427 ; Coudes 85° Ø 80 087653 ; Dauphins fonte droits à peindre Ø 80 1",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "087401, 087419, 087416, 087425, 087426, 087427, 087431, 087637, 087643, 087630, 087634, 087653, 087650, 086948, 086924, 086887, 086878"
+    },
+    {
+      "id": "ned_demironde",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière zinc demi-ronde pendante",
+      "marque": "NedZink",
+      "modele": "Gouttière ½ ronde (types 250 à 500)",
+      "attribut": "développés, épaisseurs et finitions",
+      "valeur": {
+        "développés": [
+          250,
+          285,
+          333,
+          400,
+          500
+        ],
+        "avec bavette": [
+          "350 (type 285)",
+          "450 (type 333)"
+        ],
+        "épaisseurs": [
+          0.7,
+          0.8
+        ],
+        "finitions": [
+          "NedZink NATUREL",
+          "NedZink NOIR",
+          "NedZink NEO",
+          "NedZink NOVA",
+          "cuivre"
+        ]
+      },
+      "unite": "mm",
+      "condition": "marché belge (aussi vendu en France) ; NOIR, NEO, NOVA = zincs prépatinés ; la longueur n'est pas écrite dans les tableaux",
+      "regions": [
+        "Belgique",
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "NedZink, Catalogue de produits 2025-2026 (Belgique, FR), « Gouttières & accessoires » p. 31-48 (nedzink.com, fichier du 9/02/2026)",
+          "url": "https://www.nedzink.com/wp-content/uploads/2026/02/catalogus-2025-befr_gouttieres-accessoires.pdf",
+          "type": "fabricant",
+          "extrait": "NedZink NATUREL 333 333 - GR3370 ; 333 333 - GR3380 ; 500 500 - GR5080 ; Épaisseurs 0,7 mm | 0,8 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ],
+      "reference": "GR2580, GR2880, GR3370, GR3380, GR4080, GR5080"
+    },
+    {
+      "id": "ned_accessoires",
+      "famille": "zinguerie",
+      "sous_famille": "crochet de gouttière pendante",
+      "marque": "NedZink",
+      "modele": "Crochets et accessoires de gouttière ½ ronde",
+      "attribut": "conditionnement (pictogramme du catalogue)",
+      "valeur": {
+        "crochet sans queue (trou ou bec)": 50,
+        "crochet avec queue / pré-plié 45°": 25,
+        "crochet avec queue dév. 500": 10,
+        "fermeture (talon)": 10,
+        "fermeture bombée": 25,
+        "angle intérieur ou extérieur": 5,
+        "joint de dilatation préformé": 10,
+        "sortie (naissance) dév. 333, Ø 80 / Ø 100": 10
+      },
+      "unite": "u",
+      "condition": "chiffre imprimé sous le pictogramme de chaque article ; joints de dilatation : idéalement tous les 6 m, 10 m maximum, à 3 m maximum d'un angle",
+      "regions": [
+        "Belgique"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "NedZink, Catalogue de produits 2025-2026 (Belgique, FR), « Gouttières & accessoires » p. 31-48 (nedzink.com, fichier du 9/02/2026)",
+          "url": "https://www.nedzink.com/wp-content/uploads/2026/02/catalogus-2025-befr_gouttieres-accessoires.pdf",
+          "type": "fabricant",
+          "extrait": "Crochets Sans queue avec trou 50 ; Angles intérieurs 5 ; vous les placerez à une distance maximale de 10 mètres",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "le chiffre sous le pictogramme est lu comme le conditionnement, mais le catalogue ne l'écrit pas en toutes lettres ; marché belge"
+    },
+    {
+      "id": "nicoll_lg25_coloris",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière PVC",
+      "marque": "Nicoll",
+      "modele": "Demi-ronde LG25",
+      "attribut": "coloris",
+      "valeur": [
+        "gris",
+        "blanc",
+        "sable",
+        "marron",
+        "noir",
+        "anthracite"
+      ],
+      "unite": "liste",
+      "condition": "tube de descente Ø 80 ; section 66,4 cm² ; surface desservie par naissance Ø 80 : 65 m² ; renvoi « 25 à coller uniquement » pour un coloris",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Nicoll, catalogue « Systèmes de gouttières » CGOUT23 (avril 2025), nicoll.fr",
+          "url": "https://www.nicoll.fr/sites/default/files/products/CGOUT23_04-25.pdf",
+          "type": "fabricant",
+          "extrait": "DEMI-RONDE LG25 … Coloris Gris Blanc Sable Marron Noir Anthracite",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Nicoll, fiche technique gouttières LG16 / LG25 / LG29 / LG33 (septembre 2022, diffusée par Samse)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_7761.pdf",
+          "type": "fabricant",
+          "extrait": "9 Coloris disponibles … Sable Blanc Gris Anthracite Noir Marron Brique Cuivre Graphite",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "La fiche de 2022 annonce 9 coloris pour toute la gamme LG16 à LG33 (dont brique, cuivre, graphite) ; le catalogue 2025 n'en donne que 6 pour la LG25.",
+      "controle": [
+        "pas de formule de contrôle pour une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+      ]
+    },
+    {
+      "id": "nicoll_lg33_coloris",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière PVC",
+      "marque": "Nicoll",
+      "modele": "Demi-ronde LG33",
+      "attribut": "coloris",
+      "valeur": [
+        "gris",
+        "blanc",
+        "sable",
+        "marron",
+        "noir",
+        "anthracite"
+      ],
+      "unite": "liste",
+      "condition": "tubes de descente Ø 100 et Ø 125 ; section 143 cm² ; surface desservie par naissance : 100 m² (Ø 100), 160 m² (Ø 125)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Nicoll, catalogue « Systèmes de gouttières » CGOUT23 (avril 2025), nicoll.fr",
+          "url": "https://www.nicoll.fr/sites/default/files/products/CGOUT23_04-25.pdf",
+          "type": "fabricant",
+          "extrait": "DEMI-RONDE LG33 … Coloris Ø 100 Ø 125 … Gris Blanc Sable Marron Noir Anthracite",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "le tableau croise coloris et Ø (100 / 125) par des pastilles que l'extraction du PDF ne rend pas : on ne sait pas quel coloris existe dans quel Ø"
+    },
+    {
+      "id": "firstplast_coloris",
+      "famille": "zinguerie",
+      "sous_famille": "gouttière PVC",
+      "marque": "First Plast",
+      "modele": "Gouttière PVC 16 / 25 / 33",
+      "attribut": "coloris",
+      "valeur": [
+        "sable",
+        "gris",
+        "blanc",
+        "marron",
+        "noir"
+      ],
+      "unite": "liste",
+      "condition": "assemblage par collage ou par joint",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "First Plast, fiche Batiproduits « Gouttière PVC 16, 25 ou 33 avec assemblage par collage ou joint »",
+          "url": "https://www.batiproduits.com/fiche/produits/gouttiere-pvc-16-25-ou-33-avec-assemblage-par-co-p125763215.html",
+          "type": "fabricant",
+          "extrait": "proposées dans cinq coloris sable, gris, blanc, marron et noir",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "fiche fabricant lue sur Batiproduits seulement ; site firstplast.fr non trouvé ; pas d'anthracite annoncé"
+    },
+    {
+      "id": "crochet_gouttiere_rampante_entraxe_max",
+      "famille": "zinguerie",
+      "sous_famille": "crochet de gouttière rampante",
+      "marque": "",
+      "modele": "",
+      "attribut": "espacement maximal",
+      "valeur": 0.5,
+      "unite": "m",
+      "condition": "gouttières havraises, rouennaises et nantaises : crochets de même métal, 0,50 m au plus (NF DTU 40.5) ; aucun fabricant (VMZINC, RHEINZINK, Edilians) ne donne d'écartement propre aux crochets nantais",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire",
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Progineer, synthèse du NF DTU 40.5 (cite le texte du DTU, § support et fixation)",
+          "url": "https://progineer.fr/workspace/regulation/dtu-40-5/",
+          "type": "guide",
+          "extrait": "elles sont supportées par des crochets de même nature métallique, espacés de 0,50 m au maximum",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "une seule source lue (la synthèse Progineer qui cite le DTU 40.5) ; la fiche Frénéhard des crochets nantais qui reprend « 0,50 m au maximum » n'a pas pu être ouverte (erreur TLS puis 503), l'article Batiactu non plus (403)"
+    },
+    {
+      "id": "equerre_135_zinc",
+      "famille": "zinguerie",
+      "sous_famille": "équerre (angle) de gouttière",
+      "marque": "",
+      "modele": "",
+      "attribut": "équerre zinc à 135° au catalogue",
+      "valeur": "non trouvée",
+      "unite": "",
+      "condition": "VMZINC 2026 : équerres 90° seulement ; RHEINZINK 2026 : équerres sans angle indiqué (90° d'usage) ; Edilians 2024 : équerres zinc sans angle, angles à 135° seulement en aluminium Aqualu",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "VMZINC, fiche produit « Équerre 90° » (juillet 2022, lien depuis vmzinc.com/fr-fr/documentation)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Collecte%20des%20eaux%20pluviales/EQUERRE%20A%2090.pdf",
+          "type": "fabricant",
+          "extrait": "Fiche Produit Équerre 90°",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Équerres embouties … extérieure / intérieure (aucun angle autre que 90°)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Angles intérieurs 135° développés 300 (gamme aluminium AQUALU)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "absence constatée dans trois catalogues ; une équerre à 135° en zinc se façonne ou se commande sur mesure : à faire préciser par l'artisan"
     }
   ],
   "verdict_ratios": [
@@ -2689,7 +4442,7 @@
       "origine": "§7 « coude 72° », §15 « coudes 67° »",
       "valeur_actuelle": "72° / 67°",
       "verdict": "confirme",
-      "bonne_valeur": "zinc 72° (ou 76° « Paris » RHEINZINK, 40°, 90°) ; PVC 67°30 ou 87°30",
+      "bonne_valeur": "zinc 72° (aussi 40°, 60°, 70°, 76° « Paris », 85°, 90°) ; PVC 67°30 ou 87°30",
       "sources": [
         {
           "titre": "VMZINC, Collecte des eaux pluviales, guide technique (copie hébergée par Gedimat)",
@@ -2713,7 +4466,7 @@
       "origine": "roofing.ts:3851 longueur_tube default 4 (réponse du fondateur 2026-10-05)",
       "valeur_actuelle": "4 m",
       "verdict": "corrige",
-      "bonne_valeur": "zinc : 2 m (3 m existe) ; PVC : 4 m (2 et 3 m existent)",
+      "bonne_valeur": "zinc : 2 m (3 m existe ; 4 m en Ø 100 chez VMZINC, RHEINZINK, Edilians) ; PVC : 4 m (2 et 3 m existent)",
       "sources": [
         {
           "titre": "VMZINC, Le Catalogue 2022-2023, page PLUVIAZINC (p. 104-105)",
@@ -3393,10 +5146,11 @@
         "modèle (Rouen, Toulouse, nantais, havrais…)",
         "matière (galva, inox, cuivre)",
         "longueur de tige ou de queue pour un crochet chevron",
-        "nombre"
+        "nombre",
+        "pour un crochet nantais : développé (333 / 400) et relevé (8 / 10)"
       ],
       "unite_de_vente": "pièce",
-      "conditionnement": "carton de 50 (dév. 33) ou 100 (dév. 25)",
+      "conditionnement": "selon le modèle : VMZINC crochet discret 100 (25) / 50 (33) ; RHEINZINK emboutis 100, Rouen / Toulouse / havrais 50, nantais 333 R8 100, nantais 400 R10 50 ; vente à la pièce en négoce",
       "sources": [
         {
           "titre": "RHEINZINK, fiche technique « Crochet Toulouse 333 Tige 25 » (diffusée par le négoce Samse)",
@@ -3411,6 +5165,20 @@
           "type": "fabricant",
           "extrait": "Crochet discret 100 / 50",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Crochet discret pour gouttière à pince Galvanisé mat 100 ; 50",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Crochets nantais 333 14 8 100 Pce ; 400 14 10 50 Pce",
+          "consulte": "2026-11-19"
         }
       ]
     },
@@ -3424,7 +5192,7 @@
         "nombre"
       ],
       "unite_de_vente": "pièce",
-      "conditionnement": "carton de 10 à 25",
+      "conditionnement": "VMZINC agrafable : 10 ; RHEINZINK agrafable : 25, à souder : 40 à 50 ; moignons VMZINC 10 à 50",
       "sources": [
         {
           "titre": "VMZINC, Le Catalogue 2022-2023, page PLUVIAZINC (p. 104-105)",
@@ -3439,6 +5207,20 @@
           "type": "fabricant",
           "extrait": "Conditionnement 1 : 25",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Naissance agrafable 220010739 Naturel 80 105 10",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Naissances agrafables 100 333 14 25 Pce",
+          "consulte": "2026-11-19"
         }
       ]
     },
@@ -3450,10 +5232,12 @@
         "intérieure / extérieure (équerre)",
         "à souder ou emboîtable",
         "finition",
-        "nombre"
+        "nombre",
+        "angle de l'équerre (90° au catalogue ; 135° sur mesure)",
+        "talon nantais : façonné ou fond emboîtable, relevé 8 ou 10"
       ],
       "unite_de_vente": "pièce",
-      "conditionnement": "talons : 4 à 50 par carton selon la gamme",
+      "conditionnement": "VMZINC : talons symétriques 100 (naturel), 24 à 50 (prépatinés) ; équerres ext. naturel 20, int. 4 ; RHEINZINK : talons 50 à 100, embouts G/D 5 à 10, équerres 5 à 10",
       "sources": [
         {
           "titre": "VMZINC, Le Catalogue 2022-2023, page PLUVIAZINC (p. 104-105)",
@@ -3468,6 +5252,20 @@
           "type": "fabricant",
           "extrait": "50 PCE",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VMZINC, Le Catalogue, édition 2026, ch. 6 « Collecte des eaux pluviales » p. 82-106 (PDF lié depuis vmzinc.com/fr-fr/documentation, servi par le CDN du groupe Fedrus, propriétaire de VMZINC ; fichier du 9/09/2026)",
+          "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+          "type": "fabricant",
+          "extrait": "Talons symétriques 211962000 Naturel à gorge 100",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Talons à souder 333 universelle 50 Pce",
+          "consulte": "2026-11-19"
         }
       ]
     },
@@ -3477,11 +5275,11 @@
         "Ø (80, 100, 120) ou carré",
         "cylindrique ou tronconique (à emboîter)",
         "finition",
-        "longueur (2 m, 3 m)",
+        "longueur (2 m ; 3 m ; 4 m en Ø 100)",
         "nombre de tuyaux"
       ],
-      "unite_de_vente": "tuyau de 2 m (3 m existe)",
-      "conditionnement": "botte de 5 à 10",
+      "unite_de_vente": "tuyau de 2 m (3 m existe ; 4 m en Ø 100)",
+      "conditionnement": "botte de 5 (VMZINC) ; 5 à 10 selon Ø et longueur (RHEINZINK)",
       "sources": [
         {
           "titre": "RHEINZINK, fiche technique « Descente cylindrique tulipe Ø80 x 2000 » (diffusée par le négoce Samse)",
@@ -3503,7 +5301,7 @@
       "article": "Tube de descente PVC",
       "ce_que_le_vendeur_demande": [
         "Ø (80, 100)",
-        "teinte",
+        "teinte (Nicoll LG25 : gris, blanc, sable, marron, noir, anthracite)",
         "longueur (4 m courant, 3 m, 2 m)",
         "nombre"
       ],
@@ -3581,9 +5379,10 @@
         "droit ou coudé",
         "fonte ou acier galvanisé",
         "teinte",
-        "longueur (1 m courant)"
+        "longueur (1 m courant)",
+        "teinte de l'apprêt (rouge, blanc, sable) : à repeindre"
       ],
-      "unite_de_vente": "pièce",
+      "unite_de_vente": "pièce de 1 m ou 2 m",
       "conditionnement": "à l'unité",
       "sources": [
         {
@@ -3591,6 +5390,20 @@
           "url": "https://www.richardson.fr/files/richardson/technical_document/1b5/45055_11009272_fichetechniqu.pdf",
           "type": "fabricant",
           "extrait": "Conditionnement 1 : 1 Pce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "RHEINZINK France, Catalogue produits et services, gamme zinc 2026 (v03), « Évacuation des eaux pluviales » p. 160-256 (rheinzink.fr)",
+          "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+          "type": "fabricant",
+          "extrait": "Dauphins cylindriques droits 100 1000 1 Pce 24 Pce",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians (Edilians Tech), catalogue « Évacuation des eaux pluviales » 2024, gamme NATZINC p. 14-21 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/e/d/edilians-catalogue-eaux-pluviales.pdf",
+          "type": "fabricant",
+          "extrait": "Dauphins fonte droits à peindre … Ø 80 1 ; Ø 80 2",
           "consulte": "2026-11-19"
         }
       ]
@@ -3740,7 +5553,7 @@
       "ce_que_le_vendeur_demande": [
         "marque / gamme (Nicoll, Girpi, First Plast)",
         "profil et développé (16, 25, 28, 33)",
-        "teinte",
+        "teinte (Nicoll LG25 : gris, blanc, sable, marron, noir, anthracite)",
         "nombre de longueurs de 4 m",
         "jonctions à coller, à joint ou à dilatation"
       ],

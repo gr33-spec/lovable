@@ -362,9 +362,9 @@
       "marque": "",
       "modele": "",
       "attribut": "rouleaux par palette",
-      "valeur": 25,
+      "valeur": "12 à 39",
       "unite": "rouleaux",
-      "condition": "varie de 12 à 39 selon marque",
+      "condition": "dépend du modèle, à lire sur la fiche du modèle : DELTA-MAXX PLUS 18, DELTA-XX PLUS UNIVERSAL 22, Edilians AERO 24, Spirtech 300 20, DELTA-NEO VENT 25, Divoroll Ecotech 200FR 25, Ondutiss 39, iNDi R2 12 ; sans effet sur la commande d'un chantier (vente au rouleau)",
       "regions": [
         "France"
       ],
@@ -390,9 +390,23 @@
           "type": "negoce",
           "extrait": "Palette de 25 rouleaux",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiche technique DELTA-MAXX PLUS (février 2023, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/preview/56688/file/Fiche%20Technique%20DELTA%20MAXX%20PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Palettisation 18 (dimension 1,5 x 50 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 2 / AERO 2 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
         }
       ],
-      "ecart": "Monier Spirtech 300 : 20 ; Siplast Sup'Air : 20 ; Edilians Aero 2 : 24 ; Ondutiss : 39 ; iNDi R2 : 12. Sans effet sur la commande d'un chantier (vente au rouleau)."
+      "ecart": "Il n'y a pas de nombre « standard » : 25 était le chiffre le plus fréquent de la deuxième passe, mais il varie de 12 à 39 selon la marque et le modèle. La plage est confirmée ; un chiffre se lit par modèle."
     },
     {
       "id": "ecran_hpv_sd",
@@ -778,6 +792,392 @@
       "ecart": "Deux fabricants indépendants donnent le même rouleau de 75 m² ; le grand format change selon la marque."
     },
     {
+      "id": "delta_maxx_plus_sd",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-MAXX PLUS",
+      "attribut": "valeur Sd",
+      "valeur": 0.17,
+      "unite": "m",
+      "condition": "écran perméable à la vapeur à deux bandes autocollantes intégrées ; support discontinu ou continu",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-MAXX PLUS (février 2023, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/preview/56688/file/Fiche%20Technique%20DELTA%20MAXX%20PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Valeur Sd EN ISO 12572 env. 0,17 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,17 ≤ 0,18, donc HPV"
+      ]
+    },
+    {
+      "id": "delta_maxx_plus_rouleau",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-MAXX PLUS",
+      "attribut": "format de rouleau et palette",
+      "valeur": {
+        "1,50 × 50 m": "75 m², 14 kg, 18 rouleaux par palette",
+        "2,96 × 50 m": "148 m², 28 kg, 15 rouleaux par palette"
+      },
+      "unite": "m / u",
+      "condition": "classement R (R2 / R3) non écrit sur la fiche française",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-MAXX PLUS (février 2023, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/preview/56688/file/Fiche%20Technique%20DELTA%20MAXX%20PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Dimension 1,5 x 50 / 2,96 x 50 m ; Palettisation 18 (dimension 1,5 x 50 m) 15 (dimension 2,96 x 50 m)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "1,5 × 50 = 75 m² ; 2,96 × 50 = 148 m²"
+      ]
+    },
+    {
+      "id": "delta_xx_plus_universal",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-XX PLUS UNIVERSAL",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R2 (QB CSTB n° 22-015 : E1-Sd1-TR2)",
+        "Sd_m": 0.08,
+        "entraxe_maxi_cm": 60,
+        "rouleau": "1,50 × 50 m, 11 kg",
+        "rouleaux_par_palette": 22
+      },
+      "unite": "",
+      "condition": "pose au contact de l'isolant possible",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-XX PLUS UNIVERSAL (édition 02, 10/07/2024, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/download/30020/file/DOE-0000_Datenblatt_XX-PLUS-UNIVERSAL_FR_Aufl02_LA03_240710.pdf",
+          "type": "fabricant",
+          "extrait": "Écran de sous-toiture universel HPV R2 … Valeur Sd env. 0,08 m … Palettisation 22 rouleaux/palette",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, page produit DELTA-XX PLUS UNIVERSAL (doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/delta-xx-plus-universal",
+          "type": "fabricant",
+          "extrait": "Certification QB du CSTB n°22-015 (Classement E1-Sd1,TR2)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,08 ≤ 0,18",
+        "R2 ⇔ entraxe ≤ 60 cm : la fiche écrit « entraxe maxi entre chevrons : 60 cm »",
+        "1,5 × 50 = 75 m²"
+      ]
+    },
+    {
+      "id": "delta_foxx_plus",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-FOXX PLUS",
+      "attribut": "Sd et rouleau",
+      "valeur": {
+        "Sd_m": 0.08,
+        "rouleau": "1,50 × 50 m, 20,5 kg"
+      },
+      "unite": "",
+      "condition": "écran HPV renforcé (270 g/m²), bandes adhésives intégrées",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-FOXX PLUS (février 2026, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/download/55945/file/Fiche%20Technique%20DELTA%20FOXX-PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Transmission de la vapeur d'eau - Valeur Sd – env. 0,08 m ; Dimensions du rouleau 1,50 × 50 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,08 ≤ 0,18"
+      ]
+    },
+    {
+      "id": "edilians_aero_1",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Edilians",
+      "modele": "AERO 1 / AERO 1 DBA",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R1",
+        "entraxe_maxi_cm": 45,
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 9 kg",
+        "rouleaux_par_palette": 24
+      },
+      "unite": "",
+      "condition": "DBA = double bande adhésive intégrée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique AERO 1 / AERO 1 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_1.pdf",
+          "type": "fabricant",
+          "extrait": "résistance « standard » R1 … entraxes maximum de 45 cm … Sd 0,02 … 24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "24 rouleaux × 75 m² = 1 800 m² par palette (valeur imprimée : 1800)"
+      ],
+      "reference": "078967, 078969"
+    },
+    {
+      "id": "edilians_aero_2",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Edilians",
+      "modele": "AERO 2 / AERO 2 DBA",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R2",
+        "entraxe_maxi_cm": 60,
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 12 kg",
+        "rouleaux_par_palette": 24
+      },
+      "unite": "",
+      "condition": "DBA = double bande adhésive intégrée ; AERO 2 aussi en 3 × 50 m (150 m², 23 kg)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique AERO 2 / AERO 2 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "résistance « standard » R2 … entraxes maximum de 60 cm … Sd 0,02 … 24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "24 rouleaux × 75 m² = 1 800 m² par palette (valeur imprimée : 1800)"
+      ],
+      "reference": "078826, 078944, 078828"
+    },
+    {
+      "id": "edilians_aero_3",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Edilians",
+      "modele": "AERO 3 / AERO 3 DBA",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R3",
+        "entraxe_maxi_cm": 90,
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 13 kg",
+        "rouleaux_par_palette": 24
+      },
+      "unite": "",
+      "condition": "DBA = double bande adhésive intégrée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique AERO 3 / AERO 3 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_3_1.pdf",
+          "type": "fabricant",
+          "extrait": "résistance « standard » R3 … entraxes maximum de 90 cm … Sd 0,02 … 24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "24 rouleaux × 75 m² = 1 800 m² par palette (valeur imprimée : 1800)"
+      ],
+      "reference": "078830, 078974"
+    },
+    {
+      "id": "spirtech_200",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier (BMI)",
+      "modele": "Divoroll Spirtech 200",
+      "attribut": "classe, Sd, rouleau",
+      "valeur": {
+        "classe": "E1-Sd1-TR2, R2",
+        "entraxe_maxi_cm": 60,
+        "Sd_m": 0.03,
+        "rouleau": "1,50 × 50 m = 75 m²"
+      },
+      "unite": "",
+      "condition": "existe en BBC (double bande adhésive intégrée) ; palette non indiquée",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Monier), page produit Divoroll Spirtech 200 (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/divoroll-spirtech-200-3670997695/",
+          "type": "fabricant",
+          "extrait": "Classement E.S.T. E1-Sd1-TR2 ; Classement R / Entraxe Maxi R2 / 60 cm ; Valeur Sd 0,03 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "page fabricant non datée : la règle confirme_fabricant demande une fiche datée"
+    },
+    {
+      "id": "spirtech_300",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier (BMI)",
+      "modele": "Divoroll Spirtech 300",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "E1-Sd1-TR3, R3",
+        "Sd_m": 0.03,
+        "rouleau": "1,50 × 50 m = 75 m², 12 kg",
+        "rouleaux_par_palette": 20
+      },
+      "unite": "",
+      "condition": "écran armé ; existe en BBC (double bande adhésive)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Monier), page produit Divoroll Spirtech 300 (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/divoroll-spirtech-300-409560277/",
+          "type": "fabricant",
+          "extrait": "E1-Sd1-TR3 ; R3 / 60 cm ; Valeur Sd 0,03 m ; 20",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340134215-scWdrUoLYe.pdf",
+          "type": "fabricant",
+          "extrait": "Écran r3 - entraxe 90 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Entraxe maxi : la page BMI écrit « R3 / 60 cm », la fiche diffusée par BigMat « R3 - entraxe 90 cm » (90 cm = définition de R3 / TR3). Probable coquille de la page : à faire confirmer.",
+      "raison": "page fabricant non datée et entraxe contradictoire entre deux documents du même fabricant"
+    },
+    {
+      "id": "ubbink_multivap_300xs",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Ubbink",
+      "modele": "Multivap 300XS",
+      "attribut": "classe, Sd, rouleau",
+      "valeur": {
+        "classe": "HPV R3 (QB25 CSTB n° 13-087 : E1-Sd1-TR3)",
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 12,6 kg"
+      },
+      "unite": "",
+      "condition": "tous types de pose (contact isolant, sarking, support continu) ; palette non indiquée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Ubbink France, fiche produit Écran de sous-toiture Multivap 300XS réf. 204300 (UB-17-09-2026-FR-FR, cdn-blob.ubbink.com)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/5fd7e8df-deb4-424e-9d00-84fe76fb3812/F0014334_0001.pdf",
+          "type": "fabricant",
+          "extrait": "Écran de sous-toiture R3 HPV ; Certifié QB25 par le CSTB (E1 - Sd1 - TR3) ; Valeur SD 0,02 M",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Résistances (420 / 420 N, 385 / 390 N après vieillissement) identiques à l'AERO 3 Edilians : probablement le même produit d'origine, les deux ne comptent pas comme sources indépendantes l'une de l'autre.",
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "1,5 × 50 = 75 m² (valeur imprimée : 75)"
+      ],
+      "reference": "204300"
+    },
+    {
+      "id": "delta_neo_vent_palette",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-NEO VENT",
+      "attribut": "rouleaux par palette",
+      "valeur": 25,
+      "unite": "rouleaux",
+      "condition": "fiche belge",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Dörken, fiche DELTA-NEO VENT (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/267b56a0-d96f-45b1-aff0-0ed81304405f/be-fiche-technique-delta-neo-vent.pdf",
+          "type": "fabricant",
+          "extrait": "Nombre de rouleaux par palette 25 r.",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "fiche lue chez un négoce (Chausson), produit absent de doerken.com/fr"
+    },
+    {
+      "id": "ecotech_200fr_palette",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier (BMI)",
+      "modele": "Divoroll Ecotech 200FR",
+      "attribut": "rouleaux par palette",
+      "valeur": 25,
+      "unite": "rouleaux",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Monier (BMI), fiche Divoroll Ecotech 200FR (diffusée par Samse, n° 1244784)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1244784.pdf",
+          "type": "fabricant",
+          "extrait": "Nombre d'unités par palette 25",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "fiche fabricant lue chez un négoce (Samse) seulement"
+    },
+    {
       "id": "bitume_recouvrement_longitudinal",
       "famille": "etancheite",
       "sous_famille": "membrane bitume SBS soudée",
@@ -943,8 +1343,8 @@
       "id": "soprema_flam25ar_rouleau",
       "famille": "etancheite",
       "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
-      "marque": "",
-      "modele": "",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25 AR",
       "attribut": "format de rouleau",
       "valeur": 6,
       "unite": "m²",
@@ -981,6 +1381,13 @@
           "url": "https://www.bricodepot.fr/p/3434550464697/couche-d-etancheite-superieure-ardoisee-6-x-1-m-noire",
           "type": "negoce",
           "extrait": "ardoisée 6 x 1 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 AR n° WPBFR206/1/c (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/83617731-4e5e-4eab-9498-b3f9e364539b/TDS-ELASTOPHENE-FLAM-25-AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 6mx1m ; Poids du rouleau Environ 25 kg",
           "consulte": "2026-11-19"
         }
       ],
@@ -1382,6 +1789,229 @@
         }
       ],
       "raison": "Calcul BatiClair sur des valeurs confirmées ; l'about de 10 cm reste à confirmer."
+    },
+    {
+      "id": "soprema_e25_role",
+      "famille": "etancheite",
+      "sous_famille": "1re couche (sous-couche) SBS",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25",
+      "attribut": "rôle, format, épaisseur",
+      "valeur": {
+        "role": "1re couche d'un bicouche (ou 2e couche sous protection rapportée)",
+        "rouleau": "7 × 1 m = 7 m², ≈ 25 kg",
+        "epaisseur_mm": 2.6,
+        "armature": "voile de verre",
+        "faces": "film thermofusible dessus et dessous"
+      },
+      "unite": "",
+      "condition": "soudée au chalumeau ; galon de recouvrement ≥ 60 mm",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 n° WPBFR204/b (PDF du 28/01/2015, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/f738f9cf-715b-4ed7-9c7b-66c332d934e6/TDS-ELASTOPHENE-FLAM-25.pdf",
+          "type": "fabricant",
+          "extrait": "utilisée en complexe bicouche, soit comme première couche, soit comme deuxième couche avec protection rapportée ; 7m x 1m x 2,6 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "7 × 1 = 7 m²"
+      ]
+    },
+    {
+      "id": "soprema_e25ar_role",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25 AR",
+      "attribut": "rôle, format, coloris",
+      "valeur": {
+        "role": "couche de finition autoprotégée d'un bicouche soudable",
+        "rouleau": "6 × 1 m = 6 m², ≈ 25 kg",
+        "epaisseur_mm": 2.6,
+        "coloris_standards": [
+          "Noir",
+          "Gris",
+          "Brun Matisse",
+          "Rouge Gauguin",
+          "Vert Véronèse",
+          "Sienne Cézanne",
+          "Gris Chagall",
+          "Blanc Chagall",
+          "Ocre Van Gogh",
+          "Blanc D-TOX"
+        ]
+      },
+      "unite": "",
+      "condition": "paillettes d'ardoise ; sous-couches associées : Elastophène Flam 70-25 ou 180-25",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 AR n° WPBFR206/1/c (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/83617731-4e5e-4eab-9498-b3f9e364539b/TDS-ELASTOPHENE-FLAM-25-AR.pdf",
+          "type": "fabricant",
+          "extrait": "couche de finition d'un complexe bicouche soudable ; Dimensions du rouleau 6mx1m ; Coloris standards Noir, Gris, Brun Matisse…",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "6 × 1 = 6 m²"
+      ]
+    },
+    {
+      "id": "soprema_s180ar_role",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Sopralène Flam 180 AR",
+      "attribut": "rôle, format, coloris",
+      "valeur": {
+        "role": "couche de finition autoprotégée d'un bicouche",
+        "rouleau": "6 × 1 m = 6 m², ≈ 25 kg",
+        "epaisseur_mm": 3.1,
+        "armature": "polyester non-tissé",
+        "coloris_standards": [
+          "Noir",
+          "Gris",
+          "Brun Matisse",
+          "Rouge Gauguin",
+          "Vert Véronèse",
+          "Sienne Cézanne"
+        ],
+        "coloris_reflechissants": [
+          "Blanc Chagall",
+          "Blanc D-TOX"
+        ]
+      },
+      "unite": "",
+      "condition": "soudée au chalumeau ; sous-couche Elastophène Flam 25 ; « d'autres longueurs sont réalisables à la demande »",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique SOPRALENE FLAM 180 AR n° WPBFR230/1/d (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/94559614-aeec-4bc0-80f1-b03f482ade1c/TDS-SOPRALENE-FLAM-180-AR.pdf",
+          "type": "fabricant",
+          "extrait": "couche de finition d'un complexe bicouche ; Dimensions du rouleau* 6mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "La fiche comptoir de la deuxième passe disait 1 × 8 m : la fiche française n° WPBFR230/1/d écrit 6 × 1 m (le 8 m est la version export de la fiche anglaise).",
+      "controle": [
+        "6 × 1 = 6 m²"
+      ]
+    },
+    {
+      "id": "soprema_nuancier_paillettes",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Nuancier paillettes d'ardoise",
+      "attribut": "teintes de paillettes",
+      "valeur": [
+        "Gris",
+        "Noir",
+        "Vert Véronèse",
+        "Rouge Gauguin",
+        "Gris Chagall",
+        "Brun Matisse",
+        "Sienne Cézanne",
+        "Ocre Van Gogh"
+      ],
+      "unite": "liste",
+      "condition": "toutes les feuilles autoprotégées Soprema ; disponibilité par produit : voir la fiche du produit",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, nuancier « Finitions en paillettes d'ardoise » DC-24/072_FR (novembre 2024, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/6fd74910-6f0a-41b4-9964-575acf97a48e/Nuancier-Paillettes-d-ardoise.pdf",
+          "type": "fabricant",
+          "extrait": "Finitions en paillettes d'ardoise Gris Noir Vert Véronèse Rouge Gauguin Gris Chagall Brun Matisse Sienne Cézanne Ocre Van Gogh",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de calcul possible pour une liste de teintes"
+      ]
+    },
+    {
+      "id": "siplast_paradiene_301gs",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Siplast",
+      "modele": "Paradiene 30.1 GS",
+      "attribut": "rôle, format, coloris",
+      "valeur": {
+        "role": "2e couche (finition autoprotégée) sur Adepar JS ou Paradiene FM",
+        "rouleau": "6 × 1 m",
+        "coloris": [
+          "Anthracite",
+          "Blanc Alpin SRI 82",
+          "Blanc SRI 60",
+          "Brun",
+          "Gris Anthracite",
+          "Gris Clair",
+          "Rouge Bauxite",
+          "Vert Lichen"
+        ]
+      },
+      "unite": "",
+      "condition": "autoprotection minérale ; armature voile de verre",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Siplast), page produit Paradiene 30.1 GS (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/paradiene-30-1-gs-rouge-bauxite-1568175029/",
+          "type": "fabricant",
+          "extrait": "Deuxième couche d'un système d'étanchéité ; largeur 1 m, longueur 6 m ; Rouge Bauxite",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "page fabricant non datée ; fiche technique datée non retrouvée"
+    },
+    {
+      "id": "siplast_parafor_solo_gs",
+      "famille": "etancheite",
+      "sous_famille": "monocouche SBS autoprotégée",
+      "marque": "Siplast",
+      "modele": "Parafor Solo GS",
+      "attribut": "rôle et format",
+      "valeur": {
+        "role": "monocouche soudé en plein (terrasse inaccessible ou technique)",
+        "rouleau": "1 × 7 m × 4 mm"
+      },
+      "unite": "",
+      "condition": "coloris non listés sur la page",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Siplast), page produit Parafor Solo GS (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/parafor-solo-gs-3039606568/",
+          "type": "fabricant",
+          "extrait": "Revêtement d'étanchéité monocouche, soudé en plein ; 1m x 7m x 4mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "page fabricant non datée ; teintes et palette non trouvées sur une fiche officielle"
     }
   ],
   "verdict_ratios": [
@@ -2128,10 +2758,11 @@
         "classe R2 ou R3 selon l'entraxe des chevrons (60 / 90 cm)",
         "marque ou « équivalent »",
         "avec ou sans bandes adhésives intégrées",
-        "nombre de rouleaux"
+        "nombre de rouleaux",
+        "modèle courant si l'artisan n'en a pas : Dörken DELTA-XX PLUS UNIVERSAL (R2), Edilians AERO 2 / AERO 3, Monier Spirtech 200 / 300, Ubbink Multivap 300XS (R3)"
       ],
       "unite_de_vente": "rouleau",
-      "conditionnement": "1,50 × 50 m = 75 m² (aussi 1,50 × 100 m Monier ; 30 m² en GSB) ; palette divisible de 12 à 39 rouleaux",
+      "conditionnement": "1,50 × 50 m = 75 m² (aussi 1,50 × 100 m Monier ; 2,96 × 50 m Dörken ; 3 × 50 m Edilians AERO 2 ; 30 m² en GSB) ; palette de 12 à 39 rouleaux selon le modèle (DELTA-MAXX PLUS 18, DELTA-XX PLUS 22, AERO 24, Spirtech 300 20)",
       "sources": [
         {
           "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
@@ -2146,8 +2777,23 @@
           "type": "fabricant",
           "extrait": "Écran R2, entraxe maxi 60 cm ; Palette de 20 rouleaux",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiche technique DELTA-XX PLUS UNIVERSAL (édition 02, 10/07/2024, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/download/30020/file/DOE-0000_Datenblatt_XX-PLUS-UNIVERSAL_FR_Aufl02_LA03_240710.pdf",
+          "type": "fabricant",
+          "extrait": "Palettisation 22 rouleaux/palette",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 3 / AERO 3 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_3_1.pdf",
+          "type": "fabricant",
+          "extrait": "24 rouleaux par palette",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "ecran"
     },
     {
       "article": "Contre-liteaux",
@@ -2167,7 +2813,8 @@
           "extrait": "liteaux en bois traités classe 2, de dimensions minimales 20 x 36 mm",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "ecran"
     },
     {
       "article": "Adhésif d'écran",
@@ -2193,7 +2840,8 @@
           "extrait": "CDT : rouleau",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "ecran"
     },
     {
       "article": "Bande d'égout / larmier d'écran",
@@ -2212,7 +2860,8 @@
           "extrait": "Larmier : disponible en développé 166 mm, longueur 2 ml",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "ecran"
     },
     {
       "article": "Sous-couche bitume SBS (1re couche)",
@@ -2238,18 +2887,26 @@
           "type": "fabricant",
           "extrait": "7,5 m x 1 m 25 kg",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 n° WPBFR204/b (PDF du 28/01/2015, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/f738f9cf-715b-4ed7-9c7b-66c332d934e6/TDS-ELASTOPHENE-FLAM-25.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 7mx1m",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "etancheite"
     },
     {
       "article": "Couche autoprotégée (2e couche)",
       "ce_que_le_vendeur_demande": [
         "référence",
-        "teinte des paillettes (gris ardoise, schiste clair, noir…)",
+        "teinte des paillettes (Soprema : Gris, Noir, Vert Véronèse, Rouge Gauguin, Gris Chagall, Brun Matisse, Sienne Cézanne, Ocre Van Gogh)",
         "nombre de rouleaux"
       ],
       "unite_de_vente": "rouleau",
-      "conditionnement": "1 × 6 m courant (1 × 8 m Sopralène Flam 180 AR)",
+      "conditionnement": "rouleau 6 × 1 m (Soprema Sopralène Flam 180 AR, Elastophène Flam 25 AR ; Siplast Paradiene 30.1 GS) ; 8 m sur demande / export",
       "sources": [
         {
           "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
@@ -2264,8 +2921,23 @@
           "type": "fabricant",
           "extrait": "Paradiene 30.1 GS 6mx1m",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique SOPRALENE FLAM 180 AR n° WPBFR230/1/d (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/94559614-aeec-4bc0-80f1-b03f482ade1c/TDS-SOPRALENE-FLAM-180-AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 6mx1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, nuancier « Finitions en paillettes d'ardoise » DC-24/072_FR (novembre 2024, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/6fd74910-6f0a-41b4-9964-575acf97a48e/Nuancier-Paillettes-d-ardoise.pdf",
+          "type": "fabricant",
+          "extrait": "Finitions en paillettes d'ardoise",
+          "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "etancheite"
     },
     {
       "article": "Primaire EIF",
@@ -2291,7 +2963,8 @@
           "extrait": "Siplast Primer : bidons de 2, 10 ou 25 l",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "etancheite"
     },
     {
       "article": "Isolant sous étanchéité",
@@ -2319,7 +2992,8 @@
           "extrait": "1200 x 1000",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "etancheite"
     },
     {
       "article": "Équerre de renfort",
@@ -2344,7 +3018,8 @@
           "extrait": "25 cm / 33 cm",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "etancheite"
     },
     {
       "article": "Entrée d'eaux pluviales (EEP), trop-plein, crapaudine",
@@ -2364,7 +3039,8 @@
           "extrait": "diamètres selon la surface collectée par EEP, la forme de l'EEP",
           "consulte": "2026-11-19"
         }
-      ]
+      ],
+      "famille": "etancheite"
     }
   ]
 }

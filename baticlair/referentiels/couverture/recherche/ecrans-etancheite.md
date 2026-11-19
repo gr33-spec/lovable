@@ -2,8 +2,8 @@
 
 Données complètes, sources et extraits dans `ecrans-etancheite.json`. Ce fichier n'est pas lu par le moteur.
 
-**42 entrées** (23 écrans, 19 étanchéité) : après la deuxième passe, 26 confirmées, 12 à une source, 4 à confirmer
-(avant : 24 / 13 / 5).
+**60 entrées** (35 écrans, 25 étanchéité) : après la troisième passe, 26 confirmées, 12 `confirme_fabricant`, 18 à une
+source, 4 à confirmer (deuxième passe : 26 / 0 / 12 / 4 ; première : 24 / 0 / 13 / 5).
 **33 verdicts** sur les ratios existants : 13 confirmés, 9 corrigés, 11 à confirmer. **10 fiches comptoir.**
 
 Les textes des NF DTU n'ont pas été lus. Leurs valeurs sont prises dans des guides et des fiches qui les citent
@@ -83,7 +83,9 @@ Ils sont trop courts à 30 % et moins (tuile canal, faible pente), où il faut e
 
 ## 4. Ce que le vendeur demande au comptoir
 
-- **Écran** : HPV ou non, R2 ou R3 (selon l'entraxe), bandes adhésives intégrées ou non, nombre de rouleaux de 75 m².
+- **Écran** : HPV ou non, R2 ou R3 (selon l'entraxe), bandes adhésives intégrées ou non, nombre de rouleaux de 75 m² ;
+  la marque ou un modèle courant (Dörken DELTA-XX PLUS UNIVERSAL, Edilians AERO 2 / 3, Monier Spirtech 200 / 300, Ubbink
+  Multivap 300XS).
 - **Contre-liteaux** : section, traitement classe 2, longueur des barres.
 - **Adhésif** : largeur, compatibilité avec l'écran, nombre de rouleaux de 25 m.
 - **Larmier** : développé et longueur.
@@ -116,3 +118,42 @@ Ils sont trop courts à 30 % et moins (tuile canal, faible pente), où il faut e
 - **Sans source** (verdicts) : bouteille de gaz par m², perte isolant 3 %, pare-vapeur × 1,15.
 - **Une source, fabricant seul** : formats Siplast et Soprema lus chez des négoces (Samse, Quincaillerie Angles) ; le
   `confirme_fabricant` demande la fiche datée sur le domaine du fabricant, non retrouvée (siplast.fr, lotus.soprema.fr en 503).
+
+## 7. Troisième passe (19 novembre 2026) : produits du marché nommés
+
+Le testeur-négoce ne trouvait « aucun produit du marché nommé ». Les modèles sont maintenant rangés sous leur marque
+(`marque`, `modele`). `confirme_fabricant` = fiche officielle datée, lue sur le site du fabricant (ou son CDN lié depuis le
+site), et contrôle par le calcul quand il existe (HPV ⇔ Sd ≤ 0,18 m ; R2 ⇔ 60 cm ; rouleaux × m² = m² par palette).
+
+| Marque | Modèle | Classe | Sd | Rouleau | Palette | Statut |
+| --- | --- | --- | --- | --- | --- | --- |
+| Dörken | DELTA-MAXX PLUS (2 bandes adhésives) | HPV (R non écrit) | 0,17 m | 1,50 × 50 m (aussi 2,96 × 50) | 18 (15 en 2,96 m) | confirme_fabricant |
+| Dörken | DELTA-XX PLUS UNIVERSAL | HPV R2, QB 22-015 E1-Sd1-TR2 | 0,08 m | 1,50 × 50 m, 11 kg | 22 | confirme_fabricant |
+| Dörken | DELTA-FOXX PLUS | HPV | 0,08 m | 1,50 × 50 m | — | confirme_fabricant |
+| Edilians | AERO 1 / 2 / 3 (et DBA) | HPV R1 / R2 / R3 (45 / 60 / 90 cm) | 0,02 m | 1,50 × 50 m (AERO 2 aussi 3 × 50) | 24 (1 800 m²) | confirme_fabricant |
+| Ubbink | Multivap 300XS | HPV R3, QB25 13-087 E1-Sd1-TR3 | 0,02 m | 1,50 × 50 m | — | confirme_fabricant |
+| Monier (BMI) | Divoroll Spirtech 200 | E1-Sd1-TR2, R2 | 0,03 m | 1,50 × 50 m | — | une source (page non datée) |
+| Monier (BMI) | Divoroll Spirtech 300 | E1-Sd1-TR3, R3 (page : « 60 cm », fiche : 90 cm) | 0,03 m | 1,50 × 50 m | 20 | une source, écart |
+| Dörken / Monier | DELTA-NEO VENT, Divoroll Ecotech 200FR | — | — | — | 25 | une source (fiches chez un négoce) |
+
+**Palette** : « 25 rouleaux, confirmé » avec « 12 à 39 » était incohérent. La règle dit maintenant **12 à 39 selon le
+modèle** (confirmé), et le chiffre se lit par modèle. Sans effet sur une commande de chantier (vente au rouleau).
+Ubbink Multivap 300XS et Edilians AERO 3 ont exactement les mêmes résistances : probablement le même produit d'origine.
+
+**Étanchéité bitume (Soprema, fiches techniques datées liées depuis soprema.fr)** :
+- Elastophène Flam 25 : 1re couche (ou 2e sous protection rapportée), 7 × 1 m, 2,6 mm, ≈ 25 kg.
+- Elastophène Flam 25 AR : finition autoprotégée, 6 × 1 m, 10 coloris standards.
+- Sopralène Flam 180 AR : finition autoprotégée, **6 × 1 m** (la fiche comptoir disait 8 m : c'est la longueur export),
+  3,1 mm, coloris Noir, Gris, Brun Matisse, Rouge Gauguin, Vert Véronèse, Sienne Cézanne (+ Blanc Chagall, Blanc D-TOX).
+- Nuancier paillettes Soprema (novembre 2024) : Gris, Noir, Vert Véronèse, Rouge Gauguin, Gris Chagall, Brun Matisse,
+  Sienne Cézanne, Ocre Van Gogh.
+- Siplast (pages BMI non datées, une source) : Paradiene 30.1 GS, 2e couche autoprotégée 6 × 1 m, 8 teintes (Anthracite,
+  Blanc Alpin SRI 82, Blanc SRI 60, Brun, Gris Anthracite, Gris Clair, Rouge Bauxite, Vert Lichen) ; Parafor Solo GS,
+  monocouche soudé 1 × 7 m × 4 mm.
+
+**Comptoir** : chaque rubrique porte maintenant `famille` (`ecran` ou `etancheite`), les rubriques d'étanchéité sont rangées
+après celles des écrans ; la fiche les classe déjà ainsi.
+
+Ce qui reste : DELTA-VENT N absent de doerken.com/fr (page 404 : retiré du marché français ?) ; Divoroll Top RU introuvable
+en France ; **Siga et Tyvek (Supro, Solid)** : aucune fiche française officielle trouvée (DuPont ne publie que des fiches
+anglaises) ; palettes Ubbink et Spirtech 200 non publiées ; fiches Siplast datées non retrouvées.

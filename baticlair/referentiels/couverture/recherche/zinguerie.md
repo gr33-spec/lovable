@@ -1,8 +1,8 @@
 # Zinguerie et évacuation des eaux pluviales : résumé de la recherche (19 novembre 2026)
 
-Données complètes et sources : `zinguerie.json` (67 entrées, 33 verdicts, 17 fiches comptoir).
-Statuts après la deuxième passe : 53 confirmées (au moins deux sources indépendantes), 11 à une seule source, 3 à confirmer
-(avant : 44 / 18 / 4).
+Données complètes et sources : `zinguerie.json` (109 entrées, 33 verdicts, 17 fiches comptoir).
+Statuts après la troisième passe : 55 confirmées (au moins deux sources indépendantes), 37 `confirme_fabricant`, 13 à une
+seule source, 4 à confirmer (deuxième passe : 53 / 0 / 11 / 3 ; première : 44 / 0 / 18 / 4).
 
 Sources principales : guide et dossier technique VMZINC « Collecte des eaux pluviales », catalogue VMZINC
 2022-2023 (PLUVIAZINC), fiches RHEINZINK (diffusées par Samse et Richardson), catalogue NedZink, elZinc joint
@@ -18,7 +18,8 @@ Metaconcept. Les textes AFNOR n'ont pas été lus : les valeurs DTU viennent des
 | Longueur gouttière (zinc, PVC) | 4 m ; 2 m et 6 m existent | confirmé |
 | Épaisseur | 0,65 mm (0,80 existe) | confirmé |
 | Finitions zinc | naturel, Quartz-Zinc, Anthra-Zinc, Pigmento, bilaqué (PLUVIAZINC : Quartz-Zinc seulement) | confirmé |
-| Nantaise de 33 et de 40 | longueur 4 m, relevé 80 mm (VMZINC, RHEINZINK, vendue chez Tanguy, Quéguiner, Bretagne Matériaux) ; relevé 100 mm chez VMZINC seul | confirmé |
+| Nantaise de 33 et de 40 | longueur 4 m (2 et 3 m existent), relevé 80 ou 100 mm : VMZINC 2026, RHEINZINK 2026, Edilians 2024 ; en rayon breton surtout le R8. La nantaise de 25 n'est plus dans aucun catalogue | confirmé |
+| Havraise de 33 et de 40 | 4 m (2 m existe) : VMZINC, RHEINZINK, Edilians | confirmé |
 | Quimper | VMZINC zinc naturel, 0,65 mm, développé 400, hauteur 95 mm, 4 m (cotes lues sur une seule fiche négoce) | confirmé |
 | Développé 28 en demi-ronde | existe chez RHEINZINK (280) et NedZink (285), pas chez VMZINC France ni en rayon en Bretagne | confirmé |
 | Doublis (bande à ourlet) | 2 m, développés 166 à 333 (Quéguiner, Tanguy ; elZinc, VMZINC, RHEINZINK) | confirmé |
@@ -29,10 +30,12 @@ Metaconcept. Les textes AFNOR n'ont pas été lus : les valeurs DTU viennent des
 | Pente | 5 mm/m minimum | confirmé |
 | Surface desservie par descente (DTU 60.11) | Ø 60 → 40 m² ; Ø 80 → 71 ; Ø 100 → 113 ; Ø 120 → 161 | confirmé |
 | Surface desservie par gouttière demi-ronde, par sens, à 5 mm/m | 25 → 35 m² ; 33 → 95 m² ; 40 → 180 m² | confirmé |
-| Descente zinc | Ø 60 / 80 / 100 / 120, tuyaux de **2 m** (3 m existe) ; aucun tuyau zinc de 4 m trouvé | confirmé |
+| Descente zinc | Ø 60 / 80 / 100 / 120, tuyaux de **2 m** (3 m en Ø 80 et Ø 100 ; **4 m en Ø 100** chez VMZINC, RHEINZINK et Edilians) | confirmé |
 | Descente PVC | tubes de **4 m** (Nicoll) ; 3, 2 et 1 m existent | confirmé |
 | Colliers | 2 m maximum, au moins un par élément (fonte 2,70 m ; cuivre 2,50 m) | confirmé |
-| Coudes | zinc 72° (40°, 76° « Paris », 90°) ; PVC 67°30 ou 87°30 ; 2 par dévoiement (col de cygne) | confirmé |
+| Coudes | zinc 72° (aussi 36° rotule, 40°, 60° en Ø 60, 70° angle vif, 76° « Paris », 85°, 90°) ; PVC 67°30 ou 87°30 ; 2 par dévoiement (col de cygne) | confirmé |
+| Équerres zinc | 90°, extérieure ou intérieure ; 135° en zinc dans aucun catalogue (sur mesure) | confirmé (90°) / à confirmer (135°) |
+| Talon de nantaise | façonné par le couvreur, ou fond nantais emboîtable gauche / droite, relevé 8 ou 10 (Edilians) | confirmé |
 | Dauphin | fonte ou acier, 1 m (2 m existe) | confirmé |
 | Feuille de zinc | 2 000 × 1 000 mm, 0,65 / 0,70 / 0,80 / 1 mm ; 9,36 kg en 0,65 | confirmé |
 | Bandes de 2 m par feuille | dév. 25 → 4 ; dév. 33 → 3 ; dév. 40 à 50 → 2 | confirmé (calcul) |
@@ -70,7 +73,7 @@ marge × 1,05 alors que le skill dit « l'arrondi suffit » (aucune source exter
 ## Bretagne
 
 - La demi-ronde pendante de 25 et 33 est le profil courant (VMZINC : « idéales en région de plaine ou bord de mer »).
-- Nantaise de 33 (rampante, sur ardoise) : sa capacité baisse fortement avec la pente du toit (relevé 80 mm : 35 m² à 27°, 15 m² à 45°). Elle demande une **bande de doublis** (2 m maximum), et le couvreur façonne talons et retours.
+- Nantaise de 33 (rampante, sur ardoise) : sa capacité baisse fortement avec la pente du toit (relevé 80 mm : 35 m² à 27°, 15 m² à 45°). Elle demande une **bande de doublis** (2 m maximum), et le couvreur façonne talons et retours (Edilians vend aussi des fonds nantais emboîtables). Crochets nantais : 0,50 m au plus (DTU 40.5, une source lue), RHEINZINK 333 R8 en carton de 100.
 - VMZINC fait aussi une gouttière **Quimper**, en zinc naturel, proche de la nantaise : développé 400, hauteur 95 mm, 4 m (Bretagne Matériaux, Point.P), avec son crochet équerre (Frénéhard).
 - **Longueurs vendues en Bretagne** (Quéguiner, Tanguy, Bretagne Matériaux, lus en ligne) : gouttières en 4 m, tuyaux de descente en 2 m (3 m existe en Ø 80), bandes (doublis, rive, égout, noue, faîtage) en 2 m. Aucune pièce de 3 m vue en faîtage ni en bande. Profils en rayon : demi-ronde 25 et 33, nantaise 33 (0,65) et 40 (0,80), Quimper, carrée.
 - Non consultés (pas de catalogue lisible en ligne) : Le Comptoir des Fers, Gédimat Bretagne, Asturienne. Ce qu'on vend ne dit pas ce qui est le plus posé : l'habitude locale reste à faire dire au fondateur.
@@ -105,3 +108,31 @@ marge × 1,05 alors que le skill dit « l'arrondi suffit » (aucune source exter
   premier crochet PVC (deux fabricants, deux valeurs différentes) ; gouttière PVC Nicoll ; aluminium DAL'ALU (continue 15 m,
   crochets) ; acier galva ; autres formats de feuille ; palette RHEINZINK (cohérente par le calcul, mais fiche lue chez un
   négoce : pas de `confirme_fabricant`) ; pliage VMZINC 4 m (fiche sur vmzinc.com mais non datée : pas de `confirme_fabricant`).
+
+## Troisième passe (19 novembre 2026) : modèles par marque
+
+Le testeur-négoce ne trouvait aucune marque ni modèle. Trois catalogues officiels datés, sur le site du fabricant, ont été lus
+en entier pour l'évacuation des eaux pluviales : **VMZINC Le Catalogue 2026** (PDF lié depuis vmzinc.com, servi par le CDN du
+groupe Fedrus), **RHEINZINK France catalogue gamme zinc 2026** (rheinzink.fr), **Edilians catalogue eaux pluviales 2024**
+(edilians.com) ; plus NedZink 2025-2026 (Belgique) et Nicoll avril 2025. Chaque modèle porte `marque`, `modele`, ses
+références (`reference`) et son contrôle (`controle` : pas de formule pour une longueur ou un colisage ; arithmétique quand il
+y en a une, par ex. 2,5 crochets/m = 0,40 m, palette 5/250 = 50 cartons).
+
+| Marque | Modèles ajoutés |
+| --- | --- |
+| VMZINC | demi-ronde 16, 25, 33 et pendante 40 (longueur × épaisseur par finition : naturel, Quartz-Zinc, Anthra-Zinc, Azengar, Pigmento) ; nantaise 33 (R80 / R100, 0,65 / 0,80, 2 ou 4 m) et 40 / 50 ; havraise 33 / 40 ; Quimper (R95, 0,65, 4 m) ; crochet discret 25 / 33 (100 / 50) ; équerres 90° 25 et 33 (naturel ext. 20, int. 4) ; naissances agrafables Ø 80 / Ø 100 (10) et moignons Ø 60 à 120 ; talons symétriques (100 en naturel) et embouts à talon G/D ; joint de dilatation type 26 (15 m en pendante, 12 m en nantaise) ; tuyaux 2 / 3 / 4 m ; manchons ; coudes 90°, 72°, 40°, 70°, 36° ; bagues |
+| RHEINZINK | demi-ronde 166 / 250 / 333 (CLASSIC, prePATINA) ; nantaise 333 et 400 R8 / R10 (CLASSIC, prePATINA, GRANUM EXTRA) ; havraise 333 / 400 ; crochets nantais (333 R8 : 100 ; 400 R10 : 50) et havrais (50) ; crochets emboutis (100), Rouen, Toulouse (50) ; naissances (agrafables 25, à souder 40-50) ; talons, embouts G/D, équerres ; dilatation ; tuyaux 2 / 3 / 4 m ; coudes 60°, 72°, 76°, 90° ; colliers à embase Ø 60 à 162 (25) ; dauphins fonte Ø 80 / 100 / 120 en 1 et 2 m, rouge ou blanc |
+| Edilians | demi-ronde NATZINC 166 à 400 (2, 3, 4, 6 m) ; nantaise 333 / 400 R8 / R10 et havraise 333 ; fonds nantais emboîtables G/D, naissance centrale nantaise Ø 80, crochets nantais simple / limonier ; naissances Ø 60 à 120 ; descentes, coudes 72° / 85°, colliers, dauphins fonte 1 et 2 m (pas de colisage au catalogue) |
+| NedZink | demi-ronde 250 à 500, NATUREL / NOIR / NEO / NOVA ; colisage des crochets et accessoires (une source : lu sous un pictogramme) |
+| Nicoll, First Plast | teintes PVC : LG25 gris, blanc, sable, marron, noir, anthracite (Nicoll 2025) ; LG33 idem mais Ø non lisible ; First Plast sable, gris, blanc, marron, noir |
+
+Corrections : nantaise et havraise désormais confirmées par trois fabricants indépendants (la 25 retirée : elle n'est plus dans
+aucun catalogue) ; le développé 33 est codé **330** partout dans les règles (`dev_330`), les modèles gardent **333** quand le
+fabricant l'écrit (RHEINZINK, Edilians, NedZink) ; « aucun tuyau zinc de 4 m » était faux (4 m en Ø 100 chez les trois) ;
+le conditionnement 100 / 50 des crochets est celui du crochet discret VMZINC, pas une règle générale.
+
+Ce qui reste : **0,40 m en bord de mer ou en neige** toujours sans chiffre publié (le DTU dit « fonction des charges
+climatiques », 0,50 m au plus ; seul le crochet discret VMZINC donne 2,5/m = 0,40 m) ; écartement des crochets nantais à
+0,50 m lu dans une seule source (fiche Frénéhard et article Batiactu inaccessibles) ; équerre zinc à 135° absente des
+catalogues ; Elzinc non trouvé (pas de catalogue évacuation lisible) ; Quimper : développé non écrit au catalogue VMZINC ;
+Edilians ne publie pas de colisage.
