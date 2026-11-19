@@ -47,7 +47,7 @@ export function PiedVitrine({ sansEditeur = false }: { sansEditeur?: boolean }) 
           ))}
           <Link href="/tarifs">Tarifs</Link>
           <Link href="/negoce/connexion">Accès négoce</Link>
-          <a href="/couvreurs?demo">Revoir la démo</a>
+          <Link href="/couvreurs?demo">Revoir la démo</Link>
         </nav>
       </div>
       {sansEditeur ? null : (

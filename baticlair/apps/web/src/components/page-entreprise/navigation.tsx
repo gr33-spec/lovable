@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, P
 import { useEffect, useRef, useState } from "react";
 import { lienAppel, type RealisationPublique } from "@baticlair/domain/page-entreprise";
 import { Photo } from "./photo";
+import Link from "next/link";
 
 /**
  * Les gestes de la page publique, en îlots client (le reste est rendu par le serveur) : le menu déroulant du téléphone,
@@ -44,14 +45,22 @@ export function RetourMonSite() {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     // Lu après l'affichage : la page est rendue par le serveur, le paramètre ne change rien pour un visiteur.
+    const params = new URLSearchParams(window.location.search);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVisible(new URLSearchParams(window.location.search).get("depuis") === "mon-site");
+    setVisible(params.get("depuis") === "mon-site");
+    // Développeur senior (19 novembre 2026) : le paramètre sort de la barre d'adresse aussitôt lu ; un lien copié et
+    // partagé à un client ne montre jamais « Retour à Mon site ».
+    if (params.has("depuis")) {
+      params.delete("depuis");
+      const q = params.toString();
+      window.history.replaceState(window.history.state, "", `${window.location.pathname}${q ? `?${q}` : ""}${window.location.hash}`);
+    }
   }, []);
   if (!visible) return null;
   return (
-    <a href="/mon-site" className="pe-retour-app">
+    <Link href="/mon-site" className="pe-retour-app">
       <ArrowLeft size={18} strokeWidth={2.4} aria-hidden="true" /> Retour à Mon site
-    </a>
+    </Link>
   );
 }
 

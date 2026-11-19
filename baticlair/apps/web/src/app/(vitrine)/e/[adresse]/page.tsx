@@ -18,6 +18,9 @@ const INDEXEES = process.env.PAGES_ENTREPRISES_INDEXEES === "on";
 type Props = { params: Promise<{ adresse: string }> };
 
 async function charger(adresse: string) {
+  // Une adresse tapée avec des majuscules (« /e/Toits-Martin ») mène à la page (développeur senior, 19 novembre 2026).
+  const decodee = decodeURIComponent(adresse);
+  if (decodee !== decodee.toLowerCase()) permanentRedirect(`/e/${encodeURIComponent(decodee.toLowerCase())}`);
   const lu = await lirePage(adresse);
   if (!lu) notFound();
   if ("redirection" in lu) permanentRedirect(`/e/${lu.redirection}`);

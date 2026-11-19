@@ -158,7 +158,7 @@ function Champ({ label, valeur, onChange, placeholder, max, multi = false, type 
         ) : null}
       </span>
       {multi ? <textarea rows={5} maxLength={max} value={valeur} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={cls} /> : <input type={type} inputMode={inputMode} maxLength={max} value={valeur} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={`${cls} min-h-13`} />}
-      {aide ? <span className="text-[13px] text-muted">{aide}</span> : null}
+      {aide ? <span className="text-[14px] text-muted">{aide}</span> : null}
     </label>
   );
 }
@@ -315,7 +315,7 @@ function TelephoneEntier({ contenu, testid, clic, defile, cible }: { contenu: Co
             {/* Réduit par `zoom`, jamais par `transform` (Greg, 18 novembre 2026 : sur iPhone, la barre « Appeler » restait
                 figée au milieu du petit téléphone) : Safari colle mal une barre `sticky` dans un cadre transformé. Avec
                 `zoom`, la barre se colle au bas du cadre qui défile, comme sur la vraie page. */}
-            <div ref={defile} data-testid={testid} onClickCapture={clic} className="relative overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, zoom: echelle, WebkitOverflowScrolling: "touch" }}>
+            <div ref={defile} data-testid={testid} data-reglage={cible ? "" : undefined} onClickCapture={clic} className="relative overscroll-contain overflow-y-auto bg-white [scrollbar-width:none]" style={{ width: TEL_L, height: hauteurEcran / echelle, zoom: echelle, WebkitOverflowScrolling: "touch" }}>
               <div inert aria-hidden>
                 <VuePage contenu={contenu} apercu />
               </div>
@@ -367,7 +367,7 @@ function ChoixEcran({ ecran, onChange, sombre = false }: { ecran: "telephone" | 
   return (
     <div role="radiogroup" aria-label="Taille de l'aperçu" className={`flex gap-1 rounded-full p-1 ${sombre ? "bg-white/12" : "bg-black/10"}`}>
       {(["telephone", "ordinateur"] as const).map((e) => (
-        <button key={e} type="button" role="radio" aria-checked={ecran === e} onClick={() => onChange(e)} className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[13px] font-bold ${ecran === e ? "bg-surface text-ink shadow" : sombre ? "text-white" : ""}`}>
+        <button key={e} type="button" role="radio" aria-checked={ecran === e} onClick={() => onChange(e)} className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[14px] font-bold ${ecran === e ? "bg-surface text-ink shadow" : sombre ? "text-white" : ""}`}>
           {e === "telephone" ? <Smartphone size={15} aria-hidden="true" /> : <Monitor size={15} aria-hidden="true" />} {e === "telephone" ? "Téléphone" : "Ordinateur"}
         </button>
       ))}
@@ -408,16 +408,16 @@ function Statut({ etat, erreur, compact = false }: { etat: Etat; erreur: string 
   return (
     <div className="min-w-0 flex-1" aria-live="polite">
       {erreur ? (
-        <p className="text-[13px] leading-tight font-bold text-red-700 dark:text-red-300" role="alert">
+        <p className="text-[14px] leading-tight font-bold text-red-700 dark:text-red-300" role="alert">
           {erreur}
         </p>
       ) : etat === "enregistrement" || etat === "enregistre" ? (
-        <p className="flex items-center gap-1.5 text-[13px] leading-tight text-muted" role="status">
+        <p className="flex items-center gap-1.5 text-[14px] leading-tight text-muted" role="status">
           {etat === "enregistrement" ? <Loader2 size={14} className="shrink-0 motion-safe:animate-spin" aria-hidden="true" /> : <Check size={14} className="shrink-0 text-ok" aria-hidden="true" />}
           {etat === "enregistrement" ? "Enregistrement…" : "Enregistré : ton site est à jour."}
         </p>
       ) : compact ? null : (
-        <p className="text-[13px] leading-tight text-muted">Chaque changement s&apos;enregistre tout seul.</p>
+        <p className="text-[14px] leading-tight text-muted">Chaque changement s&apos;enregistre tout seul.</p>
       )}
     </div>
   );
@@ -457,7 +457,7 @@ function Partager({ url, nom, onFermer }: { url: string; nom: string; onFermer: 
         <figure className="mt-4 flex flex-col items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/v1/ma-page/qr.svg" alt={`QR code de l'adresse ${url}`} width={180} height={180} className="rounded-xl bg-white p-2" />
-          <figcaption className="text-[13px] text-muted">À imprimer sur un devis, un véhicule ou une carte.</figcaption>
+          <figcaption className="text-[14px] text-muted">À imprimer sur un devis, un véhicule ou une carte.</figcaption>
         </figure>
       </div>
     </div>
@@ -491,7 +491,7 @@ function GalerieDefaut({ photos, choisie, onChoisir, metierPhoto }: { photos: re
     const actif = choisie === id;
     return (
       <li key={id ?? "metier"}>
-        <button type="button" role="radio" aria-checked={actif} aria-label={libelle} onClick={() => onChoisir(id)} className={`pressable grid w-full gap-1 rounded-2xl border-2 p-1 text-left ${actif ? "border-accent bg-accent/15" : "border-transparent"}`}>
+        <button type="button" role="radio" aria-checked={actif} aria-label={libelle} onClick={() => onChoisir(id)} className={`pressable grid w-full gap-1 rounded-2xl border-2 p-1 text-left ${actif ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-transparent"}`}>
           <span className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-black/10">
             {p ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -513,11 +513,11 @@ function GalerieDefaut({ photos, choisie, onChoisir, metierPhoto }: { photos: re
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">{vignette(metierPhoto, null, "Selon mon métier")}</ul>
       {neutres.length ? (
         <>
-          <p className="text-[13px] font-bold text-muted">Bâtiment (tous métiers)</p>
+          <p className="text-[14px] font-bold text-muted">Bâtiment (tous métiers)</p>
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">{neutres.map((p) => vignette(p, p.id, p.nom))}</ul>
         </>
       ) : null}
-      <p className="text-[13px] font-bold text-muted">Par métier</p>
+      <p className="text-[14px] font-bold text-muted">Par métier</p>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">{metiers.map((p) => vignette(p, p.id, `${LIBELLES[p.metier!] ?? p.nom}`))}</ul>
     </div>
   );
@@ -637,7 +637,7 @@ function PhotoEquipe({ data, actif, onErreur, recharger }: { data: MaPage; actif
           </button>
         ) : null}
       </div>
-      {!data.choix.stockagePhotos ? <p className="text-[13px] text-muted">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site.</p> : null}
+      {!data.choix.stockagePhotos ? <p className="text-[14px] text-muted">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site.</p> : null}
     </Bloc>
   );
 }
@@ -662,6 +662,11 @@ export function EditeurMaPage() {
   const ordinateur = useOrdinateur();
   const typing = useTyping();
   const enAttente = useRef<Partial<Reglages>>({});
+  // Le champ que le serveur a refusé (un lien Google qui n'en est pas un) : son erreur reste à l'écran tant que l'artisan
+  // ne l'a pas changé, même si les autres réglages, eux, passent.
+  const refuse = useRef<string | null>(null);
+  const relance = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const enregistrerRef = useRef<() => Promise<void>>(async () => undefined);
   const minuteur = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const charger = useCallback(async () => {
@@ -691,7 +696,13 @@ export function EditeurMaPage() {
   const enPreparation = data?.photos.some((p) => p.statut === "traitement") ?? false;
   useEffect(() => {
     if (!enPreparation) return;
-    const t = setInterval(() => void charger(), 1500);
+    // Pas plus de 2 minutes (développeur senior, 19 novembre 2026) : une photo bloquée ne fait plus relire la page sans fin ;
+    // le serveur la passe en erreur au ménage.
+    const debut = Date.now();
+    const t = setInterval(() => {
+      if (Date.now() - debut > 120_000) clearInterval(t);
+      else void charger();
+    }, 1500);
     return () => clearInterval(t);
   }, [enPreparation, charger]);
 
@@ -707,18 +718,46 @@ export function EditeurMaPage() {
       setR((avant) => (avant ? ({ ...d.reglages, ...Object.fromEntries(Object.keys(avant).filter((k) => CHAMPS_TEXTE.has(k as keyof Reglages) && k in enAttente.current).map((k) => [k, avant[k as keyof Reglages]])) } as Reglages) : d.reglages));
       // « Enregistré : ton site est à jour » seulement quand la page publique est régénérée.
       await rafraichirPagePublique();
-      if (!Object.keys(enAttente.current).length) setEtat("enregistre");
-      setErreur(null);
+      if (refuse.current) setEtat("erreur");
+      else {
+        if (!Object.keys(enAttente.current).length) setEtat("enregistre");
+        setErreur(null);
+      }
     } catch (e) {
+      // DÉVELOPPEUR SENIOR (19 novembre 2026) : un envoi raté ne perd plus rien. Avant, le lot partait à la poubelle ;
+      // un changement suivant affichait « Enregistré » sans lui. Le lot revient en attente (ce qui a été changé depuis
+      // passe devant) ; un champ refusé par le serveur reste de côté avec son erreur, et le reste repart aussitôt.
+      const err = e instanceof ApiError ? e : new ApiError("network", 0);
+      const champ = err.status === 400 && err.champ && err.champ in corps ? (err.champ as keyof Reglages) : null;
+      const reste: Partial<Reglages> = { ...corps };
+      if (champ) {
+        delete reste[champ];
+        refuse.current = champ;
+      }
+      enAttente.current = { ...reste, ...enAttente.current };
       setEtat("erreur");
-      setErreur((e as ApiError).phrase ?? "Ce changement n'a pas été enregistré. Réessaie.");
+      setErreur(err.phrase ?? (err.retryable ? "Pas de réseau : ton changement n'est pas encore enregistré. Je réessaie tout seul." : "Ce changement n'a pas été enregistré. Réessaie."));
+      if (relance.current) clearTimeout(relance.current);
+      if (Object.keys(enAttente.current).length && (champ || err.retryable)) relance.current = setTimeout(() => void enregistrerRef.current(), champ ? 50 : 5000);
     }
+  }, []);
+  useEffect(() => {
+    enregistrerRef.current = enregistrer;
+  }, [enregistrer]);
+  // Le réseau revient : ce qui attend repart.
+  useEffect(() => {
+    const repartir = () => {
+      if (Object.keys(enAttente.current).length) void enregistrerRef.current();
+    };
+    window.addEventListener("online", repartir);
+    return () => window.removeEventListener("online", repartir);
   }, []);
 
   const changer = useCallback(
     <K extends keyof Reglages>(cle: K, valeur: Reglages[K]) => {
       setR((avant) => (avant ? { ...avant, [cle]: valeur } : avant));
       enAttente.current = { ...enAttente.current, [cle]: valeur };
+      if (refuse.current === cle) refuse.current = null;
       setEtat("enregistrement");
       if (minuteur.current) clearTimeout(minuteur.current);
       minuteur.current = setTimeout(() => void enregistrer(), CHAMPS_TEXTE.has(cle) ? 700 : 50);
@@ -801,9 +840,9 @@ export function EditeurMaPage() {
               // Le jaune Mobiiz est la valeur par défaut : choisi, rien n'est enregistré (null).
               const choisi = (r.couleurBoutons?.toLowerCase() ?? "#fed206") === c.hex.toLowerCase();
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={choisi} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold ${choisi ? "border-accent bg-accent/15" : "border-line"}`}>
+                <button key={c.id} type="button" role="radio" aria-checked={choisi} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
                   {/* Un vrai petit bouton, dans sa couleur. */}
-                  <span className="flex h-8 w-full max-w-[84px] items-center justify-center rounded-full text-[11px] font-extrabold" style={{ background: c.hex, color: texteSurCouleur(c.hex) }} aria-hidden="true">
+                  <span className="flex h-8 w-full max-w-[84px] items-center justify-center rounded-full text-[11px] font-extrabold ring-1 ring-line" style={{ background: c.hex, color: texteSurCouleur(c.hex) }} aria-hidden="true">
                     Appeler
                   </span>
                   <span className="text-center leading-tight">{c.nom}</span>
@@ -817,9 +856,9 @@ export function EditeurMaPage() {
             {[{ id: "metier", nom: "Selon le métier", hex: teinteMetier.hex, valeur: null as string | null }, ...data.choix.teintes.map((c) => ({ ...c, valeur: c.hex as string | null }))].map((c) => {
               const choisi = couleurActive === c.valeur;
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold ${choisi ? "border-accent bg-accent/15" : "border-line"}`}>
+                <button key={c.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
                   {/* La pastille montre le rendu : la teinte et la couleur des boutons. */}
-                  <span className="relative grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5" style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${c.hex} 85%, white 10%), ${c.hex} 70%)` }} aria-hidden="true">
+                  <span className="relative grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5 ring-1 ring-line" style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${c.hex} 85%, white 10%), ${c.hex} 70%)` }} aria-hidden="true">
                     <span className="h-1.5 w-4 rounded-full" style={{ background: r.couleurBoutons ?? "#FED206" }} />
                   </span>
                   <span className="min-w-0">{c.nom}</span>
@@ -839,7 +878,7 @@ export function EditeurMaPage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photoEnCouverture} alt="Photo de couverture" className="size-full object-cover" />
             ) : (
-              <span className="flex size-full items-center justify-center p-4 text-center text-[13px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Pas encore de photo."}</span>
+              <span className="flex size-full items-center justify-center p-4 text-center text-[14px] text-muted">{couvertureEnCours ? "Préparation de la photo…" : "Pas encore de photo."}</span>
             )}
             {couvertureEnCours ? <Loader2 size={20} className="absolute top-3 right-3 motion-safe:animate-spin" aria-hidden="true" /> : null}
             <span className="absolute bottom-2 left-2 rounded-full bg-black/65 px-2.5 py-1 text-[12px] font-bold text-white">{couverture ? "Ta photo" : "Photo de la galerie"}</span>
@@ -860,7 +899,7 @@ export function EditeurMaPage() {
               <Images size={18} aria-hidden="true" /> Choisir dans la galerie <ChevronDown size={16} aria-hidden="true" className={galerie ? "rotate-180" : ""} />
             </button>
           </div>
-          {!data.choix.stockagePhotos ? <p className="rounded-xl border border-accent/60 bg-surface px-3 py-2 text-[13.5px] font-semibold text-ink">{PHRASE_STOCKAGE}</p> : data.choix.stockagePhotos && !data.reglages.photosAccord ? <p className="text-[13px] text-muted">Coche la case ci-dessus pour envoyer tes photos.</p> : null}
+          {!data.choix.stockagePhotos ? <p className="rounded-xl border border-accent/60 bg-surface px-3 py-2 text-[13.5px] font-semibold text-ink">{PHRASE_STOCKAGE}</p> : data.choix.stockagePhotos && !data.reglages.photosAccord ? <p className="text-[14px] text-muted">Coche la case ci-dessus pour envoyer tes photos.</p> : null}
           {galerie ? <GalerieDefaut photos={data.choix.photosDefaut} choisie={couverture ? "__aucune__" : r.photoDefaut} metierPhoto={photoMetier} onChoisir={(id) => void choisirPhotoDefaut(id)} /> : null}
           {couverture ? (
             <button
@@ -972,10 +1011,10 @@ export function EditeurMaPage() {
     ),
     chantiers: (
       <Bloc titre="Mes chantiers" aide="Un chantier = un titre et quelques photos. Sur ton site, la première photo s'affiche en grand ; on la touche pour voir les autres.">
-        <p className="rounded-xl bg-accent/15 px-3 py-2 text-[13px]">
+        <p className="rounded-xl bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)] px-3 py-2 text-[14px]">
           Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation, les numéros de rue et les intérieurs qui permettent de situer un domicile.
         </p>
-        {!data.choix.stockagePhotos ? <p className="rounded-xl bg-black/5 px-3 py-2 text-[13px]">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site. Tes chantiers s&apos;afficheront dès qu&apos;il le sera.</p> : null}
+        {!data.choix.stockagePhotos ? <p className="rounded-xl bg-black/5 px-3 py-2 text-[14px]">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site. Tes chantiers s&apos;afficheront dès qu&apos;il le sera.</p> : null}
         {data.choix.stockagePhotos && !data.reglages.photosAccord ? <AccordPhotos onAccord={() => void accord()} /> : null}
         <Chantiers data={data} actif={photosOk} onErreur={setErreur} onChange={(d) => (d ? setData(d) : void charger())} />
       </Bloc>
@@ -1001,10 +1040,10 @@ export function EditeurMaPage() {
           >
             <Sparkles size={18} aria-hidden="true" /> Mobiiz m&apos;aide à l&apos;écrire
           </Button>
-          <p className="text-[13px] text-muted">Relis la proposition : n&apos;écris rien que tu ne peux pas prouver.</p>
+          <p className="text-[14px] text-muted">Relis la proposition : n&apos;écris rien que tu ne peux pas prouver.</p>
           {proposition ? (
             <div className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl border-2 border-accent p-3" data-testid="proposition">
-              <p className="text-[13px] text-muted">{proposition.phrase ?? (proposition.source === "ia" ? "Proposition de Mobiiz (compte comme une analyse). Modifie-la à ta guise." : "Proposition tirée de ton profil. Modifie-la à ta guise.")}</p>
+              <p className="text-[14px] text-muted">{proposition.phrase ?? (proposition.source === "ia" ? "Proposition de Mobiiz (compte comme une analyse). Modifie-la à ta guise." : "Proposition tirée de ton profil. Modifie-la à ta guise.")}</p>
               <p className="font-bold">{proposition.accroche}</p>
               <p className="text-[15px] whitespace-pre-line">{proposition.presentation}</p>
               <div className="flex flex-wrap gap-2">
@@ -1038,7 +1077,7 @@ export function EditeurMaPage() {
               );
             })}
           </div>
-          <span className="text-[13px] text-muted">Coche seulement ce que tu fais vraiment : ils s&apos;affichent en haut de ton site.</span>
+          <span className="text-[14px] text-muted">Coche seulement ce que tu fais vraiment : ils s&apos;affichent en haut de ton site.</span>
           <AnneeChamp valeur={r.creeeEn} onChange={(n) => changer("creeeEn", n)} />
           <span className="text-[14px] font-bold">Certifications et assurances</span>
           <div className="flex flex-wrap gap-2">
@@ -1065,7 +1104,7 @@ export function EditeurMaPage() {
               e.currentTarget.value = "";
             }}
           />
-          <span className="text-[13px] text-muted">Seulement ce que tu as vraiment, à jour : tu en es responsable. « Entreprise vérifiée » s&apos;ajoute tout seul quand ton SIRET est vérifié{data.profil.verifiee ? " (c'est le cas)" : ""}.</span>
+          <span className="text-[14px] text-muted">Seulement ce que tu as vraiment, à jour : tu en es responsable. « Entreprise vérifiée » s&apos;ajoute tout seul quand ton SIRET est vérifié{data.profil.verifiee ? " (c'est le cas)" : ""}.</span>
         </Bloc>
       </>
     ),
@@ -1085,7 +1124,7 @@ export function EditeurMaPage() {
         <Champ label="Lien de ma fiche Google" type="url" inputMode="url" valeur={r.lienGoogle ?? ""} onChange={(v) => changer("lienGoogle", v || null)} max={500} placeholder="https://maps.app.goo.gl/…" aide="Dans Google Maps, ouvre ta fiche, touche « Partager » et colle le lien ici : un bouton « Voir nos avis Google » apparaît sur ton site." />
         <Champ label="Ton autre site internet" type="url" inputMode="url" valeur={r.siteWeb ?? ""} onChange={(v) => changer("siteWeb", v || null)} max={200} placeholder="www.mon-entreprise.fr" aide="Si tu en as déjà un : un lien « Voir mon site » apparaît en bas de ton site Mobiiz." />
         {data.profil.adressePostale ? <Interrupteur actif={r.afficherAdresse} onChange={(v) => changer("afficherAdresse", v)} label="Afficher mon adresse" aide={`${data.profil.adressePostale}. Désactivé : seule ta zone s'affiche.`} /> : null}
-        <p className="text-[13px] text-muted">« Demander un devis » : le message du client t&apos;arrive par e-mail et dans « Messages et réponses ». Ton e-mail n&apos;est jamais montré.</p>
+        <p className="text-[14px] text-muted">« Demander un devis » : le message du client t&apos;arrive par e-mail et dans « Messages et réponses ». Ton e-mail n&apos;est jamais montré.</p>
       </Bloc>
     ),
     publier: (
@@ -1108,7 +1147,7 @@ export function EditeurMaPage() {
                 <Share2 size={18} aria-hidden="true" /> Partager
               </Button>
             </div>
-            {!r.visible ? <p className="text-[13px] text-muted">Rends ton site visible pour le partager.</p> : null}
+            {!r.visible ? <p className="text-[14px] text-muted">Rends ton site visible pour le partager.</p> : null}
           </div>
         </Bloc>
         <Bloc titre="Adresse du site">
@@ -1126,7 +1165,7 @@ export function EditeurMaPage() {
                     <input value={nouvelleAdresse} maxLength={50} onChange={(e) => setNouvelleAdresse(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))} className="min-h-12 min-w-0 flex-1 bg-transparent px-1 text-[16px] outline-none" />
                   </span>
                 </label>
-                <p className="text-[13px] text-muted">Tu ne pourras plus la changer ensuite. L&apos;ancienne adresse continuera de mener à ton site.</p>
+                <p className="text-[14px] text-muted">Tu ne pourras plus la changer ensuite. L&apos;ancienne adresse continuera de mener à ton site.</p>
                 <div className="flex gap-2">
                   <Button
                     onClick={async () => {
@@ -1150,7 +1189,7 @@ export function EditeurMaPage() {
               </div>
             )
           ) : (
-            <p className="text-[13px] text-muted">Adresse déjà modifiée une fois.</p>
+            <p className="text-[14px] text-muted">Adresse déjà modifiée une fois.</p>
           )}
         </Bloc>
       </>
@@ -1174,7 +1213,7 @@ export function EditeurMaPage() {
               ordinateur
                 ? `pressable flex min-h-15 flex-col items-center justify-center gap-1 rounded-2xl text-[12.5px] font-bold ${choisi ? "bg-ink text-ground" : "bg-black/5 hover:bg-black/10"}`
                 : // Téléphone (Greg, 18 novembre 2026) : une colonne collée à gauche ; l'onglet ouvert en noir, un trait jaune au bord.
-                  `pressable relative flex max-h-[76px] min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-[10px] leading-none font-bold whitespace-nowrap ${choisi ? "bg-ink text-ground before:absolute before:inset-y-2 before:-left-1 before:w-1 before:rounded-r-full before:bg-accent" : "text-muted"}`
+                  `pressable relative flex max-h-[76px] min-h-11 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-[11.5px] leading-none font-bold tracking-[-0.01em] whitespace-nowrap ${choisi ? "bg-ink text-ground before:absolute before:inset-y-2 before:-left-1 before:w-1 before:rounded-r-full before:bg-accent" : "text-muted"}`
             }
           >
             <Icone size={ordinateur ? 19 : 21} aria-hidden="true" strokeWidth={choisi ? 2.4 : 2} />
@@ -1192,7 +1231,7 @@ export function EditeurMaPage() {
     ) : (
       // Téléphone (Greg, 18 novembre 2026) : un tiroir qui monte du bas, la moitié de l'écran au plus ; le téléphone reste
       // visible au-dessus, en entier, et change en direct. Il ne recouvre rien : il prend sa place sous l'aperçu.
-      <section key={actif} id="reglages-site" role="tabpanel" aria-label={libelleActif} className="flex max-h-[50dvh] min-h-0 shrink-0 animate-rise flex-col overflow-hidden rounded-[22px] bg-surface shadow-float ring-1 ring-ink/5">
+      <section key={actif} id="reglages-site" role="tabpanel" aria-label={libelleActif} className="flex max-h-[min(50dvh,58%)] min-h-0 shrink animate-rise flex-col overflow-hidden rounded-[22px] bg-surface shadow-float ring-1 ring-ink/5">
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line py-1.5 pr-1.5 pl-4">
           <h2 className="text-[17px] font-extrabold">{libelleActif}</h2>
           <button type="button" onClick={() => setOnglet(null)} aria-label={`Fermer les réglages ${libelleActif}`} className="pressable flex min-h-11 items-center gap-1 rounded-full bg-black/5 px-3 text-[14px] font-bold">
@@ -1231,15 +1270,17 @@ export function EditeurMaPage() {
         <CoucheTelephone basse={typing}>
           {/* Une colonne d'onglets collée à gauche, qui fait un L avec le menu de l'app ; à droite, le téléphone en entier ; le
               tiroir des réglages sous lui. Rien ne recouvre rien (Greg, 18 novembre 2026). */}
-          <nav aria-label="Onglets des réglages" className="w-[66px] shrink-0 rounded-r-[20px] bg-surface p-1 shadow-card ring-1 ring-ink/5">
+          <nav aria-label="Onglets des réglages" className="w-[76px] shrink-0 rounded-r-[20px] bg-surface p-1 shadow-card ring-1 ring-ink/5">
             {barreOnglets}
           </nav>
           {/* Le ＋ de la barre du bas dépasse au milieu : la colonne de droite s'arrête au-dessus de lui. */}
-          <div data-colonne-apercu className="flex min-w-0 flex-1 flex-col gap-2 pb-6">
+          <div data-colonne-apercu className="flex min-w-0 flex-1 flex-col gap-2 pb-8">
             <h1 className="sr-only">Mon site</h1>
-            <section className="flex min-h-0 flex-1 flex-col gap-1.5" aria-label="Aperçu de mon site">
+            {/* Spécialiste UI/UX (19 novembre 2026) : tiroir ouvert sur un petit iPhone, il ne restait qu'une bande du téléphone.
+                L'aperçu garde au moins 38 % de la colonne, le tiroir défile en dessous ; sa barre « Appeler » s'efface. */}
+            <section className={`flex min-h-0 flex-1 flex-col gap-1.5${actif ? " min-h-[38%]" : ""}`} aria-label="Aperçu de mon site">
               {/* Une seule ligne : l'état (ou « le rendre visible ») à gauche, « Voir mon site » en petit à droite. */}
-              <div className="flex min-h-8 shrink-0 items-center gap-2">
+              <div className="flex min-h-11 shrink-0 items-center gap-2">
                 {etat === "pret" && !erreur && !r.visible && actif !== "publier" ? (
                   <button type="button" onClick={() => ouvrir("publier")} className="min-w-0 flex-1 text-left text-[12.5px] leading-tight font-bold underline">
                     Site privé : le rendre visible
@@ -1247,7 +1288,7 @@ export function EditeurMaPage() {
                 ) : (
                   <Statut etat={etat} erreur={erreur} compact />
                 )}
-                <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-8 shrink-0 items-center gap-1 rounded-full bg-accent px-2.5 text-[12.5px] font-extrabold text-on-accent">
+                <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-11 shrink-0 items-center gap-1 rounded-full bg-accent px-3 text-[13px] font-extrabold text-on-accent">
                   <Eye size={14} aria-hidden="true" /> Voir mon site
                 </button>
               </div>

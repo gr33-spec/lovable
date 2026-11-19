@@ -219,6 +219,16 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Une liste créée par le chemin « Besoin groupé » porte `project.origine = "achat-groupe"` (migration additive `20261119090000_project_origine`). Tant qu'elle n'est pas partie chez un négoce : jamais dans « À faire : Vérifier ta liste », ni dans Demandes › Négoces, ni dans « Depuis un quantitatif » ; pas encore publiée, elle se reprend dans Demandes › Groupées (« Listes à finir »). Règle changée : avant, elle apparaissait aussi dans « À faire » et dans les listes ordinaires. Test `apps/api/test/liste-du-besoin-groupe.test.ts`.
 - Textes : « Négoce · classée » → « Classée » (et « À classer ») ; « Prix saisis en ligne » → « Prix donnés par le négoce » ; titres de liste au mois abrégé à l'écran (« Liste du 18 nov. », le nom enregistré ne change pas), coupés à la fin d'un mot avec « … » (`lib/titres.ts`), jamais en plein mot.
 
+## Décisions du 19 novembre 2026 : « Mon site », revue UI/UX, développeur senior et saboteur
+
+- Aucune faille trouvée par le saboteur. Corrigé : un changement raté de l'éditeur n'est plus perdu (relancé tout seul, le champ refusé garde son erreur) ; les limites du formulaire de devis (5 par heure et par visiteur, 30 par jour et par page) et des 20 photos tiennent même quand tout arrive au même instant ; une demande de devis est gardée même sans adresse où l'envoyer ; une photo bloquée en traitement passe en erreur au ménage ; une photo ne se retire pas quand le stockage est coupé.
+- Règle changée : les textes proposés par Mobiiz (prestations, accroches, présentations) ne promettent plus rien (« nous intervenons rapidement », « devis clair, chantier propre », « nettoyage compris », « aux normes ») ; avant, une promesse pouvait s'afficher sans que l'artisan l'ait cochée. Les sites déjà créés gardent leurs textes. Test `packages/domain/test/mon-site-revue-19-novembre.test.ts`.
+- Règle changée : « Entre pros » se lit seulement par une entreprise au SIRET vérifié (avant : tout compte connecté), n'apparaît pas quand l'artisan n'a rien publié, et vient après les prestations ; plus de bouton « Publier une mission » dans ce bloc.
+- Lien Google : plus de lien de redirection (`/url?q=`) ni de « goo.gl » (seulement « maps.app.goo.gl »). Masquage Mission : « O6 12… » (lettre O) et les e-mails en « (at) », « [at] », « arobase » sont masqués.
+- Site public : garanties sur 3 colonnes au plus sur téléphone ; la zone telle qu'écrite (plus de « et alentours » ajouté dans la barre de confiance) ; une assurance est « Assurance déclarée » ; pas de redite entre bandeau et barre ; liens de 44 px ; une adresse en majuscules redirige ; « Retour à Mon site » sort du lien aussitôt lu ; logo et image de partage gardés 5 minutes en cache (avant : un jour).
+- Éditeur sur téléphone : l'aperçu garde au moins 38 % de la hauteur quand un réglage est ouvert, sans sa barre « Appeler » ; onglets plus lisibles, « Voir mon site » à 44 px, aides en 14 px. En sombre, la couleur choisie se lit.
+- À trancher par Greg : le gris des textes de toute l'app (#614822) tire sur le brun (« aucun marron ») ; l'éditeur sur tablette garde la mise en page téléphone ; une adresse de site libérée par une entreprise supprimée peut être reprise.
+
 ## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg
 
 - Principe (tous métiers) : le négoce reçoit une commande claire, rien d'autre. L'usage des articles, le détail par pièce et les calculs restent dans l'app.
@@ -309,6 +319,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 - « recette complète » : lancer tous les testeurs (testeur-artisan, testeur-negoce, testeur-mission, saboteur, rush, comptable, relecteur, mauvais-payeur, testeur-terrain), puis rendre UN rapport classé par gravité avec des propositions. Ne rien corriger sans l'accord de Greg.
 - Les testeurs ne travaillent que sur l'environnement de test ou en local.
+- Deux agents de plus (Greg, 19 novembre 2026) : `specialiste-ui-ux` (lisibilité, contraste, toucher, mots, clair et sombre) et `developpeur-senior` (revue de code, cas limites, tests manquants). Comme les autres, ils proposent et ne corrigent rien.
 
 ## Vérifications avant la production
 

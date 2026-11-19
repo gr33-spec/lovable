@@ -205,10 +205,13 @@ describe("Ma page : réglages", () => {
     // Un visiteur non connecté : jamais le bloc.
     await anon().get("/v1/pages-entreprises/toits-martin/entre-pros").expect(401);
     await anon().get(`/v1/pages-entreprises/entreprise/${a.companyId}`).expect(401);
-    // Une entreprise connectée : disponibilité, compétences (coordonnées masquées), le lien de la disponibilité.
+    // Saboteur (19 novembre 2026) : connectée mais SIRET non vérifié, rien.
+    await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(404);
+    await ctx.prisma.company.update({ where: { id: b.companyId }, data: { siretVerifieLe: new Date() } });
+    // Une entreprise connectée et vérifiée : disponibilité, compétences (coordonnées masquées), le lien de la disponibilité.
     const vu = await b.agent.get("/v1/pages-entreprises/toits-martin/entre-pros").expect(200);
     expect(vu.headers["cache-control"]).toMatch(/no-store/);
-    expect(vu.body).toMatchObject({ mienne: false, entrepriseId: a.companyId, services: "Renfort sur toiture", disponibilite: { annonceId: dispo.id, du: "2026-12-01", au: "2026-12-20" } });
+    expect(vu.body).toMatchObject({ mienne: false, entrepriseId: a.companyId, services: "Renfort sur toiture", declarees: true, disponibilite: { annonceId: dispo.id, du: "2026-12-01", au: "2026-12-20" } });
     expect(vu.body.competences[0]).toBe("Ardoise naturelle");
     expect(vu.body.competences[1]).not.toMatch(/06 12/);
     expect(JSON.stringify(vu.body)).not.toMatch(/cv-jean|cv!/);
@@ -231,6 +234,7 @@ describe("Ma page : réglages", () => {
   it("ENTRE PROS : missions coupées dans l'admin, le bloc n'existe pas", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
     const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Zinc Le Gall", ["roofing"]);
+    await ctx.prisma.company.update({ where: { id: b.companyId }, data: { siretVerifieLe: new Date() } });
     await rendrePublique(a.agent);
     const { ReglageMissions } = await import("../src/platform/reglages/reglage-missions.js");
     const reglage = ctx.app.get(ReglageMissions);

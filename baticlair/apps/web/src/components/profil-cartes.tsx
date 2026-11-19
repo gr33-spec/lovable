@@ -19,6 +19,7 @@ import {
 import { api, ApiError } from "@/lib/api";
 import { nom, NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
+import Link from "next/link";
 
 /**
  * Mes données (RGPD) : les emporter (un fichier), ou tout effacer. La suppression demande de
@@ -89,12 +90,12 @@ export function MyData({ onDeleted, avecEmails = true }: { onDeleted: () => void
         En PDF
       </a>
       {avecEmails ? <EmailsActifs /> : null}
-      <a
+      <Link
         href="/confidentialite"
         className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text"
       >
         Ce que {NOM_APP} garde, et combien de temps
-      </a>
+      </Link>
       {confirming ? (
         <div
           role="group"
