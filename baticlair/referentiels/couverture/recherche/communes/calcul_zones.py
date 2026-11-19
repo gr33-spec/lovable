@@ -12,7 +12,7 @@ Exemple (voir README.md pour les sources) :
     --communes dg/communes-france-2026.csv \
     --polygones dg/communes-france-avec-polygon-2026.geojson \
     --trait-cote cote/TCH \
-    --ltm ltm/x/LTM/LTM_METROPOLE_rgf \
+    --cote-generale ne/ne_10m_coastline \
     --alti-ign alti/alti_mairie_ign.json \
     --littoral-bzh littoral/bzh_littoral.json \
     --cog-2011 cog/comsimp2011.txt --mvt cog/cog2025/v_mvt_commune_2025.csv \
@@ -21,6 +21,8 @@ Exemple (voir README.md pour les sources) :
 
 Règles appliquées (définitions de l'annexe B, vérifiées sur deux sources : copie du
 DTU et guide fabricant ; le texte « seul fait foi », la carte est approximative) :
+  distance = de la mairie à la côte générale (Natural Earth 1:10 M, l'échelle de la carte du
+  DTU, sans l'intérieur des estuaires de la Loire, de la Gironde et de la Seine) ;
   côte « nord » = Atlantique de Lorient (rive ouest de la rade) à la Bretagne nord,
   Manche et mer du Nord ; côte « sud » = Atlantique de Lorient à l'Espagne ;
   côte « med » = Méditerranée et Corse.
@@ -109,6 +111,15 @@ def dist_seg(p, a, b):
     return math.hypot(px - ax - t * dx, py - ay - t * dy)
 
 
+def dans_contour(x, y, edges):
+    """Rayon horizontal : nombre impair de traversées = dedans (contour en arêtes non ordonnées)."""
+    c = False
+    for (x1, y1), (x2, y2) in edges:
+        if (y1 > y) != (y2 > y) and x < (x2 - x1) * (y - y1) / (y2 - y1) + x1:
+            c = not c
+    return c
+
+
 def point_in_ring(x, y, ring):
     c = False
     for i in range(len(ring) - 1):
@@ -194,98 +205,53 @@ def charge_rives(base_tch, pas=100.0):
         length[c] += math.hypot(a[0] - b[0], a[1] - b[1])
         deg[a] += 1; deg[b] += 1
         comp_edges[c].append((a, b))
-    iles = []   # anneaux fermés de moins de 300 km = îles
+    iles = []   # contours fermés (tous les nœuds de degré pair) de moins de 300 km = îles
     for c, es in comp_edges.items():
         if length[c] > 300000 or length[c] < 300:
             continue
         nodes = {p for e in es for p in e}
-        if not all(deg[p] == 2 for p in nodes):
+        if any(deg[p] % 2 for p in nodes):
             continue
-        adj = collections.defaultdict(list)
-        for a, b in es:
-            adj[a].append(b); adj[b].append(a)
-        start = es[0][0]; ring = [start]; prev, cur = None, start
-        while len(ring) <= len(nodes) + 2:
-            nx = adj[cur][0] if adj[cur][0] != prev else adj[cur][1]
-            prev, cur = cur, nx
-            ring.append(cur)
-            if cur == start:
-                break
-        xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
-        iles.append(((min(xs), min(ys), max(xs), max(ys)), ring))
+        xs = [p[0] for p in nodes]; ys = [p[1] for p in nodes]
+        iles.append(((min(xs), min(ys), max(xs), max(ys)), es))
     pts = [p for a, b in edges for p in _echantillonne(a, b, pas)]
     return pts, iles
 
 
-def charge_cote_generale(base_ne, base_ltm, mairies, pas=250.0):
-    """Côte générale Natural Earth 1:10 M, à l'échelle de la carte du DTU, coupée à l'entrée des
-    estuaires par les limites transversales de la mer (arcs du SHOM).
+# Les trois grands estuaires où la côte générale au 1:10 M remonte loin dans les terres. Polygones
+# (lon, lat) tracés à la main, fermés côté mer sur la limite transversale de la mer du SHOM
+# (Loire : pointe de Mindin - Penhoët, décret du 8 novembre 1854 ; Gironde : décret du 26 août 1857 ;
+# Seine : décret du 24 février 1869). Les rives à l'intérieur ne sont pas « la côte » des bandes de
+# 20 / 40 km ; elles restent des rives d'estuaire pour la situation exposée.
+ESTUAIRES = {
+    "Loire": [(-2.205, 47.292), (-2.168, 47.262), (-1.95, 47.18), (-1.50, 47.13), (-1.40, 47.25),
+              (-1.60, 47.27), (-1.95, 47.33), (-2.15, 47.33)],
+    "Gironde": [(-1.045, 45.585), (-0.975, 45.600), (-0.80, 45.50), (-0.45, 45.10), (-0.42, 44.78),
+                (-0.65, 44.78), (-0.72, 45.05), (-0.90, 45.35), (-1.04, 45.52)],
+    "Seine": [(0.205, 49.472), (0.215, 49.430), (0.55, 49.33), (1.20, 49.28), (1.25, 49.50),
+              (0.60, 49.55), (0.30, 49.50)],
+}
 
-    Le côté amont d'une coupure est celui qui a le plus de mairies à moins de 15 km (la terre) ;
-    les morceaux de côte de ce côté sont des rives d'estuaire, pas « la côte ».
-    Renvoie (points mer par classe nord / sud / med, points d'estuaire, nombre de coupures utiles)."""
-    key = lambda p: (round(p[0]), round(p[1]))
-    edges = []
-    for g in read_shp(base_ne + ".shp"):
-        for part in g:
-            pts = [key(l93(lon, lat)) for lon, lat in part if -6.5 <= lon <= 10.5 and 41.0 <= lat <= 51.6]
-            edges += [(a, b) for a, b in zip(pts, pts[1:]) if math.hypot(a[0] - b[0], a[1] - b[1]) < 50000]
-    cuts = []
-    for g in read_shp(base_ltm + "_arc.shp"):
-        for part in g:
-            (x1, y1), (x2, y2) = part[0], part[-1]
-            dx, dy = x2 - x1, y2 - y1
-            L = math.hypot(dx, dy) or 1.0
-            ext = (1500.0 if L > 1000 else 600.0) / L   # la côte générale peut s'écarter d'un km
-            cuts.append(((x1 - dx * ext, y1 - dy * ext), (x2 + dx * ext, y2 + dy * ext)))
-    kept, touch = [], collections.defaultdict(set)
-    for a, b in edges:
-        hit = None
-        for ci, (p, q) in enumerate(cuts):
-            if max(a[0], b[0]) < min(p[0], q[0]) or min(a[0], b[0]) > max(p[0], q[0]) or \
-               max(a[1], b[1]) < min(p[1], q[1]) or min(a[1], b[1]) > max(p[1], q[1]):
-                continue
-            if seg_inter(a, b, p, q):
-                hit = ci; break
-        if hit is None:
-            kept.append((a, b))
-        else:
-            touch[hit].update((a, b))
-    find = _composantes(kept)
-    comp_v = collections.defaultdict(list)
-    for a, b in kept:
-        comp_v[find(a)].append(a)
-    mg = Grid(mairies, 5000.0)
-    estuaire, utiles = set(), 0
-    for ci, pts in touch.items():
-        (p, q) = cuts[ci]
-        mx, my = (p[0] + q[0]) / 2, (p[1] + q[1]) / 2
-        nx, ny = -(q[1] - p[1]), q[0] - p[0]
-        nl = math.hypot(nx, ny) or 1.0
-        side = lambda v: ((v[0] - mx) * nx + (v[1] - my) * ny) / nl
-        plus = moins = 0
-        for i in range(int((mx - 15000) // 5000), int((mx + 15000) // 5000) + 1):
-            for j in range(int((my - 15000) // 5000), int((my + 15000) // 5000) + 1):
-                for v in mg.g.get((i, j), ()):
-                    if math.hypot(v[0] - mx, v[1] - my) <= 15000 and abs(side(v)) > 300:
-                        plus += side(v) > 0; moins += side(v) < 0
-        amont = 1 if plus > moins else -1
-        comps = {c for c in (find(v) for v in pts) if c is not None and comp_v.get(c)}
-        if len(comps) < 2:
-            continue
-        utiles += 1
-        for c in comps:
-            proches = [v for v in comp_v[c] if math.hypot(v[0] - mx, v[1] - my) < 6000] or comp_v[c]
-            moy = sum(side(v) for v in proches) / len(proches)
-            if moy * amont > 0:
-                estuaire.add(c)
+
+def charge_cote_generale(base_ne, pas=250.0):
+    """Côte générale Natural Earth 1:10 M, à l'échelle de la carte du DTU (elle ne remonte pas les
+    rias), sans l'intérieur des estuaires de la Loire, de la Gironde et de la Seine.
+    Renvoie (points mer par classe nord / sud / med, points d'estuaire)."""
+    polys = {k: v + [v[0]] for k, v in ESTUAIRES.items()}
     mer = {"nord": [], "sud": [], "med": []}
     est = []
-    for a, b in kept:
-        e = find(a) in estuaire
-        for v in _echantillonne(a, b, pas):
-            (est if e else mer[classe_cote(*v)]).append(v)
-    return mer, est, utiles
+    for g in read_shp(base_ne + ".shp"):
+        for part in g:
+            ll = [(lon, lat) for lon, lat in part if -6.5 <= lon <= 10.5 and 41.0 <= lat <= 51.6]
+            for (lo1, la1), (lo2, la2) in zip(ll, ll[1:]):
+                a, b = l93(lo1, la1), l93(lo2, la2)
+                if math.hypot(a[0] - b[0], a[1] - b[1]) > 50000:
+                    continue
+                lo, la = (lo1 + lo2) / 2, (la1 + la2) / 2   # segments courts (1 à 2 km)
+                dedans = any(point_in_ring(lo, la, r) for r in polys.values())
+                for v in _echantillonne(a, b, pas):
+                    (est if dedans else mer[classe_cote(*v)]).append(v)
+    return mer, est
 
 
 # ---------------------------------------------------------------- vent / neige
@@ -359,10 +325,11 @@ def zone_alti(z):
 
 def main():
     ap = argparse.ArgumentParser()
-    for a in ("communes", "trait-cote", "cote-generale", "ltm", "alti-ign", "regions", "sortie"):
+    for a in ("communes", "trait-cote", "cote-generale", "alti-ign", "regions", "sortie"):
         ap.add_argument("--" + a, required=True)
     for a in ("polygones", "littoral-bzh", "cog-2011", "mvt", "departements"):
         ap.add_argument("--" + a)
+    ap.add_argument("--compact", action="store_true", help="JSON sans indentation (fichier France)")
     o = ap.parse_args()
     deps = set(o.departements.split(",")) if o.departements else None
 
@@ -374,15 +341,12 @@ def main():
     regions = json.load(open(o.regions, encoding="utf-8"))
     print("communes", len(rows), file=sys.stderr)
 
-    toutes = [r for r in csv.DictReader(open(o.communes, encoding="utf-8")) if r["latitude_mairie"]]
-    mairies = [l93(float(r["longitude_mairie"]), float(r["latitude_mairie"])) for r in toutes]
-    mer, est, ncuts = charge_cote_generale(o.cote_generale, o.ltm, mairies)
+    mer, est = charge_cote_generale(o.cote_generale)
     gm = {k: Grid(v) for k, v in mer.items()}
     ge = Grid(est)
     rives, iles = charge_rives(o.trait_cote)
     gr = Grid(rives, 2000.0)
-    print("côte générale", {k: len(v) for k, v in mer.items()}, "estuaires", len(est), "îles", len(iles),
-          "coupures LTM utiles", ncuts, file=sys.stderr)
+    print("côte générale", {k: len(v) for k, v in mer.items()}, "estuaires", len(est), "îles", len(iles), file=sys.stderr)
 
     polys = {}
     if o.polygones:
@@ -413,6 +377,13 @@ def main():
     out = []
     for r in rows:
         c, dep = r["code_insee"], r["dep_code"]
+        if not (r["latitude_mairie"] or r["latitude_centre"]):
+            print("sans coordonnées :", c, r["nom_standard"], file=sys.stderr)
+            out.append({"code_insee": c, "nom": r["nom_standard"], "departement": dep,
+                        "codes_postaux": r["codes_postaux"], "zone_tuile_dtu_40_21": None,
+                        "zone_ardoise_dtu_40_11": None, "alertes": ["coordonnées absentes du fichier data.gouv 2026"],
+                        "statut": "a_confirmer"})
+            continue
         lat = float(r["latitude_mairie"] or r["latitude_centre"])
         lon = float(r["longitude_mairie"] or r["longitude_centre"])
         x, y = l93(lon, lat)
@@ -444,6 +415,18 @@ def main():
         z = z_ign if z_ign is not None else zmoy
         flags, statut = [], "calcule"
 
+        # une île : sa propre côte compte (la côte générale au 1:10 M oublie les petites îles)
+        ile = any(bx0 <= x <= bx1 and by0 <= y <= by1 and dans_contour(x, y, es)
+                  for (bx0, by0, bx1, by1), es in iles)
+        if ile and dr is not None:
+            k = classe_cote(x, y)
+            if k == "nord":
+                dn = min(dn, dr) if dn is not None else dr
+            elif k == "sud":
+                ds = min(ds, dr) if ds is not None else dr
+            else:
+                dmed = min(dmed, dr) if dmed is not None else dr
+            dmer = min([d for d in (dn, ds, dmed) if d is not None])
         zc, rc = zone_cote(dn, ds)
         for d, seuil in ((dn, 20), (dn, 40), (ds, 20)):
             if d is not None and abs(d - seuil) <= 2:
@@ -498,12 +481,11 @@ def main():
         expo = []
         if dmer is not None and dmer <= 5 and dr is not None and dr <= 5:
             expo.append("littoral à %.1f km (<= 5 km)" % dr)
-        for (bx0, by0, bx1, by1), ring in iles:
-            if bx0 <= x <= bx1 and by0 <= y <= by1 and point_in_ring(x, y, ring):
-                expo.append("île")
-                break
-        if de is not None and dr is not None and dr <= 3 and (dmer is None or dmer > 5) and de <= 25:
-            expo.append("rive d'estuaire ou de ria à %.1f km (en amont de la limite transversale de la mer)" % dr)
+        if ile:
+            expo.append("île")
+        if dr is not None and dr <= 3 and (dmer is None or dmer > 5):
+            expo.append("rive d'estuaire ou de ria à %.1f km (eau salée, trait de côte Histolitt ; mer ouverte à %s km)"
+                        % (dr, dmer))
         lit = litt.get(c)
 
         # vent
@@ -542,13 +524,11 @@ def main():
             "codes_postaux": r["codes_postaux"],
             "mairie": {"lat": lat, "lon": lon},
             "altitude": {"mairie_ign_m": z_ign, "moyenne_m": zmoy, "min_m": zmin, "max_m": zmax,
-                         "retenue_m": z, "source": "mairie : IGN RGE ALTI (service data.geopf.fr) ; min/moy/max : data.gouv « communes-france-2026 »"},
+                         "retenue_m": z},
             "distance_mer_km": {"cote_nord": dn, "cote_sud": ds, "mediterranee": dmed, "plus_proche": dmer,
                                 "cote_nord_territoire_min": dn_min, "cote_sud_territoire_min": ds_min,
-                                "rive_salee_histolitt": dr, "estuaire": de,
-                                "source": "mairie -> côte générale Natural Earth 1:10 M coupée aux limites transversales de la mer (SHOM) pour les bandes de 20 / 40 km ; rive salée : trait de côte Histolitt (SHOM/IGN), estuaires compris, pour la situation exposée"},
+                                "rive_salee_histolitt": dr, "estuaire": de},
             "littoral": {"riveraine_mer_ou_estuaire": lit if lit else ("non" if o.littoral_bzh and dep in ("22", "29", "35", "56") else None),
-                         "source": "DREAL Bretagne, communes littorales au titre de la loi Littoral" if dep in ("22", "29", "35", "56") else None,
                          "littoral_5km": dmer is not None and dmer <= 5},
             "zone_tuile_dtu_40_21": zt,
             "zone_ardoise_dtu_40_11": zard,
@@ -564,13 +544,23 @@ def main():
     meta = {
         "famille": "regions", "sous_famille": "zones par commune", "generated": "2026-11-19",
         "nombre": len(out),
+        "sources_des_champs": {
+            "altitude.mairie_ign_m": "IGN, service d'altimétrie data.geopf.fr (RGE ALTI), au point de la mairie",
+            "altitude.moyenne_m/min_m/max_m": "data.gouv.fr « communes-france-2026 » (Ville de rêve, Licence Ouverte 2.0)",
+            "distance_mer_km.cote_*": "mairie -> côte générale Natural Earth 1:10 M (domaine public), sans l'intérieur des estuaires de la Loire, de la Gironde et de la Seine (en amont de la limite transversale de la mer du SHOM)",
+            "distance_mer_km.rive_salee_histolitt": "mairie -> trait de côte Histolitt TCH_FRA_V2 (SHOM / IGN, Licence Ouverte), estuaires et rias compris",
+            "distance_mer_km.*_territoire_min": "point du contour communal le plus proche de la côte (polygones data.gouv, IGN ADMIN EXPRESS simplifié)",
+            "littoral.riveraine_mer_ou_estuaire": "DREAL Bretagne, communes littorales au titre de la loi Littoral (WFS geobretagne, Licence Ouverte 2.0) ; 22, 29, 35, 56 seulement",
+            "vent": "NF EN 1991-1-4/NA par département et anciens cantons (Techniques de l'Ingénieur C 3 306 tab. 1-2 ; VMZINC mémento 2025) ; cantons 2011 INSEE (COG) suivis jusqu'aux communes 2026 par les mouvements INSEE",
+            "neige": "NF EN 1991-1-3/NA par département (Techniques de l'Ingénieur ; ICAB), valeurs reprises de regions.json"},
         "regles": __doc__.split("Règles appliquées")[1].strip(),
         "statuts": {"calcule": "toutes les règles donnent une seule zone pour la commune",
                     "limite": "la zone dépend de l'endroit exact du chantier dans la commune (bande côtière, relief, canton) : demander « bord de mer ? » / l'altitude, ou prendre la plus sévère",
                     "a_confirmer": "règle non tranchée à la commune (zone méditerranéenne de l'ardoise, montagne, vent ou neige par canton)"},
         "communes": out,
     }
-    json.dump(meta, open(o.sortie, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+    json.dump(meta, open(o.sortie, "w", encoding="utf-8"), ensure_ascii=False,
+              indent=None if o.compact else 1, separators=(",", ":") if o.compact else None)
     cnt = collections.Counter((e["departement"], e["zone_ardoise_dtu_40_11"], e["zone_tuile_dtu_40_21"]) for e in out)
     print("écrit", o.sortie, len(out), file=sys.stderr)
     print(json.dumps(collections.Counter(e["statut"] for e in out)), file=sys.stderr)

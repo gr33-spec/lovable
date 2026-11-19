@@ -174,7 +174,7 @@ def construit():
              "verdict_section26": regions.get("verdict_section26"), "verdict_zone_ts": regions.get("verdict_zone_ts")}
     communes = os.path.join(RECH, "communes")
     if os.path.isdir(communes):
-        carte["communes"] = sorted(f for f in os.listdir(communes) if f.endswith(".json"))
+        carte["communes"] = sorted(f for f in os.listdir(communes) if f.endswith((".json", ".json.gz")))
     rst = collections.Counter(e["statut"] for e in regions["entrees"])
     carte["taux_confirme"] = round(100 * sum(n for st, n in rst.items() if st in CONFIRME) / max(1, len(regions["entrees"])), 1)
 
