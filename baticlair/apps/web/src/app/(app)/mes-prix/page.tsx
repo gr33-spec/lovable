@@ -7,6 +7,7 @@ import { ButtonLink, Card, EmptyState, ErrorNotice, PageTitle, Skeleton } from "
 import { api } from "@/lib/api";
 import { euros, jourFr, type MesPrix } from "@/lib/recentrage";
 import { useResource } from "@/lib/use-resource";
+import Link from "next/link";
 
 /**
  * « MES PRIX » (Greg, 25 octobre 2026 : « ce qui fait rester ») : l'historique des prix reçus et payés PAR TOI, article par
@@ -27,7 +28,7 @@ export default function MesPrixPage() {
       {!data && !error ? <Skeleton lines={4} label="Chargement de tes prix…" /> : null}
       {data && data.formule === "gratuit" ? (
         <p className="rounded-xl bg-accent-soft p-4 text-[15px] text-ink">
-          En gratuit, tu vois tes 3 derniers mois. <a href="/abonnement" className="font-bold underline">Abonne-toi</a> pour tout ton historique.
+          En gratuit, tu vois tes 3 derniers mois. <Link href="/abonnement" className="font-bold underline">Abonne-toi</Link> pour tout ton historique.
         </p>
       ) : null}
       {data && data.articles.length === 0 ? (

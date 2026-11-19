@@ -3,6 +3,7 @@
 import { Check, Flag, Send } from "lucide-react";
 import { useState } from "react";
 import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
+import Link from "next/link";
 
 /**
  * Les deux gestes d'un visiteur sur une page publique : écrire à l'entreprise (son e-mail n'est jamais montré, le message
@@ -93,7 +94,7 @@ export function ContactPage({ adresse, nom, apercu = false }: { adresse: string;
       ) : null}
       <p className="pe-note">
         Votre message et vos coordonnées sont envoyés à {nom} seulement, pour vous répondre : par e-mail et dans son espace Mobiiz, où ils sont gardés 12 mois. Pour bloquer les abus, nous gardons 30 jours l&apos;heure de l&apos;envoi et une empreinte chiffrée de votre adresse IP.{" "}
-        {apercu ? "En savoir plus" : <a href="/confidentialite">En savoir plus</a>}.
+        {apercu ? "En savoir plus" : <Link href="/confidentialite">En savoir plus</Link>}.
       </p>
     </form>
   );

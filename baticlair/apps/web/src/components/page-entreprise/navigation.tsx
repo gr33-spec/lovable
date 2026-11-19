@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Images, Mail, Menu, P
 import { useEffect, useRef, useState } from "react";
 import { lienAppel, type RealisationPublique } from "@baticlair/domain/page-entreprise";
 import { Photo } from "./photo";
+import Link from "next/link";
 
 /**
  * Les gestes de la page publique, en îlots client (le reste est rendu par le serveur) : le menu déroulant du téléphone,
@@ -57,9 +58,9 @@ export function RetourMonSite() {
   }, []);
   if (!visible) return null;
   return (
-    <a href="/mon-site" className="pe-retour-app">
+    <Link href="/mon-site" className="pe-retour-app">
       <ArrowLeft size={18} strokeWidth={2.4} aria-hidden="true" /> Retour à Mon site
-    </a>
+    </Link>
   );
 }
 
