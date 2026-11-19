@@ -119,3 +119,26 @@ viennent de ces guides.
   Terreal ; conditionnement des supports de lisse ; abouts (déduit des gammes) ; mortier de solin ; rive de tuile plate ;
   recouvrement NOOK 15 cm ; noue à pinces Edilians ; ventilation linéaire Ubbink ; chatière ardoise VEPAC.
 - Les + 5 % sur closoir, rives et noues : toujours aucune source.
+
+## Passe 3b (19 novembre 2026, testeur-négoce) : faîtage breton
+
+- **Faîtière Armor** : fabricant **Edilians** confirmé (page produit edilians.com « Faîtière Armor 33 », réf. **729**, usine de
+  Pargny-sur-Saulx ; catalogue Toiture ardoise 360). Longueur **hors tout 370 mm** (Edilians, Leadermat, CMESMAT : `confirme`),
+  3,1 kg, **palette de 184** (code catalogue « PC184 » + Leadermat : `confirme`). Coloris **Rouge, Vieilli Masse, Émaillé Brun**
+  (`une_source` : page Edilians seule ; le catalogue cite VM et RO). **Nombre au ml : non publié** (`a_confirmer`) ; le « 33 » du
+  nom pourrait être un pas de 0,33 m (3 au ml) mais rien ne le dit : demander le nombre de faîtières. Ajout de la faîtière
+  « ardoise de 40 ouverture 17 » (réf. 720, 445 mm, 4,2 kg, `une_source`).
+- **Lignolet** : formule corrigée, unité juste : **2 × 1 000 ÷ (L + 3 mm) ardoises par ml de faîtage** (un rang de doublage par
+  versant : 32×22 ≈ 9,0 /ml ; 30×20 ≈ 9,9 /ml), 2 clous par ardoise sur les deux derniers rangs. C'est le « + 1 rang au
+  faîtage » déjà compté dans ardoise.json : ne pas l'ajouter deux fois. `une_source` (géométrie appliquée à la description du
+  guide Culture et du DTU, aucun nombre publié). L'ancien « ml ÷ L × 1,2 » est corrigé (verdict ajouté). **Écart important** : le
+  DTU 2020 (copie lue) réserve le lignolet à la **zone I protégée** (débordement 50 mm) ; la CAPEB dit « normal ou protégé ». Sur
+  la côte bretonne, le lignolet est hors DTU : seulement si le devis l'écrit.
+- **Mortier de faîtage par type** : aucun fabricant ne le chiffre par type de faîtière. Entrée `a_confirmer` qui range les
+  fourchettes publiées : ≈ 5 kg/ml sur plates et faible galbe (VPI, bas Weber), 5 à 10 (Weber) sur emboîtement galbé, jusqu'à
+  20 (PRB « suivant types de tuiles ») sur canal ou très fort galbe.
+- **Closoir selon la classe de galbe** (`confirme`, 3 fabricants) : G0 ≈ 240 mm (Edilians SIROKO+4, Ubbink TP), G1 ≈ 300-310
+  (SIROKO+3, ZEF, Ubbink TG), G2 ≈ 370-390 (SIROKO+2, ZEF ; Ubbink MG 360), G3 ≈ 390-400 (SIROKO+1 ; Ubbink FG 400) ; Monier :
+  rouleau 26/32 (Metalroll) ou 28/32 (Figaroll Plus) pour G0-G1, 32/38 ou 34/38 pour G2-G3 ; rigide Edilians SHARK+ 90 (G0-G1),
+  120 (G2), 140 (G3). La correspondance Ubbink TP/TG/MG/FG ↔ G0-G3 est une lecture (Ubbink n'écrit pas les classes QB).
+  HP 10 = G0, PV 10 = G1 (fiches Edilians).

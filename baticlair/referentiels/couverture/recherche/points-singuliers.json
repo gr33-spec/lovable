@@ -109,11 +109,128 @@
       "id": "faitiere_armor_ardoise_longueur",
       "sous_famille": "faîtage ardoise",
       "marque": "Edilians",
-      "modele": "Faîtière Armor à emboîtement universelle (pour toiture ardoise)",
+      "modele": "Faîtière Armor 33 (réf. 729), faîtière terre cuite à emboîtement pour toiture ardoise",
       "attribut": "longueur_piece",
-      "valeur": 37,
-      "unite": "cm",
-      "condition": "faîtière terre cuite pour couverture ardoise (Bretagne) ; nombre au ml non publié",
+      "valeur": 370,
+      "unite": "mm",
+      "condition": "longueur hors tout (pas la longueur utile) ; usine de Pargny-sur-Saulx ; poids 3,1 kg",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729, usine de Pargny-sur-Saulx)",
+          "url": "https://edilians.com/faitiere-armor-33.html",
+          "type": "fabricant",
+          "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1 ; coloris Rouge, Vieilli Masse, Emaille Brun",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Leadermat (négoce), « Faîtière Armor - 0,33 - Vieillie Masse » (réf. négoce 115599)",
+          "url": "https://www.leadermat.com/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033",
+          "type": "negoce",
+          "extrait": "370 mm … 3.1 kg … 1 palette · 184 unités … met en valeur le caractère distinctif du patrimoine breton",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "CMESMAT (négoce), Faîtière Armor à emboîtement universelle terre cuite rouge, long. 37 cm",
+          "url": "https://www.cmesmat.fr/couverture/tuiles/tuiles-terre-cuite/accessoires/2778524-faitiere-armor-a-emboitement-universelle-terre-cuite-rouge-long-37-cm.html",
+          "type": "negoce",
+          "extrait": "Faîtière armor à emboîtement universelle … long. 37 cm (titre de la fiche)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "points_singuliers",
+      "ecart": "Fabricant : Edilians (confirmé : page produit edilians.com, réf. 729 ; catalogue Toiture ardoise 360). Leadermat et CMESMAT donnent 370 mm / 37 cm : longueur hors tout, pas la longueur utile."
+    },
+    {
+      "id": "faitiere_armor_coloris",
+      "sous_famille": "faîtage ardoise",
+      "marque": "Edilians",
+      "modele": "Faîtière Armor 33 (réf. 729)",
+      "attribut": "coloris",
+      "valeur": [
+        "Rouge",
+        "Vieilli Masse",
+        "Émaillé Brun"
+      ],
+      "unite": "liste",
+      "condition": "codes catalogue : VM (Vieilli Masse), RO (Rouge)",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729, usine de Pargny-sur-Saulx)",
+          "url": "https://edilians.com/faitiere-armor-33.html",
+          "type": "fabricant",
+          "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1 ; coloris Rouge, Vieilli Masse, Emaille Brun",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTIÈRE ARMOR … Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287 … Fait Armor U RO 073736",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Leadermat (négoce), « Faîtière Armor - 0,33 - Vieillie Masse » (réf. négoce 115599)",
+          "url": "https://www.leadermat.com/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033",
+          "type": "negoce",
+          "extrait": "370 mm … 3.1 kg … 1 palette · 184 unités … met en valeur le caractère distinctif du patrimoine breton",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Liste complète sur la seule page Edilians (le catalogue Ardoise 360 du même fabricant ne cite que VM et RO) ; Leadermat ne vend que le Vieilli Masse. L'Émaillé Brun n'a pas de deuxième source.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitiere_armor_palette",
+      "sous_famille": "faîtage ardoise",
+      "marque": "Edilians",
+      "modele": "Faîtière Armor 33 (réf. 729)",
+      "attribut": "conditionnement",
+      "valeur": 184,
+      "unite": "u/palette",
+      "condition": "vendue aussi à l'unité (code « U »)",
+      "regions": [
+        "Bretagne",
+        "Pays de la Loire"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTIÈRE ARMOR … Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287 … Fait Armor U RO 073736",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Leadermat (négoce), « Faîtière Armor - 0,33 - Vieillie Masse » (réf. négoce 115599)",
+          "url": "https://www.leadermat.com/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033",
+          "type": "negoce",
+          "extrait": "370 mm … 3.1 kg … 1 palette · 184 unités … met en valeur le caractère distinctif du patrimoine breton",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le catalogue code la palette complète « PC184 » ; Leadermat : « 1 palette · 184 unités ».",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitiere_armor_pieces_par_ml",
+      "sous_famille": "faîtage ardoise",
+      "marque": "Edilians",
+      "modele": "Faîtière Armor 33 (réf. 729)",
+      "attribut": "pieces_par_ml",
+      "valeur": null,
+      "unite": "u/ml",
+      "condition": "longueur hors tout 370 mm ; longueur utile (pas) non publiée",
       "regions": [
         "Bretagne",
         "Pays de la Loire"
@@ -121,21 +238,54 @@
       "statut": "a_confirmer",
       "sources": [
         {
-          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
-          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729, usine de Pargny-sur-Saulx)",
+          "url": "https://edilians.com/faitiere-armor-33.html",
           "type": "fabricant",
-          "extrait": "Avec les faîtières terre cuite Ardoise et Armor … Fait Armor PC184 VM / U VM",
+          "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1 ; coloris Rouge, Vieilli Masse, Emaille Brun",
           "consulte": "2026-11-19"
         },
         {
-          "titre": "CMESMAT (négoce), Faîtière Armor à emboîtement universelle terre cuite rouge, long. 37 cm",
-          "url": "https://www.cmesmat.fr/couverture/tuiles/tuiles-terre-cuite/accessoires/2778524-faitiere-armor-a-emboitement-universelle-terre-cuite-rouge-long-37-cm.html",
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTIÈRE ARMOR … Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287 … Fait Armor U RO 073736",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Leadermat (négoce), « Faîtière Armor - 0,33 - Vieillie Masse » (réf. négoce 115599)",
+          "url": "https://www.leadermat.com/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033",
           "type": "negoce",
-          "extrait": "Faîtière armor à emboîtement universelle … long. 37 cm (titre de la fiche, page 403 à la lecture)",
+          "extrait": "370 mm … 3.1 kg … 1 palette · 184 unités … met en valeur le caractère distinctif du patrimoine breton",
           "consulte": "2026-11-19"
         }
       ],
-      "raison": "Longueur 37 cm lue dans le titre de la fiche négoce seulement ; le nombre au ml (probablement ≈ 3) n'est publié nulle part : demander à Edilians (hot.line@edilians.com) ou au négoce breton.",
+      "raison": "Ni la page Edilians, ni le catalogue Ardoise 360, ni les négoces ne donnent un nombre au ml ou une longueur utile. Le « 33 » du nom (Leadermat écrit « 0,33 ») pourrait être un pas de 0,33 m, soit 3 au ml, mais rien ne le dit : demander au comptoir ou à la hotline Edilians (hot.line@edilians.com). En attendant, demander à l'artisan le nombre de faîtières.",
+      "famille": "points_singuliers"
+    },
+    {
+      "id": "faitiere_ardoise_40_ouverture17",
+      "sous_famille": "faîtage ardoise",
+      "marque": "Edilians",
+      "modele": "Faîtière ardoise de 40 Ouverture 17 (réf. 720)",
+      "attribut": "longueur_piece",
+      "valeur": 445,
+      "unite": "mm",
+      "condition": "longueur hors tout ; 4,2 kg ; coloris Vieilli Surface, Vieilli Masse, Rouge, Émaillé Brun ; nombre au ml non publié",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, page produit « Faîtière ardoise de 40 Ouverture 17 » (réf. 720)",
+          "url": "https://edilians.com/faitiere-ardoise-de-40-ouverture-17.html",
+          "type": "fabricant",
+          "extrait": "Référence 720 … Longueur hors tout 445 mm … Poids en Kg 4.2 ; coloris Vieilli Surface, Vieilli Masse, Rouge, Emaille Brun",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Seule la page Edilians ; l'autre faîtière terre cuite « Ardoise » citée par le catalogue Ardoise 360. Nombre au ml non publié.",
       "famille": "points_singuliers"
     },
     {
@@ -317,23 +467,35 @@
       "marque": "Monier, Ubbink, Terreal",
       "modele": "closoirs souples",
       "attribut": "largeur",
-      "valeur": "240 à 400 mm selon la classe de galbe de la tuile (G0 à G3)",
+      "valeur": {
+        "G0 (éléments plats : plates, HP 10, Signy…)": "240 mm (Edilians SIROKO+4 ; Ubbink TP 240) ou rouleau 26/32 cm (Monier Metalroll) / 28/32 (Figaroll Plus) ; rigide SHARK+ 90",
+        "G1 (faible galbe : PV 10, Double Romane…)": "300 à 310 mm (Edilians SIROKO+3 310, ZEF 300 ; Ubbink TG 310 / Alu 300) ou 26/32 (Metalroll) / 28/32 (Figaroll Plus) ; SHARK+ 90",
+        "G2 (fort galbe : Galleane, Plein Ciel, Canal 40…)": "370 à 390 mm (SIROKO+2 370, ZEF 390 ; Ubbink MG 360) ou 32/38 (Metalroll) / 34/38 (Figaroll Plus) ; SHARK+ 120",
+        "G3 (très fort galbe : canal, Médoc…)": "390 à 400 mm (SIROKO+1 390, ZEF 390 ; Ubbink FG 400 / Alu 380) ou 32/38 (Metalroll) / 34/38 (Figaroll Plus) ; SHARK+ 140"
+      },
       "unite": "mm",
-      "condition": "la largeur se choisit avec le galbe de la tuile, pas selon faîtage ou arêtier",
+      "condition": "classe de galbe lue sur la fiche de la tuile (Edilians : « Classe de galbe : G0* » etc.) ; la largeur se choisit avec le galbe, pas selon faîtage ou arêtier",
       "statut": "confirme",
       "sources": [
+        {
+          "titre": "Edilians, catalogue « Gamme Accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+ : tableaux de compatibilité galbe)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+          "type": "fabricant",
+          "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+          "consulte": "2026-11-19"
+        },
         {
           "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
           "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
           "type": "fabricant",
-          "extrait": "Largeur rouleau (cm) 26-32 / 32-38 / 28-32 / 34-38 / 29,5 / 36,5",
+          "extrait": "METAROLL 26/32 : G0 E1 V111 / G1 E1 V111 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
           "consulte": "2026-11-19"
         },
         {
           "titre": "Ubbink, fiche Closoirs Airtec Duo Roll / Alu Roll (hébergée par BigMat)",
           "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645145075-rlDQWIT9Kq.pdf",
           "type": "fabricant",
-          "extrait": "Largeur 240 mm TP ; 310 mm TG ; 360 mm MG ; 400 mm FG",
+          "extrait": "Largeur 240 mm TP ; 310 mm TG ; 360 mm MG ; 400 mm FG (Alu Roll : 300 mm TG, 380 mm FG)",
           "consulte": "2026-11-19"
         },
         {
@@ -344,7 +506,7 @@
           "consulte": "2026-11-19"
         }
       ],
-      "ecart": "Le 240 mm Ubbink est pour tuiles plates (TP) : c'est sans doute l'origine du « 23 cm », mais ce n'est pas une largeur d'arêtier.",
+      "ecart": "Edilians et Monier publient des classes QB 35 (G0 à G3) ; Ubbink a sa propre codification (TP, TG, MG, FG) : la correspondance TP≈G0, TG≈G1, MG≈G2, FG≈G3 est une lecture, pas un texte Ubbink. Monier couvre deux classes par largeur (26/32 : G0-G1 ; 32/38 : G2-G3). Le 240 mm Ubbink (TP) est sans doute l'origine du « 23 cm » du référentiel.",
       "famille": "points_singuliers",
       "regions": [
         "France"
@@ -720,11 +882,55 @@
           "consulte": "2026-11-19"
         }
       ],
-      "ecart": "PRB Mortier bâtard donne « scellement de tuile : 12 à 25 kg/ml » (produit généraliste). Le 8 kg/ml du référentiel est dans la fourchette, le 12 kg/ml canal reste une valeur du fondateur.",
+      "ecart": "PRB Mortier bâtard donne « scellement de tuile : 12 à 25 kg/ml » (produit généraliste). Le 8 kg/ml du référentiel est dans la fourchette, le 12 kg/ml canal reste une valeur du fondateur. Passe 3b : aucune valeur par type de faîtière trouvée (voir mortier_faitage_par_type_faitiere, a_confirmer).",
       "famille": "points_singuliers",
       "regions": [
         "France"
       ]
+    },
+    {
+      "id": "mortier_faitage_par_type_faitiere",
+      "sous_famille": "mortier de faîtage",
+      "marque": "Weber, PRB, VPI",
+      "modele": "mortier de couverture prêt à gâcher",
+      "attribut": "consommation_par_type",
+      "valeur": {
+        "faîtière sur tuile plate ou faiblement galbée (G0-G1), faîtière Armor ou ardoise sur ardoise": "≈ 5 kg/ml (VPI : 5 kg/ml pour un lit de 20 cm ; bas de la fourchette Weber 5 à 10)",
+        "faîtière 1/2 ronde ou angulaire sur tuile à emboîtement galbée (G2)": "5 à 10 kg/ml (Weber)",
+        "faîtière sur tuile canal ou fortement galbée (G3)": "jusqu'à 20 kg/ml (PRB : « 5 à 20 kg/ml suivant types de tuiles »)"
+      },
+      "unite": "kg/ml",
+      "condition": "faîtage scellé au mortier ; les fiches ne donnent qu'une fourchette « selon les tuiles »",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Weber (Saint-Gobain), fiche weber.cel tuile, mortier à la chaux pour couverture (hébergée par Chausson)",
+          "url": "https://www.chausson.fr/media/article-document/223821",
+          "type": "fabricant",
+          "extrait": "Consommation : environ 5 à 10 kg/ml de faîtage. Un sac de 25 kg représente environ 15 l",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "PRB, fiche PRB Pose Tuiles (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+          "type": "fabricant",
+          "extrait": "Environ 5 à 20 kg/ml de faîtage suivant types de tuiles",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite, édition 2023-2024 (groupe SAMSE)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+          "type": "fabricant",
+          "extrait": "5 kg/m linéaire de faîtage ou lit de maçonnerie (20 cm de large)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Aucun fabricant ne chiffre la consommation par type de faîtière : PRB dit seulement que la consommation dépend des tuiles (5 à 20), Weber donne 5 à 10, VPI 5. Le classement par galbe est une lecture de ces fourchettes, pas une valeur publiée. Par défaut, garder 8 kg/ml (fondateur) et demander au comptoir pour le canal.",
+      "famille": "points_singuliers"
     },
     {
       "id": "mortier_couverture_sac_palette",
@@ -969,9 +1175,17 @@
           "type": "guide",
           "extrait": "faîtage en lignolet, ou en rangs de rencontre recouverts par une faîtière scellée au mortier bâtard",
           "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.4.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "débordement de 50 mm des ardoises du versant exposé au vent de pluie dominant … ne peut être exécuté qu'en zone I situation protégée",
+          "consulte": "2026-11-19"
         }
       ],
-      "famille": "points_singuliers"
+      "famille": "points_singuliers",
+      "ecart": "Le NF DTU 40.11 de 2020 (copie lue) limite le lignolet à la zone I en situation protégée, avec un débordement de 50 mm ; le calepin CAPEB écrit « site normal ou protégé ». Conséquence en Bretagne : sur la côte (zone 3, souvent situation exposée) le lignolet est hors DTU ; le proposer seulement si l'artisan l'écrit au devis (le devis prime)."
     },
     {
       "id": "faitage_lignolet_quantite",
@@ -979,23 +1193,30 @@
       "marque": "",
       "modele": "lignolet",
       "attribut": "ardoises_par_ml",
-      "valeur": "ml ÷ largeur ardoise × 1,2 (référentiel §3)",
-      "unite": "u/ml",
-      "condition": "",
+      "valeur": "2 × 1 000 ÷ (largeur d'ardoise en mm + 3) ardoises par ml de faîtage (un rang de doublage par versant), + 2 clous par ardoise sur les deux derniers rangs",
+      "unite": "ardoises par ml de faîtage (les deux versants)",
+      "condition": "exemples : 32×22 → 2 × 1 000 ÷ 223 ≈ 9,0 /ml ; 30×20 → ≈ 9,9 /ml ; 35×25 → ≈ 7,9 /ml ; ce rang est le « + 1 rang au faîtage » déjà compté dans ardoise.json : ne pas l'ajouter deux fois",
       "regions": [
         "Bretagne"
       ],
-      "statut": "a_confirmer",
+      "statut": "une_source",
       "sources": [
         {
           "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §4.3.3, 4.5.3, 4.7.1",
           "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf",
           "type": "guide",
-          "extrait": "terminer la couverture de chaque versant par un rang constitué d'une ardoise entière et d'une ardoise de tête, l'un des rangs dépassant l'autre de 50 à 60 mm",
+          "extrait": "terminer la couverture de chaque versant par un rang constitué d'une ardoise entière et d'une ardoise de tête",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.4.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "débordement de 50 mm des ardoises du versant exposé au vent de pluie dominant … ne peut être exécuté qu'en zone I situation protégée",
           "consulte": "2026-11-19"
         }
       ],
-      "raison": "Le guide Culture décrit le lignolet (sur chaque versant, un rang d'ardoises entières plus un rang d'ardoises de tête, deux clous par ardoise sur les deux derniers rangs) mais ne donne aucun nombre au ml. Par le calcul, ce serait environ 2 ardoises par largeur d'ardoise et par versant en plus des rangs courants, à faire valider par un couvreur breton : la règle « ml ÷ L × 1,2 » du §3 n'a aucune source.",
+      "raison": "Formule géométrique (une ardoise par largeur + jeu de 3 mm, comme le nombre au m² Cupa/Rathscheck) appliquée au rang de doublage que décrivent le guide Culture et le DTU ; aucun nombre publié. L'ancienne règle « ml ÷ largeur × 1,2 » (référentiel §3) n'a aucune source et donnait un total, pas un nombre au ml : abandonnée. À faire valider par un couvreur breton.",
       "famille": "points_singuliers"
     },
     {
@@ -1614,7 +1835,7 @@
       "origine": "roofing.ts closoir-aretier-5m ; §5 « arêtier : largeur 23 cm »",
       "valeur_actuelle": "23 cm",
       "verdict": "corrige",
-      "bonne_valeur": "même closoir que le faîtage ; largeur choisie selon le galbe de la tuile (240 mm tuiles plates, 280-320 faible galbe, 340-400 fort galbe)",
+      "bonne_valeur": "même closoir que le faîtage ; largeur selon la classe de galbe de la tuile : G0 ≈ 240 mm, G1 ≈ 300-310, G2 ≈ 370-390, G3 ≈ 390-400 (Edilians SIROKO+, Monier 26/32 pour G0-G1 et 32/38 pour G2-G3)",
       "sources": [
         {
           "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
@@ -1635,6 +1856,13 @@
           "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1840137.pdf",
           "type": "negoce",
           "extrait": "ventilation des faîtages et des arêtiers",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue « Gamme Accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+ : tableaux de compatibilité galbe)",
+          "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+          "type": "fabricant",
+          "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
           "consulte": "2026-11-19"
         }
       ],
@@ -2113,6 +2341,30 @@
         }
       ],
       "explication": "Les gammes ont des pièces « à sceller » et « ventilation » distinctes : le mode de pose se choisit pour tout le faîtage."
+    },
+    {
+      "ratio": "Lignolet : ml ÷ largeur ardoise × 1,2",
+      "origine": "référentiel-couverture §3",
+      "valeur_actuelle": "total d'ardoises, unité « u/ml » fausse",
+      "verdict": "corrige",
+      "bonne_valeur": "2 × 1 000 ÷ (L + 3 mm) ardoises par ml de faîtage (un rang de doublage par versant, déjà compté dans le « + 1 rang au faîtage ») ; lignolet seulement en zone I protégée selon le DTU 2020",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture / Institut supérieur de la couverture, Ouvrages de couverture – Ardoises, fascicule technique, août 2011, §4.3.3, 4.5.3, 4.7.1",
+          "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf",
+          "type": "guide",
+          "extrait": "terminer la couverture de chaque versant par un rang constitué d'une ardoise entière et d'une ardoise de tête",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.4.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "débordement de 50 mm des ardoises du versant exposé au vent de pluie dominant … ne peut être exécuté qu'en zone I situation protégée",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le × 1,2 n'a aucune source ; la formule suit la description du rang de tête (guide Culture, DTU)."
     }
   ],
   "commande_comptoir": [
@@ -2124,7 +2376,8 @@
         "à emboîtement ou non",
         "teinte",
         "pose à sec (ventilée + clip) ou à sceller",
-        "nombre de pièces"
+        "nombre de pièces",
+        "sur ardoise (Bretagne) : faîtière Armor 33 (réf. 729 : Rouge, Vieilli Masse, Émaillé Brun ; palette de 184) ou faîtière ardoise de 40 (réf. 720) ; nombre de pièces (le nombre au ml n'est pas publié)"
       ],
       "unite_de_vente": "pièce",
       "conditionnement": "à l'unité, palette selon fabricant",
@@ -2141,6 +2394,20 @@
           "url": "https://edilians.com/media/wysiwyg/Encyclopedie/fortement-galbees-tuiles-edilians.pdf",
           "type": "fabricant",
           "extrait": "Faîtière/arêtier 1/2 rond à emboîtement grand modèle",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729, usine de Pargny-sur-Saulx)",
+          "url": "https://edilians.com/faitiere-armor-33.html",
+          "type": "fabricant",
+          "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1 ; coloris Rouge, Vieilli Masse, Emaille Brun",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+          "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+          "type": "fabricant",
+          "extrait": "FAÎTIÈRE ARMOR … Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287 … Fait Armor U RO 073736",
           "consulte": "2026-11-19"
         }
       ]

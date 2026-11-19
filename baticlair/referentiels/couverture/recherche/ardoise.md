@@ -569,3 +569,28 @@ Les colonnes 5,50-11 m et 11-16,50 m sont dans `ardoise.json` (entrées `recouvr
 | 120 % (50°) | R 69 / 8 cm / 75,5 / **81,3** / 13,25 | non admis (R 77 > 73) | non admis (R 83 > 73) |
 | 140 % (54,5°) | R 65 / 7 cm / 77,5 / **79,2** / 12,90 | R 73 / 8 cm / 73,5 / **83,5** / 13,61 | non admis (R 80 > 73) |
 | 170 % (59,5°) | R 65 / 7 cm / 77,5 / **79,2** / 12,90 | R 69 / 8 cm / 75,5 / **81,3** / 13,25 | non admis (R 77 > 73) |
+## Passe 3b (19 novembre 2026, testeur-négoce) : situation exposée, carrières, palettes
+
+**Situation exposée (côte des 22, 29, 56).** Règle retenue : R exposé = la plus forte de R normal + 10 mm (NF DTU 40.11 de 2020, §5.1.1.2, lu dans une copie non officielle ET dans la fiche Progineer qui le cite) et R normal × 1,10 (Cupa catalogue 2024, Rathscheck 2023 : « majorer de 10 % », texte de 1993). Puis les formules habituelles (pureau = (H − R)/2, N = 1/[pureau × (L + 3)], crochet = R + 3 arrondi au cm sup., liteaux = 1/pureau). 45 lignes `…_zone3expo_…` (projection ≤ 5,50 m) : **42 `confirme`** (les deux règles donnent le même crochet et le même nombre à 1 % près), **3 `une_source`** (elles divergent : la valeur retenue n'est portée que par une règle ; les deux résultats sont dans `details`). Sous la pente minimale, le format n'est pas admis (H < 3 R) : ne pas calculer.
+
+Tableau : R retenu (mm) / crochet (cm) / ardoises au m² / liteaux ml/m² ; « — » = non admis à cette pente en situation exposée.
+
+| Pente | 32×22 | 30×20 | 33×23 | 35×22 | 35×25 | 40×22 | 40×25 | 27×18 |
+|---|---|---|---|---|---|---|---|---|
+| 60 % (31°) | — | — | — | — | — | R 125 / 13 / **32,6** / 7,27 | R 125 / 13 / **28,7** / 7,27 | — |
+| 70 % (35°) | — | — | — | — | — | R 117 / 12 / **31,7** / 7,07 | R 117 / 12 / **27,9** / 7,07 | — |
+| 80 % (38,7°) | — | — | R 107 / 11 / **38,5** / 8,97 | R 107 / 11 / **36,9** / 8,23 | R 107 / 11 / **32,5** / 8,23 | R 107 / 11 / **30,6** / 6,83 | R 107 / 11 / **27,0** / 6,83 | — |
+| 90 % (42°) | R 102 / 11 / **41,1** / 9,17 | — | R 102 / 11 / **37,6** / 8,77 | R 102 / 11 / **36,2** / 8,06 | R 102 / 11 / **31,9** / 8,06 | R 102 / 11 / **30,1** / 6,71 | R 102 / 11 / **26,5** / 6,71 | — |
+| 100 % (45°) | R 99 / 11 / **40,6** / 9,05 | R 99 / 11 / **49,0** / 9,95 | R 99 / 11 / **37,2** / 8,66 | R 99 / 11 / **35,7** / 7,97 | R 99 / 11 / **31,5** / 7,97 | R 99 / 11 / **29,8** / 6,64 | R 99 / 11 / **26,3** / 6,64 | — |
+| 120 % (50°) | R 93 / 10 / **39,5** / 8,81 | R 93 / 10 / **47,6** / 9,66 | R 93 / 10 / **36,2** / 8,44 | R 93 / 10 / **34,9** / 7,78 | R 93 / 10 / **30,8** / 7,78 | R 93 / 10 / **29,2** / 6,51 | R 93 / 10 / **25,7** / 6,51 | — |
+| 140 % (54,5°) | R 90 / 10 / **39,0** / 8,7 | R 90 / 10 / **46,9** / 9,52 | R 90 / 10 / **35,8** / 8,33 | R 90 / 10 / **34,5** / 7,69 | R 90 / 10 / **30,4** / 7,69 | R 90 / 10 / **28,9** / 6,45 | R 90 / 10 / **25,5** / 6,45 | R 90 / 10 / **60,7** / 11,11 (une_source) |
+| 170 % (59,5°) | R 87 / 9 / **38,5** / 8,58 | R 87 / 9 / **46,3** / 9,39 (une_source) | R 87 / 9 / **35,3** / 8,23 | R 87 / 9 / **34,1** / 7,6 | R 87 / 9 / **30,1** / 7,6 | R 87 / 9 / **28,7** / 6,39 | R 87 / 9 / **25,3** / 6,39 | R 87 / 9 / **59,7** / 10,93 (une_source) |
+
+Pente minimale en zone 3 exposée : 40×25 60 % (31.0°) ; 40×22 60 % (31.0°) ; 35×25 80 % (38.7°) ; 35×22 80 % (38.7°) ; 32×22 90 % (42.0°) ; 30×20 100 % (45.0°) ; 27×18 140 % (54.5°) ; 33×23 80 % (38.7°). Le 32×22 n'est plus admis à 38,7° en situation exposée (R 107 → 3 R = 321 mm > 320 mm, à 1 mm près) : le signaler à l'artisan plutôt que de calculer.
+
+- **Écart des deux règles** : en Bretagne les crochets sont les mêmes sauf aux pentes où R normal passe 100 mm (le + 10 % devient plus fort) ou descend sous 80 mm (le + 10 mm est plus fort). Écart sur le nombre au m² : 0 à 1,2 %.
+- **Règle `ardoise_zone_exposee`** passée de `une_source` à `confirme` (+10 mm lu dans deux relais indépendants du DTU 2020 ; le + 10 % des fabricants est l'ancien texte, écart expliqué).
+- **Carrières en modèle** (`confirme_fabricant`, dénomination lue sur la fiche officielle datée, pas de calcul possible) : Cupa 2, 3, 4, 5, 6, 7, 9, 10, 13, 17, 30, 37 (catalogue architecte, PDF du 23/08/2024) et Cupa Sélection Plus (fiche 02/2026 : Los Campos, 27×18 / 30×20 / 32×22 / 40×22, 3,5 mm) ; Samaca 29, 33, 44, 47, 55 (fiches 07/2026, carrière et formats) ; Rathscheck InterSIN SIN 120, 150, 240, 340 (brochure 03/2025, carrière, formats et épaisseurs par sélection). Pizarras Los Ángeles : non trouvé, reste à faire.
+- **Palettes** : aucun fabricant ne publie le nombre par palette (Cupa, Samaca, Rathscheck vérifiés). Négoces seulement, et pour le 32×22 seulement : Cupa 10 Excellence 1 950 (690 kg, Sobemat), SIN 340 Fine ±4 mm 1 700 (Sobemat), K08 Star 3,5 mm 2 200 (Minardoises), Catteau 2 300 (2,7-3 mm) / 1 900 (3,5-4 mm) / 1 500-1 600 (4-5 mm) / 1 400 (4,5-6 mm) / 800 (7-10 mm). Statuts : `une_source` par produit, `a_confirmer` pour la règle générale et pour les autres formats (non publiés).
+- **40×24 « ardoise naturelle »** : requalifié (`a_confirmer`, « format fibres-ciment, pas un modèle d'ardoise naturelle ») ; si un devis l'écrit, demander à l'artisan.
+- Comptoir « Ardoises naturelles » : liste de carrières, question « situation exposée ? », conditionnement par épaisseur (32×22).

@@ -212,3 +212,24 @@ Zones (DTU, via Koramic) : zone 3 = côte Atlantique, Manche et mer du Nord sur 
 - [Monier, fiche Signy 2025](https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340169521-fLwiLpCVJm.pdf) ; officielle : [bmigroup.com, Signy](https://www.bmigroup.com/fr/p/tuile-signy-rouge-vieilli-terre-cuite-1922894655/)
 - [CAP couvreur (Nomad Education)](https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41)
 - [Batidistribution 2011](https://www.baselopresse.fr/batidistribution/produits/couverture/les-tuiles/pdf)
+
+## Passe 3b (19 novembre 2026, testeur-négoce)
+
+- **HP 10 Huguenot (205)**, fiche Edilians 01/2024 + encyclopédie 2024 (`confirme_fabricant` après contrôle) : 1/2 tuile 205.01 ;
+  **chatière = tuile de ventilation 205.20, 50 cm²** ; tuile à douille Ø 160 205.32 (+ lanterne bi-section 1007, 259 cm²) ;
+  tuiles de rive à rabat D 205.72 / G 205.73 et 1/2 tuiles de rive à rabat D 205.74 / G 205.75 (2,7/ml), rive universelle 1050
+  (3/ml), rive PV 13 215.41/215.42 ; abouts 824, 859, 863, 869, 1070/1071 et frontons ; tuile de finition 205.80 / 205.86 ; tuile
+  en verre VER205. Coloris complets (6).
+- **PV 10 Huguenot (214)**, fiche Edilians **03/2026** (remplace la source Habitatpresto) : 1/2 tuile 214.01 ; chatière 214.20,
+  50 cm² ; douille Ø 160 214.32 ; rive = **rive individuelle à emboîtement PV 13 215.41 / 215.42**, désignée par la fiche PV 10
+  elle-même (ce n'est pas une erreur) ; rive universelle 1050, grande rive Patrimoine 1048 (2,5/ml) ; abouts 824, 859, 863, 869,
+  1070/1071, 1078/1079. **Pas une copie de la HP 10** : les deux fiches officielles donnent les mêmes dimensions (460 × 306,
+  LU 268, pureau 310-376, 240/palette) ; diffèrent le relief, le DTU (40.21 / 40.211), le galbe (G1 / G0), la pose, les pentes
+  (NF Faible Pente), les coloris (4 / 6) et les rives (entrée `differences_avec_hp10`).
+- **Condition « Terreal »** des palettes Edilians corrigée sur les **42** entrées concernées (« palette standard Edilians »).
+- **Coloris ajoutés** (fiche ou page officielle, `confirme_fabricant` après contrôle) : Koramic Actua (9), Alegra, Jura Nova,
+  Opalys, Vieille Panne 451 ; Terreal Santenay, Volnay PV ; Monier Signy, Galleane 10 et 12, Régence, Losangée Héritage,
+  Gallo-Romane, Romane, Postel 20, Belmont, Fontenelle, Maizières, Abeille, Chartreuse (fiches d'avril 2026). H 10 mis à jour
+  (5 coloris, Noir brillant ajouté).
+- Reste : coloris Koramic Datura, Nueva, Galbée 401, Tempête… et Terreal Romane Canal, Côte de Beaune… (pages non trouvées par
+  leur adresse) ; abouts et chatières des autres modèles.

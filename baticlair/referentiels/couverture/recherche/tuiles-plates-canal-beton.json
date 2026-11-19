@@ -345,6 +345,51 @@
    ]
   },
   {
+   "id": "p3b_edilians_canal-50-poudenx_coloris",
+   "famille": "tuile_canal",
+   "sous_famille": "tuile canal",
+   "marque": "Edilians",
+   "modele": "Canal 50 Poudenx (couvert 414 / courant à tenons 454)",
+   "attribut": "coloris",
+   "valeur": [
+    "Ancien",
+    "Bastide",
+    "Brun",
+    "Emporda",
+    "Littoral flammé",
+    "Pastel",
+    "Paysage",
+    "Rose",
+    "Rouergue",
+    "Rouge",
+    "Terroir",
+    "Tradition",
+    "Vieux toits"
+   ],
+   "unite": "liste",
+   "condition": "coloris du sélecteur de la page produit edilians.com, relevés le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, page produit (canal-50-poudenx)",
+     "url": "https://edilians.com/canal-50-poudenx.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Ancien, Bastide, Brun, Emporda, Littoral flammé, Pastel, Paysage, Rose, Rouergue, Rouge, Terroir, Tradition, Vieux toits",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "liteaux : calcul 1/360 = 2.78 ml/m², fiche 2.78",
+    "liteaux : calcul 1/350 = 2.86 ml/m², fiche 2.86",
+    "liteaux : calcul 1/340 = 2.94 ml/m², fiche 2.94",
+    "liteaux : calcul 1/330 = 3.03 ml/m², fiche 3.03"
+   ]
+  },
+  {
    "id": "edilians_canal_50_reabilis_couvert_m2_r140",
    "famille": "tuile_canal",
    "sous_famille": "tuile canal",
@@ -8301,6 +8346,39 @@
    ]
   },
   {
+   "id": "p3b_edilians_plate-tradition-17x27-phalempin_coloris",
+   "famille": "tuile_plate",
+   "sous_famille": "tuile plate terre cuite",
+   "marque": "Edilians",
+   "modele": "Plate Tradition 17x27 Phalempin (réf. 507)",
+   "attribut": "coloris",
+   "valeur": [
+    "Hermitage",
+    "Muraille"
+   ],
+   "unite": "liste",
+   "condition": "coloris du sélecteur de la page produit edilians.com, relevés le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, page produit (plate-tradition-17x27-phalempin)",
+     "url": "https://edilians.com/plate-tradition-17x27-phalempin.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Hermitage, Muraille",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "liteaux : calcul 1/90 = 11.11 ml/m², fiche 11.11",
+    "liteaux : calcul 1/95 = 10.53 ml/m², fiche 10.53",
+    "liteaux : calcul 1/100 = 10.00 ml/m², fiche 10"
+   ]
+  },
+  {
    "id": "edilians_monument_historique_16x27_503_m2_p85",
    "famille": "tuile_plate",
    "sous_famille": "tuile plate terre cuite",
@@ -9104,6 +9182,39 @@
     }
    ],
    "raison": "fiche fabricant seule (aucune autre source indépendante trouvée pour ce modèle)",
+   "controle": [
+    "liteaux : calcul 1/75 = 13.33 ml/m², fiche 13.33",
+    "liteaux : calcul 1/80 = 12.50 ml/m², fiche 12.5",
+    "liteaux : calcul 1/85 = 11.76 ml/m², fiche 11.76"
+   ]
+  },
+  {
+   "id": "p3b_edilians_plate-16x24-phalempin_coloris",
+   "famille": "tuile_plate",
+   "sous_famille": "tuile plate terre cuite",
+   "marque": "Edilians",
+   "modele": "Plate 16x24 Phalempin (réf. 505)",
+   "attribut": "coloris",
+   "valeur": [
+    "Ambré",
+    "Vieilli"
+   ],
+   "unite": "liste",
+   "condition": "coloris du sélecteur de la page produit edilians.com, relevés le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, page produit (plate-16x24-phalempin)",
+     "url": "https://edilians.com/plate-16x24-phalempin.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Ambré, Vieilli",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "liteaux : calcul 1/75 = 13.33 ml/m², fiche 13.33",
     "liteaux : calcul 1/80 = 12.50 ml/m², fiche 12.5",
@@ -9921,6 +10032,44 @@
    ]
   },
   {
+   "id": "p3b_edilians_plate-20x30-huguenot_coloris",
+   "famille": "tuile_plate",
+   "sous_famille": "tuile plate terre cuite",
+   "marque": "Edilians",
+   "modele": "Plate 20x30 Huguenot (réf. 510)",
+   "attribut": "coloris",
+   "valeur": [
+    "Alezane",
+    "Ardoisé",
+    "Flammé rustique",
+    "Gabarre",
+    "Paysage",
+    "Quercy",
+    "Vieilli"
+   ],
+   "unite": "liste",
+   "condition": "coloris du sélecteur de la page produit edilians.com, relevés le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, page produit (plate-20x30-huguenot)",
+     "url": "https://edilians.com/plate-20x30-huguenot.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Alezane, Ardoisé, Flammé rustique, Gabarre, Paysage, Quercy, Vieilli",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "liteaux : calcul 1/105 = 9.52 ml/m², fiche 9.52",
+    "liteaux : calcul 1/110 = 9.09 ml/m², fiche 9.09",
+    "liteaux : calcul 1/115 = 8.70 ml/m², fiche 8.7"
+   ]
+  },
+  {
    "id": "edilians_ecaille_pressee_ste_foy_551_m2_p90",
    "famille": "tuile_plate",
    "sous_famille": "tuile plate terre cuite",
@@ -10461,6 +10610,44 @@
    ]
   },
   {
+   "id": "p3b_edilians_plate-pressee-17x27-ste-foy_coloris",
+   "famille": "tuile_plate",
+   "sous_famille": "tuile plate terre cuite",
+   "marque": "Edilians",
+   "modele": "Plate pressée 17x27 Ste Foy (réf. 501)",
+   "attribut": "coloris",
+   "valeur": [
+    "Breteuil",
+    "Chevreuse",
+    "Millésime",
+    "Rouge Etna",
+    "Rouge nuancé",
+    "Terre de Beauce",
+    "Vieilli masse"
+   ],
+   "unite": "liste",
+   "condition": "coloris du sélecteur de la page produit edilians.com, relevés le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, page produit (plate-pressee-17x27-ste-foy)",
+     "url": "https://edilians.com/plate-pressee-17x27-ste-foy.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Breteuil, Chevreuse, Millésime, Rouge Etna, Rouge nuancé, Terre de Beauce, Vieilli masse",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "liteaux : calcul 1/90 = 11.11 ml/m², fiche 11.11",
+    "liteaux : calcul 1/95 = 10.53 ml/m², fiche 10.53",
+    "liteaux : calcul 1/100 = 10.00 ml/m², fiche 10"
+   ]
+  },
+  {
    "id": "edilians_17x27_phalempin_500_m2_p90",
    "famille": "tuile_plate",
    "sous_famille": "tuile plate terre cuite",
@@ -10724,6 +10911,43 @@
     }
    ],
    "raison": "fiche fabricant seule (aucune autre source indépendante trouvée pour ce modèle)",
+   "controle": [
+    "liteaux : calcul 1/90 = 11.11 ml/m², fiche 11.11",
+    "liteaux : calcul 1/95 = 10.53 ml/m², fiche 10.53",
+    "liteaux : calcul 1/100 = 10.00 ml/m², fiche 10"
+   ]
+  },
+  {
+   "id": "p3b_edilians_plate-17x27-phalempin_coloris",
+   "famille": "tuile_plate",
+   "sous_famille": "tuile plate terre cuite",
+   "marque": "Edilians",
+   "modele": "Plate 17x27 Phalempin (réf. 500)",
+   "attribut": "coloris",
+   "valeur": [
+    "Vintage",
+    "Amarante rustique",
+    "Ambré",
+    "Val de Seine",
+    "Vieilli",
+    "Volcane"
+   ],
+   "unite": "liste",
+   "condition": "coloris du sélecteur de la page produit edilians.com, relevés le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, page produit (plate-17x27-phalempin)",
+     "url": "https://edilians.com/plate-17x27-phalempin.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Vintage, Amarante rustique, Ambré, Val de Seine, Vieilli, Volcane",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "liteaux : calcul 1/90 = 11.11 ml/m², fiche 11.11",
     "liteaux : calcul 1/95 = 10.53 ml/m², fiche 10.53",
@@ -12216,6 +12440,40 @@
    ]
   },
   {
+   "id": "p3b_monier_plate-de-pays_coloris",
+   "famille": "tuile_plate",
+   "sous_famille": "tuile plate terre cuite",
+   "marque": "BMI Monier",
+   "modele": "Plate de Pays terre cuite",
+   "attribut": "coloris",
+   "valeur": [
+    "Ocre vieilli",
+    "Rouge vieilli",
+    "Terre de chêne"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Plate de Pays (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/PLATE-DE-PAYS.pdf?context=bWFzdGVyfHJvb3R8MTMxMzkzODR8YXBwbGljYXRpb24vcGRmfGFEUTRMMmcyTmk4NU9EVTJOVEF4TkRFMU9UWTJMMUJNUVZSRklFUkZJRkJCV1ZNdWNHUm18MGYyY2QzMTNmYzI3NTY5ZTQ3OTc2MTE4NTMyZGU3MDczNzkyM2YwMjQ2NWE5N2NjYTU0YTY5NGM5MmQwZDMzZA",
+     "type": "fabricant",
+     "extrait": "coloris : Ocre vieilli, Rouge vieilli, Terre de chêne",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 90 à 100) = 58.14 à 64.60, fiche 59",
+    "liteaux : calcul 1/90 = 11.11 ml/m², fiche 11",
+    "liteaux : calcul 1/100 = 10.00 ml/m², fiche 10"
+   ]
+  },
+  {
    "id": "terreal_rully_m2",
    "famille": "tuile_plate",
    "sous_famille": "tuile plate terre cuite",
@@ -13318,6 +13576,136 @@
    ]
   },
   {
+   "id": "monier_double_romane_coloris",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Double Romane",
+   "attribut": "coloris",
+   "valeur": [
+    "Noir",
+    "Ardoise",
+    "Brun",
+    "Rouge vieilli",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté de novembre 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Double Romane (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Double-Romane-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMjExOTd8YXBwbGljYXRpb24vcGRmfGFEZzFMMmc1TlM4eE1EQTNOVEl3TXpRek5qVTNOQzlFYjNWaWJHVWdVbTl0WVc1bFgxOUdhV05vWlNCd2NtOWtkV2wwTG5Ca1pnfDVlMDAzODYzMmEwMWU5NzhhYjFjNDIwZTExOWQwOWU4ZGY2OTJiNDZiZGYwM2JmNjg5YjA5OWIxZmUzZDU3YmI",
+     "type": "fabricant",
+     "extrait": "coloris : Noir, Ardoise, Brun, Rouge vieilli, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_double_romane_rive_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Double Romane",
+   "attribut": "tuile_rive_par_ml_et_par_cote",
+   "valeur": "3,2",
+   "unite": "u/ml",
+   "condition": "tuile de rive universelle G / D, 3,2 au m (32 / palette, 6,6 kg)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Double Romane (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Double-Romane-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMjExOTd8YXBwbGljYXRpb24vcGRmfGFEZzFMMmc1TlM4eE1EQTNOVEl3TXpRek5qVTNOQzlFYjNWaWJHVWdVbTl0WVc1bFgxOUdhV05vWlNCd2NtOWtkV2wwTG5Ca1pnfDVlMDAzODYzMmEwMWU5NzhhYjFjNDIwZTExOWQwOWU4ZGY2OTJiNDZiZGYwM2JmNjg5YjA5OWIxZmUzZDU3YmI",
+     "type": "fabricant",
+     "extrait": "Tuile de rive universelle gauche / droite … 3,2 au m",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_double_romane_faitieres_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Double Romane",
+   "attribut": "faitieres_par_ml",
+   "valeur": 2.8,
+   "unite": "u/ml",
+   "condition": "faîtière/arêtier de 42 à recouvrement (3,5 kg, 80 / palette) ; arêtier d'about de 42 ; frontons et rencontres 3 / 4 voies en plus ; clip 42 de faîtière",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Double Romane (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Double-Romane-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMjExOTd8YXBwbGljYXRpb24vcGRmfGFEZzFMMmc1TlM4eE1EQTNOVEl3TXpRek5qVTNOQzlFYjNWaWJHVWdVbTl0WVc1bFgxOUdhV05vWlNCd2NtOWtkV2wwTG5Ca1pnfDVlMDAzODYzMmEwMWU5NzhhYjFjNDIwZTExOWQwOWU4ZGY2OTJiNDZiZGYwM2JmNjg5YjA5OWIxZmUzZDU3YmI",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier de 42 à recouvrement 2,8 au m 3,5 kg/pièce 80 / palette",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_double_romane_chatiere",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Double Romane",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 18,
+   "unite": "cm²",
+   "condition": "tuile chatière grillagée (ouverture 18 cm²) ; tuile à douille Durovent Ø 110 à 160 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Double Romane (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Double-Romane-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMjExOTd8YXBwbGljYXRpb24vcGRmfGFEZzFMMmc1TlM4eE1EQTNOVEl3TXpRek5qVTNOQzlFYjNWaWJHVWdVbTl0WVc1bFgxOUdhV05vWlNCd2NtOWtkV2wwTG5Ca1pnfDVlMDAzODYzMmEwMWU5NzhhYjFjNDIwZTExOWQwOWU4ZGY2OTJiNDZiZGYwM2JmNjg5YjA5OWIxZmUzZDU3YmI",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 18 cm²)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
    "id": "monier_plein_ciel_m2",
    "famille": "tuile_beton",
    "sous_famille": "tuile béton grand moule",
@@ -13747,6 +14135,141 @@
      "consulte": "2026-11-19"
     }
    ],
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 315) = 10.58, fiche 10.6",
+    "liteaux : calcul 1/315 = 3.17 ml/m², fiche 3.2",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_plein_ciel_coloris",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Plein Ciel",
+   "attribut": "coloris",
+   "valeur": [
+    "Brun",
+    "Dune ocre",
+    "Dune sable",
+    "Muscade",
+    "Noir",
+    "Provence",
+    "Rouge",
+    "Rouge vieilli",
+    "Silvacane littoral",
+    "Blanc (sur commande)"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté de novembre 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Plein Ciel (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Plein-Ciel-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTYxNTE1NDd8YXBwbGljYXRpb24vcGRmfGFERmtMMmc1TWk4eE1EQTNOVEl3TXpNek9ESTNNQzlRYkdWcGJpQkRhV1ZzWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDI2ZWJjZTAzZGM2OTk0NjAxYTMxZjAyYzkyNmExYzUyZWUwNGZjYmIyOWFmODAxOTVhOGJkYTcxYTNiNjQ5OWE",
+     "type": "fabricant",
+     "extrait": "coloris : Brun, Dune ocre, Dune sable, Muscade, Noir, Provence, Rouge, Rouge vieilli, Silvacane littoral, Blanc (sur commande)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 315) = 10.58, fiche 10.6",
+    "liteaux : calcul 1/315 = 3.17 ml/m², fiche 3.2",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_plein_ciel_rive_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Plein Ciel",
+   "attribut": "tuile_rive_par_ml_et_par_cote",
+   "valeur": "3,2",
+   "unite": "u/ml",
+   "condition": "tuile de rive universelle G / D 3,2 au m (32 / palette) ou rive ronde G / D 3,2 au m (34 / palette)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Plein Ciel (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Plein-Ciel-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTYxNTE1NDd8YXBwbGljYXRpb24vcGRmfGFERmtMMmc1TWk4eE1EQTNOVEl3TXpNek9ESTNNQzlRYkdWcGJpQkRhV1ZzWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDI2ZWJjZTAzZGM2OTk0NjAxYTMxZjAyYzkyNmExYzUyZWUwNGZjYmIyOWFmODAxOTVhOGJkYTcxYTNiNjQ5OWE",
+     "type": "fabricant",
+     "extrait": "Tuile de rive universelle gauche / droite … 3,2 au m",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 315) = 10.58, fiche 10.6",
+    "liteaux : calcul 1/315 = 3.17 ml/m², fiche 3.2",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_plein_ciel_faitieres_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Plein Ciel",
+   "attribut": "faitieres_par_ml",
+   "valeur": 2.8,
+   "unite": "u/ml",
+   "condition": "faîtière/arêtier de 42 à recouvrement (3,5 kg, 80 / palette) ; arêtier d'about de 42 ; frontons et rencontres 3 / 4 voies en plus ; clip 42 de faîtière",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Plein Ciel (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Plein-Ciel-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTYxNTE1NDd8YXBwbGljYXRpb24vcGRmfGFERmtMMmc1TWk4eE1EQTNOVEl3TXpNek9ESTNNQzlRYkdWcGJpQkRhV1ZzWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDI2ZWJjZTAzZGM2OTk0NjAxYTMxZjAyYzkyNmExYzUyZWUwNGZjYmIyOWFmODAxOTVhOGJkYTcxYTNiNjQ5OWE",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier de 42 à recouvrement 2,8 au m 3,5 kg/pièce 80 / palette",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 315) = 10.58, fiche 10.6",
+    "liteaux : calcul 1/315 = 3.17 ml/m², fiche 3.2",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_plein_ciel_chatiere",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Plein Ciel",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 18,
+   "unite": "cm²",
+   "condition": "tuile chatière grillagée (ouverture 18 cm²) ; tuile à douille Durovent Ø 110 à 160 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Plein Ciel (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Plein-Ciel-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTYxNTE1NDd8YXBwbGljYXRpb24vcGRmfGFERmtMMmc1TWk4eE1EQTNOVEl3TXpNek9ESTNNQzlRYkdWcGJpQkRhV1ZzWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDI2ZWJjZTAzZGM2OTk0NjAxYTMxZjAyYzkyNmExYzUyZWUwNGZjYmIyOWFmODAxOTVhOGJkYTcxYTNiNjQ5OWE",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 18 cm²)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
     "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 315) = 10.58, fiche 10.6",
@@ -14192,6 +14715,136 @@
    ]
   },
   {
+   "id": "monier_perspective_coloris",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Perspective",
+   "attribut": "coloris",
+   "valeur": [
+    "Noir",
+    "Ardoise",
+    "Brun",
+    "Rouge vieilli",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté de novembre 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Perspective (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Perspective-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMzQ5ODl8YXBwbGljYXRpb24vcGRmfGFEVmlMMmd5WXk4eE1EQTNOVEl3TVRrNU5EYzRNaTlRWlhKemNHVmpkR2wyWlY5R2FXTm9aU0J3Y205a2RXbDBMbkJrWmd8MjNmMzA4MDdiYjdlZjAyOWZlNTYxMTQyNzk1ZTU0M2QwNTY1OTJlZGRjZjUxNzI4YzQ4NDQ2YThhZDMwYzcwZg",
+     "type": "fabricant",
+     "extrait": "coloris : Noir, Ardoise, Brun, Rouge vieilli, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_perspective_rive_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Perspective",
+   "attribut": "tuile_rive_par_ml_et_par_cote",
+   "valeur": "3,2",
+   "unite": "u/ml",
+   "condition": "tuile de rive universelle G / D, 3,2 au m (36 / palette)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Perspective (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Perspective-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMzQ5ODl8YXBwbGljYXRpb24vcGRmfGFEVmlMMmd5WXk4eE1EQTNOVEl3TVRrNU5EYzRNaTlRWlhKemNHVmpkR2wyWlY5R2FXTm9aU0J3Y205a2RXbDBMbkJrWmd8MjNmMzA4MDdiYjdlZjAyOWZlNTYxMTQyNzk1ZTU0M2QwNTY1OTJlZGRjZjUxNzI4YzQ4NDQ2YThhZDMwYzcwZg",
+     "type": "fabricant",
+     "extrait": "Tuile de rive universelle gauche / droite … 3,2 au m",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_perspective_faitieres_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Perspective",
+   "attribut": "faitieres_par_ml",
+   "valeur": 2.8,
+   "unite": "u/ml",
+   "condition": "faîtière/arêtier de 42 à recouvrement (3,5 kg, 80 / palette) ; arêtier d'about de 42 ; frontons et rencontres 3 / 4 voies en plus ; clip 42 de faîtière",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Perspective (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Perspective-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMzQ5ODl8YXBwbGljYXRpb24vcGRmfGFEVmlMMmd5WXk4eE1EQTNOVEl3TVRrNU5EYzRNaTlRWlhKemNHVmpkR2wyWlY5R2FXTm9aU0J3Y205a2RXbDBMbkJrWmd8MjNmMzA4MDdiYjdlZjAyOWZlNTYxMTQyNzk1ZTU0M2QwNTY1OTJlZGRjZjUxNzI4YzQ4NDQ2YThhZDMwYzcwZg",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier de 42 à recouvrement 2,8 au m 3,5 kg/pièce 80 / palette",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_perspective_chatiere",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Perspective",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 25,
+   "unite": "cm²",
+   "condition": "tuile chatière grillagée (ouverture 25 cm²) ; tuile à douille Durovent Ø 110 à 160 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Perspective (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Perspective-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwMzQ5ODl8YXBwbGljYXRpb24vcGRmfGFEVmlMMmd5WXk4eE1EQTNOVEl3TVRrNU5EYzRNaTlRWlhKemNHVmpkR2wyWlY5R2FXTm9aU0J3Y205a2RXbDBMbkJrWmd8MjNmMzA4MDdiYjdlZjAyOWZlNTYxMTQyNzk1ZTU0M2QwNTY1OTJlZGRjZjUxNzI4YzQ4NDQ2YThhZDMwYzcwZg",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 25 cm²)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
    "id": "monier_innotech_m2",
    "famille": "tuile_beton",
    "sous_famille": "tuile béton grand moule",
@@ -14622,6 +15275,138 @@
    ]
   },
   {
+   "id": "monier_innotech_coloris",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Innotech",
+   "attribut": "coloris",
+   "valeur": [
+    "Noir",
+    "Ardoise",
+    "Lauze",
+    "Brun",
+    "Rouge vieilli",
+    "Rouge",
+    "Blanc (sur commande)"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté de novembre 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Innotech (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Innotech-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwNzI4Njl8YXBwbGljYXRpb24vcGRmfGFHRTRMMmd6WkM4eE1EQTNOVEl3TVRRM01EUTVOQzlKYm01dmRHVmphRjlHYVdOb1pTQndjbTlrZFdsMExuQmtaZ3w4MTIyZGIzMDMxYzIwMmJlYTA4NzY5YzVkMzM5NjliMWEzYzQwZTY3NDExMDdmZmQ5MDZjZjY1ZWM4Nzk4NTU5",
+     "type": "fabricant",
+     "extrait": "coloris : Noir, Ardoise, Lauze, Brun, Rouge vieilli, Rouge, Blanc (sur commande)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_innotech_rive_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Innotech",
+   "attribut": "tuile_rive_par_ml_et_par_cote",
+   "valeur": "1,5 à 1,7 + 1,5 à 1,7",
+   "unite": "u/ml",
+   "condition": "tuile de rive universelle G / D 1,5 à 1,7 au m + demi-tuile de rive universelle G / D 1,5 à 1,7 au m, posées en alternance (ex. 1 m de rive : 1,7 tuile + 1,7 demi-tuile)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Innotech (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Innotech-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwNzI4Njl8YXBwbGljYXRpb24vcGRmfGFHRTRMMmd6WkM4eE1EQTNOVEl3TVRRM01EUTVOQzlKYm01dmRHVmphRjlHYVdOb1pTQndjbTlrZFdsMExuQmtaZ3w4MTIyZGIzMDMxYzIwMmJlYTA4NzY5YzVkMzM5NjliMWEzYzQwZTY3NDExMDdmZmQ5MDZjZjY1ZWM4Nzk4NTU5",
+     "type": "fabricant",
+     "extrait": "Tuile de rive universelle gauche / droite … 1,5 à 1,7 + 1,5 à 1,7 au m",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_innotech_faitieres_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Innotech",
+   "attribut": "faitieres_par_ml",
+   "valeur": 2.8,
+   "unite": "u/ml",
+   "condition": "faîtière/arêtier de 42 à recouvrement (3,5 kg, 80 / palette) ; arêtier d'about de 42 ; frontons et rencontres 3 / 4 voies en plus ; clip 42 de faîtière",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Innotech (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Innotech-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwNzI4Njl8YXBwbGljYXRpb24vcGRmfGFHRTRMMmd6WkM4eE1EQTNOVEl3TVRRM01EUTVOQzlKYm01dmRHVmphRjlHYVdOb1pTQndjbTlrZFdsMExuQmtaZ3w4MTIyZGIzMDMxYzIwMmJlYTA4NzY5YzVkMzM5NjliMWEzYzQwZTY3NDExMDdmZmQ5MDZjZjY1ZWM4Nzk4NTU5",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier de 42 à recouvrement 2,8 au m 3,5 kg/pièce 80 / palette",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_innotech_chatiere",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Innotech",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 25,
+   "unite": "cm²",
+   "condition": "tuile chatière grillagée (ouverture 25 cm²) ; tuile à douille Durovent Ø 110 à 160 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Innotech (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Innotech-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTMwNzI4Njl8YXBwbGljYXRpb24vcGRmfGFHRTRMMmd6WkM4eE1EQTNOVEl3TVRRM01EUTVOQzlKYm01dmRHVmphRjlHYVdOb1pTQndjbTlrZFdsMExuQmtaZ3w4MTIyZGIzMDMxYzIwMmJlYTA4NzY5YzVkMzM5NjliMWEzYzQwZTY3NDExMDdmZmQ5MDZjZjY1ZWM4Nzk4NTU5",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 25 cm²)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
    "id": "monier_nobilee_m2",
    "famille": "tuile_beton",
    "sous_famille": "tuile béton grand moule",
@@ -15044,6 +15829,136 @@
      "consulte": "2026-11-19"
     }
    ],
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 299-301 × pureau 345) = 9.63 à 9.69, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 299-301 × pureau 295) = 11.26 à 11.34, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_nobilee_coloris",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Nobilée",
+   "attribut": "coloris",
+   "valeur": [
+    "Noir",
+    "Ardoise",
+    "Rouge vieilli",
+    "Terroir",
+    "Sabayon"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté de novembre 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Nobilée (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Nobilee-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTU2Mzl8YXBwbGljYXRpb24vcGRmfGFEY3lMMmd6TUM4eE1EQTNOVEl3TVRnek1EazBNaTlPYjJKcGJHVmxYMFpwWTJobElIQnliMlIxYVhRdWNHUm18ZGRjZmE4YWQ1N2UzNWVjY2FmZjA1YTQ2OTVlN2I2NTI4ODlkODJhYmVhZTE0NjYxNThmMTVkYWMyYTc2MjI1MA",
+     "type": "fabricant",
+     "extrait": "coloris : Noir, Ardoise, Rouge vieilli, Terroir, Sabayon",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 299-301 × pureau 345) = 9.63 à 9.69, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 299-301 × pureau 295) = 11.26 à 11.34, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_nobilee_rive_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Nobilée",
+   "attribut": "tuile_rive_par_ml_et_par_cote",
+   "valeur": "1,5 à 1,7 + 1,5 à 1,7",
+   "unite": "u/ml",
+   "condition": "tuile de rive universelle G / D 1,5 à 1,7 au m + demi-tuile de rive universelle G / D 1,5 à 1,7 au m, en alternance",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Nobilée (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Nobilee-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTU2Mzl8YXBwbGljYXRpb24vcGRmfGFEY3lMMmd6TUM4eE1EQTNOVEl3TVRnek1EazBNaTlPYjJKcGJHVmxYMFpwWTJobElIQnliMlIxYVhRdWNHUm18ZGRjZmE4YWQ1N2UzNWVjY2FmZjA1YTQ2OTVlN2I2NTI4ODlkODJhYmVhZTE0NjYxNThmMTVkYWMyYTc2MjI1MA",
+     "type": "fabricant",
+     "extrait": "Tuile de rive universelle gauche / droite … 1,5 à 1,7 + 1,5 à 1,7 au m",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 299-301 × pureau 345) = 9.63 à 9.69, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 299-301 × pureau 295) = 11.26 à 11.34, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_nobilee_faitieres_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Nobilée",
+   "attribut": "faitieres_par_ml",
+   "valeur": 2.8,
+   "unite": "u/ml",
+   "condition": "faîtière/arêtier de 42 à recouvrement (3,5 kg, 80 / palette) ; arêtier d'about de 42 ; frontons et rencontres 3 / 4 voies en plus ; clip 42 de faîtière",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Nobilée (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Nobilee-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTU2Mzl8YXBwbGljYXRpb24vcGRmfGFEY3lMMmd6TUM4eE1EQTNOVEl3TVRnek1EazBNaTlPYjJKcGJHVmxYMFpwWTJobElIQnliMlIxYVhRdWNHUm18ZGRjZmE4YWQ1N2UzNWVjY2FmZjA1YTQ2OTVlN2I2NTI4ODlkODJhYmVhZTE0NjYxNThmMTVkYWMyYTc2MjI1MA",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier de 42 à recouvrement 2,8 au m 3,5 kg/pièce 80 / palette",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 299-301 × pureau 345) = 9.63 à 9.69, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 299-301 × pureau 295) = 11.26 à 11.34, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_nobilee_chatiere",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Nobilée",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 25,
+   "unite": "cm²",
+   "condition": "tuile chatière grillagée (ouverture 25 cm²) ; tuile à douille Durovent Ø 110 à 160 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Nobilée (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Nobilee-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTU2Mzl8YXBwbGljYXRpb24vcGRmfGFEY3lMMmd6TUM4eE1EQTNOVEl3TVRnek1EazBNaTlPYjJKcGJHVmxYMFpwWTJobElIQnliMlIxYVhRdWNHUm18ZGRjZmE4YWQ1N2UzNWVjY2FmZjA1YTQ2OTVlN2I2NTI4ODlkODJhYmVhZTE0NjYxNThmMTVkYWMyYTc2MjI1MA",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 25 cm²)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 299-301 × pureau 345) = 9.63 à 9.69, fiche 9.6",
     "tuiles_par_m2_max : calcul 1/(largeur utile 299-301 × pureau 295) = 11.26 à 11.34, fiche 11.3",
@@ -15890,6 +16805,136 @@
    ]
   },
   {
+   "id": "monier_tradipanne_coloris",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Tradipanne",
+   "attribut": "coloris",
+   "valeur": [
+    "Noir",
+    "Ardoise (jusqu'à épuisement)",
+    "Brun (jusqu'à épuisement)",
+    "Rouge vieilli",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté de novembre 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Tradipanne (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Tradipanne-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTgyMDJ8YXBwbGljYXRpb24vcGRmfGFEQm1MMmhoWlM4eE1EQTNOVEl3TURJNU1EZzBOaTlVY21Ga2FYQmhibTVsWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDkyYTRkNTY0YzM0YzQ5M2M3ZjBjYWI0NDg4ZTYxYjJmNGE3M2U1NmU1NDYyNzY1MGEzYzhjODVhOGI0ZjM4OWM",
+     "type": "fabricant",
+     "extrait": "coloris : Noir, Ardoise (jusqu'à épuisement), Brun (jusqu'à épuisement), Rouge vieilli, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_tradipanne_rive_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Tradipanne",
+   "attribut": "tuile_rive_par_ml_et_par_cote",
+   "valeur": "3,2",
+   "unite": "u/ml",
+   "condition": "tuile de rive universelle G / D, 3,2 au m (32 / palette, 6,8 kg)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Tradipanne (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Tradipanne-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTgyMDJ8YXBwbGljYXRpb24vcGRmfGFEQm1MMmhoWlM4eE1EQTNOVEl3TURJNU1EZzBOaTlVY21Ga2FYQmhibTVsWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDkyYTRkNTY0YzM0YzQ5M2M3ZjBjYWI0NDg4ZTYxYjJmNGE3M2U1NmU1NDYyNzY1MGEzYzhjODVhOGI0ZjM4OWM",
+     "type": "fabricant",
+     "extrait": "Tuile de rive universelle gauche / droite … 3,2 au m",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_tradipanne_faitieres_par_ml",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Tradipanne",
+   "attribut": "faitieres_par_ml",
+   "valeur": 2.8,
+   "unite": "u/ml",
+   "condition": "faîtière/arêtier de 42 à recouvrement (3,5 kg, 80 / palette) ; arêtier d'about de 42 ; frontons et rencontres 3 / 4 voies en plus ; clip 42 de faîtière",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Tradipanne (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Tradipanne-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTgyMDJ8YXBwbGljYXRpb24vcGRmfGFEQm1MMmhoWlM4eE1EQTNOVEl3TURJNU1EZzBOaTlVY21Ga2FYQmhibTVsWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDkyYTRkNTY0YzM0YzQ5M2M3ZjBjYWI0NDg4ZTYxYjJmNGE3M2U1NmU1NDYyNzY1MGEzYzhjODVhOGI0ZjM4OWM",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier de 42 à recouvrement 2,8 au m 3,5 kg/pièce 80 / palette",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
+   "id": "monier_tradipanne_chatiere",
+   "famille": "tuile_beton",
+   "sous_famille": "tuile béton grand moule",
+   "marque": "BMI Monier",
+   "modele": "Tradipanne",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 18,
+   "unite": "cm²",
+   "condition": "tuile chatière grillagée (ouverture 18 cm²) ; tuile à douille Durovent Ø 110 à 160 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Tradipanne (PDF du 17/11/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/Tradipanne-Fiche-produit.pdf?context=bWFzdGVyfHJvb3R8MTM3MTgyMDJ8YXBwbGljYXRpb24vcGRmfGFEQm1MMmhoWlM4eE1EQTNOVEl3TURJNU1EZzBOaTlVY21Ga2FYQmhibTVsWDBacFkyaGxJSEJ5YjJSMWFYUXVjR1JtfDkyYTRkNTY0YzM0YzQ5M2M3ZjBjYWI0NDg4ZTYxYjJmNGE3M2U1NmU1NDYyNzY1MGEzYzhjODVhOGI0ZjM4OWM",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 18 cm²)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 300 × pureau 345) = 9.66, fiche 9.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 300 × pureau 295) = 11.30, fiche 11.3",
+    "liteaux : calcul 1/295 = 3.39 ml/m², fiche 3.4",
+    "liteaux : calcul 1/345 = 2.90 ml/m², fiche 2.9"
+   ]
+  },
+  {
    "id": "monier_canal_40_tuiles_par_m2_min",
    "famille": "tuile_canal",
    "sous_famille": "tuile canal",
@@ -16262,6 +17307,42 @@
     }
    ],
    "raison": "Modèle ajouté le 19/11/2026 (catalogue BMI Monier en ligne) : fiche officielle seule, contrôle par le calcul.",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 200-230 × pureau 260) = 16.72 à 19.23, fiche 16.7",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 200-230 × pureau 230) = 18.90 à 21.74, fiche 21.7",
+    "liteaux : calcul 1/230 = 4.35 ml/m², fiche 4.4",
+    "liteaux : calcul 1/260 = 3.85 ml/m², fiche 3.9"
+   ]
+  },
+  {
+   "id": "p3b_monier_canal-40_coloris",
+   "famille": "tuile_canal",
+   "sous_famille": "tuile canal",
+   "marque": "BMI Monier",
+   "modele": "Canal de 40",
+   "attribut": "coloris",
+   "valeur": [
+    "Brun rustique",
+    "Rouge",
+    "Silvacane littoral",
+    "Silvacane Xahara"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Canal de 40 (PDF du 04/05/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/CANAL-40.pdf?context=bWFzdGVyfHJvb3R8MTI5NjE1OTh8YXBwbGljYXRpb24vcGRmfGFEYzJMMmhpTlM4NU9EVTFORGMzTlRRM01ETTRMME5CVGtGTUlEUXdMbkJrWmd8MThiYWJiZGQ4NDc5ZWI5ODdlZGIwMjJiOTc1YTFkOTZjYjBlNDYyMjA3Y2YwMDI3ZGQ5NjJkNGNjYjQ4Zjg3MQ",
+     "type": "fabricant",
+     "extrait": "coloris : Brun rustique, Rouge, Silvacane littoral, Silvacane Xahara",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 200-230 × pureau 260) = 16.72 à 19.23, fiche 16.7",
     "tuiles_par_m2_max : calcul 1/(largeur utile 200-230 × pureau 230) = 18.90 à 21.74, fiche 21.7",
@@ -17065,7 +18146,8 @@
     "coloris (code teinte : Noir 02, Ardoise 11, Rouge Sienne 22…)",
     "nombre de pièces",
     "demi-tuiles (joints croisés), tuiles de rive à rabat gauche / droite ou rive universelle",
-    "faîtières et closoir"
+    "faîtières et closoir",
+    "rives : 3,2 tuiles de rive au m par côté (Double Romane, Plein Ciel, Perspective, Tradipanne) ; Innotech / Nobilée : 1,7 tuile + 1,7 demi-tuile de rive au m ; faîtières de 42 : 2,8 au m"
    ],
    "unite_de_vente": "pièce",
    "conditionnement": "palette de 140 à 160 (grand moule), 1 008 (plates béton)",

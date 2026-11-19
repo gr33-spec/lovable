@@ -192,3 +192,15 @@ Plusieurs noms n'ont pas été trouvés dans la gamme française actuelle : Sign
 4. **Faîtière par défaut** : un ratio par famille (3 au ml pour plate et emboîtement, 2,5 au ml pour canal et romane) à la place de 2,9.
 5. **Arêtier de tuile plate** : demander « arêtier cornier ou tige de botte ? » (10 à 11 au ml contre 3 au ml).
 6. **Pentes et rampants du §28** : remplacer par les tableaux DTU relevés ici.
+
+## Passe 3b (19 novembre 2026, testeur-négoce)
+
+- **Tuiles béton Monier** (fiches bmigroup.com datées de novembre 2026, `confirme_fabricant` après contrôle), par modèle :
+  rives **3,2 au ml par côté** (Double Romane, Plein Ciel, Perspective, Tradipanne ; Plein Ciel aussi en rive ronde 3,2/ml) ;
+  **Innotech et Nobilée : 1,5 à 1,7 tuile de rive + 1,5 à 1,7 demi-tuile de rive au ml**, posées en alternance ; **faîtière /
+  arêtier de 42 : 2,8 au ml** (80 / palette) ; chatière grillagée 18 cm² (Double Romane, Plein Ciel, Tradipanne) ou 25 cm²
+  (Perspective, Innotech, Nobilée) ; coloris complets des six modèles.
+- **Coloris ajoutés** : Monier Canal de 40, Plate de Pays ; Edilians Plate 17x27 Phalempin, Plate Tradition 17x27 Phalempin,
+  Plate 16x24 Phalempin, Plate 20x30 Huguenot, Plate pressée 17x27 Ste Foy, Canal 50 Poudenx (pages produit edilians.com).
+- Comptoir « Tuiles béton (Monier) » : nombre de rives et de faîtières au ml ajouté.
+- Reste : coloris des plates Doyet et des canaux Terreal ; rubriques comptoir propres aux plates et au canal (toujours rangées ici).

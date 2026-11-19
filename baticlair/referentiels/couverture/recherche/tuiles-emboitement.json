@@ -123,7 +123,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -544,7 +544,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 200,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest",
     "Sud-Ouest"
@@ -1271,7 +1271,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -1902,7 +1902,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -2264,7 +2264,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -2612,7 +2612,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes",
     "Sud-Est"
@@ -3047,7 +3047,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 288,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes",
     "Sud-Est"
@@ -3493,7 +3493,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes",
     "Sud-Est"
@@ -3940,7 +3940,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest",
     "Sud"
@@ -4350,7 +4350,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -4757,7 +4757,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -5176,7 +5176,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "200",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes"
    ],
@@ -5657,7 +5657,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "209",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Île-de-France"
@@ -6161,7 +6161,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "205",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France (usine St-Germer-de-Fly, Oise)",
     "maisons neuves"
@@ -6320,7 +6320,7 @@
    "valeur": 2.7,
    "unite": "u/ml",
    "reference": "205",
-   "condition": "tuile de rive à rabat G/D (205.72/73) et 1/2 tuile de rive à rabat ; rive individuelle (au pureau de 368 mm). Une pièce par rang : ≈ 1 / pureau.",
+   "condition": "tuile de rive à rabat G/D (205.72/73) et 1/2 tuile de rive à rabat ; rive individuelle (au pureau de 368 mm). Une pièce par rang : ≈ 1 / pureau. La fiche HP 10 liste aussi la rive individuelle PV 13 Huguenot (215.41 / 215.42).",
    "regions": [
     "France (usine St-Germer-de-Fly, Oise)",
     "maisons neuves"
@@ -6437,16 +6437,16 @@
    "modele": "HP 10 Huguenot",
    "attribut": "coloris",
    "valeur": [
-    "Rouge",
-    "Vieilli masse",
+    "Ardoisé",
+    "Argentique",
     "Flammé rustique",
     "Gris quartz",
-    "Argentique",
-    "Ardoisé"
+    "Rouge",
+    "Vieilli masse"
    ],
    "unite": "liste",
    "reference": "205",
-   "condition": "coloris principaux lus sur la page produit (liste non exhaustive)",
+   "condition": "gamme complète de la fiche (6 coloris), identique à la page produit edilians.com",
    "regions": [
     "France (usine St-Germer-de-Fly, Oise)",
     "maisons neuves"
@@ -6469,6 +6469,286 @@
     }
    ],
    "raison": "Fiche fabricant seule. Les négoces trouvés (Chausson, BigMat, Samse, Gobert) hébergent la même fiche : pas une source indépendante (CONSIGNES). Cohérence interne vérifiée par le calcul 1 / (largeur utile × pureau).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_demi_tuile",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "demi_tuile",
+   "valeur": "1/2 tuile HP 10 Huguenot",
+   "unite": "référence",
+   "reference": "205.01",
+   "condition": "réf. 205.01 ; largeur hors tout 170 mm ; pour joints croisés et rives",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "1/2 tuile HP 10 Huguenot Réf. 205.01",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_chatiere_section_ventilation",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 50,
+   "unite": "cm²",
+   "reference": "205.20",
+   "condition": "tuile de ventilation HP 10 Huguenot (chatière), réf. 205.20",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation HP 10 Huguenot (section de ventilation 50 cm2) Réf. 205.20",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_tuile_a_douille",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "tuile_a_douille",
+   "valeur": "tuile à douille HP 10 Huguenot Ø 160, conforme VMC (réf. 205.32) ; lanterne bi-section Ø 126 et Ø 160, section d'aération 259 cm² (réf. 1007) ; kit VMC Mangouste 160",
+   "unite": "référence",
+   "reference": "205.32",
+   "condition": "sortie de ventilation ou de VMC ; 1 par sortie",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à douille HP 10 Huguenot Ø 160 (Conforme VMC) Réf. 205.32 ; Lanterne bi-section … 259 cm2 … Réf. 1007",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_tuiles_de_rive_references",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "tuiles_de_rive_references",
+   "valeur": "tuile de rive à rabat D 205.72 / G 205.73 (2,7/ml) ; 1/2 tuile de rive à rabat D 205.74 / G 205.75 (2,7/ml) ; rive universelle 1050 (3/ml) ; rive individuelle PV 13 Huguenot D 215.41 / G 215.42 (2,7/ml au pureau de 368 mm)",
+   "unite": "référence",
+   "reference": "205.72",
+   "condition": "pose avec tuiles de rive à rabat : tuile et 1/2 tuile de rive alternées selon le rang",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de rive à rabat HP 10 Huguenot (2,7 par ml) Droite Réf. 205.72 Gauche Réf. 205.73",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_abouts_references",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "abouts_references",
+   "valeur": "about de faîtière losangée 824 ; about d'arêtier angulaire 859 ; about d'arêtier à emboîtement 863 ; about de faîtière/arêtier 1/2 rond 869 ; about de rive universelle G 1070 / D 1071 ; frontons 801 (angulaire), 805/806 (Shed), 807 (1/2 rond), 809 (losangée), 1080 (rive universelle)",
+   "unite": "référence",
+   "reference": "824",
+   "condition": "1 about par extrémité de faîtage ou d'arêtier, du modèle de la faîtière choisie",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "About de faîtière losangée à emboîtement Réf. 824 … About d'arêtier angulaire à emboîtement Réf. 859",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_tuile_de_finition",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "tuile_de_finition",
+   "valeur": "tuile de finition 205.80 (sur commande) ; 1/2 tuile de finition 205.86",
+   "unite": "référence",
+   "reference": "205.80",
+   "condition": "dernier rang au faîtage",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de finition HP 10 Huguenot Réf. 205.80 (2) … 1/2 tuile de finition Réf. 205.86",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-hp10-huguenot_tuile_en_verre",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "tuile_en_verre",
+   "valeur": "réf. VER205 ; pose limitée à 3 unités et 2 rangs successifs",
+   "unite": "référence",
+   "reference": "VER205",
+   "condition": "éclairement de comble",
+   "regions": [
+    "France (usine St-Germer-de-Fly, Oise)",
+    "Bretagne (Ille-et-Vilaine, Loire-Atlantique)"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile en verre HP 10 Réf. VER205 (3) … Pose limitée à 3 unités et 2 rangs successifs",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "HP 10 Huguenot : accessoires (encyclopédie p. 82-85)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
     "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
@@ -6674,7 +6954,7 @@
    "valeur": 300,
    "unite": "u",
    "reference": "226",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord-Est"
    ],
@@ -7045,7 +7325,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "220",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -7437,7 +7717,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "202",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes"
    ],
@@ -7773,7 +8053,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "219",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -8091,7 +8371,7 @@
    "valeur": 210,
    "unite": "u",
    "reference": "223",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -8536,7 +8816,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "203",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Île-de-France",
@@ -8819,14 +9099,15 @@
    "modele": "H 10 Huguenot",
    "attribut": "coloris",
    "valeur": [
-    "Vieilli masse",
-    "Flammé rustique",
     "Ardoisé",
-    "Noir brillant"
+    "Flammé rustique",
+    "Noir brillant",
+    "Rouge",
+    "Vieilli masse"
    ],
    "unite": "liste",
    "reference": "203",
-   "condition": "coloris principaux lus sur la page produit (liste non exhaustive)",
+   "condition": "coloris de la page produit edilians.com (sélecteur de coloris), relevés le 19/11/2026",
    "regions": [
     "Nord",
     "Île-de-France",
@@ -8846,6 +9127,13 @@
      "url": "https://edilians.com/media/productattach/2/0/203_fag_h_10_huguenot_12022026_bd.pdf",
      "type": "fabricant",
      "extrait": "Pureau : de 312 mm à 388 mm ; Nb au m2 : de 10 à 12,4 selon recouvrement",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, page produit « H 10 Huguenot »",
+     "url": "https://edilians.com/h-10-huguenot.html",
+     "type": "fabricant",
+     "extrait": "Coloris : Ardoisé, Flammé Rustique, Noir Brillant, Rouge, Vieilli Masse",
      "consulte": "2026-11-19"
     }
    ],
@@ -8989,7 +9277,7 @@
    "valeur": 300,
    "unite": "u",
    "reference": "204",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord-Est",
     "Ouest (rénovation)"
@@ -9433,7 +9721,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "207",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté",
     "Est"
@@ -9913,7 +10201,7 @@
    "valeur": 300,
    "unite": "u",
    "reference": "218",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord-Est"
    ],
@@ -10382,7 +10670,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "228",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes"
    ],
@@ -10832,7 +11120,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "208",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest",
     "Ouest"
@@ -11215,7 +11503,7 @@
    "valeur": 288,
    "unite": "u",
    "reference": "210",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -11647,7 +11935,7 @@
    "valeur": 300,
    "unite": "u",
    "reference": "212",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes"
    ],
@@ -11917,10 +12205,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -11956,10 +12244,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -11994,10 +12282,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12032,10 +12320,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12070,10 +12358,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12108,10 +12396,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12133,7 +12421,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "214",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -12147,10 +12435,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12185,10 +12473,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12224,10 +12512,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12263,10 +12551,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12288,7 +12576,7 @@
    "valeur": 2.7,
    "unite": "u/ml",
    "reference": "214",
-   "condition": "rive individuelle PV 13 (au pureau de 368 mm). Une pièce par rang : ≈ 1 / pureau.",
+   "condition": "rive individuelle à emboîtement PV 13 Huguenot, D 215.41 / G 215.42 (2,7/ml au pureau de 368 mm), désignée par la fiche PV 10 elle-même ; ou rive universelle 1050 (3/ml), grande rive universelle Patrimoine 1048 (2,5/ml). Une pièce par rang : ≈ 1 / pureau.",
    "regions": [
     "France"
    ],
@@ -12302,10 +12590,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12340,10 +12628,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12379,10 +12667,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12402,14 +12690,14 @@
    "modele": "PV 10 Huguenot",
    "attribut": "coloris",
    "valeur": [
-    "Rouge",
-    "Vieilli masse",
+    "Ardoisé",
     "Flammé rustique",
-    "Ardoisé"
+    "Rouge",
+    "Vieilli masse"
    ],
    "unite": "liste",
    "reference": "214",
-   "condition": "coloris principaux lus sur la page produit (liste non exhaustive)",
+   "condition": "gamme complète de la fiche 2026 (4 coloris), identique à la page produit edilians.com",
    "regions": [
     "France"
    ],
@@ -12423,10 +12711,10 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
@@ -12445,7 +12733,7 @@
    "marque": "Edilians",
    "modele": "PV 10 Huguenot",
    "attribut": "note",
-   "valeur": "« PV » = pureau variable (66 mm). Marque NF Montagne et Faible Pente, donc table C ; ce n'est PAS la famille HP 10 (40.211).",
+   "valeur": "« PV » = pureau variable (66 mm). Marque NF Montagne et Faible Pente, donc table C ; ce n'est PAS la famille HP 10 (40.211). Mêmes dimensions que la HP 10 sur les deux fiches officielles : ce n'est pas une copie (voir differences_avec_hp10).",
    "unite": "texte",
    "reference": "214",
    "regions": [
@@ -12461,14 +12749,287 @@
      "consulte": "2026-11-19"
     },
     {
-     "titre": "Habitatpresto, « Tuile PV10 : prix au m² » (guide, reprend la fiche Edilians)",
-     "url": "https://www.habitatpresto.com/mag/toiture/tuile-pv10-prix-m2",
-     "type": "guide",
-     "extrait": "De 9,9 à 12 selon le pureau ... 19 % minimum dans le cas le plus favorable",
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 selon recouvrement … Quantité par palette : 240 tuiles … Classe de galbe G1*",
      "consulte": "2026-11-19"
     }
    ],
    "raison": "Remarque de lecture du document fabricant.",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_demi_tuile",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "demi_tuile",
+   "valeur": "1/2 tuile PV 10 Huguenot",
+   "unite": "référence",
+   "reference": "214.01",
+   "condition": "réf. 214.01 ; largeur hors tout 170 mm (176 mm utile avec 1/2 tuile)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "1/2 tuile PV 10 Huguenot … Réf. 214.01",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "PV 10 Huguenot : accessoires (encyclopédie p. 138-141)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_chatiere_section_ventilation",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 50,
+   "unite": "cm²",
+   "reference": "214.20",
+   "condition": "tuile de ventilation PV 10 Huguenot (chatière), réf. 214.20",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation PV 10 Huguenot (section de ventilation 50 cm2) Réf. 214.20",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "PV 10 Huguenot : accessoires (encyclopédie p. 138-141)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_tuile_a_douille",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "tuile_a_douille",
+   "valeur": "tuile à douille PV 10 Huguenot Ø 160, conforme VMC (réf. 214.32) ; lanterne bi-section Ø 126 et Ø 160, 259 cm² (réf. 1007) ; kit VMC Mangouste 160",
+   "unite": "référence",
+   "reference": "214.32",
+   "condition": "sortie de ventilation ou de VMC ; 1 par sortie",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à douille PV 10 Huguenot Ø 160 (Conforme VMC) Réf. 214.32",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "PV 10 Huguenot : accessoires (encyclopédie p. 138-141)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_tuiles_de_rive_references",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "tuiles_de_rive_references",
+   "valeur": "rive individuelle à emboîtement PV 13 Huguenot D 215.41 / G 215.42 (2,7/ml au pureau de 368 mm) ; rive universelle 1050 (3/ml) ; grande rive universelle Patrimoine 1048 (2,5/ml) ; pas de tuile de rive à rabat propre au PV 10",
+   "unite": "référence",
+   "reference": "215.41",
+   "condition": "la fiche PV 10 elle-même désigne la rive PV 13 comme rive du PV 10",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Rive individuelle à emboîtement PV 13 Huguenot (2,7 par ml au pureau de 368 mm) Droite Réf. 215.41 Gauche Réf. 215.42",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "PV 10 Huguenot : accessoires (encyclopédie p. 138-141)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_abouts_references",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "abouts_references",
+   "valeur": "about de faîtière losangée 824 ; about d'arêtier angulaire 859 ; about d'arêtier à emboîtement 863 ; about de faîtière/arêtier 1/2 rond 869 ; about de rive universelle G 1070 / D 1071 ; about de rive universelle Patrimoine G 1078 / D 1079 ; frontons 801, 805/806, 807, 809, 816, 816.10, 1080",
+   "unite": "référence",
+   "reference": "824",
+   "condition": "1 about par extrémité de faîtage ou d'arêtier, du modèle de la faîtière choisie",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "About de rive universelle Patrimoine Gauche Réf. 1078 Droit Réf. 1079",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "PV 10 Huguenot : accessoires (encyclopédie p. 138-141)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_tuile_en_verre",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "tuile_en_verre",
+   "valeur": "réf. VER214 ; pose limitée à 3 unités et 2 rangs successifs",
+   "unite": "référence",
+   "reference": "VER214",
+   "condition": "éclairement de comble",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile en verre PV 10 Huguenot Réf. VER214(2)",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "PV 10 Huguenot : accessoires (encyclopédie p. 138-141)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
+    "liteaux : calcul 1/310 = 3.23 ml/m², fiche 3.22",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.66"
+   ]
+  },
+  {
+   "id": "edilians-pv10-huguenot_differences_avec_hp10",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faiblement galbé À RELIEF (tuile à côte)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "differences_avec_hp10",
+   "valeur": "même moule de base que la HP 10 (460 × 306 mm, largeur utile 268, pureau 310-376, 9,9 à 12/m², 4,3 kg, 240/palette : chiffres identiques sur les deux fiches) ; diffèrent : relief à côte, DTU 40.21 (HP 10 : 40.211), classe de galbe G1 (HP 10 : G0), joints droits ou croisés (HP 10 : croisés), NF Montagne et Faible Pente (pentes dès 25 % sans écran, HP 10 : 45 %), 4 coloris (HP 10 : 6), rive PV 13 au lieu des tuiles de rive à rabat 205.72-75",
+   "unite": "",
+   "reference": "214",
+   "condition": "comparaison des deux fiches Edilians",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, documentation PV 10 Huguenot (© mars 2026, fichier du 12/02/2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Longueur hors tout ≃ 460 mm … Largeur utile ≃ 268 mm … Quantité par palette 240 tuiles … DTU 40-21 … Classe de galbe G1*",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Edilians, documentation HP 10 Huguenot (© janvier 2024, fichier du 19/04/2024)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_19042024_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Longueur hors tout ≃ 460 mm … Quantité par palette 240 tuiles … DTU 40-211 … Classe de galbe G0*",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Les chiffres identiques ne sont pas une copie : les deux fiches officielles (2024 et 2026) donnent les mêmes dimensions ; seules les différences listées changent la commande.",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 268 × pureau 376) = 9.92, fiche 9.9",
     "tuiles_par_m2_max : calcul 1/(largeur utile 268 × pureau 310) = 12.04, fiche 12",
@@ -12674,7 +13235,7 @@
    "valeur": 300,
    "unite": "u",
    "reference": "215",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord-Est"
    ],
@@ -13125,7 +13686,7 @@
    "valeur": 240,
    "unite": "u",
    "reference": "222",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Rhône-Alpes",
     "Centre-Est"
@@ -13600,7 +14161,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -14033,7 +14594,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -14392,7 +14953,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -14772,7 +15333,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -15216,7 +15777,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Île-de-France",
@@ -15657,7 +16218,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Ouest"
@@ -16071,7 +16632,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 420,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Centre",
     "Île-de-France"
@@ -16586,7 +17147,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 600,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -16911,7 +17472,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 420,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -17517,7 +18078,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 420,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -17875,7 +18436,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -18158,7 +18719,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Île-de-France",
     "Nord"
@@ -18497,7 +19058,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -18779,7 +19340,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -19010,6 +19571,44 @@
    ]
   },
   {
+   "id": "p3b_actua_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua (ex-Actua de Migeon)",
+   "attribut": "coloris",
+   "valeur": [
+    "Ardoisé",
+    "Blanc titane",
+    "Brun",
+    "Grésé Bourgogne",
+    "Gris",
+    "Gris titane",
+    "Noir titane",
+    "Nuagé",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Actua (ex-Actua de Migeon) » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/actua-rouge.html",
+     "type": "fabricant",
+     "extrait": "variantes : Ardoisé, Blanc titane, Brun, Grésé Bourgogne, Gris, Gris titane, Noir titane, Nuagé, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 310 à 380) = 10.04 à 12.31, fiche 10"
+   ]
+  },
+  {
    "id": "koramic-actua-duplex_tuiles_par_m2",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule à pureau plat",
@@ -19154,7 +19753,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -19401,7 +20000,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 288,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -19653,7 +20252,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 350,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -20031,7 +20630,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 350,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -20278,7 +20877,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 350,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -20525,7 +21124,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -20683,6 +21282,40 @@
    ]
   },
   {
+   "id": "p3b_opalys_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à relief (double tuile du Nord)",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Opalys",
+   "attribut": "coloris",
+   "valeur": [
+    "Amarante",
+    "Anthracite",
+    "Ardoisé",
+    "Rouge",
+    "Rustique"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Opalys » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/opalys-ardoise.html",
+     "type": "fabricant",
+     "extrait": "variantes : Amarante, Anthracite, Ardoisé, Rouge, Rustique",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 254 à 266) = 9.33 à 9.77, fiche 9.5"
+   ]
+  },
+  {
    "id": "koramic-jura-nova_tuiles_par_m2",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule à relief",
@@ -20827,7 +21460,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Est"
    ],
@@ -21012,6 +21645,40 @@
    ]
   },
   {
+   "id": "p3b_jura-nova_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à relief",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Jura Nova",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite",
+    "Ardoisé",
+    "Brun foncé",
+    "Nuagé",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Jura Nova » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/jura-nova-rouge.html",
+     "type": "fabricant",
+     "extrait": "variantes : Anthracite, Ardoisé, Brun foncé, Nuagé, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 335 à 390) = 9.75 à 11.35, fiche 10"
+   ]
+  },
+  {
    "id": "koramic-jpv-2_tuiles_par_m2",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule à onde douce",
@@ -21161,7 +21828,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Est"
@@ -21412,7 +22079,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -21510,6 +22177,40 @@
     }
    ],
    "raison": "Famille déduite du tableau imprimé sur la fiche (extrait DTU). Les valeurs de la famille sont confirmées par deux fabricants (voir verdict_ratios « familles de pente »).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 345 à 375) = 10.62 à 11.55, fiche 10.5"
+   ]
+  },
+  {
+   "id": "p3b_alegra_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à relief",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Alegra",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite",
+    "Ardoisé",
+    "Brun foncé",
+    "Nuagé",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Alegra » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/alegra-rouge.html",
+     "type": "fabricant",
+     "extrait": "variantes : Anthracite, Ardoisé, Brun foncé, Nuagé, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 345 à 375) = 10.62 à 11.55, fiche 10.5"
    ]
@@ -21633,7 +22334,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 256,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -21878,7 +22579,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 384,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -22097,7 +22798,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 378,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -22318,7 +23019,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -22511,7 +23212,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 432,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -22608,6 +23309,40 @@
     }
    ],
    "raison": "Remarque de lecture du document fabricant.",
+   "controle": [
+    "tuiles_par_m2 : calcul 1/(largeur utile 194 × pureau 277) = 18.61, fiche 18.5"
+   ]
+  },
+  {
+   "id": "p3b_vieille-panne-451_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "petit moule à relief (panne du Nord)",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Vieille Panne 451",
+   "attribut": "coloris",
+   "valeur": [
+    "Bleu fumé",
+    "Rouge",
+    "Rustique",
+    "Vieilli bleu fumé",
+    "Vieilli naturel"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Vieille Panne 451 » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/vieille-panne-451-rouge.html",
+     "type": "fabricant",
+     "extrait": "variantes : Bleu fumé, Rouge, Rustique, Vieilli bleu fumé, Vieilli naturel",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2 : calcul 1/(largeur utile 194 × pureau 277) = 18.61, fiche 18.5"
    ]
@@ -22791,7 +23526,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 576,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -23012,7 +23747,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 576,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -23479,7 +24214,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -23725,7 +24460,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -23999,7 +24734,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -24280,7 +25015,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -24505,7 +25240,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -24753,7 +25488,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -25034,7 +25769,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -25489,7 +26224,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Grand Ouest",
     "Loire-Atlantique (à vérifier)"
@@ -25803,7 +26538,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest",
     "Sud-Ouest"
@@ -26117,7 +26852,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest",
     "Sud-Ouest"
@@ -26426,7 +27161,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest"
    ],
@@ -26701,7 +27436,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Atlantique"
    ],
@@ -26949,7 +27684,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 90,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -27255,7 +27990,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 90,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -27512,7 +28247,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud",
     "rénovation"
@@ -27826,7 +28561,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne",
     "Rhône"
@@ -28111,7 +28846,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -28453,7 +29188,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne",
     "montagne"
@@ -28646,6 +29381,39 @@
    ]
   },
   {
+   "id": "p3b_santenay_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à côte",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Santenay",
+   "attribut": "coloris",
+   "valeur": [
+    "Ardoisé",
+    "Brun",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Santenay » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/santenay-rouge.html",
+     "type": "fabricant",
+     "extrait": "variantes : Ardoisé, Brun, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "ecart": "Santenay : la page cite aussi « Vieilli Bourgogne » hors du sélecteur (non retenu).",
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 345 à 418) = 9.61 à 11.64, fiche 10"
+   ]
+  },
+  {
    "id": "terreal-cote-de-beaune_tuiles_par_m2",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule à côte",
@@ -28790,7 +29558,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne"
    ],
@@ -29065,7 +29833,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne"
    ],
@@ -29340,7 +30108,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -29644,7 +30412,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne",
     "Nord-Est"
@@ -29746,6 +30514,39 @@
     }
    ],
    "raison": "Nouvelle tentative 19/11/2026 (tableau entier non recopié) : ce que la fiche dit déjà, « A (sous DTA avec écran) ». Le modèle a son propre tableau de pentes (DTA, option faible pente ou tables différentes avec et sans écran) : aucun code de famille unique n'est juste. À coder comme tableau propre du modèle, ou poser la question de la pente."
+  },
+  {
+   "id": "p3b_volnay-pv_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule d'aspect plat",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Volnay PV",
+   "attribut": "coloris",
+   "valeur": [
+    "Ardoisé",
+    "Rouge flammé",
+    "Vieilli Bourgogne",
+    "Vieilli Lauze"
+   ],
+   "unite": "liste",
+   "condition": "variantes de coloris du sélecteur de la page produit wienerberger.fr, relevées le 19/11/2026 (page non datée)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Wienerberger, page produit « Volnay PV » (sélecteur de coloris)",
+     "url": "https://www.wienerberger.fr/Produits/toiture/moteur-de-recherche-toiture/bucket/volnay-pv-rouge-flamme.html",
+     "type": "fabricant",
+     "extrait": "variantes : Ardoisé, Rouge flammé, Vieilli Bourgogne, Vieilli Lauze",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2 : plage calculée 1/(largeur utile × pureau 340 à 408) = 9.76 à 11.72, fiche 10"
+   ]
   },
   {
    "id": "terreal-volnay-pv-tandem_tuiles_par_m2",
@@ -29892,7 +30693,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -30164,7 +30965,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -30384,7 +31185,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 288,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -30808,7 +31609,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 450,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Normandie",
     "Île-de-France"
@@ -31114,7 +31915,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 540,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Normandie"
@@ -31669,7 +32470,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -32024,6 +32825,40 @@
    ]
   },
   {
+   "id": "p3b_monier_losangee-heritage_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule faible relief, simple emboîtement",
+   "marque": "Monier (BMI)",
+   "modele": "Losangée Héritage",
+   "attribut": "coloris",
+   "valeur": [
+    "Brun rustique",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Losangée Héritage (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/LOSANGEE-HERITAGE.pdf?context=bWFzdGVyfHJvb3R8MTA5OTQxOTd8YXBwbGljYXRpb24vcGRmfGFHTXdMMmcwTWk4NU9EVTFOemt5TlRFek1EVTBMMHhQVTBGT1IwVkZJRWhGVWtsVVFVZEZMbkJrWmd8ODY0M2JhM2JiYzRkNGY1YjVmZTg0NzQxZDY4NzRhMzhlZjJkNGYxNmQxODA2NTNlOWM3MTU2YzJkZTI2ZWQ3MQ",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Brun rustique, Rouge",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 228 × pureau 376) = 11.66, fiche 11.6",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 228 × pureau 336) = 13.05, fiche 13.1",
+    "liteaux : calcul 1/336 = 2.98 ml/m², fiche 3",
+    "liteaux : calcul 1/376 = 2.66 ml/m², fiche 2.6"
+   ]
+  },
+  {
    "id": "monier-signy_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule à pureau plat",
@@ -32342,7 +33177,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 210,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -32749,6 +33584,42 @@
    ]
   },
   {
+   "id": "p3b_monier_signy_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite mat",
+    "Moka",
+    "Rouge vieilli",
+    "Rouge naturel"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Anthracite mat, Moka, Rouge vieilli, Rouge naturel",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 283 × pureau 375) = 9.42, fiche 9.5",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 283 × pureau 300) = 11.78, fiche 11.8",
+    "liteaux : calcul 1/300 = 3.33 ml/m², fiche 3.3",
+    "liteaux : calcul 1/375 = 2.67 ml/m², fiche 2.7"
+   ]
+  },
+  {
    "id": "monier-galleane-12_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule fort galbe, aspect canal",
@@ -33030,7 +33901,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud",
     "Ouest"
@@ -33296,6 +34167,46 @@
    ]
   },
   {
+   "id": "p3b_monier_galleane-12_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule fort galbe, aspect canal",
+   "marque": "Monier (BMI)",
+   "modele": "Galleane 12",
+   "attribut": "coloris",
+   "valeur": [
+    "Cuivre",
+    "Pierre de soleil",
+    "Rouge",
+    "Rouge occitan",
+    "Rouge vieilli",
+    "Silvacane littoral",
+    "Silvacane Xahara",
+    "Toits du Sud"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Galleane 12 (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/GALLEANE-12.pdf?context=bWFzdGVyfHJvb3R8MTU5NzgzMTR8YXBwbGljYXRpb24vcGRmfGFHSmlMMmc0TXk4NU9EVTFOemcyTURJME9Ua3dMMGRCVEV4RlFVNUZJREV5TG5Ca1pnfDg4MTI5Y2VhYzkxZjY5MGRiZDIxOTE0ODJmZDZhZjQxZjEwMjg5YmE3NmQxM2RkOGMxOTA0MTdiMWYyYjQ2NWI",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Cuivre, Pierre de soleil, Rouge, Rouge occitan, Rouge vieilli, Silvacane littoral, Silvacane Xahara, Toits du Sud",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 215-230 × pureau 380) = 11.44 à 12.24, fiche 11.4",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 215-230 × pureau 350) = 12.42 à 13.29, fiche 13.2",
+    "liteaux : calcul 1/350 = 2.86 ml/m², fiche 2.8",
+    "liteaux : calcul 1/380 = 2.63 ml/m², fiche 2.6"
+   ]
+  },
+  {
    "id": "monier-regence_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "petit moule à pureau plat",
@@ -33526,7 +34437,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 510,
    "unite": "u",
-   "condition": "palette standard (le fabricant la donne « à titre indicatif » pour Terreal)",
+   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -33772,6 +34683,41 @@
     }
    ],
    "ecart": "Fiche : ≈ 18,7 cm ; page produit : 18,6 à 18,8 cm.",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 187 × pureau 276) = 19.38, fiche 19.2",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 187 × pureau 266) = 20.10, fiche 20.3",
+    "liteaux : calcul 1/266 = 3.76 ml/m², fiche 3.7",
+    "liteaux : calcul 1/276 = 3.62 ml/m², fiche 3.7"
+   ]
+  },
+  {
+   "id": "p3b_monier_regence_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "petit moule à pureau plat",
+   "marque": "Monier (BMI)",
+   "modele": "Régence",
+   "attribut": "coloris",
+   "valeur": [
+    "Noir",
+    "Brun vieilli",
+    "Terron"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Régence (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/REGENCE.pdf?context=bWFzdGVyfHJvb3R8ODcwOTI5MHxhcHBsaWNhdGlvbi9wZGZ8YURjM0wyZzNOQzg1T0RVMk5UQXpOalEwTVRrd0wxSkZSMFZPUTBVdWNHUm18MGQ4YjNmOTQxZjJiZjM0MmZiYmRkNjcwMWFiNDRlMTZjZDc5ODUwZTkzMWEwODcwMzYxZjEyNDBiNmU0ZDU3YQ",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Noir, Brun vieilli, Terron",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 187 × pureau 276) = 19.38, fiche 19.2",
     "tuiles_par_m2_max : calcul 1/(largeur utile 187 × pureau 266) = 20.10, fiche 20.3",
@@ -35115,6 +36061,48 @@
    ]
   },
   {
+   "id": "p3b_monier_gallo-romane_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule fortement galbé",
+   "marque": "Monier (BMI)",
+   "modele": "Gallo-Romane",
+   "attribut": "coloris",
+   "valeur": [
+    "Brun masse",
+    "Brun vieilli",
+    "Noir",
+    "Ocre",
+    "Rouge",
+    "Silvacane littoral",
+    "Silvacane Xahara",
+    "Tons variés Atlantique",
+    "Valmagne beige",
+    "Valmagne cuivre"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Gallo-Romane (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/GALLO-ROMANE.pdf?context=bWFzdGVyfHJvb3R8MTAxNzE0ODl8YXBwbGljYXRpb24vcGRmfGFHVTJMMmc1TUM4NU9EVTFOemc0TnpFeE9UWTJMMGRCVEV4UExWSlBUVUZPUlM1d1pHWXw5YmFhMGVkNzJhMTk2Mjc3MmQ0MjMyYmEzYjQ1YzE1YTAxMzc3NTQ4ODI1NzljYTE2NzU5NjU3OTg2NGY2Yjc3",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Brun masse, Brun vieilli, Noir, Ocre, Rouge, Silvacane littoral, Silvacane Xahara, Tons variés Atlantique, Valmagne beige, Valmagne cuivre",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 217 × pureau 368) = 12.52, fiche 12.4",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 217 × pureau 358) = 12.87, fiche 13",
+    "liteaux : calcul 1/358 = 2.79 ml/m², fiche 2.8",
+    "liteaux : calcul 1/368 = 2.72 ml/m², fiche 2.7"
+   ]
+  },
+  {
    "id": "monier-galleane-10_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule fortement galbé (aspect canal)",
@@ -35570,6 +36558,47 @@
     }
    ],
    "raison": "Fiche officielle BMI Monier (bmigroup.com) seule : à confirmer par le contrôle par le calcul (confirme_fabricant.py).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 250-265 × pureau 383) = 9.85 à 10.44, fiche 9.9",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 250-265 × pureau 353) = 10.69 à 11.33, fiche 11.3",
+    "liteaux : calcul 1/353 = 2.83 ml/m², fiche 2.8",
+    "liteaux : calcul 1/383 = 2.61 ml/m², fiche 2.6"
+   ]
+  },
+  {
+   "id": "p3b_monier_galleane-10_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule fortement galbé (aspect canal)",
+   "marque": "Monier (BMI)",
+   "modele": "Galleane 10",
+   "attribut": "coloris",
+   "valeur": [
+    "Aurore",
+    "Authentique",
+    "Cuivre",
+    "Rose",
+    "Rouge",
+    "Rouge vieilli",
+    "Silvacane littoral",
+    "Terre d'ocres",
+    "Toits du Sud"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Galleane 10 (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/GALLEANE-10.pdf?context=bWFzdGVyfHJvb3R8MTUyOTc0Mjl8YXBwbGljYXRpb24vcGRmfGFEY3lMMmd5WWk4NU9EVTFOemcxTlRZMk1qTTRMMGRCVEV4RlFVNUZJREV3TG5Ca1pnfDQ1MmRmZWZlZjVhZWY2YTVhYjA1NGM1YTMzMGJkMjI0MDUyZGI2MWYxYjRkOWZmN2FiMzU0ZTEzNGY0OGQ5ZmM",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Aurore, Authentique, Cuivre, Rose, Rouge, Rouge vieilli, Silvacane littoral, Terre d'ocres, Toits du Sud",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 250-265 × pureau 383) = 9.85 à 10.44, fiche 9.9",
     "tuiles_par_m2_max : calcul 1/(largeur utile 250-265 × pureau 353) = 10.69 à 11.33, fiche 11.3",
@@ -36041,6 +37070,41 @@
    ]
   },
   {
+   "id": "p3b_monier_romane_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule fortement galbé",
+   "marque": "Monier (BMI)",
+   "modele": "Romane (Monier)",
+   "attribut": "coloris",
+   "valeur": [
+    "Rose",
+    "Rouge",
+    "Silvacane littoral"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Romane (Monier) (PDF du 04/05/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/ROMANE.pdf?context=bWFzdGVyfHJvb3R8MTYxMzE3MjB8YXBwbGljYXRpb24vcGRmfGFHWmxMMmhrTnk4NU9EVTJOVEEwTkRrMk1UVTRMMUpQVFVGT1JTNXdaR1l8YTMzZmJiZmEyNmFmN2FjYWNlOTc2Mjg2N2IzMTIwODAyMzQ2M2NhNTZmZTQ2MGVmYjIwMDUxMmM0OTBiMGIwOQ",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Rose, Rouge, Silvacane littoral",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 208 × pureau 366) = 13.14, fiche 13",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 208 × pureau 358) = 13.43, fiche 13.6",
+    "liteaux : calcul 1/358 = 2.79 ml/m², fiche 2.8",
+    "liteaux : calcul 1/366 = 2.73 ml/m², fiche 2.7"
+   ]
+  },
+  {
    "id": "monier-postel-20_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "petit moule à relief",
@@ -36496,6 +37560,42 @@
     }
    ],
    "raison": "Fiche officielle BMI Monier (bmigroup.com) seule : à confirmer par le contrôle par le calcul (confirme_fabricant.py).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 202 × pureau 250) = 19.80, fiche 19.8",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 202 × pureau 235) = 21.07, fiche 21",
+    "liteaux : calcul 1/235 = 4.26 ml/m², fiche 4.3",
+    "liteaux : calcul 1/250 = 4.00 ml/m², fiche 4"
+   ]
+  },
+  {
+   "id": "p3b_monier_postel20_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "petit moule à relief",
+   "marque": "Monier (BMI)",
+   "modele": "Postel 20",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite",
+    "Gris ardoisé",
+    "Rouge vieilli",
+    "Rouge naturel"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Postel 20 (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/POSTEL20.pdf?context=bWFzdGVyfHJvb3R8ODkyMDE1NHxhcHBsaWNhdGlvbi9wZGZ8YUdGbEwyZ3hOQzg1T0RVMk5UQXlPVEl6TWprMEwxQlBVMVJGVERJd0xuQmtaZ3wwNTY1Y2ZlNWIwYzUzYjc3MmZmZDBhNDc1NTJlOTY1NWY4ZjM2Mzg2OTQ4NmI3ZGFiM2IzNDViMmZhZmNhYjll",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Anthracite, Gris ardoisé, Rouge vieilli, Rouge naturel",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 202 × pureau 250) = 19.80, fiche 19.8",
     "tuiles_par_m2_max : calcul 1/(largeur utile 202 × pureau 235) = 21.07, fiche 21",
@@ -36967,6 +38067,42 @@
    ]
   },
   {
+   "id": "p3b_monier_belmont_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat (faible galbe)",
+   "marque": "Monier (BMI)",
+   "modele": "Belmont",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite mat",
+    "Moka",
+    "Rouge vieilli",
+    "Rouge naturel"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Belmont (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/BELMONT.pdf?context=bWFzdGVyfHJvb3R8ODA5OTIxOHxhcHBsaWNhdGlvbi9wZGZ8YURsbEwyZzBaaTg1T0RVMU5EYzJOamsxTURjd0wwSkZURTFQVGxRdWNHUm18YzlkYWJiMDc5NTIyNGEyMTRlZDU1YTZiOTRjODljMzkwMTg0M2M0ZDA5Y2FmNDJlMmIwOGQxYjljZjQ4ZmUxNg",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Anthracite mat, Moka, Rouge vieilli, Rouge naturel",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 282 × pureau 375) = 9.46, fiche 9.7",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 282 × pureau 300) = 11.82, fiche 11.9",
+    "liteaux : calcul 1/300 = 3.33 ml/m², fiche 3.3",
+    "liteaux : calcul 1/375 = 2.67 ml/m², fiche 2.7"
+   ]
+  },
+  {
    "id": "monier-fontenelle_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "petit moule à pureau plat",
@@ -37415,6 +38551,41 @@
     }
    ],
    "raison": "Fiche officielle BMI Monier (bmigroup.com) seule : à confirmer par le contrôle par le calcul (confirme_fabricant.py).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 200 × pureau 255) = 19.61, fiche 19.7",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 200 × pureau 240) = 20.83, fiche 20.8",
+    "liteaux : calcul 1/240 = 4.17 ml/m², fiche 4.2",
+    "liteaux : calcul 1/255 = 3.92 ml/m², fiche 4"
+   ]
+  },
+  {
+   "id": "p3b_monier_fontenelle_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "petit moule à pureau plat",
+   "marque": "Monier (BMI)",
+   "modele": "Fontenelle",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite",
+    "Moka",
+    "Rouge vieilli"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Fontenelle (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/FONTENELLE.pdf?context=bWFzdGVyfHJvb3R8MjI3NzA2OTV8YXBwbGljYXRpb24vcGRmfGFHWXpMMmhtTlM4NU9EVTFOemM1TnprNU1EY3dMMFpQVGxSRlRrVk1URVV1Y0dSbXwzNGQ4OWRhMDE1NzhhNDE3YjI3MDVkOWZjOTI1NmRiNDg0YTI1MTE2NDY5NGYyY2ZjYTMwNTg1ODc3OTdmZWEw",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Anthracite, Moka, Rouge vieilli",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 200 × pureau 255) = 19.61, fiche 19.7",
     "tuiles_par_m2_max : calcul 1/(largeur utile 200 × pureau 240) = 20.83, fiche 20.8",
@@ -37886,6 +39057,40 @@
    ]
   },
   {
+   "id": "p3b_monier_maizieres_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule à pureau plat (faible galbe)",
+   "marque": "Monier (BMI)",
+   "modele": "Maizières",
+   "attribut": "coloris",
+   "valeur": [
+    "Anthracite mat",
+    "Rouge vieilli"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Maizières (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/MAIZIERES.pdf?context=bWFzdGVyfHJvb3R8ODI2MzcyOXxhcHBsaWNhdGlvbi9wZGZ8YURRMkwyZzJZUzg1T0RZd01qazNNVGsxTlRVd0wwMUJTVnBKUlZKRlV5NXdaR1l8NDExMTAyNzVmMDVlMmEyMGQyMjcyZDQ4YTkyYWM0M2U1YWFjZTcyOGZjNTI4MjBlMzIwNjQ0MmVkMzY4ZTlhOQ",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Anthracite mat, Rouge vieilli",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 280 × pureau 375) = 9.52, fiche 9.5",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 280 × pureau 300) = 11.90, fiche 11.9",
+    "liteaux : calcul 1/300 = 3.33 ml/m², fiche 3.3",
+    "liteaux : calcul 1/375 = 2.67 ml/m², fiche 2.7"
+   ]
+  },
+  {
    "id": "monier-abeille_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "grand moule fortement galbé (aspect canal)",
@@ -38349,6 +39554,42 @@
    ]
   },
   {
+   "id": "p3b_monier_abeille_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "grand moule fortement galbé (aspect canal)",
+   "marque": "Monier (BMI)",
+   "modele": "Abeille",
+   "attribut": "coloris",
+   "valeur": [
+    "Authentique",
+    "Rose",
+    "Rouge",
+    "Silvacane littoral"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Abeille (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/ABEILLE.pdf?context=bWFzdGVyfHJvb3R8OTYwODMxM3xhcHBsaWNhdGlvbi9wZGZ8YURCbUwyZ3pOaTg1T0RVMU5EY3dNek00TURjNEwwRkNSVWxNVEVVdWNHUm18NWMyNTAwZmU1ZDc0OWNmNzgzODdhN2NlMjgwNTNmM2Q2ZDhlMmUwYzkyNmY3MjY3MzllYzg4YjhjMTE1YTQxMA",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Authentique, Rose, Rouge, Silvacane littoral",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 252 × pureau 414) = 9.59, fiche 9.5",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 252 × pureau 400) = 9.92, fiche 10.1",
+    "liteaux : calcul 1/400 = 2.50 ml/m², fiche 2.5",
+    "liteaux : calcul 1/414 = 2.42 ml/m², fiche 2.4"
+   ]
+  },
+  {
    "id": "monier-chartreuse_tuiles_par_m2_min",
    "famille": "tuile_emboitement",
    "sous_famille": "petit moule à relief",
@@ -38804,6 +40045,40 @@
     }
    ],
    "raison": "Fiche officielle BMI Monier (bmigroup.com) seule : à confirmer par le contrôle par le calcul (confirme_fabricant.py).",
+   "controle": [
+    "tuiles_par_m2_min : calcul 1/(largeur utile 188 × pureau 276) = 19.27, fiche 19.1",
+    "tuiles_par_m2_max : calcul 1/(largeur utile 188 × pureau 266) = 20.00, fiche 20.2",
+    "liteaux : calcul 1/266 = 3.76 ml/m², fiche 3.7",
+    "liteaux : calcul 1/276 = 3.62 ml/m², fiche 3.6"
+   ]
+  },
+  {
+   "id": "p3b_monier_chartreuse_coloris",
+   "famille": "tuile_emboitement",
+   "sous_famille": "petit moule à relief",
+   "marque": "Monier (BMI)",
+   "modele": "Chartreuse",
+   "attribut": "coloris",
+   "valeur": [
+    "Brun masse",
+    "Brun vieilli"
+   ],
+   "unite": "liste",
+   "condition": "gamme de coloris de la fiche produit (document daté d'avril 2026)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Chartreuse (PDF du 08/04/2026, bmigroup.com)",
+     "url": "https://store.bmigroup.com/medias/CHARTREUSE.pdf?context=bWFzdGVyfHJvb3R8NzYzODU4NXxhcHBsaWNhdGlvbi9wZGZ8YUdKaEwyZzVNaTg1T0RVMU5EZ3lNek14TVRZMkwwTklRVkpVVWtWVlUwVXVjR1JtfDE2NTY3YzMzMzRkZDdhYzg0YzgzZjVjM2QwNzViODM0ODgyYzdhYTMyMzNhN2Y2ZGRkNmQ3ZDUxYTQ2MGU0YTA",
+     "type": "fabricant",
+     "extrait": "gamme de coloris (fiche datée d'avril 2026) : Brun masse, Brun vieilli",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Fiche officielle du fabricant seule (règle du fondateur : confirme_fabricant si le modèle passe le contrôle par le calcul).",
    "controle": [
     "tuiles_par_m2_min : calcul 1/(largeur utile 188 × pureau 276) = 19.27, fiche 19.1",
     "tuiles_par_m2_max : calcul 1/(largeur utile 188 × pureau 266) = 20.00, fiche 20.2",
