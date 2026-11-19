@@ -66,9 +66,37 @@ class Sources:
         return self.par_cle[cle]
 
 
+# Un seul nom par donnée, d'une famille à l'autre (testeur-négoce, 19/11/2026 : « tuiles au m² » contre
+# « tuiles_par_m2 »). Le libellé d'origine reste dans `libelle_source`.
+SYNONYMES = {
+    "tuiles au m²": "tuiles_par_m2", "tuiles de couvert au m² (couvert seul)": "couverts_par_m2",
+    "tuiles au m² (courants ou couverts seuls)": "couverts_par_m2", "courants au m²": "courants_par_m2",
+    "couverts au m²": "couverts_par_m2", "courants + couverts au m²": "tuiles_par_m2",
+    "liteaux au m²": "liteaux_ml_par_m2", "largeur utile": "largeur_utile", "poids unitaire": "poids_unitaire",
+    "tuiles par palette": "tuiles_par_palette", "pente minimale": "pente_minimale", "pente_mini_fiche": "pente_minimale",
+    "pente minimale sans écran": "pente_minimale_sans_ecran", "norme d'application": "dtu",
+    "faîtières au ml": "faitieres_par_ml", "faitieres_et_accessoires_par_ml": "faitieres_par_ml",
+    "longueur hors tout": "longueur_hors_tout", "dimensions hors tout": "dimensions_hors_tout",
+    "existence au catalogue": "existence_au_catalogue", "poids unitaire / au m²": "poids_unitaire_et_au_m2",
+    "longueur × largeur hors tout (largeur utile)": "dimensions_et_largeur_utile",
+    "tuile_rive_par_ml_et_par_cote": "rives_par_ml_et_par_cote", "ardoises_m2": "ardoises_par_m2",
+}
+
+
+def nom_attribut(a):
+    a = SYNONYMES.get(a, a)
+    a = a.lower()
+    for x, y in (("é", "e"), ("è", "e"), ("ê", "e"), ("à", "a"), ("â", "a"), ("î", "i"), ("ô", "o"), ("û", "u"),
+                 ("ç", "c"), ("²", "2"), ("×", "x"), ("œ", "oe")):
+        a = a.replace(x, y)
+    return re.sub(r"[^a-z0-9]+", "_", a).strip("_")
+
+
 def valeur(e, src):
-    v = {"id": e["id"], "attribut": e["attribut"], "valeur": e.get("valeur"), "unite": e.get("unite"),
+    v = {"id": e["id"], "attribut": nom_attribut(e["attribut"]), "valeur": e.get("valeur"), "unite": e.get("unite"),
          "statut": e["statut"], "sources": [src.id(s) for s in e.get("sources", [])]}
+    if v["attribut"] != e["attribut"]:
+        v["libelle_source"] = e["attribut"]
     for k in ("condition", "regions", "ecart", "raison", "controle", "reference", "details"):
         if e.get(k) not in (None, "", []):
             v[k] = e[k]
@@ -77,6 +105,23 @@ def valeur(e, src):
     if ex:
         v["preuves"] = ex
     return v
+
+
+MOTS_FAMILLE = [("tuile_canal", r"canal|bardelis|courant|couvert"), ("tuile_plate", r"plate"),
+                ("tuile_romane", r"romane"), ("tuile_beton", r"b[ée]ton|monier"),
+                ("etancheite", r"[ée]tanch|membrane|bitum|primaire|isolant|epdm|pvc|sbs|relev|terrasse|pare-vapeur|autoprot|[ée]querre|2e couche"),
+                ("ecran", r"[ée]cran|hpv|contre-liteau|adh[ée]sif|larmier")]
+
+
+def famille_de(texte, soeurs):
+    """La famille d'un verdict ou d'une rubrique comptoir parmi celles d'un même fichier ; la première par défaut."""
+    if len(soeurs) == 1:
+        return soeurs[0]
+    t = texte.lower()
+    for code, motif in MOTS_FAMILLE:
+        if code in soeurs and re.search(motif, t):
+            return code
+    return soeurs[0]
 
 
 def construit():
@@ -110,10 +155,13 @@ def construit():
         for s in sous.values():
             s["marques"] = [{**m, "modeles": list(m["modeles"].values())} for m in s["marques"].values()]
             fam["sous_familles"].append(s)
-        # Verdicts et comptoir : une seule fois par fichier (la première famille qui le lit).
-        if filtre is None or filtre == min(f for c, l, fi, f in FAMILLES if fi == fichier):
-            fam["verdicts"] = [{**v, "sources": [src.id(s) for s in v.get("sources", [])]} for v in d.get("verdict_ratios", [])]
-            fam["comptoir"] = [{**c, "sources": [src.id(s) for s in c.get("sources", [])]} for c in d.get("commande_comptoir", [])]
+        # Verdicts et comptoir : chacun sous SA famille quand le fichier en couvre plusieurs (mots de l'article ou du ratio).
+        soeurs = [c for c, l, fi, f in FAMILLES if fi == fichier]
+        fam["verdicts"] = [{**v, "sources": [src.id(s) for s in v.get("sources", [])]} for v in d.get("verdict_ratios", [])
+                           if famille_de(v.get("ratio", "") + " " + v.get("origine", ""), soeurs) == code]
+        fam["comptoir"] = [{**c, "sources": [src.id(s) for s in c.get("sources", [])]} for c in d.get("commande_comptoir", [])
+                           if famille_de(c.get("article", ""), soeurs) == code]
+        if code == soeurs[0]:
             for k in ("regle_arrondi", "regle_confirmation", "perimetre", "note_format"):
                 if d.get(k):
                     fam[k] = d[k]
