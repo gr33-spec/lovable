@@ -172,17 +172,35 @@ Zones (DTU, via Koramic) : zone 3 = côte Atlantique, Manche et mer du Nord sur 
 
 ## Écarts de calcul (nb/m² publié comparé à 1 / (largeur utile × pureau), au-delà de 6 %)
 
-- Médiane Plus Gélis : publié 11,1–11,6, calcul 11,8–13,6. Cause probable : jeu latéral, largeur utile moyenne, ou valeur publiée au seul lattage maxi.
+- Médiane Plus Gélis : résolu en deuxième passe. L'encyclopédie 2024 publie 11,1–11,6 pour la pose **bloquée à 240 mm** (1/(0,240 × 0,376) = 11,08 ; 1/(0,240 × 0,360) = 11,57). La fiche 2026 publie 11,8–13,6 pour la pose libre (largeur utile 205–225), ce qui passe le calcul. La pose bloquée est gardée à part (`tuiles_par_m2_pose_bloquee`).
+- Panne S Huguenot : publié 20, calcul 1/(0,190 × 0,275) = 19,1 (4,4 %). Les trois documents Edilians disent la même chose : l'écart n'est pas expliqué, le modèle reste `une_source`.
+- Côte Fleurie PV : publié 18 à 20, calcul 17,6 à 19,3 (le maxi dépasse de 3,4 %). Arrondi probable : le modèle reste `une_source`.
 
 ## À confirmer
 
 - La deuxième source indépendante des chiffres par modèle. Deux pistes : la liste des produits certifiés NF du CSTB, ou un catalogue négoce avec ses propres conditionnements.
-- Les modèles qui ont leur propre table de pente : Alpha 10, Rhôna 10, Losangée Huguenot, Canal S, Jura 10, Montagny, Tempête 18, Côte Fleurie PV, Héritage Canal, Panne TFP.
-- Signy : la pente mini passe de 40 % (fiche de 2024) à 35 % (fiche de 2025).
+- Les modèles qui ont leur propre table de pente (13 entrées `famille_pente` en `a_confirmer`) : Alpha 10, Rhôna 10, Losangée Huguenot, Canal S, Jura 10, Montagny, Volnay PV, Volnay PV Tandem, Actua, Tempête 18, Côte Fleurie PV, Héritage Canal, Panne TFP. Nouvelle tentative le 19/11 : la fiche confirme à chaque fois un tableau propre, qu'aucun code de famille ne résume. Il faut le recopier modèle par modèle, ou poser la question de la pente. Pour la Tempête 18, rien de lisible.
+- Panne S Huguenot et Côte Fleurie PV : le contrôle par le calcul échoue (voir plus haut).
 - Rive à rabat de la HP 10 posée à joints croisés : Edilians donne 2,7/ml pour la tuile à rabat et 2,7/ml pour la demi-tuile à rabat. Il faut lui demander comment elles se répartissent.
-- Les modèles de la liste du fondateur que je n'ai pas trouvés : Sud 2000, Pierrelatte, Alliance, Signature, « Ergo », « Tuile du Nord » (nom générique ?). « Koramic Losange » correspond sans doute à la Losangée Koramic, « Huguenot H14 » à la H 14 Huguenot, et « Migeon » est l'ancienne marque de l'Actua (tous trois présents). Hors famille (béton) : Double Romane et Plein Ciel (Monier).
+- Modèles de la liste du fondateur **retirés ou introuvables** (5 entrées `a_confirmer`, « existence au catalogue ») : Sud 2000, Pierrelatte, Alliance, Signature, Ergo. Ils sont absents du plan du site BMI (3 477 adresses), de celui de Wienerberger (10 245 adresses, Koramic et Terreal) et de la recherche Edilians. Le seul « Alliance » de BMI est un écran SCR. « Tuile du Nord » est sans doute un nom générique. Si un devis les cite : « il en faut combien au m² ? ».
 - La lecture des zones en Bretagne : elle est à vérifier sur la carte du DTU 40.21.
 - Les modèles réellement vendus en Ille-et-Vilaine et en Loire-Atlantique.
+
+## Deuxième passe (19 novembre 2026)
+
+- **Négoce remplacé par le site du fabricant.** Les fiches Monier (Signy, Losangée Héritage, Galleane 12, Régence) n'étaient sourcées que par Chausson, BigMat ou Samse. Elles sont maintenant reprises sur bmigroup.com : page produit, plus le PDF `store.bmigroup.com` daté du 08/04/2026. Les valeurs sont les mêmes. Pour Signy, le débat 2024/2025 est tranché : la fiche en ligne dit **35 %** (zone 1, site protégé et normal), les 40 % étaient ceux de la fiche Samse de juin 2024.
+- **Contrôles qui ne pouvaient pas tourner** : la donnée manquante a été retrouvée sur la fiche officielle.
+  - Canal S : 11,4/m² au pureau de 375 sur la fiche 2026, et pureau 369 à 381 sur la page produit.
+  - HP 17 : largeur utile 204 et liteaux 4,5 / 3,51.
+  - Panne S : largeur utile 190.
+  - Lisséa : 17 à 22/m² et largeur utile moyenne 201.
+  - Prima : lattage 340 à 380 et largeur utile 278.
+  - Rully : pureau 15,2 à 16,8.
+  - Côte Fleurie PV : largeur utile 20,6, liteaux et pente mini 35 %.
+  - Régence : largeur utile 18,7.
+- **Fiches Edilians 2026** (12/02/2026) ajoutées en source pour Canal S, Médiane Plus, HP 17 et Panne S.
+- **Modèles ajoutés** depuis le catalogue BMI Monier 2026 : Gallo-Romane et Canal de 40 (région affichée : Pays de la Loire), Galleane 10, Romane (Monier), Postel 20, Belmont, Fontenelle, Maizières, Abeille, Chartreuse. Tous passent le contrôle par le calcul. Quand la page et le PDF diffèrent, c'est le PDF qui est retenu, et l'écart est noté. Pour Romane et Maizières, la pente mini est de 19 % sur la page et de 30 % sur la fiche : à vérifier avant d'automatiser. La Canal de 40 est rangée dans le fichier canal.
+- Comptes : avant, 907 `confirme_fabricant`, 133 `une_source`, 14 `a_confirmer`, 13 `confirme`. Après, 1 139 `confirme_fabricant`, 28 `une_source`, 18 `a_confirmer` (dont les 5 introuvables), 13 `confirme`.
 
 ## Sources principales
 
@@ -191,6 +209,6 @@ Zones (DTU, via Koramic) : zone 3 = côte Atlantique, Manche et mer du Nord sur 
 - [Koramic, Guide de pose (2016)](https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf)
 - [Koramic, fiche Actua (2026)](https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf)
 - [Terreal, fiches produit (wienerberger.fr)](https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf)
-- [Monier, fiche Signy 2025](https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340169521-fLwiLpCVJm.pdf)
+- [Monier, fiche Signy 2025](https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340169521-fLwiLpCVJm.pdf) ; officielle : [bmigroup.com, Signy](https://www.bmigroup.com/fr/p/tuile-signy-rouge-vieilli-terre-cuite-1922894655/)
 - [CAP couvreur (Nomad Education)](https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41)
 - [Batidistribution 2011](https://www.baselopresse.fr/batidistribution/produits/couverture/les-tuiles/pdf)

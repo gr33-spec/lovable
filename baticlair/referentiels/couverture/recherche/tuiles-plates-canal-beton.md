@@ -153,12 +153,36 @@ Plusieurs noms n'ont pas été trouvés dans la gamme française actuelle : Sign
 
 ## À confirmer
 
-- Le nombre de plaques support au m². Le recouvrement longitudinal entre plaques n'est écrit dans aucune fiche : il est dans le DTA de chaque plaque.
-- La densité de fixation des plates (clous ou crochets par tuile, DTU 40.23 §4.3). La densité pour la canal n'a qu'une source (Terreal : 1 courant sur 5 cloué, couverts tous fixés).
 - La quantité de tuiles d'égout (doublis) au ml pour la canal traditionnelle.
-- La plage béton grand moule 9,6 à 11,3 : un seul fabricant (Monier).
-- La présence réelle de la tuile béton dans les lotissements bretons (aucune source régionale trouvée), et les modèles béton anciens : Signy, Redland, Lafarge.
+- La plage béton grand moule 9,6 à 11,3. Elle figure sur les fiches officielles BMI 2026 (Double Romane, Perspective, Innotech, Nobilée, Tradipanne) et passe le calcul. Mais Monier est le seul fabricant de tuile béton en France : l'entrée reste `une_source`, jamais `confirme`.
+- Le nombre de plaques support au m². Il se calcule avec la documentation Onduline 2024 : surface utile de 1,59 à 1,79 m² par plaque (pente > 20 %), soit 0,56 à 0,63 plaque/m², et longueur utile 1 860 sur 2 000 (recouvrement de 140 mm). C'est une seule source (`une_source`), et les autres plaques ont chacune leur DTA.
+- La densité de fixation de la canal n'a qu'une source (Terreal : 1 courant sur 5 cloué, couverts tous fixés).
+- Médiévale et Vieille France (plates béton Monier). Aucune fiche ni page produit n'est publiée sur bmigroup.com : seule la page de gamme existe, et ces modèles sont absents du plan du site et de la brochure béton 2026. La fiche ne se trouve que chez le négoce. Elles restent `une_source` (modèle peut-être retiré).
+- La présence réelle de la tuile béton dans les lotissements bretons. La nouvelle tentative n'a rien donné : aucune source régionale, et les moteurs de recherche sont inaccessibles depuis le poste. Les usines béton BMI sont à Saint-Nabord, Verberie et Aiguillon. Restent aussi les modèles béton anciens : Redland, Lafarge.
 - Les formats 17 × 30 et 25 × 40 de la doc §5 : aucun modèle vendu trouvé.
+- Sologne et Ségala Vieux Pays : la largeur utile n'est pas publiée, donc le contrôle se fait sur les seuls liteaux (1/pureau).
+
+## Deuxième passe (19 novembre 2026)
+
+- **Négoce remplacé par le site du fabricant.**
+  - BMI Monier (bmigroup.com, PDF du 17/11/2026 pour le béton, du 08/04/2026 pour la Plate de Pays) : Double Romane, Plein Ciel, Perspective, Innotech, Nobilée, Plate de Pays.
+  - Terreal sur wienerberger.fr : Romane Canal, Romane Réno (04/2025), Latitude 12 (05/2022), Rully (02/2024), Héritage Canal (04/2025), Double Canal Languedoc (fiche technique 2018 : « 9 à 10 /m² »), Sologne Vieux Pays (11/2015 et guide plates du 07/04/2025), Ségala Vieux Pays (09/2016).
+  - Plate 301 : guide Koramic 2026 p. 45 et page produit (largeur utile 170).
+  - Flexoutuile : fr.onduline.com, 09/2024. Le document poseur 2024 dit **15 pointes par plaque**, contre 12 dans la fiche 2020 : la valeur 2024 est retenue.
+- **Contrôles qui ne pouvaient pas tourner** : largeur utile et pureau ajoutés depuis la fiche officielle.
+  - Canal Gironde et Charentaise à blocage : 200 à 230 mm, pureau 342 et 250.
+  - Double Canal 12 : 22,6 × 37,3.
+  - Héritage Canal, Canal Évolution, Vendéenne, Languedocienne à talons 75CLP, Canal Origine.
+  - Les noms d'un même modèle ont été unifiés, car le contrôle se fait par modèle.
+  - Les liteaux en plage sont réécrits « mini / maxi ».
+- **Fixation des tuiles plates** (`confirme`) : le tableau du NF DTU 40.23 est cité par deux guides, Terreal 2025 p. 98 et Koramic p. 15.
+  - Pente ≤ 175 % : aucune tuile fixée en zones 1-2 (site protégé ou normal), 1 sur 6 ailleurs.
+  - 175 à 300 % : 1 sur 6.
+  - Au-delà de 300 % : toutes.
+  - Rives et égout : toutes fixées, sauf pente ≤ 100 % en zones 1-2 (site protégé ou normal).
+- **Formats plates 16 × 27 et 16 × 24** (`confirme`) : Edilians et Koramic/Aléonard donnent les mêmes nombres aux mêmes pureaux.
+- **Modèles ajoutés** : Tradipanne (béton Monier, 9,6 à 11,3) et Canal de 40 (Monier, 16,7 à 21,7 courants ou couverts seuls, région affichée : Pays de la Loire).
+- Comptes : avant, 244 `confirme_fabricant`, 137 `une_source`, 34 `confirme`, 3 `a_confirmer`. Après, 427 `confirme_fabricant`, 31 `une_source`, 37 `confirme`, 0 `a_confirmer`.
 
 ## Décisions à trancher par le fondateur
 
