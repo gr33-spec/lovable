@@ -491,7 +491,7 @@ function GalerieDefaut({ photos, choisie, onChoisir, metierPhoto }: { photos: re
     const actif = choisie === id;
     return (
       <li key={id ?? "metier"}>
-        <button type="button" role="radio" aria-checked={actif} aria-label={libelle} onClick={() => onChoisir(id)} className={`pressable grid w-full gap-1 rounded-2xl border-2 p-1 text-left ${actif ? "border-accent bg-accent/15" : "border-transparent"}`}>
+        <button type="button" role="radio" aria-checked={actif} aria-label={libelle} onClick={() => onChoisir(id)} className={`pressable grid w-full gap-1 rounded-2xl border-2 p-1 text-left ${actif ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-transparent"}`}>
           <span className="relative block aspect-[4/3] overflow-hidden rounded-xl bg-black/10">
             {p ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -840,7 +840,7 @@ export function EditeurMaPage() {
               // Le jaune Mobiiz est la valeur par défaut : choisi, rien n'est enregistré (null).
               const choisi = (r.couleurBoutons?.toLowerCase() ?? "#fed206") === c.hex.toLowerCase();
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={choisi} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold text-ink ${choisi ? "border-accent bg-accent/15" : "border-line"}`}>
+                <button key={c.id} type="button" role="radio" aria-checked={choisi} aria-label={c.nom} onClick={() => changer("couleurBoutons", i === 0 ? null : c.hex)} className={`pressable grid justify-items-center gap-1.5 rounded-2xl border-2 px-1 py-2.5 text-[12.5px] font-bold text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
                   {/* Un vrai petit bouton, dans sa couleur. */}
                   <span className="flex h-8 w-full max-w-[84px] items-center justify-center rounded-full text-[11px] font-extrabold ring-1 ring-line" style={{ background: c.hex, color: texteSurCouleur(c.hex) }} aria-hidden="true">
                     Appeler
@@ -856,7 +856,7 @@ export function EditeurMaPage() {
             {[{ id: "metier", nom: "Selon le métier", hex: teinteMetier.hex, valeur: null as string | null }, ...data.choix.teintes.map((c) => ({ ...c, valeur: c.hex as string | null }))].map((c) => {
               const choisi = couleurActive === c.valeur;
               return (
-                <button key={c.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold text-ink ${choisi ? "border-accent bg-accent/15" : "border-line"}`}>
+                <button key={c.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("couleur", c.valeur)} className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
                   {/* La pastille montre le rendu : la teinte et la couleur des boutons. */}
                   <span className="relative grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5 ring-1 ring-line" style={{ background: `radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, ${c.hex} 85%, white 10%), ${c.hex} 70%)` }} aria-hidden="true">
                     <span className="h-1.5 w-4 rounded-full" style={{ background: r.couleurBoutons ?? "#FED206" }} />
@@ -1011,7 +1011,7 @@ export function EditeurMaPage() {
     ),
     chantiers: (
       <Bloc titre="Mes chantiers" aide="Un chantier = un titre et quelques photos. Sur ton site, la première photo s'affiche en grand ; on la touche pour voir les autres.">
-        <p className="rounded-xl bg-accent/15 px-3 py-2 text-[14px]">
+        <p className="rounded-xl bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)] px-3 py-2 text-[14px]">
           Mets seulement tes propres photos de chantiers. Avant de publier une photo prise chez un client, demande-lui son accord ; évite les personnes reconnaissables, les plaques d&apos;immatriculation, les numéros de rue et les intérieurs qui permettent de situer un domicile.
         </p>
         {!data.choix.stockagePhotos ? <p className="rounded-xl bg-black/5 px-3 py-2 text-[14px]">L&apos;envoi de tes propres photos n&apos;est pas encore ouvert sur ce site. Tes chantiers s&apos;afficheront dès qu&apos;il le sera.</p> : null}
