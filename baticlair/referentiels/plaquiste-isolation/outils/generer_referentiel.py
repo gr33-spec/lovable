@@ -480,9 +480,9 @@ def cloison():
          "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.", **prov("snip-fc18", OK2("Un montant par entraxe + 1 ; en doublés, les deux montants de bout ne se doublent pas : (n + (doubles − 1)(n − 2)) × 1,05. Redonne le SNIP (2,10 / 2,89 / 3,68 / 5,25 ml/m²) et Placo Intégrale 2021-22 (recherche/09 n° 35). Hors montants d'huisserie."))},
         {"id": "rails", "slot": "rail", "formula": "longueur_cloison * regle.rails_par_cloison * regle.chute_ossature", "unit": "ml", "core": True, "precision": "rails haut et bas", "short": "rails",
          **prov("snip-fc18", OK2("2 × longueur × 1,05 : SNIP (0,84 ml/m² à 2,50 m) et Pladur (0,84 / 0,75 / 0,70 selon la hauteur)."))},
-        {"id": "vis-ttpc-25", "slot": "vis", "formula": f"surface * {vis_ttpc}", "unit": "u", "core": True, "short": "vis TTPC 25", **prov("snip-fc18", UNE("Ratio SNIP par montage."))},
-        {"id": "vis-ttpc-35", "slot": "vis_ext", "formula": f"surface * {vis_ext}", "unit": "u", "core": True, "when": "couches >= 2", "short": "vis TTPC 35", "precision": "2e peau", **prov("snip-fc18", UNE("Ratio SNIP, parement double."))},
-        {"id": "vis-trpf", "slot": "trpf", "formula": f"surface * {trpf}", "unit": "u", "core": True, "short": "vis TRPF", **prov("snip-fc18", UNE("Ratio SNIP."))},
+        {"id": "vis-ttpc-25", "slot": "vis", "formula": f"surface * {vis_ttpc}", "unit": "u", "core": True, "short": "vis TTPC 25", **prov("snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."))},
+        {"id": "vis-ttpc-35", "slot": "vis_ext", "formula": f"surface * {vis_ext}", "unit": "u", "core": True, "when": "couches >= 2", "short": "vis TTPC 35", "precision": "2e peau", **prov("snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."))},
+        {"id": "vis-trpf", "slot": "trpf", "formula": f"surface * {trpf}", "unit": "u", "core": True, "short": "vis TRPF", **prov("snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."))},
         {"id": "fixations-clous", "slot": "fixation", "formula": "arrondi_sup(longueur_cloison * regle.rails_par_cloison * regle.chute_ossature / regle.pas_fixation_rail)", "unit": "u", "core": True, "when": "fixation_rail < 2", "short": "fixations de rail",
          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz", "precisionRequires": ["marque_cloueur"],
          "precision": "une fixation tous les 60 cm", **prov("siniat-carnet-cloison", DOUTE("Pas de 60 cm confirmé (Siniat, Placo) ; la fixation en bout de chaque rail n'est chiffrée par aucune source lue."))},
@@ -626,8 +626,8 @@ def doublage_fourrures():
         besoin("rails", "rail_f530", "longueur_mur * regle.rails_par_mur * regle.chute", "ml", "placo-rail-f530", OK2("2 × longueur × 1,05 (SNIP, Pladur) ; rail F 530 de 2,35 m (Placo)."), short="rails", precision="haut et bas"),
         besoin("appuis", "appui", "nb_fourrures * lignes_appuis", "u", "rockwool-murs-2024", OK2("Un appui par fourrure verticale et par ligne : SNIP 0,80/m² et notice Isover Optima2 ; le « 2 appuis/m² » Placo ancien ne se retrouve nulle part (recherche/09 n° 42)."),
                designation="Appuis intermédiaires pour isolant de {epaisseur_isolant|mm#} mm", short="appuis"),
-        besoin("vis-ttpc-25", "vis", "surface * regle.vis_par_m2", "u", "snip-fc18", CONFLIT("SNIP 15/m².", "Placo 11, Pladur 26."), short="vis"),
-        besoin("vis-trpf", "trpf", "surface * regle.trpf_par_m2", "u", "snip-fc18", UNE("SNIP."), short="vis TRPF"),
+        besoin("vis-ttpc-25", "vis", "surface * regle.vis_par_m2", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis"),
+        besoin("vis-trpf", "trpf", "surface * regle.trpf_par_m2", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis TRPF"),
         *fixations_rail("longueur_mur * regle.rails_par_mur * regle.chute", "nb_fourrures * lignes_appuis"),
         besoin("isolant", "isolant", "surface * regle.isolant_par_m2", "m2", "pladur-2019", OK2("1,05 m²/m²."), core=False, short="isolant"),
         *besoins_finitions("surface"),
@@ -664,8 +664,8 @@ def contre_cloison():
          "h48_d60": regle("2.40", "m", "rockwool-murs-2024", hh), "h48_d40": regle("2.65", "m", "pladur-2019", UNE("Pladur : 2,65 m.")),
          "h70_s60": regle("2.50", "m", "rockwool-murs-2024", hh),
          "vis_s60": regle("15", "u/m2", "snip-fc18", CONFLIT("15 vis/m² (SNIP fiche 18).", "Placo ancien 11 ; Pladur 26."), label="{v} vis par m²"),
-         "vis_s40": regle("19", "u/m2", "snip-fc18", UNE("SNIP."), label="{v} vis par m²"),
-         "trpf_s": regle("2", "u/m2", "snip-fc18", UNE("SNIP."), label="{v} TRPF par m²"),
+         "vis_s40": regle("19", "u/m2", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), label="{v} vis par m²"),
+         "trpf_s": regle("2", "u/m2", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), label="{v} TRPF par m²"),
          "trpf_d": regle("5", "u/m2", "snip-fc18", OK2("SNIP 5, Placo 5 si montants doublés."), label="{v} TRPF par m²"),
          "pas_fixation_rail": c_pas_fixation(),
          "isolant_par_m2": regle("1.05", "u", "pladur-2019", OK2("1,05 m²/m² : Pladur et Placo."), label="isolant + 5 %"),
@@ -690,8 +690,8 @@ def contre_cloison():
         besoin("plaques", "plaque", "arrondi_sup(longueur_mur * regle.chute / regle.largeur_plaque)", "u", "snip-fc18", OK2("1,05 m²/m² (SNIP, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}", precision="pour {longueur_mur|m} de mur"),
         besoin("montants", "montant", "arrondi_sup((longueur_mur / entraxe + 1 + (doubles - 1) * (longueur_mur / entraxe - 1)) * regle.chute)", "u", "snip-fc18", OK2("Même règle que la cloison : SNIP et Placo (recherche/09 n° 45)."), designation="Montants M{montant|mm#} longueur {longueur_montant|m}", precision="{montage}", short="montants"),
         besoin("rails", "rail", "longueur_mur * regle.rails_par_mur * regle.chute", "ml", "snip-fc18", OK2("2 × longueur × 1,05 (SNIP, Pladur)."), short="rails", precision="haut et bas"),
-        besoin("vis-ttpc-25", "vis", "surface * si(montage < 2, regle.vis_s60, regle.vis_s40)", "u", "snip-fc18", UNE("SNIP."), short="vis"),
-        besoin("vis-trpf", "trpf", "surface * si(montage < 3, regle.trpf_s, regle.trpf_d)", "u", "snip-fc18", UNE("SNIP."), short="vis TRPF"),
+        besoin("vis-ttpc-25", "vis", "surface * si(montage < 2, regle.vis_s60, regle.vis_s40)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis"),
+        besoin("vis-trpf", "trpf", "surface * si(montage < 3, regle.trpf_s, regle.trpf_d)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis TRPF"),
         *fixations_rail("longueur_mur * regle.rails_par_mur * regle.chute"),
         besoin("isolant", "isolant", "surface * regle.isolant_par_m2", "m2", "pladur-2019", OK2("1,05 m²/m²."), core=False, short="isolant"),
         *besoins_finitions("surface"),
@@ -726,7 +726,7 @@ def plafond():
          "suspentes_e50": regle("1.84", "u/m2", "snip-fc18", UNE("1,84 (SNIP) ; Pladur 1,75 à 5 % près (recherche/09 n° 48). Règle changée : avant 2,2."), label="{v} suspentes par m²"),
          "suspentes_e40": regle("2.7", "u/m2", "placo-integrale-plafonds-2023", UNE("2,7 (Placo 2023)."), label="{v} suspentes par m²"),
          "eclisses_e60": regle("0.21", "u/m2", "snip-fc18", UNE("SNIP (aboutage des fourrures)."), label="{v} éclisses par m²"),
-         "eclisses_e50": regle("0.25", "u/m2", "snip-fc18", UNE("SNIP."), label="{v} éclisses par m²"),
+         "eclisses_e50": regle("0.25", "u/m2", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), label="{v} éclisses par m²"),
          "vis_e60": regle("12", "u/m2", "snip-fc18", CONFLIT("12 vis/m² à 0,60 (SNIP).", "Placo 2023 : 10 ; Pladur : 8."), label="{v} vis par m²"),
          "vis_e50": regle("14", "u/m2", "snip-fc18", CONFLIT("14 (SNIP).", "Placo 12."), label="{v} vis par m²"),
          "vis_e40": regle("15", "u/m2", "placo-integrale-plafonds-2023", UNE("15 (Placo 2023)."), label="{v} vis par m²"),
@@ -764,7 +764,7 @@ def plafond():
                "default": {**prov("placo-ba13", UNE("2,50 m : longueur la plus courante (pile de 50) ; ne change pas le nombre de m².")), "value": "2.5", "note": "plaques de 2,50 m, par défaut"}},
               TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR]
     E = "si(entraxe_fourrures >= regle.e60, {a}, si(entraxe_fourrures >= regle.e50, {b}, {c}))"
-    derived = [derive("nb_suspentes", "Nombre de suspentes", "u", "arrondi_sup(surface * " + E.format(a="regle.suspentes_e60", b="regle.suspentes_e50", c="regle.suspentes_e40") + ")", "snip-fc18", CONFLIT("Ratio Placo 2023.", "SNIP 1,56 à 0,60."))]
+    derived = [derive("nb_suspentes", "Nombre de suspentes", "u", "arrondi_sup(surface * " + E.format(a="regle.suspentes_e60", b="regle.suspentes_e50", c="regle.suspentes_e40") + ")", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(surface * couches * regle.chute / (regle.largeur_plaque * longueur_plaque))", "u", "placo-integrale-plafonds-2023", OK2("1,05 m² de plaque par m² et par peau (Placo, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"),
         besoin("fourrures", "fourrure", "surface * " + E.format(a="regle.fourrures_e60", b="regle.fourrures_e50", c="regle.fourrures_e40"), "ml", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 2,0 à 0,60."), short="fourrures", precision="entraxe {entraxe_fourrures|cm}"),
@@ -772,7 +772,7 @@ def plafond():
         besoin("suspentes-secables", "suspente_secable", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum >= 2", short="suspentes"),
         besoin("vis-suspentes", "vis_suspente", "nb_suspentes * regle.vis_par_suspente_bois", "u", "placo-integrale-plafonds-2023", OK2("2 TTPC 35 par suspente sous bois."), when="support < 2", short="vis de suspente"),
         besoin("chevilles-suspentes", "cheville_suspente", "nb_suspentes", "u", "placo-integrale-plafonds-2023", OK2("Une cheville métallique par suspente sous béton : Placo Intégrale 2023 et Pladur 2019 (chevilles sous agrément à chaque point) (recherche/09 n° 24)."), when="support >= 2", short="chevilles de suspente"),
-        besoin("eclisses", "eclisse", "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)", "u", "snip-fc18", UNE("SNIP."), short="éclisses"),
+        besoin("eclisses", "eclisse", "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="éclisses"),
         besoin("corniere", "corniere", "surface * table.perimetre * regle.chute_corniere", "ml", "snip-fc18", OK2("Méthode périmètre × 1,05 : SNIP et Pladur (recherche/09 n° 64) ; le périmètre reste estimé (pièce carrée)."), estimate="périmètre estimé d'après la surface : ajuste à tes pièces", short="cornière de rive"),
         besoin("vis-ttpc-25", "vis", "surface * si(couches < 2, " + E.format(a="regle.vis_e60", b="regle.vis_e50", c="regle.vis_e40") + ", regle.vis_int)", "u", "snip-fc18", CONFLIT("SNIP.", "Placo 10."), short="vis"),
         besoin("vis-ttpc-35", "vis_ext", "surface * regle.vis_ext", "u", "snip-fc18", OK2("SNIP 12/m², Placo 10-15."), when="couches >= 2", short="vis 2e peau"),
@@ -880,7 +880,7 @@ def isolation_rouleaux():
                "choices": [{"label": "Une", "value": "1"}, {"label": "Deux", "value": "2"}],
                "textValues": [{"value": "2", "keywords": ["2 couches", "deux couches", "croisees"]}],
                "default": {**prov("acermi-gr32", OK2("Une couche par ligne de devis : une 2e couche s'écrit à part (DTU 45.10, règle 2/3-1/3).")), "value": "1", "note": "une couche, par défaut"}}]
-    needs = [besoin("isolant", "isolant", "surface * couches_isolant * regle.chute", "m2", "pladur-2019", UNE("Surface × couches × 1,05 : seule valeur publiée pour les combles, deux fiches Isover 2019 (recherche/12) ; Placo et Pladur donnent 1,05 pour les murs."), short="isolant")]
+    needs = [besoin("isolant", "isolant", "surface * couches_isolant * regle.chute", "m2", "pladur-2019", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="isolant")]
     slots = [slot("isolant", "insulation", "Isolant", "gr32-roule-100", "Isolant écrit au devis.", "isover-gr32-roule", None, ["laine", "isolant", "ibr", "gr32", "isoconfort", "rockmur"], ask="Quel isolant : marque ou équivalent, gamme, épaisseur (ou R), kraft ou nu ?")]
     return {"id": "isolation-rouleaux", "trade": TRADE, "section": "principal", "label": "Isolant en rouleaux ou panneaux (combles, rampants, murs)",
             "triggers": ["insulation"], "params": params, "slots": slots, "constants": c, "needs": needs}

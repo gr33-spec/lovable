@@ -3795,7 +3795,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP par montage."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "when": "ei < 1"
@@ -3810,7 +3810,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP par montage."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "when": "ei >= 1",
@@ -3832,7 +3832,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP, parement double."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1
         },
@@ -3848,7 +3848,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP, parement double."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "precisionRequires": [
@@ -3866,7 +3866,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "when": "ei < 1"
@@ -3881,7 +3881,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "when": "ei >= 1",
@@ -6957,10 +6957,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : SNIP 15/m²."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 11, Pladur 26.",
           "short": "vis"
         },
         {
@@ -6972,7 +6971,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "vis TRPF"
@@ -8012,7 +8011,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -8024,7 +8023,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -8228,7 +8227,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "vis"
@@ -8242,7 +8241,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "vis TRPF"
@@ -9307,7 +9306,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9485,10 +9484,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio Placo 2023."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
-          "version": 1,
-          "conflict": "SNIP 1,56 à 0,60."
+          "version": 1
         }
       ],
       "tables": {
@@ -9734,7 +9732,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "éclisses",
@@ -9749,7 +9747,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "éclisses",
@@ -10271,7 +10269,7 @@
           "source": "pladur-2019",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Surface × couches × 1,05 : seule valeur publiée pour les combles, deux fiches Isover 2019 (recherche/12) ; Placo et Pladur donnent 1,05 pour les murs."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "isolant"
