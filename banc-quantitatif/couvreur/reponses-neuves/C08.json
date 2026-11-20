@@ -1,0 +1,18 @@
+[
+ {
+  "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "bouton": "Je façonne (feuilles ou bobineau)",
+  "valeur": "",
+  "unite": "u",
+  "ne_sait_pas": false,
+  "dit": "Je plie moi-même, à l'atelier."
+ },
+ {
+  "id": "param:hauteur_descente ¦ Hauteur d'une descente ?",
+  "bouton": "",
+  "valeur": "",
+  "unite": "m",
+  "ne_sait_pas": true,
+  "dit": "Pas encore mesurée, je repasse."
+ }
+]

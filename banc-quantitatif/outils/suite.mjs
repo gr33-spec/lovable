@@ -51,7 +51,6 @@ if (cmd === "questions") {
       ecrire(`${dossier(m, c, e)}/final.json`, { posees: r.posees, ouverture: f(r.ouverture), final: f(r.final) }); finis++;
     } catch (err) { erreurs.push(`${m}-${c}-e${e} : ${err.message.slice(0, 150)}`); }
   }
-  fs.rmSync("couvreur/a-poser", { recursive: true, force: true });
   for (const [c, qs] of Object.entries(aPoser)) ecrire(`couvreur/a-poser/${c}.json`, Object.entries(qs).map(([id, q]) => ({ id, question: q.text, boutons: q.options.map((o) => o.label), unite: q.unit, aide: q.hint })));
   console.log(`listes finales : ${finis} ; chantiers avec questions à poser au couvreur : ${Object.keys(aPoser).join(",") || "aucun"}${erreurs.length ? `\nERREURS :\n${erreurs.join("\n")}` : ""}`);
 }
@@ -60,10 +59,10 @@ if (cmd === "integrer") {
   for (const f of fs.existsSync("couvreur/reponses-neuves") ? fs.readdirSync("couvreur/reponses-neuves") : []) {
     const c = f.replace(".json", ""), neuves = lire(`couvreur/reponses-neuves/${f}`), poser = lire(`couvreur/a-poser/${f}`) ?? [], C = carnet(c);
     if (!Array.isArray(neuves)) { console.log(c, "réponses illisibles"); continue; }
-    let n = 0; for (const r of neuves) { const q = poser.find((p) => p.id === r.id); if (!q || C[r.id]) continue; C[r.id] = { question: q, reponse: { bouton: r.bouton ?? "", valeur: r.valeur ?? "", unite: r.unite ?? "", ne_sait_pas: !!r.ne_sait_pas, dit: r.dit ?? "" } }; n++; }
+    let n = 0; for (const r of neuves) { const q = poser.find((p) => p.id === r.id) ?? { id: r.id }; if (!r.id || C[r.id]) continue; C[r.id] = { question: q, reponse: { bouton: r.bouton ?? "", valeur: r.valeur ?? "", unite: r.unite ?? "", ne_sait_pas: !!r.ne_sait_pas, dit: r.dit ?? "" } }; n++; }
     ecrire(`couvreur/${c}.json`, C); console.log(c, `+${n} réponse(s)`, poser.length - n ? `(${poser.length - n} sans réponse !)` : "");
   }
-  fs.rmSync("couvreur/reponses-neuves", { recursive: true, force: true });
+  fs.rmSync("couvreur/reponses-neuves", { recursive: true, force: true }); fs.rmSync("couvreur/a-poser", { recursive: true, force: true });
 }
 
 /** Une ligne de liste, pour comparer : article, quantité, unité, état (à commander / à chiffrer). */
