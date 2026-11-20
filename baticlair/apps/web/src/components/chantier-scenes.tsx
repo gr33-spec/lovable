@@ -283,7 +283,7 @@ export function ListScene() {
         {ITEMS.map((it, i) => (
           <span key={i} className="absolute right-4 left-4 flex items-center gap-2" style={{ top: ROW_Y(i) - LIST.y - 2, ...anim(`bc-row-${i}`) }}>
             <span className="size-2.5 shrink-0 rounded-full bg-[#12a372]" style={anim(`bc-dot-${i}`, "cubic-bezier(.3,1.6,.5,1)")} />
-            <span className="h-[7px] rounded-[2px] bg-[#614822]" style={{ width: `${it.name}%` }} />
+            <span className="h-[7px] rounded-[2px] bg-[#4F4B45]" style={{ width: `${it.name}%` }} />
             <span className="ml-auto h-[7px] rounded-[2px] bg-[#130901]" style={{ width: `${it.qty}%` }} />
           </span>
         ))}

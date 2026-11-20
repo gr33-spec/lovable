@@ -17,7 +17,7 @@ import type { Regroupement } from "@/lib/recentrage";
  */
 const TEXTURES: Record<string, string> = {
   couverture:
-    "repeating-linear-gradient(0deg, rgba(251,248,243,0.10) 0 2px, transparent 2px 18px), repeating-linear-gradient(90deg, rgba(13,6,1,0.18) 0 2px, transparent 2px 26px), linear-gradient(135deg, #614822, #614822 55%, #2E1B05)",
+    "repeating-linear-gradient(0deg, rgba(251,248,243,0.10) 0 2px, transparent 2px 18px), repeating-linear-gradient(90deg, rgba(13,6,1,0.18) 0 2px, transparent 2px 26px), linear-gradient(135deg, #4F4B45, #4F4B45 55%, #2E1B05)",
   charpente: "repeating-linear-gradient(90deg, rgba(97,72,34,0.35) 0 3px, transparent 3px 14px), linear-gradient(160deg, #CA8A1B, #96580C 60%, #96580C)",
   second_oeuvre: "radial-gradient(circle at 30% 30%, rgba(251,248,243,0.35) 0 3px, transparent 4px), radial-gradient(circle at 70% 60%, rgba(251,248,243,0.25) 0 2px, transparent 3px), linear-gradient(135deg, #F4DB5C, #CA8A1B)",
 };
