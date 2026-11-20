@@ -3370,10 +3370,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 2 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 2 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.94",
           "unit": "kg/m2",
@@ -4558,10 +4557,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 2 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 2 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.94",
           "unit": "kg/m2",
@@ -4862,6 +4860,61 @@
               "value": "3"
             }
           ]
+        },
+        {
+          "key": "support_mur",
+          "label": "Mur à doubler",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Ton mur est plan, ou irrégulier (mur ancien) ?",
+          "hint": "Un mur irrégulier ou un complexe en laine minérale prend plus de mortier adhésif.",
+          "choices": [
+            {
+              "label": "Plan",
+              "value": "1",
+              "dit": [
+                "plan",
+                "droit",
+                "neuf"
+              ]
+            },
+            {
+              "label": "Irrégulier",
+              "value": "2",
+              "dit": [
+                "irregulier",
+                "ancien",
+                "pas droit"
+              ]
+            }
+          ],
+          "display": {
+            "1": "mur plan",
+            "2": "mur irrégulier"
+          },
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "calibel",
+                "laine de verre",
+                "laine minerale",
+                "mur ancien",
+                "renovation",
+                "irregulier"
+              ]
+            }
+          ],
+          "default": {
+            "source": "siniat-pregycolle",
+            "verification": {
+              "status": "draft",
+              "note": "Recherche du 2026-11-19 — 2 sources : Mur plan (béton, parpaing enduit) : cas du quantitatif fabricant (Siniat, Placo)."
+            },
+            "version": 1,
+            "value": "1",
+            "note": "mur plan, par défaut"
+          }
         },
         {
           "key": "enduit_forme",
@@ -5306,12 +5359,23 @@
           "source": "siniat-pregycolle",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 1,8 kg/m² (10 plots de 10 cm) : Siniat Prégycolle 120 (01/09/2026) et Placo brochure doublage 2017."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,8 kg/m² (10 plots de 10 cm, complexe PSE sur mur plan) : Siniat Prégycolle 120 (01/09/2026) et Placo brochure doublage 2017 / Placotherm+. Le « 2 à 3 kg/m² » de la fiche produit MAP vaut pour tous les usages du mortier (recherche/12)."
           },
           "version": 1,
-          "conflict": "La fiche produit Placo MAP Formule + (28/05/2025) dit 2 à 3 kg/m² « minimum », Pladur 2,5 : selon la planéité du mur. À trancher par un plaquiste.",
           "kind": "installation_condition",
           "value": "1.8",
+          "unit": "kg/m2",
+          "label": "{v} de mortier adhésif par m²"
+        },
+        "map_irregulier_par_m2": {
+          "source": "pladur-2019",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 2,5 kg/m² pour un complexe en laine minérale ou un mur irrégulier : Placo DuoPass 2017, Pladur 2017, Knauf Mak 3 2020 « 2 à 2,5 » (recherche/12)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "2.5",
           "unit": "kg/m2",
           "label": "{v} de mortier adhésif par m²"
         },
@@ -5343,10 +5407,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 1 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 1 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.47",
           "unit": "kg/m2",
@@ -5401,16 +5464,15 @@
         {
           "id": "map",
           "slot": "map",
-          "formula": "surface * regle.map_par_m2",
+          "formula": "surface * si(support_mur < 2, regle.map_par_m2, regle.map_irregulier_par_m2)",
           "unit": "kg",
           "core": true,
           "source": "siniat-pregycolle",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio Siniat / Placo système."
+            "note": "Recherche du 2026-11-19 — 2 sources : Ratio Siniat / Placo système ; mur irrégulier ou laine : Placo, Pladur, Knauf."
           },
           "version": 1,
-          "conflict": "Fiche produit MAP : 2 à 3 kg/m².",
           "short": "mortier adhésif"
         },
         {
@@ -6391,10 +6453,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 1 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 1 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.47",
           "unit": "kg/m2",
@@ -7667,10 +7728,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 1 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 1 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.47",
           "unit": "kg/m2",
@@ -8884,10 +8944,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 1 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 1 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.47",
           "unit": "kg/m2",
@@ -9378,10 +9437,9 @@
           "source": "placo-integrale-2023-bande",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × 1 face(s)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 1 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
           },
           "version": 1,
-          "conflict": "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2).",
           "kind": "installation_condition",
           "value": "0.47",
           "unit": "kg/m2",
@@ -9517,10 +9575,9 @@
           "source": "pladur-2019",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 1,05 m² par m² (Placo et Pladur en cloison et doublage)."
+            "note": "Recherche du 2026-11-19 — 1 source : 1,05 m² par m² et par couche : fiches Isover 2019 combles perdus et rampants (seule valeur publiée) ; Placo et Pladur 1,05 en cloison et doublage."
           },
           "version": 1,
-          "conflict": "Aucune valeur fabricant pour les combles ; entre montants ou chevrons à 60 cm la chute est presque nulle, en rampants biais elle est plus forte.",
           "kind": "installation_condition",
           "value": "1.05",
           "unit": "u",
@@ -9537,10 +9594,9 @@
           "source": "pladur-2019",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Surface × couches × 1,05."
+            "note": "Recherche du 2026-11-19 — 1 source : Surface × couches × 1,05 : seule valeur publiée pour les combles, deux fiches Isover 2019 (recherche/12) ; Placo et Pladur donnent 1,05 pour les murs."
           },
           "version": 1,
-          "conflict": "Chute non publiée pour les combles.",
           "short": "isolant"
         }
       ]
@@ -9925,7 +9981,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Joints entre lés + raccords en rive : aucun ratio fabricant ; 30 % pour les rives, à confirmer."
+            "note": "Recherche du 2026-11-19 — 1 source : Joints entre lés + rives : 0,93 ml/m², dans la fourchette Isover 0,8 à 1,4 m/m² « suivant les points singuliers » (extrait, recherche/12) ; aucune autre marque ne publie de ratio."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9944,7 +10000,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Surface × 1,10."
+            "note": "Recherche du 2026-11-19 — 2 sources : Surface × 1,10 : Isover (étiquettes Vario Xtra, Stopvap) et calcul sur le recouvrement de 10 cm de trois fabricants (recherche/12)."
           },
           "version": 1,
           "short": "membrane"
@@ -9958,7 +10014,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Joints tous les 1,40 m + rives."
+            "note": "Recherche du 2026-11-19 — 1 source : Joints tous les 1,40 m + rives."
           },
           "version": 1,
           "short": "adhésif"

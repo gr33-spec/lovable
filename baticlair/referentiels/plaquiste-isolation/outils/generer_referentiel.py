@@ -375,7 +375,7 @@ def finitions_constantes(parements):
     return {
         "bande_par_m2": regle(str(round(1.40 * parements, 2)), "ml/m2", "placo-integrale-2023-bande", OK2(f"1,40 ml par m² de parement (Placo Intégrale 04/2023 et brochure doublage 2017 ; fiche solution 72/48 : 2,80 pour deux faces) × {parements} face(s). Siniat dit 1,1 (joints entre plaques seulement) : Placo retenu, plus prudent."), label="{v} de bande par m²"),
         "enduit_poudre_par_m2": regle(str(round(0.33 * parements, 2)), "kg/m2", "placo-pr4", OK2(f"0,33 kg/m² de parement : fiche Placo PR4 (02/04/2026) et Intégrale 2023 ; Siniat 0,30-0,35 × {parements} face(s)."), label="{v} d'enduit poudre par m²"),
-        "enduit_pate_par_m2": regle(str(round(0.47 * parements, 2)), "kg/m2", "placo-integrale-2023-bande", CONFLIT(f"0,47 kg/m² de parement : Intégrale Placo 2023 et brochure 2017 × {parements} face(s).", "La fiche Placomix Pro dit 0,525 kg/m², Siniat Prégy S 0,45 : selon le produit (recherche/05 B.2)."), label="{v} d'enduit prêt à l'emploi par m²"),
+        "enduit_pate_par_m2": regle(str(round(0.47 * parements, 2)), "kg/m2", "placo-integrale-2023-bande", OK2(f"0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × {parements} face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."), label="{v} d'enduit prêt à l'emploi par m²"),
     }
 
 
@@ -561,16 +561,24 @@ def doublage_colle():
     c = {**longueurs(),
          "largeur_plaque": regle("1.20", "m", "placo-ba13", OK2("Complexes de 1,20 m (Placo, Isover, Siniat, Knauf).")),
          "chute_plaques": regle("1.05", "u", "pladur-2019", OK2("1,05 m² de complexe par m² : Pladur Mémento 2017 et Placo (Placotherm, extrait)."), label="complexes + {v}"),
-         "map_par_m2": regle("1.8", "kg/m2", "siniat-pregycolle", CONFLIT("1,8 kg/m² (10 plots de 10 cm) : Siniat Prégycolle 120 (01/09/2026) et Placo brochure doublage 2017.", "La fiche produit Placo MAP Formule + (28/05/2025) dit 2 à 3 kg/m² « minimum », Pladur 2,5 : selon la planéité du mur. À trancher par un plaquiste."), label="{v} de mortier adhésif par m²"),
+         "map_par_m2": regle("1.8", "kg/m2", "siniat-pregycolle", OK2("1,8 kg/m² (10 plots de 10 cm, complexe PSE sur mur plan) : Siniat Prégycolle 120 (01/09/2026) et Placo brochure doublage 2017 / Placotherm+. Le « 2 à 3 kg/m² » de la fiche produit MAP vaut pour tous les usages du mortier (recherche/12)."), label="{v} de mortier adhésif par m²"),
+         "map_irregulier_par_m2": regle("2.5", "kg/m2", "pladur-2019", OK2("2,5 kg/m² pour un complexe en laine minérale ou un mur irrégulier : Placo DuoPass 2017, Pladur 2017, Knauf Mak 3 2020 « 2 à 2,5 » (recherche/12)."), label="{v} de mortier adhésif par m²"),
          **finitions_constantes(1)}
-    params = [surface("Surface de doublage", "Surface de doublage ?"), HAUTEUR, ENDUIT]
+    params = [surface("Surface de doublage", "Surface de doublage ?"), HAUTEUR,
+              {"key": "support_mur", "label": "Mur à doubler", "unit": "u", "kind": "site_data", "question": "Ton mur est plan, ou irrégulier (mur ancien) ?",
+               "hint": "Un mur irrégulier ou un complexe en laine minérale prend plus de mortier adhésif.",
+               "choices": [{"label": "Plan", "value": "1", "dit": ["plan", "droit", "neuf"]}, {"label": "Irrégulier", "value": "2", "dit": ["irregulier", "ancien", "pas droit"]}],
+               "display": {"1": "mur plan", "2": "mur irrégulier"},
+               "textValues": [{"value": "2", "keywords": ["calibel", "laine de verre", "laine minerale", "mur ancien", "renovation", "irregulier"]}],
+               "default": {**prov("siniat-pregycolle", OK2("Mur plan (béton, parpaing enduit) : cas du quantitatif fabricant (Siniat, Placo).")), "value": "1", "note": "mur plan, par défaut"}},
+              ENDUIT]
     derived = [derive("longueur_mur", "Longueur de mur", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_complexe", "Longueur des complexes", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Complexes en 2,50 / 2,60 / 2,70 / 2,80 / 3,00 m (Doublissimo, Calibel, Prégytherm) : recherche/01 §8."), True)]
     needs = [
         besoin("complexes", "complexe", "arrondi_sup(longueur_mur * regle.chute_plaques / regle.largeur_plaque)", "u", "pladur-2019", OK2("Complexes = longueur ÷ 1,20 × 1,05."),
                designation="Complexes de doublage {devis} 1,20 × {longueur_complexe|m}", precision="pour {longueur_mur|m} de mur, hauteur {hauteur|m}",
                exclusions="Au-delà de 3,00 m : complexes superposés (Siniat) ; au-delà de 3,60 m : tasseau intermédiaire (NF DTU 25.42)."),
-        besoin("map", "map", "surface * regle.map_par_m2", "kg", "siniat-pregycolle", CONFLIT("Ratio Siniat / Placo système.", "Fiche produit MAP : 2 à 3 kg/m²."), short="mortier adhésif"),
+        besoin("map", "map", "surface * si(support_mur < 2, regle.map_par_m2, regle.map_irregulier_par_m2)", "kg", "siniat-pregycolle", OK2("Ratio Siniat / Placo système ; mur irrégulier ou laine : Placo, Pladur, Knauf."), short="mortier adhésif"),
         *besoins_finitions("surface"),
     ]
     slots = [
@@ -866,13 +874,13 @@ def joints():
 # OUVRAGE 8 : ISOLANT EN ROULEAUX OU PANNEAUX (combles, rampants, murs, planchers)
 # ---------------------------------------------------------------------------------------------------------------
 def isolation_rouleaux():
-    c = {"chute": regle("1.05", "u", "pladur-2019", CONFLIT("1,05 m² par m² (Placo et Pladur en cloison et doublage).", "Aucune valeur fabricant pour les combles ; entre montants ou chevrons à 60 cm la chute est presque nulle, en rampants biais elle est plus forte."), label="+ {v}")}
+    c = {"chute": regle("1.05", "u", "pladur-2019", UNE("1,05 m² par m² et par couche : fiches Isover 2019 combles perdus et rampants (seule valeur publiée) ; Placo et Pladur 1,05 en cloison et doublage."), label="+ {v}")}
     params = [surface("Surface à isoler", "Surface à isoler ?"),
               {"key": "couches_isolant", "label": "Couches", "unit": "u", "kind": "site_data", "question": "Combien de couches de cet isolant ?",
                "choices": [{"label": "Une", "value": "1"}, {"label": "Deux", "value": "2"}],
                "textValues": [{"value": "2", "keywords": ["2 couches", "deux couches", "croisees"]}],
                "default": {**prov("acermi-gr32", OK2("Une couche par ligne de devis : une 2e couche s'écrit à part (DTU 45.10, règle 2/3-1/3).")), "value": "1", "note": "une couche, par défaut"}}]
-    needs = [besoin("isolant", "isolant", "surface * couches_isolant * regle.chute", "m2", "pladur-2019", CONFLIT("Surface × couches × 1,05.", "Chute non publiée pour les combles."), short="isolant")]
+    needs = [besoin("isolant", "isolant", "surface * couches_isolant * regle.chute", "m2", "pladur-2019", UNE("Surface × couches × 1,05 : seule valeur publiée pour les combles, deux fiches Isover 2019 (recherche/12) ; Placo et Pladur donnent 1,05 pour les murs."), short="isolant")]
     slots = [slot("isolant", "insulation", "Isolant", "gr32-roule-100", "Isolant écrit au devis.", "isover-gr32-roule", None, ["laine", "isolant", "ibr", "gr32", "isoconfort", "rockmur"], ask="Quel isolant : marque ou équivalent, gamme, épaisseur (ou R), kraft ou nu ?")]
     return {"id": "isolation-rouleaux", "trade": TRADE, "section": "principal", "label": "Isolant en rouleaux ou panneaux (combles, rampants, murs)",
             "triggers": ["insulation"], "params": params, "slots": slots, "constants": c, "needs": needs}
@@ -915,10 +923,10 @@ def soufflage():
 def pare_vapeur():
     c = {"majoration": regle("1.10", "u", "isover-vario", OK2("1,10 m² de membrane par m² : rendement Isover et calcul (lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés), confirmé en 3e passe (recherche/07)."), label="membrane + {v}"),
          "largeur_utile": regle("1.40", "m", "isover-vario", OK2("Recouvrement de 10 cm au moins entre lés : Knauf, Rockwool (11/2024), Soprema, Isover (recherche/07)."), label="un joint tous les {v}"),
-         "majoration_adhesif": regle("1.3", "u", "isover-vario", DOUTE("Joints entre lés + raccords en rive : aucun ratio fabricant ; 30 % pour les rives, à confirmer."), label="adhésif + {v}")}
+         "majoration_adhesif": regle("1.3", "u", "isover-vario", UNE("Joints entre lés + rives : 0,93 ml/m², dans la fourchette Isover 0,8 à 1,4 m/m² « suivant les points singuliers » (extrait, recherche/12) ; aucune autre marque ne publie de ratio."), label="adhésif + {v}")}
     params = [surface("Surface de membrane", "Surface à couvrir ?")]
-    needs = [besoin("membrane", "membrane", "surface * regle.majoration", "m2", "isover-vario", UNE("Surface × 1,10."), short="membrane"),
-             besoin("adhesif", "adhesif", "surface / regle.largeur_utile * regle.majoration_adhesif", "ml", "isover-vario", DOUTE("Joints tous les 1,40 m + rives."), short="adhésif", core=True)]
+    needs = [besoin("membrane", "membrane", "surface * regle.majoration", "m2", "isover-vario", OK2("Surface × 1,10 : Isover (étiquettes Vario Xtra, Stopvap) et calcul sur le recouvrement de 10 cm de trois fabricants (recherche/12)."), short="membrane"),
+             besoin("adhesif", "adhesif", "surface / regle.largeur_utile * regle.majoration_adhesif", "ml", "isover-vario", UNE("Joints tous les 1,40 m + rives."), short="adhésif", core=True)]
     slots = [slot("membrane", "vapour_barrier", "Membrane pare-vapeur", "vario-xtra", "Rouleau de 60 m².", "isover-vario", None, ["membrane", "pare-vapeur", "vario"]),
              slot("adhesif", "vb_tape", "Adhésif de membrane", "adhesif-kb1", "Adhésif de la même marque, rouleau de 40 m.", "gedimat-vario", "membrane", ["adhesif", "kb1"])]
     return {"id": "pare-vapeur", "trade": TRADE, "section": "principal", "label": "Membrane pare-vapeur et adhésifs",
