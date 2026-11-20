@@ -37,6 +37,11 @@ FAMILLES = [
     ("bois_couverture", "Bois de couverture", "bois.json", None),
     ("pertes", "Pertes de casse et de coupe", "pertes.json", None),
     ("comptoir_exposee", "Points du comptoir et situation exposée", "comptoir-exposee.json", None),
+    ("sarking", "Sarking (isolation par-dessus les chevrons)", "sarking.json", None),
+    ("abergement", "Abergements de souche et de cheminée", "abergements-souches.json", None),
+    ("sous_face", "Sous-faces et habillages de débord", "sous-faces-etancheite.json", "sous_face"),
+    # Même famille, second fichier : ajouté à l'étanchéité déjà lue (toiture-terrasse : SBS, EPDM, PIR, relevés).
+    ("etancheite", "Étanchéité de toiture", "sous-faces-etancheite.json", "etancheite"),
 ]
 CONFIRME = ("confirme", "confirme_fabricant")
 
@@ -120,7 +125,8 @@ def valeur(e, src):
     return v
 
 
-MOTS_FAMILLE = [("tuile_canal", r"canal|bardelis|courant|couvert"), ("tuile_plate", r"plate"),
+MOTS_FAMILLE = [("sous_face", r"sous-face|sous face|lambris|planche de rive|habillage|d[ée]bord|lames? "),
+                ("tuile_canal", r"canal|bardelis|courant|couvert"), ("tuile_plate", r"plate"),
                 ("tuile_romane", r"romane"), ("tuile_beton", r"b[ée]ton|monier"),
                 ("etancheite", r"[ée]tanch|membrane|bitum|primaire|isolant|epdm|pvc|sbs|relev|terrasse|pare-vapeur|autoprot|[ée]querre|2e couche|eep|eaux pluviales|trop-plein|crapaudine"),
                 ("ecran", r"[ée]cran|hpv|contre-liteau|adh[ée]sif|larmier")]
@@ -228,7 +234,12 @@ def construit():
             for k in ("regle_arrondi", "regle_confirmation", "perimetre", "note_format"):
                 if d.get(k):
                     fam[k] = d[k]
-        familles.append(fam)
+        deja = next((f for f in familles if f["code"] == code), None)
+        if deja:  # une famille lue dans deux fichiers : une seule famille dans la fiche
+            for k in ("sous_familles", "verdicts", "comptoir"):
+                deja[k].extend(fam[k])
+        else:
+            familles.append(fam)
 
     regions = charge("regions.json")
     carte = {"version": VERSION, "definitions_zones": regions.get("definitions_zones"),

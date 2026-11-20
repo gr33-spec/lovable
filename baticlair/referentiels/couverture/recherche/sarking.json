@@ -1,0 +1,1167 @@
+{
+  "famille": "sarking",
+  "generated": "2026-11-20",
+  "perimetre": "Isolation de toiture par l'extérieur (sarking) : panneaux PIR/PU, phénolique, fibre de bois ; vis, contre-lattes, adhésif, butée d'égout. Les écrans, pare-vapeur et larmiers sont dans ecrans-etancheite.json.",
+  "entrees": [
+    {
+      "id": "sark_format_pir",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "",
+      "modele": "",
+      "attribut": "format hors tout",
+      "valeur": "2400 × 1200",
+      "unite": "mm",
+      "condition": "panneaux PIR ou PU à rainure-languette 4 côtés (Unilin, Recticel, Soprema, Edilians, Terreal)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Unilin Insulation, fiche Utherm Sarking K (Nr. BE-FR-19-2), diffusée par Gobert",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/UNILIN%20UTHERM%20FT%20SARKING%20K.pdf",
+          "type": "fabricant",
+          "extrait": "Standard : 2400 x 1200 mm ; 60 mm RD 2,70, 6 plaques, 17,28 m² par paquet",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Recticel Insulation (Bourges), fiche Eurotoit AC8R5XTGJ9X, diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_934483.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 2400 (2380 net) ; Largeur 1200 (1180 net) ; 60 - 88 - 110 - 132 - 160 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, brochure Efisarking DC-14/014_FR (février 2014), diffusée par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/211172",
+          "type": "fabricant",
+          "extrait": "Efibande Butyle : rouleaux de 20 m - Largeur 75 mm - Colis de 8 rouleaux",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, fiche technique Sarkéo Feu 2019 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_sarkeo_feu_a4_2019_hd_1__1.pdf",
+          "type": "fabricant",
+          "extrait": "1200 x 2400 mm ; 80 100 120 130 147 mm ; RD 3,30 4,15 5 5,40 6",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Efisarking : 2410 × 1200 hors tout dans sa fiche CE (2400 × 1200 dans la brochure). Unilin L Comfort (PIR + fibre de bois) : 2511 × 611. Eurotoit existe aussi en 1200 × 1000."
+    },
+    {
+      "id": "sark_surface_utile_pir",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "",
+      "modele": "",
+      "attribut": "surface utile d'un panneau 2400 × 1200",
+      "valeur": "2,81 à 2,86",
+      "unite": "m²",
+      "condition": "surface couverte après emboîtement ; la surface hors tout (2,88 m²) surestime la couverture de 1 à 2,5 %",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Recticel Insulation (Bourges), fiche Eurotoit AC8R5XTGJ9X, diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_934483.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 2400 (2380 net) ; Largeur 1200 (1180 net) ; 60 - 88 - 110 - 132 - 160 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/b (marquage CE, ACERMI 12/006/749), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_884154.pdf",
+          "type": "fabricant",
+          "extrait": "Format 2410 mm x 1200 mm ; Dimensions utiles 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, fiche Utherm Sarking K (données Unilin)",
+          "url": "https://www.batiproduits.com/fiche/produits/panneaux-rigides-pour-isolation-des-toitures-par-l-p68879818.html",
+          "type": "autre",
+          "extrait": "Dimensions plaques : 1200 x 2400 mm (surface nette après mise en place 2380 x 1180 mm selon la fiche K Anti-Slide)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Recticel et Unilin 2380 × 1180 = 2,808 m² ; Edilians 2385 × 1185 = 2,826 m² ; Soprema 2400 × 1190 = 2,856 m².",
+      "controle": "surface utile = longueur nette × largeur nette ; panneaux au m² = 1 ÷ surface utile = 0,350 à 0,356"
+    },
+    {
+      "id": "sark_unilin_k",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "Unilin",
+      "modele": "Utherm Sarking K",
+      "attribut": "épaisseurs, R et colisage",
+      "valeur": {
+        "format": "2400 × 1200 mm (net 2380 × 1180)",
+        "lambda": 0.022,
+        "R_france_acermi": {
+          "60": 2.75,
+          "70": 3.2,
+          "80": 3.7,
+          "100": 4.6,
+          "120": 5.55,
+          "130": 6.0,
+          "140": 6.45,
+          "160": 7.4
+        },
+        "R_belgique_ce": {
+          "60": 2.7,
+          "80": 3.6,
+          "100": 4.5,
+          "120": 5.45,
+          "140": 6.35,
+          "160": 7.25
+        },
+        "plaques_par_colis": {
+          "60": 6,
+          "70": 5,
+          "80": 4,
+          "100": 3,
+          "120": 3,
+          "130": 3,
+          "140": 3,
+          "160": 2
+        },
+        "m2_par_colis_hors_tout": {
+          "60": 17.28,
+          "80": 11.52,
+          "100": 8.64,
+          "160": 5.76
+        }
+      },
+      "unite": "",
+      "condition": "fiche française ACERMI et fiche belge CE ; vente au colis",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Unilin Insulation SAS (Rosny-sous-Bois), fiche technique UTHERMsarking (ACERMI 11/121/688), diffusée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/0132232d-665c-4017-bba9-f6f3a448a893/ficheproduitcaractristiquesgnrales-794090.pdf",
+          "type": "fabricant",
+          "extrait": "R2,75 60 TG ... R7,40 160 TG ; 1200 x 2400 ; ACERMI calculée avec λ = 0,0216",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Unilin Insulation, fiche Utherm Sarking K (Nr. BE-FR-19-2), diffusée par Gobert",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/UNILIN%20UTHERM%20FT%20SARKING%20K.pdf",
+          "type": "fabricant",
+          "extrait": "Standard : 2400 x 1200 mm ; 60 mm RD 2,70, 6 plaques, 17,28 m² par paquet",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, fiche Utherm Sarking K (données Unilin)",
+          "url": "https://www.batiproduits.com/fiche/produits/panneaux-rigides-pour-isolation-des-toitures-par-l-p68879818.html",
+          "type": "autre",
+          "extrait": "Dimensions plaques : 1200 x 2400 mm (surface nette après mise en place 2380 x 1180 mm selon la fiche K Anti-Slide)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "R France > R Belgique à épaisseur égale : la fiche française dit que la R ACERMI est calculée avec λ = 0,0216 (au lieu de 0,022). Les deux fiches viennent d'Unilin : une seule source au sens des consignes.",
+      "controle": "R = e / λ : 160 / 0,022 = 7,27 (7,25) ; 160 / 0,0216 = 7,41 (7,40) ; colis 6 × 2,88 = 17,28 m²"
+    },
+    {
+      "id": "sark_unilin_lcomfort",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR + fibre de bois",
+      "marque": "Unilin",
+      "modele": "Utherm Sarking L Comfort",
+      "attribut": "format, épaisseurs et R",
+      "valeur": {
+        "format": "2511 × 611 mm, net 2485 × 585 mm (1,454 m²)",
+        "epaisseurs_R": {
+          "60+35": 3.5,
+          "80+35": 4.4,
+          "100+35": 5.3,
+          "120+35": 6.25,
+          "140+35": 7.15,
+          "160+35": 8.05
+        },
+        "commande": "par multiple de 2 pièces"
+      },
+      "unite": "",
+      "condition": "PIR + panneau de fibres de bois 35 mm collé (acoustique)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Unilin Insulation, fiche Utherm Sarking L Comfort (Nr. BE-FR-19-1), diffusée par Gobert",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/UNILIN%20UTHERM%20FT%20SARKING%20L%20CONFORT.pdf",
+          "type": "fabricant",
+          "extrait": "Standard : 2511 x 611 mm ; surface nette après mise en place : 2485 x 585 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sark_recticel_eurotoit",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "Recticel",
+      "modele": "Eurotoit",
+      "attribut": "format, épaisseurs et R",
+      "valeur": {
+        "format_A": "2400 × 1200 mm (net 2380 × 1180)",
+        "epaisseurs_A": [
+          60,
+          88,
+          110,
+          132,
+          160
+        ],
+        "format_B": "1200 × 1000 mm (net 1180 × 980), 100 à 160 mm",
+        "R": {
+          "60": 2.7,
+          "88": 4.0,
+          "100": 4.5,
+          "110": 5.0,
+          "120": 5.45,
+          "132": 6.0,
+          "160": 7.25
+        },
+        "acermi": "04/003/345"
+      },
+      "unite": "",
+      "condition": "climat de plaine ; joints pontés par la bande RECTITAPE",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Recticel Insulation (Bourges), fiche Eurotoit AC8R5XTGJ9X, diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_934483.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 2400 (2380 net) ; Largeur 1200 (1180 net) ; 60 - 88 - 110 - 132 - 160 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, fiche Eurotoit (données Recticel)",
+          "url": "https://www.batiproduits.com/fiche/produits/panneau-de-sarking-adapte-au-climat-de-plaine-p68911058.html",
+          "type": "autre",
+          "extrait": "2380 mm utile, 2400 mm ; 1180 mm utile, 1200 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "R = e / 0,022 : 132 / 0,022 = 6,0 ; 88 / 0,022 = 4,0"
+    },
+    {
+      "id": "sark_recticel_powerroof_max",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "Recticel",
+      "modele": "Powerroof Max",
+      "attribut": "format, épaisseurs et R",
+      "valeur": {
+        "format": "2400 × 1200 mm (net 2380 × 1180)",
+        "R": {
+          "60": 2.7,
+          "80": 3.6,
+          "90": 4.05,
+          "100": 4.5,
+          "120": 5.45,
+          "140": 6.35,
+          "160": 7.25,
+          "180": 8.15
+        },
+        "ecran_integre": "Rectivent, Sd 0,02 m"
+      },
+      "unite": "",
+      "condition": "marché belge (ATG 750) ; écran de sous-toiture collé en usine",
+      "regions": [
+        "Belgique"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Recticel Insulation (Wevelgem), fiche Powerroof Max, diffusée par Handy Home Ottevaere (Belgique)",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PRCPRM60.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 2400 (2380 net) ; Largeur 1200 (1180 net) ; 60 - 180 mm ; µd/sd 0.02 m",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sark_soprema_efisarking",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "Soprema (Efyos)",
+      "modele": "Efisarking",
+      "attribut": "format, épaisseurs et R",
+      "valeur": {
+        "format": "2410 × 1200 mm hors tout, utile 2400 × 1190 (2,856 m²)",
+        "R": {
+          "65": 3.0,
+          "80": 3.7,
+          "86": 4.0,
+          "115": 5.3,
+          "130": 6.0,
+          "160": 7.4
+        },
+        "plage": "40 à 160 mm (RD 1,85 à 7,40)",
+        "acermi": "12/006/749",
+        "pose": "1 ou 2 lits, 280 mm maxi"
+      },
+      "unite": "",
+      "condition": "climat de plaine (< 900 m) ; Efyos est la marque isolation de Soprema",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/b (marquage CE, ACERMI 12/006/749), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_884154.pdf",
+          "type": "fabricant",
+          "extrait": "Format 2410 mm x 1200 mm ; Dimensions utiles 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/a, diffusée par Chausson",
+          "url": "https://cdn.chausson.fr/media/article-document/211173",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles (Longueur x largeur) 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, brochure Efisarking DC-14/014_FR (février 2014), diffusée par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/211172",
+          "type": "fabricant",
+          "extrait": "Efibande Butyle : rouleaux de 20 m - Largeur 75 mm - Colis de 8 rouleaux",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Trois documents Soprema (une seule source). La brochure 2014 écrit 2400 × 1200, la fiche CE 2410 × 1200.",
+      "controle": "R = e / 0,022 : 86 / 0,022 = 3,9 (4,00 déclaré, ACERMI) ; 160 / 0,022 = 7,27 (7,40)"
+    },
+    {
+      "id": "sark_soprema_efivis",
+      "famille": "sarking",
+      "sous_famille": "vis de fixation des contre-lattes",
+      "marque": "Soprema (Efyos)",
+      "modele": "Efivis SF / DF",
+      "attribut": "longueur minimale de vis selon épaisseur",
+      "valeur": {
+        "contre_latte_27": {
+          "86": 200,
+          "115": "200 sans support, 220 avec support",
+          "130": "220 / 240",
+          "160": 260,
+          "172 (2 × 86)": "300 / 330 (DF)"
+        },
+        "contre_latte_40": {
+          "86": "200 / 220",
+          "115": "220 / 240",
+          "130": "240 / 260",
+          "160": "260 / 280",
+          "172 (2 × 86)": 330
+        },
+        "regle": "simple filet perpendiculaire jusqu'à 160 mm ; double filet à 60° / 120° au-delà"
+      },
+      "unite": "mm",
+      "condition": "valeur de gauche sans support continu, de droite avec support de 10 à 18 mm",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/b (marquage CE, ACERMI 12/006/749), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_884154.pdf",
+          "type": "fabricant",
+          "extrait": "Format 2410 mm x 1200 mm ; Dimensions utiles 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "86 + 27 + 18 + 60 = 191 ≤ 200 ; 160 + 40 + 18 + 60 = 278 ≤ 280 : cohérent avec la règle « ancrage 60 mm »"
+    },
+    {
+      "id": "sark_edilians_sarkeo",
+      "famille": "sarking",
+      "sous_famille": "panneau phénolique de sarking",
+      "marque": "Edilians",
+      "modele": "Sarkéo Feu",
+      "attribut": "format, épaisseurs et R",
+      "valeur": {
+        "format": "2400 × 1200 mm, utile 2385 × 1185 (2,826 m²)",
+        "R": {
+          "80": 3.3,
+          "100": 4.15,
+          "120": 5.0,
+          "130": 5.4,
+          "147": 6.0
+        },
+        "lambda": "0,024 (40-130 mm) / 0,025 (140-160 mm)",
+        "pose": "sur platelage bois, écran AÉRO FEU"
+      },
+      "unite": "",
+      "condition": "mousse phénolique, classée C-s1,d0",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique Sarkéo Feu 2019 (edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_sarkeo_feu_a4_2019_hd_1__1.pdf",
+          "type": "fabricant",
+          "extrait": "1200 x 2400 mm ; 80 100 120 130 147 mm ; RD 3,30 4,15 5 5,40 6",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "R = e / λ : 120 / 0,024 = 5,0 ; 147 / 0,025 = 5,9 (6)"
+    },
+    {
+      "id": "sark_steico_format",
+      "famille": "sarking",
+      "sous_famille": "panneau fibre de bois de sarking",
+      "marque": "Steico",
+      "modele": "STEICOspecial dry / universal dry",
+      "attribut": "format",
+      "valeur": "1880 × 600 (net 1855 × 575)",
+      "unite": "mm",
+      "condition": "rainure-languette ; aussi 2230 et 2550 de long en universal dry",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "STEICO, technical data sheet universal dry, état EUR_en_V1_20250523",
+          "url": "https://cdn.shopify.com/s/files/1/0222/7290/1216/files/STEICO_technical-data-sheet_universal-dry_EUR_en_i.pdf",
+          "type": "fabricant",
+          "extrait": "60 T+G 1880 600 1855 575 38 ; 60 mm : 1.35 m²K/W ; roof pitch ≥ 14°",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Roofing Superstore (négoce UK), STEICO Special Dry 1880 x 600 x 80 mm",
+          "url": "https://www.roofingsuperstore.co.uk/product/steico-special-dry-woodfibre-sarking-sheathing-board-1880-x-600-x-80mm.html",
+          "type": "negoce",
+          "extrait": "1880mm length x 600mm width x 80mm thickness",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "surface utile 1,855 × 0,575 = 1,067 m² ; 0,94 panneau au m²"
+    },
+    {
+      "id": "sark_steico_universal_dry",
+      "famille": "sarking",
+      "sous_famille": "panneau fibre de bois de sarking",
+      "marque": "Steico",
+      "modele": "STEICOuniversal dry",
+      "attribut": "épaisseurs, R, pente et palette",
+      "valeur": {
+        "R": {
+          "35": 0.75,
+          "40": 0.9,
+          "60": 1.35,
+          "80": 1.85,
+          "100": 2.3
+        },
+        "pente_mini_deg": 14,
+        "pieces_par_palette_1880": {
+          "40": 56,
+          "60": 38,
+          "80": 28
+        },
+        "lambda": "0,045 (35 mm) / 0,043 (≥ 40 mm)"
+      },
+      "unite": "",
+      "condition": "pare-pluie rigide ; combiné avec isolant entre chevrons",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "STEICO, technical data sheet universal dry, état EUR_en_V1_20250523",
+          "url": "https://cdn.shopify.com/s/files/1/0222/7290/1216/files/STEICO_technical-data-sheet_universal-dry_EUR_en_i.pdf",
+          "type": "fabricant",
+          "extrait": "60 T+G 1880 600 1855 575 38 ; 60 mm : 1.35 m²K/W ; roof pitch ≥ 14°",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "R = e / λ : 60 / 0,043 = 1,40 (1,35 déclaré) ; 100 / 0,043 = 2,33"
+    },
+    {
+      "id": "sark_vis_longueur_regle",
+      "famille": "sarking",
+      "sous_famille": "vis de fixation des contre-lattes",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur de vis",
+      "valeur": "contre-latte + isolant + support (volige, platelage) + ancrage ≥ 60 mm",
+      "unite": "mm",
+      "condition": "vis perpendiculaire ; en pose inclinée (30° à 60°) la longueur augmente : prendre le tableau du fabricant de vis",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "STEICO, STEICOtherm prescriptions de mise en œuvre (abaque SFS intec, vis Twin UD), diffusé par Mauris",
+          "url": "https://www.mauris.fr/pieces-jointes/fiches-fournisseurs/2021/STEICO-BARDAGE-ET-ISOLATION-DOC-PRESCRIPTION-DE-MISE-EN-OEUVRE-THERM.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe chevrons 600, neige 55 daN/m² : entraxe des vis 850 mm, 1.96 vis/m² ; isolant+volige 60 mm, contrelatte 40 mm : vis 210",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Simpson admet 40 mm de pénétration côté pointe pour un isolant rigide et 60 mm pour un isolant souple. Exemple Edilians : panneau 80 + contre-latte 40 + platelage 18 + 60 = 198 mm."
+    },
+    {
+      "id": "sark_vis_ancrage",
+      "famille": "sarking",
+      "sous_famille": "vis de fixation des contre-lattes",
+      "marque": "",
+      "modele": "",
+      "attribut": "ancrage minimal dans le chevron",
+      "valeur": 60,
+      "unite": "mm",
+      "condition": "tous isolants rigides PIR / phénolique / laine de roche",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Simpson : ≥ 40 mm (isolant rigide) ou ≥ 60 mm (isolant souple) côté pointe."
+    },
+    {
+      "id": "sark_vis_densite_plaine",
+      "famille": "sarking",
+      "sous_famille": "vis de fixation des contre-lattes",
+      "marque": "",
+      "modele": "",
+      "attribut": "vis au m²",
+      "valeur": 2,
+      "unite": "vis/m²",
+      "condition": "climat de plaine, neige A1/A2 à 200 m, couverture 0,55 à 0,65 kN/m² (ardoise, tuile légère), chevrons à 60 cm, contre-latte 40 × 60",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "STEICO, STEICOtherm prescriptions de mise en œuvre (abaque SFS intec, vis Twin UD), diffusé par Mauris",
+          "url": "https://www.mauris.fr/pieces-jointes/fiches-fournisseurs/2021/STEICO-BARDAGE-ET-ISOLATION-DOC-PRESCRIPTION-DE-MISE-EN-OEUVRE-THERM.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe chevrons 600, neige 55 daN/m² : entraxe des vis 850 mm, 1.96 vis/m² ; isolant+volige 60 mm, contrelatte 40 mm : vis 210",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide vis sarking sur isolants STEICO (2020, simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2021/12/22/111823/guide-vis-sarking_steico-2020-vf.pdf",
+          "type": "fabricant",
+          "extrait": "A2 - 200 m, 0,65 kN/m² : entraxe 1250 à 1600 mm, densité 1,67 à 1,94 vis/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide de choix vis SARKING, 23/04/2025 (simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2025/05/07/164648/Guide-Vis-Sarking_2025_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Section contrelatte considérée 40(tb) x 60 mm (mini 30 x 50) ; La contrelatte doit être fixée sur 3 points minimum",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "SFS/Steico : 1,96 vis/m² (neige 55 daN/m²), 2,22 (100 daN/m²) ; Simpson/Steico : 1,67 à 1,94 (0,65 kN/m²), 2,22 à 2,78 (1 kN/m²) ; Simpson isolant rigide σ10 = 0,1 N/mm² : 1,7 à 3,1. Neige de montagne (C2 800 m) : 3 à 6 vis/m². Rockwool (laine de roche) : 6 vis/m². Le nombre se lit dans l'abaque du fabricant de vis : à demander.",
+      "controle": "vis au ml de contre-latte ≈ vis/m² × entraxe chevrons : 2 × 0,60 = 1,2 vis/ml, plus une vis à chaque extrémité"
+    },
+    {
+      "id": "sark_vis_laine_roche",
+      "famille": "sarking",
+      "sous_famille": "vis de fixation des contre-lattes",
+      "marque": "Rockwool",
+      "modele": "Rockroof Sarking",
+      "attribut": "vis au m²",
+      "valeur": 6,
+      "unite": "vis/m²",
+      "condition": "vis acier Ø 7 mm, espacement ≤ 600 mm, première à ≤ 200 mm du bout",
+      "regions": [
+        "Belgique",
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sark_vis_par_contre_latte",
+      "famille": "sarking",
+      "sous_famille": "vis de fixation des contre-lattes",
+      "marque": "",
+      "modele": "",
+      "attribut": "fixations minimales par contre-latte et position en bout",
+      "valeur": {
+        "minimum": "2 vis (Terreal) ou 3 points (Simpson)",
+        "premiere_vis_du_bout_mm": "100 (Terreal) à 200 (Rockwool)"
+      },
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide de choix vis SARKING, 23/04/2025 (simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2025/05/07/164648/Guide-Vis-Sarking_2025_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Section contrelatte considérée 40(tb) x 60 mm (mini 30 x 50) ; La contrelatte doit être fixée sur 3 points minimum",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Les fabricants donnent 2 ou 3 points minimum ; à trancher par l'abaque du système choisi."
+    },
+    {
+      "id": "sark_contre_latte_section",
+      "famille": "sarking",
+      "sous_famille": "contre-latte sur sarking",
+      "marque": "",
+      "modele": "",
+      "attribut": "section",
+      "valeur": "27 × 60 ou 40 × 60",
+      "unite": "mm",
+      "condition": "Terreal : 27 × 60 si couverture < 46 kg/m² (ardoise, tuile légère), 40 × 60 de 46 à 100 kg/m² ; Simpson et Steico calculent en 40 × 60 (mini 30 × 50)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide de choix vis SARKING, 23/04/2025 (simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2025/05/07/164648/Guide-Vis-Sarking_2025_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Section contrelatte considérée 40(tb) x 60 mm (mini 30 x 50) ; La contrelatte doit être fixée sur 3 points minimum",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "STEICO, STEICOtherm prescriptions de mise en œuvre (abaque SFS intec, vis Twin UD), diffusé par Mauris",
+          "url": "https://www.mauris.fr/pieces-jointes/fiches-fournisseurs/2021/STEICO-BARDAGE-ET-ISOLATION-DOC-PRESCRIPTION-DE-MISE-EN-OEUVRE-THERM.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe chevrons 600, neige 55 daN/m² : entraxe des vis 850 mm, 1.96 vis/m² ; isolant+volige 60 mm, contrelatte 40 mm : vis 210",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/b (marquage CE, ACERMI 12/006/749), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_884154.pdf",
+          "type": "fabricant",
+          "extrait": "Format 2410 mm x 1200 mm ; Dimensions utiles 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Soprema donne ses longueurs de vis pour 27 et 40 mm de hauteur ; Rockwool : ≈ 60 × 40. Une contre-latte d'écran ordinaire (27 × 40, section 20 × 36 mini) est trop étroite pour la vis de sarking."
+    },
+    {
+      "id": "sark_adhesif_ml_m2",
+      "famille": "sarking",
+      "sous_famille": "adhésif de jonction des panneaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "ml d'adhésif par m² de toiture",
+      "valeur": 1.5,
+      "unite": "ml/m²",
+      "condition": "panneaux 2400 × 1200 ; pontage des joints quand il n'y a pas d'écran séparé",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "IKO, brochure sarking IKO enertherm (2024)",
+          "url": "https://eu.iko.com/wp-content/uploads/2023/11/240620_sarking_broch_FR_web.pdf",
+          "type": "fabricant",
+          "extrait": "Le pontage des joints avec un adhésif doit être effectué avant la mise en oeuvre des contrelattes en l'absence d'écran",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Le calcul des seuls joints donne (2,38 + 1,18) ÷ 2,81 = 1,27 ml/m² ; Terreal écrit 1,5 ml/m² (rives et pénétrations comprises). Panneau 1200 × 1000 : 1,83 ml/m² au calcul.",
+      "controle": "joints par m² = (longueur nette + largeur nette) ÷ surface nette"
+    },
+    {
+      "id": "sark_adhesif_rouleaux",
+      "famille": "sarking",
+      "sous_famille": "adhésif de jonction des panneaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "formats de rouleau",
+      "valeur": {
+        "Terreal NRJ+": "45 m × 50 mm",
+        "Soprema Efibande Butyle": "20 m × 75 mm, colis de 8",
+        "Recticel": "RECTITAPE (format non trouvé)"
+      },
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, brochure Efisarking DC-14/014_FR (février 2014), diffusée par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/211172",
+          "type": "fabricant",
+          "extrait": "Efibande Butyle : rouleaux de 20 m - Largeur 75 mm - Colis de 8 rouleaux",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, fiche pratique sarking (cite Eurotoit et la bande RECTITAPE)",
+          "url": "https://capeb.fr/www/capeb/media/document/fiche-pratique-sarking.pdf",
+          "type": "guide",
+          "extrait": "Une bande adhésive RECTITAPE permet de jointer les panneaux",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Chaque format n'est donné que par son fabricant."
+    },
+    {
+      "id": "sark_butee_egout",
+      "famille": "sarking",
+      "sous_famille": "butée et finitions d'égout",
+      "marque": "",
+      "modele": "",
+      "attribut": "pièce de bois en pied de versant (butée, sabot, lisse)",
+      "valeur": "1 ml par ml d'égout",
+      "unite": "ml",
+      "condition": "hauteur = épaisseur d'isolant ; vissée dans les chevrons ; le premier rang de panneaux s'appuie dessus",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Edilians : « sabot (butée + lisse) » ; Terreal : « butée de rive » ; Rockwool : « poutre de support » de 60 mm de large. Le larmier (bande d'égout zinc 2 m) est déjà dans ecrans-etancheite.json."
+    },
+    {
+      "id": "sark_entraxe_chevrons_terreal",
+      "famille": "sarking",
+      "sous_famille": "panneau PIR / PU de sarking",
+      "marque": "Terreal",
+      "modele": "Sarking NRJ+",
+      "attribut": "entraxe maxi des chevrons selon épaisseur",
+      "valeur": {
+        "90": "non autorisé en pose directe",
+        "120": "500 mm",
+        "132": "500 mm",
+        "160": "jusqu'à 900 mm"
+      },
+      "unite": "mm",
+      "condition": "pose directe sur chevrons, climat de plaine (lecture du tableau, mise en page ambiguë)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Tableau mal lisible dans le PDF ; à relire sur la fiche Terreal."
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Isolant sarking (PIR, fibre de bois) : m² × 1,03 / surface panneau",
+      "origine": "referentiel-couverture.md §6 (ligne 204)",
+      "valeur_actuelle": "1,03 et surface du panneau",
+      "verdict": "corrige",
+      "bonne_valeur": "diviser par la SURFACE UTILE (PIR 2400 × 1200 : 2,81 à 2,86 m² ; Steico 1880 × 600 : 1,067 m²) ; perte de 3 % : aucune source",
+      "sources": [
+        {
+          "titre": "Recticel Insulation (Bourges), fiche Eurotoit AC8R5XTGJ9X, diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_934483.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 2400 (2380 net) ; Largeur 1200 (1180 net) ; 60 - 88 - 110 - 132 - 160 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/b (marquage CE, ACERMI 12/006/749), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_884154.pdf",
+          "type": "fabricant",
+          "extrait": "Format 2410 mm x 1200 mm ; Dimensions utiles 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "STEICO, technical data sheet universal dry, état EUR_en_V1_20250523",
+          "url": "https://cdn.shopify.com/s/files/1/0222/7290/1216/files/STEICO_technical-data-sheet_universal-dry_EUR_en_i.pdf",
+          "type": "fabricant",
+          "extrait": "60 T+G 1880 600 1855 575 38 ; 60 mm : 1.35 m²K/W ; roof pitch ≥ 14°",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "La surface hors tout (2,88 m²) compte les languettes ; l'écart est de 1 à 2,5 %. Le 1,03 n'a pas de source : à garder comme décision du fondateur ou à remplacer par la vente au colis."
+    },
+    {
+      "ratio": "Vis de sarking : longueur",
+      "origine": "absent du code et de la doc",
+      "valeur_actuelle": "—",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "contre-latte + isolant + support + 60 mm d'ancrage, arrondi à la longueur vendue (200, 220, 240, 260, 280, 300, 330 mm…)",
+      "sources": [
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "À ajouter si le fondateur veut compter les vis : la question à poser est l'épaisseur d'isolant et de contre-latte."
+    },
+    {
+      "ratio": "Vis de sarking : nombre",
+      "origine": "absent du code et de la doc",
+      "valeur_actuelle": "—",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "≈ 2 vis/m² en plaine (chevrons 60 cm) ; 3 à 6 en montagne ou laine de roche ; le fabricant de vis donne l'abaque",
+      "sources": [
+        {
+          "titre": "STEICO, STEICOtherm prescriptions de mise en œuvre (abaque SFS intec, vis Twin UD), diffusé par Mauris",
+          "url": "https://www.mauris.fr/pieces-jointes/fiches-fournisseurs/2021/STEICO-BARDAGE-ET-ISOLATION-DOC-PRESCRIPTION-DE-MISE-EN-OEUVRE-THERM.pdf",
+          "type": "fabricant",
+          "extrait": "Entraxe chevrons 600, neige 55 daN/m² : entraxe des vis 850 mm, 1.96 vis/m² ; isolant+volige 60 mm, contrelatte 40 mm : vis 210",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide vis sarking sur isolants STEICO (2020, simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2021/12/22/111823/guide-vis-sarking_steico-2020-vf.pdf",
+          "type": "fabricant",
+          "extrait": "A2 - 200 m, 0,65 kN/m² : entraxe 1250 à 1600 mm, densité 1,67 à 1,94 vis/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Rockwool Benelux, fiche technique Rockroof Sarking",
+          "url": "https://www.rockwool.com/siteassets/rw-bnl/downloads-fr/downloads/fiches-techniques/toiture-inclinee/fiche-technique-rockroof-sarking-fr.pdf",
+          "type": "fabricant",
+          "extrait": "L'espacement des vis est de 600 mm maximum, en commençant à 200 mm maximum de l'extrémité ; ancré à au moins 60 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Un chiffre unique est trompeur : il dépend de la neige, du vent, du poids de couverture et de l'isolant. En Bretagne (plaine, basse altitude), 2 vis/m² est l'ordre de grandeur des abaques, à confirmer par le vent local."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Panneau isolant sarking",
+      "ce_que_le_vendeur_demande": [
+        "marque et modèle (Utherm Sarking K, Eurotoit, Efisarking, Sarkéo, Steico)",
+        "épaisseur ou R visé",
+        "écran intégré ou non",
+        "nombre de colis ou de m²"
+      ],
+      "unite_de_vente": "colis (paquet) ou palette",
+      "conditionnement": "PIR 2400 × 1200 : 2 à 6 plaques par colis selon l'épaisseur (Unilin) ; Steico : à la palette (28 à 56 panneaux)",
+      "sources": [
+        {
+          "titre": "Unilin Insulation, fiche Utherm Sarking K (Nr. BE-FR-19-2), diffusée par Gobert",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/UNILIN%20UTHERM%20FT%20SARKING%20K.pdf",
+          "type": "fabricant",
+          "extrait": "Standard : 2400 x 1200 mm ; 60 mm RD 2,70, 6 plaques, 17,28 m² par paquet",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Unilin Insulation SAS (Rosny-sous-Bois), fiche technique UTHERMsarking (ACERMI 11/121/688), diffusée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/0132232d-665c-4017-bba9-f6f3a448a893/ficheproduitcaractristiquesgnrales-794090.pdf",
+          "type": "fabricant",
+          "extrait": "R2,75 60 TG ... R7,40 160 TG ; 1200 x 2400 ; ACERMI calculée avec λ = 0,0216",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "STEICO, technical data sheet universal dry, état EUR_en_V1_20250523",
+          "url": "https://cdn.shopify.com/s/files/1/0222/7290/1216/files/STEICO_technical-data-sheet_universal-dry_EUR_en_i.pdf",
+          "type": "fabricant",
+          "extrait": "60 T+G 1880 600 1855 575 38 ; 60 mm : 1.35 m²K/W ; roof pitch ≥ 14°",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sarking"
+    },
+    {
+      "article": "Vis de sarking",
+      "ce_que_le_vendeur_demande": [
+        "épaisseur d'isolant",
+        "hauteur de contre-latte",
+        "support continu ou non",
+        "longueur de vis",
+        "nombre de boîtes"
+      ],
+      "unite_de_vente": "boîte",
+      "conditionnement": "boîtes de 50 à 100 selon la longueur (non vérifié)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique Efisarking INSFR012/b (marquage CE, ACERMI 12/006/749), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_884154.pdf",
+          "type": "fabricant",
+          "extrait": "Format 2410 mm x 1200 mm ; Dimensions utiles 2400 ± 10 mm x 1190 ± 7,5 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide de choix vis SARKING, 23/04/2025 (simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2025/05/07/164648/Guide-Vis-Sarking_2025_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Section contrelatte considérée 40(tb) x 60 mm (mini 30 x 50) ; La contrelatte doit être fixée sur 3 points minimum",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sarking"
+    },
+    {
+      "article": "Contre-latte de sarking",
+      "ce_que_le_vendeur_demande": [
+        "section 27 × 60 ou 40 × 60",
+        "longueur des barres",
+        "traitement"
+      ],
+      "unite_de_vente": "ml ou botte",
+      "conditionnement": "barres de 4 m (bois.json)",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Simpson Strong-Tie, Guide de choix vis SARKING, 23/04/2025 (simpson.fr)",
+          "url": "https://www.simpson.fr/sites/default/files/field_download_file/2025/05/07/164648/Guide-Vis-Sarking_2025_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Section contrelatte considérée 40(tb) x 60 mm (mini 30 x 50) ; La contrelatte doit être fixée sur 3 points minimum",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sarking"
+    },
+    {
+      "article": "Adhésif de jonction",
+      "ce_que_le_vendeur_demande": [
+        "marque du panneau (adhésif du système)",
+        "largeur",
+        "nombre de rouleaux"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "Terreal 45 m × 5 cm ; Soprema Efibande 20 m × 75 mm, colis de 8",
+      "sources": [
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, brochure Efisarking DC-14/014_FR (février 2014), diffusée par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/211172",
+          "type": "fabricant",
+          "extrait": "Efibande Butyle : rouleaux de 20 m - Largeur 75 mm - Colis de 8 rouleaux",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sarking"
+    },
+    {
+      "article": "Butée / sabot d'égout",
+      "ce_que_le_vendeur_demande": [
+        "section = épaisseur d'isolant",
+        "longueur = ml d'égout"
+      ],
+      "unite_de_vente": "ml",
+      "conditionnement": "bois de charpente au ml",
+      "sources": [
+        {
+          "titre": "Edilians, guide de pose Sarkéo (edilians.com)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/Sarking/Guide-de-pose-sarkeo.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions utiles des panneaux : 2385 x 1185 mm ; Un ancrage de 60 mm minimum dans le chevron",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, documentation Sarking NRJ+ (avis CSTB n°20181212023), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891395596-sNmvYEPg0k.pdf",
+          "type": "fabricant",
+          "extrait": "Un ancrage minimal de la fixation dans le chevron de 60 mm ; bande autocollante en rouleaux de 45 ml x 5 cm de large, 1.5 ml/m²",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sarking"
+    }
+  ]
+}

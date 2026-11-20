@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **93.4 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **92.4 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -1112,6 +1112,65 @@ Taux de chiffres confirmés : **93.4 %**. Règle : confirme : deux sources indé
 
 - **Siplast Parafor Solo GS** (une_source 1) : 
 
+### 1re couche (sous-couche) SBS
+
+- **Soprema Sopralène Flam 180** (une_source 1) : 
+
+### 1re couche SBS
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| rouleau_de_1_x_10_m_existe_t_il | oui, hors 1re couche soudée courante  | 1 × 10 m : Siplast Paracier (bac acier, fixé mécaniquement), Soprema Belgique Soprarock SBS P3 TF (36 kg) ; en France la sous-couche soudée courante fait 6 à 7,5 m | confirme |
+
+
+### 2e couche autoprotégée SBS
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| rouleau_de_1_x_8_m_en_france | None  |  | a_confirmer |
+
+
+### membrane bitume SBS soudée
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| recouvrement_en_about_transversal | 10 à 15 cm | Soprema (guide) 10 cm mini en bord et en bout de lé ; IKO 15 cm transversal (8 cm longitudinal) | confirme |
+
+
+### bicouche SBS
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| decalage_des_joints_de_la_2e_couche | demi-largeur de lé  | joints décalés dans les deux sens (quinconce) | confirme |
+| majoration_pertes_et_recouvrements | 1.15 × surface | rouleaux, hors relevés comptés à part | une_source |
+
+
+### membrane EPDM
+
+- **Firestone RubberCover** (une_source 1) : 
+
+### colle EPDM
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| consommation_de_colle_de_contact_solvant | 0,35 à 0,45 l/m² | Firestone BA 2012 : 2,35 à 2,75 m²/l (bidons 5 l = 10-12,5 m², 10 l = 20-25 m²) ; BA-2016 projetée : canister 22 l = 50-60 m² ; Elevate BA-2012 : ≈ 3 m²/l | confirme |
+
+- **Flexirub colle membrane EPDM bois / béton** (une_source 1) : consommation 0.25 l/m²
+
+### isolant PIR sous étanchéité
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| format_de_panneau_courant | 1200 × 600 (0,72 m²) mm | Utherm Roof L, IKO enertherm ALU, Recticel PowerDeck F ; existent aussi 1200 × 1000 (Knauf Thane OpTTI), 1200 × 2400 (IKO XL), 600 × 600 (Efigreen Alu+) | confirme |
+
+
+### entrée d'eaux pluviales (EEP)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| regle_de_dimensionnement_et_trop_plein | None  | NF DTU 60.11 P3 (2013) tableau 5 : diamètre selon la surface collectée par EEP, majoré selon les NF DTU 43 ; trop-plein obligatoire avec une seule EEP (NF DTU 43.1 §8.6.1, cité par un forum) | a_confirmer |
+
+
 ## Bois de couverture
 
 ### liteau
@@ -1296,6 +1355,167 @@ Taux de chiffres confirmés : **93.4 %**. Règle : confirme : deux sources indé
 ### tuile terre cuite
 
 - **Toutes marques DTU 40.21 / 40.211** (confirme 1) : effet_situation_exposee pente minimale plus forte (colonne « exposé » des tableaux), pas de majoration de recouvrement
+
+## Sarking (isolation par-dessus les chevrons)
+
+### panneau PIR / PU de sarking
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| format_hors_tout | 2400 × 1200 mm | panneaux PIR ou PU à rainure-languette 4 côtés (Unilin, Recticel, Soprema, Edilians, Terreal) | confirme |
+| surface_utile_d_un_panneau_2400_x_1200 | 2,81 à 2,86 m² | surface couverte après emboîtement ; la surface hors tout (2,88 m²) surestime la couverture de 1 à 2,5 % | confirme |
+
+- **Unilin Utherm Sarking K** (une_source 1) : 
+- **Recticel Eurotoit** (une_source 1) : 
+- **Recticel Powerroof Max** (une_source 1) : 
+- **Soprema (Efyos) Efisarking** (une_source 1) : 
+- **Terreal Sarking NRJ+** (a_confirmer 1) : 
+
+### panneau PIR + fibre de bois
+
+- **Unilin Utherm Sarking L Comfort** (une_source 1) : 
+
+### vis de fixation des contre-lattes
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| longueur_de_vis | contre-latte + isolant + support (volige, platelage) + ancrage ≥ 60 mm mm | vis perpendiculaire ; en pose inclinée (30° à 60°) la longueur augmente : prendre le tableau du fabricant de vis | confirme |
+| ancrage_minimal_dans_le_chevron | 60 mm | tous isolants rigides PIR / phénolique / laine de roche | confirme |
+| vis_au_m2 | 2 vis/m² | climat de plaine, neige A1/A2 à 200 m, couverture 0,55 à 0,65 kN/m² (ardoise, tuile légère), chevrons à 60 cm, contre-latte 40 × 60 | confirme |
+| fixations_minimales_par_contre_latte_et_position_en_bout | {'minimum': '2 vis (Terreal) ou 3 points (Simpson)', 'premiere_vis_du_bout_mm': '100 (Terreal) à 200 (Rockwool)'}  |  | a_confirmer |
+
+- **Soprema (Efyos) Efivis SF / DF** (une_source 1) : 
+- **Rockwool Rockroof Sarking** (une_source 1) : vis_au_m2 6 vis/m²
+
+### panneau phénolique de sarking
+
+- **Edilians Sarkéo Feu** (une_source 1) : 
+
+### panneau fibre de bois de sarking
+
+- **Steico STEICOspecial dry / universal dry** (confirme 1) : format 1880 × 600 (net 1855 × 575) mm
+- **Steico STEICOuniversal dry** (une_source 1) : 
+
+### contre-latte sur sarking
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| section | 27 × 60 ou 40 × 60 mm | Terreal : 27 × 60 si couverture < 46 kg/m² (ardoise, tuile légère), 40 × 60 de 46 à 100 kg/m² ; Simpson et Steico calculent en 40 × 60 (mini 30 × 50) | confirme |
+
+
+### adhésif de jonction des panneaux
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| ml_d_adhesif_par_m2_de_toiture | 1.5 ml/m² | panneaux 2400 × 1200 ; pontage des joints quand il n'y a pas d'écran séparé | une_source |
+| formats_de_rouleau | {'Terreal NRJ+': '45 m × 50 mm', 'Soprema Efibande Butyle': '20 m × 75 mm, colis de 8', 'Recticel': 'RECTITAPE (format non trouvé)'}  |  | une_source |
+
+
+### butée et finitions d'égout
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| piece_de_bois_en_pied_de_versant_butee_sabot_lisse | 1 ml par ml d'égout ml | hauteur = épaisseur d'isolant ; vissée dans les chevrons ; le premier rang de panneaux s'appuie dessus | confirme |
+
+
+## Abergements de souche et de cheminée
+
+### abergement de souche (métal façonné)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pieces_d_un_abergement_complet | ['bavette (devant, en aval, sur le dernier rang)', '2 rives latérales : noquets (ardoise, tuile plate) ou couloirs (tuile à relief)', "derrière / besace (amont, petit chéneau qui rejette l'eau sur les côtés)", 'bande porte-solin + solin (mortier ou mastic) sur le pourtour'] liste | souche, contrefort, édicule ; tuile ou ardoise | confirme |
+| debord_de_la_bavette_de_chaque_cote_de_la_souche | 10 à 12 cm | longueur de bavette = largeur de la souche + 2 × 10 à 12 cm ; partie visible au moins égale à un pureau ; goussets soudés aux angles | confirme |
+| derriere_besace_debords_recouvrement_et_releve | {'debord_chaque_cote_cm': '12 à 15', 'recouvrement_tuiles_cm_min': 6, 'espace_libre_amont': '3 à 4 pureaux', 'releve_cm': '10 à 12'}  | tuile plate ; une pince à chaque extrémité, goussets soudés | une_source |
+| releve_contre_la_souche | 10 cm | minimum ; recouvert par la bande porte-solin ou le solin | confirme |
+
+
+### noquets
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| dimensions_d_un_noquet | {'longueur': "longueur de l'ardoise ou de la tuile", 'largeur_ardoise': 'demi-ardoise (partie plate) + relevé contre le mur'}  | noquet posé tous les deux rangs | confirme |
+| nombre_de_noquets_au_ml_de_jouee | 1 ÷ (2 × pureau) u/ml | cas le plus courant : un noquet tous les deux rangs (longueur = longueur de l'élément) ; ex. pureau 11 cm → 4,5/ml ; 13 cm → 3,8/ml ; tuile plate pureau 10 cm → 5/ml ; arrondir au supérieur + 1 | confirme |
+| noquets_tailles_dans_une_feuille_de_zinc_2_x_1_m | ≈ 30 (ardoise 32 × 22) u/feuille | noquet 32 cm de long × ≈ 20 cm de développé (11 cm de partie plate + ≈ 9 cm de relevé) : 6 × 5 = 30 | a_confirmer |
+
+
+### bande porte-solin
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| developpe_et_longueur | dév. 100 mm, 2 m  | retombée ≈ 50 mm + partie horizontale 15-20 mm + relevé 20-30 mm ≈ 85 à 100 mm ; vendue façonnée en 2 m | confirme |
+| hauteur_du_solin_mortier_suspendu_au_dessus_des_tuiles | 20 à 30 mm | rive avec noquets et solin suspendu | une_source |
+
+
+### plomb laminé
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| masse_surfacique | {'1,25': 14.2, '1,5': 17.0, '2': 22.7, '2,5': 28.4, '3': 34.05} kg/m² selon épaisseur (mm) | plomb laminé EN 12588, masse volumique 11,35 kg/dm³ | confirme |
+| formats_vendus_bandes_en_rouleau | {'longueurs_m': [10, 5, 2], 'largeurs_bandes_mm': '160 à 400 (500 en 2,5 mm)', 'epaisseurs_mm': '1,25 à 3', 'tables': '1 m de large en 2, 5 ou 10 m', 'Le Plomb Français': '10 m × 160 / 200 / 250 / 300 (1,25 à 2 mm) ; 5 m × 330 (1,5 et 2 mm) ; 5 m × 300 à 500 (2,5 mm)'}  | plomb de couverture ; en grande surface de bricolage : 10 m × 100 ou 160 mm en 1,25 mm | confirme |
+
+- **Le Plomb Français guide des épaisseurs** (une_source 1) : 
+
+### abergement préfabriqué
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| largeur_de_la_bavette_plomb_plisse | 200 à 300 mm | Edilians 250 mm (6 coloris) ; Terreal 300 mm en rouleau séparé ; abergement universel 200 mm (plomb plissé 0,6 mm) | confirme |
+| plages_de_reglage_et_pentes | {'Edilians réglable': "30-60 cm et 60-110 cm, pentes jusqu'à 100 %", 'Edilians fixe': 'boisseaux 26 × 26 à 60 × 40 cm, pentes 25 à 45 %, table plomb 9/10', 'Terreal': 'petit format (boisseaux 350 × 350 à 400 × 400, 300 × 500), grand format (530 × 760 à 1000 × 1000)', 'Universel (BigMat)': '30 à 53 cm, rallonges 500 / 800 mm, pentes ≤ 63 %'}  | boisseaux et souches ; commande à l'unité selon les cotes extérieures | confirme |
+
+
+### bande d'abergement souple sans plomb
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| longueur_de_rouleau | 5 m | Wakaflex, Flexeo, Easy-Form, Ubiflex Finio (Wakaflex 280 mm existe aussi en 10 m ; Ubiflex Standard en 12 m) | confirme |
+| largeurs_vendues | {'Wakaflex': [140, 180, 280, 370, 560], 'Flexeo': [280, 450], 'Easy-Form': [200, 250, 300, 450, 600], 'Ubiflex Finio': [250, 300, 400, 500]} mm | largeur courante pour une souche : 280 à 300 mm | une_source |
+| longueur_de_bande_par_souche | ≈ périmètre + 1 m ml | devant : L + 2 × 10-15 cm ; côtés : 2 × (P + chevauchement tuile + 10-15 cm) ; arrière : L + 2 × 10-15 cm, en 350 mm de large mini (souvent 2 bandes ou une bande de 370 / 560) | une_source |
+
+- **Monier Wakaflex** (une_source 1) : 
+
+## Sous-faces et habillages de débord
+
+### lambris PVC de sous-face
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| largeurs_de_lame | 100 et 250 mm | lame 10 mm d'épaisseur ; 250 mm (frisette, planche) le plus courant ; Deceuninck de 100 à 250 | confirme |
+| longueurs_vendues | 4 m (3, 4,5 et 6 m existent) m | pro : 4 m (M.E.P, Atout Pro), 6 m (Atout Pro, Deceuninck) ; grande surface de bricolage : 3 m | confirme |
+| fixation_des_lames | 1 clip inox tous les 60 cm au plus  | entraxe des tasseaux ≤ 60 cm ; à réduire selon coloris et exposition (notice de pose) | une_source |
+| lame_d_air_derriere_les_lames | 20 mm | minimum, entre montants bois ; ventilation selon le DTU de couverture | une_source |
+
+- **M.E.P SE254 / SER254 / ST254 / SL254 / SME254 / SB104** (une_source 1) : 
+
+### profils de finition et de ventilation
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| accessoires_de_sous_face | {'finition': ['SFP24 petite finition', 'SFA34 finition murale', 'SFPC4 finition clipable', 'SDC204 / SAJ254 finition double'], 'ventilation': ['grilles SV4 / SV7 (4 et 7 cm)', 'SV237 / SV238 / SV404', 'SVD404 profilé de ventilation dissimulé'], 'fixation': 'clip inox SB3A'}  | longueurs des profils non publiées dans le catalogue ; 3 m en grande surface (Tecnoprofils) | une_source |
+
+
+### planche de rive / bandeau PVC cellulaire
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| largeurs_et_longueurs | {'largeurs_mm': '150 à 400', 'longueurs_m': [5, 6], 'epaisseur_mm': '9 à 25'}  | Deceuninck 150-400 × 9 mm en 6 m (et 5-6 m selon gamme) ; Plastivan 150 à 404 × 18 mm en 5 m | confirme |
+
+- **M.E.P Rivecel L9** (une_source 1) : 
+
+### sous-face aluminium
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| longueur_standard_des_lames | 3 m | DAL'ALU SF77 / SF129 (largeur utile 280-290 mm, ≈ 2 kg/m²) ; GutterFrance 310 mm utiles, 0,7 mm | une_source |
+
+- **DAL'ALU SF77 / SF129 perforées** (une_source 1) : 
+
+### lambris bois de sous-face
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| format_standard | None  | sapin, pin, douglas ; classe d'emploi 3 (ou 2 sous abri) | a_confirmer |
+
 
 ## Carte des régions
 
