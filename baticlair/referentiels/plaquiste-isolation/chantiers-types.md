@@ -1,7 +1,7 @@
 # Chantiers types plaquiste-isolation (jeu de test pour l'ouverture du métier)
 
 Calculés par le moteur de Mobiiz (`packages/domain`, `computeWorkItem` puis `purchaseList`) avec `referentiel.json`
-(version `plaquiste-isolation-2026.11.20-2`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
+(version `plaquiste-isolation-2026.11.20-3`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
 Écrit par `outils/calculer_chantiers.mjs` : ne pas modifier à la main, relancer l'outil.
 
 Lecture : « Lu au devis » = données que le modèle de lecture doit trouver dans la ligne ; « Questions » = ce que le moteur
@@ -51,7 +51,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 12,31 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,6 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 40 cm ; Longueur des montants : 2,59 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Chevilles de fixation des rails : Chevilles 6 × 40 ; Isolant de cloison : GR 32 Nu 45 ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 12,31 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,6 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 40 cm ; Longueur des montants : 2,59 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Chevilles de fixation des rails : Chevilles 6 × 40 ; Isolant de cloison : Laine 45 mm (PRK 32) ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -63,7 +63,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Vis TTPC 25 | 2 boîtes de 1000 | 1184 pièces |  |
 | Vis TRPF 13 | 1 boîte de 500 | 96 pièces |  |
 | Chevilles 6 × 40 | 1 sachet de 50 | 44 pièces | une cheville tous les 60 cm |
-| GR 32 Nu 45 | 3 colis de 12,15 m² | 33,6 m² |  |
+| Laine 45 mm (PRK 32) | 4 colis de 10,53 m² | 33,6 m² |  |
 | Bande à joint | 1 rouleau de 150 m | 89,6 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 21,12 kg |  |
 
@@ -81,7 +81,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 20 m ; Longueur des plaques : 3 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 60 cm ; Longueur des montants : 2,99 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Isolant de cloison : GR 32 Nu 45 ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 20 m ; Longueur des plaques : 3 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 60 cm ; Longueur des montants : 2,99 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Isolant de cloison : Laine 45 mm (PRK 32) ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -94,7 +94,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Vis TTPC 35 Placo | 2 boîtes de 1000 | 1620 pièces | 2e peau ; système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Vis TRPF 13 Placo | 1 boîte de 500 | 120 pièces | système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 71 pièces | une fixation tous les 60 cm |
-| Laine minérale 45 mm Placo | 6 colis de 12,15 m² | 63 m² | système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Laine minérale 45 mm Placo | 6 colis de 10,53 m² | 63 m² | système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Bande à joint | 2 rouleaux de 150 m | 168 ml | joints jointoyés avec bande |
 | Enduit poudre | 2 sacs de 25 kg | 39,6 kg |  |
 
@@ -217,7 +217,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 13,2 kg |  |
 | Membrane pare-vapeur | 1 rouleau de 60 m² | 44 m² |  |
-| Adhésif membrane | 1 rouleau de 40 m | 37,14 ml |  |
+| Adhésif membrane | 1 rouleau de 40 m | 32 ml |  |
 
 ## PI-08 — Contre-cloison M48 devant mur humide, HSP 2,40 m
 
@@ -307,7 +307,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Chevilles métal 6 × 40 | 1 boîte de 100 | 63 pièces |  |
 | Éclisses de fourrure Placo | 1 boîte de 50 | 23,87 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
-| Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Vis TTPC 25 Placo | 1 boîte de 1000 | 120 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 45 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
@@ -382,7 +382,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 |---|---|---|---|
 | Isoconfort 35 220 | 16 colis de 3,36 m² | 52,5 m² |  |
 | Membrane pare-vapeur | 1 rouleau de 60 m² | 55 m² |  |
-| Adhésif membrane | 2 rouleaux de 40 m | 46,43 ml |  |
+| Adhésif membrane | 1 rouleau de 40 m | 40 ml |  |
 | Plaques BA13 standard 1,20 × 2,5 m | 18 plaques | 18 pièces |  |
 | Fourrures F530 | 30 longueurs de 3 m | 89,5 ml | entraxe 60 cm |
 | Suspentes sécables (plénum 80 à 580 mm) | 2 boîtes de 50 | 78 pièces |  |
@@ -410,7 +410,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 8,8 m ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation : Clous + gaz béton ; Isolant : GR 32 Nu 45 ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 8,8 m ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation : Clous + gaz béton ; Isolant : Laine 45 mm (PRK 32) ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -423,7 +423,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Vis TTPC 35 | 1 boîte de 1000 | 660 pièces |  |
 | Vis TRPF 13 | 1 boîte de 500 | 88 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 62 pièces | une fixation tous les 60 cm |
-| GR 32 Nu 45 | 2 colis de 12,15 m² | 23,1 m² |  |
+| Laine 45 mm (PRK 32) | 3 colis de 10,53 m² | 23,1 m² |  |
 | Bande à joint | 1 rouleau de 150 m | 61,6 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 14,52 kg |  |
 

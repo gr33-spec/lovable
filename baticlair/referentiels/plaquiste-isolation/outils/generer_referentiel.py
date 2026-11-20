@@ -21,7 +21,7 @@ import os
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SORTIE = os.path.join(ICI, "..", "referentiel.json")
-VERSION = "plaquiste-isolation-2026.11.20-2"
+VERSION = "plaquiste-isolation-2026.11.20-3"
 TRADE = "drywall"
 DATE = "2026-11-19"
 
@@ -274,7 +274,7 @@ def isolant(id, label, short, m2, source, etat, aliases):
 
 
 PRODUCTS = [p for p in PRODUCTS if p["id"] != "laine-cloison-45"] + [
-    isolant("gr32-nu-45", "Isover GR 32 Nu 45 mm, R 1,40, panneaux 1,35 × 0,60 m (paquet de 15 = 12,15 m²) ou équivalent", "GR 32 Nu 45", 12.15, "isover-gr32-nu", UNE("12,15 m² par paquet : une seule fiche Isover (2014), produit sur fabrication ; R 1,40 tranché par le certificat ACERMI en vigueur (recherche/10 n° 29)."), ["gr32 45", "gr 32 45", "laine 45", "laine de verre 45", "isoconfort 32 45"]),
+    isolant("ursa-prk32-45", "URSA PRK 32 45 mm, R 1,40, panneaux 1,35 × 0,60 m (colis de 13 = 10,53 m²) ou équivalent", "Laine 45 mm (PRK 32)", 10.53, "acermi-gr32", OK2("R 1,40 et format 1,35 × 0,60 : fiche URSA et certificat ACERMI (recherche/04 A3, A5). Remplace le GR 32 Nu 45, retiré de la fiche Isover du 24/03/2026 (recherche/15)."), ["laine 45", "laine de verre 45", "prk 32 45", "gr32 45", "gr 32 45", "isoconfort 32 45"]),
     isolant("gr32-roule-100", "Isover GR 32 Roulé Revêtu Kraft 100 mm, R 3,15, rouleau 2,70 × 1,20 m (3,24 m²) ou équivalent", "GR 32 kraft 100", 3.24, "isover-gr32-roule", OK2("3,24 m² : fiche Isover 24/04/2026 et 13/05/2024 ; Brico Dépôt 2,7 × 1,2 m."), ["gr32 100", "gr 32 100", "laine de verre 100"]),
     isolant("gr32-roule-120", "Isover GR 32 Roulé Revêtu Kraft 120 mm, R 3,75, rouleau 2,70 × 1,20 m (3,24 m²) ou équivalent", "GR 32 kraft 120", 3.24, "isover-gr32-roule", OK2("3,24 m² : fiches Isover 2026 et 2024 ; Bricomarché."), ["gr32 120", "gr 32 120", "laine de verre 120"]),
     isolant("gr32-roule-140", "Isover GR 32 Roulé Revêtu Kraft 140 mm, R 4,35, rouleau 2,70 × 1,20 m (3,24 m²) ou équivalent", "GR 32 kraft 140", 3.24, "isover-gr32-roule", OK2("3,24 m² : fiches Isover 2026 et 2024."), ["gr32 140", "gr 32 140"]),
@@ -428,8 +428,8 @@ def cloison():
         "vis_1p_s40": regle("37", "u/m2", "snip-fc18", OK2("37 vis/m² à 0,40 : SNIP fiche 18 et fiche solution Placo sp00011244 (36,75) (recherche/09 n° 6)."), label="{v} vis par m²"),
         "vis_1p_d60": regle("35", "u/m2", "snip-fc18", OK2("35 vis/m² en doublés 0,60 : SNIP fiche 18 et guide Chausson 2020-21 (recherche/13 A1)."), label="{v} vis par m²"),
         "vis_1p_d40": regle("47", "u/m2", "snip-fc18", OK2("47 vis/m² en doublés 0,40 : SNIP 47 et Chausson 45, à 4 % près (recherche/13 A2)."), label="{v} vis par m²"),
-        "vis_int_s60": regle("10", "u/m2", "snip-fc18", UNE("SNIP fiche 18, 98/48 : 1re peau vissée à 60 cm, TTPC 25."), label="{v} vis 1re peau par m²"),
-        "vis_int_s40": regle("14", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
+        "vis_int_s60": regle("10", "u/m2", "snip-fc18", OK2("1re peau vissée à 60 cm : SNIP (10) et guide Chausson 2020-21 (même règle, le calcul redonne 10) (recherche/15 n° 1)."), label="{v} vis 1re peau par m²"),
+        "vis_int_s40": regle("14", "u/m2", "snip-fc18", OK2("SNIP 14 et règle Chausson (calcul : 14) (recherche/15 n° 1)."), label="{v} vis 1re peau par m²"),
         "vis_int_d60": regle("13", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
         "vis_int_d40": regle("18", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
         "vis_ext_s60": regle("27", "u/m2", "snip-fc18", OK2("2e peau TTPC 35 : SNIP 27 et Placo sp00011452 (26,25) (recherche/09 n° 11)."), label="{v} vis 2e peau par m²"),
@@ -439,7 +439,7 @@ def cloison():
         "trpf_s60": regle("2", "u/m2", "snip-fc18", OK2("2 TRPF/m² (montant sur rail, haut et bas) : SNIP fiche 18 et Placo fiche solution 72/48."), label="{v} vis TRPF par m²"),
         "trpf_s40": regle("3", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis TRPF par m²"),
         "trpf_d60": regle("6", "u/m2", "placo-integrale-plafonds-2023", OK2("6 TRPF/m² en doublés 0,60 : Placo (assemblage des montants doublés compris) et guide Chausson ; le SNIP en compte 5 (recherche/13 A4). Règle changée : avant 5."), label="{v} vis TRPF par m²"),
-        "trpf_d40": regle("7", "u/m2", "snip-fc18", CONFLIT("7 TRPF/m² (SNIP).", "Placo : 10."), label="{v} vis TRPF par m²"),
+        "trpf_d40": regle("10", "u/m2", "placo-integrale-plafonds-2023", CONFLIT("10 TRPF/m² : Placo Intégrale 2021-22 et le calcul de sa règle « montants doublés solidarisés tous les 40 cm » (9,9) (recherche/15 n° 2). Règle changée : avant 7.", "SNIP 7, Chausson 8 : ils ne comptent pas toute la solidarisation des montants doublés."), label="{v} vis TRPF par m²"),
         "isolant_par_m2": regle("1.05", "u", "snip-fc18", OK2("1,05 m² d'isolant par m² : SNIP fiche 18 et Placo fiche solution 72/48."), label="isolant + 5 %"),
         **finitions_constantes(2),
     }
@@ -505,7 +505,7 @@ def cloison():
         {"key": "trpf", "family": "screw_metal", "label": "Vis TRPF", "formOf": "cloison", "keywords": ["trpf"], "usual": {"text": "TRPF 13, montant sur rail.", "source": "snip-fc18", "productId": "vis-trpf-13"}},
         {"key": "fixation", "family": "anchor", "label": "Clous de fixation des rails", "formOf": "cloison", "keywords": ["clou", "cloueur"], "usual": {"text": "Clous pour cloueur à gaz, béton.", "source": "spit-pulsa", "productId": "clous-gaz-beton"}},
         {"key": "fixation_cheville", "family": "anchor", "label": "Chevilles de fixation des rails", "formOf": "cloison", "keywords": ["cheville"], "usual": {"text": "Chevilles à frapper 6 × 40.", "source": "brico-depot-chevilles", "productId": "cheville-frapper"}},
-        {"key": "isolant", "family": "insulation", "label": "Isolant de cloison", "keywords": ["laine", "isolant", "gr32"], "usual": {"text": "Laine minérale 45 mm (épaisseur admise en M48 : 30 à 45 mm, DTU via Rockwool).", "source": "dtu-2541-2022", "productId": "gr32-nu-45"}},
+        {"key": "isolant", "family": "insulation", "label": "Isolant de cloison", "keywords": ["laine", "isolant", "gr32"], "usual": {"text": "Laine minérale 45 mm (épaisseur admise en M48 : 30 à 45 mm, DTU via Rockwool).", "source": "dtu-2541-2022", "productId": "ursa-prk32-45"}},
         *slots_finitions(),
     ]
     return {"id": "cloison-distributive", "trade": TRADE, "section": "principal", "label": "Cloison sur ossature métallique (72/48, 98/48, 100/70, 120/70…)",
@@ -727,14 +727,14 @@ def plafond():
          "fourrures_e50": regle("2.10", "ml/m2", "snip-fc18", OK2("2,10 ml/m² à 0,50 : SNIP et Pladur ; Placo 2,2."), label="{v} de fourrures par m²"),
          "fourrures_e40": regle("3.0", "ml/m2", "placo-integrale-plafonds-2023", UNE("3,0 ml/m² à 0,40 : Placo Intégrale 2023."), label="{v} de fourrures par m²"),
          "suspentes_e60": regle("1.56", "u/m2", "snip-fc18", OK2("1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."), label="{v} suspentes par m²"),
-         "suspentes_e50": regle("1.84", "u/m2", "snip-fc18", UNE("1,84 (SNIP) ; Pladur 1,75 à 5 % près (recherche/09 n° 48). Règle changée : avant 2,2."), label="{v} suspentes par m²"),
+         "suspentes_e50": regle("1.84", "u/m2", "snip-fc18", OK2("SNIP 1,84 et Pladur 1,75 sortent de la même formule à la pièce (une suspente tous les 1,20 m par file), seule la pièce de référence change (recherche/15 n° 5)."), label="{v} suspentes par m²"),
          "suspentes_e40": regle("2.7", "u/m2", "placo-integrale-plafonds-2023", OK2("2,7 : Placo 2023 ; le calcul à la pièce (une suspente tous les 1,20 m par file) donne 2,63 pour 4 × 4 m (recherche/13 E2)."), label="{v} suspentes par m²"),
          "longueur_fourrure_plafond": regle("3", "m", "placo-f530", OK2("Fourrure commandée en 3,00 m (Placo, Chausson) : une éclisse à chaque aboutage."), label="fourrures de {v}"),
          "vis_int_e50": regle("4", "u/m2", "placo-integrale-plafonds-2023", OK2("1re peau d'un plafond en 2 BA13, entraxe 0,50 : 4 vis/m², Placo 2023 et Pladur 2019 ; le SNIP compte le double (recherche/13 E7)."), label="{v} vis 1re peau par m²"),
          "vis_e60": regle("12", "u/m2", "snip-fc18", CONFLIT("12 vis/m² à 0,60 (SNIP).", "Placo 2023 : 10 ; Pladur : 8."), label="{v} vis par m²"),
          "vis_e50": regle("14", "u/m2", "snip-fc18", OK2("14 vis/m² à 0,50 : SNIP et guide Chausson 2020-21 (recherche/13 E4)."), label="{v} vis par m²"),
          "vis_e40": regle("15", "u/m2", "placo-integrale-plafonds-2023", UNE("15 (Placo 2023)."), label="{v} vis par m²"),
-         "vis_int": regle("8", "u/m2", "snip-fc18", CONFLIT("1re peau à 0,60 : 8 vis/m² (SNIP), gardé pour la marge.", "Placo 2023 : 3 ; le SNIP compte le double de Placo et Pladur (recherche/13 E7)."), label="{v} vis 1re peau par m²"),
+         "vis_int": regle("3", "u/m2", "placo-integrale-plafonds-2023", OK2("1re peau d'un plafond en 2 BA13, entraxe 0,60 : 3 vis/m², Placo 2023 et règle DTU des premiers parements vissés à 60 cm (guide CAPEB 2022, Chausson) qui redonne 3 (recherche/15 n° 5). Règle changée : avant 8 (SNIP, vis de rive comprises)."), label="{v} vis 1re peau par m²"),
          "vis_ext": regle("12", "u/m2", "snip-fc18", OK2("2e peau : 12 vis TTPC 35/m² (SNIP) ; Placo 10 à 15."), label="{v} vis 2e peau par m²"),
          "vis_par_suspente_bois": regle("2", "u", "placo-integrale-plafonds-2023", OK2("2 vis TTPC 35 par suspente sous bois : Placo Intégrale 2023 et fiche Maxi Stil F 530."), label="{v} vis par suspente"),
          "pas_fixation_rail": c_pas_fixation(),
@@ -818,8 +818,8 @@ def separative():
          "e60": regle("0.60", "m", "dtu-2541-2022", OK2("Entraxe 0,60.")),
          "files_montants": regle("2", "u", "dtu-2541-2022", OK2("Séparative à double ossature : SNIP p. 7 (4,20 ml/m² = 2 × 2,10) et Pladur Mémento 2017 p. 64 (3,50 = 2 × 1,75) (recherche/09 n° 59)."), label="{v} files de montants"),
          "vis_int": regle("12", "u/m2", "snip-fc18", UNE("Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12) ; Pladur compte plus serré (recherche/13 C1)."), label="{v} vis 1re peau par m²"),
-         "vis_ext": regle("30", "u/m2", "snip-fc18", UNE("Séparative, 2e peau : SNIP p. 6-7 (30) (recherche/13 C2)."), label="{v} vis 2e peau par m²"),
-         "trpf": regle("4", "u/m2", "snip-fc18", UNE("Séparative : SNIP p. 6-7 (4 en simples 0,60) ; Pladur 2 (recherche/13 C3)."), label="{v} TRPF par m²"),
+         "vis_ext": regle("30", "u/m2", "snip-fc18", OK2("Séparative, 2e peau : SNIP 30 ; chaque file est une 72/48 déjà confirmée (SNIP + Placo 29,19) (recherche/15 n° 3)."), label="{v} vis 2e peau par m²"),
+         "trpf": regle("4", "u/m2", "snip-fc18", OK2("Séparative : 4 TRPF/m² = deux files de 72/48 à 2 (SNIP + Placo) (recherche/15 n° 3)."), label="{v} TRPF par m²"),
          "pas_fixation_rail": c_pas_fixation(),
          "isolant_par_m2": regle("1.05", "u", "snip-fc18", OK2("1,05 m²/m² par couche."), label="isolant + 5 %"),
          **finitions_constantes(2)}
@@ -832,7 +832,7 @@ def separative():
     derived = [derive("longueur_cloison", "Longueur de cloison", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_plaque", "Longueur des plaques", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Plus petite longueur ≥ hauteur − 1 cm."), True),
                derive("longueur_montant", "Longueur des montants", "m", LONGUEUR_MONTANT, "placo-m48", OK2("Montant = hauteur − 1 cm."), True),
-               derive("files_rails", "Files de rails", "u", "si(type_separative < 2, 1, 2)", "dtu-2541-2022", d)]
+               derive("files_rails", "Files de rails", "u", "si(type_separative < 2, 1, 2)", "dtu-2541-2022", OK2("SAA : un rail large ; SAD : deux rails : SNIP et fiches système Placo (recherche/15 n° 3)."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(longueur_cloison * regle.faces * regle.plaques_par_face * regle.chute / regle.largeur_plaque)", "u", "snip-fc18", OK2("4,2 m² de plaques par m² (2 faces × 2 plaques × 1,05), comme le parement double (Placo, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"),
         besoin("montants", "montant", "arrondi_sup((longueur_cloison / regle.e60 + 1) * regle.files_montants * regle.chute)", "u", "dtu-2541-2022", d, designation="Montants M48 longueur {longueur_montant|m}", short="montants", precision="deux files ({type_separative})"),
@@ -853,7 +853,7 @@ def separative():
         slot("vis_ext", "screw_board", "Vis TTPC 35", "vis-ttpc-35", "TTPC 35.", "gypso-vis", "separative", ["ttpc 35"]),
         slot("trpf", "screw_metal", "Vis TRPF", "vis-trpf-13", "TRPF 13.", "snip-fc18", "separative", ["trpf"]),
         *slots_fixation("separative"),
-        slot("isolant", "insulation", "Isolant", "gr32-nu-45", "Isolant écrit au devis.", "acermi-gr32", None, ["laine", "isolant"], ask="Quel isolant : marque ou équivalent, épaisseur ?"),
+        slot("isolant", "insulation", "Isolant", "ursa-prk32-45", "Isolant écrit au devis.", "acermi-gr32", None, ["laine", "isolant"], ask="Quel isolant : marque ou équivalent, épaisseur ?"),
         *slots_finitions(),
     ]
     return {"id": "cloison-separative", "trade": TRADE, "section": "principal", "label": "Cloison séparative (SAA, SAD)",
@@ -932,10 +932,10 @@ def soufflage():
 def pare_vapeur():
     c = {"majoration": regle("1.10", "u", "isover-vario", OK2("1,10 m² de membrane par m² : rendement Isover et calcul (lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés), confirmé en 3e passe (recherche/07)."), label="membrane + {v}"),
          "largeur_utile": regle("1.40", "m", "isover-vario", OK2("Recouvrement de 10 cm au moins entre lés : Knauf, Rockwool (11/2024), Soprema, Isover (recherche/07)."), label="un joint tous les {v}"),
-         "majoration_adhesif": regle("1.3", "u", "isover-vario", UNE("Joints entre lés + rives : 0,93 ml/m², dans la fourchette Isover 0,8 à 1,4 m/m² « suivant les points singuliers » (extrait, recherche/12) ; aucune autre marque ne publie de ratio."), label="adhésif + {v}")}
+         "adhesif_par_m2": regle("0.8", "ml/m2", "isover-vario", UNE("0,8 ml d'adhésif par m² : seule valeur écrite telle quelle (Isover, fourchette 0,8 à 1,4 « suivant les points singuliers ») ; le guide Chausson donne un minimum de 0,65 (recherche/15 n° 7). Règle changée : avant 0,93."), label="{v} d'adhésif par m²")}
     params = [surface("Surface de membrane", "Surface à couvrir ?")]
     needs = [besoin("membrane", "membrane", "surface * regle.majoration", "m2", "isover-vario", OK2("Surface × 1,10 : Isover (étiquettes Vario Xtra, Stopvap) et calcul sur le recouvrement de 10 cm de trois fabricants (recherche/12)."), short="membrane"),
-             besoin("adhesif", "adhesif", "surface / regle.largeur_utile * regle.majoration_adhesif", "ml", "isover-vario", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="adhésif", core=True)]
+             besoin("adhesif", "adhesif", "surface * regle.adhesif_par_m2", "ml", "isover-vario", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="adhésif", core=True)]
     slots = [slot("membrane", "vapour_barrier", "Membrane pare-vapeur", "vario-xtra", "Rouleau de 60 m².", "isover-vario", None, ["membrane", "pare-vapeur", "vario"]),
              slot("adhesif", "vb_tape", "Adhésif de membrane", "adhesif-kb1", "Adhésif de la même marque, rouleau de 40 m.", "gedimat-vario", "membrane", ["adhesif", "kb1"])]
     return {"id": "pare-vapeur", "trade": TRADE, "section": "principal", "label": "Membrane pare-vapeur et adhésifs",

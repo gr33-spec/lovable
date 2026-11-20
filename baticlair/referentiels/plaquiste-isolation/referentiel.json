@@ -1,6 +1,6 @@
 {
   "id": "plaquiste-isolation",
-  "version": "plaquiste-isolation-2026.11.20-2",
+  "version": "plaquiste-isolation-2026.11.20-3",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -1530,15 +1530,16 @@
       ]
     },
     {
-      "id": "gr32-nu-45",
+      "id": "ursa-prk32-45",
       "family": "insulation",
-      "label": "Isover GR 32 Nu 45 mm, R 1,40, panneaux 1,35 × 0,60 m (paquet de 15 = 12,15 m²) ou équivalent",
-      "shortLabel": "GR 32 Nu 45",
+      "label": "URSA PRK 32 45 mm, R 1,40, panneaux 1,35 × 0,60 m (colis de 13 = 10,53 m²) ou équivalent",
+      "shortLabel": "Laine 45 mm (PRK 32)",
       "aliases": [
-        "gr32 45",
-        "gr 32 45",
         "laine 45",
         "laine de verre 45",
+        "prk 32 45",
+        "gr32 45",
+        "gr 32 45",
         "isoconfort 32 45"
       ],
       "generic": true,
@@ -1547,18 +1548,18 @@
         {
           "id": "colis",
           "label": {
-            "one": "colis de 12,15 m²",
-            "many": "colis de 12,15 m²"
+            "one": "colis de 10,53 m²",
+            "many": "colis de 10,53 m²"
           },
           "contains": {
-            "source": "isover-gr32-nu",
+            "source": "acermi-gr32",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 1 source : 12,15 m² par paquet : une seule fiche Isover (2014), produit sur fabrication ; R 1,40 tranché par le certificat ACERMI en vigueur (recherche/10 n° 29)."
+              "note": "Recherche du 2026-11-19 — 2 sources : R 1,40 et format 1,35 × 0,60 : fiche URSA et certificat ACERMI (recherche/04 A3, A5). Remplace le GR 32 Nu 45, retiré de la fiche Isover du 24/03/2026 (recherche/15)."
             },
             "version": 1,
             "kind": "packaging",
-            "value": "12.15",
+            "value": "10.53",
             "unit": "m2"
           },
           "primary": true
@@ -2923,7 +2924,7 @@
           "usual": {
             "text": "Laine minérale 45 mm (épaisseur admise en M48 : 30 à 45 mm, DTU via Rockwool).",
             "source": "dtu-2541-2022",
-            "productId": "gr32-nu-45"
+            "productId": "ursa-prk32-45"
           }
         },
         {
@@ -3504,7 +3505,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18, 98/48 : 1re peau vissée à 60 cm, TTPC 25."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1re peau vissée à 60 cm : SNIP (10) et guide Chausson 2020-21 (même règle, le calcul redonne 10) (recherche/15 n° 1)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3516,7 +3517,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18."
+            "note": "Recherche du 2026-11-19 — 2 sources : SNIP 14 et règle Chausson (calcul : 14) (recherche/15 n° 1)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3633,15 +3634,15 @@
           "label": "{v} vis TRPF par m²"
         },
         "trpf_d40": {
-          "source": "snip-fc18",
+          "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 7 TRPF/m² (SNIP)."
+            "note": "Recherche du 2026-11-19 — contradiction : 10 TRPF/m² : Placo Intégrale 2021-22 et le calcul de sa règle « montants doublés solidarisés tous les 40 cm » (9,9) (recherche/15 n° 2). Règle changée : avant 7."
           },
           "version": 1,
-          "conflict": "Placo : 10.",
+          "conflict": "SNIP 7, Chausson 8 : ils ne comptent pas toute la solidarisation des montants doublés.",
           "kind": "installation_condition",
-          "value": "7",
+          "value": "10",
           "unit": "u/m2",
           "label": "{v} vis TRPF par m²"
         },
@@ -4555,7 +4556,7 @@
           "usual": {
             "text": "Isolant écrit au devis.",
             "source": "acermi-gr32",
-            "productId": "gr32-nu-45"
+            "productId": "ursa-prk32-45"
           },
           "ask": "Quel isolant : marque ou équivalent, épaisseur ?"
         },
@@ -4965,7 +4966,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Séparative, 2e peau : SNIP p. 6-7 (30) (recherche/13 C2)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Séparative, 2e peau : SNIP 30 ; chaque file est une 72/48 déjà confirmée (SNIP + Placo 29,19) (recherche/15 n° 3)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -4977,7 +4978,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Séparative : SNIP p. 6-7 (4 en simples 0,60) ; Pladur 2 (recherche/13 C3)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Séparative : 4 TRPF/m² = deux files de 72/48 à 2 (SNIP + Placo) (recherche/15 n° 3)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -5095,7 +5096,7 @@
           "source": "dtu-2541-2022",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48."
+            "note": "Recherche du 2026-11-19 — 2 sources : SAA : un rail large ; SAD : deux rails : SNIP et fiches système Placo (recherche/15 n° 3)."
           },
           "version": 1
         }
@@ -9393,7 +9394,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 1,84 (SNIP) ; Pladur 1,75 à 5 % près (recherche/09 n° 48). Règle changée : avant 2,2."
+            "note": "Recherche du 2026-11-19 — 2 sources : SNIP 1,84 et Pladur 1,75 sortent de la même formule à la pièce (une suspente tous les 1,20 m par file), seule la pièce de référence change (recherche/15 n° 5)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9475,15 +9476,14 @@
           "label": "{v} vis par m²"
         },
         "vis_int": {
-          "source": "snip-fc18",
+          "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 1re peau à 0,60 : 8 vis/m² (SNIP), gardé pour la marge."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1re peau d'un plafond en 2 BA13, entraxe 0,60 : 3 vis/m², Placo 2023 et règle DTU des premiers parements vissés à 60 cm (guide CAPEB 2022, Chausson) qui redonne 3 (recherche/15 n° 5). Règle changée : avant 8 (SNIP, vis de rive comprises)."
           },
           "version": 1,
-          "conflict": "Placo 2023 : 3 ; le SNIP compte le double de Placo et Pladur (recherche/13 E7).",
           "kind": "installation_condition",
-          "value": "8",
+          "value": "3",
           "unit": "u/m2",
           "label": "{v} vis 1re peau par m²"
         },
@@ -10830,17 +10830,17 @@
           "unit": "m",
           "label": "un joint tous les {v}"
         },
-        "majoration_adhesif": {
+        "adhesif_par_m2": {
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Joints entre lés + rives : 0,93 ml/m², dans la fourchette Isover 0,8 à 1,4 m/m² « suivant les points singuliers » (extrait, recherche/12) ; aucune autre marque ne publie de ratio."
+            "note": "Recherche du 2026-11-19 — 1 source : 0,8 ml d'adhésif par m² : seule valeur écrite telle quelle (Isover, fourchette 0,8 à 1,4 « suivant les points singuliers ») ; le guide Chausson donne un minimum de 0,65 (recherche/15 n° 7). Règle changée : avant 0,93."
           },
           "version": 1,
           "kind": "installation_condition",
-          "value": "1.3",
-          "unit": "u",
-          "label": "adhésif + {v}"
+          "value": "0.8",
+          "unit": "ml/m2",
+          "label": "{v} d'adhésif par m²"
         }
       },
       "needs": [
@@ -10861,7 +10861,7 @@
         {
           "id": "adhesif",
           "slot": "adhesif",
-          "formula": "surface / regle.largeur_utile * regle.majoration_adhesif",
+          "formula": "surface * regle.adhesif_par_m2",
           "unit": "ml",
           "core": true,
           "source": "isover-vario",
