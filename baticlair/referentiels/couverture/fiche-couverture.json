@@ -213,6 +213,34 @@
    ],
    "avant": "0 % (aucune règle de perte pour la tuile canal)",
    "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.supplement_expose",
+   "famille": "ardoise",
+   "libelle": "Ardoise en situation exposée, région III : recouvrement + 10 mm au moins",
+   "valeur": "10",
+   "unite": "mm",
+   "regle": "recouvrement exposé = max(R + 10 mm, R × 1,10)",
+   "decision": "NF DTU 40.11 (2020) §5.1.1.2 (+ 10 mm, via Progineer et une copie du texte) et Cupa / Rathscheck (+ 10 %) : on retient la plus forte des deux (écart de moins de 3 mm). Recherche du 20/11/2026.",
+   "preuves": [
+    "ardoise_situation_exposee_zone3"
+   ],
+   "avant": "aucune majoration",
+   "statut": "confirme"
+  },
+  {
+   "cle": "ardoise.coef_expose",
+   "famille": "ardoise",
+   "libelle": "Ardoise en situation exposée, région III : recouvrement × 1,10 au moins",
+   "valeur": "1.10",
+   "unite": "u",
+   "regle": "recouvrement exposé = max(R + 10 mm, R × 1,10)",
+   "decision": "Cupa et Rathscheck (+ 10 %), NF DTU 40.11 (+ 10 mm) : la plus forte des deux. Recherche du 20/11/2026.",
+   "preuves": [
+    "ardoise_situation_exposee_zone3"
+   ],
+   "avant": "aucune majoration",
+   "statut": "confirme"
   }
  ],
  "tables": [

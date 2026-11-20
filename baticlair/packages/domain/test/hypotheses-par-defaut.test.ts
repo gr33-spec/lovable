@@ -34,13 +34,15 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
       ["Région ardoise", "3", "u"],
       // Le rampant choisit la table du DTU (≤ 5,50 m, 5,50 à 11 m, au-delà).
       ["Longueur du rampant", "5,5", "m"],
+      // Situation normale par défaut ; exposée quand la commune du chantier est au bord de mer (fiche couverture).
+      ["Situation du chantier", "1", "u"],
       // NF DTU 40.11 (fiche couverture) : 45°, région III → recouvrement 89 mm → pureau (300 − 89) / 2.
       ["Pureau", "10,55", "cm"],
       // Formule Cupa (§34) : crochet courant 1 mm sans département littoral connu.
       ["Diamètre du crochet", "1", "mm"],
     ]);
     expect(ardoises.trace.find((t) => t.label === "Région ardoise")).toMatchObject({ value: "3", shown: "III" });
-    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
+    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "param:situation", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
     // Les hypothèses à boutons gardent leurs réponses proposées (l'artisan ne tape rien).
     expect(ardoises.assumptions.find((a) => a.key === "param:pente")?.choices?.map((c) => c.label)).toEqual(["30°", "35°", "45°"]);
     expect(need(r, "contre-liteaux-ardoise").assumptions.map((a) => a.key)).toEqual(["product:contre_liteau", "param:entraxe_supports"]);
@@ -52,7 +54,7 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 73 mm (NF DTU 40.11), dans la table Cupa :
     // 39,5/m² × 200 = 7 900 + 5 % = 8 295 (avant, ancien tableau : 80 mm, 8 547).
     expect(ardoises.quantity).toEqual({ value: "8295", unit: "u" });
-    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
+    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "param:situation", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
     expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "45", unit: "°" });
   });
 

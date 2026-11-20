@@ -36,7 +36,7 @@ describe("le quantitatif garde sa version de référentiel", () => {
   it("un quantitatif né sous une version ANCIENNE se recalcule avec elle (ici : 10 % de perte sur l'ardoise au lieu de 5)", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const q = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
-    expect(ardoises(q)).toBe(8925);
+    expect(ardoises(q)).toBe(9383);
     // Une ancienne version, telle qu'elle aurait été enregistrée à l'époque : même référentiel, perte ardoise 10 %.
     const old = JSON.parse(JSON.stringify(ROOFING_REFERENTIAL)) as typeof ROOFING_REFERENTIAL;
     const ancienne = { ...old, version: "roofing-2026.09.01-0", wasteRules: old.wasteRules.map((w) => (w.family === "roof_slate" ? { ...w, rate: "10" } : w)) };
@@ -44,8 +44,8 @@ describe("le quantitatif garde sa version de référentiel", () => {
     await ctx.prisma.takeoff.updateMany({ data: { referentialVersion: ancienne.version } });
     const again = (await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q;
     expect(again.version_referentiel).toBe("roofing-2026.09.01-0");
-    // 8 500 × 1,10 = 9 350 ardoises : la perte de l'époque, pas celle du jour.
-    expect(ardoises(again)).toBe(9350);
+    // 8 936,7 × 1,10 = 9 830 ardoises (Brest exposée) : la perte de l'époque, pas celle du jour.
+    expect(ardoises(again)).toBe(9830);
   });
 
   it("un instantané abîmé ne sert jamais : le référentiel du jour prend le relais", async () => {
@@ -53,6 +53,6 @@ describe("le quantitatif garde sa version de référentiel", () => {
     const q = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
     await ctx.prisma.referentialSnapshot.create({ data: { trade: "roofing", version: "roofing-casse", data: { id: "x" } } });
     await ctx.prisma.takeoff.updateMany({ data: { referentialVersion: "roofing-casse" } });
-    expect(ardoises((await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q)).toBe(8925);
+    expect(ardoises((await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q)).toBe(9383);
   });
 });

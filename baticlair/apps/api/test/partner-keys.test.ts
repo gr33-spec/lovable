@@ -35,7 +35,7 @@ describe("une clé API partenaire", () => {
 
     const q = await raw().post("/v1/quantitatifs").set("x-api-key", cle).send(RAPPIDOS);
     expect(q.status).toBe(201);
-    expect(q.body.lignes.find((l: { libelle: string }) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(8925);
+    expect(q.body.lignes.find((l: { libelle: string }) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9383);
     // Le quantitatif appartient à l'entreprise de la clé ; l'appli le voit.
     expect((await ctx.prisma.quantitatif.findFirstOrThrow()).companyId).toBe(companyId);
     expect((await agent.get(`/v1/quantitatifs/${q.body.id}`)).status).toBe(200);

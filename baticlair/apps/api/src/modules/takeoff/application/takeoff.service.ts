@@ -1544,6 +1544,11 @@ export class TakeoffService {
         : `Code postal du chantier (${postalCodeIn(address)}, zone la plus forte de ses communes)`
       : `Code postal du chantier (${postalCodeIn(address)})`;
     const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: preuveZone, origin: "document" }] : [];
+    // Situation exposée (NF DTU 40.11 : littoral sur environ 5 km, îles, rives d'estuaire près de l'embouchure), lue à la
+    // commune dans la carte des régions : une hypothèse dite, modifiable d'un tap (fiche couverture, 2026-11-20).
+    if (commune?.exposee) {
+      extraFacts.push({ key: "situation", value: "2", unit: "u", evidence: `Commune du chantier au bord de mer (${postalCodeIn(address)}) : situation exposée`, origin: "document" });
+    }
     if (isCoastal(postalCodeIn(address))) {
       extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
     }

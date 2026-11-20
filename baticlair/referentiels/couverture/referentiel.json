@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.20-59",
+  "version": "roofing-2026.11.20-60",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -6249,6 +6249,38 @@
           "estimate": "Prise égale à la zone climatique du département, en attendant la liste des régions du DTU 40.11."
         },
         {
+          "key": "situation",
+          "label": "Situation du chantier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le chantier est-il en situation exposée (bord de mer à moins de 5 km, île, falaise) ?",
+          "default": {
+            "value": "1",
+            "source": "fiche-couverture",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+            },
+            "version": 1,
+            "note": "situation normale, à défaut de commune au bord de mer"
+          },
+          "choices": [
+            {
+              "label": "Normale",
+              "value": "1"
+            },
+            {
+              "label": "Exposée (bord de mer, île)",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "normale",
+            "2": "exposée"
+          }
+        },
+        {
           "key": "diametre_crochet",
           "label": "Diamètre du crochet",
           "unit": "mm",
@@ -6464,6 +6496,45 @@
           },
           "version": 1,
           "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
+        },
+        "supplement_expose": {
+          "kind": "installation_condition",
+          "value": "10",
+          "unit": "mm",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "Ardoise en situation exposée, région III : recouvrement + 10 mm au moins. NF DTU 40.11 (2020) §5.1.1.2 (+ 10 mm, via Progineer et une copie du texte) et Cupa / Rathscheck (+ 10 %) : on retient la plus forte des deux (écart de moins de 3 mm). Recherche du 20/11/2026."
+        },
+        "coef_expose": {
+          "kind": "installation_condition",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "Ardoise en situation exposée, région III : recouvrement × 1,10 au moins. Cupa et Rathscheck (+ 10 %), NF DTU 40.11 (+ 10 mm) : la plus forte des deux. Recherche du 20/11/2026."
+        },
+        "pas_mm": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1,
+          "note": "Recouvrement arrondi au millimètre supérieur."
         },
         "seuil_rampant": {
           "kind": "installation_condition",
@@ -8106,19 +8177,31 @@
           "version": 1
         },
         {
+          "key": "recouvrement_dtu",
+          "label": "Recouvrement DTU (situation normale)",
+          "unit": "mm",
+          "formula": "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1
+        },
+        {
           "key": "recouvrement",
           "label": "Recouvrement",
           "unit": "mm",
-          "formula": "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
+          "formula": "recouvrement_dtu + si(situation >= 2, si(zone >= 3, arrondi_sup(max(recouvrement_dtu + regle.supplement_expose, recouvrement_dtu * regle.coef_expose) / regle.pas_mm) * regle.pas_mm - recouvrement_dtu, recouvrement_dtu * 0), recouvrement_dtu * 0)",
           "shown": true,
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
-          "version": 1
+          "version": 2
         }
       ],
       "needs": [

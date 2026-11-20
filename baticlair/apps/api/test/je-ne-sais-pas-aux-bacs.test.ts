@@ -18,6 +18,7 @@ beforeEach(async () => {
   await resetDatabase(ctx.prisma);
 });
 
+// Lorient : bord de mer, situation exposée (carte des régions) : recouvrement d'ardoise majoré (NF DTU 40.11 §5.1.1.2), 4 889 → 5 121.
 const LIGNES = [
   { libelle: "Couverture zinc joint debout", quantite: "40", unite: "m²" },
   { libelle: "Couverture ardoise naturelle 32x22", quantite: "120", unite: "m²" },
@@ -43,7 +44,7 @@ describe("la longueur des bacs laissée sans réponse", () => {
   it("« Je ne sais pas » : les ardoises sont chiffrées avec leur rampant courant ; les bacs restent à préciser", async () => {
     const b = await chantier(null);
     const liste = b.ecran.purchase.toBuy.map((x) => [x.label, x.quantity]);
-    expect(liste).toContainEqual(["Ardoises naturelles Espagne 1er choix 32×22", "4 889 pièces"]);
+    expect(liste).toContainEqual(["Ardoises naturelles Espagne 1er choix 32×22", "5 121 pièces"]);
     const bacs = liste.find(([label]) => /joint debout/i.test(label ?? ""))!;
     expect(bacs[1]).toBeNull();
     // La question reste sur la ligne des bacs : elle se règle dans la liste.
@@ -54,7 +55,7 @@ describe("la longueur des bacs laissée sans réponse", () => {
     const b = await chantier("5");
     expect(b.ecran.purchase.toBuy.map((x) => [x.label, x.quantity])).toEqual([
       ["Bacs joint debout zinc naturel 0,65 mm, longueur 5,15 m", "19 bacs"],
-      ["Ardoises naturelles Espagne 1er choix 32×22", "4 889 pièces"],
+      ["Ardoises naturelles Espagne 1er choix 32×22", "5 121 pièces"],
     ]);
     expect(b.questions.map((x) => x.id)).not.toContain("engine:param:longueur_rampant");
   });

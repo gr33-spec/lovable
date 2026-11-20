@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.20-60 — Ardoise en situation exposée : recouvrement majoré en région III
+
+- **§3 Recouvrement, situation exposée** (NF DTU 40.11 2020 §5.1.1.2 : + 10 mm ; Cupa et Rathscheck : + 10 %) : en région
+  III exposée, la plus forte des deux, au mm supérieur (`ardoise.supplement_expose`, `ardoise.coef_expose`). 45° : 89 → 99 mm ;
+  30° : 119 → 131 mm. Régions I et II exposées : rien (une seule source, à confirmer).
+- La situation (`param:situation`, normale / exposée) est lue à la commune du chantier dans la carte des régions
+  (littoral à 5 km, îles, rives d'estuaire près de l'embouchure) : une hypothèse dite et modifiable, jamais une question.
+  Sans commune connue : normale.
+
 ## roofing-2026.11.20-59 — Base couverture : la fiche, le DTU, la zone par commune (mission du fondateur, 19-20 novembre 2026)
 
 Travail de la branche `claude/amazing-einstein-jhz8k4`, fusionné sur la branche de test. Chaque constante est lue dans

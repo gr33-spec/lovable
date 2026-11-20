@@ -35,6 +35,19 @@ describe("recouvrement du NF DTU 40.11 (fiche couverture, 2026-11-19)", () => {
   });
 });
 
+describe("situation exposée (NF DTU 40.11 2020, Cupa, Rathscheck ; fiche couverture, 2026-11-20)", () => {
+  const expose = (zone: string, pente = "45") =>
+    computeWorkItem(REFERENTIEL_COMPLET, input({ zone: { value: zone, unit: "u", origin: "artisan" }, pente: { value: pente, unit: "°", origin: "artisan" }, situation: { value: "2", unit: "u", origin: "document", evidence: "Commune au bord de mer" } }));
+  it("région III exposée : supplement_expose et coef_expose, la plus forte de R + 10 mm et R × 1,10 (45° : 89 → 99 mm)", () => {
+    expect(need(expose("3"), "ardoises").trace.find((t) => t.label === "Recouvrement")?.value).toBe("99");
+    // 30° : 119 → max(129, 130,9) = 131 mm (au mm supérieur).
+    expect(need(expose("3", "30"), "ardoises").trace.find((t) => t.label === "Recouvrement")?.value).toBe("131");
+  });
+  it("régions I et II exposées : rien n'est ajouté (non confirmé par deux sources)", () => {
+    expect(need(expose("2"), "ardoises").trace.find((t) => t.label === "Recouvrement")?.value).toBe("80");
+  });
+});
+
 describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
   it("200 m² en 30×22, recouvrement posé 95 mm (pureau 10,25 cm), crochet 1 mm : 9 271 ardoises", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, input(pureau("10.25")));
