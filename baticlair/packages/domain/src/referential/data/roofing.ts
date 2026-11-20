@@ -464,6 +464,9 @@ const RAMPANT_BACS_PARAM: ParamDef = {
 };
 /** Réponses du fondateur du 2026-11-18 (couverture zinc à tasseaux). */
 const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
+/** Recherche « fixations » du 20/11/2026 (`referentiels/couverture/recherche/fixations.json`). */
+const RECH_FIXATIONS = "recherche-fixations-2026-11-20";
+const FIXATIONS_VERIFIE = { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "Recherche base couverture (fixations.json) : deux sources indépendantes" } as const;
 /** Le skill « regles-metier » du fondateur (interview du 18/11/2026). */
 const SKILL_FONDATEUR = "fondateur-skill-regles-metier-2026-11-18";
 const FOUNDER_SKILL = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur), interview du skill regles-metier" } as const;
@@ -1334,6 +1337,13 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
     },
     {
+      id: RECH_FIXATIONS,
+      kind: "manufacturer",
+      title: "Pointes de liteaux : une par croisement avec le chevron (NF DTU 40.11 §4.2.1.4, DTU 40.21, Koramic, guide du ministère de la Culture) ; pointes au kg (Alsafix, ArcelorMittal)",
+      documentRef: "referentiels/couverture/recherche/fixations.json",
+      retrievedAt: "2026-11-20",
+    },
+    {
       id: SKILL_FONDATEUR,
       kind: "trade_practice",
       title: "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
@@ -1680,6 +1690,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "roof_window_shutter", label: "Volet roulant de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_blind", label: "Store de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_lining", label: "Habillage intérieur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "batten_nail", label: "Pointes de liteaux", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_flashing", label: "Raccord d'étanchéité de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["raccord d'etancheite", "raccord etancheite"] },
   ],
   products: [
@@ -1978,6 +1989,14 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("volet-fenetre-toit", "roof_window_shutter", "Volet roulant de fenêtre de toit, à la taille de la fenêtre", "Volets roulants de fenêtre de toit"),
     generic("store-fenetre-toit", "roof_window_blind", "Store de fenêtre de toit, à la taille de la fenêtre", "Stores de fenêtre de toit"),
     generic("habillage-fenetre-toit", "roof_window_lining", "Habillage intérieur de fenêtre de toit, à la taille de la fenêtre", "Habillages intérieurs de fenêtre de toit"),
+    // Pointes galva annelées, longueur ≈ 2 × épaisseur du liteau + ancrage : 2,8 × 60 sous liteau de 18 (ardoise ; Ø 2,7
+    // au moins, NF DTU 40.11 2020), 3,1 × 70 sous liteau de 27 (tuile). Boîtes de 1 kg : 335 et 230 pointes (Alsafix, ArcelorMittal).
+    generic("pointes-liteau-28x60", "batten_nail", "Pointes galva annelées 2,8 × 60 pour liteaux, boîte de 1 kg", "Pointes galva 2,8 × 60", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("335", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "2,8 × 60 : ≈ 335 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
+    }),
+    generic("pointes-liteau-31x70", "batten_nail", "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg", "Pointes galva 3,1 × 70", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("230", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
+    }),
     generic("raccord-fenetre-toit", "roof_window_flashing", "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre", "Raccords d'étanchéité"),
     generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
     // §25.2 : « Noue préformée : développé 500 mm, L 2 m ou 3 m ; recouvrement 150 mm → longueur utile 1,85 m pour 2 m ».
@@ -2093,9 +2112,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"], usual: USUAL_LITEAU_TUILE },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
+        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).", source: RECH_FIXATIONS, productId: "pointes-liteau-31x70" }, suggested: { label: "Pointes pour liteaux" } },
         { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
       ],
       constants: {
+        // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
+        liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
         zone_littorale: ZONE_LITTORALE,
       },
@@ -2121,6 +2143,18 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Hors doublage du liteau d'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "pointes-liteaux",
+          slot: "pointe",
+          formula: "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          unit: "u",
+          core: false,
+          precision: "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          exclusions: "Pointes de contre-liteaux et de voliges à part.",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
           version: 1,
         },
         {
@@ -2321,8 +2355,11 @@ export const ROOFING_REFERENTIAL: Referential = {
         },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
+        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (NF DTU 40.11).", source: RECH_FIXATIONS, productId: "pointes-liteau-28x60" }, suggested: { label: "Pointes pour liteaux" } },
       ],
       constants: {
+        // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
+        liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
         supplement_expose: deFiche("ardoise.supplement_expose"),
         coef_expose: deFiche("ardoise.coef_expose"),
@@ -2420,6 +2457,18 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une file par rang ; hors doublis à l'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "pointes-liteaux",
+          slot: "pointe",
+          formula: "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          unit: "u",
+          core: false,
+          precision: "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          exclusions: "Pointes de contre-liteaux et de voliges à part.",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
           version: 1,
         },
         {

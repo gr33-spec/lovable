@@ -35,6 +35,8 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { projetId } = await chantier(agent);
     const e = await ecran(agent, projetId);
     expect(e.suggestions).toEqual([
+      // Skill du fondateur : « Pointes pour liteaux… : en Suggestion » (une par croisement, fixations.json).
+      { key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" },
       { key: "gouttiere/naissance", label: "Naissances de gouttière" },
       { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)" },
       { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)" },
@@ -56,7 +58,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { id, projetId } = await chantier(agent);
     expect((await repondre(agent, id, "gouttiere/etain")).status).toBe(400);
     expect((await repondre(agent, id, "couverture-ardoise/liteau")).status).toBe(400);
-    expect((await ecran(agent, projetId)).suggestions).toHaveLength(7);
+    expect((await ecran(agent, projetId)).suggestions).toHaveLength(8);
   });
 
   it("naissances cochées : elles entrent dans la liste, l'étape est close ; talons et angles n'existent pas", async () => {

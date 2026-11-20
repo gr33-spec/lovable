@@ -15,6 +15,11 @@
   dauphins (descentes), jonctions (gouttière PVC ou alu) proposés en cases quand le devis ne les écrit pas. Une case
   cochée tranche ce qu'elle dit (`suggested.vaut`) : « Dauphins » coché vaut « oui », la question « Un dauphin en pied
   de chaque descente ? » ne se pose plus. Avant : jamais proposés. Cuvette : pas encore d'article au tiroir.
+- **Pointes de liteaux, Suggestions** (skill du fondateur : « Pointes pour liteaux, contre-liteaux et voliges : en
+  Suggestion ») : proposées sur l'ardoise au crochet et la tuile à emboîtement. Cochées : une pointe par croisement
+  liteau / chevron plus une par bout de liteau de 4 m (NF DTU 40.11 §4.2.1.4, DTU 40.21, Koramic, guide du ministère de
+  la Culture), en boîtes de 1 kg : 2,8 × 60 sous ardoise (≈ 335 au kg), 3,1 × 70 sous tuile (≈ 230 au kg) (Alsafix,
+  ArcelorMittal). Avant : rien. Contre-liteaux et voliges : pas encore.
 
 ## roofing-2026.11.20-61 — Plomb en rouleaux de 10 m et de 5 m ; teintes de l'ardoise fibres-ciment
 
