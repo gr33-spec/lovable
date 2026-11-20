@@ -2458,7 +2458,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       params: [SURFACE_PARAM, TEINTE_FC_PARAM, ENTRAXE_PARAM, PENTE_PARAM],
       slots: [
         { key: "ardoise", family: "roof_slate_fc", label: "Ardoises fibres-ciment", ask: "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?" },
-        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" } },
+        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" }, suggested: { label: "Clous d'ardoise fibres-ciment" } },
         { key: "antivent", family: "slate_wind_hook", label: "Crochets d'antivent", keywords: ["antivent", "crochet"], usual: { text: "Un crochet d'antivent par ardoise (§4).", source: F, productId: "antivent-ardoise-fc" } },
         {
           key: "liteau",

@@ -82,6 +82,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       // Rives (skill du fondateur : « rive absente du devis : d'abord en Suggestion »).
       "couverture-tuiles-emboitement/rive : Tuiles de rive",
       "couverture-tuiles-canal/rive : Bardelis (tuiles de rive)",
+      // Clous (skill du fondateur : « Clous (en Suggestion, jamais d'office) »).
+      "couverture-ardoises-fibres-ciment/clou : Clous d'ardoise fibres-ciment",
       // Velux (skill du fondateur, 18/11/2026 ; BFX : tarif Velux France 2024) : un par fenêtre, à sa taille.
       "fenetre-de-toit/isolation : Kits d'isolation de fenêtre de toit (type BDX)",
       "fenetre-de-toit/pare_vapeur : Pare-vapeur de fenêtre de toit (type BBX)",
