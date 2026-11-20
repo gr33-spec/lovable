@@ -1,0 +1,24 @@
+{
+ "doutes": [
+  {
+   "id": "gouttiere dev 33 ¦ gouttiere zinc demi ronde de 33",
+   "reference": "Gouttière dév. 33",
+   "lue": "Gouttière zinc demi-ronde de 33"
+  },
+  {
+   "id": "tubes de descente 100 longueur 2 m ¦ descente d eaux pluviales zinc 100",
+   "reference": "Tubes de descente Ø100, longueur 2 m",
+   "lue": "Descente d'eaux pluviales zinc Ø 100"
+  }
+ ],
+ "questions": [
+  {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?"
+  },
+  {
+   "id": "param:epaisseur_zinc ¦ Épaisseur du zinc ?",
+   "question": "Épaisseur du zinc ?"
+  }
+ ]
+}

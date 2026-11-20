@@ -1,0 +1,43 @@
+{
+ "m": "M7",
+ "c": "C10",
+ "e": 1,
+ "nRef": 9,
+ "justes": 7,
+ "quantite": 0,
+ "manquantes": 2,
+ "inventees": 2,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 3,
+ "questionsHorsRef": 3,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 3,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Gouttière dév. 25 (5 longueurs de 4 m)",
+   "Tubes de descente Ø80, longueur 2 m (6 pièces)"
+  ],
+  "inventees": [
+   "Gouttières PVC sable (5 longueurs de 4 m)",
+   "Descentes PVC (6 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:surface",
+    "text": "Surface du toit ?"
+   },
+   {
+    "key": "param:usage_sortie",
+    "text": "Sortie de toit : conduit de fumée ou ventilation ?"
+   },
+   {
+    "key": "param:developpe_gouttiere",
+    "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+   }
+  ]
+ }
+}

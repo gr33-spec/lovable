@@ -1,0 +1,33 @@
+{
+ "m": "M5",
+ "c": "C08",
+ "e": 1,
+ "nRef": 4,
+ "justes": 2,
+ "quantite": 0,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 1,
+ "questions": 2,
+ "questionsRef": 2,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Descente Ø80 d'eau pluviale, diamètre descentes mm (1 pièces)"
+  ],
+  "inventees": [
+   "DEP Ø080 (1 pièces)"
+  ],
+  "doutes": [
+   {
+    "ref": "Mortier pour solin",
+    "lue": "Mortier"
+   }
+  ],
+  "horsRef": []
+ }
+}

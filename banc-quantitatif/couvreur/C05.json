@@ -209,5 +209,21 @@
    "ne_sait_pas": false,
    "dit": "7,20 m au total."
   }
+ },
+ "param:nb_cheminees ¦ Combien de cheminées ?": {
+  "question": {
+   "id": "param:nb_cheminees ¦ Combien de cheminées ?",
+   "question": "Combien de cheminées ?",
+   "boutons": [],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "1",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Une seule cheminée."
+  }
  }
 }

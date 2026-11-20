@@ -69,3 +69,30 @@ ${regles}`);
   T.push(`${id}|opus|high`);
 }
 console.log(T.join("\n"));
+
+// Le contrôleur tranche les doutes de la comparaison par le code (deux libellés : même article ?) et les questions hors référence (l'information est-elle déjà au devis ?).
+if (cmd === "juger") {
+  const notes = lire("resultats/notes.json") ?? [], n = (s) => String(s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/(\d),(\d)/g, "$1.$2").replace(/[^a-z0-9.]/g, " ").replace(/\.(?!\d)/g, " ").replace(/\s+/g, " ").trim();
+  const par = {};
+  for (const x of notes) { if (x.absent) continue; const p = (par[x.c] ??= { doutes: {}, questions: {} }); for (const d of x.detail.doutes) p.doutes[`${n(d.ref)} ¦ ${n(d.lue)}`] = { reference: d.ref, lue: d.lue }; for (const q of x.detail.horsRef) p.questions[`${q.key} ¦ ${q.text}`] = q.text; }
+  for (const [c, p] of Object.entries(par)) {
+    const dj = lire(`controle/${c}/doutes.json`) ?? {}, qj = lire(`controle/${c}/questions.json`) ?? {};
+    const doutes = Object.entries(p.doutes).filter(([k]) => dj[k] === undefined).map(([id, v]) => ({ id, ...v })), questions = Object.entries(p.questions).filter(([k]) => qj[k] === undefined).map(([id, question]) => ({ id, question }));
+    if (!doutes.length && !questions.length) continue;
+    fs.mkdirSync(`controle/${c}`, { recursive: true }); fs.writeFileSync(`controle/${c}/a-juger.json`, JSON.stringify({ doutes, questions }, null, 1));
+    const id = `juger-${c}-${Date.now().toString(36)}`;
+    ecrire(`travaux/${id}.md`, `${tete(id, "LE CONTRÔLEUR : tu tranches des doutes de comparaison, sans savoir de quelle méthode ils viennent")}
+1. Lis le devis : ${devis(c)}. Lis \`controle/${c}/a-juger.json\`.
+2. \`doutes\` : pour chaque paire, « reference » est une ligne de la liste de référence, « lue » une ligne d'une liste à noter. Dis si c'est LE MÊME ARTICLE du comptoir issu de la même ligne du devis (même chose à commander, même si le libellé diffère ou si l'un est le nom calculé et l'autre la phrase du devis) : true ; sinon false.
+3. \`questions\` : des questions posées au couvreur. Pour chacune, dis si l'information demandée est DÉJÀ ÉCRITE dans le devis (n'importe où : ligne, descriptif, note) : true = déjà écrite (question inutile) ; false = le devis ne le dit pas.
+4. Écris dans \`controle/${c}/jugements.json\` : {"doutes": {"<id recopié à l'identique>": true|false, …}, "questions": {"<id recopié à l'identique>": true|false, …}}.
+${regles}`);
+    console.log(`${id}|sonnet|medium`);
+  }
+}
+if (cmd === "ranger-jugements") for (const c of fs.readdirSync("controle")) {
+  const j = lire(`controle/${c}/jugements.json`); if (!j) continue;
+  fs.writeFileSync(`controle/${c}/doutes.json`, JSON.stringify({ ...(lire(`controle/${c}/doutes.json`) ?? {}), ...(j.doutes ?? {}) }, null, 1));
+  fs.writeFileSync(`controle/${c}/questions.json`, JSON.stringify({ ...(lire(`controle/${c}/questions.json`) ?? {}), ...(j.questions ?? {}) }, null, 1));
+  fs.rmSync(`controle/${c}/jugements.json`); fs.rmSync(`controle/${c}/a-juger.json`, { force: true });
+}

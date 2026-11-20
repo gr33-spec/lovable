@@ -1,0 +1,60 @@
+{
+ "m": "M2",
+ "c": "C05",
+ "e": 1,
+ "nRef": 9,
+ "justes": 4,
+ "quantite": 3,
+ "manquantes": 0,
+ "inventees": 1,
+ "doutes": 2,
+ "questions": 6,
+ "questionsRef": 4,
+ "questionsHorsRef": 5,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 5,
+ "questionsOubliees": 3,
+ "detail": {
+  "quantite": [
+   "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 6851 pièces lu",
+   "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 6851 pièces lu",
+   "Feuilles zinc naturel 2 × 1 m, 0,65 mm : 2 pièces attendu, 3 pièces lu"
+  ],
+  "manquantes": [],
+  "inventees": [
+   "Ardoise naturelle 30×20 (à chiffrer )"
+  ],
+  "doutes": [
+   {
+    "ref": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+    "lue": "Fenêtres de toit"
+   },
+   {
+    "ref": "4 noues de 1,80 m.",
+    "lue": "Noues de lucarnes"
+   }
+  ],
+  "horsRef": [
+   {
+    "key": "param:perimetre_cheminee",
+    "text": "Périmètre d'une cheminée (les 4 côtés) ?"
+   },
+   {
+    "key": "param:diametre_sortie",
+    "text": "Sortie de toit : quel diamètre ?"
+   },
+   {
+    "key": "param:usage_sortie",
+    "text": "Sortie de toit : conduit de fumée ou ventilation ?"
+   },
+   {
+    "key": "param:longueur_noue",
+    "text": "Longueur de noue ?"
+   },
+   {
+    "key": "param:qualite_ardoise",
+    "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
+   }
+  ]
+ }
+}

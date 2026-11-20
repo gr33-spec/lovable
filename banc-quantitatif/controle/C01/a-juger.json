@@ -1,0 +1,40 @@
+{
+ "doutes": [
+  {
+   "id": "ecran hpv rouleau 1.50 50 m ¦ ecran sous toiture hpv",
+   "reference": "Écran HPV, rouleau 1,50 × 50 m",
+   "lue": "Écran sous-toiture HPV"
+  },
+  {
+   "id": "gouttiere dev 25 ¦ gouttiere demi ronde zinc de 25",
+   "reference": "Gouttière dév. 25",
+   "lue": "Gouttière demi-ronde zinc de 25"
+  },
+  {
+   "id": "tubes de descente 80 longueur 2 m ¦ descente d eau pluviale zinc 80",
+   "reference": "Tubes de descente Ø80, longueur 2 m",
+   "lue": "Descente d'eau pluviale zinc Ø80"
+  },
+  {
+   "id": "dauphin fonte 80 en pied de descente ¦ dauphins fonte 80",
+   "reference": "Dauphin fonte Ø80 en pied de descente",
+   "lue": "Dauphins fonte Ø80"
+  },
+  {
+   "id": "crochets d ardoise ardoises ¦ crochets d ardoise inox standard longueur 10 cm",
+   "reference": "Crochets d'ardoise (Ardoises)",
+   "lue": "Crochets d'ardoise inox standard, longueur 10 cm"
+  },
+  {
+   "id": "ecran hpv rouleau 1.50 50 m ¦ fourniture et pose d un ecran sous toiture hpv",
+   "reference": "Écran HPV, rouleau 1,50 × 50 m",
+   "lue": "Fourniture et pose d'un écran sous-toiture HPV"
+  }
+ ],
+ "questions": [
+  {
+   "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
+   "question": "Quelle longueur de crochet ?"
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+{
+ "m": "M9",
+ "c": "C10",
+ "e": 1,
+ "nRef": 9,
+ "justes": 5,
+ "quantite": 2,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 1,
+ "questions": 4,
+ "questionsRef": 3,
+ "questionsHorsRef": 2,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 2,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [
+   "Ardoises fibres-ciment : à chiffrer  attendu, 3211 pièces lu",
+   "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 771 ml lu"
+  ],
+  "manquantes": [
+   "Gouttière dév. 25 (5 longueurs de 4 m)"
+  ],
+  "inventees": [
+   "Gouttières PVC sable (5 longueurs de 4 m)"
+  ],
+  "doutes": [
+   {
+    "ref": "Tubes de descente Ø80, longueur 2 m",
+    "lue": "Descentes PVC Ø80"
+   }
+  ],
+  "horsRef": [
+   {
+    "key": "param:surface",
+    "text": "Surface du toit ?"
+   },
+   {
+    "key": "param:developpe_gouttiere",
+    "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+   }
+  ]
+ }
+}

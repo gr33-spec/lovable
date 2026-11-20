@@ -1,0 +1,205 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Install. chantier, nacelle et sécu.",
+   "quantite": "1",
+   "unite": "FT",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)",
+   "quantite": "150",
+   "unite": "M2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bac acier 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face",
+     "quantite": "150",
+     "unite": "M2",
+     "ouvrage": "couverture-bac-acier",
+     "emplacement": "couverture",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "150"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "6"
+      },
+      {
+       "cle": "type_bac",
+       "valeur": "1"
+      },
+      {
+       "cle": "teinte_bac",
+       "valeur": "7016"
+      },
+      {
+       "cle": "feutre_bac",
+       "valeur": "1"
+      },
+      {
+       "cle": "nb_pans",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Vis autoperceuses rondelle EPDM",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-bac-acier",
+     "emplacement": "vis",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour bac acier 63/100"
+    },
+    {
+     "nom": "Closoirs mousse",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-bac-acier",
+     "emplacement": "closoir",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour bac acier 63/100"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "F. et P. faîtière BA RAL 7016, lg 12,50 m",
+   "quantite": "12,5",
+   "unite": "ML",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Faîtière BA RAL 7016",
+     "quantite": "12,5",
+     "unite": "ML",
+     "ouvrage": "couverture-bac-acier",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "teinte_bac",
+       "valeur": "7016"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour bac acier, longueur 12,50 m"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "F. et P. goutt. PVC gris dév. 25, 2 x 12,50 m",
+   "quantite": "25",
+   "unite": "ML",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Gouttière PVC gris dév. 25",
+     "quantite": "25",
+     "unite": "ML",
+     "ouvrage": "gouttiere-pvc-alu",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "matiere_gouttiere",
+       "valeur": "1"
+      },
+      {
+       "cle": "teinte_gouttiere",
+       "valeur": "1"
+      },
+      {
+       "cle": "nb_lignes",
+       "valeur": "2"
+      },
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "25"
+      },
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+   "quantite": "2",
+   "unite": "U",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Descente EP PVC gris Ø80",
+     "quantite": "2",
+     "unite": "U",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "4"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "hauteur 4,00 m"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Nettoyage fin de chantier, évac. des chutes",
+   "quantite": "1",
+   "unite": "FT",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note1",
+   "designation": "NB : toiture 2 pans, rampant 6,00 m. Charpente et pannes hors lot (posées par le charpentier avant notre intervention).",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

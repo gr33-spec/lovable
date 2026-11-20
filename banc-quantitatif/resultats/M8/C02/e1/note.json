@@ -1,0 +1,37 @@
+{
+ "m": "M8",
+ "c": "C02",
+ "e": 1,
+ "nRef": 7,
+ "justes": 3,
+ "quantite": 0,
+ "manquantes": 4,
+ "inventees": 2,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 0,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 1,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Écran HPV, rouleau 1,50 × 50 m (2 rouleaux)",
+   "Liteaux 27×40 (210 ml)",
+   "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge (à chiffrer )",
+   "Faîtières terre cuite rouge (24 pièces)"
+  ],
+  "inventees": [
+   "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m². (120 ml)",
+   "120 m². Pente 30°, rampant 7,50 m. (1 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:surface",
+    "text": "Surface du toit ?"
+   }
+  ]
+ }
+}

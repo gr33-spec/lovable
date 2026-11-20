@@ -1,0 +1,114 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Dépose anc. gout. + DEP, évac. déchetterie",
+   "quantite": "",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles",
+   "quantite": "28",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Gouttière 1/2 ronde zinc naturel dév. 33",
+     "quantite": "28",
+     "unite": "ml",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "33"
+      },
+      {
+       "cle": "nb_angles",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "sur 3 façades, y compris 2 angles"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "F et P DEP zn Ø100",
+   "quantite": "3",
+   "unite": "u",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Descente d'eau pluviale zinc Ø100",
+     "quantite": "3",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "3"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "100"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "F et P dauphins fonte en pied de DEP",
+   "quantite": "3",
+   "unite": "u",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Dauphins fonte",
+     "quantite": "3",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "dauphin",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "3"
+      },
+      {
+       "cle": "dauphin",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "en pied de DEP"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Echaf. roulant + protections, mise en place et repli",
+   "quantite": "",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

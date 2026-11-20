@@ -1,0 +1,21 @@
+{
+  "accords": [
+    {"article": "Équerre (angle) extérieure 90° gouttière demi-ronde zinc naturel dév. 33", "quantite": 2, "unite": "pièces"},
+    {"article": "Tuyau de descente zinc naturel Ø100", "quantite": 9, "unite": "tubes de 2 m (référence : pièces ; 3 descentes × 6 m = 18 m = 9 tubes de 2 m)"},
+    {"article": "Dauphin fonte Ø100", "quantite": 3, "unite": "pièces"}
+  ],
+  "desaccords": [
+    {
+      "article": "Gouttière demi-ronde zinc naturel dév. 33",
+      "controleur": "8 longueurs de 4 m",
+      "reference": "7 longueurs de 4 m",
+      "ecart": "Même article et même unité, mais 8 longueurs côté contrôleur contre 7 côté référence (1 longueur d'écart)."
+    },
+    {
+      "article": "Naissance (moignon) zinc pour gouttière demi-ronde dév. 33, sortie Ø100",
+      "controleur": "3 pièces",
+      "reference": "absent",
+      "ecart": "Article présent côté contrôleur (3 pièces) et absent de la liste de référence."
+    }
+  ]
+}

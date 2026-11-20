@@ -1,0 +1,327 @@
+{
+ "posees": [
+  {
+   "key": "param:support_sortie",
+   "text": "Sortie de toit : sur quelle couverture ?",
+   "options": [
+    "Ardoise ou tuile",
+    "Zinc"
+   ],
+   "reponse": "Ardoise ou tuile"
+  },
+  {
+   "key": "param:surface@couverture-ardoises-crochet__5",
+   "text": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : surface du toit ?",
+   "options": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "reponse": "3.2 m2"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:nb_cheminees",
+   "text": "Combien de cheminées ?",
+   "options": [],
+   "reponse": "1 u"
+  },
+  {
+   "key": "param:qualite_ardoise@couverture-ardoises-crochet__5",
+   "text": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir.",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Noues zinc façonnées",
+    "quantite": "7,2",
+    "unite": "ml",
+    "affiche": "7,2 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Fenêtres de toit de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Abergement de cheminée d'un abergement de cheminée en zinc, périmètre 3 m.",
+    "quantite": "3",
+    "unite": "ml",
+    "affiche": "3 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sorties de toit de sorties de toit Ø125 pour VMC.",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Abergement de cheminée d'un abergement de cheminée en zinc, périmètre 3 m.",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Ardoises)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "Dépose de la couverture existante Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "Dépose des anciens châssis de toit Dépose sans réemploi.",
+   "Évacuation des gravats Tri et évacuation des gravats en déchetterie agréée.",
+   "Fin de chantier Nettoyage du chantier et repli de l'échafaudage.",
+   "Objet : réfection de la couverture en ardoise naturelle, lucarnes, fenêtres de toit et ouvrages de zinguerie.",
+   "Maison d'habitation de plus de 2 ans",
+   "TVA à 10 % : travaux de rénovation sur logement achevé depuis plus de 2 ans (attestation à nous retourner signée).",
+   "Délai d'intervention : 8 à 10 semaines après accord, hors intempéries.",
+   "Durée des travaux : environ 3 semaines.",
+   "Tout remplacement de bois de charpente constaté nécessaire à la dépose fera l'objet d'un avenant."
+  ],
+  "questions": [
+   "param:support_sortie",
+   "param:surface@couverture-ardoises-crochet__5",
+   "param:faconnage@pieces-pliees",
+   "param:nb_cheminees",
+   "param:qualite_ardoise@couverture-ardoises-crochet__5"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 30×20",
+    "quantite": "157",
+    "unite": "pièces",
+    "affiche": "157 pièces",
+    "etat": "ready",
+    "precision": "3,2 m² × 46,6 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "4",
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "157",
+    "unite": "pièces",
+    "affiche": "157 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "4",
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "pour 1,8 ml de noue, développé 50 cm ; pour façonner l'abergement de cheminée, développé 33 cm",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Fenêtres de toit de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Abergement de cheminée d'un abergement de cheminée en zinc, périmètre 3 m.",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "Dépose de la couverture existante Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "Dépose des anciens châssis de toit Dépose sans réemploi.",
+   "Évacuation des gravats Tri et évacuation des gravats en déchetterie agréée.",
+   "Fin de chantier Nettoyage du chantier et repli de l'échafaudage.",
+   "Objet : réfection de la couverture en ardoise naturelle, lucarnes, fenêtres de toit et ouvrages de zinguerie.",
+   "Maison d'habitation de plus de 2 ans",
+   "TVA à 10 % : travaux de rénovation sur logement achevé depuis plus de 2 ans (attestation à nous retourner signée).",
+   "Délai d'intervention : 8 à 10 semaines après accord, hors intempéries.",
+   "Durée des travaux : environ 3 semaines.",
+   "Tout remplacement de bois de charpente constaté nécessaire à la dépose fera l'objet d'un avenant."
+  ],
+  "questions": []
+ }
+}

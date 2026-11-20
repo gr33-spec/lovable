@@ -97,6 +97,30 @@
  },
  {
   "m": "OR",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -131,6 +155,30 @@
   "doutes": 0,
   "questions": 1,
   "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
   "questionsHorsRef": 0,
   "questionsInutiles": 0,
   "questionsNonJugees": 0,
@@ -195,7 +243,30 @@
   "m": "M0",
   "c": "C01",
   "e": 1,
-  "absent": true
+  "nRef": 8,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 3,
+  "questionsRef": 2,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:longueur_crochet",
+     "text": "Quelle longueur de crochet ?"
+    }
+   ]
+  }
  },
  {
   "m": "M0",
@@ -253,7 +324,70 @@
   "m": "M0",
   "c": "C04",
   "e": 1,
-  "absent": true
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 3,
+  "questionsRef": 2,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M0",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 7,
+  "questionsRef": 4,
+  "questionsHorsRef": 3,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 3,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 164 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 164 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:developpe_noue",
+     "text": "Noue de 50 ou de 66 ?"
+    },
+    {
+     "key": "param:qualite_ardoise",
+     "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
+    },
+    {
+     "key": "param:longueur_crochet",
+     "text": "Quelle longueur de crochet ?"
+    }
+   ]
+  }
  },
  {
   "m": "M0",
@@ -313,15 +447,432 @@
  },
  {
   "m": "M0",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 5,
+  "questionsRef": 2,
+  "questionsHorsRef": 3,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 3,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Mortier pour solin",
+     "lue": "Mortier"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:developpe_noue",
+     "text": "Noue de 50 ou de 66 ?"
+    },
+    {
+     "key": "fiche:modele_ardoise",
+     "text": "Quelle ardoise ?"
+    },
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M0",
   "c": "C09",
   "e": 1,
-  "absent": true
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 6,
+  "questionsRef": 4,
+  "questionsHorsRef": 2,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 2,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    },
+    {
+     "key": "param:epaisseur_zinc",
+     "text": "Épaisseur du zinc ?"
+    }
+   ]
+  }
  },
  {
   "m": "M0",
   "c": "C10",
   "e": 1,
-  "absent": true
+  "nRef": 9,
+  "justes": 8,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 5,
+  "questionsRef": 3,
+  "questionsHorsRef": 2,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 2,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 100 ml lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    },
+    {
+     "key": "param:developpe_gouttiere",
+     "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 3,
+  "questionsRef": 2,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:longueur_crochet",
+     "text": "Quelle longueur de crochet ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 5,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [
+    "Liteaux 27×40 (210 ml)"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 3,
+  "questionsRef": 2,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 7,
+  "questionsRef": 4,
+  "questionsHorsRef": 3,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 3,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 164 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 164 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:developpe_noue",
+     "text": "Noue de 50 ou de 66 ?"
+    },
+    {
+     "key": "param:qualite_ardoise",
+     "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
+    },
+    {
+     "key": "param:longueur_crochet",
+     "text": "Quelle longueur de crochet ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 1,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles canal terre cuite, courants et couverts : à chiffrer  attendu, 85 pièces lu",
+    "Rives : 33 pièces attendu, 12 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Liteaux 27×40 (Liteaux)",
+     "lue": "Liteaux"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 5,
+  "questionsRef": 2,
+  "questionsHorsRef": 3,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 3,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Mortier pour solin",
+     "lue": "Mortier"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:developpe_noue",
+     "text": "Noue de 50 ou de 66 ?"
+    },
+    {
+     "key": "fiche:modele_ardoise",
+     "text": "Quelle ardoise ?"
+    },
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 6,
+  "questionsRef": 4,
+  "questionsHorsRef": 2,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 2,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Gouttière dév. 33",
+     "lue": "Gouttière zinc demi-ronde de 33"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    },
+    {
+     "key": "param:epaisseur_zinc",
+     "text": "Épaisseur du zinc ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M1",
+  "c": "C10",
+  "e": 1,
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 5,
+  "questionsRef": 3,
+  "questionsHorsRef": 2,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 2,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:dauphin",
+     "text": "Un dauphin en pied de chaque descente ?"
+    },
+    {
+     "key": "param:developpe_gouttiere",
+     "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+    }
+   ]
+  }
  },
  {
   "m": "M2",
@@ -379,7 +930,36 @@
   "m": "M2",
   "c": "C03",
   "e": 1,
-  "absent": true
+  "nRef": 4,
+  "justes": 1,
+  "quantite": 0,
+  "manquantes": 2,
+  "inventees": 2,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)",
+    "Descente zinc Ø100 (9 pièces)"
+   ],
+   "inventees": [
+    "gout. 1/2 rde zn nat. (7 longueurs de 4 m)",
+    "DEP zn (9 pièces)"
+   ],
+   "doutes": [
+    {
+     "ref": "Gouttière demi-ronde zinc naturel dév. 33",
+     "lue": "Naissances dév. 33 Ø100"
+    }
+   ],
+   "horsRef": []
+  }
  },
  {
   "m": "M2",
@@ -407,9 +987,87 @@
  },
  {
   "m": "M2",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 4,
+  "quantite": 3,
+  "manquantes": 0,
+  "inventees": 1,
+  "doutes": 2,
+  "questions": 6,
+  "questionsRef": 4,
+  "questionsHorsRef": 5,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 5,
+  "questionsOubliees": 3,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 6851 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 6851 pièces lu",
+    "Feuilles zinc naturel 2 × 1 m, 0,65 mm : 2 pièces attendu, 3 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [
+    "Ardoise naturelle 30×20 (à chiffrer )"
+   ],
+   "doutes": [
+    {
+     "ref": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+     "lue": "Fenêtres de toit"
+    },
+    {
+     "ref": "4 noues de 1,80 m.",
+     "lue": "Noues de lucarnes"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:perimetre_cheminee",
+     "text": "Périmètre d'une cheminée (les 4 côtés) ?"
+    },
+    {
+     "key": "param:diametre_sortie",
+     "text": "Sortie de toit : quel diamètre ?"
+    },
+    {
+     "key": "param:usage_sortie",
+     "text": "Sortie de toit : conduit de fumée ou ventilation ?"
+    },
+    {
+     "key": "param:longueur_noue",
+     "text": "Longueur de noue ?"
+    },
+    {
+     "key": "param:qualite_ardoise",
+     "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M2",
   "c": "C06",
   "e": 1,
-  "absent": true
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
  },
  {
   "m": "M2",
@@ -437,6 +1095,35 @@
      "lue": "Couverture BA 63/100 simple peau"
     }
    ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M2",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 2,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Descente Ø80 d'eau pluviale, diamètre descentes mm (1 pièces)",
+    "Ardoises (Ardoises) (à chiffrer )"
+   ],
+   "inventees": [
+    "DEP (1 pièces)"
+   ],
+   "doutes": [],
    "horsRef": []
   }
  },
@@ -500,6 +1187,293 @@
   }
  },
  {
+  "m": "M3",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 7,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Écran HPV, rouleau 1,50 × 50 m",
+     "lue": "Écran sous-toiture HPV"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 4,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [
+    "Liteaux 27×40 (210 ml)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Écran HPV, rouleau 1,50 × 50 m",
+     "lue": "Écran sous-toiture HPV"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Dauphins fonte Ø100",
+     "lue": "Dauphins fonte en pied de descente d'eaux pluviales"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Couvre-joints Quartz-Zinc 0,70 mm pour tasseaux de 50 mm : 75 ml attendu, à chiffrer  lu"
+   ],
+   "manquantes": [],
+   "inventees": [
+    "Tasseaux bois (à chiffrer )"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Rives : 33 pièces attendu, 12 ml lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+     "lue": "Couverture BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Mortier pour solin (1 sac de 25 kg)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Descente Ø80 d'eau pluviale, diamètre descentes mm",
+     "lue": "DEP Ø80"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M3",
+  "c": "C10",
+  "e": 1,
+  "nRef": 9,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 3,
+  "questionsRef": 3,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Écran HPV, rouleau 1,50 × 50 m",
+     "lue": "Écran sous-toiture HPV"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
   "m": "M4",
   "c": "C01",
   "e": 1,
@@ -601,6 +1575,33 @@
  },
  {
   "m": "M4",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -649,6 +1650,30 @@
  },
  {
   "m": "M4",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -675,7 +1700,25 @@
   "m": "M4",
   "c": "C10",
   "e": 1,
-  "absent": true
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 3,
+  "questionsRef": 3,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
  },
  {
   "m": "M5",
@@ -714,13 +1757,63 @@
   "m": "M5",
   "c": "C02",
   "e": 1,
-  "absent": true
+  "nRef": 7,
+  "justes": 4,
+  "quantite": 1,
+  "manquantes": 2,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 0,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [
+    "Faîtières terre cuite rouge (24 pièces)",
+    "Closoir ventilé (2 rouleaux de 5 m)"
+   ],
+   "inventees": [
+    "8,00 m. (2 rouleaux de 5 m)"
+   ],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:longueur_faitage",
+     "text": "Longueur du faîtage ?"
+    }
+   ]
+  }
  },
  {
   "m": "M5",
   "c": "C03",
   "e": 1,
-  "absent": true
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
  },
  {
   "m": "M5",
@@ -748,6 +1841,33 @@
      "lue": "Descente d'eaux pluviales zinc quartz Ø100"
     }
    ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
    "horsRef": []
   }
  },
@@ -806,6 +1926,39 @@
  },
  {
   "m": "M5",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Descente Ø80 d'eau pluviale, diamètre descentes mm (1 pièces)"
+   ],
+   "inventees": [
+    "DEP Ø080 (1 pièces)"
+   ],
+   "doutes": [
+    {
+     "ref": "Mortier pour solin",
+     "lue": "Mortier"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -832,7 +1985,30 @@
   "m": "M5",
   "c": "C10",
   "e": 1,
-  "absent": true
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 3,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:surface",
+     "text": "Surface du toit ?"
+    }
+   ]
+  }
  },
  {
   "m": "M6",
@@ -862,7 +2038,32 @@
   "m": "M6",
   "c": "C02",
   "e": 1,
-  "absent": true
+  "nRef": 7,
+  "justes": 6,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 0,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:longueur_faitage",
+     "text": "Longueur du faîtage ?"
+    }
+   ]
+  }
  },
  {
   "m": "M6",
@@ -916,6 +2117,33 @@
  },
  {
   "m": "M6",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M6",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -947,19 +2175,111 @@
   "m": "M6",
   "c": "C07",
   "e": 1,
-  "absent": true
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M6",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Mortier pour solin",
+     "lue": "Mortier"
+    },
+    {
+     "ref": "Descente Ø80 d'eau pluviale, diamètre descentes mm",
+     "lue": "DEP Ø80"
+    }
+   ],
+   "horsRef": []
+  }
  },
  {
   "m": "M6",
   "c": "C09",
   "e": 1,
-  "absent": true
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
  },
  {
   "m": "M6",
   "c": "C10",
   "e": 1,
-  "absent": true
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 3,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:surface",
+     "text": "Surface du toit ?"
+    }
+   ]
+  }
  },
  {
   "m": "M7",
@@ -1087,6 +2407,55 @@
  },
  {
   "m": "M7",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 3,
+  "quantite": 3,
+  "manquantes": 0,
+  "inventees": 2,
+  "doutes": 3,
+  "questions": 3,
+  "questionsRef": 4,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 2,
+  "detail": {
+   "quantite": [
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 7027 pièces lu",
+    "Feuilles zinc naturel 2 × 1 m, 0,65 mm : 2 pièces attendu, 1 pièce lu",
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 7027 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [
+    "Ardoises naturelles 30×20 (à chiffrer )",
+    "Crochets noirs (à chiffrer )"
+   ],
+   "doutes": [
+    {
+     "ref": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+     "lue": "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98"
+    },
+    {
+     "ref": "Faîtières",
+     "lue": "Faîtières terre cuite"
+    },
+    {
+     "ref": "4 noues de 1,80 m.",
+     "lue": "Noues zinc"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:usage_sortie",
+     "text": "Sortie de toit : conduit de fumée ou ventilation ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M7",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -1152,6 +2521,39 @@
  },
  {
   "m": "M7",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Mortier pour solin",
+     "lue": "mortier"
+    },
+    {
+     "ref": "Descente Ø80 d'eau pluviale, diamètre descentes mm",
+     "lue": "Tubes de descente"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -1178,7 +2580,44 @@
   "m": "M7",
   "c": "C10",
   "e": 1,
-  "absent": true
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 0,
+  "manquantes": 2,
+  "inventees": 2,
+  "doutes": 0,
+  "questions": 5,
+  "questionsRef": 3,
+  "questionsHorsRef": 3,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 3,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Gouttière dév. 25 (5 longueurs de 4 m)",
+    "Tubes de descente Ø80, longueur 2 m (6 pièces)"
+   ],
+   "inventees": [
+    "Gouttières PVC sable (5 longueurs de 4 m)",
+    "Descentes PVC (6 pièces)"
+   ],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:surface",
+     "text": "Surface du toit ?"
+    },
+    {
+     "key": "param:usage_sortie",
+     "text": "Sortie de toit : conduit de fumée ou ventilation ?"
+    },
+    {
+     "key": "param:developpe_gouttiere",
+     "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+    }
+   ]
+  }
  },
  {
   "m": "M8",
@@ -1213,7 +2652,38 @@
   "m": "M8",
   "c": "C02",
   "e": 1,
-  "absent": true
+  "nRef": 7,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 4,
+  "inventees": 2,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 0,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Écran HPV, rouleau 1,50 × 50 m (2 rouleaux)",
+    "Liteaux 27×40 (210 ml)",
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge (à chiffrer )",
+    "Faîtières terre cuite rouge (24 pièces)"
+   ],
+   "inventees": [
+    "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m². (120 ml)",
+    "120 m². Pente 30°, rampant 7,50 m. (1 pièces)"
+   ],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:surface",
+     "text": "Surface du toit ?"
+    }
+   ]
+  }
  },
  {
   "m": "M8",
@@ -1258,7 +2728,77 @@
   "m": "M8",
   "c": "C04",
   "e": 1,
-  "absent": true
+  "nRef": 6,
+  "justes": 3,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 3,
+  "questionsRef": 2,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Feuilles Quartz-Zinc 2 × 1 m, 0,70 mm : 1 pièce attendu, 9 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Couvre-joints Quartz-Zinc 0,70 mm pour tasseaux de 50 mm",
+     "lue": "Tasseaux bois et des couvre-joints zinc quartz ( au poste 2)"
+    },
+    {
+     "ref": "Tubes de descente Ø100, longueur 2 m",
+     "lue": "Tubes de descente"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:longueur_bande@bandes-zinc__3",
+     "text": "Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?"
+    }
+   ]
+  }
+ },
+ {
+  "m": "M8",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 6,
+  "quantite": 2,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 5,
+  "questionsRef": 4,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+   ],
+   "manquantes": [
+    "4 noues de 1,80 m. (à chiffrer )"
+   ],
+   "inventees": [
+    "Abergement de cheminée d'un abergement de cheminée en zinc, périmètre 3 m. (à chiffrer )"
+   ],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:nb_cheminees",
+     "text": "Combien de cheminées ?"
+    }
+   ]
+  }
  },
  {
   "m": "M8",
@@ -1329,6 +2869,36 @@
  },
  {
   "m": "M8",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [
+    "Mortier pour solin : 1 sac de 25 kg attendu, 3 ml lu"
+   ],
+   "manquantes": [
+    "Descente Ø80 d'eau pluviale, diamètre descentes mm (1 pièces)"
+   ],
+   "inventees": [
+    "Remplact DEP Ø080 (1 pièces)"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M8",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -1355,7 +2925,325 @@
   "m": "M8",
   "c": "C10",
   "e": 1,
+  "nRef": 9,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 3,
+  "questionsRef": 3,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Écran HPV, rouleau 1,50 × 50 m",
+     "lue": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV."
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 3,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 3,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 893 ml lu"
+   ],
+   "manquantes": [
+    "Ardoises (Ardoises) (à chiffrer )"
+   ],
+   "inventees": [
+    "Ardoises naturelles Espagne 1er choix 32×22 (3992 pièces)"
+   ],
+   "doutes": [
+    {
+     "ref": "Gouttière dév. 25",
+     "lue": "Gouttière demi-ronde zinc de 25"
+    },
+    {
+     "ref": "Tubes de descente Ø80, longueur 2 m",
+     "lue": "Descente d'eau pluviale zinc Ø80"
+    },
+    {
+     "ref": "Crochets d'ardoise (Ardoises)",
+     "lue": "Crochets d'ardoise inox standard, longueur 10 cm"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 6,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Tubes de descente Ø100, longueur 2 m",
+     "lue": "Descente d'eaux pluviales zinc quartz Ø100"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C05",
+  "e": 1,
   "absent": true
+ },
+ {
+  "m": "M9",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Faîtières (27 pièces)"
+   ],
+   "inventees": [
+    "Faitage (27 pièces)"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 4,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [
+    "F. et P. desc. EP PVC gris Ø80, ht 4,00 m : 2 pièces attendu, 4 pièces lu"
+   ],
+   "manquantes": [
+    "Faîtières (38 pièces)"
+   ],
+   "inventees": [
+    "Faîtière BA RAL 7016 (12,5 ml)"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Descente Ø80 d'eau pluviale, diamètre descentes mm",
+     "lue": "DEP Ø80"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Gouttière dév. 33",
+     "lue": "Gouttière zinc demi-ronde de 33"
+    },
+    {
+     "ref": "Tubes de descente Ø100, longueur 2 m",
+     "lue": "Descente d'eaux pluviales zinc Ø 100"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M9",
+  "c": "C10",
+  "e": 1,
+  "nRef": 9,
+  "justes": 5,
+  "quantite": 2,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 1,
+  "questions": 4,
+  "questionsRef": 3,
+  "questionsHorsRef": 2,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 2,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [
+    "Ardoises fibres-ciment : à chiffrer  attendu, 3211 pièces lu",
+    "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 771 ml lu"
+   ],
+   "manquantes": [
+    "Gouttière dév. 25 (5 longueurs de 4 m)"
+   ],
+   "inventees": [
+    "Gouttières PVC sable (5 longueurs de 4 m)"
+   ],
+   "doutes": [
+    {
+     "ref": "Tubes de descente Ø80, longueur 2 m",
+     "lue": "Descentes PVC Ø80"
+    }
+   ],
+   "horsRef": [
+    {
+     "key": "param:surface",
+     "text": "Surface du toit ?"
+    },
+    {
+     "key": "param:developpe_gouttiere",
+     "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+    }
+   ]
+  }
  },
  {
   "m": "M10",
@@ -1468,6 +3356,33 @@
  },
  {
   "m": "M10",
+  "c": "C05",
+  "e": 1,
+  "nRef": 9,
+  "justes": 7,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M10",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -1526,6 +3441,39 @@
  },
  {
   "m": "M10",
+  "c": "C08",
+  "e": 1,
+  "nRef": 4,
+  "justes": 2,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Mortier pour solin",
+     "lue": "Mortier"
+    },
+    {
+     "ref": "Descente Ø80 d'eau pluviale, diamètre descentes mm",
+     "lue": "DEP Ø80"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M10",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -1552,6 +3500,29 @@
   "m": "M10",
   "c": "C10",
   "e": 1,
-  "absent": true
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 3,
+  "questionsHorsRef": 1,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 1,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": [
+    {
+     "key": "param:surface",
+     "text": "Surface du toit ?"
+    }
+   ]
+  }
  }
 ]

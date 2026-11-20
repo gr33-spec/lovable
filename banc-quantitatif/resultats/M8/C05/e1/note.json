@@ -1,0 +1,36 @@
+{
+ "m": "M8",
+ "c": "C05",
+ "e": 1,
+ "nRef": 9,
+ "justes": 6,
+ "quantite": 2,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 4,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 1,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+   "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+  ],
+  "manquantes": [
+   "4 noues de 1,80 m. (à chiffrer )"
+  ],
+  "inventees": [
+   "Abergement de cheminée d'un abergement de cheminée en zinc, périmètre 3 m. (à chiffrer )"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:nb_cheminees",
+    "text": "Combien de cheminées ?"
+   }
+  ]
+ }
+}

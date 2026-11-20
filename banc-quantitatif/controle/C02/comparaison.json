@@ -1,0 +1,14 @@
+{
+  "accords": [
+    {"article": "Écran sous-toiture HPV, rouleau 1,50 × 50 m", "quantite": 2, "unite": "rouleaux"},
+    {"article": "Closoir de faîtage souple ventilé, rouleau de 5 m", "quantite": 2, "unite": "rouleaux"}
+  ],
+  "desaccords": [
+    {"article": "Contre-liteau sapin traité classe 2, 27×40", "controleur": "200 ml", "reference": "210 ml", "ecart": "Même article (contre-lattage, une file tous les 60 cm sur 120 m²), quantité différente : 200 ml côté contrôleur contre 210 ml côté référence, soit 10 ml d'écart."},
+    {"article": "Liteau sapin traité classe 2, 27×40", "controleur": "336 ml", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 336 ml ; la référence ne donne aucune quantité (à chiffrer, pureau minimal manquant)."},
+    {"article": "Tuile terre cuite HP 10 Huguenot rouge", "controleur": "1260 pièces", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 1260 pièces ; la référence ne donne ni quantité ni unité (120 m² au devis seulement)."},
+    {"article": "Tuile de rive à rabat HP 10 rouge, gauche (réf. 205.73)", "controleur": "41 pièces", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 41 pièces ; la référence indique les tuiles de rive à chiffrer, sans quantité."},
+    {"article": "Tuile de rive à rabat HP 10 rouge, droite (réf. 205.72)", "controleur": "41 pièces", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 41 pièces ; la référence indique les tuiles de rive à chiffrer, sans quantité."},
+    {"article": "Faîtière terre cuite demi-ronde à emboîtement rouge", "controleur": "25 pièces", "reference": "24 pièces", "ecart": "Même article, quantité différente : 25 pièces côté contrôleur (casse 1 % incluse) contre 24 pièces côté référence, soit 1 pièce d'écart."}
+  ]
+}

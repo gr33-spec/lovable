@@ -1,0 +1,41 @@
+{
+  "accords": [],
+  "desaccords": [
+    {
+      "article": "Tuile canal terre cuite courant (Edilians Canal 50, courant)",
+      "controleur": "991 pièces",
+      "reference": "à chiffrer (ligne « Tuiles canal terre cuite, courants et couverts » sans quantité ni unité, détail : 85 m² au devis)",
+      "ecart": "Le contrôleur donne 991 pièces, la référence ne donne aucune quantité ni unité pour les tuiles (courants et couverts non distingués)."
+    },
+    {
+      "article": "Tuile canal terre cuite couvert (Edilians Canal 50, couvert)",
+      "controleur": "à chiffrer",
+      "reference": "à chiffrer (ligne unique courants et couverts, sans quantité ni unité)",
+      "ecart": "Les deux côtés sont sans quantité, mais la référence ne sépare pas courants et couverts alors que le contrôleur en fait deux articles."
+    },
+    {
+      "article": "Liteau 27×40",
+      "controleur": "256 ml",
+      "reference": "à chiffrer (calcul impossible sans « Liteaux au m² à R 170 »)",
+      "ecart": "Le contrôleur chiffre 256 ml, la référence laisse l'article à chiffrer."
+    },
+    {
+      "article": "Bardelis / rives (tuile de rive canal)",
+      "controleur": "34 pièces (17 gauche + 17 droit)",
+      "reference": "33 pièces",
+      "ecart": "Quantité différente : 34 pièces contre 33 pour les rives 2 x 6 ml ; la référence ne distingue pas gauche et droit."
+    },
+    {
+      "article": "Faîtière canal terre cuite 50 cm",
+      "controleur": "28 pièces",
+      "reference": "27 pièces",
+      "ecart": "Quantité différente : 28 pièces contre 27 pour le faîtage de 9 ml."
+    },
+    {
+      "article": "Mortier de couverture (scellement du faîtage)",
+      "controleur": "4 sacs de 25 kg",
+      "reference": "absent",
+      "ecart": "Article présent chez le contrôleur (4 sacs de 25 kg), absent de la liste de référence."
+    }
+  ]
+}

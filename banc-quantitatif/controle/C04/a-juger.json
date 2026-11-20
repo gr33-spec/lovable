@@ -1,0 +1,34 @@
+{
+ "doutes": [
+  {
+   "id": "tubes de descente 100 longueur 2 m ¦ descente d eaux pluviales zinc quartz 100",
+   "reference": "Tubes de descente Ø100, longueur 2 m",
+   "lue": "Descente d'eaux pluviales zinc quartz Ø100"
+  },
+  {
+   "id": "tubes de descente 100 longueur 2 m ¦ descente d eaux pluviales zinc quartz",
+   "reference": "Tubes de descente Ø100, longueur 2 m",
+   "lue": "Descente d'eaux pluviales zinc quartz"
+  },
+  {
+   "id": "couvre joints quartz zinc 0.70 mm pour tasseaux de 50 mm ¦ tasseaux bois et des couvre joints zinc quartz au poste 2",
+   "reference": "Couvre-joints Quartz-Zinc 0,70 mm pour tasseaux de 50 mm",
+   "lue": "Tasseaux bois et des couvre-joints zinc quartz ( au poste 2)"
+  },
+  {
+   "id": "tubes de descente 100 longueur 2 m ¦ tubes de descente",
+   "reference": "Tubes de descente Ø100, longueur 2 m",
+   "lue": "Tubes de descente"
+  }
+ ],
+ "questions": [
+  {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?"
+  },
+  {
+   "id": "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?",
+   "question": "Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?"
+  }
+ ]
+}

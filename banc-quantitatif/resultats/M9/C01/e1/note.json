@@ -1,0 +1,43 @@
+{
+ "m": "M9",
+ "c": "C01",
+ "e": 1,
+ "nRef": 8,
+ "justes": 3,
+ "quantite": 1,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 3,
+ "questions": 2,
+ "questionsRef": 2,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 893 ml lu"
+  ],
+  "manquantes": [
+   "Ardoises (Ardoises) (à chiffrer )"
+  ],
+  "inventees": [
+   "Ardoises naturelles Espagne 1er choix 32×22 (3992 pièces)"
+  ],
+  "doutes": [
+   {
+    "ref": "Gouttière dév. 25",
+    "lue": "Gouttière demi-ronde zinc de 25"
+   },
+   {
+    "ref": "Tubes de descente Ø80, longueur 2 m",
+    "lue": "Descente d'eau pluviale zinc Ø80"
+   },
+   {
+    "ref": "Crochets d'ardoise (Ardoises)",
+    "lue": "Crochets d'ardoise inox standard, longueur 10 cm"
+   }
+  ],
+  "horsRef": []
+ }
+}

@@ -1,0 +1,34 @@
+{
+  "accords": [
+    {"article": "Écran sous-toiture HPV, rouleau 1,50 × 50 m", "quantite": 2, "unite": "rouleaux"},
+    {"article": "Feuille de zinc naturel 2 × 1 m, 0,65 mm (faîtage 8 ml, dév. 33 cm)", "quantite": 2, "unite": "feuilles"},
+    {"article": "Tuyau de descente zinc Ø 80, longueur 2 m", "quantite": 6, "unite": "tubes de 2 m"},
+    {"article": "Dauphin fonte Ø 80", "quantite": 2, "unite": "pièces"}
+  ],
+  "desaccords": [
+    {
+      "article": "Gouttière demi-ronde zinc de 25, 0,65 mm, longueur 4 m",
+      "controleur": "5 longueurs de 4 m",
+      "reference": "4 longueurs de 4 m",
+      "ecart": "Même article et même unité, mais le contrôleur compte 5 longueurs (16,12 ml avec 30 mm par jonction soudée) et la référence 4 longueurs."
+    },
+    {
+      "article": "Liteaux sapin traité classe 2, 18×40, longueurs de 4 m",
+      "controleur": "988 ml",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur donne 988 ml (247 liteaux de 4 m) ; la référence ne chiffre pas l'article (calcul impossible sans la « Longueur » de l'ardoise)."
+    },
+    {
+      "article": "Ardoise naturelle d'Espagne 1er choix 32×22",
+      "controleur": "4330 pièces",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur donne 4330 ardoises ; la référence ne chiffre pas l'article (calcul impossible sans la « Longueur » de l'ardoise)."
+    },
+    {
+      "article": "Crochets d'ardoise inox Ø 2,7 mm, longueur 10 cm",
+      "controleur": "9 boîtes de 500",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur donne 9 boîtes de 500 ; la référence ne chiffre pas l'article (dépend du calcul des ardoises, non fait)."
+    }
+  ]
+}

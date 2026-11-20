@@ -1,0 +1,35 @@
+{
+ "m": "M0",
+ "c": "C10",
+ "e": 1,
+ "nRef": 9,
+ "justes": 8,
+ "quantite": 1,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 3,
+ "questionsHorsRef": 2,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 2,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 100 ml lu"
+  ],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:dauphin",
+    "text": "Un dauphin en pied de chaque descente ?"
+   },
+   {
+    "key": "param:developpe_gouttiere",
+    "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+   }
+  ]
+ }
+}
