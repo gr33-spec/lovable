@@ -404,6 +404,44 @@ Pas d'ouvrage « coffrage » dans `referentiel.json` : la ligne part telle qu'é
   - rendement de n'importe quelle cartouche de 310 ml : 310 000 ÷ section en mm² (Ø 8 mm ≈ 6,2 m) ✔✔ [R05 E] ;
   - mastic acoustique Placo, mousse coupe-feu : ? (non trouvés).
 
+### 5.8 Coupe-feu : systèmes courants par marque (décision de Greg, 20 novembre 2026)
+
+**Règle.** Le classement se lit au devis, il ne se déduit jamais : EI, REI, « CF », « coupe-feu », PV. Dès qu'il est écrit, Mobiiz pose **une seule question** : « Ton système coupe-feu, c'est quelle marque ? » (Placo / Knauf / Siniat). Ensuite :
+- chaque ligne du système porte cette marque (plaques, montants, rails, fourrures, suspentes, éclisses, cornières, vis, laine), **jamais « ou équivalent »** ;
+- la précision dit « système coupe-feu EI xx, marque unique selon son procès-verbal ».
+
+Chaque marque dit que ses performances ne valent qu'avec ses propres composants ✔✔ [R11 §4.1].
+
+**Souvent, la plaque ne change pas.** En 72/48 EI 30 et en 98/48 EI 60, les trois marques utilisent des plaques **standard**. Le moteur ne passe donc pas en plaque feu par réflexe [R11 §4.2]. ✔✔ (3 marques)
+
+| Classement | Placo | Siniat | Knauf | État |
+|---|---|---|---|---|
+| EI 30, 72/48 | 1 BA13 standard par face, M48, laine minérale 45 (PV RS 15-019) | 1 Prégyplac BA13 par face, M48-35, laine de verre 45 (EFR-24-005466), 2,50 à 3,40 m | 1 KS 13 par face, M48/35, laine minérale obligatoire, H ≤ 3,00 m (06-V-263) | ✔✔ |
+| EI 60, 72/48 | 1 **Placoflam** BA13 par face, M48 **doublés à 0,40**, laine minérale 45, 3,45 m (RS 15-020) | **n'existe pas** : passer en D106/70 (BA18) ou D100/70 Flam (Prégyflam BA15) | 1 **KF 13** par face, M48 doublés à 0,40, laine de verre 45 mm 12 kg/m³ obligatoire, feuillard aux joints horizontaux, 3,40 m (EFR-19-V-002073) | ✔✔ (Placo, Knauf) |
+| EI 60, 98/48 | 2 BA13 standard par face, M48 simples à 0,60, 3 m (sp00018909) | 2 Prégyplac BA13 par face, M48-50 (06-V-052) | 2 KS 13 par face (07-A-234) | ✔✔ |
+| EI 90 | non trouvé | non trouvé | 98/48 KS 13 + KF 13 par face | ✔ |
+| EI 120, 98/48 | 2 Placoflam par face, M48-50 à 0,60, sans isolant, 3,10 m (RS 15-022) | D102/48 EI 120 (composition à lire), ou séparatives S195 / S205 en 3 + 3 BA13 | 2 KF 13 par face, jusqu'à 4,35 m | ✔✔ (Placo, Knauf) ; ? Siniat |
+| Plafond REI 60 sous plancher | montage PRF : 2 Placoflam BA13, fourrures à 0,60, entretoises PRF (2,6/m²), vis tous les 15 cm (jusqu'à 23/m²) | 2 Prégyflam BA13 ou BA15, fourrures S47 à 0,50 | Métal Chrono : 1 KF BA15 (principe seulement) | ✔✔ plaques ; ✔ montage |
+| Gaines | trappes coupe-feu 30, 60, 120 min (gaine non trouvée) | D72/48 sur montants accolés (EI 30), D84/48 BA18 S (EI 60) | KM 72/48 KS 13 + laine ; trappes Star GT 18 / GT 25 | ✔ |
+
+**Ce que fait `referentiel.json`** (ouvrages `cloison-distributive` et `plafond-fourrures`) :
+- donnée `ei`, lue au devis (« EI 60 », « REI 60 », « CF 1h ») ; par défaut 0, « pas d'exigence feu écrite » ;
+- question `marque_systeme` ; elle n'est posée que si `ei` est écrit ;
+- toutes les lignes du système en version « marque » ;
+- plaque par défaut selon le classement : standard en 72/48 EI 30 et en 98/48 EI 60 ; feu en 72/48 EI 60 et en 98/48 EI 120 ;
+- 72/48 EI 60 : montants doublés à 0,40 par défaut ;
+- 72/48 coupe-feu : **laine minérale 45 mm de la marque obligatoire** (sortie d'office, « obligatoire si ») ;
+- plafond coupe-feu : deux plaques par défaut à partir de REI 60, peau visible vissée à 15 cm (23 vis/m², Placo PRF ✔).
+
+**Pas encore généré, à préciser au comptoir** (jamais inventé) [R11 §4.4] :
+- le mastic ou la bande intumescente en pied et en tête de cloison ;
+- la protection des boîtiers électriques ;
+- les entretoises PRF Placo ;
+- le feuillard Knauf aux joints horizontaux ;
+- le système Siniat qui remplace la 72/48 EI 60 ;
+- les hauteurs Knauf (catalogue 2020, antérieur au DTU 2022) ;
+- la gaine Placo ; les plafonds rampants des trois marques.
+
 ### 5.7 Locaux humides
 
 | Règle | Valeur | État | Sources |
