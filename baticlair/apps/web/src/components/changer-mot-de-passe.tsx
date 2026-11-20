@@ -13,7 +13,8 @@ const MIN = 10;
 function phraseRefus(e: unknown): { champ: "actuel" | "nouveau" | null; phrase: string } {
   if (e instanceof ApiError) {
     if (e.status === 429) return { champ: null, phrase: "Trop d'essais. Réessaie dans une heure, ou passe par « Mot de passe oublié ? »." };
-    if (e.code === "INVALID_PASSWORD" || e.code === "CREDENTIAL_ACCOUNT_NOT_FOUND") return { champ: "actuel", phrase: "Le mot de passe actuel ne correspond pas." };
+    if (e.code === "INVALID_PASSWORD" || e.code === "CREDENTIAL_ACCOUNT_NOT_FOUND")
+      return { champ: "actuel", phrase: "Le mot de passe actuel ne correspond pas." };
     if (e.code === "PASSWORD_TOO_SHORT") return { champ: "nouveau", phrase: `Le nouveau mot de passe doit faire au moins ${MIN} caractères.` };
     if (e.code === "PASSWORD_TOO_LONG") return { champ: "nouveau", phrase: "Le nouveau mot de passe est trop long." };
     if (e.code === "PASSWORD_COMPROMISED") return { champ: "nouveau", phrase: "Ce mot de passe a déjà fuité sur Internet. Choisis-en un autre." };
@@ -22,7 +23,23 @@ function phraseRefus(e: unknown): { champ: "actuel" | "nouveau" | null; phrase: 
   return { champ: null, phrase: "Le mot de passe n'a pas pu être changé. Réessaie dans un instant." };
 }
 
-function Champ({ id, label, valeur, onChange, autoComplete, erreur, aide }: { id: string; label: string; valeur: string; onChange: (v: string) => void; autoComplete: string; erreur?: string | null; aide?: string }) {
+function Champ({
+  id,
+  label,
+  valeur,
+  onChange,
+  autoComplete,
+  erreur,
+  aide,
+}: {
+  id: string;
+  label: string;
+  valeur: string;
+  onChange: (v: string) => void;
+  autoComplete: string;
+  erreur?: string | null;
+  aide?: string;
+}) {
   const [visible, setVisible] = useState(false);
   return (
     <div className="flex flex-col gap-1.5">
@@ -30,8 +47,23 @@ function Champ({ id, label, valeur, onChange, autoComplete, erreur, aide }: { id
         {label}
       </label>
       <div className="relative">
-        <input id={id} type={visible ? "text" : "password"} value={valeur} onChange={(e) => onChange(e.target.value)} autoComplete={autoComplete} aria-invalid={erreur ? true : undefined} aria-describedby={erreur ? `${id}-erreur` : aide ? `${id}-aide` : undefined} className={`${INPUT} w-full pr-14 ${erreur ? "border-danger" : ""}`} />
-        <button type="button" onClick={() => setVisible((v) => !v)} aria-pressed={visible} aria-label={visible ? `Masquer : ${label}` : `Afficher : ${label}`} className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 place-items-center rounded-full text-ink">
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          value={valeur}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          aria-invalid={erreur ? true : undefined}
+          aria-describedby={erreur ? `${id}-erreur` : aide ? `${id}-aide` : undefined}
+          className={`${INPUT} w-full pr-14 ${erreur ? "border-danger" : ""}`}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          aria-pressed={visible}
+          aria-label={visible ? `Masquer : ${label}` : `Afficher : ${label}`}
+          className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 place-items-center rounded-full text-ink"
+        >
           {visible ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
         </button>
       </div>
@@ -56,7 +88,9 @@ function Champ({ id, label, valeur, onChange, autoComplete, erreur, aide }: { id
  * Un compte créé avec Google ou Microsoft n'a pas de mot de passe ici : on le dit, sans formulaire inutile.
  */
 export function ChangerMotDePasse() {
-  const { data: comptes } = useResource(useCallback((s: AbortSignal) => api<{ providerId?: string; provider?: string }[]>("/v1/auth/list-accounts", { signal: s }).catch(() => null), []));
+  const { data: comptes } = useResource(
+    useCallback((s: AbortSignal) => api<{ providerId?: string; provider?: string }[]>("/v1/auth/list-accounts", { signal: s }).catch(() => null), []),
+  );
   const [ouvert, setOuvert] = useState(false);
   const [actuel, setActuel] = useState("");
   const [nouveau, setNouveau] = useState("");
@@ -80,7 +114,11 @@ export function ChangerMotDePasse() {
     setRefus(null);
     try {
       await api("/v1/auth/change-password", { method: "POST", body: { currentPassword: actuel, newPassword: nouveau, revokeOtherSessions: autres } });
-      setFait(autres ? "Mot de passe modifié. Tes autres appareils sont déconnectés ; celui-ci reste connecté." : "Mot de passe modifié. Tes appareils restent connectés.");
+      setFait(
+        autres
+          ? "Mot de passe modifié. Tes autres appareils sont déconnectés ; celui-ci reste connecté."
+          : "Mot de passe modifié. Tes appareils restent connectés.",
+      );
       setActuel("");
       setNouveau("");
       setConfirmation("");
@@ -101,16 +139,58 @@ export function ChangerMotDePasse() {
         </p>
       ) : null}
       {sansMotDePasse ? (
-        <p className="text-[15px] leading-relaxed text-muted">Tu te connectes avec {fournisseurs.includes("google") ? "Google" : fournisseurs.includes("microsoft") ? "Microsoft" : "un autre service"} : ton mot de passe se gère chez lui, pas dans Mobiiz.</p>
+        <p className="text-[15px] leading-relaxed text-muted">
+          Tu te connectes avec {fournisseurs.includes("google") ? "Google" : fournisseurs.includes("microsoft") ? "Microsoft" : "un autre service"} : ton mot de
+          passe se gère chez lui, pas dans Mobiiz.
+        </p>
       ) : !ouvert ? (
-        <Button variant="secondary" onClick={() => { setOuvert(true); setFait(null); }}>
-          Modifier mon mot de passe
-        </Button>
+        <>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setOuvert(true);
+              setFait(null);
+            }}
+          >
+            Modifier mon mot de passe
+          </Button>
+          {/* Greg, 19 novembre 2026 : un compte créé par la carte n'a pas de mot de passe connu (il se connecte par lien). Pour
+              en choisir un : un lien par e-mail, le même chemin sûr que « Mot de passe oublié » (anti-robot compris). */}
+          <Link
+            href="/mot-de-passe-oublie?choisir=1"
+            className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text underline underline-offset-4"
+          >
+            Choisir un mot de passe
+          </Link>
+          <p className="text-[13px] text-muted">Tu te connectes par lien et tu veux aussi un mot de passe ? On t&apos;envoie un lien pour le choisir.</p>
+        </>
       ) : (
         <form onSubmit={(e) => void envoyer(e)} noValidate className="flex flex-col gap-3" aria-label="Modifier mon mot de passe">
-          <Champ id="mdp-actuel" label="Mot de passe actuel" valeur={actuel} onChange={setActuel} autoComplete="current-password" erreur={refus?.champ === "actuel" ? refus.phrase : null} />
-          <Champ id="mdp-nouveau" label="Nouveau mot de passe" valeur={nouveau} onChange={setNouveau} autoComplete="new-password" erreur={refus?.champ === "nouveau" ? refus.phrase : null} aide={`${MIN} caractères au moins. Un mot de passe déjà fuité sur Internet est refusé.`} />
-          <Champ id="mdp-confirmation" label="Confirmer le nouveau mot de passe" valeur={confirmation} onChange={setConfirmation} autoComplete="new-password" erreur={refus?.champ === "confirmation" ? refus.phrase : null} />
+          <Champ
+            id="mdp-actuel"
+            label="Mot de passe actuel"
+            valeur={actuel}
+            onChange={setActuel}
+            autoComplete="current-password"
+            erreur={refus?.champ === "actuel" ? refus.phrase : null}
+          />
+          <Champ
+            id="mdp-nouveau"
+            label="Nouveau mot de passe"
+            valeur={nouveau}
+            onChange={setNouveau}
+            autoComplete="new-password"
+            erreur={refus?.champ === "nouveau" ? refus.phrase : null}
+            aide={`${MIN} caractères au moins. Un mot de passe déjà fuité sur Internet est refusé.`}
+          />
+          <Champ
+            id="mdp-confirmation"
+            label="Confirmer le nouveau mot de passe"
+            valeur={confirmation}
+            onChange={setConfirmation}
+            autoComplete="new-password"
+            erreur={refus?.champ === "confirmation" ? refus.phrase : null}
+          />
           <label className="flex min-h-11 items-start gap-3">
             <input type="checkbox" checked={autres} onChange={(e) => setAutres(e.target.checked)} className="mt-1 size-5 shrink-0 accent-accent" />
             <span className="text-[15px] leading-relaxed">Déconnecter mes autres appareils</span>
@@ -124,7 +204,14 @@ export function ChangerMotDePasse() {
             <Button type="submit" pending={pending}>
               Enregistrer
             </Button>
-            <Button type="button" variant="secondary" onClick={() => { setOuvert(false); setRefus(null); }}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setOuvert(false);
+                setRefus(null);
+              }}
+            >
               Annuler
             </Button>
           </div>

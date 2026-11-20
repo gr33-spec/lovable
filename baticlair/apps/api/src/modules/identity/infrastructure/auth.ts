@@ -2,12 +2,12 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
-import { captcha } from "better-auth/plugins";
+import { captcha, magicLink } from "better-auth/plugins";
 import { ENDPOINTS_TURNSTILE } from "../../../platform/http/turnstile.js";
 import { PREVIEW_ORIGIN_JOKER, type AppConfig } from "../../../platform/config/config.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
-import { resetPasswordEmail, verificationEmail } from "./emails.js";
+import { magicLinkEmail, resetPasswordEmail, verificationEmail } from "./emails.js";
 import { NOM_APP } from "@baticlair/domain";
 import { Logger } from "@nestjs/common";
 
@@ -40,6 +40,17 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
     // Turnstile (Cloudflare) sur l'inscription et le mot de passe oublié, dès que la clé secrète est posée.
     plugins: [
       ...(config.motsDePasseFuites ? [haveIBeenPwned({ customPasswordCompromisedMessage: "Ce mot de passe a déjà fuité sur Internet. Choisis-en un autre." })] : []),
+      // LE LIEN DE CONNEXION (Greg, 19 novembre 2026) : « Recevoir un lien de connexion », la façon normale de se reconnecter
+      // sans mot de passe. Usage unique (le jeton est consommé à la première ouverture), 15 minutes, jamais une création de
+      // compte (`disableSignUp`), jeton haché en base. Le mot de passe reste possible pour qui en a un.
+      magicLink({
+        expiresIn: 15 * 60,
+        disableSignUp: true,
+        storeToken: "hashed",
+        sendMagicLink: async ({ email: adresse, url }) => {
+          await email.send(magicLinkEmail(adresse, url));
+        },
+      }),
       ...(config.turnstileSecret ? [captcha({ provider: "cloudflare-turnstile", secretKey: config.turnstileSecret, endpoints: [...ENDPOINTS_TURNSTILE] })] : []),
     ],
     // Recentrage (Greg, 25 octobre 2026) : l'admin peut couper temporairement les inscriptions gratuites (coût IA) ;
@@ -101,6 +112,8 @@ export function createAuth(config: AppConfig, prisma: PrismaService, email: Tran
       customRules: {
         "/sign-in/email": { window: 60, max: 5 },
         "/sign-up/email": { window: 3600, max: 5 },
+        // Le lien de connexion : cinq demandes par heure et par adresse IP (chaque demande envoie un e-mail).
+        "/sign-in/magic-link": { window: 3600, max: 5 },
         "/request-password-reset": { window: 3600, max: 3 },
         "/forget-password": { window: 3600, max: 3 },
         "/send-verification-email": { window: 3600, max: 3 },

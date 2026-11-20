@@ -26,6 +26,12 @@ async function appel(page: Page, method: string, url: string, body?: unknown): P
   );
 }
 
+// Le mode par défaut, comme les autres séries : l'achat groupé automatique (une série interrompue a pu en laisser un autre) ;
+// les analyses offertes se comptent dans ce mode.
+test.beforeEach(async ({ request }) => {
+  expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: "automatique" } })).status()).toBe(200);
+});
+
 /** La carte : région puis département, au toucher (tracés) ou par les boutons. */
 async function choisirDepartement(page: Page, region: string, departement: string, { parLaCarte = true } = {}) {
   if (parLaCarte) await page.locator(`path[data-region="${region}"]`).click();
@@ -179,4 +185,83 @@ test("un compte d'avant (inscription complète) n'est pas touché : ni confirmat
   expect(r.body.error?.details?.reason).not.toBe("identite_a_confirmer");
   const identite = await appel(page, "GET", "/v1/company/identite");
   expect(identite.body.aConfirmer).toBe(false);
+});
+
+const SECRET = "Bearer e2e-secret-de-la-tache";
+async function dernierMail(page: Page, email: string, sujet: RegExp): Promise<string> {
+  const r = await page.request.get(`/v1/internal/test/emails?to=${encodeURIComponent(email)}`, { headers: { authorization: SECRET } });
+  const mails = ((await r.json()) as { emails: { subject: string; text: string }[] }).emails.filter((m) => sujet.test(m.subject));
+  const m = mails.at(-1);
+  if (!m) throw new Error(`aucun e-mail « ${sujet} » pour ${email}`);
+  return /https?:\/\/\S+/.exec(m.text)![0];
+}
+
+test("connexion par lien : en premier sur l'écran, un toucher connecte, le lien ne sert qu'une fois ; le mot de passe reste possible", async ({ page, browser }) => {
+  const { email } = await onboarding(page);
+  await confirmerEmail(page, email);
+  await expect(page).toHaveURL(/\/chantiers\/nouveau/, { timeout: 15_000 });
+  // Un autre appareil, sans session.
+  const ctx = await browser.newContext({ ...(test.info().project.use as object) });
+  const autre = await ctx.newPage();
+  await autre.goto("/connexion");
+  const lienBouton = autre.getByRole("button", { name: "Recevoir un lien de connexion" });
+  const motDePasse = autre.getByRole("button", { name: "Se connecter" });
+  expect((await lienBouton.boundingBox())!.y).toBeLessThan((await motDePasse.boundingBox())!.y);
+  await autre.getByLabel("E-mail").fill(email);
+  await lienBouton.click();
+  await expect(autre.getByRole("status")).toContainText("valable 15 minutes");
+  const lien = await dernierMail(autre, email, /lien de connexion/);
+  await autre.goto(lien);
+  await expect(autre).not.toHaveURL(/\/connexion/);
+  expect((await autre.request.get("/v1/me")).status()).toBe(200);
+  await ctx.close();
+  // Le même lien, une seconde fois : refusé, on le dit.
+  const ctx2 = await browser.newContext({ ...(test.info().project.use as object) });
+  const troisieme = await ctx2.newPage();
+  await troisieme.goto(lien);
+  await expect(troisieme).toHaveURL(/\/connexion\?lien=/);
+  await expect(troisieme.getByRole("alert").filter({ hasText: "a expiré ou a déjà servi" })).toBeVisible();
+  expect((await troisieme.request.get("/v1/me")).status()).toBe(401);
+  await ctx2.close();
+});
+
+test("aucun nom d'entreprise avant le SIRET ; « Voici ton adresse Mobiiz » au premier envoi, une seule fois", async ({ page }) => {
+  test.setTimeout(120_000);
+  const { email } = await onboarding(page);
+  await confirmerEmail(page, email);
+  await expect(page).toHaveURL(/\/chantiers\/nouveau/, { timeout: 15_000 });
+  await expect(page.getByText("Mon entreprise", { exact: true })).toHaveCount(0);
+  // Une liste saisie (aucune IA), validée, et un négoce au carnet.
+  const q = await appel(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Ardoise naturelle 32×22", quantite: "900", unite: "pièces" }] });
+  expect(q.status).toBe(201);
+  const { id, projetId } = q.body as unknown as { id: string; projetId: string };
+  let courant = (await appel(page, "GET", `/v1/quantitatifs/${id}`)).body as unknown as { questions: { id: string; boutons: { valeur: string }[] }[] };
+  for (let i = 0; i < 10 && courant.questions.length > 0; i++)
+    courant = (await appel(page, "POST", `/v1/quantitatifs/${id}/reponses`, { reponses: [{ question: courant.questions[0]!.id, valeur: courant.questions[0]!.boutons[0]?.valeur ?? "ok" }] })).body as unknown as typeof courant;
+  expect((await appel(page, "POST", `/v1/quantitatifs/${id}/validation`)).status).toBe(200);
+  expect((await appel(page, "POST", "/v1/suppliers", { name: "Négoce du Trieux", email: `trieux-${unique()}@negoce.example` })).status).toBe(201);
+  await page.goto(`/chantiers/${projetId}`);
+  await expect(page.getByText("Mon entreprise", { exact: true })).toHaveCount(0);
+  // Avant aucune adresse : elle se fabrique au premier envoi.
+  expect((await appel(page, "GET", "/v1/company/identite")).body.entreprise).toBe("");
+  await page.getByRole("button", { name: "Demander les prix à mes négoces" }).click();
+  const avant = page.getByRole("dialog", { name: "Avant d'envoyer" });
+  await expect(avant.getByText("Pour que les négoces sachent à qui ils répondent")).toBeVisible();
+  await expect(avant.getByLabel("Ton portable")).toHaveValue("06 12 34 56 78");
+  await avant.getByLabel("SIRET de ton entreprise").fill("73282932000074");
+  await avant.getByLabel("Ton prénom").fill("Yann");
+  await avant.locator('[aria-label="L\'entreprise trouvée"]').getByRole("button", { name: /^C'est bien mon/ }).click();
+  const adresse = page.getByRole("dialog", { name: "Voici ton adresse Mobiiz :" });
+  await expect(adresse).toBeVisible();
+  await expect(adresse.getByText("Les réponses des négoces arrivent ici", { exact: false })).toBeVisible();
+  await adresse.getByRole("button", { name: "C'est compris" }).click();
+  await expect(page.getByRole("dialog", { name: "À qui j'envoie ?" })).toBeVisible();
+  // Rouvert : plus jamais l'écran de l'adresse.
+  await page.reload();
+  const feuille = page.getByRole("dialog", { name: "À qui j'envoie ?" });
+  const ouvrir = page.getByRole("button", { name: /^(Demander les prix à mes négoces|Envoyer la demande de devis)$/ }).first();
+  await expect(feuille.or(ouvrir).first()).toBeVisible();
+  if (!(await feuille.isVisible())) await ouvrir.click();
+  await expect(feuille).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Voici ton adresse Mobiiz :" })).toHaveCount(0);
 });

@@ -2,7 +2,7 @@
 
 import { Check, Copy, Inbox, Mail } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { Button, Card, ErrorNotice, Field, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur, type EtatAdresseMobiiz } from "@/lib/api";
 import { NOM_APP } from "@/lib/nom";
@@ -45,7 +45,13 @@ function BoutonCopier({ texte, compact = false }: { texte: string; compact?: boo
     setTimeout(() => setCopie(false), 2000);
   }
   return (
-    <Button type="button" variant={compact ? "secondary" : "primary"} onClick={() => void copier()} className={compact ? "min-h-11 px-3 text-[14px]" : "min-h-12"} aria-live="polite">
+    <Button
+      type="button"
+      variant={compact ? "secondary" : "primary"}
+      onClick={() => void copier()}
+      className={compact ? "min-h-11 px-3 text-[14px]" : "min-h-12"}
+      aria-live="polite"
+    >
       {copie ? <Check size={18} aria-hidden="true" /> : <Copy size={18} aria-hidden="true" />}
       {copie ? "Copiée" : "Copier l'adresse"}
     </Button>
@@ -91,7 +97,11 @@ export function EcranAdresseMobiiz({ onContinuer }: { onContinuer: () => void })
       <p className="text-[17px] leading-relaxed">
         {PHRASES_ADRESSE.envoie} {PHRASES_ADRESSE.recoit}
       </p>
-      {!data.email ? <p className="text-[14px] text-muted">Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.</p> : null}
+      {!data.email ? (
+        <p className="text-[14px] text-muted">
+          Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.
+        </p>
+      ) : null}
       <div className="flex flex-col gap-2">
         <BoutonCopier texte={adresseAffichee(data)} />
         <Button type="button" variant="secondary" className="min-h-12" pending={pending} onClick={() => void compris()}>
@@ -102,6 +112,30 @@ export function EcranAdresseMobiiz({ onContinuer }: { onContinuer: () => void })
         </Link>
       </div>
     </section>
+  );
+}
+
+/**
+ * AU PREMIER ENVOI AUX NÉGOCES (Greg, 19 novembre 2026 ; RÈGLE CHANGÉE : avant, juste après l'inscription) : le même
+ * contenu, dans la feuille d'envoi, une seule fois (`vueLe`). Chargé seulement à ce moment-là : l'adresse se fabrique
+ * alors avec le vrai nom de l'entreprise (confirmé par le SIRET). Rien tant que ce n'est pas chargé ; déjà vue : `onDejaVue`.
+ */
+export function ContenuAdresseMobiiz({ onDejaVue }: { onDejaVue: () => void }) {
+  const { data, error, reload } = useAdresseMobiiz();
+  const vue = !!data?.vueLe;
+  useEffect(() => {
+    if (vue) onDejaVue();
+  }, [vue, onDejaVue]);
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data || vue) return <Skeleton lines={3} label="Préparation de ton adresse…" />;
+  return (
+    <div className="flex flex-col gap-4" aria-label="Ton adresse Mobiiz">
+      <AdresseEnGros adresse={adresseAffichee(data)} />
+      <p className="text-[17px] leading-relaxed">
+        {PHRASES_ADRESSE.envoie} {PHRASES_ADRESSE.recoit}
+      </p>
+      <BoutonCopier texte={adresseAffichee(data)} />
+    </div>
   );
 }
 
@@ -152,7 +186,11 @@ export function AdresseMobiizCard() {
           <p className="text-[14px] text-muted">
             {PHRASES_ADRESSE.envoie} {PHRASES_ADRESSE.recoit}
           </p>
-          {!data.email ? <p className="text-[14px] text-muted">Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.</p> : null}
+          {!data.email ? (
+            <p className="text-[14px] text-muted">
+              Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.
+            </p>
+          ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <BoutonCopier texte={adresseAffichee(data)} compact />
             <Link href="/recus" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-[14px] font-bold">
@@ -181,7 +219,11 @@ export function AdresseMobiizCard() {
               <Field
                 id={ids.adresse}
                 label="Nouvelle adresse (une seule fois)"
-                hint={data.domaine ? `Lettres sans accent, chiffres et tirets, puis @${data.domaine}. L'ancienne reste valable.` : "Lettres sans accent, chiffres et tirets. L'ancienne reste valable."}
+                hint={
+                  data.domaine
+                    ? `Lettres sans accent, chiffres et tirets, puis @${data.domaine}. L'ancienne reste valable.`
+                    : "Lettres sans accent, chiffres et tirets. L'ancienne reste valable."
+                }
                 value={souhaitee}
                 onChange={(e) => {
                   setSouhaitee(e.target.value);
