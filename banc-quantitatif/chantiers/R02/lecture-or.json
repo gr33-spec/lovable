@@ -210,8 +210,8 @@
    "fournitures": [
     {
      "nom": "Contre-lattes en liteaux 27x40 mm",
-     "quantite": "",
-     "unite": "",
+     "quantite": "120",
+     "unite": "m²",
      "ouvrage": "couverture-tuiles-emboitement",
      "emplacement": "contre_liteau",
      "donnees": [
@@ -239,8 +239,8 @@
    "fournitures": [
     {
      "nom": "Liteaux 27x40 mm pour tuiles HP10",
-     "quantite": "",
-     "unite": "",
+     "quantite": "120",
+     "unite": "m²",
      "ouvrage": "couverture-tuiles-emboitement",
      "emplacement": "liteau",
      "donnees": [
@@ -450,7 +450,9 @@
        "valeur": "80"
       }
      ],
-     "attend": [],
+     "attend": [
+      "fixation_crochet"
+     ],
      "a_preciser": [],
      "precision": ""
     }
@@ -594,7 +596,10 @@
        "valeur": "1"
       }
      ],
-     "attend": [],
+     "attend": [
+      "diametre_sortie",
+      "usage_sortie"
+     ],
      "a_preciser": [
       "modèle"
      ],

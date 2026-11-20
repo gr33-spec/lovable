@@ -161,12 +161,12 @@
    "designation": "Liteaux bois pour ardoises",
    "quantite": "200",
    "unite": "m²",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Liteaux bois pour ardoises",
-     "quantite": "",
-     "unite": "",
+     "quantite": "200",
+     "unite": "m²",
      "ouvrage": "couverture-ardoises-crochet",
      "emplacement": "liteau",
      "donnees": [
@@ -188,7 +188,7 @@
    "designation": "Ardoises naturelles 30x22",
    "quantite": "200",
    "unite": "m²",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Ardoises naturelles 30x22",
@@ -213,7 +213,7 @@
    "designation": "Gouttière de 25, bandeau en zinc",
    "quantite": "17",
    "unite": "m",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Gouttière zinc de 25",
@@ -248,7 +248,7 @@
    "designation": "Faîtage zinc",
    "quantite": "17",
    "unite": "m",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Faîtage zinc",
@@ -273,7 +273,7 @@
    "designation": "Ardoises pour jouées de lucarnes",
    "quantite": "6",
    "unite": "unités",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Ardoises pour jouées de lucarnes",
@@ -295,7 +295,7 @@
    "designation": "Entourage de cheminée zinc et solin",
    "quantite": "2",
    "unite": "unités",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Entourage de cheminée zinc et solin",
@@ -320,7 +320,7 @@
    "designation": "Chatières de ventilation",
    "quantite": "12",
    "unite": "unités",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Chatières de ventilation",

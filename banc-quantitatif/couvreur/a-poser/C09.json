@@ -1,0 +1,48 @@
+[
+ {
+  "id": "param:faconnage@couverture-zinc-joint-debout ¦ Couverture zinc à joint debout : tu façonnes toi-même ou tu commandes façonné ?",
+  "question": "Couverture zinc à joint debout : tu façonnes toi-même ou tu commandes façonné ?",
+  "boutons": [
+   "Je façonne (bobines)",
+   "Je commande façonné (bacs)"
+  ],
+  "unite": "u",
+  "aide": "Bobine de zinc au mètre linéaire si tu façonnes ; bacs à la longueur du rampant sinon."
+ },
+ {
+  "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "boutons": [
+   "Je façonne (feuilles ou bobineau)",
+   "Je commande façonné"
+  ],
+  "unite": "u",
+  "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+ },
+ {
+  "id": "param:developpe@bandes-zinc ¦ Bande d'égout en zinc naturel : développé de la bande zinc ?",
+  "question": "Bande d'égout en zinc naturel : développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ },
+ {
+  "id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?",
+  "question": "Faîtage en bande zinc : développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ }
+]

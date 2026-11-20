@@ -1,0 +1,14 @@
+[
+ {
+  "id": "param:recouvrement_canal ¦ Recouvrement des tuiles canal ?",
+  "question": "Recouvrement des tuiles canal ?",
+  "boutons": [
+   "140 mm",
+   "150 mm",
+   "160 mm",
+   "170 mm"
+  ],
+  "unite": "mm",
+  "aide": "Il dépend de la pente et de la zone (DTU 40.22) ; sans effet pour une tuile à blocage (150 mm fixe)."
+ }
+]
