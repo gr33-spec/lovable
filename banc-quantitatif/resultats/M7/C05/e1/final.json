@@ -1,0 +1,351 @@
+{
+ "posees": [
+  {
+   "key": "param:support_sortie",
+   "text": "Sortie de toit : sur quelle couverture ?",
+   "options": [
+    "Ardoise ou tuile",
+    "Zinc"
+   ],
+   "reponse": "Ardoise ou tuile"
+  },
+  {
+   "key": "param:usage_sortie",
+   "text": "Sortie de toit : conduit de fumée ou ventilation ?",
+   "options": [
+    "Conduit de fumée",
+    "Ventilation"
+   ],
+   "reponse": "Ventilation"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles 30×20",
+    "quantite": "7027",
+    "unite": "pièces",
+    "affiche": "7 027 pièces",
+    "etat": "ready",
+    "precision": "140 m² × 47,8 ardoises/m² (crochet 10 cm, pente 50°) + 5 % de marge",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "7027",
+    "unite": "pièces",
+    "affiche": "7 027 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises naturelles 30×20",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2.1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Crochets noirs",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2.2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Noues zinc",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "param:faconnage@pieces-pliees"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Abergement de cheminée en zinc",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières terre cuite",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sorties de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier",
+   "Dépose de la couverture existante",
+   "Dépose des anciens châssis de toit",
+   "Évacuation des gravats",
+   "Fin de chantier"
+  ],
+  "questions": [
+   "param:support_sortie",
+   "param:usage_sortie",
+   "param:faconnage@pieces-pliees"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles 30×20",
+    "quantite": "7027",
+    "unite": "pièces",
+    "affiche": "7 027 pièces",
+    "etat": "ready",
+    "precision": "140 m² × 47,8 ardoises/m² (crochet 10 cm, pente 50°) + 5 % de marge",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "7027",
+    "unite": "pièces",
+    "affiche": "7 027 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises naturelles 30×20",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2.1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Crochets noirs",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2.2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Noues zinc",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour façonner l'abergement de cheminée, développé 33 cm",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières terre cuite",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125, pour ardoise ou tuile",
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier",
+   "Dépose de la couverture existante",
+   "Dépose des anciens châssis de toit",
+   "Évacuation des gravats",
+   "Fin de chantier"
+  ],
+  "questions": []
+ }
+}

@@ -1,0 +1,9 @@
+[
+ "ligne 2 : « Voliges sapin » deux quantités (60,00 contre ), à demander.",
+ "ligne 3 : donnée epaisseur_zinc divergente (0,70 contre 0.7), retirée : le code la demandera.",
+ "ligne 3 : donnée aspect_zinc divergente (zinc naturel contre 1), retirée : le code la demandera.",
+ "ligne 3 : donnée longueur_rampant divergente (5,00 contre 5), retirée : le code la demandera.",
+ "ligne 4 : « Bande d'égout en zinc naturel » rangé différemment (couverture-zinc-joint-debout/egout contre bandes-zinc/bande), gardé tel qu'écrit.",
+ "ligne 5 : donnée aspect_zinc divergente (zinc naturel contre 1), retirée : le code la demandera.",
+ "ligne 7 : donnée hauteur_descente divergente (5,00 contre 5), retirée : le code la demandera."
+]

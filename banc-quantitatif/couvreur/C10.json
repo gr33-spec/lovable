@@ -34,5 +34,151 @@
    "ne_sait_pas": false,
    "dit": "Je les plie moi-même."
   }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, raccord direct sur regard."
+  }
+ },
+ "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?": {
+  "question": {
+   "id": "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?",
+   "question": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+   "boutons": [
+    "De 25",
+    "De 28",
+    "De 33",
+    "De 40"
+   ],
+   "unite": "cm",
+   "aide": "Le développé : la largeur de la feuille avant façonnage."
+  },
+  "reponse": {
+   "bouton": "De 25",
+   "valeur": "",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "De 25."
+  }
+ },
+ "param:developpe ¦ Rives : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Rives : développé de la bande zinc ?",
+   "question": "Rives : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
+ },
+ "param:surface ¦ Surface du toit ?": {
+  "question": {
+   "id": "param:surface ¦ Surface du toit ?",
+   "question": "Surface du toit ?",
+   "boutons": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "unite": "m2",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "110",
+   "unite": "m2",
+   "ne_sait_pas": false,
+   "dit": "110 mètres carrés."
+  }
+ },
+ "param:developpe ¦ Rives - bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Rives - bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?",
+   "question": "Rives - bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
+ },
+ "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?": {
+  "question": {
+   "id": "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?",
+   "question": "Sortie de toit : conduit de fumée ou ventilation ?",
+   "boutons": [
+    "Conduit de fumée",
+    "Ventilation"
+   ],
+   "unite": "u",
+   "aide": "Un conduit de fumée demande une collerette d'étanchéité (solin)."
+  },
+  "reponse": {
+   "bouton": "Ventilation",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Ventilation, c'est l'évent."
+  }
+ },
+ "param:developpe ¦ Rives de bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Rives de bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?",
+   "question": "Rives de bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
  }
 }

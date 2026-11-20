@@ -39,5 +39,21 @@
    "ne_sait_pas": false,
    "dit": "Je plie moi-même"
   }
+ },
+ "param:longueur_crochet ¦ Quelle longueur de crochet ?": {
+  "question": {
+   "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
+   "question": "Quelle longueur de crochet ?",
+   "boutons": [],
+   "unite": "cm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "10",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "10 cm."
+  }
  }
 }

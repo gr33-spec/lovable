@@ -1,72 +1,9 @@
 [
  {
-  "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
-  "question": "Noue de 50 ou de 66 ?",
-  "boutons": [
-   "De 50",
-   "De 66"
-  ],
-  "unite": "mm",
-  "aide": null
- },
- {
-  "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
-  "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
-  "boutons": [
-   "Espagne 1er choix",
-   "Ardoise NF (type Cupa)"
-  ],
-  "unite": "u",
-  "aide": null
- },
- {
-  "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
-  "question": "Quelle longueur de crochet ?",
+  "id": "param:nb_cheminees ¦ Combien de cheminées ?",
+  "question": "Combien de cheminées ?",
   "boutons": [],
-  "unite": "cm",
-  "aide": null
- },
- {
-  "id": "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?",
-  "question": "Périmètre d'une cheminée (les 4 côtés) ?",
-  "boutons": [
-   "2 m",
-   "3 m",
-   "4 m",
-   "5 m"
-  ],
-  "unite": "m",
-  "aide": null
- },
- {
-  "id": "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?",
-  "question": "Sortie de toit : quel diamètre ?",
-  "boutons": [
-   "Ø 80",
-   "Ø 100",
-   "Ø 125",
-   "Ø 150",
-   "Ø 180",
-   "VMC"
-  ],
-  "unite": "mm",
-  "aide": "Le fournisseur en a besoin pour chiffrer la bonne embase et le bon chapeau."
- },
- {
-  "id": "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?",
-  "question": "Sortie de toit : conduit de fumée ou ventilation ?",
-  "boutons": [
-   "Conduit de fumée",
-   "Ventilation"
-  ],
   "unite": "u",
-  "aide": "Un conduit de fumée demande une collerette d'étanchéité (solin)."
- },
- {
-  "id": "param:longueur_noue ¦ Longueur de noue ?",
-  "question": "Longueur de noue ?",
-  "boutons": [],
-  "unite": "m",
   "aide": null
  }
 ]

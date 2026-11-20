@@ -33,5 +33,59 @@
    "ne_sait_pas": true,
    "dit": "Pas encore mesurée, je repasse."
   }
+ },
+ "param:developpe_noue ¦ Noue de 50 ou de 66 ?": {
+  "question": {
+   "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
+   "question": "Noue de 50 ou de 66 ?",
+   "boutons": [
+    "De 50",
+    "De 66"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "De 50",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "Noue de 50."
+  }
+ },
+ "fiche:modele_ardoise ¦ Quelle ardoise ?": {
+  "question": {
+   "id": "fiche:modele_ardoise ¦ Quelle ardoise ?",
+   "question": "Quelle ardoise ?",
+   "boutons": [],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "ardoise naturelle d'Espagne 1er choix 32×22",
+   "unite": "",
+   "ne_sait_pas": false,
+   "dit": "Naturelle d'Espagne 1er choix, 32×22."
+  }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, je garde le dauphin existant."
+  }
  }
 }

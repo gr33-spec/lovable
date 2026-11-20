@@ -1,0 +1,206 @@
+{
+ "posees": [
+  {
+   "key": "param:longueur_faitage",
+   "text": "Longueur du faîtage ?",
+   "options": [],
+   "reponse": "8 m"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": "sur fermettes",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "210",
+    "unite": "ml",
+    "affiche": "210 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 60 cm",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières terre cuite rouge",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "posées à sec",
+    "lignes": [
+     "6.1"
+    ],
+    "attend": [
+     "param:longueur_faitage"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Closoir ventilé",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6.2"
+    ],
+    "attend": [
+     "param:longueur_faitage"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Tuiles de rive HP 10 rouge",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Liteaux 27×40 (Contre-liteaux sapin traité 27×40)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage. Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "Main-d'œuvre. Main-d'œuvre de pose de la couverture, des rives et du faîtage."
+  ],
+  "questions": [
+   "param:longueur_faitage"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": "sur fermettes",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "210",
+    "unite": "ml",
+    "affiche": "210 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 60 cm",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières terre cuite rouge",
+    "quantite": "24",
+    "unite": "pièces",
+    "affiche": "24 pièces",
+    "etat": "ready",
+    "precision": "posées à sec",
+    "lignes": [
+     "6.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir ventilé",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Tuiles de rive HP 10 rouge",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Liteaux 27×40 (Contre-liteaux sapin traité 27×40)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage. Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "Main-d'œuvre. Main-d'œuvre de pose de la couverture, des rives et du faîtage."
+  ],
+  "questions": []
+ }
+}

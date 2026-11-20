@@ -22,5 +22,40 @@
    "ne_sait_pas": false,
    "dit": "650 mm, bobineau de 650."
   }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, raccordée direct sur le regard."
+  }
+ },
+ "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?": {
+  "question": {
+   "id": "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?",
+   "question": "Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "75",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "75 mètres de couvre-joints."
+  }
  }
 }
