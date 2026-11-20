@@ -17,14 +17,14 @@ const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find
 const order = (r: ReturnType<typeof computeWorkItem>, id: string) => Number(need(r, id).purchase?.order.count);
 
 describe("modèle refusé : le générique compte, le fournisseur met sa marque", () => {
-  it("D-2026-015 : faîtières ventilées refusées → 29 faîtières (modèle à préciser) et 29 crochets, plus rien à chiffrer", () => {
+  it("D-2026-015 : faîtières ventilées refusées → 30 faîtières (modèle à préciser, 3 au ml) et 30 crochets, plus rien à chiffrer", () => {
     const c = REAL_QUOTES.find((q) => q.id === "D-2026-015")!;
     const v = readQuote(c.lines, c.answers);
     expect(v.toQuote).toEqual([]);
     const faitieres = v.toBuy.find((b) => b.needIds.includes("faitieres"))!;
     expect(faitieres.label).toMatch(/^Faîtières \(modèle à préciser\)/);
-    expect(faitieres.quantity).toBe("29 pièces");
-    expect(v.toBuy.find((b) => b.needIds.includes("crochets-faitiere"))?.quantity).toBe("29 pièces");
+    expect(faitieres.quantity).toBe("30 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("crochets-faitiere"))?.quantity).toBe("30 pièces");
     // L'hypothèse « modèle » n'est pas re-posée : l'artisan a déjà répondu.
     expect(v.assumptions.some((a) => a.key === "product:faitiere")).toBe(false);
   });

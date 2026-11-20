@@ -851,14 +851,14 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 488 pièces",
+    "quantite": "1 258 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
     "designation": "Arêtiers",
-    "quantite": "70 pièces",
+    "quantite": "72 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -883,21 +883,21 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "2 049 ml",
+    "quantite": "1 991 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -952,7 +952,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 028 pièces",
+    "quantite": "1 956 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1141,14 +1141,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1165,14 +1165,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "1 880 pièces",
+    "quantite": "1 830 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 9 cm",
-    "quantite": "1 918 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 8 cm",
+    "quantite": "1 830 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1363,14 +1363,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 379 pièces",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "3 447 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1507,14 +1507,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 379 pièces",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "3 447 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1569,7 +1569,7 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 488 pièces",
+    "quantite": "1 258 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -1585,6 +1585,21 @@
   "questions": [
    "product:tuile"
   ],
+  "aChiffrer": []
+ },
+ {
+  "fichier": "roofing-317f36c017dd.json",
+  "metier": "roofing",
+  "lignes": [
+   {
+    "designation": "Tubes de descente PVC Ø80, longueur 4 m",
+    "quantite": "1 pièce",
+    "unite": "pièce",
+    "etat": "ok",
+    "raison": null
+   }
+  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -1606,34 +1621,19 @@
   "aChiffrer": []
  },
  {
-  "fichier": "roofing-3485e9747c0c.json",
-  "metier": "roofing",
-  "lignes": [
-   {
-    "designation": "Tubes de descente PVC Ø80, longueur 2 m",
-    "quantite": "2 pièces",
-    "unite": "pièces",
-    "etat": "ok",
-    "raison": null
-   }
-  ],
-  "questions": [],
-  "aChiffrer": []
- },
- {
   "fichier": "roofing-350116ac7064.json",
   "metier": "roofing",
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "1 880 pièces",
+    "quantite": "1 830 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 9 cm",
-    "quantite": "1 918 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 8 cm",
+    "quantite": "1 830 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1710,21 +1710,21 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "2 049 ml",
+    "quantite": "1 991 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -1921,14 +1921,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "8 447 pièces",
+    "quantite": "8 148 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "8 616 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 148 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1951,8 +1951,8 @@
     "raison": null
    },
    {
-    "designation": "Tubes de descente PVC gris Ø80, longueur 4 m",
-    "quantite": "4 pièces",
+    "designation": "Tubes de descente PVC gris Ø80, longueur 2 m",
+    "quantite": "6 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -2018,14 +2018,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2085,14 +2085,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2109,7 +2109,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 028 pièces",
+    "quantite": "1 956 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Épaisseur, qualité à préciser"
@@ -2162,21 +2162,21 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "2 049 ml",
+    "quantite": "1 991 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -2216,14 +2216,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Marque, qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Marque, qualité à préciser"
@@ -2309,14 +2309,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2440,14 +2440,14 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 488 pièces",
+    "quantite": "1 258 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
     "designation": "Arêtiers",
-    "quantite": "35 pièces",
+    "quantite": "36 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -2464,14 +2464,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2543,14 +2543,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "2 782 pièces",
+    "quantite": "2 678 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 838 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "2 678 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2567,7 +2567,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2652,14 +2652,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2675,8 +2675,8 @@
   "metier": "roofing",
   "lignes": [
    {
-    "designation": "Tubes de descente zinc Ø100, longueur 4 m",
-    "quantite": "4 pièces",
+    "designation": "Tubes de descente zinc Ø100, longueur 2 m",
+    "quantite": "6 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -2708,14 +2708,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2732,14 +2732,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -2768,14 +2768,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 379 pièces",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "3 447 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2815,14 +2815,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2925,14 +2925,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3017,14 +3017,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 379 pièces",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "3 447 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3201,7 +3201,7 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 488 pièces",
+    "quantite": "1 258 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3225,7 +3225,7 @@
   "lignes": [
    {
     "designation": "Liteaux 18×40",
-    "quantite": "4 098 ml",
+    "quantite": "3 982 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -3331,14 +3331,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "8 447 pièces",
+    "quantite": "8 148 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "8 616 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 148 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3376,14 +3376,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3441,28 +3441,28 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "547 ml",
+    "quantite": "484 ml",
     "unite": "ml",
     "etat": "check",
     "raison": "Valeur par défaut à confirmer"
    },
    {
     "designation": "Tuiles HP10 rouge",
-    "quantite": "1 488 pièces",
+    "quantite": "1 258 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
     "designation": "Tuiles de rive",
-    "quantite": "78 pièces",
+    "quantite": "66 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
     "designation": "Faîtières",
-    "quantite": "29 pièces",
+    "quantite": "30 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3476,7 +3476,7 @@
    },
    {
     "designation": "Crochets de faîtière",
-    "quantite": "29 pièces",
+    "quantite": "30 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3503,8 +3503,8 @@
     "raison": null
    },
    {
-    "designation": "Tubes de descente PVC sable Ø80, longueur 4 m",
-    "quantite": "2 pièces",
+    "designation": "Tubes de descente PVC sable Ø80, longueur 2 m",
+    "quantite": "4 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3743,14 +3743,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3852,21 +3852,21 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Tubes de descente zinc Ø80, longueur 4 m",
-    "quantite": "2 pièces",
+    "designation": "Tubes de descente zinc Ø80, longueur 2 m",
+    "quantite": "4 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -4002,14 +4002,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 408 pièces",
+    "quantite": "9 261 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 597 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "9 261 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4076,8 +4076,8 @@
     "raison": "Développé à préciser"
    },
    {
-    "designation": "Tubes de descente alu Ø80, longueur 4 m",
-    "quantite": "2 pièces",
+    "designation": "Tubes de descente alu Ø80, longueur 2 m",
+    "quantite": "3 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -4171,14 +4171,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4335,14 +4335,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4551,8 +4551,8 @@
   "metier": "roofing",
   "lignes": [
    {
-    "designation": "Tubes de descente zinc Ø100, longueur 4 m",
-    "quantite": "4 pièces",
+    "designation": "Tubes de descente zinc Ø100, longueur 2 m",
+    "quantite": "6 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -4585,14 +4585,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "6 953 pièces",
+    "quantite": "6 694 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "7 093 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "6 694 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4632,14 +4632,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 379 pièces",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "3 447 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3 260 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4811,14 +4811,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4934,14 +4934,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5026,14 +5026,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 32×22",
-    "quantite": "2 028 pièces",
+    "quantite": "1 956 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 069 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "1 956 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5092,14 +5092,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5184,14 +5184,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5208,14 +5208,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 32×22",
-    "quantite": "2 052 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 094 pièces",
+    "quantite": "2 122 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5425,14 +5425,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 271 pièces",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 457 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "8 925 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5464,14 +5464,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "10 003 pièces",
+    "quantite": "9 797 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 12 cm",
-    "quantite": "10 204 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "9 797 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5506,14 +5506,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "6 953 pièces",
+    "quantite": "6 694 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "7 093 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "6 694 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5562,14 +5562,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "9 408 pièces",
+    "quantite": "9 261 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 597 pièces",
+    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "9 261 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5694,8 +5694,8 @@
     "raison": null
    },
    {
-    "designation": "Tubes de descente zinc Ø80, longueur 4 m",
-    "quantite": "2 pièces",
+    "designation": "Tubes de descente zinc Ø80, longueur 2 m",
+    "quantite": "4 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null

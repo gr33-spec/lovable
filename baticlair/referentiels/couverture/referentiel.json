@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.20-59",
+  "version": "roofing-2026.11.20-61",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -25,6 +25,22 @@
       "kind": "definition",
       "title": "Définition",
       "retrievedAt": "2026-10-01"
+    },
+    {
+      "id": "fiche-couverture",
+      "kind": "baticlair_rule",
+      "title": "Fiche couverture Mobiiz (base de référence, constantes de calcul)",
+      "documentRef": "referentiels/couverture/fiche-couverture.json, constantes.json",
+      "retrievedAt": "2026-11-19",
+      "note": "Chaque constante renvoie aux chiffres confirmés de la recherche du 19/11/2026 qui la prouvent (règle du fondateur ou deux sources)."
+    },
+    {
+      "id": "fiche-couverture-produits",
+      "kind": "retailer",
+      "title": "Fiche couverture Mobiiz : données produit relevées chez les fabricants et les négoces",
+      "documentRef": "referentiels/couverture/fiche-couverture.json (sources de chaque chiffre)",
+      "retrievedAt": "2026-11-19",
+      "note": "Longueurs vendues et conditionnements confirmés par un fabricant et des négoces (bretons d'abord)."
     },
     {
       "id": "edilians-canal",
@@ -2995,17 +3011,16 @@
       "attributes": {
         "pieces_par_ml": {
           "kind": "manufacturer_spec",
-          "value": "2.9",
+          "value": "3",
           "unit": "u/m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture-produits",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "« ml faîtage / 0,35 ≈ 2,9 pièces/ml »."
+          "note": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml. Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre."
         }
       },
       "sellingUnits": [
@@ -4307,7 +4322,7 @@
     {
       "id": "bande-faitage-zinc-standard",
       "family": "zinc_ridge",
-      "label": "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 3 m",
+      "label": "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 2 m",
       "shortLabel": "Faîtage zinc (bande)",
       "aliases": [],
       "generic": true,
@@ -4316,21 +4331,21 @@
         {
           "id": "longueur",
           "label": {
-            "one": "longueur de 3 m",
-            "many": "longueurs de 3 m"
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
           },
           "contains": {
             "kind": "packaging",
-            "value": "3",
+            "value": "2",
             "unit": "m",
-            "source": "fondateur-referentiel-2026-10-03",
+            "source": "fiche-couverture-produits",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1
+            "version": 1,
+            "note": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m. Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage."
           },
           "primary": true
         }
@@ -4377,17 +4392,16 @@
       "attributes": {
         "pieces_par_ml": {
           "kind": "manufacturer_spec",
-          "value": "2.9",
+          "value": "3",
           "unit": "u/m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture-produits",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "« ml arêtier / 0,35 ≈ 2,9 pièces/ml » (§5)."
+          "note": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml. Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre."
         }
       },
       "sellingUnits": [
@@ -4480,7 +4494,7 @@
     {
       "id": "bande-aretier-zinc-standard",
       "family": "hip_strip",
-      "label": "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m",
+      "label": "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 2 m",
       "shortLabel": "Arêtier zinc (bande)",
       "aliases": [],
       "generic": true,
@@ -4489,21 +4503,21 @@
         {
           "id": "longueur",
           "label": {
-            "one": "longueur de 3 m",
-            "many": "longueurs de 3 m"
+            "one": "longueur de 2 m",
+            "many": "longueurs de 2 m"
           },
           "contains": {
             "kind": "packaging",
-            "value": "3",
+            "value": "2",
             "unit": "m",
-            "source": "fondateur-referentiel-2026-10-03",
+            "source": "fiche-couverture-produits",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1
+            "version": 1,
+            "note": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m. Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage."
           },
           "primary": true
         }
@@ -5463,16 +5477,15 @@
             "pureau"
           ],
           "default": {
-            "formula": "si(zone >= regle.zone_littorale, tuile.pureau_min, si(pente < regle.seuil_pente_pureau, tuile.pureau_min, tuile.pureau_max))",
-            "source": "fondateur-referentiel-2026-10-03",
+            "formula": "max(tuile.pureau_min, longueur_rampant / arrondi_sup(longueur_rampant / tuile.pureau_max))",
+            "source": "fiche-couverture",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-03",
-              "verifiedBy": "Fondateur (couvreur)",
-              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1,
-            "note": "pureau mini du fabricant en zone littorale ou pente < 19,3° (35 %), sinon pureau maxi"
+            "version": 2,
+            "note": "rampant partagé en rangs entiers, au plus long pureau admis par le fabricant"
           }
         },
         {
@@ -5581,6 +5594,42 @@
           ]
         },
         {
+          "key": "longueur_rampant",
+          "label": "Longueur du rampant",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du rampant (de l'égout au faîtage) ?",
+          "textLabels": [
+            "rampant"
+          ],
+          "default": {
+            "value": "5.5",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "rampant courant, jusqu'à 5,5 m"
+          },
+          "choices": [
+            {
+              "label": "Jusqu'à 5,5 m",
+              "value": "5.5"
+            },
+            {
+              "label": "5,5 à 8 m",
+              "value": "8"
+            },
+            {
+              "label": "Plus de 8 m",
+              "value": "10"
+            }
+          ]
+        },
+        {
           "key": "longueur_rives",
           "label": "Longueur de rives",
           "unit": "m",
@@ -5669,47 +5718,31 @@
           "version": 1,
           "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
         },
-        "recouvrement_faible_pente": {
+        "coef_ecran_faible_pente": {
           "kind": "installation_condition",
-          "value": "0.20",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.20",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+          "note": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %. Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur."
         },
-        "recouvrement_forte_pente": {
+        "coef_ecran_forte_pente": {
           "kind": "installation_condition",
-          "value": "0.10",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente supérieure au seuil."
-        },
-        "seuil_pente_pureau": {
-          "kind": "installation_condition",
-          "value": "19.3",
-          "unit": "°",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1,
-          "note": "Sous cette pente (35 %, soit 19,3°), pureau mini (nombre de tuiles maxi)."
+          "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
         },
         "zone_littorale": {
           "kind": "installation_condition",
@@ -5780,7 +5813,7 @@
         {
           "id": "ecran",
           "slot": "ecran",
-          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "formula": "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)",
           "unit": "m2",
           "core": true,
           "exclusions": "Hors recouvrements en bout de rouleau (10 cm au droit d'un support), relevés et chutes.",
@@ -6101,8 +6134,8 @@
             "formula": "(ardoise.longueur - recouvrement) / 2",
             "whenGiven": {
               "param": "longueur_crochet",
-              "formula": "(ardoise.longueur - (longueur_crochet - regle.marge_crochet)) / 2",
-              "note": "recouvrement des crochets du devis (crochet − 1 cm)"
+              "formula": "(ardoise.longueur - (longueur_crochet - regle.jeu_tete_crochet)) / 2",
+              "note": "recouvrement des crochets du devis (crochet − 5 mm, jeu de tête)"
             },
             "source": "fondateur-referentiel-2026-10-03",
             "verification": {
@@ -6140,7 +6173,7 @@
               "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
             },
             "version": 1,
-            "note": "recouvrement + 1 cm (Cupa)"
+            "note": "recouvrement + 3 mm, arrondi au cm (Cupa, Frénéhard, NF DTU 40.11)"
           }
         },
         {
@@ -6255,6 +6288,38 @@
           "estimate": "Prise égale à la zone climatique du département, en attendant la liste des régions du DTU 40.11."
         },
         {
+          "key": "situation",
+          "label": "Situation du chantier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le chantier est-il en situation exposée (bord de mer à moins de 5 km, île, falaise) ?",
+          "default": {
+            "value": "1",
+            "source": "fiche-couverture",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+            },
+            "version": 1,
+            "note": "situation normale, à défaut de commune au bord de mer"
+          },
+          "choices": [
+            {
+              "label": "Normale",
+              "value": "1"
+            },
+            {
+              "label": "Exposée (bord de mer, île)",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "normale",
+            "2": "exposée"
+          }
+        },
+        {
           "key": "diametre_crochet",
           "label": "Diamètre du crochet",
           "unit": "mm",
@@ -6360,6 +6425,10 @@
             {
               "label": "Plus de 8 m",
               "value": "10"
+            },
+            {
+              "label": "Plus de 11 m",
+              "value": "12"
             }
           ]
         }
@@ -6441,100 +6510,122 @@
           "version": 1,
           "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
         },
-        "recouvrement_faible_pente": {
+        "coef_ecran_faible_pente": {
           "kind": "installation_condition",
-          "value": "0.20",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.20",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+          "note": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %. Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur."
         },
-        "recouvrement_forte_pente": {
+        "coef_ecran_forte_pente": {
           "kind": "installation_condition",
-          "value": "0.10",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente supérieure au seuil."
+          "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
+        },
+        "supplement_expose": {
+          "kind": "installation_condition",
+          "value": "10",
+          "unit": "mm",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "Ardoise en situation exposée, région III : recouvrement + 10 mm au moins. NF DTU 40.11 (2020) §5.1.1.2 (+ 10 mm, via Progineer et une copie du texte) et Cupa / Rathscheck (+ 10 %) : on retient la plus forte des deux (écart de moins de 3 mm). Recherche du 20/11/2026."
+        },
+        "coef_expose": {
+          "kind": "installation_condition",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "Ardoise en situation exposée, région III : recouvrement × 1,10 au moins. Cupa et Rathscheck (+ 10 %), NF DTU 40.11 (+ 10 mm) : la plus forte des deux. Recherche du 20/11/2026."
+        },
+        "pas_mm": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1,
+          "note": "Recouvrement arrondi au millimètre supérieur."
         },
         "seuil_rampant": {
           "kind": "installation_condition",
           "value": "5.5",
           "unit": "m",
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Au-delà, +10 mm de recouvrement."
+          "note": "Ardoise : au-delà de 5,50 m de projection horizontale du rampant, table de recouvrement suivante. NF DTU 40.11 (2020), annexe B : colonnes ≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m (relu chez Cupa et Rathscheck)."
         },
-        "supplement_rampant": {
+        "seuil_rampant_2": {
           "kind": "installation_condition",
-          "value": "10",
-          "unit": "mm",
-          "source": "fondateur-referentiel-2026-10-03",
+          "value": "11",
+          "unit": "m",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-          },
-          "version": 1
-        },
-        "supplement_nul": {
-          "kind": "installation_condition",
-          "value": "0",
-          "unit": "mm",
-          "source": "definition",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "BatiClair (définition)"
-          },
-          "version": 1
-        },
-        "pas_recouvrement": {
-          "kind": "installation_condition",
-          "value": "5",
-          "unit": "mm",
-          "source": "fondateur-referentiel-2026-10-03",
-          "verification": {
-            "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Recouvrement arrondi aux 5 mm supérieurs."
+          "note": "Ardoise : au-delà de 11 m de projection horizontale du rampant, dernière table de recouvrement. NF DTU 40.11 (2020), annexe B (relu chez Cupa et Rathscheck)."
         },
         "marge_crochet": {
           "kind": "installation_condition",
-          "value": "10",
+          "value": "3",
           "unit": "mm",
-          "source": "cupa-pureau-ardoises-m2",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "« Longueur de crochet = R + 1 cm environ » (Cupa, §34)."
+          "note": "Crochet par défaut = recouvrement + 3 mm, arrondi au centimètre supérieur. Recherche du 19/11/2026 : Cupa, Frénéhard (fabricant de crochets), NF DTU 40.11 (2020) cité par un guide. Sert seulement quand le devis ne dit pas le crochet."
+        },
+        "jeu_tete_crochet": {
+          "kind": "installation_condition",
+          "value": "5",
+          "unit": "mm",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm. Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa."
         },
         "pas_crochet": {
           "kind": "installation_condition",
@@ -7751,19 +7842,28 @@
         }
       },
       "tables": {
-        "recouvrement": {
-          "label": "Recouvrement de l'ardoise",
+        "recouvrement_a": {
+          "label": "Recouvrement DTU, rampant ≤ 5,50 m",
           "unit": "mm",
           "axes": [
             {
               "param": "pente",
               "thresholds": [
-                "25",
-                "30",
-                "35",
-                "40",
-                "45",
-                "50"
+                "24.23",
+                "26.57",
+                "28.81",
+                "30.96",
+                "34.99",
+                "38.66",
+                "41.99",
+                "45.00",
+                "50.19",
+                "54.46",
+                "59.53",
+                "63.43",
+                "68.20",
+                "71.57",
+                "75.07"
               ]
             },
             {
@@ -7777,45 +7877,327 @@
           ],
           "values": [
             [
+              "107",
+              "119",
+              "133"
+            ],
+            [
+              "103",
+              "113",
+              "127"
+            ],
+            [
+              "97",
+              "107",
+              "119"
+            ],
+            [
+              "92",
+              "103",
+              "113"
+            ],
+            [
+              "87",
+              "94",
+              "106"
+            ],
+            [
+              "80",
+              "89",
+              "97"
+            ],
+            [
+              "77",
+              "87",
+              "92"
+            ],
+            [
+              "73",
+              "80",
+              "89"
+            ],
+            [
+              "69",
+              "77",
+              "83"
+            ],
+            [
+              "65",
+              "73",
+              "80"
+            ],
+            [
+              "65",
+              "69",
+              "77"
+            ],
+            [
+              "63",
+              "67",
+              "73"
+            ],
+            [
+              "60",
+              "65",
+              "73"
+            ],
+            [
+              "60",
+              "63",
+              "73"
+            ],
+            [
+              "60",
+              "63",
+              "69"
+            ]
+          ],
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort)."
+        },
+        "recouvrement_b": {
+          "label": "Recouvrement DTU, rampant de 5,50 à 11 m",
+          "unit": "mm",
+          "axes": [
+            {
+              "param": "pente",
+              "thresholds": [
+                "24.23",
+                "26.57",
+                "28.81",
+                "30.96",
+                "34.99",
+                "38.66",
+                "41.99",
+                "45.00",
+                "50.19",
+                "54.46",
+                "59.53",
+                "63.43",
+                "68.20",
+                "71.57",
+                "75.07"
+              ]
+            },
+            {
+              "param": "zone",
+              "thresholds": [
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "116",
+              "130",
+              "147"
+            ],
+            [
               "110",
-              "120",
-              "130"
+              "123",
+              "137"
+            ],
+            [
+              "103",
+              "116",
+              "127"
             ],
             [
               "100",
               "110",
-              "120"
+              "123"
             ],
             [
-              "90",
-              "100",
+              "92",
+              "103",
               "110"
             ],
             [
-              "85",
-              "90",
+              "87",
+              "94",
+              "103"
+            ],
+            [
+              "83",
+              "89",
               "100"
             ],
             [
               "80",
-              "85",
-              "95"
+              "87",
+              "94"
             ],
             [
-              "70",
+              "73",
               "80",
-              "90"
+              "87"
+            ],
+            [
+              "73",
+              "77",
+              "83"
+            ],
+            [
+              "67",
+              "73",
+              "80"
+            ],
+            [
+              "65",
+              "73",
+              "77"
+            ],
+            [
+              "63",
+              "69",
+              "77"
+            ],
+            [
+              "63",
+              "69",
+              "77"
+            ],
+            [
+              "63",
+              "67",
+              "73"
             ]
           ],
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pose au crochet, rampant ≤ 5,5 m. Lignes 25°, 30°, 35°, 40°, 45°, ≥ 50° du référentiel (§3) ; la première ligne vaut dès la pente minimale de l'ardoise (24°, arrondie à 25°). Sous 25° : hors table, l'ouvrage n'est pas calculé."
+          "note": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort)."
+        },
+        "recouvrement_c": {
+          "label": "Recouvrement DTU, rampant de 11 à 16,50 m",
+          "unit": "mm",
+          "axes": [
+            {
+              "param": "pente",
+              "thresholds": [
+                "24.23",
+                "26.57",
+                "28.81",
+                "30.96",
+                "34.99",
+                "38.66",
+                "41.99",
+                "45.00",
+                "50.19",
+                "54.46",
+                "59.53",
+                "63.43",
+                "68.20",
+                "71.57",
+                "75.07"
+              ]
+            },
+            {
+              "param": "zone",
+              "thresholds": [
+                "1",
+                "2",
+                "3"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "127",
+              "142",
+              "153"
+            ],
+            [
+              "117",
+              "130",
+              "142"
+            ],
+            [
+              "113",
+              "123",
+              "137"
+            ],
+            [
+              "106",
+              "117",
+              "130"
+            ],
+            [
+              "100",
+              "107",
+              "117"
+            ],
+            [
+              "92",
+              "100",
+              "110"
+            ],
+            [
+              "87",
+              "94",
+              "103"
+            ],
+            [
+              "83",
+              "92",
+              "97"
+            ],
+            [
+              "80",
+              "87",
+              "92"
+            ],
+            [
+              "77",
+              "83",
+              "87"
+            ],
+            [
+              "73",
+              "77",
+              "87"
+            ],
+            [
+              "69",
+              "77",
+              "83"
+            ],
+            [
+              "67",
+              "73",
+              "80"
+            ],
+            [
+              "67",
+              "73",
+              "80"
+            ],
+            [
+              "65",
+              "73",
+              "77"
+            ]
+          ],
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1,
+          "note": "NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck (132 valeurs communes identiques). Pentes du DTU en %, converties en degrés ; une pente entre deux lignes prend la ligne du dessous (recouvrement plus fort)."
         }
       },
       "derived": [
@@ -7834,19 +8216,31 @@
           "version": 1
         },
         {
+          "key": "recouvrement_dtu",
+          "label": "Recouvrement DTU (situation normale)",
+          "unit": "mm",
+          "formula": "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
+          "source": "fiche-couverture",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+          },
+          "version": 1
+        },
+        {
           "key": "recouvrement",
           "label": "Recouvrement",
           "unit": "mm",
-          "formula": "arrondi_sup((table.recouvrement + si(longueur_rampant > regle.seuil_rampant, regle.supplement_rampant, regle.supplement_nul)) / regle.pas_recouvrement) * regle.pas_recouvrement",
+          "formula": "recouvrement_dtu + si(situation >= 2, si(zone >= 3, arrondi_sup(max(recouvrement_dtu + regle.supplement_expose, recouvrement_dtu * regle.coef_expose) / regle.pas_mm) * regle.pas_mm - recouvrement_dtu, recouvrement_dtu * 0), recouvrement_dtu * 0)",
           "shown": true,
-          "source": "fondateur-referentiel-2026-10-03",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-03",
-            "verifiedBy": "Fondateur (couvreur)",
-            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
-          "version": 1
+          "version": 2
         }
       ],
       "needs": [
@@ -7877,8 +8271,8 @@
           "formula": "commande.ardoises",
           "unit": "u",
           "core": true,
-          "exclusions": "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
-          "precision": "un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)",
+          "exclusions": "Un crochet par ardoise commandée (règle du fondateur) : jamais moins de crochets que d'ardoises.",
+          "precision": "un par ardoise commandée",
           "designation": "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
           "source": "baticlair-geometrie-ardoise",
           "verification": {
@@ -7926,7 +8320,7 @@
         {
           "id": "ecran-ardoise",
           "slot": "ecran",
-          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "formula": "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)",
           "unit": "m2",
           "core": true,
           "exclusions": "Hors recouvrements en bout de rouleau, relevés et chutes.",
@@ -8192,33 +8586,31 @@
           "version": 1,
           "note": "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."
         },
-        "recouvrement_faible_pente": {
+        "coef_ecran_faible_pente": {
           "kind": "installation_condition",
-          "value": "0.20",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.20",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."
+          "note": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %. Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur."
         },
-        "recouvrement_forte_pente": {
+        "coef_ecran_forte_pente": {
           "kind": "installation_condition",
-          "value": "0.10",
-          "unit": "m",
-          "source": "soprema-sop-ecran-hpv-r2",
+          "value": "1.10",
+          "unit": "u",
+          "source": "fiche-couverture",
           "verification": {
             "status": "verified",
-            "verifiedAt": "2026-10-01",
-            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
-            "note": "Page et version exactes à compléter à réception du PDF."
+            "verifiedAt": "2026-11-19",
+            "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
           },
           "version": 1,
-          "note": "Pente supérieure au seuil."
+          "note": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %. Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m²."
         },
         "clous_par_ardoise": {
           "kind": "installation_condition",
@@ -8339,7 +8731,7 @@
         {
           "id": "ecran-ardoise",
           "slot": "ecran",
-          "formula": "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))",
+          "formula": "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)",
           "unit": "m2",
           "core": true,
           "exclusions": "Hors recouvrements en bout de rouleau, relevés et chutes.",
@@ -8606,7 +8998,7 @@
           "unit": "u",
           "kind": "artisan_preference",
           "question": "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?",
-          "hint": "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 3 m.",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 2 m.",
           "choices": [
             {
               "label": "Je façonne (feuilles ou bobineau)",
@@ -8821,7 +9213,7 @@
           "family": "zinc_ridge",
           "label": "Faîtage zinc (bande)",
           "usual": {
-            "text": "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).",
+            "text": "Bande zinc en longueurs de 2 m (développé 25 à 33 cm).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-faitage-zinc-standard"
           }
@@ -10166,7 +10558,7 @@
           "family": "hip_strip",
           "label": "Arêtier zinc (bande)",
           "usual": {
-            "text": "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).",
+            "text": "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-aretier-zinc-standard"
           }
@@ -14650,7 +15042,7 @@
           "family": "zinc_ridge",
           "label": "Faîtage zinc",
           "usual": {
-            "text": "Bande de faîtage zinc en longueurs de 3 m (§7).",
+            "text": "Bande de faîtage zinc en longueurs de 2 m (fiche couverture).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bande-faitage-zinc-standard"
           }
@@ -16747,7 +17139,7 @@
           "unit": "mm",
           "kind": "site_data",
           "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
           "choices": [
             {
               "label": "Ø 80",
@@ -17644,7 +18036,7 @@
           "unit": "mm",
           "kind": "site_data",
           "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
           "choices": [
             {
               "label": "Ø 80",
@@ -18053,7 +18445,7 @@
           "unit": "mm",
           "kind": "site_data",
           "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+          "hint": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
           "choices": [
             {
               "label": "Ø 80",
@@ -18127,26 +18519,26 @@
           "label": "Longueur des tubes",
           "unit": "m",
           "kind": "site_data",
-          "question": "Tubes de descente en longueurs de 4 m ou de 2 m ?",
+          "question": "Tubes de descente en longueurs de 2 m ou de 4 m ?",
           "default": {
-            "value": "4",
-            "source": "fondateur-reponses-2026-10-05",
+            "value": "2",
+            "source": "fiche-couverture",
             "verification": {
               "status": "verified",
-              "verifiedAt": "2026-10-05",
-              "verifiedBy": "Fondateur (couvreur)"
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
             },
-            "version": 1,
-            "note": "longueurs de 4 m"
+            "version": 2,
+            "note": "longueurs de 2 m (zinc et PVC)"
           },
           "choices": [
             {
-              "label": "4 m",
-              "value": "4"
-            },
-            {
               "label": "2 m",
               "value": "2"
+            },
+            {
+              "label": "4 m",
+              "value": "4"
             }
           ],
           "textValues": [
@@ -18159,6 +18551,17 @@
                 "tubes de 2 m",
                 "en 2 m",
                 "barres de 2 m"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "longueur de 4 m",
+                "longueurs de 4 m",
+                "tube de 4 m",
+                "tubes de 4 m",
+                "en 4 m",
+                "barres de 4 m"
               ]
             }
           ]
@@ -18503,19 +18906,6 @@
       "note": "Comme l'ardoise naturelle (§4 : « mêmes formules »)."
     },
     {
-      "family": "slate_hook",
-      "rate": "2",
-      "source": "fondateur-referentiel-2026-10-03",
-      "verification": {
-        "status": "verified",
-        "verifiedAt": "2026-10-03",
-        "verifiedBy": "Fondateur (couvreur)",
-        "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
-      },
-      "version": 1,
-      "note": "« Commander crochets = ardoises × 1,02 »."
-    },
-    {
       "family": "roof_tile",
       "rate": "3",
       "source": "fondateur-referentiel-2026-10-03",
@@ -18527,6 +18917,18 @@
       },
       "version": 1,
       "note": "Tuiles mécaniques."
+    },
+    {
+      "family": "roof_tile_canal",
+      "rate": "3",
+      "source": "fiche-couverture",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-11-19",
+        "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+      },
+      "version": 1,
+      "note": "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)."
     },
     {
       "family": "batten",
@@ -18552,7 +18954,7 @@
         "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
       },
       "version": 1,
-      "note": "Recouvrements des bandes de 3 m."
+      "note": "Recouvrements des bandes façonnées."
     },
     {
       "family": "hip_strip",

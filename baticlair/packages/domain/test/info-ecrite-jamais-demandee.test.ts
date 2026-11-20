@@ -112,7 +112,8 @@ describe("« Je ne sais pas » à la longueur des bacs ne bloque pas un autre ou
 
   it("les ardoises reprennent leur rampant courant (il ne règle que leur recouvrement) et sont chiffrées ; les bacs restent à préciser", () => {
     const e = voir({ "param:longueur_rampant": null });
-    expect(ardoises(e)?.quantity).toBe("2 052 pièces");
+    // D-2026-020, crochet 11 : pureau (320 − 110) ÷ 2 + 2,5 mm = 10,75 cm (fiche couverture ; avant 11 cm, 2 052).
+    expect(ardoises(e)?.quantity).toBe("2 122 pièces");
     expect((ardoises(e)?.waitsOn ?? []).join(" ")).not.toMatch(/rampant/);
     expect(e.purchase.toBuy.filter((b) => /^Bobine/.test(b.label) && b.quantity)).toEqual([]);
   });

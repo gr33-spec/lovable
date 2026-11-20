@@ -134,10 +134,13 @@ describe("fiche d'un besoin calculé : origines séparées, jamais mélangées",
   });
 
   it("préférence incompatible (autre famille) : écartée, la vérification normale reprend", () => {
-    const n = need({ ...ROOF, preferences: { products: { ecran: "liteau-sapin-27x40" } } }, "ecran");
+    // La pente est donnée : l'écran se compte sur la surface (fiche couverture, 2026-11-19), la seule question est le produit.
+    const n = need({ ...ROOF, params: { ...ROOF.params, pente: { value: "45", unit: "°", origin: "artisan" } }, preferences: { products: { ecran: "liteau-sapin-27x40" } } }, "ecran");
     expect(n.preferenceIgnored).toBe("Produit habituel « Liteaux 27×40 » écarté : ce n'est pas un produit de cette famille.");
-    expect(n.question).toMatchObject({ kind: "choose_product" });
-    expect(assessNeed(n).state).toBe("to_confirm");
+    // L'écran se compte sur la surface (fiche couverture, 2026-11-19) : le besoin en m² est dit, mais sans produit la
+    // commande attend (« Produit à identifier »), jamais un nombre de rouleaux inventé.
+    expect(n.purchase).toBeUndefined();
+    expect(n.purchaseUnavailable).toMatch(/Produit à identifier/);
   });
 
   it("préférence vers un produit retiré du référentiel : écartée", () => {

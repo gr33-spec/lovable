@@ -8,7 +8,7 @@ import { readQuoteComplet } from "./support/complet.js";
  * LOT COUVERTURE, POINT 1 : noues et arêtiers (§3, §5, §7, §25.2). Noue zinc commandée façonnée en longueurs de 2 m
  * (longueur utile 1,85 m), ou façonnée sur place (feuilles 2 × 1 m, bobineau au-delà de 6 ml), au développé du devis
  * (noue préformée de 50 sinon). Arêtier en tuiles (arêtières, closoir de 23 cm, crochets, abouts) ou en bande zinc
- * (longueurs de 3 m, pattes 3/ml) : lu dans la ligne ou sur la couverture du devis, sinon demandé avec les mots du
+ * (longueurs de 2 m depuis le 2026-11-19, avant 3 m ; pattes 3/ml) : lu dans la ligne ou sur la couverture du devis, sinon demandé avec les mots du
  * comptoir. Compte rendu : `docs/lot-couverture/point-1.md`, tableau de Brest compris.
  */
 const CAS: Metier[] = [
@@ -70,7 +70,7 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     expect(long.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "3 pièces"]]);
   });
 
-  it("arêtier sur un toit de tuiles : arêtières 2,9/ml, closoir de 23 cm, un crochet par arêtière, un about par arêtier", () => {
+  it("arêtier sur un toit de tuiles : arêtières 3/ml, closoir de 23 cm, un crochet par arêtière, un about par arêtier", () => {
     const v = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture tuiles HP10 terre cuite", quantity: "120", unit: "m²" },
@@ -80,7 +80,7 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     );
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:aretier_matiere");
     const got = Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
-    expect(got).toMatchObject({ Arêtiers: "35 pièces", "Crochets d'arêtier": "35 pièces", "Abouts d'arêtier": "2 pièces" }); // 12 × 2,9 = 34,8
+    expect(got).toMatchObject({ Arêtiers: "36 pièces", "Crochets d'arêtier": "36 pièces", "Abouts d'arêtier": "2 pièces" }); // 12 × 3 = 36 (fiche couverture, 2026-11-19 ; avant 2,9 : 35)
     expect(v.toBuy.find((b) => b.label === "Closoir d'arêtier")!.quantity).toBe("3 rouleaux de 5 m"); // 12 ml en rouleaux de 5 m
   });
 
@@ -90,7 +90,7 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm") });
     expect(v.questions).toEqual([]);
     expect(labels(v)).toEqual(expect.arrayContaining([expect.stringMatching(/^Arêtier zinc naturel 0,65 mm, bande dév\. 33/), expect.stringMatching(/^Pattes de fixation/)]));
-    expect(v.toBuy.find((b) => b.label.startsWith("Arêtier zinc"))!.quantity).toBe("4 longueurs de 3 m"); // 9 × 1,05 = 9,45 ml en longueurs de 3 m
+    expect(v.toBuy.find((b) => b.label.startsWith("Arêtier zinc"))!.quantity).toBe("5 longueurs de 2 m"); // 9 × 1,05 = 9,45 ml en longueurs de 2 m (fiche couverture, 2026-11-19 ; avant 3 m)
     expect(v.toBuy.find((b) => b.label.startsWith("Pattes"))!.quantity).toBe("27 pièces");
   });
 });

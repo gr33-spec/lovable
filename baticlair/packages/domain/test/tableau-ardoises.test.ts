@@ -37,8 +37,9 @@ function ligne(h: number, l: number, crochet: number) {
   return {
     format: `${h}×${l}`,
     crochet,
-    recouvrement: (crochet - 1) * 10,
-    pureau: (h * 10 - (crochet - 1) * 10) / 20,
+    // Jeu de tête de 5 mm (règle du fondateur, confirmée le 2026-11-19 : manuel CAP, Culture, Cupa ; fiche couverture).
+    recouvrement: crochet * 10 - 5,
+    pureau: (h * 10 - (crochet * 10 - 5)) / 20,
     ardoisesM2: ardoisesM2?.value ?? "?",
     source: /hors table|formule/i.test(ardoisesM2?.label ?? "") ? "formule" : "table des fabricants",
     ardoises: commande("ardoises"),
@@ -50,13 +51,15 @@ function ligne(h: number, l: number, crochet: number) {
 describe("le tableau des ardoises : format + crochet → pureau, ardoises au m², liteaux", () => {
   const lignes = FORMATS.flatMap(([h, l]) => CROCHETS.map((c) => ligne(h, l, c)));
 
-  it("l'exemple de Greg : 32×22, crochets de 11 → pureau 11 cm, 40,7 ardoises au m² (table des fabricants)", () => {
+  // Règle du fondateur du 18 novembre, confirmée le 19 (fiche couverture) : pureau = (longueur − crochet) ÷ 2 + 2,5 mm,
+  // un crochet par ardoise. Avant (17 novembre) : recouvrement = crochet − 1 cm, pureau 11 cm, 40,7/m², crochets + 2 %.
+  it("l'exemple de Greg : 32×22, crochets de 11 → recouvrement 10,5 cm, pureau 10,75 cm, 42,09 ardoises au m²", () => {
     const g = lignes.find((x) => x.format === "32×22" && x.crochet === 11)!;
-    expect(g).toMatchObject({ recouvrement: 100, pureau: 11, ardoisesM2: "40,7", source: "table des fabricants" });
-    // Pour 100 m² : 40,7 × 100 + 5 % de chutes = 4 274 ardoises ; un crochet par ardoise + 2 % ; un liteau par rang + 5 %.
-    expect(g.ardoises).toBe(4274);
-    expect(g.crochets).toBe(4360);
-    expect(Math.round(g.liteaux)).toBe(955);
+    expect(g).toMatchObject({ recouvrement: 105, pureau: 10.75, ardoisesM2: "42,09", source: "formule" });
+    // Pour 100 m² : 42,09 × 100 + 5 % de chutes = 4 420 ardoises ; un crochet par ardoise ; un liteau par rang + 5 %.
+    expect(g.ardoises).toBe(4420);
+    expect(g.crochets).toBe(4420);
+    expect(Math.round(g.liteaux)).toBe(977);
   });
 
   it("chaque format et chaque crochet se calculent, sans rien demander ; plus le crochet est long, plus il faut d'ardoises", () => {
@@ -77,18 +80,18 @@ describe("le tableau des ardoises : format + crochet → pureau, ardoises au m²
       "## La règle, en clair",
       "",
       "- On ne demande jamais le pureau. On lit le **format de l'ardoise** et la **taille des crochets** (au devis, sinon on les demande ou on les propose).",
-      "- Recouvrement = crochet − 1 cm (un crochet de 11 tient un recouvrement de 10 cm).",
+      "- Recouvrement = crochet − 5 mm de jeu de tête (un crochet de 11 tient un recouvrement de 10,5 cm), soit pureau = (hauteur − crochet) ÷ 2 + 2,5 mm (règle du fondateur, confirmée : manuel CAP, ministère de la Culture, Cupa).",
       "- Pureau = (hauteur de l'ardoise − recouvrement) ÷ 2.",
       "- Ardoises au m² : la valeur de la table des fabricants (Cupa) quand elle existe pour ce format et ce recouvrement ; sinon la formule 1 ÷ (pureau × (largeur + épaisseur du crochet)).",
       "- Ardoises à commander = surface × ardoises au m² + **5 % de chutes**.",
-      "- Crochets = un par ardoise commandée + **2 %**.",
+      "- Crochets = un par ardoise commandée.",
       "- Liteaux = un rang par pureau (surface ÷ pureau) + **5 %**.",
       "",
       "## Le tableau (quantités pour 100 m² de toiture)",
       "",
       "| Format | Crochet | Recouvrement | Pureau | Ardoises au m² | D'où vient le chiffre | Ardoises pour 100 m² | Crochets pour 100 m² | Liteaux pour 100 m² |",
       "|---|---|---|---|---|---|---|---|---|",
-      ...lignes.map((x) => `| ${x.format} | de ${x.crochet} | ${x.recouvrement / 10} cm | ${fr(x.pureau, x.pureau % 1 ? (x.pureau * 10) % 1 ? 2 : 1 : 0)} cm | ${x.ardoisesM2} | ${x.source} | ${fr(x.ardoises)} | ${fr(x.crochets)} | ${fr(Math.round(x.liteaux))} ml |`),
+      ...lignes.map((x) => `| ${x.format} | de ${x.crochet} | ${fr(x.recouvrement / 10, x.recouvrement % 10 ? 1 : 0)} cm | ${fr(x.pureau, x.pureau % 1 ? (x.pureau * 10) % 1 ? 2 : 1 : 0)} cm | ${x.ardoisesM2} | ${x.source} | ${fr(x.ardoises)} | ${fr(x.crochets)} | ${fr(Math.round(x.liteaux))} ml |`),
       "",
     ].join("\n");
     if (process.env.MAJ_TABLEAU || !existsSync(DOC)) writeFileSync(DOC, md);
