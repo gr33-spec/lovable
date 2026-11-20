@@ -85,3 +85,9 @@
 - Règle changée : TRPF 10 (doublés 0,60) et 14 (0,40), avant 4 ; vis des plaques 15 / 35 et 21 / 47, avant 12 / 30.
 - Nouveau d'office : ruban résilient sous les rails bas (rouleaux de 15 m) et mastic acrylique en pied (1 cartouche pour 3 m², quantité d'une seule source).
 - Chantier PI-14 : montants 33 → 62 ; TRPF 88 → 220 ; vis 264 → 330 et 660 → 770 ; + 2 rouleaux de ruban, + 8 cartouches de mastic.
+
+## plaquiste-isolation-2026.11.20-8 — Isolation approfondie (20 novembre 2026, `recherche/23`)
+
+- Nouveau : piges de repérage d'épaisseur en case à cocher dans le soufflage (une pour 25 m², 4 au moins ; AQC / Proreno et Biofib).
+- Fiche lisible §8.5 : R des complexes collés à demander (deux isolants à même épaisseur), épaisseur maxi collée (DTU 25.42/A1 2026), plots de colle, aucune cheville de sécurité d'office, R de deux couches = somme, rampants (fourrures, suspentes Intégra 1,5/m²), combles en rouleaux (2e couche nue), conduits et spots, charge maxi de 6 kg/m² sur plafond (alerte ouate R 7), sous-face de plancher, textes et aides en vigueur.
+- Chantiers types : aucune quantité ne change (piges non cochées).

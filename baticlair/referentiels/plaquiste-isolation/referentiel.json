@@ -1,6 +1,6 @@
 {
   "id": "plaquiste-isolation",
-  "version": "plaquiste-isolation-2026.11.20-7",
+  "version": "plaquiste-isolation-2026.11.20-8",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -48,6 +48,14 @@
       "url": "https://www.base-inies.fr/api/Produit/38669",
       "retrievedAt": "2026-11-20",
       "note": "recherche/21 [P3] à [P7] : quantités par m² (montants, rails, vis, bande résiliente, mastic)."
+    },
+    {
+      "id": "proreno-combles",
+      "kind": "trade_practice",
+      "title": "AQC / Proreno, fiche d'autocontrôle « Isolation des combles perdus » ; Biofib, guide de pose combles perdus soufflage ; Isover « antisèches DTU 45.11 » (CAPEB)",
+      "url": "https://www.capeb.fr/www/capeb/media/document/les-antiseches-isover-dtu-45.11.pdf",
+      "retrievedAt": "2026-11-20",
+      "note": "recherche/23 §4 [A10] [A11] [A12]."
     },
     {
       "id": "snip-fc18",
@@ -765,6 +773,18 @@
         "bande d'angle"
       ],
       "consumable": true
+    },
+    {
+      "code": "depth_marker",
+      "label": "Pige de repérage d'épaisseur",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "pige",
+        "piges",
+        "repere d'epaisseur"
+      ]
     },
     {
       "code": "resilient_strip",
@@ -1971,6 +1991,39 @@
             "kind": "packaging",
             "value": "2.4",
             "unit": "m2"
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pige-reperage",
+      "family": "depth_marker",
+      "label": "Pige de repérage d'épaisseur pour isolant soufflé",
+      "shortLabel": "Piges de repérage",
+      "aliases": [
+        "pige"
+      ],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pige",
+            "many": "piges"
+          },
+          "contains": {
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Mobiiz (définition)"
+            },
+            "version": 1,
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u"
           },
           "primary": true
         }
@@ -11228,9 +11281,38 @@
             "source": "acermi-soufflage",
             "productId": "vrac-souffle"
           }
+        },
+        {
+          "key": "piges",
+          "family": "depth_marker",
+          "label": "Piges de repérage",
+          "keywords": [
+            "pige",
+            "piges"
+          ],
+          "usual": {
+            "text": "Une pige pour 25 m², 4 au moins.",
+            "source": "proreno-combles",
+            "productId": "pige-reperage"
+          },
+          "suggested": {
+            "label": "Piges de repérage d'épaisseur (si tu ne les as pas)"
+          }
         }
       ],
       "constants": {
+        "m2_par_pige": {
+          "source": "proreno-combles",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 1 pige pour 25 m², minimum 4 : AQC / Proreno et Biofib (recherche/23 §4)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "25",
+          "unit": "m2",
+          "label": "une pige pour {v} m²"
+        },
         "cent_m2": {
           "source": "acermi-soufflage",
           "verification": {
@@ -11360,6 +11442,21 @@
           "designation": "{produit_vrac}",
           "precision": "pour {surface|m2} à {r_vise}, épaisseur après tassement du certificat",
           "exclusions": "Aucune majoration : le tassement est déjà dans le tableau du certificat. Piges, déflecteurs de conduits et rehausse de trappe : seulement s'ils sont écrits."
+        },
+        {
+          "id": "piges",
+          "slot": "piges",
+          "formula": "max(4, arrondi_sup(surface / regle.m2_par_pige))",
+          "unit": "u",
+          "core": false,
+          "source": "proreno-combles",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Une pige de repérage pour 25 m², 4 au moins (4 pour 100 m²) : fiche AQC / Proreno et guide Biofib ; l'exigence de repérage est du NF DTU 45.11 (antisèches Isover) (recherche/23 §4)."
+          },
+          "version": 1,
+          "short": "piges",
+          "precision": "une pour 25 m², 4 au moins"
         }
       ]
     },

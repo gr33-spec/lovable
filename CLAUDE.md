@@ -358,4 +358,5 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Septième vague (20 novembre 2026, version `-7`, `recherche/21` et `22`) :
   - séparatives SAA / SAD corrigées : montants doublés (avant simples), rails SAA sur le pourtour, ruban résilient et mastic d'office, vis TRPF 10 / 14 ;
   - coupe-feu : compléments par marque dans `FICHE.md` §5.8 bis (98/48 EI 120 à 3,00 m, EI 90 → système EI 120 de la marque).
+  - isolation (version `-8`, `recherche/23`) : piges de repérage en case à cocher ; R d'un complexe collé à demander ; charge maxi 6 kg/m² sur plafond ; détail dans `FICHE.md` §8.5.
 

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-7` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
+| Version | `plaquiste-isolation-2026.11.20-8` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -624,6 +624,31 @@ Accessoires du soufflage, **seulement s'ils sont écrits** :
 La fiche **ne déduit jamais un R** des aides : le R se lit au devis, ou se demande.
 
 ---
+
+### 8.5 Compléments isolation (septième vague, `recherche/23-isolation-approfondie.md`, version `-8`)
+
+| Point | Règle | État |
+|---|---|---|
+| Complexe collé « 13+80 » | **ne dit pas son R** : deux isolants à épaisseur égale (λ 0,032 : 2,55 / 3,15 / 3,80 / 4,40 / 5,05 ; λ 0,030 : 2,75 / 3,40 / 4,10 / 4,80 / 5,45 / 6,05), chez Placo, Siniat et Knauf : le R se demande quand il n'est pas écrit | ✔✔ (Offre Placo 2024, mémento Siniat 2025) |
+| Doublissimo | 4,80 (13+140) et 5,45 (13+160) gardés (fiches Placo 2025 ; l'offre 2024, 4,75 / 5,35, est dépassée) ; Prégymax 2,55 et 2,75 existent tous les deux | ✔✔ |
+| Épaisseur maxi collée | NF DTU 25.42/A1 (2026) : PSE 160 mm, PU 140 mm ; un 13+180 sort « à vérifier » | ✔✔ |
+| ERP, habitation 3e et 4e familles | complexe en BA13 seulement (un « 10+ » se demande) ; ERP : 4 m au plus, tasseau à chaque jonction | ✔✔ |
+| Plots de colle | 10 plots de Ø 10 cm par m² | ✔✔ (Siniat 2025, Placo) |
+| Chevilles de sécurité d'un doublage collé | **aucune règle trouvée** : rien d'office, seulement si le devis les écrit (les « 2 par panneau » vus en ligne concernent l'isolation par l'extérieur) | ✔ |
+| Rampants, R de deux couches | **somme des R** (Isover 80 + 240 = R 9,10 ; FDES INIES 53321 : 60 + 280 = R 9,7 ; fiche CEE BAR-EN-103) | ✔✔ |
+| Rampants, quantités | fourrures 1,75 à 1,79 ml/m² ; suspentes Intégra 1,5/m² (grille 0,60 × 1,20), taille selon l'épaisseur sous la suspente ; membrane 1,10 m²/m² (la FDES dit 1,21 : écart non tranché) ; adhésif 0,65 à 0,75 ml/m² | ✔✔ / à confirmer |
+| Combles perdus en rouleaux | 1re couche à la hauteur des solives (avec kraft), 2e couche **croisée et nue**, jamais une 2e couche kraft | ✔✔ |
+| Piges de repérage | une pour 25 m², 4 au moins ; **case à cocher** dans le soufflage (`-8`) | ✔✔ (AQC / Proreno, Biofib) |
+| Conduits de fumée (soufflage) | sans données du conduit : 10 cm (maçonné), 8 cm (métallique, une source), raccordement 3 × Ø et 37,5 cm au moins ; coffrage ou arrêtoir = épaisseur d'isolant + 10 cm, classé A2-s1, d0 au moins | ✔✔ (8 cm : ✔) |
+| Spots | un capot par spot, classé A2-s2, d0 (ou M0), étanche à la poussière ; une ligne seulement si les spots sont comptés au devis | ✔✔ |
+| Trappe | rehausse = épaisseur d'isolant + 5 cm ; isolant semi-rigide sur la trappe, R au moins celui du soufflé | ✔ (Isover seul) |
+| Charge sur plafond | soufflage sur plafond en plaques à ossature 0,60 : **6 kg/m² au plus** ; une ouate à R 7 pèse environ 7 kg/m² : **alerte à l'artisan** (entraxe des fourrures à réduire) | ✔✔ |
+| Biosourcés | Biofib'Trio 1,20 × 0,60 m (0,72 m²), colisage de la fiche du 15/01/2025 (une source) ; Biofib'Chanvre, Biofib'Ouate, ouate en panneaux : aucun R par défaut (ACERMI non lu) | ✔ / à confirmer |
+| Sous-face de plancher | PSE Siniat U.Th38 IGN / U.Th32 IGN : R 3 à 120 mm (λ 38) ou 100 mm (λ 32) ; fixations **selon le produit** (Siniat 6/m², Isover 4,2/m², laine de roche 6,7/m²) : jamais un ratio commun | ✔✔ |
+| Textes en vigueur | NF DTU 45.11 P1-1 de novembre 2025 (arrêtoirs au charpentier en neuf) ; NF DTU 25.42 P1-1/A1 (2026) | ✔✔ |
+| Aides au 20/11/2026 | CEE BAR-EN-103 (plancher bas) : R ≥ 3 (fiche officielle v. A64.6) ; MaPrimeRénov' par geste : plus aucune isolation en métropole (murs exclus au 01/01/2026, combles et toitures au 01/09/2026) ; ne pas reprendre la grille 3 / 2,7 / 2,1 du mémento Siniat 2025 (valeurs d'avant 2023) | ✔✔ |
+
+Reste à confirmer : densité des suspentes Knauf, membrane 1,10 ou 1,21 m²/m², Placotherm, Knauf TP 238, fixations de la laine de bois en sous-face, biosourcés.
 
 ## 9. Famille G : accessoires
 

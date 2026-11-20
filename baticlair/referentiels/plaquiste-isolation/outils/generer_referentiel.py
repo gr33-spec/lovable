@@ -21,7 +21,7 @@ import os
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SORTIE = os.path.join(ICI, "..", "referentiel.json")
-VERSION = "plaquiste-isolation-2026.11.20-7"
+VERSION = "plaquiste-isolation-2026.11.20-8"
 TRADE = "drywall"
 DATE = "2026-11-19"
 
@@ -94,6 +94,7 @@ SOURCES = [
     {"id": "mobiiz-geometrie", "kind": "baticlair_rule", "title": "Géométrie Mobiiz : longueur d'ouvrage = surface ÷ hauteur ; une plaque couvre 1,20 m × la hauteur ; arrondi à l'unité de vente", "retrievedAt": DATE, "note": "Règle de calcul, à faire valider par un plaquiste (fiche plaquiste-isolation, section Règles de calcul)."},
     {"id": "siniat-dta-separatives", "kind": "manufacturer", "title": "CSTB / Siniat, DTA n° 9/11-922_V5 « Cloisons séparatives Prégymétal S et S Twin » (valide du 02/09/2026)", "url": "https://media.siniat.fr/pi42095/original/991616172/siniat---dta---cloisons-separatives-pregymetal-s---cstb-9_11_922_v3", "retrievedAt": "2026-11-20", "note": "recherche/21 [S1]."},
     {"id": "placo-fdes-separatives", "kind": "manufacturer", "title": "Placo, FDES des séparatives SAA 120, SAA 140, SAD 180, SAD 220 (base INIES, 2024)", "url": "https://www.base-inies.fr/api/Produit/38669", "retrievedAt": "2026-11-20", "note": "recherche/21 [P3] à [P7] : quantités par m² (montants, rails, vis, bande résiliente, mastic)."},
+    {"id": "proreno-combles", "kind": "trade_practice", "title": "AQC / Proreno, fiche d'autocontrôle « Isolation des combles perdus » ; Biofib, guide de pose combles perdus soufflage ; Isover « antisèches DTU 45.11 » (CAPEB)", "url": "https://www.capeb.fr/www/capeb/media/document/les-antiseches-isover-dtu-45.11.pdf", "retrievedAt": "2026-11-20", "note": "recherche/23 §4 [A10] [A11] [A12]."},
     {"id": "snip-fc18", "kind": "manufacturer", "title": "SNIP, fiche conseil n° 18 « Ouvrages en plaques de plâtre : quantitatifs estimés de produits » (déc. 2024, PDF du 13/02/2025)", "publisher": "SNIP (syndicat des fabricants : Placo, Knauf, Siniat…)", "url": "https://www.lesindustriesduplatre.org/wp-content/uploads/2025/03/SNIP-FICHE-CONSEIL-18-VERSIONS-2025_V6-13fevrier.pdf", "retrievedAt": DATE, "note": "Hypothèses du document : 5 % de chutes comprises, vis des rails comptées, cloison 4 m × 2,50-2,70 m, plafond 8 × 10 m. recherche/02, section D."},
     {"id": "dtu-2541-2022", "kind": "standard", "title": "NF DTU 25.41 (février 2022) : hauteurs limites des cloisons et contre-cloisons, tableaux repris par Rockwool (guide cloisons 12/2023, guide murs 07/2024) et la CAPEB", "documentRef": "NF DTU 25.41 P1-1, février 2022 (texte AFNOR non recopié)", "url": "https://www.rockwool.com/siteassets/rw-f/telechargements/guides-de-pose-et-mise-en-oeuvre/cloisons/rockwool_mise_en_oeuvre_isolation_des_cloisons.pdf", "retrievedAt": DATE, "note": "recherche/03, sections 1.0, 1.1, 4.2."},
     {"id": "capeb-dtu-2541", "kind": "standard", "title": "CAPEB, guide « NF DTU 25.41 — Les principales nouveautés 2022 »", "url": "https://www.capeb.fr/www/capeb/media//morbihan/document/2022_Guide%20DTU%2025-41_DEF_HD_WEB.pdf", "retrievedAt": DATE},
@@ -185,6 +186,7 @@ FAMILIES += [
     fam("vb_tape", "Adhésif de membrane", "ml", ["adhesif", "kb1", "multitape"], consumable=True),
     fam("boxing", "Coffrage, soffite, caisson", "ml", ["coffrage", "soffite", "caisson", "habillage de poutre", "encoffrement", "ipn"]),
     fam("corner_tape", "Bande armée d'angle", "ml", ["bande armee", "bande d'angle"], consumable=True),
+    fam("depth_marker", "Pige de repérage d'épaisseur", "u", ["pige", "piges", "repere d'epaisseur"]),
     fam("resilient_strip", "Bande résiliente sous rail", "ml", ["ruban resilient", "bande resiliente", "resilient"], consumable=True),
     fam("acoustic_sealant", "Mastic acrylique acoustique", "u", ["mastic acrylique", "mastic acoustique", "mastic"], consumable=True),
     fam("hanger_anchor", "Fixation des suspentes au support", "u", ["cheville metal", "clou cheville"], consumable=True),
@@ -298,6 +300,7 @@ PRODUCTS = [p for p in PRODUCTS if p["id"] != "laine-cloison-45"] + [
     isolant("ibr-200", "Isover IBR Revêtu Kraft 200 mm, R 5,00, rouleau 4,5 × 1,20 m (5,40 m²) ou équivalent", "IBR 200", 5.40, "isover-ibr", OK2("5,40 m² : Isover, Castorama, Leroy Merlin (recherche/10 n° 55)."), ["ibr 200"]),
     isolant("ibr-300", "Isover IBR Revêtu Kraft 300 mm, R 7,50, rouleau 2,6 × 1,20 m (3,12 m²) ou équivalent", "IBR 300", 3.12, "isover-ibr", OK2("3,12 m² : SFIC et Tessella ; fiche Isover 2017."), ["ibr 300"]),
     isolant("ibr-400", "Isover IBR Revêtu Kraft 400 mm, R 10, rouleau 2,0 × 1,20 m (2,40 m²) ou équivalent", "IBR 400", 2.40, "isover-ibr", OK2("2,40 m² : fiche Isover (extrait) et Brico Dépôt."), ["ibr 400"]),
+    produit("pige-reperage", "depth_marker", "Pige de repérage d'épaisseur pour isolant soufflé", "Piges de repérage", piece("pige", "piges"), ["pige"]),
     produit("ruban-resilient", "resilient_strip", "Ruban résilient 45 sous rail (Placo Ruban Résilient 45 ou équivalent), rouleau de 15 m", "Ruban résilient",
             [unite("rouleau", "rouleau de 15 m", "rouleaux de 15 m", "15", "m", "placo-fdes-separatives", OK2("Rouleau de 15 m : fiche Placo Ruban Résilient 45 (copie BigMat, 18/12/2023) et extrait de la fiche Placo du 31/03/2026 (recherche/21 N1, N2)."))], ["ruban resilient", "bande resiliente"]),
     produit("mastic-acrylique", "acoustic_sealant", "Mastic acrylique, cartouche de 310 ml", "Mastic acrylique", piece("cartouche", "cartouches"), ["mastic acrylique"]),
@@ -971,10 +974,12 @@ def soufflage():
     needs = [besoin("sacs", "vrac", "arrondi_sup(surface * si(produit_vrac < 2, table.sacs_a, si(produit_vrac < 3, table.sacs_b, si(produit_vrac < 5, table.sacs_a, table.sacs_b))) / regle.cent_m2)", "u", "acermi-soufflage", acermi,
                     designation="{produit_vrac}", precision="pour {surface|m2} à {r_vise}, épaisseur après tassement du certificat",
                     exclusions="Aucune majoration : le tassement est déjà dans le tableau du certificat. Piges, déflecteurs de conduits et rehausse de trappe : seulement s'ils sont écrits.")]
+    needs.append(besoin("piges", "piges", "max(4, arrondi_sup(surface / regle.m2_par_pige))", "u", "proreno-combles", OK2("Une pige de repérage pour 25 m², 4 au moins (4 pour 100 m²) : fiche AQC / Proreno et guide Biofib ; l'exigence de repérage est du NF DTU 45.11 (antisèches Isover) (recherche/23 §4)."), core=False, short="piges", precision="une pour 25 m², 4 au moins"))
     slots = [{"key": "combles", "family": "blown_insulation_work", "label": "Combles soufflés", "measureOnly": True},
-             slot("vrac", "loose_fill", "Isolant à souffler", "vrac-souffle", "Sacs du produit écrit au devis.", "acermi-soufflage", "combles", ["comblissimo", "supafil", "ouate", "jetrock"])]
+             slot("vrac", "loose_fill", "Isolant à souffler", "vrac-souffle", "Sacs du produit écrit au devis.", "acermi-soufflage", "combles", ["comblissimo", "supafil", "ouate", "jetrock"]),
+             slot("piges", "depth_marker", "Piges de repérage", "pige-reperage", "Une pige pour 25 m², 4 au moins.", "proreno-combles", None, ["pige", "piges"], suggested={"label": "Piges de repérage d'épaisseur (si tu ne les as pas)"})]
     return {"id": "isolation-soufflee", "trade": TRADE, "section": "principal", "label": "Isolation des combles perdus par soufflage",
-            "triggers": ["blown_insulation_work"], "params": params, "slots": slots, "constants": {"cent_m2": regle("100", "m2", "acermi-soufflage", OK2("Le certificat ACERMI donne les sacs pour 100 m² (définition du tableau)."), label="pour {v}")}, "tables": {"sacs_a": sacs_a, "sacs_b": sacs_b}, "needs": needs}
+            "triggers": ["blown_insulation_work"], "params": params, "slots": slots, "constants": {"m2_par_pige": regle("25", "m2", "proreno-combles", OK2("1 pige pour 25 m², minimum 4 : AQC / Proreno et Biofib (recherche/23 §4)."), label="une pige pour {v} m²"), "cent_m2": regle("100", "m2", "acermi-soufflage", OK2("Le certificat ACERMI donne les sacs pour 100 m² (définition du tableau)."), label="pour {v}")}, "tables": {"sacs_a": sacs_a, "sacs_b": sacs_b}, "needs": needs}
 
 
 # ---------------------------------------------------------------------------------------------------------------
