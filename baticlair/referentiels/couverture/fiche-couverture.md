@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **91.0 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **90.0 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -79,7 +79,7 @@ Taux de chiffres confirmés : **91.0 %**. Règle : confirme : deux sources indé
 - **Cupa Pizarras Cupa 2** (confirme_fabricant 1) : carriere_et_epaisseurs carrière souterraine de Riodolas, Carballeda de Valdeorras (Ourense), depuis 1972 ; épaisseurs nominales 3,5 à 6 mm
 - **Cupa Pizarras Cupa 3** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Solana de Forcadas (León), zone San Pedro, depuis 1892 ; épaisseur moyenne 3,5 mm, 7 à 8 mm en « Heavy »
 - **Cupa Pizarras Cupa 4** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Armadilla, zone Benuza (León), depuis 1968 ; 3,5 à 4 mm, jusqu'à 8 mm (modèles épais) ; gamme Monument historique
-- **Cupa Pizarras Cupa 5** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Valdacal, zone Pusmazán (Ourense), depuis 1971 ; 3,5 à 5 mm, 7-8 mm (épais, Pyrineas) ; gris clair
+- **Cupa Pizarras Cupa 5** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Valdacal, zone Pusmazán (Ourense), depuis 1971 ; 5 / 6,5 / 7,5 / 9 mm (fiche carrière actuelle, plus de 3,5 mm ; relu le 20/11/2026) (épais, Pyrineas) ; gris clair
 - **Cupa Pizarras Cupa 6** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Los Campos, zone San Pedro (León), depuis 1968 ; 3,5 à 5 mm
 - **Cupa Pizarras Cupa 7** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Las Arcas Prada, zone San Pedro (León), depuis 1983 ; 3,5 à 5 mm
 - **Cupa Pizarras Cupa 9** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Anabel, Abejera de Aliste (Zamora), depuis 2001 ; 4, 5 et jusqu'à 8 mm ; noire
@@ -1341,7 +1341,7 @@ Taux de chiffres confirmés : **91.0 %**. Règle : confirme : deux sources indé
 - **Toutes marques 35x25** (une_source 1) : ardoises_par_palette 800 u/palette
 - **Toutes marques 40x25** (une_source 1) : ardoises_par_palette 950 u/palette
 - **Toutes marques 46x30** (une_source 1) : ardoises_par_palette 700 u/palette
-- **Toutes marques 30x20** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques 30x20** (une_source 1) : ardoises_par_palette 1 800 à 2 000 u/palette
 - **Toutes marques 33x23** (a_confirmer 1) : ardoises_par_palette None u/palette
 - **Toutes marques 35x22** (a_confirmer 1) : ardoises_par_palette None u/palette
 - **Toutes marques 45x30** (a_confirmer 1) : ardoises_par_palette None u/palette
@@ -1645,6 +1645,184 @@ Taux de chiffres confirmés : **91.0 %**. Règle : confirme : deux sources indé
 | teintes | Cedral : anthracite (Kergoat), anthracite ou brun (Orléane), brun flammé (Pommay), gris / brun / rouge (Tecta) ; Cembrit : noir, brun  | le comptoir demande la gamme et la teinte | confirme |
 | liteaux_ml_par_m2 | 40×24 : 6,67 ; 60×30 : 4,00 ; 33×23 : 8,70 ; 45×30 : 5,71 ml/m² | recouvrement 100 mm : pureau = (longueur − 100) ÷ 2 ; liteaux = 1 ÷ pureau (une file par pureau) | confirme |
 
+
+## Accessoires de tuiles : chatières, rives, closoirs, mortier
+
+### chatière (tuile de ventilation)
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 3) : chatiere_reference 205.20 référence; chatiere_section_ventilation 50 cm² par tuile
+- **Edilians PV 10 Huguenot** (confirme_fabricant 3) : chatiere_reference 214.20 référence; chatiere_section_ventilation 50 cm² par tuile
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 3) : chatiere_reference 200.20 référence; chatiere_section_ventilation 19 cm² par tuile
+- **Koramic Actua** (confirme_fabricant 3) : chatiere_reference MACT 8640 (+ grille 6070272) référence; chatiere_section_ventilation 26 cm² par tuile
+- **Terreal Romane Canal** (confirme_fabricant 3) : chatiere_reference 610 RC référence; chatiere_section_ventilation 18 cm² par tuile
+- **Monier Signy** (confirme_fabricant 3) : chatiere_reference (pas de code sur la fiche) référence; chatiere_section_ventilation 33 cm² par tuile
+- **Toutes marques toutes tuiles** (confirme 1) : chatieres_nombre_total arrondi supérieur de (surface projetée × 1/5000 ou 1/3000) ÷ section de la chatière, la moitié en bas du versant, la moitié en haut formule
+
+### tuile à douille / sortie
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+
+### demi-tuile / ajustement
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+
+### tuile de rive
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+- **Toutes marques tuiles à emboîtement grand moule** (confirme 1) : 
+
+### faîtière / about / fronton
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+
+### coloris
+
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : coloris_restriction_accessoires rive universelle de 33 et about de rive de 33 : Rouge Vieilli uniquement texte
+- **Toutes marques HP 10, PV 10, Alpha 10, Actua, Signy, Romane Canal** (a_confirmer 1) : coloris_les_plus_vendus_en_bretagne None liste
+
+### closoir ventilé de faîtage / arêtier
+
+- **Toutes marques HP 10 Huguenot** (confirme 1) : 
+- **Toutes marques PV 10 Huguenot** (confirme 1) : 
+- **Toutes marques Alpha 10 Ste Foy** (confirme 1) : 
+- **Toutes marques Actua** (confirme 1) : 
+- **Toutes marques Signy** (confirme 1) : 
+- **Toutes marques Romane Canal** (confirme 1) : 
+- **Toutes marques closoir souple en rouleau de 5 m** (confirme 1) : rouleaux arrondi supérieur de (ml faîtage + ml arêtiers) ÷ 4,95 formule
+- **Edilians SIROKO+ (bavette plissée alu)** (une_source 1) : 
+- **Edilians SIROKO+** (une_source 1) : section_ventilation 150 à 200 cm²/ml
+- **Edilians ZEF (bavette alu)** (une_source 1) : 
+- **Edilians SHARK+ (rigide)** (une_source 1) : 
+- **Monier Figaroll Plus** (confirme 1) : 
+- **Terreal Lahe-Roll (alu)** (une_source 1) : 
+
+### mortier de faîtage scellé
+
+- **Toutes marques mortiers de couverture** (confirme 1, a_confirmer 1, une_source 1) : 
+- **Toutes marques sac de 25 kg** (confirme 1) : 
+- **Saint-Gobain Weber webercel tuile** (une_source 1) : rendement_sac 15 l de mortier par sac de 25 kg
+
+## Ardoises : carrières, palettes, faîtage breton, crochets
+
+### ardoise naturelle
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| selection_sur_palette | 1re sélection = D1 seules ; 2e sélection = D2 seules ; 3e sélection exclue de la marque NF ; seules les A1 T1 S1 (et W1) sont admises  | le niveau de sélection est obligatoirement écrit sur l'étiquette de palette (marque NF) | confirme |
+| tendance_regionale | Bretagne et Pyrénées : ardoises épaisses ; Val de Loire : 32×22 en 3,5 mm ; Pyrénées : 32×22 en 5 mm  | conseil de choix du fabricant (pas une règle) | une_source |
+
+- **Cupa Pizarras Cupa 3 (Solana de Forcadas, León)** (une_source 1) : 
+- **Cupa Pizarras Cupa 5 (Valdacal, Pusmazán, Ourense)** (une_source 1) : 
+- **Cupa Pizarras Cupa 12 (La Campa, Folgoso del Caurel, Lugo)** (une_source 1) : 
+- **Cupa Pizarras Cupa 30 (La Invencible-Proinor)** (une_source 1) : classement_nf_en_12326 W1 (0,22 %) T1 S1 ; NF 16/01 n° 37493
+- **Cupa Pizarras sélections Excellence / Ardoisier / Naturelle** (une_source 1) : 
+- **Cupa Pizarras 32×22** (confirme_fabricant 1) : poids_au_m2 26.9 kg/m2
+- **Cupa Pizarras Prestige 30×20 (Cupa 4 Armadilla), 3,8 mm** (une_source 1) : ardoises_par_palette 2000 u/palette
+- **Rathscheck Schiefer (InterSIN) SIN 240 (Rozadais III, Casayo)** (confirme 1) : 
+- **Rathscheck Schiefer Domaine / Renaissance (SIN 150, SIN 340)** (une_source 1) : garantie 30 ans
+- **Rathscheck Schiefer 32×22 Domaine / Renaissance (≈ 5 mm)** (confirme 1) : poids_au_m2 35.2 kg/m2
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 27×18** (confirme_fabricant 1) : ardoises_par_palette 1800 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 30×20** (confirme_fabricant 1) : ardoises_par_palette 1850 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 32×22** (confirme_fabricant 1) : ardoises_par_palette 1450 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 40×22** (confirme_fabricant 1) : ardoises_par_palette 1300 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 40×25** (confirme_fabricant 1) : ardoises_par_palette 850 u/palette
+- **Rathscheck Schiefer 40×22 et 40×25, 5 mm** (une_source 1) : 
+- **Pizarras La Baña (BAÑA) Élite / Supérieure / Classique / MH** (une_source 1) : 
+- **Ardoisières d'Angers (Imerys) Angers-Trélazé (H1, H2, Prieuré, Armor, Armen)** (confirme 1) : production arrêtée en mars 2014 (dernier site : les Fresnais) ; plus de production neuve, seulement stocks ou réemploi
+- **Toutes marques 27×18** (confirme_fabricant 2, une_source 1) : poids_unitaire 0.612 kg; poids_unitaire 0.68 kg
+- **Toutes marques 30×20** (confirme_fabricant 4, confirme 1) : poids_unitaire 0.756 kg; poids_unitaire 0.84 kg; poids_unitaire 1.176 kg; poids_unitaire 1.344 kg; ardoises_par_palette 1 800 à 2 000 u/palette
+- **Toutes marques 32×22** (confirme_fabricant 4, confirme 1) : poids_unitaire 0.887 kg; poids_unitaire 0.986 kg; poids_unitaire 1.38 kg; poids_unitaire 1.577 kg
+- **Toutes marques 33×23** (confirme_fabricant 4) : poids_unitaire 0.956 kg; poids_unitaire 1.063 kg; poids_unitaire 1.488 kg; poids_unitaire 1.7 kg
+- **Toutes marques 35×22** (confirme_fabricant 4) : poids_unitaire 0.97 kg; poids_unitaire 1.078 kg; poids_unitaire 1.509 kg; poids_unitaire 1.725 kg
+- **Toutes marques 40×20** (confirme_fabricant 4) : poids_unitaire 1.008 kg; poids_unitaire 1.12 kg; poids_unitaire 1.568 kg; poids_unitaire 1.792 kg
+- **Toutes marques 40×22** (a_confirmer 1, confirme_fabricant 3) : poids_unitaire 1.109 kg; poids_unitaire 1.232 kg; poids_unitaire 1.725 kg; poids_unitaire 1.971 kg
+- **Toutes marques 40×25** (confirme_fabricant 4) : poids_unitaire 1.26 kg; poids_unitaire 1.4 kg; poids_unitaire 1.96 kg; poids_unitaire 2.24 kg
+- **Toutes marques 46×30** (confirme_fabricant 3) : poids_unitaire 1.932 kg; poids_unitaire 2.705 kg; poids_unitaire 3.091 kg
+- **Toutes marques 50×25** (confirme_fabricant 3) : poids_unitaire 1.75 kg; poids_unitaire 2.45 kg; poids_unitaire 2.8 kg
+- **Toutes marques 60×30** (confirme_fabricant 3) : poids_unitaire 2.52 kg; poids_unitaire 3.528 kg; poids_unitaire 4.032 kg
+- **Toutes marques 32×22 (et 32,5×22 Angers H1)** (confirme 1) : poids_au_m2 34.7 kg/m2
+- **Toutes marques Ardoise d'Espagne 4A 32×22 A1 T1 S1** (une_source 1) : ardoises_par_palette 1900 u/palette
+- **Toutes marques 33×23, 35×25** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques tous formats** (confirme 1) : poids_palette 1 130 à 1 660 kg
+
+### ardoise naturelle épaisse
+
+- **Cupa Pizarras Cupa Heavy 3** (une_source 1) : epaisseur_moyenne 7.5 mm
+- **Cupa Pizarras Heavy (7 à 8 mm), 32×22** (a_confirmer 1) : poids_au_m2 54 kg/m2
+
+### ardoise naturelle importée
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| classement_et_epaisseur | None  | aucune fiche de carrière brésilienne ou chinoise vendue en Bretagne trouvée ; le Brésil et la Chine exportent en Europe | a_confirmer |
+
+
+### ardoise naturelle (historique)
+
+- **Ardoisières d'Angers 32,5×22 H1** (une_source 1) : ardoises_par_palette 1800 u/palette
+- **Ardoisières d'Angers 30×20 12H1** (une_source 1) : ardoises_par_palette 1800 u/palette
+- **Ardoisières d'Angers 30×18 Grande Moyenne H1** (une_source 1) : ardoises_par_palette 2000 u/palette
+- **Ardoisières d'Angers 27×18 Moyenne H1** (une_source 1) : ardoises_par_palette 2000 u/palette
+- **Ardoisières d'Angers 27×16 Flamande H1** (une_source 1) : ardoises_par_palette 2500 u/palette
+- **Ardoisières d'Angers 30×20 12H2** (une_source 1) : ardoises_par_palette 1200 u/palette
+- **Ardoisières d'Angers 27×18 Moyenne H2** (une_source 1) : ardoises_par_palette 1600 u/palette
+
+### faîtage ardoise
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| fabricants_actifs | None  | anciens centres (Dol, Lannilis, Quimper, Lamballe, Guingamp…) disparus ; aucune faîtière bretonne actuelle trouvée ; Terreal : pas de faîtière propre à l'ardoise trouvée | a_confirmer |
+
+- **Edilians Faîtière Ardoise (réf. 720)** (une_source 2) : conditionnement 120 u/palette
+- **Edilians Faîtière Armor 33 (réf. 729)** (confirme 1) : conditionnement 184 u/palette
+- **Edilians faîtage simple à pinces / à ourlets** (une_source 1) : 
+- **Toutes marques lignolet** (confirme 1) : mise_en_oeuvre deux rangées d'ardoises superposées au faîte, celles du côté au vent débordant ; Morbihan et Finistère nord : ardoises triangulaires
+- **Toutes marques lignolet en 32×22** (a_confirmer 1) : ardoises_par_ml_de_faitage 9.0 ardoises/ml de faîtage (les deux versants)
+- **Toutes marques lignolet en 30×20** (a_confirmer 1) : ardoises_par_ml_de_faitage 9.9 ardoises/ml de faîtage (les deux versants)
+
+### crochet d'ardoise
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| correspondance_nuances | {'inox 17 %': 'X6Cr17 (AISI 430, ferritique, pas A2)', 'inox 18/10 = A2': 'X5CrNi18-10 (1.4301, AISI 304)', 'inox 316Ti = famille A4': 'X6CrNiMoTi17-12-2 (1.4571)'}  | le vendeur dit « 17 % », « 18/10 » ou « 316 » : A2 = 18/10, A4 = 316 / 316Ti | confirme |
+| nuance_selon_distance_mer | {'> 20 km, rural': '17 % admis', '3 à 20 km (marine)': '18/10 (A2) ; 17 % seulement par dérogation Frénéhard au-delà de 3 km en zone 2', '< 3 km': '316Ti (A4), 18/10 ou cuivre sur dérogation écrite du fabricant', 'front de mer (embruns)': "316Ti seul (Frénéhard admet l'Anjou Color 18/10)"}  | Bretagne : la plupart des communes côtières sont à moins de 20 km de la mer → au moins 18/10 | confirme |
+| part_crochets_pointe_bretagne | None fraction | pointe = voligeage (100 %), agrafe = liteaux ; règle de la base : 1/5 de pointes sur liteaux (une_source) | a_confirmer |
+
+- **Bati-Avenue (fabrication Frénéhard probable) CA Inox 18/10 agrafe A16, 10 cm et crosinus 12 cm, Ø 2,7** (confirme 1) : conditionnement 500 u/boîte
+
+### crochet d'ardoise teinté
+
+- **Frénéhard Anjou Color (inox 17 % ou 18/10 laqué)** (une_source 1) : conditionnement 403 à 1 300 u/boîte bois
+- **Frénéhard Anjou Color** (a_confirmer 1) : garantie 10 à 20 ans
+
+### clou d'ardoise
+
+- **Clouterie Rivierre pointe ardoise cuivre tête plate large 2,7 × 27 et 2,7 × 30** (une_source 1) : diametre_tete 7.6 mm
+- **Toutes marques cuivre 2,7 × 30 tête large** (a_confirmer 1) : clous_par_kg 572 u/kg
+- **Toutes marques inox A2 / A4 tête large 2,7 à 3,0 × 30** (a_confirmer 1) : clous_par_kg None u/kg
+- **PGB Europe (TEL D.1160B) cuivre Ø 2,5 / 2,8 / 3,0 × 25 à 65** (une_source 1) : conditionnement 5 kg
 
 ## Zinguerie et écrans : modèles et références du marché
 

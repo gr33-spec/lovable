@@ -677,7 +677,6 @@ const unitWord = (unit: string | null) => (unit === "u" ? "pièces" : unit === "
 export const LIGNE_NON_CHIFFREE = "Je n'ai pas su en tirer les articles : ajoute ce qu'il te faut, ou retire la ligne.";
 export const SUGGESTIONS_KEY = "suggestions:choisies";
 export const SUGGESTIONS_AUCUNE = "aucune";
-export const SUGGESTIONS_MAX = 5;
 export const SUGGESTIONS_TEXTE = "Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.";
 
 /** Les articles cochés, lus dans la réponse (« gouttiere/naissance,gouttiere/talon ») ; « aucune » ou rien : aucun. */
@@ -687,7 +686,11 @@ export function suggestionsChoisies(reponse: unknown): ReadonlySet<string> {
   return new Set(reponse.split(/[,+]/).map((x) => x.trim()).filter(Boolean));
 }
 
-/** Les oublis probables d'un devis, d'après la fiche : dans l'ordre des ouvrages du devis, sans doublon, cinq au plus. */
+/**
+ * Les oublis probables d'un devis, d'après la fiche : dans l'ordre des ouvrages du devis, sans doublon, SANS LIMITE DE
+ * NOMBRE (skill regles-metier du fondateur, 18/11/2026 : « toutes les cases décochées au départ, sans limite de nombre »).
+ * Avant : cinq au plus (les pattes de fixation du D-2026-020 n'étaient pas proposées).
+ */
 export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: string; label: string }[] {
   const out: { key: string; label: string }[] = [];
   for (const input of plan.inputs) {
@@ -700,7 +703,7 @@ export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: str
       out.push({ key, label: slot.suggested.label });
     }
   }
-  return out.slice(0, SUGGESTIONS_MAX);
+  return out;
 }
 
 /**
@@ -968,7 +971,7 @@ export function ecranDeLecture(input: {
     }
     return [...parNom].map(([label, cles]) => ({ key: cles.join("+"), label }));
   };
-  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? [...suggestionsDuPlan(ref, plan), ...consommables()].slice(0, SUGGESTIONS_MAX) : [];
+  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? [...suggestionsDuPlan(ref, plan), ...consommables()] : [];
   // UN ARTICLE ÉCRIT NE DISPARAÎT JAMAIS (§49.1 ; retour de Greg du 18 novembre 2026, D-2026-024 : « tout ce qui fait partie
   // du devis doit être pris en considération, l'analyse doit être complète »). Une ligne que le devis dit « fourniture »
   // (ou « fourniture et pose ») et dont la lecture n'a tiré aucun article n'est pas une ligne « sans fourniture » : elle

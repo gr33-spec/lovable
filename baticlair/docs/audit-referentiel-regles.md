@@ -1,8 +1,8 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.20-61`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.20-62`.
 
-203 règles de calcul : 79 constantes, 8 tables, 29 valeurs intermédiaires, 87 besoins. Règles sans test qui les cite : 0.
+209 règles de calcul : 79 constantes, 8 tables, 29 valeurs intermédiaires, 93 besoins. Règles sans test qui les cite : 0.
 
 Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à défaut, ceux qui citent sa section (« par §x »).
 
@@ -173,6 +173,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `closoir-aretier` | `longueur_aretier` | §7 | aretier | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
 | Besoin | `closoirs` | `nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile) * regle.closoirs_par_plaque` | §8 | couverture-bac-acier | lot-couverture-4.test.ts |
 | Besoin | `clous` | `commande.ardoises * regle.clous_par_ardoise` | §4 | couverture-ardoises-fibres-ciment | assistant-ia.test.ts, lot-couverture-5.test.ts |
+| Besoin | `collerette-ecran-fenetre` | `nb_fenetres` | §11 | fenetre-de-toit | deux-fenetres-de-toit.test.ts (par §11), lot-couverture-2.test.ts (par §11) |
 | Besoin | `collerette-sortie` | `nb_sorties` | §25 | sortie-de-toit | regles-sans-test-audit.test.ts |
 | Besoin | `colliers` | `nb_descentes * (arrondi_sup(hauteur_descente / regle.espacement_collier) + 1)` | §7, §15 | descente | characteristics.test.ts, devis-d2026-020.test.ts, lot-couverture-7.test.ts, platform.test.ts |
 | Besoin | `contre-liteaux` | `surface / entraxe_supports` | §5, §35 | couverture-tuiles-emboitement | devis-d2026-020.test.ts, hypotheses-par-defaut.test.ts, lot-couverture-5.test.ts, referential.test.ts |
@@ -202,7 +203,9 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `feuilles-noue` | `arrondi_sup(longueur_noue / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))))` | §25.2 | noue | dernier-recours.test.ts (par §25.2), lot-couverture-1.test.ts (par §25.2) |
 | Besoin | `feuilles-porte-solin` | `arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))` | §48.6 | bande-porte-solin | bobineau.test.ts (par §48.6), chantier-test-45-5.test.ts (par §48.6), dernier-recours.test.ts (par §48.6) |
 | Besoin | `fixations-pattes-joint-debout` | `(commande.pattes_coulissantes + commande.pattes_fixes) * regle.fixations_par_patte` | §7, §36 | couverture-zinc-joint-debout | couverture-regions.test.ts (par §7, §36), dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |
+| Besoin | `habillage-fenetre-toit` | `nb_fenetres` | §11 | fenetre-de-toit | deux-fenetres-de-toit.test.ts (par §11), lot-couverture-2.test.ts (par §11) |
 | Besoin | `jonctions` | `nb_lignes * (arrondi_sup(longueur_gouttiere / nb_lignes / regle.longueur_profil) - 1)` | §15 | gouttiere-pvc-alu | lot-couverture-3.test.ts |
+| Besoin | `kit-isolation-fenetre` | `nb_fenetres` | §11 | fenetre-de-toit | deux-fenetres-de-toit.test.ts (par §11), lot-couverture-2.test.ts (par §11) |
 | Besoin | `liteaux` | `surface / pureau` | §5, §35 | couverture-tuiles-emboitement | achat-groupe.test.ts, assistant-ia.test.ts, assistant-langage-artisan.test.ts, assistant-mobiiz.test.ts, bref-materiau-ecrit.test.ts, catalogue-metier.test.ts, characteristics.test.ts, commande-du-mois.test.ts, comparison.test.ts, conversation-ag-v1.test.ts, couverture-regions.test.ts, couvreur-ardoises-ouvrages-comptes.test.ts, devis-d2026-020.test.ts, hypotheses-par-defaut.test.ts, info-manquante-sur-sa-ligne.test.ts, jamais-de-quantite-demandee.test.ts, lot-couverture-5.test.ts, marchandise-seule.test.ts, mesure-a-verifier.test.ts, missions.test.ts, nature-document.test.ts, negocie-humain.test.ts, referential.test.ts, rien-ne-part-vide.test.ts, surlongueur-et-bache.test.ts, tableau-ardoises.test.ts, tuiles-canal.test.ts, achats-groupes-v1.test.ts, assistant-comprendre.test.ts, envoi-fournisseur.test.ts, parcours-negoce.test.ts, platform.test.ts, retour-fournisseur.test.ts |
 | Besoin | `liteaux-ardoise` | `surface / pureau` | §3, §34 | couverture-ardoises-crochet | hypotheses-par-defaut.test.ts, tableau-ardoises.test.ts |
 | Besoin | `liteaux-ardoise` | `surface * ardoise.liteaux_par_m2` | §4 | couverture-ardoises-fibres-ciment | hypotheses-par-defaut.test.ts, tableau-ardoises.test.ts |
@@ -214,6 +217,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `naissances` | `nb_descentes` | §7, §25, §15 | gouttiere, gouttiere-pvc-alu | characteristics.test.ts, devis-d2026-020.test.ts, etape-suggestions.test.ts, lecture-de00000071.test.ts, liste-des-fournitures.test.ts, pliage-une-reponse-pour-le-devis.test.ts, questions-3-pourcent.test.ts, regle-du-comptoir.test.ts, six-reponses-sur-six.test.ts, demande-de-devis-45.test.ts, etape-suggestions.test.ts, platform.test.ts, prompt-lecture.test.ts, suppliers-price-requests.test.ts |
 | Besoin | `noues-faconnees` | `arrondi_sup(longueur_noue / regle.longueur_utile_noue)` | §25.2 | noue | dernier-recours.test.ts (par §25.2), lot-couverture-1.test.ts (par §25.2) |
 | Besoin | `panneaux-sandwich` | `nb_pans * arrondi_sup(largeur_pan / regle.largeur_utile)` | §8 | couverture-bac-acier | lot-couverture-4.test.ts (par §8) |
+| Besoin | `pare-vapeur-fenetre` | `nb_fenetres` | §11 | fenetre-de-toit | deux-fenetres-de-toit.test.ts (par §11), lot-couverture-2.test.ts (par §11) |
 | Besoin | `pattes_coulissantes` | `surface * coulissantes_m2` | §7, §36 | couverture-zinc-joint-debout | couverture-regions.test.ts (par §7, §36), dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |
 | Besoin | `pattes_fixes` | `surface * fixes_m2` | §7, §36 | couverture-zinc-joint-debout | couverture-regions.test.ts (par §7, §36), dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |
 | Besoin | `pattes-aretier-zinc` | `longueur_aretier * regle.pattes_par_metre` | §7 | aretier | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
@@ -226,6 +230,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `raccords` | `nb_fenetres` | §11 | fenetre-de-toit | catalogues-par-metier.test.ts, lecture-de00000071.test.ts, catalogues-par-metier.test.ts, fiches-epreuves-faux-lecteur.test.ts, lecture-51-5.test.ts |
 | Besoin | `rouleaux-plomb` | `arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)` | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
 | Besoin | `rouleaux-plomb-larges` | `arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb_large)` | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
+| Besoin | `store-fenetre-toit` | `nb_fenetres` | §11 | fenetre-de-toit | deux-fenetres-de-toit.test.ts (par §11), lot-couverture-2.test.ts (par §11) |
 | Besoin | `talons` | `regle.talons_par_ligne` | §7, §25 | gouttiere | etape-suggestions.test.ts, lot-couverture-3.test.ts, regle-du-comptoir.test.ts, etape-suggestions.test.ts |
 | Besoin | `talons` | `regle.talons_par_ligne * nb_lignes` | §15 | gouttiere-pvc-alu | etape-suggestions.test.ts, lot-couverture-3.test.ts, regle-du-comptoir.test.ts, etape-suggestions.test.ts |
 | Besoin | `tasseaux-zinc` | `nb_rangs * longueur_rampant` | §7 | couverture-zinc-tasseaux | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
@@ -235,6 +240,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `tuiles-de-rive` | `longueur_rives / pureau` | §5, §35 | couverture-tuiles-emboitement | hypotheses-par-defaut.test.ts |
 | Besoin | `vis` | `arrondi_sup(surface * regle.vis_par_m2 + nb_pans * 2 * longueur_rampant * regle.vis_par_ml_rive)` | §8 | couverture-bac-acier | adresse-mobiiz.test.ts, apprentissage-habitudes.test.ts, assistant-mobiiz.test.ts, chantier-test-45-5.test.ts, dernier-recours.test.ts, etape-suggestions.test.ts, fiches-metier.test.ts, lot-couverture-4.test.ts, platrerie.test.ts, question-du-modele-rattachee.test.ts, regles-sans-test-audit.test.ts, catalogues-par-metier.test.ts, demande-de-devis-45.test.ts, etape-suggestions.test.ts, referentiel-par-metier.test.ts |
 | Besoin | `vis-bandes` | `longueur_bande * regle.vis_par_ml` | §25.5 | bandes-zinc | regles-sans-test-audit.test.ts |
+| Besoin | `volet-fenetre-toit` | `nb_fenetres` | §11 | fenetre-de-toit | deux-fenetres-de-toit.test.ts (par §11), lot-couverture-2.test.ts (par §11) |
 | Besoin | `voliges` | `surface` | §7 | voligeage | ce-que-voit-l-artisan.test.ts, couverture-regions.test.ts, joint-debout.test.ts, pliage-une-reponse-pour-le-devis.test.ts, rampant-long-panneaux-habitudes.test.ts, six-reponses-sur-six.test.ts, voligeage.test.ts, demande-de-devis-45.test.ts |
 | Besoin | `voliges-joint-debout` | `surface` | §36.4 | couverture-zinc-joint-debout | rampant-long-panneaux-habitudes.test.ts |
 | Besoin | `zinc-bacs` | `arrondi_sup(largeur_pan / entraxe_joints) * si(longueur_rampant > regle.rampant_max_bac, arrondi_sup(longueur_rampant / regle.rampant_max_bac), 1)` | §7, §36 | couverture-zinc-joint-debout | rampant-long-panneaux-habitudes.test.ts |

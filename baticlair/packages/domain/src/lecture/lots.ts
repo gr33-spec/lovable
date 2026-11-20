@@ -3,7 +3,7 @@ import { ficheDeCalcul } from "../referential/fiches/index.js";
 import { referentialFor, tradeIdOf } from "../referential/registry.js";
 import { tradeProfile } from "../trades/index.js";
 import { POINTS_ELECTRIQUES } from "./electricite.js";
-import { SUGGESTIONS_MAX, type EcranDeLecture, type LectureDevis, type LectureLot } from "./lecture.js";
+import { type EcranDeLecture, type LectureDevis, type LectureLot } from "./lecture.js";
 import type { ScreenRow } from "../trust/purchase-view.js";
 import { ecranDeLecture } from "./lecture.js";
 
@@ -96,7 +96,7 @@ export function ecranParLots(input: Entree & { refDe: (metier: string) => Refere
     questions: unique(tous.flatMap((e) => e.questions), (q) => q.key),
     lignes: tous.flatMap((e) => e.lignes).sort((a, b) => rang(a.ligne.ref) - rang(b.ligne.ref)),
     sansFourniture: tous.flatMap((e) => e.sansFourniture),
-    suggestions: unique(tous.flatMap((e) => e.suggestions), (x) => x.key).slice(0, SUGGESTIONS_MAX),
+    suggestions: unique(tous.flatMap((e) => e.suggestions), (x) => x.key),
     lots: parLot.map(({ lot, ref }) => ({ metier: lot.metier, libelle: lot.libelle, trade: ref.trade })),
   };
 }

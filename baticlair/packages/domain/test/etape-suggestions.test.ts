@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { D2026_020_LECTURE, ecranDeLecture, ROOFING_REFERENTIAL, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, SUGGESTIONS_MAX, SUGGESTIONS_TEXTE, suggestionsDuPlan, type EngineAnswer } from "../src/index.js";
+import { D2026_020_LECTURE, ecranDeLecture, ROOFING_REFERENTIAL, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, SUGGESTIONS_TEXTE, suggestionsDuPlan, type EngineAnswer } from "../src/index.js";
 
 /**
  * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 13 à 17 ; règle changée : §49.1 points 3 et 5).
@@ -16,7 +16,7 @@ const cles = (e: ReturnType<typeof ecran>) => e.purchase.questions.map((d) => d.
 const noms = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.map((b) => b.label);
 
 describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, avant les questions", () => {
-  it("à l'ouverture : naissances, talons, angles, puis les consommables (silicone, vis) ; jamais les crochets déjà écrits ; cinq au plus ; rien n'est ajouté", () => {
+  it("à l'ouverture : naissances, talons, angles, puis les consommables (silicone, vis) ; jamais les crochets déjà écrits ; sans limite de nombre (skill du fondateur, 18/11/2026 ; avant : cinq au plus, les pattes n'étaient pas proposées) ; rien n'est ajouté", () => {
     const e = ecran();
     expect(e.suggestions.map((o) => o.label)).toEqual([
       "Naissances de gouttière",
@@ -24,10 +24,10 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "Angles de gouttière (si tu ne les fabriques pas)",
       "Cartouches de silicone zinc",
       "Vis inox 4 × 40",
+      "Pattes de fixation",
     ]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis"]);
-    expect(e.suggestions.length).toBe(SUGGESTIONS_MAX);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -78,6 +78,13 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {
     const slots = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.slots.filter((s) => s.suggested).map((s) => `${w.id}/${s.key} : ${s.suggested!.label}`));
     expect(slots).toEqual([
+      // Velux (skill du fondateur, 18/11/2026 ; BFX : tarif Velux France 2024) : un par fenêtre, à sa taille.
+      "fenetre-de-toit/isolation : Kits d'isolation de fenêtre de toit (type BDX)",
+      "fenetre-de-toit/pare_vapeur : Pare-vapeur de fenêtre de toit (type BBX)",
+      "fenetre-de-toit/collerette : Collerettes d'écran de fenêtre de toit (type BFX)",
+      "fenetre-de-toit/volet : Volets roulants de fenêtre de toit",
+      "fenetre-de-toit/store : Stores de fenêtre de toit",
+      "fenetre-de-toit/habillage : Habillages intérieurs de fenêtre de toit",
       "gouttiere/crochet : Crochets de gouttière",
       "gouttiere/naissance : Naissances de gouttière",
       "gouttiere/talon : Talons de gouttière (si tu ne les fabriques pas)",

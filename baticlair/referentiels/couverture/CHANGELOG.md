@@ -1,5 +1,16 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.20-62 — Suggestions : sans limite de nombre
+
+- **§49.1 point 5, Règle changée** : l'étape « Suggestions » propose tous les oublis probables de la fiche et tous les
+  consommables liés aux lignes écrites, sans limite de nombre (skill du fondateur, 18/11/2026 : « toutes les cases
+  décochées au départ, sans limite de nombre »). Avant : cinq au plus (`SUGGESTIONS_MAX`), au-delà les derniers n'étaient
+  pas proposés. D-2026-020 : les pattes de fixation (faîtage zinc) sont maintenant proposées (6 cases au lieu de 5).
+- **§11 Fenêtres de toit, Suggestions** (skill du fondateur, 18/11/2026 : « En Suggestion : kit d'isolation (BDX),
+  pare-vapeur (BBX), volet roulant, store, habillage intérieur ») : six cases proposées quand une fenêtre de toit est
+  écrite, la collerette d'écran (BFX) en plus (vendue à part du raccord, tarif Velux France 2024, recherche du
+  20/11/2026). Cochées : un par fenêtre, à sa taille (« Kits d'isolation (type BDX), fenêtre 78 × 98 »). Avant : rien.
+
 ## roofing-2026.11.20-61 — Plomb en rouleaux de 10 m et de 5 m ; teintes de l'ardoise fibres-ciment
 
 | Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |

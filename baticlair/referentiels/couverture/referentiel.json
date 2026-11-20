@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.20-61",
+  "version": "roofing-2026.11.20-62",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -117,6 +117,14 @@
       "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       "retrievedAt": "2026-10-04",
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
+    },
+    {
+      "id": "fondateur-skill-regles-metier-2026-11-18",
+      "kind": "trade_practice",
+      "title": "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
+      "documentRef": ".claude/skills/regles-metier/SKILL.md (§ Velux, § Oublis probables)",
+      "retrievedAt": "2026-11-18",
+      "note": "« En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur. » Un par fenêtre, à sa taille ; la collerette d'écran (BFX) ajoutée d'après le tarif Velux France 2024 (vendue à part du raccord), recherche du 20/11/2026."
     },
     {
       "id": "fondateur-reponses-2026-11-18",
@@ -1168,6 +1176,48 @@
         ],
         "answered": "\\b\\d{2,3} ?[x×*] ?\\d{2,3}\\b|\\b[a-z]k ?\\d{2}\\b"
       }
+    },
+    {
+      "code": "roof_window_insulation",
+      "label": "Kit d'isolation de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_vapour",
+      "label": "Pare-vapeur de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_collar",
+      "label": "Collerette d'écran de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_shutter",
+      "label": "Volet roulant de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_blind",
+      "label": "Store de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_lining",
+      "label": "Habillage intérieur de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "roof_window_flashing",
@@ -4479,6 +4529,192 @@
             },
             "version": 1,
             "note": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m. Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "kit-isolation-fenetre",
+      "family": "roof_window_insulation",
+      "label": "Kit d'isolation de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Kits d'isolation (type BDX)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pare-vapeur-fenetre",
+      "family": "roof_window_vapour",
+      "label": "Pare-vapeur de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Pare-vapeur de fenêtre (type BBX)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "collerette-ecran-fenetre",
+      "family": "roof_window_collar",
+      "label": "Collerette d'écran de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Collerettes d'écran (type BFX)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "volet-fenetre-toit",
+      "family": "roof_window_shutter",
+      "label": "Volet roulant de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Volets roulants de fenêtre de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "store-fenetre-toit",
+      "family": "roof_window_blind",
+      "label": "Store de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Stores de fenêtre de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "habillage-fenetre-toit",
+      "family": "roof_window_lining",
+      "label": "Habillage intérieur de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Habillages intérieurs de fenêtre de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
           },
           "primary": true
         }
@@ -10920,6 +11156,84 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "raccord-fenetre-toit"
           }
+        },
+        {
+          "key": "isolation",
+          "family": "roof_window_insulation",
+          "label": "Kits d'isolation (type BDX)",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "kit-isolation-fenetre"
+          },
+          "suggested": {
+            "label": "Kits d'isolation de fenêtre de toit (type BDX)"
+          }
+        },
+        {
+          "key": "pare_vapeur",
+          "family": "roof_window_vapour",
+          "label": "Pare-vapeur de fenêtre (type BBX)",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "pare-vapeur-fenetre"
+          },
+          "suggested": {
+            "label": "Pare-vapeur de fenêtre de toit (type BBX)"
+          }
+        },
+        {
+          "key": "collerette",
+          "family": "roof_window_collar",
+          "label": "Collerettes d'écran (type BFX)",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "collerette-ecran-fenetre"
+          },
+          "suggested": {
+            "label": "Collerettes d'écran de fenêtre de toit (type BFX)"
+          }
+        },
+        {
+          "key": "volet",
+          "family": "roof_window_shutter",
+          "label": "Volets roulants de fenêtre de toit",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "volet-fenetre-toit"
+          },
+          "suggested": {
+            "label": "Volets roulants de fenêtre de toit"
+          }
+        },
+        {
+          "key": "store",
+          "family": "roof_window_blind",
+          "label": "Stores de fenêtre de toit",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "store-fenetre-toit"
+          },
+          "suggested": {
+            "label": "Stores de fenêtre de toit"
+          }
+        },
+        {
+          "key": "habillage",
+          "family": "roof_window_lining",
+          "label": "Habillages intérieurs de fenêtre de toit",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "habillage-fenetre-toit"
+          },
+          "suggested": {
+            "label": "Habillages intérieurs de fenêtre de toit"
+          }
         }
       ],
       "constants": {},
@@ -10941,6 +11255,102 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "kit-isolation-fenetre",
+          "slot": "isolation",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Kits d'isolation (type BDX), {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "pare-vapeur-fenetre",
+          "slot": "pare_vapeur",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Pare-vapeur de fenêtre (type BBX), {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "collerette-ecran-fenetre",
+          "slot": "collerette",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Collerettes d'écran (type BFX), {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "volet-fenetre-toit",
+          "slot": "volet",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Volets roulants de fenêtre de toit, {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "store-fenetre-toit",
+          "slot": "store",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Stores de fenêtre de toit, {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "habillage-fenetre-toit",
+          "slot": "habillage",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Habillages intérieurs de fenêtre de toit, {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
           },
           "version": 1
         }

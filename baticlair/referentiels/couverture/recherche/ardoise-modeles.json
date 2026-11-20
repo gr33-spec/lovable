@@ -1,0 +1,3184 @@
+{
+ "famille": "ardoise_modeles",
+ "generated": "2026-11-20",
+ "entrees": [
+  {
+   "id": "cupa3_epaisseurs_formats",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "Cupa 3 (Solana de Forcadas, León)",
+   "attribut": "epaisseurs_nominales",
+   "valeur": [
+    3.5,
+    5,
+    7.65
+   ],
+   "unite": "mm",
+   "condition": "formats rectangulaires 25×15 à 50×45 cm ; sélections Excellence, Ardoisier, Naturelle, Heavy ; classement W1 (absorption 0,22 %), S1, T1, marque NF 02/01 n° 5273",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 3",
+     "url": "https://www.cupapizarras.com/sites/default/files/fr/cupa3.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière Solana de Forcadas … Formats: 25x15 - 50x45 cm  Épaisseur: 3.5 - 5 - 7.65 mm ; W1 ; S1 ; T1 ; HEAVY",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, catalogue couvreur (PDF modifié le 23/08/2024)",
+     "url": "https://www.cupapizarras.com/sites/default/files/catalogue_couvreur.pdf",
+     "type": "fabricant",
+     "extrait": "L'épaisseur moyenne de l'ardoise exfoliée est de 3,5 mm, et varie de 7 à 8 mm pour l'ardoise Heavy",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "deux documents du même fabricant (fiche carrière, catalogue couvreur) : une seule source ; cohérent avec la base (ardoise_carriere_cupa3)"
+  },
+  {
+   "id": "cupa_heavy3_epaisseur",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle épaisse",
+   "marque": "Cupa Pizarras",
+   "modele": "Cupa Heavy 3",
+   "attribut": "epaisseur_moyenne",
+   "valeur": 7.5,
+   "unite": "mm",
+   "condition": "ardoise Heavy de la carrière Cupa 3 ; fiche carrière 7,65 mm, catalogue 7 à 8 mm, fiche SpecifiedBy 7,5 mm ; longueurs 300 à 500 mm, largeurs 200 à 250 mm",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 3",
+     "url": "https://www.cupapizarras.com/sites/default/files/fr/cupa3.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière Solana de Forcadas … Formats: 25x15 - 50x45 cm  Épaisseur: 3.5 - 5 - 7.65 mm ; W1 ; S1 ; T1 ; HEAVY",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, catalogue couvreur (PDF modifié le 23/08/2024)",
+     "url": "https://www.cupapizarras.com/sites/default/files/catalogue_couvreur.pdf",
+     "type": "fabricant",
+     "extrait": "varie de 7 à 8 mm pour l'ardoise Heavy",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "SpecifiedBy (fiche produit déposée par Cupa Pizarras), CUPA HEAVY 3",
+     "url": "https://product-explorer.specifiedby.com/cupa-pizarras/cupa-heavy-3-natural-slate?sm=1",
+     "type": "autre",
+     "extrait": "Split to an average thickness of 7.5 mm ; Length: 300 - 500 mm ; Width: 200 - 250 mm",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "7,5 (SpecifiedBy) / 7,65 (fiche carrière) / 7 à 8 (catalogue) : même fabricant, arrondis différents ; retenir 7,5 à 8 mm pour le poids",
+   "raison": "SpecifiedBy reprend la déclaration du fabricant : pas une source indépendante"
+  },
+  {
+   "id": "cupa5_epaisseurs",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "Cupa 5 (Valdacal, Pusmazán, Ourense)",
+   "attribut": "epaisseurs_nominales",
+   "valeur": [
+    5,
+    6.5,
+    7.5,
+    9
+   ],
+   "unite": "mm",
+   "condition": "gris clair, texture rugueuse ; formats 20×20 à 60×45 cm ; sélections Excellence, Ardoisier, Naturelle, Patrimoine, MH, Pyrineas, Heavy ; W1 (0,21 %), S1, T1, NF 02/03 n° 5275",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 5",
+     "url": "https://www.cupapizarras.com/sites/default/files/fr/cupa5.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière Valdacal … Formats: 20x20 - 60x45 cm  Épaisseur: 5 - 6.5 - 7.5 - 9 mm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, brochure Gamme Monuments historiques et Patrimoine",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/gamme_monuments_historiques_patrimoine.pdf",
+     "type": "fabricant",
+     "extrait": "CUPA 5 VALDACAL … Ardoise semi-épaisses 5 mm … épaisses 7 mm … épaisses 9 mm",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "la base (ardoise_carriere_cupa5, catalogue architecte 2018) donne « 3,5 à 5 mm, 7-8 mm » ; la fiche carrière actuelle et la gamme MH ne proposent plus de 3,5 mm en Cupa 5 : la Cupa 5 est une ardoise épaisse (5 mm et plus)"
+  },
+  {
+   "id": "cupa12_epaisseurs_formats",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "Cupa 12 (La Campa, Folgoso del Caurel, Lugo)",
+   "attribut": "epaisseurs_nominales",
+   "valeur": [
+    3.5,
+    5,
+    6
+   ],
+   "unite": "mm",
+   "condition": "gris, texture lisse ; en exploitation depuis 1972 ; formats 20×20 à 60×45 cm ; sélections Excellence, Ardoisier, Naturelle ; W1 (0,20 %), S1, T1 ; NF02/09 n° 17704",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 12",
+     "url": "https://cdn.cupapizarras.com/wp-content/uploads/2019/06/cupa12_fr.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière La Campa. Folgoso del Caurel (Lugo) … Formats: 20x20 - 60x45 cm  Épaisseur: 3,5 - 5 - 6 mm",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "absente de la base ; fiche carrière seule, pas de palette publiée"
+  },
+  {
+   "id": "cupa30_classement",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "Cupa 30 (La Invencible-Proinor)",
+   "attribut": "classement_NF_EN_12326",
+   "valeur": "W1 (0,22 %) T1 S1 ; NF 16/01 n° 37493",
+   "unite": "",
+   "condition": "épaisseurs 5 / 6,5 / 7,5 mm (comme la base)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 30",
+     "url": "https://www.cupapizarras.com/wp-content/uploads/2021/10/cupa30_fr.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière La invencible-Proinor … Épaisseurs: 5 – 6.5 – 7.5 mm ; W1 ; S1 ; T1",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "cupa_garantie_selection",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "sélections Excellence / Ardoisier / Naturelle",
+   "attribut": "garantie",
+   "valeur": {
+    "Excellence (D1, marque NF)": 30,
+    "Ardoisier (D2, marque NF)": 30,
+    "Naturelle (hors marque NF)": 10,
+    "MH / Patrimoine / Prestige": 30
+   },
+   "unite": "ans",
+   "condition": "garantie contre la défectuosité compromettant l'étanchéité, pose conforme au NF DTU 40.11 ; Sélection Plus NF : 100 ans (voir base)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, catalogue couvreur (PDF modifié le 23/08/2024)",
+     "url": "https://www.cupapizarras.com/sites/default/files/catalogue_couvreur.pdf",
+     "type": "fabricant",
+     "extrait": "garanties pour une durée de 30 ans … sélection NATURELLE sont garanties dix années",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, brochure Gamme Monuments historiques et Patrimoine",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/gamme_monuments_historiques_patrimoine.pdf",
+     "type": "fabricant",
+     "extrait": "certificat de garantie 30 ans et d'authenticité",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "marque_nf_selection_palette",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "toutes (marque NF 228)",
+   "modele": "",
+   "attribut": "selection_sur_palette",
+   "valeur": "1re sélection = D1 seules ; 2e sélection = D2 seules ; 3e sélection exclue de la marque NF ; seules les A1 T1 S1 (et W1) sont admises",
+   "unite": "",
+   "condition": "le niveau de sélection est obligatoirement écrit sur l'étiquette de palette (marque NF)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, catalogue couvreur (PDF modifié le 23/08/2024)",
+     "url": "https://www.cupapizarras.com/sites/default/files/catalogue_couvreur.pdf",
+     "type": "fabricant",
+     "extrait": "1ère sélection : uniquement les ardoises D1 … 3ème sélection : exclue du Label Marque NF",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Batiproduits, conseil d'expert « Couverture de toiture : le choix des ardoises naturelles »",
+     "url": "https://www.batiproduits.com/conseils-experts/couverture-de-toiture-le-choix-des-ardoises-naturelles-g1470",
+     "type": "guide",
+     "extrait": "seules les ardoises classées A1-T1-S1 peuvent bénéficier de la marque",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "LNE, marque NF 228 Ardoises",
+     "url": "https://www.lne.fr/en/certification/marque-nf/nf-228-ardoises",
+     "type": "autre",
+     "extrait": "référentiel NF 228 Ardoises",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "rathscheck_sin240_epaisseurs",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer (InterSIN)",
+   "modele": "SIN 240 (Rozadais III, Casayo)",
+   "attribut": "epaisseurs_nominales",
+   "valeur": [
+    3.5,
+    4.0,
+    5.0
+   ],
+   "unite": "mm",
+   "condition": "Primera (A1 T1 S1 D1) et Standard (D2), longueurs 220 à 600, largeurs 150 à 300 ; certificat NF 228 n° 37913 valable jusqu'au 31/12/2028 ; « bien adapté en climat maritime »",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Rathscheck, fiche technique carrière SIN 240 avec certificat NF 228 n° 37913 rév. 3 (LNE, valable 01/01/2026 – 31/12/2028)",
+     "url": "https://www.rathscheck.de/sin240-fiche_technique",
+     "type": "fabricant",
+     "extrait": "PRIMERA … 3,5 / 4,0 / 5,0 … D1 ; Standard [A1, T1, S1, D2] ; NF EN 12326-1 : 2014",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck, brochure InterSIN (2020)",
+     "url": "https://www.rathscheck.de/wp-content/uploads/2020/10/RSCH_Broschuere_InterSIN_FR_A4_210x297_web.pdf",
+     "type": "fabricant",
+     "extrait": "SIN 240 … 32×22 (4/5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "la brochure 2020 ne citait que 4 et 5 mm pour le 32×22 ; le certificat LNE 2026 ajoute 3,5 mm (certificat délivré par le LNE, organisme indépendant)"
+  },
+  {
+   "id": "rathscheck_domaine_garantie",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "Domaine / Renaissance (SIN 150, SIN 340)",
+   "attribut": "garantie",
+   "valeur": 30,
+   "unite": "ans",
+   "condition": "carbonates, pyrites traversantes, gel, flexion ; pose selon NF DTU 40.11 ; remplacement de la matière seule",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Nos ardoises Domaine et Renaissance ont une garantie de 30 ans",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "bana_formats_epaisseurs",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Pizarras La Baña (BAÑA)",
+   "modele": "Élite / Supérieure / Classique / MH",
+   "attribut": "formats_epaisseurs",
+   "valeur": {
+    "Élite 3,5 et 4,5 mm": "60×30, 50×25, 46×30, 40×25, 40×22, 35×25, 35×22, 33×23, 32×22, 30×20, 31×18, 27×18, 27×16, 25×18, 25×15, 22×16",
+    "Supérieure 3,5 mm": "46×30 à 27×16",
+    "Supérieure 4,5 mm": "46×30, 40×25, 32×22, 30×20, 31×18, 27×18, 27×16",
+    "Classique 3,5 mm": "46×30, 40×22, 32×22, 30×20, 31×18, 27×16",
+    "Classique 4,5 mm": "30×20, 31×18",
+    "MH 4 / 5 / 7 mm": "40×25 à 22×16"
+   },
+   "unite": "",
+   "condition": "vendue en Bretagne par Denis Matériaux ; A1 T1 S1",
+   "regions": [
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Denis Matériaux (négoce breton), catalogue ardoise BAÑA (2023)",
+     "url": "https://www.denismateriaux.com/ressources/drupal/files/2023-04/La%20Ba%C3%B1a-%20Catalogue_6P.pdf",
+     "type": "negoce",
+     "extrait": "Gamme Élite … ÉP. 3.5 mm / ÉP. 4.5 mm ; 60x30 … 33x23 32x22 30x20 … 22x16 ; A1T1S1",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "angers_trelaze_fin_production",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Ardoisières d'Angers (Imerys)",
+   "modele": "Angers-Trélazé (H1, H2, Prieuré, Armor, Armen)",
+   "attribut": "production",
+   "valeur": "arrêtée en mars 2014 (dernier site : les Fresnais) ; plus de production neuve, seulement stocks ou réemploi",
+   "unite": "",
+   "condition": "le nom « ardoise d'Angers » au devis désigne en pratique une ardoise de remplacement (Espagne) ou du réemploi : demander la carrière",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Ville d'Angers, archives municipales, fonds « Ardoisières »",
+     "url": "https://archives.angers.fr/fileadmin/plugin/tx_dcddownloads/F_Ardoisieres.pdf",
+     "type": "autre",
+     "extrait": "les Ardoisières ont fermé définitivement en mars 2014",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Le Journal des entreprises, réhabilitation du site des Fresnais (Trélazé)",
+     "url": "https://www.lejournaldesentreprises.com/article/le-promoteur-p2i-rehabilite-le-site-ardoisier-des-fresnais-trelaze-2046904",
+     "type": "autre",
+     "extrait": "Fermé depuis 2014, le dernier site d'exploitation d'ardoises de Trélazé",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Mission Val de Loire, « Closure of the Trélazé slate quarries »",
+     "url": "https://loirevalley-worldheritage.org/News/Articles/All/Closure-of-the-Trelaze-slate-quarries",
+     "type": "autre",
+     "extrait": "Imerys has announced the closure of the slate quarry company Ardoisière Anjou",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "bresil_chine_classement",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle importée",
+   "marque": "Brésil, Chine",
+   "modele": "",
+   "attribut": "classement_et_epaisseur",
+   "valeur": null,
+   "unite": "",
+   "condition": "aucune fiche de carrière brésilienne ou chinoise vendue en Bretagne trouvée ; le Brésil et la Chine exportent en Europe",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Agence wallonne du patrimoine, « Ardoises naturelles : spécifications produit »",
+     "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2019/12/01-ardoises-naturelles-specifications-produit.pdf",
+     "type": "guide",
+     "extrait": "le Brésil, le Canada et la Chine exportent leurs ardoises",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Batiproduits, conseil d'expert « Couverture de toiture : le choix des ardoises naturelles »",
+     "url": "https://www.batiproduits.com/conseils-experts/couverture-de-toiture-le-choix-des-ardoises-naturelles-g1470",
+     "type": "guide",
+     "extrait": "seules les ardoises classées A1-T1-S1 peuvent bénéficier de la marque",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "ni épaisseur, ni format, ni palette, ni classement publiés ; exiger la déclaration de performance (A, T, S) du lot ; hors marque NF si T2 ou S2"
+  },
+  {
+   "id": "bretagne_ardoise_epaisse",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (conseil)",
+   "modele": "",
+   "attribut": "tendance_regionale",
+   "valeur": "Bretagne et Pyrénées : ardoises épaisses ; Val de Loire : 32×22 en 3,5 mm ; Pyrénées : 32×22 en 5 mm",
+   "unite": "",
+   "condition": "conseil de choix du fabricant (pas une règle)",
+   "regions": [
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "la Bretagne et les Pyrénées sont orientées vers les ardoises épaisses (conseils Cupa reproduits dans le dossier)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "poids_27x18_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "27×18",
+   "attribut": "poids_unitaire",
+   "valeur": 0.612,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.612,
+    "publie_kg": 0.612,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_27x18_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "27×18",
+   "attribut": "poids_unitaire",
+   "valeur": 0.68,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.68,
+    "publie_kg": 0.68,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_30x20_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "30×20",
+   "attribut": "poids_unitaire",
+   "valeur": 0.756,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.756,
+    "publie_kg": 0.756,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_30x20_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "30×20",
+   "attribut": "poids_unitaire",
+   "valeur": 0.84,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.84,
+    "publie_kg": 0.84,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_30x20_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "30×20",
+   "attribut": "poids_unitaire",
+   "valeur": 1.176,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.176,
+    "publie_kg": 1.176,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_30x20_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "30×20",
+   "attribut": "poids_unitaire",
+   "valeur": 1.344,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.344,
+    "publie_kg": 1.344,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_32x22_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "32×22",
+   "attribut": "poids_unitaire",
+   "valeur": 0.887,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.887,
+    "publie_kg": 0.887,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_32x22_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "32×22",
+   "attribut": "poids_unitaire",
+   "valeur": 0.986,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.986,
+    "publie_kg": 0.986,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_32x22_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "32×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.38,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.38,
+    "publie_kg": 1.38,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_32x22_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "32×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.577,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.577,
+    "publie_kg": 1.577,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_33x23_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "33×23",
+   "attribut": "poids_unitaire",
+   "valeur": 0.956,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.956,
+    "publie_kg": 0.956,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_33x23_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "33×23",
+   "attribut": "poids_unitaire",
+   "valeur": 1.063,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.063,
+    "publie_kg": 1.063,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_33x23_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "33×23",
+   "attribut": "poids_unitaire",
+   "valeur": 1.488,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.488,
+    "publie_kg": 1.488,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_33x23_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "33×23",
+   "attribut": "poids_unitaire",
+   "valeur": 1.7,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.7,
+    "publie_kg": 1.7,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_35x22_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "35×22",
+   "attribut": "poids_unitaire",
+   "valeur": 0.97,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 0.97,
+    "publie_kg": 0.97,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_35x22_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "35×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.078,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.078,
+    "publie_kg": 1.078,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_35x22_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "35×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.509,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.509,
+    "publie_kg": 1.509,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_35x22_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "35×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.725,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.725,
+    "publie_kg": 1.725,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x20_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×20",
+   "attribut": "poids_unitaire",
+   "valeur": 1.008,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.008,
+    "publie_kg": 1.008,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x20_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×20",
+   "attribut": "poids_unitaire",
+   "valeur": 1.12,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.12,
+    "publie_kg": 1.12,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x20_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×20",
+   "attribut": "poids_unitaire",
+   "valeur": 1.568,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.568,
+    "publie_kg": 1.568,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x20_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×20",
+   "attribut": "poids_unitaire",
+   "valeur": 1.792,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.792,
+    "publie_kg": 1.792,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x22_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.109,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.109,
+    "publie_kg": 1.19,
+    "ok": false
+   },
+   "ecart": "la fiche Cupa écrit 1.19 kg ; le calcul de la même fiche donne 1.109 kg (coquille probable : 1,109 et non 1,190)",
+   "raison": "valeur publiée contraire à la règle de calcul du fabricant ; retenue = calcul"
+  },
+  {
+   "id": "poids_40x22_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.232,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.232,
+    "publie_kg": 1.232,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x22_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.725,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.725,
+    "publie_kg": 1.725,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x22_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×22",
+   "attribut": "poids_unitaire",
+   "valeur": 1.971,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.971,
+    "publie_kg": 1.971,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x25_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×25",
+   "attribut": "poids_unitaire",
+   "valeur": 1.26,
+   "unite": "kg",
+   "condition": "épaisseur 4,5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.26,
+    "publie_kg": 1.26,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x25_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×25",
+   "attribut": "poids_unitaire",
+   "valeur": 1.4,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.4,
+    "publie_kg": 1.4,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x25_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×25",
+   "attribut": "poids_unitaire",
+   "valeur": 1.96,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.96,
+    "publie_kg": 1.96,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_40x25_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "40×25",
+   "attribut": "poids_unitaire",
+   "valeur": 2.24,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 2.24,
+    "publie_kg": 2.24,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_46x30_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "46×30",
+   "attribut": "poids_unitaire",
+   "valeur": 1.932,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.932,
+    "publie_kg": 1.932,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_46x30_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "46×30",
+   "attribut": "poids_unitaire",
+   "valeur": 2.705,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 2.705,
+    "publie_kg": 2.705,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_46x30_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "46×30",
+   "attribut": "poids_unitaire",
+   "valeur": 3.091,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 3.091,
+    "publie_kg": 3.091,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_50x25_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "50×25",
+   "attribut": "poids_unitaire",
+   "valeur": 1.75,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 1.75,
+    "publie_kg": 1.75,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_50x25_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "50×25",
+   "attribut": "poids_unitaire",
+   "valeur": 2.45,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 2.45,
+    "publie_kg": 2.45,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_50x25_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "50×25",
+   "attribut": "poids_unitaire",
+   "valeur": 2.8,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 2.8,
+    "publie_kg": 2.8,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_60x30_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "60×30",
+   "attribut": "poids_unitaire",
+   "valeur": 2.52,
+   "unite": "kg",
+   "condition": "épaisseur 5 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 2.52,
+    "publie_kg": 2.52,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_60x30_7mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "60×30",
+   "attribut": "poids_unitaire",
+   "valeur": 3.528,
+   "unite": "kg",
+   "condition": "épaisseur 7 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 3.528,
+    "publie_kg": 3.528,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_60x30_8mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras (masse volumique 2,8)",
+   "modele": "60×30",
+   "attribut": "poids_unitaire",
+   "valeur": 4.032,
+   "unite": "kg",
+   "condition": "épaisseur 8 mm ; indicatif, non contractuel",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "L × l × e × 2,8 g/cm³",
+    "calcul_kg": 4.032,
+    "publie_kg": 4.032,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_m2_32x22_3_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "32×22",
+   "attribut": "poids_au_m2",
+   "valeur": 26.9,
+   "unite": "kg/m2",
+   "condition": "3,5 mm, 39 ardoises/m² (pente 45°, zone 2, projection < 11 m), sans crochets ni liteaux",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "on compte +/- 39 ardoises au m2 … 689,92 x 39 = 26,9 kg/m2",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "poids unitaire × nombre au m²",
+    "calcul": 26.9,
+    "publie": 26.9,
+    "ok": true
+   }
+  },
+  {
+   "id": "poids_m2_32x22_4_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa / Ardoisières d'Angers",
+   "modele": "32×22 (et 32,5×22 Angers H1)",
+   "attribut": "poids_au_m2",
+   "valeur": 34.7,
+   "unite": "kg/m2",
+   "condition": "4,5 mm, environ 38 à 39 ardoises/m² ; Cupa 0,887 kg × 39 = 34,6 ; Angers H1 920 kg/mille × 37,9 = 34,9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "32 x 22 H1 / 325 x 220 mm  920  1800  1656  37,9",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "34,6 contre 34,9 kg/m² : Angers en 325 mm de haut et R 85"
+  },
+  {
+   "id": "poids_m2_32x22_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "32×22 Domaine / Renaissance (≈ 5 mm)",
+   "attribut": "poids_au_m2",
+   "valeur": 35.2,
+   "unite": "kg/m2",
+   "condition": "940 kg au mille × 37,4 ardoises/m² (crochet de 9) ; Cupa 5 mm : 0,986 × 37,4 = 36,9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Rathscheck 940 kg/mille correspond à 4,8 mm à 2,8 g/cm³ : 35,2 contre 36,9 kg/m² (5 %)"
+  },
+  {
+   "id": "poids_m2_heavy_7_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle épaisse",
+   "marque": "Cupa Pizarras",
+   "modele": "Heavy (7 à 8 mm), 32×22",
+   "attribut": "poids_au_m2",
+   "valeur": 54,
+   "unite": "kg/m2",
+   "condition": "1,380 (7 mm) à 1,577 kg (8 mm) × 37 à 39/m² : 51 à 61 kg/m², environ le double d'une 3,5 mm",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 3",
+     "url": "https://www.cupapizarras.com/sites/default/files/fr/cupa3.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière Solana de Forcadas … Formats: 25x15 - 50x45 cm  Épaisseur: 3.5 - 5 - 7.65 mm ; W1 ; S1 ; T1 ; HEAVY",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "calcul sur la table Cupa ; pas de valeur publiée au m² pour la Heavy ; à vérifier sur charpente ancienne"
+  },
+  {
+   "id": "palette_rathscheck_domaine_27x18",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "Domaine / Renaissance SIN 150 et SIN 340 27×18",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1800,
+   "unite": "u/palette",
+   "condition": "poids au mille 650 kg (épaisseur ≈ 4.8 mm) ; palette ≈ 1170 kg ; 59.1 ardoises/m² au crochet de 9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "1/(pureau × (largeur + 3)), pureau = (H − R)/2 avec R ≈ crochet − 5 = 85 mm",
+    "calcul": 59.1,
+    "publie": 59.1,
+    "ok": true
+   }
+  },
+  {
+   "id": "palette_rathscheck_domaine_30x20",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "Domaine / Renaissance SIN 150 et SIN 340 30×20",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1850,
+   "unite": "u/palette",
+   "condition": "poids au mille 800 kg (épaisseur ≈ 4.8 mm) ; palette ≈ 1480 kg ; 45.8 ardoises/m² au crochet de 9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "1/(pureau × (largeur + 3)), pureau = (H − R)/2 avec R ≈ crochet − 5 = 85 mm",
+    "calcul": 45.8,
+    "publie": 45.8,
+    "ok": true
+   }
+  },
+  {
+   "id": "palette_rathscheck_domaine_32x22",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "Domaine / Renaissance SIN 150 et SIN 340 32×22",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1450,
+   "unite": "u/palette",
+   "condition": "poids au mille 940 kg (épaisseur ≈ 4.8 mm) ; palette ≈ 1363 kg ; 37.4 ardoises/m² au crochet de 9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "1/(pureau × (largeur + 3)), pureau = (H − R)/2 avec R ≈ crochet − 5 = 85 mm",
+    "calcul": 38.2,
+    "publie": 37.4,
+    "ok": true
+   }
+  },
+  {
+   "id": "palette_rathscheck_domaine_40x22",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "Domaine / Renaissance SIN 150 et SIN 340 40×22",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1300,
+   "unite": "u/palette",
+   "condition": "poids au mille 1170 kg (épaisseur ≈ 4.7 mm) ; palette ≈ 1521 kg ; 28.6 ardoises/m² au crochet de 9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "1/(pureau × (largeur + 3)), pureau = (H − R)/2 avec R ≈ crochet − 5 = 85 mm",
+    "calcul": 28.5,
+    "publie": 28.6,
+    "ok": true
+   }
+  },
+  {
+   "id": "palette_rathscheck_domaine_40x25",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "Domaine / Renaissance SIN 150 et SIN 340 40×25",
+   "attribut": "ardoises_par_palette",
+   "valeur": 850,
+   "unite": "u/palette",
+   "condition": "poids au mille 1330 kg (épaisseur ≈ 4.8 mm) ; palette ≈ 1130 kg ; 24.8 ardoises/m² au crochet de 9",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "1/(pureau × (largeur + 3)), pureau = (H − R)/2 avec R ≈ crochet − 5 = 85 mm",
+    "calcul": 25.1,
+    "publie": 24.8,
+    "ok": true
+   }
+  },
+  {
+   "id": "palette_cupa_prestige_30x20",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa Pizarras",
+   "modele": "Prestige 30×20 (Cupa 4 Armadilla), 3,8 mm",
+   "attribut": "ardoises_par_palette",
+   "valeur": 2000,
+   "unite": "u/palette",
+   "condition": "48 ardoises/m² ; poids au mille 588 kg",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche PRESTIGE (carrière CUPA 4 Armadilla)",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/fiche_prestige.pdf",
+     "type": "fabricant",
+     "extrait": "Palettisation : 300 x 200 / 3,8 / poids au mille 588 / quantité par palette 2000 / ardoise au m2 48",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "588 kg au mille est le poids d'une 30×20 de 3,5 mm (table Cupa 0,588) ; à 3,8 mm le calcul donne 638 kg : palette 1 176 à 1 277 kg"
+  },
+  {
+   "id": "palette_angers_h1_32_5x22",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "32,5×22 H1",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1800,
+   "unite": "u/palette",
+   "condition": "épaisseur 4,5 mm, 920 kg au mille, palette 1656 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_angers_12h1_30x20",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "30×20 12H1",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1800,
+   "unite": "u/palette",
+   "condition": "épaisseur 4,5 mm, 760 kg au mille, palette 1368 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_angers_grande_moyenne_h1_30x18",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "30×18 Grande Moyenne H1",
+   "attribut": "ardoises_par_palette",
+   "valeur": 2000,
+   "unite": "u/palette",
+   "condition": "épaisseur 4,5 mm, 670 kg au mille, palette 1340 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_angers_moyenne_h1_27x18",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "27×18 Moyenne H1",
+   "attribut": "ardoises_par_palette",
+   "valeur": 2000,
+   "unite": "u/palette",
+   "condition": "épaisseur 4,5 mm, 600 kg au mille, palette 1200 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_angers_flamande_h1_27x16",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "27×16 Flamande H1",
+   "attribut": "ardoises_par_palette",
+   "valeur": 2500,
+   "unite": "u/palette",
+   "condition": "épaisseur 4,5 mm, 520 kg au mille, palette 1300 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_angers_12h2_30x20",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "30×20 12H2",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1200,
+   "unite": "u/palette",
+   "condition": "épaisseur 6,7 mm, 1000 kg au mille, palette 1200 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_angers_moyenne_h2_27x18",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle (historique)",
+   "marque": "Ardoisières d'Angers",
+   "modele": "27×18 Moyenne H2",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1600,
+   "unite": "u/palette",
+   "condition": "épaisseur 6,7 mm, 820 kg au mille, palette 1312 kg ; production arrêtée en 2014 : repère pour l'épaisseur, pas un article commandable",
+   "regions": [
+    "Pays de la Loire",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "palette_minardoises_32x22_4a",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Minardoises (négoce, Derval 44)",
+   "modele": "Ardoise d'Espagne 4A 32×22 A1 T1 S1",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1900,
+   "unite": "u/palette",
+   "condition": "environ 47 m² par palette (≈ 40/m²) ; épaisseur non indiquée",
+   "regions": [
+    "Bretagne",
+    "Pays de la Loire"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Destockplus, annonce Minardoises (Derval, 44) « Ardoise d'Espagne A1/T1/S1 32x22 Norme CE »",
+     "url": "https://www.destockplus.com/acheter/c-534356-ardoise-d-espagne-a1-t1-s1-32x22.html",
+     "type": "negoce",
+     "extrait": "Palette d'environ 1900 unités, soit environ 47M2 a couvrir",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "la même enseigne annonce 2 200 pour sa K08 Star 3,5 mm (base) : la 4A est plus épaisse ou la palette plus légère"
+  },
+  {
+   "id": "palette_30x20_synthese",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "toutes",
+   "modele": "30×20",
+   "attribut": "ardoises_par_palette",
+   "valeur": "1 800 à 2 000",
+   "unite": "u/palette",
+   "condition": "épaisseur 3,8 à 5 mm : Cupa Prestige 3,8 mm 2 000 ; Angers 12H1 4,5 mm 1 800 ; Rathscheck 5 mm 1 850",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche PRESTIGE (carrière CUPA 4 Armadilla)",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/fiche_prestige.pdf",
+     "type": "fabricant",
+     "extrait": "Palettisation : 300 x 200 / 3,8 / poids au mille 588 / quantité par palette 2000 / ardoise au m2 48",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "la base (comptoir-exposee, règle par le poids) estimait ≈ 2 300 ; aucune palette publiée ne dépasse 2 000 en 30×20"
+  },
+  {
+   "id": "palette_32x22_synthese_epaisseur",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "toutes",
+   "modele": "32×22",
+   "attribut": "ardoises_par_palette",
+   "valeur": {
+    "3,5 mm": "1 900 à 2 200",
+    "4,5 mm": 1800,
+    "5 mm": 1450
+   },
+   "unite": "u/palette",
+   "condition": "3,5 mm : Minardoises 2 200 (K08 Star) et 1 900 (4A), Catteau 1 900 (base) ; 4,5 mm : Angers H1 1 800 ; 5 mm : Rathscheck Domaine 1 450",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Destockplus, annonce Minardoises (Derval, 44) « Ardoise d'Espagne A1/T1/S1 32x22 Norme CE »",
+     "url": "https://www.destockplus.com/acheter/c-534356-ardoise-d-espagne-a1-t1-s1-32x22.html",
+     "type": "negoce",
+     "extrait": "Palette d'environ 1900 unités, soit environ 47M2 a couvrir",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "le nombre baisse de 25 à 35 % entre 3,5 et 5 mm ; toujours demander l'épaisseur avant de convertir en palettes"
+  },
+  {
+   "id": "palette_27x18_selon_epaisseur",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "toutes",
+   "modele": "27×18",
+   "attribut": "ardoises_par_palette",
+   "valeur": {
+    "4,5 mm": 2000,
+    "5 mm": 1800
+   },
+   "unite": "u/palette",
+   "condition": "Angers Moyenne H1 4,5 mm 2 000 ; Rathscheck 5 mm 1 800 ; la base donne 2 800 (Leroy Merlin, épaisseur non dite, sans doute 3,5 mm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "une source par épaisseur"
+  },
+  {
+   "id": "palette_40x22_40x25_5mm",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Rathscheck Schiefer",
+   "modele": "40×22 et 40×25, 5 mm",
+   "attribut": "ardoises_par_palette",
+   "valeur": {
+    "40×22": 1300,
+    "40×25": 850
+   },
+   "unite": "u/palette",
+   "condition": "la base donne 1 500 (40×22) et 950 / 900 (40×25) chez les négoces, en 4 mm ou moins",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "cohérent : environ 10 à 15 % de moins en 5 mm"
+  },
+  {
+   "id": "palette_33x23_35x25",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "toutes",
+   "modele": "33×23, 35×25",
+   "attribut": "ardoises_par_palette",
+   "valeur": null,
+   "unite": "u/palette",
+   "condition": "33×23 vendu en Bretagne (BAÑA Élite 3,5 / 4,5 mm ; Cupa Prestige) ; 35×25 (BAÑA, Cupa MH 5)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Denis Matériaux (négoce breton), catalogue ardoise BAÑA (2023)",
+     "url": "https://www.denismateriaux.com/ressources/drupal/files/2023-04/La%20Ba%C3%B1a-%20Catalogue_6P.pdf",
+     "type": "negoce",
+     "extrait": "Gamme Élite … ÉP. 3.5 mm / ÉP. 4.5 mm ; 60x30 … 33x23 32x22 30x20 … 22x16 ; A1T1S1",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, brochure Gamme Monuments historiques et Patrimoine",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/gamme_monuments_historiques_patrimoine.pdf",
+     "type": "fabricant",
+     "extrait": "le certificat de garantie 30 ans et d'authenticité ; MH 5mm - MH 7mm - MH 9mm",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "aucun nombre par palette publié ; estimation par le poids (1,2 à 1,5 t ÷ poids unitaire) : 33×23 3,5 mm ≈ 1 600 à 2 000, 35×25 5 mm ≈ 950 à 1 200 ; à demander au négoce"
+  },
+  {
+   "id": "palette_poids_total",
+   "famille": "ardoise_modeles",
+   "sous_famille": "ardoise naturelle",
+   "marque": "toutes",
+   "modele": "tous formats",
+   "attribut": "poids_palette",
+   "valeur": "1 130 à 1 660",
+   "unite": "kg",
+   "condition": "Rathscheck 1 130 à 1 520 kg ; Angers 1 180 à 1 656 kg ; Cupa Prestige ≈ 1 180 à 1 280 kg",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, fiche PRESTIGE (carrière CUPA 4 Armadilla)",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/fiche_prestige.pdf",
+     "type": "fabricant",
+     "extrait": "Palettisation : 300 x 200 / 3,8 / poids au mille 588 / quantité par palette 2000 / ardoise au m2 48",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "la base (comptoir-exposee) retenait ≈ 1 350 kg (1,0 à 1,45 t) : la plage publiée monte à 1,65 t ; la règle par le poids reste un ordre de grandeur"
+  },
+  {
+   "id": "faitiere_ardoise_720_palette",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Ardoise (réf. 720)",
+   "attribut": "conditionnement",
+   "valeur": 120,
+   "unite": "u/palette",
+   "condition": "coloris Vieilli Masse (VM) et Rouge (RO), finitions « PC120 » (palette complète) ou à l'unité (U)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Toiture ardoise 360 » (web, octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Ardoise PC120 VM … Fait Armor PC184 VM … Dimensions 333 x 0,65 mm - Longueur 2 ml … Zinc prépatiné noir",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "nombre au ml 2,5 (base comptoir-exposee, une_source)"
+  },
+  {
+   "id": "faitiere_ardoise_720_coloris",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Ardoise (réf. 720)",
+   "attribut": "coloris",
+   "valeur": [
+    "Vieilli Masse",
+    "Rouge"
+   ],
+   "unite": "liste",
+   "condition": "mêmes coloris que l'Armor 729 hors Émaillé Brun",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Toiture ardoise 360 » (web, octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Ardoise PC120 VM … Fait Armor PC184 VM … Dimensions 333 x 0,65 mm - Longueur 2 ml … Zinc prépatiné noir",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "faitiere_armor_729_palette_2025",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Armor 33 (réf. 729)",
+   "attribut": "conditionnement",
+   "valeur": 184,
+   "unite": "u/palette",
+   "condition": "« Fait Armor PC184 » VM et RO, catalogue octobre 2025 : confirme la base (184)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Toiture ardoise 360 » (web, octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Ardoise PC120 VM … Fait Armor PC184 VM … Dimensions 333 x 0,65 mm - Longueur 2 ml … Zinc prépatiné noir",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Leadermat, Faîtière Armor 0,33 Vieillie Masse",
+     "url": "https://www.leadermat.com/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033",
+     "type": "negoce",
+     "extrait": "1 palette 184 unités",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "faitage_zinc_ardoise_finitions",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "faîtage simple à pinces / à ourlets",
+   "attribut": "finitions",
+   "valeur": [
+    "zinc naturel",
+    "zinc prépatiné noir"
+   ],
+   "unite": "liste",
+   "condition": "développés 250, 333, 400 × 0,65 mm, longueur 2 ml (comme la base) ; prépatiné noir présenté pour les toitures ardoise",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Toiture ardoise 360 » (web, octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Ardoise PC120 VM … Fait Armor PC184 VM … Dimensions 333 x 0,65 mm - Longueur 2 ml … Zinc prépatiné noir",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "faitiere_fabricants_bretons",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "briqueteries bretonnes",
+   "modele": "",
+   "attribut": "fabricants_actifs",
+   "valeur": null,
+   "unite": "",
+   "condition": "anciens centres (Dol, Lannilis, Quimper, Lamballe, Guingamp…) disparus ; aucune faîtière bretonne actuelle trouvée ; Terreal : pas de faîtière propre à l'ardoise trouvée",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Maisons paysannes de France (Loiret), fiche « Toitures n° 4 : ardoise de l'ouest »",
+     "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+     "type": "guide",
+     "extrait": "anciens centres de poterie bretons … aujourd'hui disparus",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "en Bretagne la faîtière terre cuite sur ardoise vendue est l'Edilians Armor 729 ou Ardoise 720 ; vérifier Terreal auprès d'un négoce"
+  },
+  {
+   "id": "lignolet_bretagne_forme",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "",
+   "modele": "lignolet",
+   "attribut": "mise_en_oeuvre",
+   "valeur": "deux rangées d'ardoises superposées au faîte, celles du côté au vent débordant ; Morbihan et Finistère nord : ardoises triangulaires",
+   "unite": "",
+   "condition": "sans métal ni mortier",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Maisons paysannes de France (Loiret), fiche « Toitures n° 4 : ardoise de l'ouest »",
+     "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+     "type": "guide",
+     "extrait": "Dans le Morbihan et le Finistère nord, le faîtage en lignolet est assuré par des ardoises triangulaires.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "ardoise-angers.fr, « Faîtage de toiture en ardoise »",
+     "url": "https://www.ardoise-angers.fr/faitage-toiture-ardoise/",
+     "type": "autre",
+     "extrait": "Le lignolet se compose donc de deux rangées d'ardoises superposées",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "lignolet_ardoises_ml_32x22",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "",
+   "modele": "lignolet en 32×22",
+   "attribut": "ardoises_par_ml_de_faitage",
+   "valeur": 9.0,
+   "unite": "ardoises/ml de faîtage (les deux versants)",
+   "condition": "2 × 1 000 ÷ (220 + 3) = 8.97, arrondi 9 au ml ; + 2 clous inox ou cuivre par ardoise",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "ardoise-angers.fr, « Faîtage de toiture en ardoise »",
+     "url": "https://www.ardoise-angers.fr/faitage-toiture-ardoise/",
+     "type": "autre",
+     "extrait": "deux rangées d'ardoises superposées",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Maisons paysannes de France (Loiret), fiche « Toitures n° 4 : ardoise de l'ouest »",
+     "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+     "type": "guide",
+     "extrait": "Dans le Morbihan et le Finistère nord, le faîtage en lignolet est assuré par des ardoises triangulaires.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "calcul tiré de la formule de la base (points-singuliers, une_source) ; aucune source ne donne un nombre au ml ; la forme triangulaire (Morbihan, Finistère nord) change la découpe, pas le nombre"
+  },
+  {
+   "id": "lignolet_ardoises_ml_30x20",
+   "famille": "ardoise_modeles",
+   "sous_famille": "faîtage ardoise",
+   "marque": "",
+   "modele": "lignolet en 30×20",
+   "attribut": "ardoises_par_ml_de_faitage",
+   "valeur": 9.9,
+   "unite": "ardoises/ml de faîtage (les deux versants)",
+   "condition": "2 × 1 000 ÷ (200 + 3) = 9.85, arrondi 10 au ml ; + 2 clous inox ou cuivre par ardoise",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "ardoise-angers.fr, « Faîtage de toiture en ardoise »",
+     "url": "https://www.ardoise-angers.fr/faitage-toiture-ardoise/",
+     "type": "autre",
+     "extrait": "deux rangées d'ardoises superposées",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Maisons paysannes de France (Loiret), fiche « Toitures n° 4 : ardoise de l'ouest »",
+     "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+     "type": "guide",
+     "extrait": "Dans le Morbihan et le Finistère nord, le faîtage en lignolet est assuré par des ardoises triangulaires.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "calcul tiré de la formule de la base (points-singuliers, une_source) ; aucune source ne donne un nombre au ml ; la forme triangulaire (Morbihan, Finistère nord) change la découpe, pas le nombre"
+  },
+  {
+   "id": "inox_a2_a4_correspondance",
+   "famille": "ardoise_modeles",
+   "sous_famille": "crochet d'ardoise",
+   "marque": "",
+   "modele": "",
+   "attribut": "correspondance_nuances",
+   "valeur": {
+    "inox 17 %": "X6Cr17 (AISI 430, ferritique, pas A2)",
+    "inox 18/10 = A2": "X5CrNi18-10 (1.4301, AISI 304)",
+    "inox 316Ti = famille A4": "X6CrNiMoTi17-12-2 (1.4571)"
+   },
+   "unite": "",
+   "condition": "le vendeur dit « 17 % », « 18/10 » ou « 316 » : A2 = 18/10, A4 = 316 / 316Ti",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Frénéhard, fiche « Nouveau NF DTU 40.11 pour crochets d'ardoise » (édition février 2021, hébergée par BigMat)",
+     "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661044015305-G2cxbgH7t4.pdf",
+     "type": "fabricant",
+     "extrait": "En bord de mer (<3km du littoral), l'inox 316Ti est la matière adaptée sauf dérogation écrite du fabricant",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "TWI, FAQ « equivalent European and American standards for common stainless steels »",
+     "url": "https://www.twi-global.com/technical-knowledge/faqs/faq-what-are-the-equivalent-european-and-american-standards-for-common-stainless-steels",
+     "type": "guide",
+     "extrait": "1.4301 X5CrNi18-10 = 304 ; 1.4571 X6CrNiMoTi17-12-2 = 316Ti",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "inox_selon_mer_bretagne",
+   "famille": "ardoise_modeles",
+   "sous_famille": "crochet d'ardoise",
+   "marque": "Frénéhard (et NF DTU 40.11 P1-2 annexe B)",
+   "modele": "",
+   "attribut": "nuance_selon_distance_mer",
+   "valeur": {
+    "> 20 km, rural": "17 % admis",
+    "3 à 20 km (marine)": "18/10 (A2) ; 17 % seulement par dérogation Frénéhard au-delà de 3 km en zone 2",
+    "< 3 km": "316Ti (A4), 18/10 ou cuivre sur dérogation écrite du fabricant",
+    "front de mer (embruns)": "316Ti seul (Frénéhard admet l'Anjou Color 18/10)"
+   },
+   "unite": "",
+   "condition": "Bretagne : la plupart des communes côtières sont à moins de 20 km de la mer → au moins 18/10",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Frénéhard, fiche « Nouveau NF DTU 40.11 pour crochets d'ardoise » (édition février 2021, hébergée par BigMat)",
+     "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661044015305-G2cxbgH7t4.pdf",
+     "type": "fabricant",
+     "extrait": "En bord de mer (<3km du littoral), l'inox 316Ti est la matière adaptée sauf dérogation écrite du fabricant",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Bati-Avenue, fiche technique réf. 760725 « CA Inox 17% 11x2.7 A16 500 »",
+     "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/F/T/FT_D127760725_a59b.pdf",
+     "type": "negoce",
+     "extrait": "Déconseillé en bordure de mer et en atmosphère industrielle",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Bati-Avenue, fiche technique réf. 760824 « CA Inox 18/10 10x2.7 A16 500 »",
+     "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/F/T/FT_D127760824_4f67.pdf",
+     "type": "negoce",
+     "extrait": "Fil inoxydable austénique 18% de chrome, 10% de nickel ; Recommandé en milieu urbain marin et industriel",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Agence wallonne du patrimoine, fiche « Ardoises naturelles : crochets de pose inox »",
+     "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-1-ardoises-naturelles-crochets-de-pose-inox.pdf",
+     "type": "guide",
+     "extrait": "Inox austénitique de la nuance 316 ; 316 Ti en atmosphère corrosive ; polyéthylène (PET) de teinte noire",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "la base (ardoise_crochet_nuance_selon_mer) était une_source (Frénéhard seul) : Bati-Avenue (17 % « déconseillé en bordure de mer ») et l'AWaP (316 / 316Ti en atmosphère corrosive) confirment le sens"
+  },
+  {
+   "id": "crochet_18_10_boite_500",
+   "famille": "ardoise_modeles",
+   "sous_famille": "crochet d'ardoise",
+   "marque": "Bati-Avenue (fabrication Frénéhard probable)",
+   "modele": "CA Inox 18/10 agrafe A16, 10 cm et crosinus 12 cm, Ø 2,7",
+   "attribut": "conditionnement",
+   "valeur": 500,
+   "unite": "u/boîte",
+   "condition": "agrafe 16 mm pour liteau 15 à 18 ; ardoise 3 à 4,5 mm ; « diam 2,7 et 3,0 en côte Bretonne »",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Bati-Avenue, fiche technique réf. 760824 « CA Inox 18/10 10x2.7 A16 500 »",
+     "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/F/T/FT_D127760824_4f67.pdf",
+     "type": "negoce",
+     "extrait": "Fil inoxydable austénique 18% de chrome, 10% de nickel ; Recommandé en milieu urbain marin et industriel",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Bati-Avenue, fiche technique réf. 760826 « CA Inox 18/10 crosinus 12x2.7 A16 500 »",
+     "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/F/T/FT_D127760826_0907.pdf",
+     "type": "negoce",
+     "extrait": "Fil adapté à toutes les zones diam 2,7 et 3,0 en côte Bretonne",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Chausson, fiche Frénéhard crochets (base)",
+     "url": "https://cdn.chausson.fr/catalog-document/710080ed-1675-41ed-a0f3-6ebf9b87e667/ficheproduitcaractristiquesgnrales-809534.pdf",
+     "type": "fabricant",
+     "extrait": "agrafe Ø 2,7 boîte de 500",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "crochet_teinte_anjou_color",
+   "famille": "ardoise_modeles",
+   "sous_famille": "crochet d'ardoise teinté",
+   "marque": "Frénéhard",
+   "modele": "Anjou Color (inox 17 % ou 18/10 laqué)",
+   "attribut": "conditionnement",
+   "valeur": "403 à 1 300",
+   "unite": "u/boîte bois",
+   "condition": "Ø 2,4 / 2,7 / 3,0 ; 10 longueurs de 70 à 160 mm ; agrafe ou pointe ; peinture polyester 100 µm sur la partie visible ; teinte standard bleu ardoise, 185 RAL sur demande",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Batiproduits, fiche Frénéhard « Crochets d'ardoise Anjou Color® / Force 9® »",
+     "url": "http://www.batiproduits.com/fiche/produits/crochets-d-ardoise-anjou-color-force-9-p69038968.html",
+     "type": "autre",
+     "extrait": "peinture polyester de 100 microns ; 403 à 1300 pièces rangées/boîte bois ; 185 teintes RAL sur demande ; Garantie : 20 ans",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Frénéhard, fiche « Nouveau NF DTU 40.11 pour crochets d'ardoise » (édition février 2021, hébergée par BigMat)",
+     "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661044015305-G2cxbgH7t4.pdf",
+     "type": "fabricant",
+     "extrait": "ANJOU COLOR® ET FORCE 9®, NOS MODÈLES RECONNUS",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "crochet_teinte_garantie",
+   "famille": "ardoise_modeles",
+   "sous_famille": "crochet d'ardoise teinté",
+   "marque": "Frénéhard",
+   "modele": "Anjou Color",
+   "attribut": "garantie",
+   "valeur": "10 à 20",
+   "unite": "ans",
+   "condition": "Frénéhard : garantie commerciale 10 ans dépose-repose (tenue mécanique) ; Batiproduits : 20 ans (revêtement, couleur)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Frénéhard, fiche « Nouveau NF DTU 40.11 pour crochets d'ardoise » (édition février 2021, hébergée par BigMat)",
+     "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661044015305-G2cxbgH7t4.pdf",
+     "type": "fabricant",
+     "extrait": "En bord de mer (<3km du littoral), l'inox 316Ti est la matière adaptée sauf dérogation écrite du fabricant",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Batiproduits, fiche Frénéhard « Crochets d'ardoise Anjou Color® / Force 9® »",
+     "url": "http://www.batiproduits.com/fiche/produits/crochets-d-ardoise-anjou-color-force-9-p69038968.html",
+     "type": "autre",
+     "extrait": "peinture polyester de 100 microns ; 403 à 1300 pièces rangées/boîte bois ; 185 teintes RAL sur demande ; Garantie : 20 ans",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "10 ans (tenue du crochet, dépose-repose) et 20 ans (tenue et couleur du revêtement) ne garantissent pas la même chose",
+   "raison": "demander le certificat au négoce"
+  },
+  {
+   "id": "crochet_pointe_vs_agrafe_bretagne",
+   "famille": "ardoise_modeles",
+   "sous_famille": "crochet d'ardoise",
+   "marque": "",
+   "modele": "",
+   "attribut": "part_crochets_pointe_bretagne",
+   "valeur": null,
+   "unite": "fraction",
+   "condition": "pointe = voligeage (100 %), agrafe = liteaux ; règle de la base : 1/5 de pointes sur liteaux (une_source)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Forumconstruire, fil « quelles ardoises et crochets … liteaux » (avis de particuliers, Bretagne)",
+     "url": "https://www.forumconstruire.com/construire/topic-288115-quelles-ardoises-et-crochets-utiliser-sur-une-toiture-en-liteaux-de-8-cm-.php",
+     "type": "autre",
+     "extrait": "avis de particuliers, non chiffré",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Agence wallonne du patrimoine, fiche « Ardoises naturelles : crochets de pose inox »",
+     "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-1-ardoises-naturelles-crochets-de-pose-inox.pdf",
+     "type": "guide",
+     "extrait": "le crochet peut être utilisé tant sur un voligeage que sur un complexe latte - contre-latte",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "aucune statistique régionale ; des couvreurs du Finistère ne posent que sur volige (avis de forum) ; demander à l'artisan : volige ou liteaux"
+  },
+  {
+   "id": "clou_cuivre_27_tete",
+   "famille": "ardoise_modeles",
+   "sous_famille": "clou d'ardoise",
+   "marque": "Clouterie Rivierre",
+   "modele": "pointe ardoise cuivre tête plate large 2,7 × 27 et 2,7 × 30",
+   "attribut": "diametre_tete",
+   "valeur": 7.6,
+   "unite": "mm",
+   "condition": "boîte de 1 kg ; conforme au minimum de tête 7,5 mm (base, NF DTU 40.11)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Clouterie Rivierre (clous.eu), pointe ardoise cuivre tête plate large 2,7 × 30",
+     "url": "https://www.clous.eu/Metaux/Cuivre/Pointes-ardoise-cuivre/Pointe-ardoise-Cuivre-Tete-plate-large-2-7-mm-L-30-mm-2-7-mm.html",
+     "type": "fabricant",
+     "extrait": "Diamètre de la tête : 7.6 mm ; vendues par boîtes de 1 kg",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "clou_cuivre_27x30_par_kg",
+   "famille": "ardoise_modeles",
+   "sous_famille": "clou d'ardoise",
+   "marque": "",
+   "modele": "cuivre 2,7 × 30 tête large",
+   "attribut": "clous_par_kg",
+   "valeur": 572,
+   "unite": "u/kg",
+   "condition": "calcul : galva 2,7 × 30 653/kg (ArcelorMittal, base) × 7,85 ÷ 8,96 (masses volumiques acier / cuivre) = 572",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Clouterie Rivierre (clous.eu), pointe ardoise cuivre tête plate large 2,7 × 30",
+     "url": "https://www.clous.eu/Metaux/Cuivre/Pointes-ardoise-cuivre/Pointe-ardoise-Cuivre-Tete-plate-large-2-7-mm-L-30-mm-2-7-mm.html",
+     "type": "fabricant",
+     "extrait": "Diamètre de la tête : 7.6 mm ; vendues par boîtes de 1 kg",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "aucun fabricant ne publie le nombre au kg du cuivre 2,7 × 30 (table Rivierre en image) ; le catalogue ArcelorMittal (base) donne 420/kg pour le cuivre crantée 3,0 × 30"
+  },
+  {
+   "id": "clou_cuivre_conditionnement_pgb",
+   "famille": "ardoise_modeles",
+   "sous_famille": "clou d'ardoise",
+   "marque": "PGB Europe (TEL D.1160B)",
+   "modele": "cuivre Ø 2,5 / 2,8 / 3,0 × 25 à 65",
+   "attribut": "conditionnement",
+   "valeur": 5,
+   "unite": "kg",
+   "condition": "pas de 2,7 en cuivre chez PGB (2,5 / 2,8 / 3,0)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "PGB Europe, pointe d'ardoise TEL D.1160B Ø 3,00 × 30 Cu (titre et conditionnement lus par le moteur de recherche ; page 403 au robot)",
+     "url": "https://www.pgb-europe.com/fr-fr/211732/pointe-dardoise-tel-d-1160b-300x30-cu",
+     "type": "negoce",
+     "extrait": "Pointe d'ardoise TEL D.1160B Ø3,00x30 Cu ; contenu emballage 5 kg",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "pages PGB refusées au robot ; lu dans les titres du moteur de recherche"
+  },
+  {
+   "id": "clou_inox_par_kg",
+   "famille": "ardoise_modeles",
+   "sous_famille": "clou d'ardoise",
+   "marque": "",
+   "modele": "inox A2 / A4 tête large 2,7 à 3,0 × 30",
+   "attribut": "clous_par_kg",
+   "valeur": null,
+   "unite": "u/kg",
+   "condition": "ordre de grandeur ≈ galva (masse volumique inox 7,9 ≈ acier 7,85) : ≈ 650/kg en 2,7 × 30",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Clouterie Rivierre (clous.eu), pointe ardoise cuivre tête plate large 2,7 × 30",
+     "url": "https://www.clous.eu/Metaux/Cuivre/Pointes-ardoise-cuivre/Pointe-ardoise-Cuivre-Tete-plate-large-2-7-mm-L-30-mm-2-7-mm.html",
+     "type": "fabricant",
+     "extrait": "catégorie Inox A4 316 L sans pointe ardoise",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "aucune pointe ardoise inox avec nombre au kg trouvée"
+  }
+ ],
+ "verdict_ratios": [
+  {
+   "ratio": "palette 30×20 estimée ≈ 2 300 (règle par le poids, 3,5 mm)",
+   "origine": "comptoir-exposee.json ardoise_palette_30x20 / comptoir-exposee.md §2",
+   "valeur_actuelle": "≈ 2 300 (a_confirmer)",
+   "verdict": "corrige",
+   "bonne_valeur": "1 800 à 2 000 (3,8 à 5 mm)",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche PRESTIGE (carrière CUPA 4 Armadilla)",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/fiche_prestige.pdf",
+     "type": "fabricant",
+     "extrait": "Palettisation : 300 x 200 / 3,8 / poids au mille 588 / quantité par palette 2000 / ardoise au m2 48",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "trois palettes publiées, aucune au-dessus de 2 000"
+  },
+  {
+   "ratio": "palette ≈ 1 350 kg (1,0 à 1,45 t)",
+   "origine": "comptoir-exposee.json ardoise_palette_regle_poids",
+   "valeur_actuelle": "1 350 kg",
+   "verdict": "corrige",
+   "bonne_valeur": "1 130 à 1 660 kg (moyenne ≈ 1 350)",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "la moyenne tient, la plage monte à 1,65 t"
+  },
+  {
+   "ratio": "Cupa 5 : 3,5 à 5 mm, 7-8 mm",
+   "origine": "ardoise.json ardoise_carriere_cupa5",
+   "valeur_actuelle": "3,5 à 5 mm",
+   "verdict": "corrige",
+   "bonne_valeur": "5 / 6,5 / 7,5 / 9 mm",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche carrière CUPA 5",
+     "url": "https://www.cupapizarras.com/sites/default/files/fr/cupa5.pdf",
+     "type": "fabricant",
+     "extrait": "Carrière Valdacal … Formats: 20x20 - 60x45 cm  Épaisseur: 5 - 6.5 - 7.5 - 9 mm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, brochure Gamme Monuments historiques et Patrimoine",
+     "url": "https://www.cupapizarras.com/pub/patrimoine-mh/gamme_monuments_historiques_patrimoine.pdf",
+     "type": "fabricant",
+     "extrait": "le certificat de garantie 30 ans et d'authenticité ; MH 5mm - MH 7mm - MH 9mm",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "fiche carrière actuelle"
+  },
+  {
+   "ratio": "nuance inox selon distance à la mer",
+   "origine": "ardoise.json ardoise_crochet_nuance_selon_mer",
+   "valeur_actuelle": "une_source",
+   "verdict": "confirme",
+   "bonne_valeur": "17 % hors zone marine ; 18/10 (A2) de 3 à 20 km ; 316Ti (A4) à moins de 3 km",
+   "sources": [
+    {
+     "titre": "Frénéhard, fiche « Nouveau NF DTU 40.11 pour crochets d'ardoise » (édition février 2021, hébergée par BigMat)",
+     "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661044015305-G2cxbgH7t4.pdf",
+     "type": "fabricant",
+     "extrait": "En bord de mer (<3km du littoral), l'inox 316Ti est la matière adaptée sauf dérogation écrite du fabricant",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Bati-Avenue, fiche technique réf. 760725 « CA Inox 17% 11x2.7 A16 500 »",
+     "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/F/T/FT_D127760725_a59b.pdf",
+     "type": "negoce",
+     "extrait": "Déconseillé en bordure de mer et en atmosphère industrielle",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Agence wallonne du patrimoine, fiche « Ardoises naturelles : crochets de pose inox »",
+     "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-1-ardoises-naturelles-crochets-de-pose-inox.pdf",
+     "type": "guide",
+     "extrait": "Inox austénitique de la nuance 316 ; 316 Ti en atmosphère corrosive ; polyéthylène (PET) de teinte noire",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "deuxième et troisième sources trouvées"
+  },
+  {
+   "ratio": "lignolet = 2 × 1 000 ÷ (largeur + 3) ardoises par ml",
+   "origine": "points-singuliers.json faitage_lignolet_quantite",
+   "valeur_actuelle": "une_source, unité ambiguë",
+   "verdict": "a_confirmer",
+   "bonne_valeur": "32×22 : 8,97 (9) ; 30×20 : 9,85 (10) ardoises par ml de faîtage, les deux versants",
+   "sources": [
+    {
+     "titre": "ardoise-angers.fr, « Faîtage de toiture en ardoise »",
+     "url": "https://www.ardoise-angers.fr/faitage-toiture-ardoise/",
+     "type": "autre",
+     "extrait": "Le lignolet se compose donc de deux rangées d'ardoises superposées",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Maisons paysannes de France (Loiret), fiche « Toitures n° 4 : ardoise de l'ouest »",
+     "url": "https://www.maisons-paysannes-loiret.org/attachments/article/39/Toitures%20N%C2%B0%204%20Ardoise%20de%20l'ouest.pdf",
+     "type": "guide",
+     "extrait": "Dans le Morbihan et le Finistère nord, le faîtage en lignolet est assuré par des ardoises triangulaires.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "les guides confirment deux rangs, aucun ne chiffre ; l'unité est « par ml de faîtage »"
+  },
+  {
+   "ratio": "poids 40×22 4,5 mm = 1,190 kg",
+   "origine": "fiche Cupa (non reprise dans la base)",
+   "valeur_actuelle": "—",
+   "verdict": "corrige",
+   "bonne_valeur": "1,109 kg",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, fiche technique « Calcul du poids d'une ardoise »",
+     "url": "https://www.cupapizarras.com/pub/cupa_fiche_poids.pdf",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube ; Principaux poids d'ardoise par format et par épaisseur",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "coquille de la fiche : 40 × 22 × 0,45 × 2,8 = 1 109 g"
+  }
+ ],
+ "commande_comptoir": [
+  {
+   "article": "ardoise naturelle",
+   "ce_que_le_vendeur_demande": [
+    "carrière ou marque (Cupa 3, 5, 12… ; SIN 240 ; BAÑA)",
+    "format",
+    "épaisseur (3,5 / 4,5 / 5 mm ; Heavy 7-8)",
+    "sélection (Excellence D1, Ardoisier D2, Naturelle)",
+    "marque NF oui / non"
+   ],
+   "unite_de_vente": "au mille ou à la palette",
+   "conditionnement": "32×22 : 1 900-2 200 (3,5 mm), 1 800 (4,5), 1 450 (5) ; 30×20 : 1 800-2 000",
+   "sources": [
+    {
+     "titre": "Rathscheck Schiefer, brochure « Domaine et Renaissance » (SIN 150 / SIN 340)",
+     "url": "https://rathscheck.de/fr/rathscheck_schiefer_domaine_f",
+     "type": "fabricant",
+     "extrait": "Format / Quantité par palette (pcs) / Poids au mille (kg) / Nombre d'ardoises approx. au m² (crochet de 9)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoisières d'Angers, documentation « Gamme Historique Angers-Trélazé » reprise dans le dossier ressource du Bac pro Patrimoine bâti (session 2015, Éduscol)",
+     "url": "https://sti.eduscol.education.fr/sites/eduscol.education.fr.sti/files/concours-examens/6876/6876-u21-dossier-ressource-specifique-quintin.pdf",
+     "type": "guide",
+     "extrait": "Poids au mille en Kg / Quantité par palette / Poids par palette en Kg / Ardoises au m2 (exemple au R de 85 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Destockplus, annonce Minardoises (Derval, 44) « Ardoise d'Espagne A1/T1/S1 32x22 Norme CE »",
+     "url": "https://www.destockplus.com/acheter/c-534356-ardoise-d-espagne-a1-t1-s1-32x22.html",
+     "type": "negoce",
+     "extrait": "Palette d'environ 1900 unités, soit environ 47M2 a couvrir",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "crochet d'ardoise inox teinté",
+   "ce_que_le_vendeur_demande": [
+    "agrafe ou pointe",
+    "longueur (cm)",
+    "diamètre 2,7 ou 3,0 (côte bretonne)",
+    "nuance 17 % / 18/10 / 316Ti",
+    "teinte (bleu ardoise standard, RAL sur demande)"
+   ],
+   "unite_de_vente": "boîte",
+   "conditionnement": "403 à 1 300 par boîte bois selon modèle",
+   "sources": [
+    {
+     "titre": "Batiproduits, fiche Frénéhard « Crochets d'ardoise Anjou Color® / Force 9® »",
+     "url": "http://www.batiproduits.com/fiche/produits/crochets-d-ardoise-anjou-color-force-9-p69038968.html",
+     "type": "autre",
+     "extrait": "peinture polyester de 100 microns ; 403 à 1300 pièces rangées/boîte bois ; 185 teintes RAL sur demande ; Garantie : 20 ans",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "faîtière terre cuite sur ardoise",
+   "ce_que_le_vendeur_demande": [
+    "Armor 33 (729) ou Ardoise 40 (720)",
+    "coloris (Vieilli Masse, Rouge ; Émaillé Brun en Armor)",
+    "longueur de faîtage"
+   ],
+   "unite_de_vente": "pièce ou palette",
+   "conditionnement": "Armor 184 / palette ; Ardoise 120 / palette",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Toiture ardoise 360 » (web, octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Ardoise PC120 VM … Fait Armor PC184 VM … Dimensions 333 x 0,65 mm - Longueur 2 ml … Zinc prépatiné noir",
+     "consulte": "2026-11-20"
+    }
+   ]
+  }
+ ]
+}

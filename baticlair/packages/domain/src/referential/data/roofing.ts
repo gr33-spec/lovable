@@ -464,6 +464,9 @@ const RAMPANT_BACS_PARAM: ParamDef = {
 };
 /** Réponses du fondateur du 2026-11-18 (couverture zinc à tasseaux). */
 const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
+/** Le skill « regles-metier » du fondateur (interview du 18/11/2026). */
+const SKILL_FONDATEUR = "fondateur-skill-regles-metier-2026-11-18";
+const FOUNDER_SKILL = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur), interview du skill regles-metier" } as const;
 const FOUNDER_REPLY_TASSEAUX = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur)" } as const;
 /**
  * Zinc à tasseaux : la largeur de la bobine. Greg, 18 novembre 2026 : « En général : bobine de 65 cm de largeur […] Parfois
@@ -1231,7 +1234,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.20-61",
+  version: "roofing-2026.11.20-62",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1329,6 +1332,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       documentRef: "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       retrievedAt: "2026-10-04",
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
+    },
+    {
+      id: SKILL_FONDATEUR,
+      kind: "trade_practice",
+      title: "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
+      documentRef: ".claude/skills/regles-metier/SKILL.md (§ Velux, § Oublis probables)",
+      retrievedAt: "2026-11-18",
+      note: "« En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur. » Un par fenêtre, à sa taille ; la collerette d'écran (BFX) ajoutée d'après le tarif Velux France 2024 (vendue à part du raccord), recherche du 20/11/2026.",
     },
     {
       id: "fondateur-reponses-2026-11-18",
@@ -1663,6 +1674,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
     },
     // §11 : « Raccord d'étanchéité : 1 par fenêtre ; type tuile (ondulée, pureau > 45 mm), ardoise ou matériau plat ».
+    { code: "roof_window_insulation", label: "Kit d'isolation de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_vapour", label: "Pare-vapeur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_collar", label: "Collerette d'écran de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_shutter", label: "Volet roulant de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_blind", label: "Store de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_lining", label: "Habillage intérieur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_flashing", label: "Raccord d'étanchéité de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["raccord d'etancheite", "raccord etancheite"] },
   ],
   products: [
@@ -1955,6 +1972,12 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 2 m", "Arêtier zinc (bande)", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: longueurFiche("zinguerie.longueur_faitage_aretier_faconne"), primary: true }],
     }),
+    generic("kit-isolation-fenetre", "roof_window_insulation", "Kit d'isolation de fenêtre de toit, à la taille de la fenêtre", "Kits d'isolation (type BDX)"),
+    generic("pare-vapeur-fenetre", "roof_window_vapour", "Pare-vapeur de fenêtre de toit, à la taille de la fenêtre", "Pare-vapeur de fenêtre (type BBX)"),
+    generic("collerette-ecran-fenetre", "roof_window_collar", "Collerette d'écran de fenêtre de toit, à la taille de la fenêtre", "Collerettes d'écran (type BFX)"),
+    generic("volet-fenetre-toit", "roof_window_shutter", "Volet roulant de fenêtre de toit, à la taille de la fenêtre", "Volets roulants de fenêtre de toit"),
+    generic("store-fenetre-toit", "roof_window_blind", "Store de fenêtre de toit, à la taille de la fenêtre", "Stores de fenêtre de toit"),
+    generic("habillage-fenetre-toit", "roof_window_lining", "Habillage intérieur de fenêtre de toit, à la taille de la fenêtre", "Habillages intérieurs de fenêtre de toit"),
     generic("raccord-fenetre-toit", "roof_window_flashing", "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre", "Raccords d'étanchéité"),
     generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
     // §25.2 : « Noue préformée : développé 500 mm, L 2 m ou 3 m ; recouvrement 150 mm → longueur utile 1,85 m pour 2 m ».
@@ -2815,7 +2838,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "fenetre", family: "roof_window", label: "Fenêtres de toit", measureOnly: true, orderedAsWritten: true },
-        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
+        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },        { key: "isolation", family: "roof_window_insulation", label: "Kits d'isolation (type BDX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "kit-isolation-fenetre" }, suggested: { label: "Kits d'isolation de fenêtre de toit (type BDX)" } },
+        { key: "pare_vapeur", family: "roof_window_vapour", label: "Pare-vapeur de fenêtre (type BBX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "pare-vapeur-fenetre" }, suggested: { label: "Pare-vapeur de fenêtre de toit (type BBX)" } },
+        { key: "collerette", family: "roof_window_collar", label: "Collerettes d'écran (type BFX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "collerette-ecran-fenetre" }, suggested: { label: "Collerettes d'écran de fenêtre de toit (type BFX)" } },
+        { key: "volet", family: "roof_window_shutter", label: "Volets roulants de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "volet-fenetre-toit" }, suggested: { label: "Volets roulants de fenêtre de toit" } },
+        { key: "store", family: "roof_window_blind", label: "Stores de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "store-fenetre-toit" }, suggested: { label: "Stores de fenêtre de toit" } },
+        { key: "habillage", family: "roof_window_lining", label: "Habillages intérieurs de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "habillage-fenetre-toit" }, suggested: { label: "Habillages intérieurs de fenêtre de toit" } },
       ],
       constants: {},
       needs: [
@@ -2830,6 +2858,78 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["raccord_couverture"],
           source: F,
           verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "kit-isolation-fenetre",
+          slot: "isolation",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Kits d'isolation (type BDX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "pare-vapeur-fenetre",
+          slot: "pare_vapeur",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Pare-vapeur de fenêtre (type BBX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "collerette-ecran-fenetre",
+          slot: "collerette",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Collerettes d'écran (type BFX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "volet-fenetre-toit",
+          slot: "volet",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Volets roulants de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "store-fenetre-toit",
+          slot: "store",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Stores de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "habillage-fenetre-toit",
+          slot: "habillage",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Habillages intérieurs de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
           version: 1,
         },
       ],
