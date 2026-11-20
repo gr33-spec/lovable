@@ -7,7 +7,7 @@ Tu fabriques UN chantier de couverture fictif mais réaliste, **en partant de la
 
 Lis d'abord (et rien de plus, pour économiser) :
 - `fiche/export-lecture.txt` : la fiche métier couverture telle que l'appli la donne au lecteur (ouvrages, données, emplacements, calculs).
-- les 40 premières lignes de `fiche/systeme-m0.txt` seulement (les règles et le format exact de la lecture ; la suite du fichier est la même fiche métier, ne la relis pas).
+- les 47 premières lignes de `fiche/systeme-m0.txt` seulement (les règles et le format exact de la lecture ; la suite du fichier est la même fiche métier, ne la relis pas).
 
 Travaille vite et sobrement (peu d'allers-retours). Écris dans `chantiers/<ID>/` trois fichiers, dans cet ordre :
 
