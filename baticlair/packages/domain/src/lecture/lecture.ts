@@ -426,7 +426,16 @@ export function planDeLecture(
   for (const input of inputs.values()) {
     const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
     input.suggestions = true;
-    for (const slot of work?.slots ?? []) if (choisies.has(`${work!.id}/${slot.key}`) && !input.mentioned.includes(slot.key)) input.mentioned.push(slot.key);
+    for (const slot of work?.slots ?? []) {
+      if (!choisies.has(`${work!.id}/${slot.key}`)) continue;
+      if (!input.mentioned.includes(slot.key)) input.mentioned.push(slot.key);
+      // La case cochée tranche ce qu'elle dit (le dauphin : « oui ») ; une donnée écrite au devis l'emporte.
+      for (const [key, value] of Object.entries(slot.suggested?.vaut ?? {})) {
+        const def = work!.params.find((p) => p.key === key);
+        if (!def || input.params[key]) continue;
+        input.params[key] = { value, unit: def.unit, origin: "artisan", evidence: `Suggestion cochée : ${slot.suggested!.label}` };
+      }
+    }
   }
   // Les faits du chantier (fiche, réponses, code postal) et ce que les autres ouvrages du devis ont lu (« 2 descentes de 3 m »
   // sur le tuyau sert à la naissance de la gouttière ; l'aspect du zinc d'une bande ne fait pas celui de la couverture)

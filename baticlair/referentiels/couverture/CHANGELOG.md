@@ -10,6 +10,11 @@
   pare-vapeur (BBX), volet roulant, store, habillage intérieur ») : six cases proposées quand une fenêtre de toit est
   écrite, la collerette d'écran (BFX) en plus (vendue à part du raccord, tarif Velux France 2024, recherche du
   20/11/2026). Cochées : un par fenêtre, à sa taille (« Kits d'isolation (type BDX), fenêtre 78 × 98 »). Avant : rien.
+- **Rives, dauphins, jonctions, Suggestions** (skill du fondateur : « rive absente du devis : d'abord en Suggestion » ;
+  « Dauphin, cuvette (boîte à eau), jonctions : en Suggestion ») : tuiles de rive (emboîtement), bardelis (canal),
+  dauphins (descentes), jonctions (gouttière PVC ou alu) proposés en cases quand le devis ne les écrit pas. Une case
+  cochée tranche ce qu'elle dit (`suggested.vaut`) : « Dauphins » coché vaut « oui », la question « Un dauphin en pied
+  de chaque descente ? » ne se pose plus. Avant : jamais proposés. Cuvette : pas encore d'article au tiroir.
 
 ## roofing-2026.11.20-61 — Plomb en rouleaux de 10 m et de 5 m ; teintes de l'ardoise fibres-ciment
 

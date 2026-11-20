@@ -22,12 +22,13 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "Naissances de gouttière",
       "Talons de gouttière (si tu ne les fabriques pas)",
       "Angles de gouttière (si tu ne les fabriques pas)",
+      "Dauphins (pied de descente)", // skill du fondateur : dauphin en Suggestion (le devis n'en dit rien)
       "Cartouches de silicone zinc",
       "Vis inox 4 × 40",
       "Pattes de fixation",
     ]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -78,6 +79,9 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {
     const slots = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.slots.filter((s) => s.suggested).map((s) => `${w.id}/${s.key} : ${s.suggested!.label}`));
     expect(slots).toEqual([
+      // Rives (skill du fondateur : « rive absente du devis : d'abord en Suggestion »).
+      "couverture-tuiles-emboitement/rive : Tuiles de rive",
+      "couverture-tuiles-canal/rive : Bardelis (tuiles de rive)",
       // Velux (skill du fondateur, 18/11/2026 ; BFX : tarif Velux France 2024) : un par fenêtre, à sa taille.
       "fenetre-de-toit/isolation : Kits d'isolation de fenêtre de toit (type BDX)",
       "fenetre-de-toit/pare_vapeur : Pare-vapeur de fenêtre de toit (type BBX)",
@@ -89,9 +93,19 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "gouttiere/naissance : Naissances de gouttière",
       "gouttiere/talon : Talons de gouttière (si tu ne les fabriques pas)",
       "gouttiere/angle : Angles de gouttière (si tu ne les fabriques pas)",
+      "gouttiere-pvc-alu/jonction : Jonctions de gouttière",
       "gouttiere-pvc-alu/talon : Talons de gouttière",
       "gouttiere-pvc-alu/angle : Angles de gouttière",
       "gouttiere-pvc-alu/naissance : Naissances de gouttière",
+      "descente/dauphin : Dauphins (pied de descente)",
     ]);
+  });
+});
+
+describe("dauphins cochés (skill du fondateur : « Dauphin, cuvette, jonctions : en Suggestion »)", () => {
+  it("la case vaut le « oui » : un dauphin par descente, sans reposer « Un dauphin en pied de chaque descente ? »", () => {
+    const e = ecran({ [SUGGESTIONS_KEY]: "descente/dauphin" });
+    expect(cles(e).join(" ")).not.toMatch(/dauphin/);
+    expect(noms(e).some((n) => /dauphin/i.test(n))).toBe(true);
   });
 });

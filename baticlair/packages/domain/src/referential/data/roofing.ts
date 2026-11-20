@@ -2093,7 +2093,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"], usual: USUAL_LITEAU_TUILE },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
-        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" } },
+        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
       ],
       constants: {
         ...ECRAN_CONSTANTS,
@@ -2189,7 +2189,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "tuile", family: "roof_tile_canal", label: "Tuiles canal" },
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte", "liteaunage"], usual: USUAL_LITEAU_TUILE },
-        { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" } },
+        { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" }, suggested: { label: "Bardelis (tuiles de rive)" } },
       ],
       constants: {
         couvert_et_courant: condition("2", "u", "edilians-canal", FOUNDER_DOC, "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."),
@@ -4130,7 +4130,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "profil", family: "gutter_plastic", label: "Gouttière", usual: { text: "Longueurs de 4 m (§15).", source: F, productId: "gouttiere-pvc-alu-4m" } },
         { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer), plus un en bout (§15).", source: F, productId: "crochet-gouttiere-standard" } },
-        { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" } },
+        { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" }, suggested: { label: "Jonctions de gouttière" } },
         { key: "talon", family: "gutter_end", label: "Talons", usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" }, suggested: { label: "Talons de gouttière" } },
         { key: "angle", family: "gutter_angle", label: "Angles", usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" }, suggested: { label: "Angles de gouttière" } },
         { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true, suggested: { label: "Naissances de gouttière" } },
@@ -4305,7 +4305,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "coude", family: "downpipe_elbow", label: "Coudes", charsFrom: "tube", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
         // §49.6 : « fixation … des tuyaux de descente » sur la ligne de pose cite les colliers sans les chiffrer.
         { key: "collier", family: "downpipe_clamp", label: "Colliers", citedBy: ["fixation", "fixations"], usual: { text: "Un collier tous les 2 m, plus un.", source: FR_REPLY_DESCENTES, productId: "collier-descente-standard" } },
-        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" } },
+        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" }, suggested: { label: "Dauphins (pied de descente)", vaut: { dauphin: "1" } } },
       ],
       constants: {
         espacement_collier: condition("2", "m", FR_REPLY_DESCENTES, FOUNDER_REPLY_DESCENTES, "« colliers tous les 2 m » (réponse du fondateur, 2026-10-05)."),

@@ -5897,6 +5897,9 @@
             "text": "Tuile de rive du modèle de tuile posé.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "tuile-rive-standard"
+          },
+          "suggested": {
+            "label": "Tuiles de rive"
           }
         }
       ],
@@ -6155,6 +6158,9 @@
             "text": "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bardelis-standard"
+          },
+          "suggested": {
+            "label": "Bardelis (tuiles de rive)"
           }
         }
       ],
@@ -17983,6 +17989,9 @@
             "text": "Une jonction entre deux longueurs (§15).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "jonction-gouttiere"
+          },
+          "suggested": {
+            "label": "Jonctions de gouttière"
           }
         },
         {
@@ -18558,6 +18567,12 @@
             "text": "Un dauphin par descente, 1 m (§15).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "dauphin-standard"
+          },
+          "suggested": {
+            "label": "Dauphins (pied de descente)",
+            "vaut": {
+              "dauphin": "1"
+            }
           }
         }
       ],
