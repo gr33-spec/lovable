@@ -15,7 +15,6 @@ de la plus récente à la plus ancienne :
 - Recherche des pertes (`recherche/pertes.md`) : aucun autre pourcentage n'est confirmé par deux sources ; les marges en
   place (ardoise 5 %, tuile 3 %, liteaux 5 %, volige 5 %, bande zinc 5 %) restent celles du référentiel du fondateur.
 
-## roofing-2026.11.19-58 (suite) — Zone du chantier calculée par commune
 ### Étape — Zone du chantier calculée par commune
 
 - **§26 / §32.1 Zone climatique** : lue PAR COMMUNE dans la carte des régions (`carte-regions.json`, `zones_communes`,
