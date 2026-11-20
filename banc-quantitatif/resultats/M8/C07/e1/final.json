@@ -1,0 +1,180 @@
+{
+ "posees": [
+  {
+   "key": "param:teinte_gouttiere@gouttiere-pvc-alu__4",
+   "text": "Gouttière : gouttière : grise, blanche, sable, brune ou anthracite ?",
+   "options": [
+    "Grise",
+    "Blanche",
+    "Sable",
+    "Brune",
+    "Anthracite"
+   ],
+   "reponse": "Grise"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)",
+    "quantite": "150",
+    "unite": "m²",
+    "affiche": "150 m²",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "38",
+    "unite": "pièces",
+    "affiche": "38 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière PVC de 25",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "param:teinte_gouttiere@gouttiere-pvc-alu__4"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, nacelle et sécu.",
+   "Nettoyage fin de chantier, évac. des chutes",
+   "NB : toiture 2 pans, rampant 6,00 m. Charpente et pannes hors lot (posées par le charpentier avant notre intervention).",
+   "Conditions : acompte 30 % à la commande, solde à réception des travaux, par virement ou chèque.",
+   "Délai d'intervention : 5 à 6 semaines après accord, selon météo.",
+   "Garantie décennale n° 0457812 - Assurances du Méné, 22000 Saint-Brieuc."
+  ],
+  "questions": [
+   "param:teinte_gouttiere@gouttiere-pvc-alu__4"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)",
+    "quantite": "150",
+    "unite": "m²",
+    "affiche": "150 m²",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "38",
+    "unite": "pièces",
+    "affiche": "38 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière PVC grise de 25",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, nacelle et sécu.",
+   "Nettoyage fin de chantier, évac. des chutes",
+   "NB : toiture 2 pans, rampant 6,00 m. Charpente et pannes hors lot (posées par le charpentier avant notre intervention).",
+   "Conditions : acompte 30 % à la commande, solde à réception des travaux, par virement ou chèque.",
+   "Délai d'intervention : 5 à 6 semaines après accord, selon météo.",
+   "Garantie décennale n° 0457812 - Assurances du Méné, 22000 Saint-Brieuc."
+  ],
+  "questions": []
+ }
+}

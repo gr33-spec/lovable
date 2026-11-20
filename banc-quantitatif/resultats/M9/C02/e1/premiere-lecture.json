@@ -1,0 +1,168 @@
+{
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Échafaudage Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m².",
+   "quantite": "120",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m².",
+     "quantite": "120",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Contre-liteaux et liteaux Fourniture et pose de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Contre-liteaux et liteaux Fourniture et pose de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+     "quantite": "1",
+     "unite": "ens",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture tuiles Fourniture de tuiles terre cuite HP10 Huguenot Fenal, coloris rouge. Surface : 120 m². Pente 30°, rampant 7,50 m.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "120 m². Pente 30°, rampant 7,50 m.",
+     "quantite": "1",
+     "unite": "ens",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7.50 m"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Rives Fourniture de tuiles de rive HP 10 rouge. 4 rives de 7,50 m.",
+   "quantite": "30",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuiles de rive",
+     "quantite": "30",
+     "unite": "ml",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "rive",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Faîtage à sec Fourniture de faîtières terre cuite rouge posées à sec sur closoir ventilé. Longueur : 8,00 m.",
+   "quantite": "8.00",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Closoir",
+     "quantite": "8.00",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "closoir",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Main-d'œuvre Main-d'œuvre de pose de la couverture, des rives et du faîtage.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note1",
+   "designation": "Construction neuve : maison individuelle",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note2",
+   "designation": "Lot n° 7, lotissement du Clos des Mésanges",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note3",
+   "designation": "22400 Lamballe",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note4",
+   "designation": "Objet : couverture en tuiles terre cuite d'une maison neuve.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note5",
+   "designation": "Délai : démarrage sous 6 semaines à réception du devis signé, sous réserve des conditions météorologiques.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note6",
+   "designation": "Les déchets de chantier sont évacués par nos soins en déchetterie professionnelle.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ]
+}

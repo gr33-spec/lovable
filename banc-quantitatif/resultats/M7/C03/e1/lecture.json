@@ -1,0 +1,115 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles",
+   "quantite": "28",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Gouttière demi-ronde zinc naturel dév. 33",
+     "quantite": "28",
+     "unite": "ml",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "28 ml"
+      },
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "33 cm"
+      },
+      {
+       "cle": "nb_angles",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Angles",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "gouttiere",
+     "emplacement": "angle",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "F et P DEP zn Ø100",
+   "quantite": "3",
+   "unite": "u",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Descente zinc Ø100",
+     "quantite": "3",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "3 u"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "100 mm"
+      },
+      {
+       "cle": "dauphin",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Dauphins fonte",
+     "quantite": "3",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "dauphin",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Dépose anc. gout. + DEP, évac. déchetterie",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "4",
+   "designation": "Echaf. roulant + protections, mise en place et repli",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

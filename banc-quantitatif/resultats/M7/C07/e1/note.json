@@ -1,0 +1,37 @@
+{
+ "m": "M7",
+ "c": "C07",
+ "e": 1,
+ "nRef": 6,
+ "justes": 1,
+ "quantite": 0,
+ "manquantes": 3,
+ "inventees": 0,
+ "doutes": 2,
+ "questions": 0,
+ "questionsRef": 1,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Closoirs mousse profilés au bac acier (52 pièces)",
+   "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m (26 pièces)",
+   "Faîtières (38 pièces)"
+  ],
+  "inventees": [],
+  "doutes": [
+   {
+    "ref": "Vis autoperceuses rondelle EPDM bac acier avec",
+    "lue": "Faîtière bac acier"
+   },
+   {
+    "ref": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+    "lue": "Tubes de descente PVC gris Ø80, longueur 2 m"
+   }
+  ],
+  "horsRef": []
+ }
+}

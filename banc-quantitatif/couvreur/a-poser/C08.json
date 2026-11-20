@@ -1,19 +1,29 @@
 [
  {
-  "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
-  "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
+  "question": "Noue de 50 ou de 66 ?",
   "boutons": [
-   "Je façonne (feuilles ou bobineau)",
-   "Je commande façonné"
+   "De 50",
+   "De 66"
   ],
-  "unite": "u",
-  "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  "unite": "mm",
+  "aide": null
  },
  {
-  "id": "param:hauteur_descente ¦ Hauteur d'une descente ?",
-  "question": "Hauteur d'une descente ?",
+  "id": "fiche:modele_ardoise ¦ Quelle ardoise ?",
+  "question": "Quelle ardoise ?",
   "boutons": [],
-  "unite": "m",
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+  "question": "Un dauphin en pied de chaque descente ?",
+  "boutons": [
+   "Oui",
+   "Non"
+  ],
+  "unite": "u",
   "aide": null
  }
 ]

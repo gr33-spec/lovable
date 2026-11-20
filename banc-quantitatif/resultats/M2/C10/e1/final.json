@@ -1,0 +1,330 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m15"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises fibres-ciment",
+    "quantite": "110",
+    "unite": "",
+    "affiche": "110",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m19"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m23"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes de rive en zinc, dév. 250 mm",
+    "quantite": "22",
+    "unite": "",
+    "affiche": "22",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m25"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttières PVC sable",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m30"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Naissances sable de Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m30"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Descentes PVC",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5 m",
+    "lignes": [
+     "m34"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sortie de toit",
+    "quantite": "1",
+    "unite": "",
+    "affiche": "1",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m38"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 100",
+    "lignes": [],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 18×40 (Liteaux sapin traité)",
+    "raison": "Calcul impossible sans « Liteaux au m² » de ardoise.",
+    "lignes": [
+     "m17"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier Mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente."
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m15"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises fibres-ciment",
+    "quantite": "110",
+    "unite": "",
+    "affiche": "110",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m19"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m23"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes de rive en zinc",
+    "quantite": "22",
+    "unite": "",
+    "affiche": "22",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m25"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttières PVC sable",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m30"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Naissances sable de Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m30"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Descentes PVC",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5 m",
+    "lignes": [
+     "m34"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sortie de toit",
+    "quantite": "1",
+    "unite": "",
+    "affiche": "1",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "m38"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 22 ml de bande, développé 25 cm",
+    "lignes": [],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 100",
+    "lignes": [],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 18×40 (Liteaux sapin traité)",
+    "raison": "Calcul impossible sans « Liteaux au m² » de ardoise.",
+    "lignes": [
+     "m17"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier Mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente."
+  ],
+  "questions": []
+ }
+}

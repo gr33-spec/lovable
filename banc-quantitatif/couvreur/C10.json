@@ -1,0 +1,38 @@
+{
+ "param:support_sortie ¦ Sortie de toit : sur quelle couverture ?": {
+  "question": {
+   "id": "param:support_sortie ¦ Sortie de toit : sur quelle couverture ?"
+  },
+  "reponse": {
+   "bouton": "Ardoise ou tuile",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Sur ardoise."
+  }
+ },
+ "param:developpe ¦ Rives. de bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Rives. de bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?"
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
+ },
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je les plie moi-même."
+  }
+ }
+}

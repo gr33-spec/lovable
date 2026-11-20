@@ -1,7 +1,1182 @@
 [
  {
+  "m": "OR",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 7,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "OR",
+  "c": "C10",
+  "e": 1,
+  "nRef": 9,
+  "justes": 9,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 3,
+  "questionsRef": 3,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
   "m": "M0",
   "c": "C01",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M0",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 5,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [
+    "Liteaux 27×40 (210 ml)"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M0",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M0",
+  "c": "C04",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M0",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 1,
+  "quantite": 2,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles canal terre cuite, courants et couverts : à chiffrer  attendu, 85 pièces lu",
+    "Rives : 33 pièces attendu, 12 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Liteaux 27×40 (Liteaux)",
+     "lue": "Liteaux"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M0",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M0",
+  "c": "C09",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M0",
+  "c": "C10",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M2",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M2",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 6,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles de rive (Tuiles de rive HP 10 rouge) : à chiffrer  attendu, 4  lu"
+   ],
+   "manquantes": [],
+   "inventees": [
+    "Liteaux 27×40 (Écran sous-toiture HPV) (à chiffrer )"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M2",
+  "c": "C03",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M2",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M2",
+  "c": "C06",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M2",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+     "lue": "Couverture BA 63/100 simple peau"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M2",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M2",
+  "c": "C10",
+  "e": 1,
+  "nRef": 9,
+  "justes": 5,
+  "quantite": 2,
+  "manquantes": 2,
+  "inventees": 4,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 3,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 2,
+  "detail": {
+   "quantite": [
+    "Ardoises fibres-ciment : à chiffrer  attendu, 110  lu",
+    "Embase plomb de sortie de toit : 1 pièce attendu, 1  lu"
+   ],
+   "manquantes": [
+    "Gouttière dév. 25 (5 longueurs de 4 m)",
+    "Tubes de descente Ø80, longueur 2 m (6 pièces)"
+   ],
+   "inventees": [
+    "Bandes de rive en zinc (22 )",
+    "Gouttières PVC sable (5 longueurs de 4 m)",
+    "Naissances sable de Ø80 (2 pièces)",
+    "Descentes PVC (6 pièces)"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 5,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [
+    "Liteaux 27×40 (210 ml)"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M4",
+  "c": "C10",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M5",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Gouttière dév. 25",
+     "lue": "Gouttière demi-ronde zinc de 25"
+    },
+    {
+     "ref": "Tubes de descente Ø80, longueur 2 m",
+     "lue": "Descente d'eau pluviale zinc Ø80"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
+  "c": "C02",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M5",
+  "c": "C03",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M5",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Tubes de descente Ø100, longueur 2 m",
+     "lue": "Descente d'eaux pluviales zinc quartz Ø100"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 4,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+     "lue": "Couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M5",
+  "c": "C10",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M6",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 8,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M6",
+  "c": "C02",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M6",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M6",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M6",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Tuiles canal terre cuite, courants et couverts",
+     "lue": "Tuiles canal"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M6",
+  "c": "C07",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M6",
+  "c": "C09",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M6",
+  "c": "C10",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M7",
+  "c": "C01",
+  "e": 1,
+  "nRef": 8,
+  "justes": 4,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 2,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 893 ml lu"
+   ],
+   "manquantes": [
+    "Ardoises (Ardoises) (à chiffrer )"
+   ],
+   "inventees": [
+    "Ardoises naturelles Espagne 1er choix 32×22 (3992 pièces)"
+   ],
+   "doutes": [
+    {
+     "ref": "Dauphin fonte Ø80 en pied de descente",
+     "lue": "Dauphins fonte Ø80"
+    },
+    {
+     "ref": "Crochets d'ardoise (Ardoises)",
+     "lue": "Crochets d'ardoise inox standard, longueur 10 cm"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C02",
+  "e": 1,
+  "nRef": 7,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 2,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Liteaux 27×40 (Contre-liteaux sapin traité 27×40) (à chiffrer )",
+    "Tuiles de rive (Tuiles de rive HP 10 rouge) (à chiffrer )"
+   ],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Angles de gouttière demi-ronde zinc naturel dév. 33",
+     "lue": "Angles"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 2,
+  "questionsRef": 2,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Tubes de descente Ø100, longueur 2 m",
+     "lue": "Descente d'eaux pluviales zinc quartz"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 0,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Faîtières (27 pièces)"
+   ],
+   "inventees": [
+    "Faitage (27 pièces)"
+   ],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 1,
+  "quantite": 0,
+  "manquantes": 3,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 0,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Closoirs mousse profilés au bac acier (52 pièces)",
+    "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m (26 pièces)",
+    "Faîtières (38 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Vis autoperceuses rondelle EPDM bac acier avec",
+     "lue": "Faîtière bac acier"
+    },
+    {
+     "ref": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+     "lue": "Tubes de descente PVC gris Ø80, longueur 2 m"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M7",
+  "c": "C10",
   "e": 1,
   "absent": true
  },
@@ -35,6 +1210,154 @@
   }
  },
  {
+  "m": "M8",
+  "c": "C02",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M8",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 0,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 3,
+  "questions": 0,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Gouttière demi-ronde zinc naturel dév. 33 (7 longueurs de 4 m)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Angles de gouttière demi-ronde zinc naturel dév. 33",
+     "lue": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles"
+    },
+    {
+     "ref": "Descente zinc Ø100",
+     "lue": "F et P DEP zn Ø100"
+    },
+    {
+     "ref": "Dauphins fonte Ø100",
+     "lue": "F et P dauphins fonte en pied de DEP"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M8",
+  "c": "C04",
+  "e": 1,
+  "absent": true
+ },
+ {
+  "m": "M8",
+  "c": "C06",
+  "e": 1,
+  "nRef": 4,
+  "justes": 1,
+  "quantite": 1,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 1,
+  "questions": 0,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 1,
+  "detail": {
+   "quantite": [
+    "Tuiles canal terre cuite, courants et couverts : à chiffrer  attendu, à chiffrer  lu"
+   ],
+   "manquantes": [
+    "Rives (33 pièces)"
+   ],
+   "inventees": [
+    "Les rives 2 x 6ml soit 12ml (12 ml)"
+   ],
+   "doutes": [
+    {
+     "ref": "Liteaux 27×40 (Liteaux)",
+     "lue": "Liteaux neufs sur toute la toiture 85m2"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M8",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 2,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Vis autoperceuses rondelle EPDM bac acier avec (12 boîtes de 100)",
+    "Closoirs mousse profilés au bac acier (52 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+     "lue": "F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M8",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 4,
+  "questionsRef": 4,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M8",
+  "c": "C10",
+  "e": 1,
+  "absent": true
+ },
+ {
   "m": "M10",
   "c": "C01",
   "e": 1,
@@ -59,11 +1382,72 @@
   }
  },
  {
-  "m": "M2",
-  "c": "C01",
+  "m": "M10",
+  "c": "C02",
   "e": 1,
-  "nRef": 8,
-  "justes": 8,
+  "nRef": 7,
+  "justes": 6,
+  "quantite": 1,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 0,
+  "questions": 0,
+  "questionsRef": 0,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   ],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M10",
+  "c": "C03",
+  "e": 1,
+  "nRef": 4,
+  "justes": 1,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 0,
+  "doutes": 2,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [
+    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
+   ],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Gouttière demi-ronde zinc naturel dév. 33",
+     "lue": "Gouttière 1/2 rde zn nat. dév. 33"
+    },
+    {
+     "ref": "Descente zinc Ø100",
+     "lue": "DEP zn Ø100"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M10",
+  "c": "C04",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
   "quantite": 0,
   "manquantes": 0,
   "inventees": 0,
@@ -83,17 +1467,75 @@
   }
  },
  {
-  "m": "OR",
-  "c": "C01",
+  "m": "M10",
+  "c": "C06",
   "e": 1,
-  "nRef": 8,
-  "justes": 8,
+  "nRef": 4,
+  "justes": 3,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Tuiles canal terre cuite, courants et couverts",
+     "lue": "Tuiles canal"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M10",
+  "c": "C07",
+  "e": 1,
+  "nRef": 6,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 0,
+  "inventees": 0,
+  "doutes": 1,
+  "questions": 1,
+  "questionsRef": 1,
+  "questionsHorsRef": 0,
+  "questionsInutiles": 0,
+  "questionsNonJugees": 0,
+  "questionsOubliees": 0,
+  "detail": {
+   "quantite": [],
+   "manquantes": [],
+   "inventees": [],
+   "doutes": [
+    {
+     "ref": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
+     "lue": "Couverture BA 63/100 simple peau, ep. 0,63 mm, RAL 7016"
+    }
+   ],
+   "horsRef": []
+  }
+ },
+ {
+  "m": "M10",
+  "c": "C09",
+  "e": 1,
+  "nRef": 6,
+  "justes": 6,
   "quantite": 0,
   "manquantes": 0,
   "inventees": 0,
   "doutes": 0,
-  "questions": 2,
-  "questionsRef": 2,
+  "questions": 4,
+  "questionsRef": 4,
   "questionsHorsRef": 0,
   "questionsInutiles": 0,
   "questionsNonJugees": 0,
@@ -105,5 +1547,11 @@
    "doutes": [],
    "horsRef": []
   }
+ },
+ {
+  "m": "M10",
+  "c": "C10",
+  "e": 1,
+  "absent": true
  }
 ]

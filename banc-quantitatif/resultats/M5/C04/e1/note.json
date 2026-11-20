@@ -1,0 +1,29 @@
+{
+ "m": "M5",
+ "c": "C04",
+ "e": 1,
+ "nRef": 6,
+ "justes": 5,
+ "quantite": 0,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 1,
+ "questions": 2,
+ "questionsRef": 2,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [
+   {
+    "ref": "Tubes de descente Ø100, longueur 2 m",
+    "lue": "Descente d'eaux pluviales zinc quartz Ø100"
+   }
+  ],
+  "horsRef": []
+ }
+}

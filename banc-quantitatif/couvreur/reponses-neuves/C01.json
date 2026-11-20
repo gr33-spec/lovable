@@ -1,0 +1,10 @@
+[
+ {
+  "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
+  "bouton": "",
+  "valeur": "10",
+  "unite": "cm",
+  "ne_sait_pas": false,
+  "dit": "10 cm."
+ }
+]

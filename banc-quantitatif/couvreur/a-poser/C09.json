@@ -1,0 +1,23 @@
+[
+ {
+  "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+  "question": "Un dauphin en pied de chaque descente ?",
+  "boutons": [
+   "Oui",
+   "Non"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:epaisseur_zinc ¦ Épaisseur du zinc ?",
+  "question": "Épaisseur du zinc ?",
+  "boutons": [
+   "0,65 mm",
+   "0,70 mm",
+   "0,80 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ }
+]

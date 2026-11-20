@@ -1,0 +1,302 @@
+{
+ "posees": [
+  {
+   "key": "param:developpe",
+   "text": "Développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3992",
+    "unite": "pièces",
+    "affiche": "3 992 pièces",
+    "etat": "ready",
+    "precision": "96 m² × 39,6 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3992",
+    "unite": "pièces",
+    "affiche": "3 992 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 18×40",
+    "quantite": "893",
+    "unite": "ml",
+    "affiche": "893 ml",
+    "etat": "ready",
+    "precision": "lattage 96 m², une file tous les 11,3 cm",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1.3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttière demi-ronde zinc dév. 25",
+    "quantite": "4",
+    "unite": "longueurs de 4 m",
+    "affiche": "4 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente zinc Ø80, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5,5 m",
+    "lignes": [
+     "4.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphins fonte Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4.2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier, échafaudage de pied sur les deux façades, protections",
+   "Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie",
+   "Nettoyage du chantier et repli de l'échafaudage"
+  ],
+  "questions": [
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "3992",
+    "unite": "pièces",
+    "affiche": "3 992 pièces",
+    "etat": "ready",
+    "precision": "96 m² × 39,6 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "3992",
+    "unite": "pièces",
+    "affiche": "3 992 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 18×40",
+    "quantite": "893",
+    "unite": "ml",
+    "affiche": "893 ml",
+    "etat": "ready",
+    "precision": "lattage 96 m², une file tous les 11,3 cm",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1.3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "pour 8 ml de faîtage, développé 33 cm",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière demi-ronde zinc dév. 25",
+    "quantite": "4",
+    "unite": "longueurs de 4 m",
+    "affiche": "4 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente zinc Ø80, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5,5 m",
+    "lignes": [
+     "4.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphins fonte Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4.2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier, échafaudage de pied sur les deux façades, protections",
+   "Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie",
+   "Nettoyage du chantier et repli de l'échafaudage"
+  ],
+  "questions": []
+ }
+}

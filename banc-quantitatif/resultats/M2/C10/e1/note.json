@@ -1,0 +1,35 @@
+{
+ "m": "M2",
+ "c": "C10",
+ "e": 1,
+ "nRef": 9,
+ "justes": 5,
+ "quantite": 2,
+ "manquantes": 2,
+ "inventees": 4,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 3,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 2,
+ "detail": {
+  "quantite": [
+   "Ardoises fibres-ciment : à chiffrer  attendu, 110  lu",
+   "Embase plomb de sortie de toit : 1 pièce attendu, 1  lu"
+  ],
+  "manquantes": [
+   "Gouttière dév. 25 (5 longueurs de 4 m)",
+   "Tubes de descente Ø80, longueur 2 m (6 pièces)"
+  ],
+  "inventees": [
+   "Bandes de rive en zinc (22 )",
+   "Gouttières PVC sable (5 longueurs de 4 m)",
+   "Naissances sable de Ø80 (2 pièces)",
+   "Descentes PVC (6 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

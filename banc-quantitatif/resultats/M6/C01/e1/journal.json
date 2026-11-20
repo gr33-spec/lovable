@@ -1,0 +1,8 @@
+[
+ "ligne 5 : donnée surface divergente (96 contre rien), retirée : le code la demandera.",
+ "ligne 7 : donnée nb_descentes divergente (2 contre rien), retirée : le code la demandera.",
+ "ligne 7 : donnée diametre_descente divergente (80 contre rien), retirée : le code la demandera.",
+ "ligne 8 : « Descente d'eau pluviale zinc Ø80 » deux quantités ( contre 2), à demander.",
+ "ligne 9 : « Dauphin fonte Ø80 » deux quantités ( contre 2), à demander.",
+ "ligne 9 : donnée nb_descentes divergente (2 contre rien), retirée : le code la demandera."
+]

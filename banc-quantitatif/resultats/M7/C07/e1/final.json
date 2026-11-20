@@ -1,0 +1,123 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Gouttière PVC gris grise de 25",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente PVC gris Ø80, longueur 2 m",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 4 m",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Faîtière bac acier",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, nacelle et sécu.",
+   "Nettoyage fin de chantier, évac. des chutes"
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Gouttière PVC gris grise de 25",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente PVC gris Ø80, longueur 2 m",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 4 m",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Faîtière bac acier",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, nacelle et sécu.",
+   "Nettoyage fin de chantier, évac. des chutes"
+  ],
+  "questions": []
+ }
+}

@@ -1,0 +1,26 @@
+{
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je plie moi-même."
+  }
+ },
+ "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?": {
+  "question": {
+   "id": "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?"
+  },
+  "reponse": {
+   "bouton": "Jusqu'à 65 cm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "650 mm, bobineau de 650."
+  }
+ }
+}

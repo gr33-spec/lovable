@@ -1,0 +1,103 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Fourniturre et pose de tuiles canal terre cuite, courants et couverts, sur 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tuiles canal terre cuite, courants et couverts",
+     "quantite": "85",
+     "unite": "m2",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85 m2"
+      },
+      {
+       "cle": "longueur_rives",
+       "valeur": "12 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Liteaux neufs",
+     "quantite": "85",
+     "unite": "m2",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "liteau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Rives",
+     "quantite": "12",
+     "unite": "ml",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "rive",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Faitage 9ml scellé au mortier",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Faitage",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "9 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "4",
+   "designation": "Divers et imprevus",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}
