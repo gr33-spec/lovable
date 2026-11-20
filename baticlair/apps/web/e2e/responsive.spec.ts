@@ -89,8 +89,8 @@ for (const size of WIDTHS) {
 
     await page.goto("/connexion");
     await shoot(page, size.name, "01-connexion");
-    // « Créer un compte » mène au nouvel onboarding (`/commencer`, Greg, 19 novembre 2026) ; l'inscription complète reste
-    // servie pour les parcours de test : on y va directement.
+    // Onboarding du 19 novembre 2026 : « Créer un compte » mène à /commencer (carte, métier, e-mail) ; l'inscription
+    // complète reste servie pour les parcours de test.
     await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveAttribute("href", "/commencer");
     await page.goto("/inscription");
     await shoot(page, size.name, "02-inscription");
