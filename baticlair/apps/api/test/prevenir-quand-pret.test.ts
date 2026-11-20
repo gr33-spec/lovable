@@ -67,6 +67,8 @@ async function until(done: () => boolean) {
 }
 
 async function deposit(agent: Agent) {
+  // Ce test branche un vrai nom de fournisseur : une analyse y demande une adresse e-mail vérifiée (Greg, 15 novembre 2026).
+  await ctx.prisma.user.updateMany({ data: { emailVerified: true } });
   const project = await agent.post("/v1/projects").send({ name: "Toiture Dupont" });
   const doc = await agent
     .post(`/v1/projects/${project.body.id}/documents`)

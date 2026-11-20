@@ -7,11 +7,11 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Terrasse bois | 0 | 1 | 0 | 1 |
+| Terrasse bois | 0 | 1 | 0 | 0 |
 | Pavage | 0 | 2 | 0 | 0 |
 | Terrassement | 1 | 2 | 0 | 0 |
 | Arrosage | 0 | 1 | 0 | 0 |
-| Constructeur, entreprise générale | 2 | 4 | 0 | 1 |
+| Constructeur, entreprise générale | 2 | 4 | 0 | 0 |
 
 ## Terrasse bois
 
@@ -23,8 +23,7 @@ Devis de test :
 
 **À l'ouverture : 0 verte · 1 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -35,7 +34,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Lames pin classe 4 27×145, L 4,20 m | 56 lames |  | chiffrable |
-| Vis inox terrasse 5 × 50 | 960 pièces |  | chiffrable |
 
 ## Pavage
 
@@ -126,8 +124,7 @@ Devis de test :
 
 **À l'ouverture : 2 vertes · 4 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -146,9 +143,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Prise 2P+T 16 A Legrand Dooxie blanc | 24 pièces |  | chiffrable |
 | Carrelage grès cérame 60×60 | 58 cartons de 1,44 m² | carton entier, un seul bain | chiffrable |
 | Peinture acrylique mate blanche, seau de 15 L | 4 seaux de 15 L | même teinte, même lot | chiffrable |
-| Vis à plaque 25 mm | 1 950 vis |  | chiffrable |
-| Bande à joint | 260 ml |  | chiffrable |
-| Enduit à joint | 52 kg |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 

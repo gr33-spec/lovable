@@ -41,16 +41,14 @@ export function nextAction(s: ProjectSnapshot): NextAction | null {
   }
   const recipients = s.request.recipients;
   const received = recipients.filter((r) => r.status === "received" && r.hasQuote);
-  const unread = received.filter((r) => !r.read).length;
   const toSend = recipients.filter((r) => r.status === "to_send").length;
-  const offers = plural(received.length, "offre reçue", "offres reçues");
-  if (unread > 0 && received.length > 1) return { kind: "compare", label: "Comparer les offres", detail: offers, target: "fournisseurs" };
+  const offers = plural(received.length, "devis reçu", "devis reçus");
   if (toSend > 0) {
     return { kind: "send_requests", label: "Envoyer les demandes", detail: plural(toSend, "demande à envoyer", "demandes à envoyer"), target: "fournisseurs" };
   }
-  if (unread > 0) return { kind: "view_offer", label: "Voir l'offre reçue", detail: offers, target: "fournisseurs" };
+  // Point 7 (Greg, 28 octobre 2026) : plus de lecture IA des devis reçus ; l'artisan les ouvre et retient un négoce.
   if (received.length > 0 && !s.request.chosen) {
-    return { kind: "choose_supplier", label: "Choisir un fournisseur", detail: offers, target: "comparer" };
+    return { kind: "view_offer", label: received.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu", detail: offers, target: "fournisseurs" };
   }
   return null;
 }

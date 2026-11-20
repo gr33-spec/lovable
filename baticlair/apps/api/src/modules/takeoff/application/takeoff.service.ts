@@ -1,5 +1,7 @@
 import {
   baseOf,
+  type SectionDuDevis,
+  lectureParLots,
   AI_ADDITION,
   MISSING_INFO,
   CONSUMABLES_KEY,
@@ -47,23 +49,35 @@ import {
   ecranDeLecture,
   ecranParLots,
   LOTS_KEY,
+  SUGGESTIONS_AUCUNE,
+  SUGGESTIONS_KEY,
   exportPourLecture,
   ficheAvecBref,
   lectureDepuisLignes,
   lignesDeLecture,
   lotLabel,
+  choixParPiece,
+  donneesDicibles,
   piecewiseParams,
+  type ChoixDePiece,
+  type DonneeDicible,
   scopedKey,
   type LectureDevis,
+  valeurApprise,
+  lignesDuTexte,
+  phraseGrosDevis,
+  poidsAnalyse,
 } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { DocumentInput, ReadAttempt } from "../../../platform/ai/document-reader.js";
 import type { AiUsageRecorder, AnalysisMeter } from "../../ai-usage/index.js";
-import type { DocumentAiInput, DocumentRepository, DocumentWithProcessing, PreparedDocument } from "../../documents/index.js";
-import type { CompanyMemory, CorrectionJournal } from "../../learning/index.js";
+import { imageMimeType, looksLikePdf, type DocumentAiInput, type DocumentRepository, type DocumentWithProcessing, type PreparedDocument } from "../../documents/index.js";
+import type { CompanyMemory, CorrectionJournal, HabitudesService } from "../../learning/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { decodeRelecture, doublonDe, FICHE_RELECTURE_PROMPT, type FicheRelecteur, type QuestionPosee, type RelectureQuestion } from "./fiche-relecture.js";
-import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader } from "./lecture-reader.js";
+import { LECTURE_PROMPT, REPERAGE_PROMPT, type LectureReader, type LignesEnCours } from "./lecture-reader.js";
+import { lireLotParLot } from "./lecture-par-lots.js";
+import { LISTE_PROMPT, type ListeLigne, type ListeReader } from "./liste-reader.js";
 import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.repository.js";
 
 /**
@@ -77,12 +91,25 @@ import type { LineFields, TakeoffRecord, TakeoffRepository } from "./takeoff.rep
  *   avant tout appel, et le nombre d'appels est plafonné.
  */
 export interface ReadingOptions {
+  /** La lecture part en même temps que le repérage des métiers (`LECTURE_ET_REPERAGE_ENSEMBLE`) ; éteint sans réglage. */
+  lectureEtReperageEnsemble?: boolean;
+  /**
+   * L'apprentissage des corrections (Greg, 24 octobre 2026) : une correction répétée sur 2 chantiers (ou validée par l'admin
+   * après 3 artisans) s'applique d'elle-même à la liste, « Ajusté selon tes habitudes », annulable en un clic.
+   */
+  habitudes?: Pick<HabitudesService, "apprendre" | "ajustements" | "annuler">;
   /** Compte autorisé à voir les calculs des règles en brouillon (marqués « provisoire »), pour les valider. */
   isValidator?: (tenant: TenantContext) => Promise<boolean>;
   /** Adresse du chantier (code postal → zone climatique), sans rien demander à l'artisan. */
   projectAddress?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
   /** Infos chantier facultatives : la note de l'artisan (texte libre, commentaires de croquis), lue à chaque calcul. */
   projectNotes?: (tenant: TenantContext, projectId: string) => Promise<string | null>;
+  /**
+   * Le chantier fictif du mode démo (« Essayer avec un chantier fictif ») : son devis, inventé, est lu par la lecture
+   * simulée déterministe (celle des tests), sans appel au modèle : immédiat et gratuit (recette en ligne du 25 octobre
+   * 2026 : plus d'une minute de vraie lecture payante à chaque essai). Un vrai devis n'y passe jamais.
+   */
+  lecteurDemo?: (tenant: TenantContext, projectId: string) => Promise<LectureReader | null>;
   /**
    * Version figée par chantier (plan v3 §3) : le référentiel est enregistré à sa version quand le quantitatif naît,
    * et chaque recalcul relit CETTE version. Sans ce port, le référentiel du jour sert (tests unitaires).
@@ -98,6 +125,8 @@ export interface ReadingOptions {
    * ligne. Absent, ou lecteur simulé sans lecture enregistrée pour ce devis : l'ancienne lecture (prompt A) sert encore.
    */
   lecteur?: LectureReader;
+  /** « J'ai déjà ma liste » : la lecture d'image ou de PDF d'une liste déjà comptée (lignes telles qu'écrites, aucun calcul). */
+  listeur?: ListeReader;
   /** Le nom de l'entreprise, injecté dans le prompt B ({nom_entreprise}). */
   companyName?: (tenant: TenantContext) => Promise<string | null>;
   /**
@@ -116,10 +145,18 @@ export interface ReadingOptions {
   /** Lecture échouée (IA en panne, réponse inutilisable, erreur imprévue) : prévenir l'équipe (B5). */
   onReadingFailed?: (reason: string) => void;
   /**
+   * Revue du 26 octobre 2026 : une panne PASSAGÈRE du fournisseur d'IA (indisponible, trop lent) part dans la file de
+   * reprise (deux nouveaux essais, puis alerte). Une réponse illisible ou refusée ne se retente pas seule (elle coûterait
+   * pour rien) : l'artisan garde « Réessayer ».
+   */
+  onEchecPassager?: (tenant: TenantContext, documentId: string, reason: string) => void;
+  /**
    * §48 : « Va boire un café, je te préviens quand c'est prêt. » Une lecture ou un calcul trop long pour une réponse
    * (passé en arrière-plan) prévient l'artisan qui l'a lancé quand il finit : questions prêtes, ou liste prête.
    */
   onReady?: (tenant: TenantContext, ready: { step: "questions" | "resultat"; projectId: string }) => Promise<void>;
+  /** Lot 6 : un devis où la lecture n'a rien trouvé remonte dans la file d'exceptions de l'admin (document illisible). */
+  onIllisible?: (tenant: TenantContext, d: { documentId: string; projectId: string | null; nom: string }) => Promise<void>;
   /** Garde la lecture en vie après la réponse (Vercel : waitUntil). Par défaut : elle continue seule. */
   keepAlive?: (work: Promise<unknown>) => void;
   /** §45.8 : la mémoire des consommables de l'entreprise (« On ajoute ? »). */
@@ -183,6 +220,79 @@ export interface ReadingState {
   status: "reading" | "failed";
   /** Raison de l'échec (« interrupted », « abnormal_size »…), ou null. */
   reason: string | null;
+  /** Pendant la lecture : les lignes du devis déjà lues (ses propres mots) et leur nombre. Absent tant que rien n'est lu. */
+  lignes?: string[];
+  total?: number;
+}
+
+/** Les lignes déjà lues, notées avec l'analyse en cours (`suiviDesLignes`) ; rien si la note n'a pas cette forme. */
+function lignesNotees(readingStats: unknown): { lignes: string[]; total: number } | null {
+  const enCours = (readingStats as { enCours?: { lignes?: unknown; total?: unknown } } | null | undefined)?.enCours;
+  if (!enCours || !Array.isArray(enCours.lignes) || typeof enCours.total !== "number" || enCours.total <= 0) return null;
+  return { lignes: enCours.lignes.filter((l): l is string => typeof l === "string").slice(0, 200), total: enCours.total };
+}
+
+/** Écart minimal entre deux notes du suivi d'une lecture : l'écran regarde chaque seconde. */
+const SUIVI_PAS_MS = 900;
+
+/**
+ * LES LIGNES UNE PAR UNE (Greg, 17 novembre 2026). Chaque appel de lecture dit ce qu'il a déjà lu ; le suivi réunit les
+ * appels (dans l'ordre où ils sont partis) et le note, une fois par seconde au plus. Des appels simultanés (un par métier,
+ * un par tranche) s'ajoutent ; un appel qui part seul après les autres (une relecture) repart de zéro. Les notes
+ * s'écrivent l'une après l'autre, et `fin` attend la dernière puis l'efface : les mesures de la lecture, écrites ensuite,
+ * ne sont jamais recouvertes, et les mots d'un devis ne restent pas avec une lecture finie.
+ */
+export function suiviDesLignes(noter: (lues: LignesEnCours) => Promise<void>, pasMs = SUIVI_PAS_MS, maintenant: () => number = Date.now) {
+  let appels: LignesEnCours[] = [];
+  let enVol = 0;
+  let fini = false;
+  let note = false;
+  let dernier = 0;
+  let dernierTotal = -1;
+  let file: Promise<void> = Promise.resolve();
+  const ecrire = (lues: LignesEnCours) => {
+    file = file.then(() => noter(lues)).catch(() => undefined);
+  };
+  const dire = () => {
+    if (fini) return;
+    const lues = { lignes: appels.flatMap((a) => a.lignes).slice(0, 200), total: appels.reduce((t, a) => t + a.total, 0) };
+    if (lues.total === dernierTotal || maintenant() - dernier < pasMs) return;
+    dernier = maintenant();
+    dernierTotal = lues.total;
+    note = true;
+    ecrire(lues);
+  };
+  return {
+    lecteur(lecteur: LectureReader): LectureReader {
+      return {
+        provider: lecteur.provider,
+        ...(lecteur.reperer ? { reperer: (texte: string) => lecteur.reperer!(texte) } : {}),
+        lire: (request) => {
+          if (enVol === 0) appels = [];
+          const rang = appels.push({ lignes: [], total: 0 }) - 1;
+          const cetAppel = appels;
+          enVol += 1;
+          return lecteur
+            .lire({
+              ...request,
+              surLignes: (lues) => {
+                if (cetAppel !== appels) return;
+                appels[rang] = lues;
+                dire();
+              },
+            })
+            .finally(() => {
+              enVol -= 1;
+            });
+        },
+      };
+    },
+    async fin(): Promise<void> {
+      fini = true;
+      if (note) ecrire({ lignes: [], total: 0 });
+      await file;
+    },
+  };
 }
 
 export type StartResult = { state: "ready"; result: ReviewedTakeoff } | { state: "reading" };
@@ -284,12 +394,20 @@ export interface ReviewedTakeoff {
    * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
    */
   habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** Les pièces d'un groupe « une seule réponse pour tout le devis », chacune avec son choix (modifiable pour elle seule). */
+  choixPieces?: ChoixDePiece[];
+  /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même (jamais posées). */
+  dicibles?: DonneeDicible[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation) : hors de la liste, repliées à part. */
   withoutSupply?: { lineId: string; label: string; measure: string | null }[];
+  /** Étape « Suggestions » : les oublis probables à proposer en cases (fiche du métier), tant que l'artisan n'a pas répondu. */
+  suggestions?: { key: string; label: string }[];
   /** La note de l'artisan sur le chantier (§44), pour le bref de l'écran et de l'envoi (§50.7). */
   siteNotes?: string | null;
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché, hors de la liste. */
   aiSuggestions: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
+  /** Les lignes ajustées d'elles-mêmes par une règle apprise (24 octobre 2026) : « Ajusté selon tes habitudes », « Annuler ». */
+  ajustements?: { itemKey: string; regleId: string; texte: string }[];
 }
 
 
@@ -322,11 +440,11 @@ export class TakeoffService {
    * cours » (la lecture continue, l'écran interroge `readingState`). Une lecture déjà en cours n'est
    * jamais relancée (double appui, rechargement) : rien n'est payé deux fois.
    */
-  async start(tenant: TenantContext, documentId: string): Promise<StartResult> {
+  async start(tenant: TenantContext, documentId: string, options: { confirmeGros?: boolean } = {}): Promise<StartResult> {
     assertCanWrite(tenant);
     const running = await this.meter.current(tenant.companyId, documentId);
     if (running?.status === "started" && !this.stale(running.startedAt)) return { state: "reading" };
-    const work = this.extract(tenant, documentId);
+    const work = this.extract(tenant, documentId, options);
     const wait = this.reading.answerWithinMs ?? 8000;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timeout = new Promise<"later">((resolve) => {
@@ -401,7 +519,7 @@ export class TakeoffService {
   async readingStateOf(tenant: TenantContext, documentId: string): Promise<ReadingState | null> {
     const analysis = await this.meter.current(tenant.companyId, documentId);
     if (!analysis || analysis.status === "completed") return null;
-    if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null };
+    if (analysis.status === "started") return this.stale(analysis.startedAt) ? { status: "failed", reason: "interrupted" } : { status: "reading", reason: null, ...(lignesNotees(analysis.readingStats) ?? {}) };
     // Le motif enregistré avec la lecture (« nothing_read » : rien trouvé dans le devis), sinon l'échec générique.
     const failure = (analysis.readingStats as { failure?: unknown } | null | undefined)?.failure;
     return { status: "failed", reason: failure === "nothing_read" ? "nothing_read" : "analysis_failed" };
@@ -411,7 +529,12 @@ export class TakeoffService {
     return (this.reading.now ?? (() => new Date()))().getTime() - startedAt.getTime() > STALE_READING_MS;
   }
 
-  async extract(tenant: TenantContext, documentId: string): Promise<ReviewedTakeoff> {
+  /**
+   * `confirmeGros` (Greg, 30 octobre 2026, décision 3) : un devis de plus de 150 lignes compte pour 2 analyses ; l'écran le
+   * dit AVANT la lecture (refus `gros_devis`, rien n'est dépensé ni décompté) et relance avec `confirmeGros: true`. Les
+   * autres chemins (reprise, partenaires) lisent sans demander : la lecture compte quand même pour 2.
+   */
+  async extract(tenant: TenantContext, documentId: string, options: { confirmeGros?: boolean } = {}): Promise<ReviewedTakeoff> {
     assertCanWrite(tenant);
     const doc = await this.documents.findById(tenant, documentId);
     if (!doc) throw notFound("Document");
@@ -428,12 +551,20 @@ export class TakeoffService {
     if (plan.estimate.totalMicroUsd > (this.reading.maxAnalysisMicroUsd ?? DEFAULT_MAX_ANALYSIS_MICRO_USD)) {
       throw new DomainError("unreadable_document", "Estimated reading cost is abnormal for a quote", { reason: "abnormal_size" });
     }
+    const lignes = lignesDuTexte(prepared.input.numberedText);
+    const poids = poidsAnalyse(lignes);
+    // Un gros devis compte pour deux analyses OFFERTES : la question ne se pose qu'à un compte gratuit (un abonné n'a pas de nombre).
+    const jauge = poids === 2 && options.confirmeGros === false ? await this.meter.jauge(tenant.companyId) : null;
+    if (jauge) {
+      throw new DomainError("conflict", "Large quote: counts as two analyses", { reason: "gros_devis", lignes, poids, restantes: jauge.restantes, message: phraseGrosDevis(lignes, jauge.restantes) });
+    }
     const begin = await this.meter.begin({
       companyId: tenant.companyId,
       userId: tenant.userId,
       projectId: doc.projectId,
       documentId,
       kind: "client_quote",
+      poids,
     });
     if (begin.status === "already_done") throw new DomainError("conflict", "Analysis already completed for this document");
     const analysisId = begin.analysis.id;
@@ -448,7 +579,10 @@ export class TakeoffService {
     } catch (error) {
       const known = error instanceof DomainError && error.code === "analysis_failed";
       if (!known) await this.meter.fail(analysisId).catch(() => undefined);
-      this.reading.onReadingFailed?.(known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error");
+      const reason = known ? String((error.details as { reason?: string } | undefined)?.reason ?? "analysis_failed") : "unexpected_error";
+      this.reading.onReadingFailed?.(reason);
+      const essaiAuto = known && (error.details as { essaiAuto?: boolean } | undefined)?.essaiAuto === true;
+      if (essaiAuto) this.reading.onEchecPassager?.(tenant, documentId, reason);
       throw error;
     }
   }
@@ -478,11 +612,30 @@ export class TakeoffService {
       return lecteur.lire({ document, trade: t, tradeLabel: tradeProfile(t).label, referentiel, siteNotes });
     };
     const donne = referentialFor(trade)?.trade ?? tradeIdOf(trade.split(",")[0] ?? "");
-    const vus = donne === "general" ? [] : await this.reperer(lecteur, document.numberedText, compter);
+    // VITESSE (Greg, 17 novembre 2026 : « 24 secondes, c'est trop long ») : avec `LECTURE_ET_REPERAGE_ENSEMBLE`, la lecture
+    // part avec le métier du compte EN MÊME TEMPS que le repérage, au lieu d'attendre sa réponse (2 à 4 secondes). Si le
+    // repérage confirme ce seul métier (le cas d'un artisan qui lit un devis de son métier), cette lecture est gardée.
+    // Sinon elle est comptée (elle a coûté) puis écartée, et la lecture repart comme avant avec les bons référentiels.
+    const ensemble = this.reading.lectureEtReperageEnsemble === true && donne !== "general" && referentialFor(trade) !== null;
+    const pari = ensemble ? lire(trade, [donne]) : null;
+    pari?.catch(() => null);
+    const reperage = donne === "general" ? { metiers: [], sections: [] } : await this.reperer(lecteur, document.numberedText, compter);
+    const vus = reperage.metiers;
+    if (pari) {
+      const confirme = (vus.length === 0 || (vus.length === 1 && vus[0] === donne)) && !lectureParLots([donne], document.numberedText);
+      const lu = await pari.catch(() => null);
+      const garde = confirme && lu !== null && lu.status === "success" && lu.output !== null && metiersDesLots(lu.output, trade).length === 0 && metierAutre(lu.output, trade) === null;
+      // Gardée : c'est LA lecture (essai n° 1). Écartée : elle est comptée à part (essai n° 0), elle a coûté.
+      if (lu) await compter(garde ? 1 : 0, lu, LECTURE_PROMPT);
+      if (garde && lu) return { result: lu, trade };
+    }
     // Un devis d'un autre métier que le compte : ce métier ; un devis à plusieurs lots sans le métier du compte : le principal.
     if (vus.length > 0 && !vus.includes(donne)) trade = vus[0]!;
     const principal = referentialFor(trade)?.trade ?? trade;
     const dejaLus = vus.length > 1 ? [principal, ...vus.filter((m) => m !== principal)] : [principal];
+    // Décision du fondateur (24 octobre 2026, « option 1 ») : un GROS devis de plusieurs métiers est lu en UN APPEL PAR
+    // MÉTIER, en parallèle, chacun avec son référentiel ; un appel unique avec tous les référentiels était coupé (7954).
+    if (lectureParLots(dejaLus, document.numberedText)) return this.lireParLots(lecteur, document, dejaLus, reperage.sections, siteNotes, compter);
     let result = await lire(trade, dejaLus);
     if (result === null) return null;
     await compter(1, result, LECTURE_PROMPT);
@@ -508,18 +661,51 @@ export class TakeoffService {
     return { result, trade };
   }
 
+  /**
+   * La lecture lot par lot (décision du fondateur, 24 octobre 2026) : un appel par métier, en parallèle, chacun avec son
+   * seul référentiel et la consigne de ne rendre que ses lignes (le principal rend aussi les lignes sans lot) ; les
+   * lectures sont fusionnées (`fusionnerLectures`). Un lot en échec n'empêche pas les autres : il est gardé dans
+   * `lotsNonLus` et l'écran le dit (« Je n'ai pas pu lire la partie … ») ; tous en échec, la lecture échoue comme avant.
+   */
+  private async lireParLots(
+    lecteur: LectureReader,
+    document: DocumentInput,
+    metiers: readonly string[],
+    sections: readonly SectionDuDevis[],
+    siteNotes: string | null,
+    compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>,
+  ): Promise<{ result: ReadAttempt<LectureDevis>; trade: string } | null> {
+    const { lecture, appels, metier, dureeMs } = await lireLotParLot(lecteur, document, metiers, sections, siteNotes);
+    const lus = appels.flatMap((a) => (a.attempt ? [a.attempt] : []));
+    if (lus.length === 0) return null;
+    for (const [i, e] of lus.entries()) await compter(i + 1, e, LECTURE_PROMPT);
+    const premier = lus.find((e) => e.status === "success" && e.output) ?? lus[0]!;
+    const usage = {
+      inputTokens: lus.reduce((t, e) => t + e.usage.inputTokens, 0),
+      outputTokens: lus.reduce((t, e) => t + e.usage.outputTokens, 0),
+      cacheReadTokens: lus.reduce((t, e) => t + (e.usage.cacheReadTokens ?? 0), 0),
+    };
+    const durationMs = dureeMs;
+    const result: ReadAttempt<LectureDevis> = lecture ? { ...premier, usage, durationMs, status: "success", output: lecture, errorCode: null } : { ...premier, usage, durationMs, output: null };
+    return { result, trade: metier };
+  }
+
   /** Le repérage des métiers (texte seul, modèle rapide) : jamais bloquant, un échec ou un silence laisse le métier donné. */
-  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<string[]> {
-    if (!lecteur.reperer) return [];
+  private async reperer(lecteur: LectureReader, numberedText: string, compter: (attempt: number, r: ReadAttempt<unknown>, prompt: { id: string; version: number }) => Promise<void>): Promise<{ metiers: string[]; sections: SectionDuDevis[] }> {
+    const rien = { metiers: [], sections: [] };
+    if (!lecteur.reperer) return rien;
     try {
       // 25 s au plus : un repérage lent ne retarde jamais la lecture plus que la relecture qu'il évite.
       let timer: ReturnType<typeof setTimeout> | undefined;
       const r = await Promise.race([lecteur.reperer(numberedText), new Promise<null>((resolve) => (timer = setTimeout(() => resolve(null), REPERAGE_MAX_MS)))]).finally(() => clearTimeout(timer));
-      if (!r) return [];
+      if (!r) return rien;
       await compter(0, r, REPERAGE_PROMPT);
-      return r.status === "success" && r.output ? r.output.filter((m) => referentialFor(m)?.trade === m) : [];
+      if (r.status !== "success" || !r.output) return rien;
+      const lu = Array.isArray(r.output) ? { metiers: r.output, sections: [] } : r.output;
+      const metiers = lu.metiers.filter((m) => referentialFor(m)?.trade === m);
+      return { metiers, sections: lu.sections.filter((x) => metiers.includes(x.metier)) };
     } catch {
-      return [];
+      return rien;
     }
   }
 
@@ -530,20 +716,25 @@ export class TakeoffService {
    * lit pas ce devis (lecteur simulé sans lecture enregistrée) ; une lecture en échec est une lecture échouée.
    */
   private async readLecture(tenant: TenantContext, doc: DocumentWithProcessing, prepared: Prepared, analysisId: string): Promise<ReviewedTakeoff | null> {
-    const lecteur = this.reading.lecteur!;
+    const demo = doc.projectId ? ((await this.reading.lecteurDemo?.(tenant, doc.projectId)) ?? null) : null;
+    const lecteur = demo ?? this.reading.lecteur!;
     const started = Date.now();
     let trade = doc.trade;
     let ref = referentialFor(trade);
     const siteNotes = doc.projectId ? ((await this.reading.projectNotes?.(tenant, doc.projectId)) ?? null) : null;
-    // Le devis complet : son texte numéroté (pour citer les lignes) et le PDF entier, toutes pages.
-    const content = await this.documents.readContent(tenant, doc.id);
-    const pages = prepared.pages.map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
-    const document = { numberedText: prepared.input.numberedText, imagePdf: content?.bytes ?? prepared.input.imagePdf, imagePages: pages };
+    // RGPD (Greg, 24 octobre 2026 ; RÈGLE CHANGÉE §51.5, avant : « le PDF entier ») : le texte numéroté, déjà débarrassé
+    // des coordonnées du client, et seulement l'image des pages sans texte (un scan ne se nettoie pas sans le lire). Le
+    // PDF d'origine n'est plus joint quand toutes ses pages ont du texte.
+    const pages = prepared.pages.filter((p) => p.route === "vision").map((p) => p.pageNumber).filter((n): n is number => typeof n === "number");
+    const document = { numberedText: prepared.input.numberedText, imagePdf: prepared.input.imagePdf, imagePages: pages };
     const counted = { text: prepared.pages.filter((p) => p.route === "text").length, vision: prepared.pages.filter((p) => p.route === "vision").length };
     let cost = 0;
-    const lu = await this.lireLeDevis(lecteur, document, trade, siteNotes, async (n, r, prompt) => {
-      cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
-    });
+    // Les lignes une par une (Greg, 17 novembre 2026) : ce que chaque appel a déjà lu est noté avec l'analyse, pour l'écran.
+    const suivi = suiviDesLignes((lues) => this.meter.recordReading(analysisId, { enCours: lues }));
+    const lu = await this.lireLeDevis(suivi.lecteur(lecteur), document, trade, siteNotes, async (n, r, prompt) => {
+      // La lecture simulée du chantier fictif ne coûte rien : rien n'est compté comme un appel au modèle.
+      if (!demo) cost += await this.record(tenant, doc, counted, prepared.processingId, analysisId, n, r, prompt);
+    }).finally(() => suivi.fin());
     if (lu === null) return null;
     const result = lu.result;
     trade = lu.trade;
@@ -573,13 +764,17 @@ export class TakeoffService {
     if (result.status !== "success" || !result.output) {
       await this.saveStats(analysisId, stats("failed", result.status));
       await this.meter.fail(analysisId);
-      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status });
+      // Une panne passagère (fournisseur indisponible, trop lent, 429) repart seule ; un refus (crédit épuisé, requête
+      // refusée) ou une réponse illisible attend l'artisan. `essaiAuto` le dit à l'écran.
+      const essaiAuto = result.status === "timeout" || (result.status === "provider_error" && !/^http_4(?!29)/.test(result.errorCode ?? ""));
+      throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status, essaiAuto });
     }
     const lecture = result.output;
     const lignes = lignesDeLecture(lecture);
     if (lignes.length === 0) {
       await this.saveStats(analysisId, stats("failed", "nothing_read"));
       await this.meter.fail(analysisId);
+      await this.reading.onIllisible?.(tenant, { documentId: doc.id, projectId: doc.projectId ?? null, nom: doc.originalName ?? "devis" }).catch(() => undefined);
       throw new DomainError("analysis_failed", "Nothing was read in this quote", { reason: "nothing_read" });
     }
     await this.saveStats(analysisId, stats("completed", undefined, lignes.length));
@@ -670,6 +865,104 @@ export class TakeoffService {
         aiDoubt: null,
         priceRaw: l.price?.trim() || null,
         origin: "partner",
+      })),
+    });
+    return this.review(tenant, takeoff);
+  }
+
+  /** Une liste déjà comptée peut-elle être lue ? (le lecteur d'image est configuré) */
+  get listeAvailable(): boolean {
+    return this.reading.listeur !== undefined;
+  }
+
+  /**
+   * « J'AI DÉJÀ MA LISTE » : une photo (JPEG, PNG, WebP) ou un PDF d'une liste écrite à la main, d'un bon ou d'un devis de
+   * négoce. L'IA lit les lignes TELLES QU'ÉCRITES (article, quantité, unité) ; aucun calcul de quantitatif, aucune question :
+   * l'artisan a déjà compté. La liste arrive sur le même écran que celle d'un devis (modifier, supprimer, ajouter une ligne) ;
+   * rien ne part sans sa validation. L'appel est enregistré (coût mesuré) mais ne compte pas comme une analyse de devis.
+   */
+  /**
+   * LA LECTURE SEULE d'une liste, d'un bon ou d'un devis de négoce (Greg, 12 novembre 2026 : « importer un document depuis
+   * une liste en cours ») : le quota vérifié, l'appel journalisé, les lignes RENDUES telles qu'écrites. Rien n'est créé ici :
+   * ni chantier, ni quantitatif, ni fichier. Un scan ne compte que s'il a réussi (`scansFaits` lit le journal).
+   */
+  async lireListe(tenant: TenantContext, projectId: string | null, trade: string, file: { name: string; bytes: Uint8Array }): Promise<{ lignes: ListeLigne[]; model: string }> {
+    assertCanWrite(tenant);
+    const listeur = this.reading.listeur;
+    if (!listeur) throw new DomainError("ai_unavailable", "AI reading is not configured");
+    // Greg, 15 novembre 2026 : un scan compte dans les analyses offertes (compte gratuit) ou dans le plafond caché (abonné) ;
+    // au-delà, rien n'est lu ni dépensé.
+    await this.meter.verifierScan(tenant.companyId, tenant.userId);
+    if (file.bytes.byteLength === 0) throw new DomainError("unreadable_document", "Empty file", { reason: "empty" });
+    const mediaType = imageMimeType(file.bytes);
+    if (!mediaType && !looksLikePdf(file.bytes)) throw new DomainError("unreadable_document", "Not an image or a PDF", { reason: "not_pdf" });
+    const attempt = await listeur.lire({
+      fileName: file.name,
+      trade,
+      document: mediaType ? { numberedText: "", imagePdf: null, imagePages: [], images: [{ mediaType, bytes: file.bytes }] } : { numberedText: "", imagePdf: file.bytes, imagePages: [] },
+    });
+    if (attempt) {
+      try {
+        await this.recorder.record({
+          companyId: tenant.companyId,
+          projectId,
+          documentId: null,
+          userId: tenant.userId,
+          task: LISTE_PROMPT.id,
+          route: "vision",
+          provider: attempt.provider,
+          model: attempt.model,
+          promptId: LISTE_PROMPT.id,
+          promptVersion: LISTE_PROMPT.version,
+          attempt: 1,
+          pagesText: 0,
+          pagesVision: 1,
+          usage: attempt.usage,
+          status: attempt.status,
+          errorCode: attempt.errorCode,
+          durationMs: attempt.durationMs,
+        });
+      } catch (error) {
+        this.onRecordFailure(error);
+      }
+    }
+    if (!attempt || attempt.status !== "success" || !attempt.output) {
+      this.reading.onReadingFailed?.(attempt?.status ?? "no_reader");
+      // Le motif du prestataire (« http_400: invalid_request_error, … », jamais la clé) suit, pour le journal du serveur.
+      throw new DomainError("analysis_failed", "The AI could not read this list", { reason: attempt?.status ?? "no_reader", ...(attempt?.errorCode ? { motif: attempt.errorCode } : {}) });
+    }
+    const lignes = attempt.output.lignes;
+    if (lignes.length === 0) throw new DomainError("analysis_failed", "Nothing was read in this list", { reason: "nothing_read" });
+    return { lignes, model: attempt.model };
+  }
+
+  async fromListe(tenant: TenantContext, projectId: string, trade: string, file: { name: string; bytes: Uint8Array }): Promise<ReviewedTakeoff> {
+    const { lignes, model } = await this.lireListe(tenant, projectId, trade, file);
+    const ref = referentialFor(trade);
+    if (ref) await this.reading.referentials?.ensure(ref);
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId,
+      documentId: null,
+      source: "lignes",
+      referentialVersion: ref?.version ?? null,
+      analysisId: null,
+      trade,
+      calculated: true,
+      promptId: LISTE_PROMPT.id,
+      promptVersion: LISTE_PROMPT.version,
+      model,
+      notes: [],
+      lines: lignes.map((l) => ({
+        designation: l.designation,
+        quantityRaw: l.quantite,
+        unitRaw: l.unite,
+        reference: null,
+        sourceRefs: [],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        priceRaw: null,
+        origin: "liste",
       })),
     });
     return this.review(tenant, takeoff);
@@ -902,7 +1195,7 @@ export class TakeoffService {
 
   async answer(tenant: TenantContext, takeoffId: string, key: string, value: EngineAnswer): Promise<ReviewedTakeoff> {
     // Une correction d'article (§41.4, §45.8, §45.9 : depuis l'aperçu avant envoi) ne lève aucun doute : la liste validée le reste.
-    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref):/.test(key);
+    const itemOnly = /^(quantite|libelle|precision|retire|ajout|bref|habitude|chantier):/.test(key);
     const takeoff = itemOnly ? await this.itemEditable(tenant, await this.takeoffs.findById(tenant, takeoffId)) : await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
     const previous = takeoff.answers[key];
     // §45.8 : « On ajoute ? » — Oui / Non d'un tap, mémorisé pour l'entreprise.
@@ -927,7 +1220,8 @@ export class TakeoffService {
       if (corrected[1] === "retire" && value !== "oui" && value !== null) throw validationFailed("Answer oui", { reason: "invalid_answer" });
       const answers = { ...takeoff.answers };
       for (const k of ["quantite", "libelle", "precision", "retire"]) delete answers[`${k}:${itemKey}`];
-      const engine = (await this.review(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
+      // La proposition d'avant toute correction : celle du moteur, sans les habitudes apprises (on apprend de l'écart à l'IA).
+      const engine = (await this.reviewBrut(tenant, { ...takeoff, answers })).purchase.toBuy.find((b) => b.key === itemKey);
       await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
       const after = await this.reload(tenant, takeoff.id);
       const now = after.purchase.toBuy.find((b) => b.key === itemKey);
@@ -952,8 +1246,22 @@ export class TakeoffService {
             })),
           },
         });
+        // L'apprentissage (24 octobre 2026) : la même correction sur 2 chantiers deviendra une habitude de l'artisan.
+        const champ = corrected[1] as "quantite" | "libelle" | "precision" | "retire";
+        if (champ !== "retire" && this.reading.habitudes) {
+          const valeur = valeurApprise(champ, { label: engine.label, count: engine.order?.count ?? null }, value as string | { value: string; unit: string } | null);
+          if (valeur) await this.reading.habitudes.apprendre(tenant, { metier: takeoff.trade, propose: engine.label, champ, valeur, projectId: takeoff.projectId }).catch(() => undefined);
+        }
       }
       return after;
+    }
+    // « Annuler » sur une ligne ajustée par une habitude : la ligne revient à la proposition, la règle de l'artisan s'arrête.
+    if (key.startsWith("habitude:")) {
+      if (value !== "non") throw validationFailed("Answer non", { reason: "invalid_answer" });
+      const ajustement = (await this.review(tenant, takeoff)).ajustements?.find((a) => a.itemKey === key.slice("habitude:".length));
+      await this.takeoffs.setAnswer(tenant, takeoff.id, key, "non");
+      if (ajustement) await this.reading.habitudes?.annuler(tenant, ajustement.regleId);
+      return this.reload(tenant, takeoff.id);
     }
     // §47.3 / §47.4 : « C'est bon » sur une quantité calculée avec une règle « à vérifier » : la ligne passe au vert,
     // chaque règle est confirmée pour l'entreprise (trois entreprises différentes la valident), et tout va au journal.
@@ -1012,6 +1320,8 @@ export class TakeoffService {
     }
     // §52, la carte « Lots repérés » : au moins un lot, chacun un métier (« electrical,plumbing »).
     if (key === LOTS_KEY && (typeof value !== "string" || !/^[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,40})*$/.test(value))) throw validationFailed("Answer the kept lots", { reason: "invalid_answer" });
+    // Étape « Suggestions » : « aucune », ou des cases « ouvrage/emplacement » séparées par des virgules.
+    if (key === SUGGESTIONS_KEY && (typeof value !== "string" || !(value === SUGGESTIONS_AUCUNE || /^[a-z0-9_/+-]{3,400}(,[a-z0-9_/+-]{3,400}){0,4}$/.test(value)))) throw validationFailed("Answer the ticked suggestions", { reason: "invalid_answer" });
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
@@ -1193,8 +1503,25 @@ export class TakeoffService {
    * L'écran, recalculé à chaque lecture avec les règles de sa version (§51.5) : la lecture du modèle, ou, sans lecture
    * (lignes d'un partenaire, ancien quantitatif), chaque ligne telle qu'écrite.
    */
-  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+  /** L'écran sans les habitudes apprises : ce que proposent la lecture et le moteur. */
+  private async reviewBrut(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
     return this.reviewLecture(tenant, record, record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw }))));
+  }
+
+  private async review(tenant: TenantContext, record: TakeoffRecord): Promise<ReviewedTakeoff> {
+    const lecture = record.lecture ?? lectureDepuisLignes(record.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })));
+    const brut = await this.reviewLecture(tenant, record, lecture);
+    // L'apprentissage (24 octobre 2026) : les règles apprises posent leur réponse sur la ligne, comme une correction à la
+    // main, sauf là où l'artisan a déjà répondu ou a annulé l'ajustement (« habitude:<ligne> »).
+    const h = this.reading.habitudes;
+    if (!h) return brut;
+    const lignes = brut.purchase.toBuy.map((b) => ({ key: b.key, label: b.label, count: b.order?.count ?? null, unit: b.order?.unit ?? null }));
+    const ajustements = await h.ajustements(tenant, record.trade, lignes, (cle) => cle in record.answers).catch(() => []);
+    if (ajustements.length === 0) return brut;
+    const appris = Object.fromEntries(ajustements.map((a) => [`${a.champ}:${a.itemKey}`, a.reponse]));
+    const ajuste = await this.reviewLecture(tenant, { ...record, answers: { ...appris, ...record.answers } }, lecture);
+    const vus = new Set<string>();
+    return { ...ajuste, ajustements: ajustements.filter((a) => !vus.has(a.itemKey) && vus.add(a.itemKey)).map((a) => ({ itemKey: a.itemKey, regleId: a.regleId, texte: a.texte })) };
   }
 
   /**
@@ -1289,12 +1616,15 @@ export class TakeoffService {
         ref.workItems
           .filter((w) => used.has(w.id))
           .flatMap((w) => w.params.map((d) => ({ w, d })))
-          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
+          .filter(({ w, d }) => d.kind === "artisan_preference" && d.question && (d.choices?.length ?? 0) > 0 && (preferences.params?.[`${d.key}@${w.id}`] ?? (d.groupe ? preferences.params?.[`${d.key}@${d.groupe.id}`] : undefined) ?? preferences.params?.[d.key]) !== undefined && takeoff.answers[`param:${d.key}`] === undefined)
           .map(({ w, d }) => {
-            const perLot = piecewise.has(`param:${d.key}`);
-            const usual = (perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
-            const key = perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
-            const question = perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
+            // Une seule réponse pour tout le devis (`groupe`, dans la fiche du métier) : l'habitude se confirme une fois, avec
+            // la question du groupe ; sinon lot par lot quand plusieurs ouvrages en dépendent.
+            const g = d.groupe;
+            const perLot = !g && piecewise.has(`param:${d.key}`);
+            const usual = (g ? (preferences.params?.[`${d.key}@${g.id}`] ?? preferences.params?.[`${d.key}@${w.id}`]) : perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
+            const key = g ? scopedKey(d.key, g.id) : perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
+            const question = g ? g.question : perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
             return [key, { key, question, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
           })
           .filter(([key]) => takeoff.answers[key] === undefined),
@@ -1311,8 +1641,13 @@ export class TakeoffService {
       brief,
       fiche,
       habits,
+      // « Il peut modifier ce choix pour une pièce dans le récapitulatif » (Greg, 17 novembre 2026).
+      choixPieces: choixParPiece(ref, e.plan, takeoff.answers),
+      // « Je veux les 6 comprises » (Greg, 17 novembre 2026) : ce que l'artisan peut dire sans qu'on le lui demande.
+      dicibles: donneesDicibles(ref, e.plan, takeoff.answers, [...purchase.questions.map((q) => q.question?.key ?? q.key), ...habits.map((h) => h.key)]),
       aiSuggestions: [],
       withoutSupply: e.sansFourniture,
+      suggestions: e.suggestions,
       siteNotes: notes,
     };
   }

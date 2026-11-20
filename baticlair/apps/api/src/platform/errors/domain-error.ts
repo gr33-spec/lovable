@@ -18,6 +18,8 @@ export type ErrorCode =
   | "no_referential"
   | "analysis_quota_reached"
   | "plan_limit_reached"
+  /** L'essai est fini et l'abonnement n'est pas actif : l'action payante attend « Je continue » (24 octobre 2026). */
+  | "abonnement_requis"
   | "ai_unavailable"
   | "analysis_failed"
   /** Le prestataire d'e-mail a refusé ou n'a pas répondu : la demande au fournisseur n'est pas partie. */

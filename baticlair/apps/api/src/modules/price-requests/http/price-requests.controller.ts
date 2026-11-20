@@ -21,15 +21,19 @@ import { FilesInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import { memoryStorage } from "multer";
 import { z } from "zod";
+import { COULEURS_PDF, MODELES_PDF, type CouleurPdf } from "@baticlair/domain";
 import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { assembleQuote, chunkedFields, UploadParts } from "../../documents/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { IdentiteConfirmeeGuard } from "../../../platform/http/identite-confirmee.guard.js";
 import { PriceRequestsService, type PriceRequestView } from "../application/price-requests.service.js";
-import { packetDocument } from "../application/supplier-packet.js";
+import { packetDocument, type ZonePdf } from "../application/supplier-packet.js";
 
 const supplierIds = z.array(z.string()).min(1).max(20);
-const settingsBody = z.object({ attachQuoteDetail: z.boolean() });
+// Assistant (31 octobre 2026) : le modèle et la couleur du PDF se règlent ici aussi ; chaque champ est facultatif.
+const apercuQuery = z.object({ modele: z.enum(MODELES_PDF).optional(), couleur: z.enum(COULEURS_PDF.map((c) => c.id) as [CouleurPdf, ...CouleurPdf[]]).optional() });
+const settingsBody = z.object({ attachQuoteDetail: z.boolean().optional(), modelePdf: z.enum(MODELES_PDF).optional(), couleurPdf: z.enum(COULEURS_PDF.map((c) => c.id) as [CouleurPdf, ...CouleurPdf[]]).optional() });
 const createBody = z.object({
   supplierIds,
   message: z
@@ -44,14 +48,19 @@ const createBody = z.object({
     .transform((v) => (v ? new Date(`${v}T00:00:00Z`) : null)),
   /** §48.5 : « Envoyer une sélection à un autre fournisseur » : les articles cochés (clés de la liste). */
   articles: z.array(z.string().min(1).max(300)).min(1).max(500).optional(),
+  /** Lot final, point 4 : tutoyer le négoce (vouvoiement par défaut). */
+  tutoie: z.boolean().nullish(),
+  /** Tri par métier : les demandes d'un même envoi portent le même lot (l'écran les suit ensemble). */
+  lot: z.string().min(8).max(64).regex(/^[\w-]+$/).optional(),
 });
 const addBody = z.object({ supplierIds });
-const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish() });
+const repartitionBody = createBody.pick({ supplierIds: true, articles: true });
+const previewBody = createBody.omit({ supplierIds: true }).extend({ destinataire: z.string().trim().max(200).nullish(), supplierId: z.string().max(60).nullish() });
 const statusBody = z.object({
   status: z.enum(["to_send", "sent", "declined"]),
 });
 const quoteBody = z.object(chunkedFields);
-const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.array(z.string()).max(20).optional() });
+const classifyBody = z.object({ classified: z.boolean(), retainedSupplierIds: z.array(z.string()).max(20).optional(), retirerDesGroupes: z.boolean().optional() });
 const orderBody = z.object({ supplierId: z.string(), outcome: z.enum(["as_is", "modified"]), text: z.string().max(20000).nullish() });
 const orderDocumentBody = z.object({ ...chunkedFields, supplierId: z.string() });
 
@@ -72,8 +81,14 @@ export function toDto(r: PriceRequestView) {
     retainedSupplierIds: r.retainedSupplierIds,
     /** §48.5 : les articles de la liste envoyés à part ; vide = toute la liste. */
     articles: r.itemKeys,
+    /** Les demandes parties ensemble par le tri par métier ; null = demande seule. */
+    lot: r.lot,
     /** §47.5 : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
     orderFeedback: r.orderFeedback,
+    /** Après la commande : la date de livraison souhaitée, combien d'autres négoces ont été consultés, et le choix pris. */
+    apresCommande: r.apresCommande ? { livraisonSouhaitee: r.apresCommande.livraisonSouhaitee?.toISOString().slice(0, 10) ?? null, autres: r.apresCommande.autres, autresChoix: r.apresCommande.autresChoix } : null,
+    /** Le rappel de suivi à 7 jours et « C'est réglé ». */
+    suivi: { rappelLe: r.suivi?.rappelLe?.toISOString() ?? null, regleLe: r.suivi?.regleLe?.toISOString() ?? null },
     packet: r.packet
       ? {
           entreprise: r.packet.entreprise,
@@ -94,6 +109,18 @@ export function toDto(r: PriceRequestView) {
       supplier: x.supplier,
       status: x.status,
       sentAt: x.sentAt?.toISOString() ?? null,
+      etiquette: x.etiquette,
+      rappelLe: x.rappelLe?.toISOString() ?? null,
+      /** Le bon de commande est parti à ce négoce (date), sinon null. */
+      commandeLe: x.commandeLe?.toISOString() ?? null,
+      negoce: x.negoce
+        ? {
+            vaRepondreLe: x.negoce.intentionLe?.toISOString() ?? null,
+            refusMotif: x.negoce.refusMotif,
+            conditions: x.negoce.conditions ?? null,
+            precision: x.negoce.precision ? { question: x.negoce.precision.question, demandeeLe: x.negoce.precision.demandeeLe?.toISOString() ?? null, reponse: x.negoce.precision.reponse, repondueLe: x.negoce.precision.repondueLe?.toISOString() ?? null } : null,
+          }
+        : null,
       document: x.document,
       email: r.emails.get(x.id) ?? null,
     })),
@@ -136,9 +163,21 @@ export class PriceRequestsController {
   /** Envoi par le serveur (§45) : le mail court, le PDF « Demande de devis » joint, puis « envoyée ». */
   @Throttle({ default: HOURLY(60) })
   @Post("price-request-recipients/:id/send")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   async send(@Tenant() tenant: TenantContext, @Param("id") id: string) {
     return toDto(await this.requests.send(tenant, id));
+  }
+
+  /** Apparence (1er novembre 2026) : l'aperçu en direct des réglages du PDF ; `modele` et `couleur` pour essayer avant d'enregistrer. */
+  @Get("price-requests/settings/apercu.pdf")
+  async apercuReglages(@Tenant() tenant: TenantContext, @Query(new ZodPipe(apercuQuery)) q: z.infer<typeof apercuQuery>, @Res({ passthrough: true }) res: Response) {
+    const pdf = await this.requests.apercuReglages(tenant, { modele: q.modele, couleur: q.couleur });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename="${pdf.filename}"`);
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("X-Apercu-Exemple", pdf.exemple ? "1" : "0");
+    return new StreamableFile(pdf.bytes);
   }
 
   /** « Exporter la liste en PDF » (§21.3, §45.9) : la liste validée du chantier, même PDF que celui du fournisseur, aucun prix. */
@@ -152,6 +191,17 @@ export class PriceRequestsController {
     return new StreamableFile(pdf.bytes);
   }
 
+  /**
+   * Assistant Mobiiz (31 octobre 2026, point 6) : les zones des lignes du PDF de l'aperçu (clé de l'article, page, rectangle
+   * en points PDF), pour toucher une ligne dans le PDF et la modifier. Le même rendu que `?apercu=1`.
+   */
+  @Get("projects/:projectId/demande-de-devis.zones")
+  async zonesPdf(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
+    const zones: ZonePdf[] = [];
+    await this.requests.exportPdf(tenant, projectId, { apercu: true, zones });
+    return { zones };
+  }
+
   @Get("projects/:projectId/price-requests")
   async list(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string) {
     return {
@@ -163,10 +213,18 @@ export class PriceRequestsController {
   @Post("projects/:projectId/price-requests/preview")
   @HttpCode(200)
   async preview(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(previewBody)) body: z.infer<typeof previewBody>) {
-    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null });
+    return this.requests.preview(tenant, projectId, { message: body.message ?? null, dueDate: body.dueDate ?? null, destinataire: body.destinataire ?? null, supplierId: body.supplierId ?? null, tutoie: body.tutoie ?? null });
+  }
+
+  /** Qui reçoit quoi, avant l'envoi : les lignes triées par métier de chaque négoce choisi. Rien n'est créé. */
+  @Post("projects/:projectId/price-requests/repartition")
+  @HttpCode(200)
+  async repartition(@Tenant() tenant: TenantContext, @Param("projectId") projectId: string, @Body(new ZodPipe(repartitionBody)) body: z.infer<typeof repartitionBody>) {
+    return this.requests.repartition(tenant, projectId, { supplierIds: body.supplierIds, ...(body.articles ? { articles: body.articles } : {}) });
   }
 
   @Post("projects/:projectId/price-requests")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(201)
   @Idempotent()
   async create(
@@ -174,11 +232,12 @@ export class PriceRequestsController {
     @Param("projectId") projectId: string,
     @Body(new ZodPipe(createBody)) body: z.infer<typeof createBody>,
   ) {
-    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}) };
+    const input = { supplierIds: body.supplierIds, message: body.message ?? null, dueDate: body.dueDate ?? null, ...(body.articles ? { articles: body.articles } : {}), ...(typeof body.tutoie === "boolean" ? { tutoie: body.tutoie } : {}), ...(body.lot ? { lot: body.lot } : {}) };
     return toDto(await this.requests.create(tenant, projectId, input));
   }
 
   @Post("price-requests/:id/recipients")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   async addSuppliers(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(addBody)) body: z.infer<typeof addBody>) {
     return toDto(await this.requests.addSuppliers(tenant, id, body.supplierIds));
@@ -193,7 +252,7 @@ export class PriceRequestsController {
   /** « Classé » (fournisseurs retenus facultatifs), ou réouverture. */
   @Patch("price-requests/:id/classification")
   async classify(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(classifyBody)) body: z.infer<typeof classifyBody>) {
-    return toDto(await this.requests.classify(tenant, id, body.classified, body.retainedSupplierIds ?? []));
+    return toDto(await this.requests.classify(tenant, id, body.classified, body.retainedSupplierIds ?? [], { retirerDesGroupes: body.retirerDesGroupes === true }));
   }
 
   @Patch("price-request-recipients/:id")
@@ -207,6 +266,7 @@ export class PriceRequestsController {
 
   /** §47.5 : « commandé tel quel » ou « modifié » (bon de commande collé), d'un tap. */
   @Post("price-requests/:id/order")
+  @UseGuards(IdentiteConfirmeeGuard)
   @HttpCode(200)
   async order(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(orderBody)) body: z.infer<typeof orderBody>) {
     return toDto(await this.requests.recordOrder(tenant, id, body));

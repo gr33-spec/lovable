@@ -42,7 +42,8 @@ describe("§49.4 : le façonnage est obligatoire avant le calcul", () => {
 
     const ok = await agent
       .post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`)
-      .send({ reponses: [{ question: key, valeur: "1", unite: "u" }] });
+      // Règle changée le 18 novembre 2026 : le rampant des bacs, que ce devis n'écrit pas, se répond aussi (plus de 5,5 m supposés).
+      .send({ reponses: [{ question: key, valeur: "1", unite: "u" }, { question: "engine:param:longueur_rampant", valeur: "5.5", unite: "m" }] });
     expect(ok.status).toBe(200);
     const text = JSON.stringify(ok.body);
     expect(text).toContain("Pattes fixes");

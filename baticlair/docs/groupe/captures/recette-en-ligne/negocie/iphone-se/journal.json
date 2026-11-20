@@ -1,0 +1,135 @@
+{
+  "base": "https://test.mobiiz.fr",
+  "appareil": "se",
+  "journal": [
+    {
+      "n": 1,
+      "etape": "Landing /couvreurs : chasseurs d'opportunités",
+      "statut": "ok",
+      "detail": "",
+      "capture": "01-landing-couvreurs-chasseurs-d-opportunites.jpg",
+      "ms": 2997
+    },
+    {
+      "n": 2,
+      "etape": "Artisan : inscription, SIRET, adresse dans le 22",
+      "statut": "ok",
+      "detail": "delivered+neg-artisan-se-mvno94jz@resend.dev",
+      "capture": "02-artisan-inscription-siret-adresse-dans-le-22.jpg",
+      "ms": 7466
+    },
+    {
+      "n": 3,
+      "etape": "Demande perso : choisir son négoce (accord coché d'office)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "03-demande-perso-choisir-son-negoce-accord-coche-d-.jpg",
+      "ms": 3898
+    },
+    {
+      "n": 4,
+      "etape": "Préviens ton négoce",
+      "statut": "ok",
+      "detail": "SMS prérempli",
+      "capture": "04-previens-ton-negoce.jpg",
+      "ms": 1966
+    },
+    {
+      "n": 5,
+      "etape": "E-mail réel au négoce (demande de prix)",
+      "statut": "ok",
+      "detail": "« Demande de devis · Toitures Négocié SE · chantier Devis du 2026-10-25 (Lannion) »",
+      "capture": "05-e-mail-reel-au-negoce-demande-de-prix.jpg",
+      "ms": 985
+    },
+    {
+      "n": 6,
+      "etape": "Besoin déclaré (ardoise, le crochet refusé)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "06-besoin-declare-ardoise-le-crochet-refuse.jpg",
+      "ms": 963
+    },
+    {
+      "n": 7,
+      "etape": "Regroupements : en cours",
+      "statut": "ok",
+      "detail": "",
+      "capture": "07-regroupements-en-cours.jpg",
+      "ms": 2072
+    },
+    {
+      "n": 8,
+      "etape": "Chasseur : code par e-mail",
+      "statut": "ok",
+      "detail": "",
+      "capture": "08-chasseur-code-par-e-mail.jpg",
+      "ms": 14044
+    },
+    {
+      "n": 9,
+      "etape": "Chasseur : tableau des regroupements",
+      "statut": "ok",
+      "detail": "N° 1 · En collecte · Ardoise 32×22 Espagne 1er choix",
+      "capture": "09-chasseur-tableau-des-regroupements.jpg",
+      "ms": 84
+    },
+    {
+      "n": 10,
+      "etape": "Chasseur : je prends en charge",
+      "statut": "ok",
+      "detail": "",
+      "capture": "10-chasseur-je-prends-en-charge.jpg",
+      "ms": 921
+    },
+    {
+      "n": 11,
+      "etape": "Chasseur : offre saisie (commission incluse)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "11-chasseur-offre-saisie-commission-incluse.jpg",
+      "ms": 165
+    },
+    {
+      "n": 12,
+      "etape": "Chasseur : offre envoyée à tous",
+      "statut": "ok",
+      "detail": "",
+      "capture": "12-chasseur-offre-envoyee-a-tous.jpg",
+      "ms": 967
+    },
+    {
+      "n": 13,
+      "etape": "Artisan : offre reçue (négoce masqué)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "13-artisan-offre-recue-negoce-masque.jpg",
+      "ms": 2203
+    },
+    {
+      "n": 14,
+      "etape": "Artisan : j'accepte, bon de commande",
+      "statut": "ok",
+      "detail": "« Ta commande groupée n° 1001 : Ardoise naturelle 32×22 Espagne 1er choix »",
+      "capture": "14-artisan-j-accepte-bon-de-commande.jpg",
+      "ms": 2560
+    },
+    {
+      "n": 15,
+      "etape": "Chasseur : acceptation vue, lot transmis au négoce",
+      "statut": "ok",
+      "detail": "« Commande groupée n° 1 : 1 800 pièces de Ardoise 32×22 Espagne 1er choix »",
+      "capture": "15-chasseur-acceptation-vue-lot-transmis-au-negoce.jpg",
+      "ms": 7319
+    },
+    {
+      "n": 16,
+      "etape": "Nettoyage : comptes supprimés",
+      "statut": "ok",
+      "detail": "",
+      "capture": "16-nettoyage-comptes-supprimes.jpg",
+      "ms": 5978
+    }
+  ],
+  "anomalies": []
+}

@@ -6,6 +6,7 @@ import { CorrectionsController } from "./http/corrections.controller.js";
 import { MemoryController } from "./http/memory.controller.js";
 import { PrismaCompanyMemoryStore, PrismaCorrectionJournalStore } from "./infrastructure/prisma-learning.js";
 import { TenancyModule } from "../tenancy/index.js";
+import { HabitudesService } from "./application/habitudes.service.js";
 
 /**
  * Apprentissage CONTRÔLÉ (PD-045) : mémoire de chaque entreprise et journal
@@ -19,12 +20,13 @@ import { TenancyModule } from "../tenancy/index.js";
     { provide: CORRECTION_JOURNAL_STORE, useFactory: (p: PrismaService) => new PrismaCorrectionJournalStore(p), inject: [PrismaService] },
     { provide: COMPANY_MEMORY_STORE, useFactory: (p: PrismaService) => new PrismaCompanyMemoryStore(p), inject: [PrismaService] },
     { provide: CorrectionJournal, useFactory: (s: CorrectionJournalStore) => new CorrectionJournal(s), inject: [CORRECTION_JOURNAL_STORE] },
+    { provide: HabitudesService, useFactory: (p: PrismaService) => new HabitudesService(p), inject: [PrismaService] },
     {
       provide: CompanyMemory,
       useFactory: (s: CompanyMemoryStore, j: CorrectionJournal) => new CompanyMemory(s, j),
       inject: [COMPANY_MEMORY_STORE, CorrectionJournal],
     },
   ],
-  exports: [CorrectionJournal, CompanyMemory],
+  exports: [CorrectionJournal, CompanyMemory, HabitudesService],
 })
 export class LearningModule {}

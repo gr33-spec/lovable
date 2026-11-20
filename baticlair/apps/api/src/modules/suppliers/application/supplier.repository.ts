@@ -6,10 +6,15 @@ export interface SupplierFields {
   email: string;
   phone: string | null;
   notes: string | null;
+  /** Spécialités déclarées par l'artisan (Greg, 1er novembre 2026) ; vide : non renseignées. */
+  specialites?: string[];
 }
 
 export interface SupplierRecord extends SupplierFields {
   id: string;
+  specialites: string[];
+  /** D'où viennent les spécialités affichées : l'artisan, le négoce inscrit lié (une seule source pour l'artisan), ou rien. */
+  specialitesSource: "artisan" | "negoce" | null;
   archived: boolean;
   createdAt: Date;
   updatedAt: Date;

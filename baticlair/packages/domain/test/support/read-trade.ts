@@ -1,4 +1,5 @@
-import { ecranDeLecture, type EngineAnswer, type PurchaseView, type Referential } from "../../src/index.js";
+import { ecranDeLecture, SUGGESTIONS_KEY, type EngineAnswer, type PurchaseView, type Referential } from "../../src/index.js";
+import { SUGGESTIONS_DU_BANC } from "./read-quote.js";
 import type { QuoteLineInput } from "./read-quote.js";
 import { lectureEnregistree } from "./lectures.js";
 
@@ -13,7 +14,7 @@ export function readTradeQuote(
   validated: ReadonlySet<string> = new Set(),
 ): PurchaseView {
   const lecture = lectureEnregistree(ref, bench, [], {}, { acceptDraft: true }, undefined, answers);
-  return ecranDeLecture({ ref, lecture, answers, options: { acceptDraft: true }, validated, interdits: false }).purchase;
+  return ecranDeLecture({ ref, lecture, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, ...answers }, options: { acceptDraft: true }, validated, interdits: false }).purchase;
 }
 
 /** Les couleurs de la liste (§46) : vert, orange, gris. */

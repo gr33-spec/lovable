@@ -237,7 +237,17 @@ export interface ParamDef {
   /** Sans valeur lue ni répondue : cette hypothèse, dite et modifiable. Sans hypothèse : une question. */
   default?: ParamDefault;
   /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */
-  choices?: { label: string; value: string }[];
+  /**
+   * `dit` : les mots de l'artisan pour ce bouton quand il répond au clavier ou à la voix (« je plie », « tout fait »).
+   * Ils vivent ICI, dans la fiche du métier : le lecteur des réponses est le même pour tous les métiers (Greg, 17 novembre
+   * 2026 : « le cœur de Mobiiz doit s'adapter à n'importe quel métier »).
+   */
+  choices?: { label: string; value: string; dit?: string[] }[];
+  /**
+   * Une donnée qui ne se DEMANDE JAMAIS à l'artisan (Greg, 17 novembre 2026 : « ne me demande jamais le pureau ») : elle
+   * se calcule (`default`) d'après d'autres données, qui se demandent, elles. Une question du modèle sur elle est écartée.
+   */
+  neverAsk?: true;
   /**
    * Valeur approchée faute de table officielle (la région ardoise prise égale à la zone climatique
    * du département) : dite « estimation » à l'artisan, avec cette raison.
@@ -265,8 +275,15 @@ export interface ParamDef {
   fromWorks?: { value: string; workItems: string[] }[];
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
-  /** Jamais prêtée par un autre ouvrage : « tu façonnes ? » se demande pièce par pièce (§48.6). */
+  /** Jamais prêtée par un autre ouvrage : ce que le devis écrit pour une pièce ne vaut pas pour sa voisine (§48.6). */
   ownOnly?: true;
+  /**
+   * UNE SEULE RÉPONSE POUR TOUT LE DEVIS (Greg, 17 novembre 2026 : « je plie : une seule réponse pour tout le devis, plus
+   * jamais pièce par pièce »). Les ouvrages dont la donnée porte le même groupe partagent UNE question (celle du groupe,
+   * avec ses mots) et sa réponse ; l'artisan peut ensuite changer ce choix pour une pièce (la clé de la pièce passe devant).
+   * Écrit dans la fiche du métier : le moteur ne connaît aucun groupe.
+   */
+  groupe?: { id: string; question: string; hint?: string };
 }
 
 /**
@@ -360,6 +377,12 @@ export interface Slot {
    */
   indissociable?: true;
   /**
+   * Étape « Suggestions » (Greg, 17 novembre 2026, points 13 à 17) : un oubli probable. Quand un autre article de
+   * l'ouvrage est écrit et que celui-ci ne l'est pas, il est PROPOSÉ une fois, dans une carte à cases, avec ces mots ;
+   * coché, il vaut un article écrit (ses questions se posent alors) ; non coché, il n'existe pas. Jamais ajouté d'office.
+   */
+  suggested?: { label: string };
+  /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
    */
@@ -410,6 +433,11 @@ export interface NeedRule extends Provenance {
    * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).
    */
   precision?: string;
+  /**
+   * L'unité de vente d'une pièce dont la longueur est une donnée du chantier (Greg, 18 novembre 2026 : « 2 tubes de 3 m »,
+   * jamais « 2 pièces ») : deux gabarits, au singulier et au pluriel (« tube de {longueur_tube|m} »).
+   */
+  pieceUnit?: { one: string; many: string };
   /** Comment la quantité se compte, dit seulement quand le devis écrit une autre quantité (« pour 10 ml, un tous les 50 cm »). */
   basis?: string;
   /**

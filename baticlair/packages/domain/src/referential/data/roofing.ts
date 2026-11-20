@@ -447,9 +447,52 @@ const RAMPANT_PARAM: ParamDef = {
   ],
 };
 /**
+ * Le rampant d'une couverture en bacs de zinc (joint debout, tasseaux) : un bac va de l'égout au faîtage, sa longueur EST
+ * celle du rampant (« Bacs façonnés à la longueur du rampant », §7). Retour de Greg du 18 novembre 2026 (D-2026-024) : le
+ * devis disait « bacs de 4 m » et la longueur du rampant était demandée quand même. Les mots du devis sont ici.
+ */
+// Règle changée (18 novembre 2026) : avant, 5,5 m supposés en silence quand le devis ne disait rien. Pour des bacs, la
+// longueur commandée EST le rampant : une supposition donne une mauvaise commande. Écrite au devis, elle est prise ; sinon
+// elle se demande, en mètres (plus de boutons « jusqu'à 5,5 m », qui ne disent pas une longueur de bac).
+const RAMPANT_BACS_PARAM: ParamDef = {
+  key: RAMPANT_PARAM.key,
+  label: RAMPANT_PARAM.label,
+  unit: "m",
+  kind: "site_data",
+  question: "Longueur des bacs (le rampant, de l'égout au faîtage) ?",
+  textLabels: ["rampant", "longueur des bacs", "longueur de bac", "longueur bac", "bac"],
+};
+/** Réponses du fondateur du 2026-11-18 (couverture zinc à tasseaux). */
+const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
+const FOUNDER_REPLY_TASSEAUX = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur)" } as const;
+/**
+ * Zinc à tasseaux : la largeur de la bobine. Greg, 18 novembre 2026 : « En général : bobine de 65 cm de largeur […] Parfois
+ * les bacs sont faits dans des bobines de 50 cm de large ». La valeur courante est dite (hypothèse modifiable), jamais
+ * demandée ; écrite au devis, elle est prise.
+ */
+const LARGEUR_BOBINE_TASSEAUX_PARAM: ParamDef = {
+  key: "largeur_bobine_tasseaux",
+  label: "Largeur de la bobine",
+  unit: "mm",
+  kind: "artisan_preference",
+  question: "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+  // Recette en ligne du 19 novembre 2026 : le modèle posait cette question et la couverture restait en attente. Greg : « en
+  // général 65 cm » : la valeur courante est dite et se change dans la liste, elle ne se demande jamais.
+  neverAsk: true,
+  textLabels: ["largeur de bobine", "largeur bobine", "bobine", "largeur developpee", "developpe des bacs"],
+  default: { value: "650", source: FR_REPLY_TASSEAUX, verification: FOUNDER_REPLY_TASSEAUX, version: 1, note: "bobine de 65 cm en général ; parfois 50 cm" },
+  choices: [
+    { label: "Bobine de 650 mm", value: "650" },
+    { label: "Bobine de 500 mm", value: "500" },
+  ],
+};
+/**
  * Métal façonné (§40.2, §41.2) : « tu façonnes toi-même ou tu commandes façonné ? ». La réponse change
  * tout : bobines au mètre linéaire d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
  */
+/** Les mots de l'artisan pour le façonnage (Greg, 16 novembre 2026 : « J'achète tout fait », « ou je pli »). */
+const DIT_JE_FACONNE = ["pli", "plie", "plis", "plies", "plier", "pliage", "je plie", "je le plie", "je les plie", "je la plie", "moi meme", "je fais", "je le fais", "je les fais", "je la fais", "je faconne", "je le faconne", "je les faconne", "je la faconne"];
+const DIT_JE_COMMANDE = ["tout fait", "tout faits", "toute faite", "toutes faites", "tout pret", "tout prets", "toute prete", "toutes pretes", "achete", "deja faconne", "deja faconnes", "deja faconnee", "deja faconnees", "commande", "commandes", "commandee", "commandees"];
 const FACONNAGE_PARAM: ParamDef = {
   key: "faconnage",
   // §48.6 : une question par ouvrage, jamais une réponse prêtée d'une pièce à l'autre.
@@ -460,8 +503,8 @@ const FACONNAGE_PARAM: ParamDef = {
   question: "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
   hint: "Bobine de zinc au mètre linéaire si tu façonnes ; bacs à la longueur du rampant sinon.",
   choices: [
-    { label: "Je façonne (bobines)", value: "1" },
-    { label: "Je commande façonné (bacs)", value: "2" },
+    { label: "Je façonne (bobines)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné (bacs)", value: "2", dit: DIT_JE_COMMANDE },
   ],
   display: { "1": "je façonne", "2": "commandé façonné" },
 };
@@ -611,11 +654,19 @@ const QUALITE_ARDOISE_PARAM: ParamDef = {
 };
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
+  // Greg, 17 novembre 2026 : « une seule réponse pour tout le devis, plus jamais pièce par pièce ». S'il plie : des
+  // feuilles, comptées d'après les développés et les longueurs. S'il achète tout fait : des longueurs de pièces façonnées.
+  // Il peut ensuite changer ce choix pour une pièce.
+  groupe: {
+    id: "pieces-pliees",
+    question: "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+    hint: "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés.",
+  },
   question: "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
   hint: "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
   choices: [
-    { label: "Je façonne (feuilles ou bobineau)", value: "1" },
-    { label: "Je commande façonné", value: "2" },
+    { label: "Je façonne (feuilles ou bobineau)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné", value: "2", dit: DIT_JE_COMMANDE },
   ],
   // « Façonnage et pose des bandes de rive » (D-2026-020), « comprend le pliage » (D-2026-018) : l'artisan les façonne
   // lui-même. « Bandes de ventilation perforées pliées en Z » (D-2026-018) : la pièce s'achète déjà pliée. §48.6 : une
@@ -1023,8 +1074,8 @@ const FACONNAGE_CUIVRE_PARAM: ParamDef = {
   ...FACONNAGE_BANDES_PARAM,
   question: "Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?",
   choices: [
-    { label: "Je façonne (feuilles ou bobine)", value: "1" },
-    { label: "Je commande façonné", value: "2" },
+    { label: "Je façonne (feuilles ou bobine)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné", value: "2", dit: DIT_JE_COMMANDE },
   ],
   hint: "Je façonne : feuilles de cuivre 2 × 1 m, bobine au mètre au-delà de 6 ml. Commandées façonnées : longueurs de 2 m.",
 };
@@ -1280,6 +1331,23 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
     },
     {
+      id: "fondateur-reponses-2026-11-18",
+      kind: "trade_practice",
+      title: "Réponses du fondateur (couvreur) : couverture zinc à tasseaux",
+      documentRef: "Message du fondateur dans la conversation de travail, 2026-11-18, après son devis D-2026-024",
+      retrievedAt: "2026-11-18",
+      note: "« En général : bobine de 65 cm de largeur, hauteur de tasseau 50 mm, entraxe 62, les pattes sont souvent faites avec des chutes de zinc (4 cm par 15 cm environ). Parfois les bacs sont faits dans des bobines de 50 cm de large. »",
+    },
+    {
+      id: "vmzinc-tasseaux",
+      kind: "manufacturer",
+      title: "VMZINC, « Couverture à tasseaux », descriptif type (DTU 40.41)",
+      publisher: "VMZINC",
+      url: "https://www.vmzinc.com/getmedia/53fd3606-92a5-440e-9110-1377f96be36e/couv-tasseau-14-03-2022.doc",
+      retrievedAt: "2026-11-18",
+      note: "Largeur développée 650 mm : entraxe des tasseaux 630 mm (tasseaux de 40) ou 620 mm (tasseaux de 50) ; 500 mm : 480 ou 470 mm, imposée en région 3 site exposé et en région 4. Tasseaux de 40 mm si la projection horizontale du rampant est inférieure à 8 m, de 50 mm sinon. Reliefs latéraux 35 / 45 mm. Pattes à tasseaux en zinc de 40 mm de large, tous les 50 cm. Couvre-joints en éléments de 1 m, recouvrement de 50 mm au moins. Pointes Ø 3,4 ou vis Ø 4, longueur 70 mm (tasseaux de 40) ou 80 mm (tasseaux de 50).",
+    },
+    {
       id: "fondateur-reponses-2026-10-05",
       kind: "trade_practice",
       title: "Réponses du fondateur (couvreur) aux partiels du référentiel",
@@ -1351,6 +1419,11 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
+    // Zinc à tasseaux (Greg, 18 novembre 2026 ; VMZINC) : la ligne du devis est une SURFACE ; ce qui se commande, c'est de la
+    // bobine au mètre linéaire, et, quand le devis les écrit, les tasseaux de bois et les couvre-joints.
+    { code: "batten_seam", label: "Couverture zinc à tasseaux", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["zinc a tasseaux", "couverture a tasseaux", "zinc sur tasseaux", "a tasseaux", "sur tasseaux"] },
+    { code: "zinc_batten", label: "Tasseau bois pour couverture zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["tasseau trapezoidal", "tasseaux trapezoidaux", "tasseau zinc", "tasseaux bois"] },
+    { code: "batten_cap", label: "Couvre-joint zinc de tasseau", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["couvre-joint de tasseau", "couvre-joints de tasseaux", "couvre joint tasseau"] },
     { code: "zinc_coil", label: "Bobine de zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
     { code: "zinc_panel", label: "Bac joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bac joint debout", "bac zinc", "bacs zinc"] },
     // Bandes zinc au ml (§7, §36.4) : solin, rive, égout, ventilation, couvre-joint. Jamais commandées en « ml de zinc » nu.
@@ -1849,8 +1922,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bobine-cuivre", "copper_coil", "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)", "Cuivre en bobine", {
       sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
     }),
-    // §49.7 : un mortier d'étanchéité spécial solin, prêt à gâcher, en sac de 25 kg (jamais « ciment + sable »).
-    generic("mortier-solin-25", "solin_mortar", "Mortier d'étanchéité pour solin, prêt à gâcher, sac de 25 kg", "Mortier d'étanchéité pour solin, sac 25 kg", {
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « Ne transforme pas mes mots : "mortier de ciment" est devenu "mortier
+    // d'étanchéité" ») : le mortier garde le nom que le devis lui donne ; le code ne compte que les sacs de 25 kg.
+    // Avant (§49.7) : « Mortier d'étanchéité pour solin, prêt à gâcher ».
+    generic("mortier-solin-25", "solin_mortar", "Mortier pour solin", "Mortier pour solin", {
       sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "« sac de 25 kg » (§49.7)."), primary: true }],
     }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
@@ -1921,6 +1996,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }), primary: true }],
       }),
     ),
+    generic("tasseau-zinc-50", "zinc_batten", "Tasseau bois trapézoïdal de 50 mm pour couverture zinc, au mètre linéaire", "Tasseaux bois trapézoïdaux de 50 mm", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
+    generic("couvre-joint-tasseau-zinc", "batten_cap", "Couvre-joint zinc pour tasseau de 50 mm, au mètre linéaire (aspect et épaisseur du chantier)", "Couvre-joints zinc de tasseaux", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
     generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc", {
       // §50.7 : « 31 bacs », la longueur dans le nom (« longueur 7,15 m »).
       sellingUnits: [{ id: "bac", label: { one: "bac", many: "bacs" }, contains: ONE_PIECE, primary: true }],
@@ -2147,9 +2228,12 @@ export const ROOFING_REFERENTIAL: Referential = {
           question: "À quel pureau posez-vous ces ardoises ?",
           hint: "Il change le nombre d'ardoises, de crochets et de liteaux.",
           textLabels: ["pureau"],
-          // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur). Des crochets
-          // écrits au devis disent le recouvrement de l'artisan : crochet − 5 mm de jeu de tête (règle du fondateur, confirmée
-          // le 2026-11-19 : manuel CAP, ministère de la Culture, Cupa ; fiche couverture), jamais contredits (D-2026-020).
+          // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Ne me demande jamais le pureau : demande seulement le format de
+          // l'ardoise et la taille des crochets. » Le pureau se CALCULE toujours : (hauteur de l'ardoise − recouvrement) ÷ 2.
+          // Des crochets écrits au devis disent le recouvrement de l'artisan : crochet − 5 mm de jeu de tête (règle du
+          // fondateur, confirmée le 2026-11-19 : manuel CAP, ministère de la Culture, Cupa ; fiche couverture), jamais
+          // contredits (D-2026-020) ; sans crochets écrits, le recouvrement vient du tableau du NF DTU 40.11 (fiche).
+          neverAsk: true,
           default: {
             formula: "(ardoise.longueur - recouvrement) / 2",
             whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.jeu_tete_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 5 mm, jeu de tête)" },
@@ -2528,7 +2612,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          precision: "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_faitage|ml} de faîtage, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2603,7 +2687,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          precision: "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_noue|ml} de noue, développé {developpe_noue|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2770,7 +2854,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" }, formOf: "bande" },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
         { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier pour solin, en sacs de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
@@ -2812,9 +2896,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
-          precision: "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_bande|ml} de bande, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
-          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm, pour {piece_min}",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
@@ -2854,7 +2938,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "kg",
           core: false,
           exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
           precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
@@ -2879,7 +2962,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", usual: { text: "Bande porte-solin, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "porte_solin" },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier pour solin, en sacs de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
       ],
       constants: {
@@ -2912,7 +2995,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          precision: "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_bande|ml} de porte-solin, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2928,7 +3011,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "kg",
           core: false,
           exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
           precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
@@ -3316,12 +3398,89 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
     },
     {
+      // Greg, 18 novembre 2026 (devis D-2026-024) : « Tu dois TOUT connaître sur la couverture ». Le zinc à tasseaux manquait :
+      // 32 m² de couverture sortaient sans aucune fourniture. Ses chiffres (bobine de 650, tasseaux de 50, entraxe 62) sont
+      // ceux du descriptif VMZINC. Les pattes sont faites dans les chutes : aucune ligne à commander.
+      id: "couverture-zinc-tasseaux",
+      trade: "roofing",
+      section: "principal",
+      label: "Couverture zinc à tasseaux",
+      triggers: ["batten_seam"],
+      params: [SURFACE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, LARGEUR_BOBINE_TASSEAUX_PARAM],
+      slots: [
+        { key: "couverture", family: "batten_seam", label: "Couverture zinc à tasseaux", measureOnly: true },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.", source: FR_REPLY_TASSEAUX, productId: "bobine-zinc-standard" }, formOf: "couverture" },
+        { key: "tasseau", family: "zinc_batten", label: "Tasseaux bois", keywords: ["tasseau", "tasseaux"], usual: { text: "Tasseaux de bois trapézoïdaux de 50 mm, un rang entre deux bacs.", source: FR_REPLY_TASSEAUX, productId: "tasseau-zinc-50" } },
+        { key: "couvre_joint", family: "batten_cap", label: "Couvre-joints zinc", keywords: ["couvre-joint", "couvre-joints", "couvre joint", "couvre joints"], usual: { text: "Un couvre-joint zinc sur chaque rang de tasseaux, en éléments de 1 m (VMZINC).", source: "vmzinc-tasseaux", productId: "couvre-joint-tasseau-zinc" } },
+      ],
+      constants: {
+        largeur_etroite: condition("500", "mm", "vmzinc-tasseaux", FOUNDER_REPLY_TASSEAUX, "Bobine de 500 : « parfois » (Greg) ; imposée en région 3 site exposé et en région 4 (VMZINC)."),
+        entraxe_650: condition("620", "mm", FR_REPLY_TASSEAUX, FOUNDER_REPLY_TASSEAUX, "« entraxe 62 » (Greg) ; VMZINC : 620 mm pour une bobine de 650 et des tasseaux de 50."),
+        entraxe_500: condition("470", "mm", "vmzinc-tasseaux", FOUNDER_REPLY_TASSEAUX, "VMZINC : 470 mm pour une bobine de 500 et des tasseaux de 50."),
+        seuil_070: ZINC_PLAT_CONSTANTS.seuil_070,
+        surlongueur_bac: condition("0.15", "m", FR_REPLY, FOUNDER_REPLY, "Comme le joint debout : « 15 cm par bac (10 en égout, 5 en faîtage) » (réponse du fondateur, 2026-10-04)."),
+      },
+      derived: [
+        { key: "entraxe_tasseaux", label: "Entraxe des tasseaux", unit: "mm", formula: "si(largeur_bobine_tasseaux <= regle.largeur_etroite, regle.entraxe_500, regle.entraxe_650)", shown: true, source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
+        { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "nb_bacs", label: "Nombre de bacs", unit: "u", formula: "arrondi_sup(largeur_pan / entraxe_tasseaux)", source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
+        { key: "longueur_bac", label: "Longueur de bobine par bac", unit: "m", formula: "longueur_rampant + regle.surlongueur_bac", source: FR_REPLY, verification: FOUNDER_REPLY, version: 1 },
+        // Un rang de tasseaux de chaque côté de chaque bac : un de plus que de bacs. À CONFIRMER par le fondateur (finition des
+        // rives) : tant que ce n'est pas fait, tasseaux et couvre-joints restent « à chiffrer », sans quantité.
+        { key: "nb_rangs", label: "Rangs de tasseaux", unit: "u", formula: "nb_bacs + 1", source: "definition", verification: DRAFT, version: 1 },
+      ],
+      needs: [
+        {
+          id: "zinc-bobine-tasseaux",
+          slot: "bobine",
+          // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ entraxe des tasseaux) × (rampant + 15 cm).
+          // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul (comme le joint debout).
+          formula: "nb_bacs * longueur_bac * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          unit: "m",
+          core: true,
+          exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur ; hors couvre-joints, bandes d'égout, de rive et de faîtage, comptés à part. Les pattes à tasseaux se font dans les chutes.",
+          precision: "{nb_bacs} bacs × {longueur_bac|m}",
+          designation: "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine_tasseaux|mm}",
+          precisionRequires: ["aspect_zinc"],
+          source: FR_REPLY_TASSEAUX,
+          verification: FOUNDER_REPLY_TASSEAUX,
+          version: 1,
+        },
+        {
+          id: "tasseaux-zinc",
+          slot: "tasseau",
+          formula: "nb_rangs * longueur_rampant",
+          unit: "m",
+          core: true,
+          exclusions: "Un rang de tasseaux de chaque côté de chaque bac, sur la longueur du rampant. Pointes ou vis de 80 mm à part.",
+          precision: "{nb_rangs} rangs × {longueur_rampant|m}",
+          source: "definition",
+          verification: DRAFT,
+          version: 1,
+        },
+        {
+          id: "couvre-joints-tasseaux",
+          slot: "couvre_joint",
+          formula: "nb_rangs * longueur_rampant",
+          unit: "m",
+          core: true,
+          exclusions: "Un couvre-joint par rang de tasseaux ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
+          precision: "{nb_rangs} rangs × {longueur_rampant|m}",
+          designation: "Couvre-joints {aspect_zinc} {epaisseur_zinc} mm pour tasseaux de 50 mm",
+          precisionRequires: ["aspect_zinc"],
+          source: "definition",
+          verification: DRAFT,
+          version: 1,
+        },
+      ],
+    },
+    {
       id: "couverture-zinc-joint-debout",
       trade: "roofing",
       section: "principal",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
-      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
+      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
         { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine largeur 650 mm (naturel ou prépatiné selon le devis), commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" }, formOf: "couverture" },
@@ -3679,14 +3838,18 @@ export const ROOFING_REFERENTIAL: Referential = {
           ],
         },
         ZONE_PARAM,
+        NB_ANGLES_PARAM,
         DEVELOPPE_GOUTTIERE_PARAM,
         FIXATION_CROCHET_PARAM,
         DIAMETRE_DESCENTE_PARAM,
       ],
       slots: [
         { key: "profil", family: "gutter", label: "Gouttière", usual: { text: "Longueurs de 4 m ; le profil (demi-ronde de 25, de 33…) suit le devis.", source: F, productId: "gouttiere-standard-4m" } },
-        { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" } },
-        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true },
+        { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" }, suggested: { label: "Crochets de gouttière" } },
+        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true, suggested: { label: "Naissances de gouttière" } },
+        // Greg, 17 novembre 2026 (point 13) : talons et angles, des lignes à part, proposées seulement à l'étape « Suggestions ».
+        { key: "talon", family: "gutter_end", label: "Talons", keywords: ["talon"], usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" }, suggested: { label: "Talons de gouttière (si tu ne les fabriques pas)" } },
+        { key: "angle", family: "gutter_angle", label: "Angles", keywords: ["angle"], usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" }, suggested: { label: "Angles de gouttière (si tu ne les fabriques pas)" } },
         // §49.1 point 4 : « étain et décapant si du zinc à souder est écrit » (« réalisation des soudures » à la pose).
         { key: "etain", family: "solder", label: "Étain à souder", citedBy: ["soudure", "soudures", "souder"], usual: { text: "Baguettes d'étain 33 % de 250 g (§25.3).", source: F, productId: "baguette-etain-250" } },
         { key: "decapant", family: "flux", label: "Décapant zinc", usual: { text: "Décapant pour zinc, flacon de 250 ml (§25.3).", source: F, productId: "decapant-zinc-250" } },
@@ -3697,6 +3860,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         longueur_barre_gouttiere: condition("4", "m", F, FOUNDER_DOC, "Gouttière zinc en longueurs de 4 m (§25.2)."),
         flacons_decapant: rule("1", "u", F, todo("§25.3 : 1 flacon de 250 ml pour ≈ 40 ml de soudure, à valider (§25.7)."), "décapant {v} flacon pour les soudures"),
         ...CROCHETS_GOUTTIERE,
+        talons_par_ligne: condition("2", "u", F, FOUNDER_DOC, "« 2 talons par ligne droite » (§15, « même logique que le zinc »)."),
       },
       derived: [
         {
@@ -3751,6 +3915,33 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["developpe_gouttiere", "diametre_descente"],
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "talons",
+          slot: "talon",
+          formula: "regle.talons_par_ligne",
+          unit: "u",
+          core: true,
+          exclusions: "Deux talons pour une ligne droite (une ligne finissant en angle n'en a qu'un : à corriger d'un toucher).",
+          designation: "Talons de gouttière {devis} dév. {developpe_gouttiere|cm#}",
+          precisionRequires: ["developpe_gouttiere"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "angles",
+          slot: "angle",
+          when: "nb_angles > 0",
+          formula: "nb_angles",
+          unit: "u",
+          core: true,
+          exclusions: "Angles extérieurs à 90° ; un angle intérieur se corrige d'un toucher.",
+          designation: "Angles de gouttière {devis} dév. {developpe_gouttiere|cm#}",
+          precisionRequires: ["developpe_gouttiere"],
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -3840,9 +4031,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "profil", family: "gutter_plastic", label: "Gouttière", usual: { text: "Longueurs de 4 m (§15).", source: F, productId: "gouttiere-pvc-alu-4m" } },
         { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer), plus un en bout (§15).", source: F, productId: "crochet-gouttiere-standard" } },
         { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" } },
-        { key: "talon", family: "gutter_end", label: "Talons", usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" } },
-        { key: "angle", family: "gutter_angle", label: "Angles", usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" } },
-        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true },
+        { key: "talon", family: "gutter_end", label: "Talons", usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" }, suggested: { label: "Talons de gouttière" } },
+        { key: "angle", family: "gutter_angle", label: "Angles", usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" }, suggested: { label: "Angles de gouttière" } },
+        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true, suggested: { label: "Naissances de gouttière" } },
         { key: "dilatation", family: "gutter_expansion", label: "Joints de dilatation", usual: { text: "Un joint de dilatation tous les 12 m de ligne droite en PVC (§15).", source: F, productId: "dilatation-gouttiere" } },
       ],
       constants: {
@@ -4025,7 +4216,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "tube",
           formula: "nb_descentes * arrondi_sup(hauteur_descente / longueur_tube)",
           unit: "u",
-          precision: "{nb_descentes} descentes × {hauteur_descente|m}",
+          precision: "{nb_descentes|pluriel:descente:descentes} × {hauteur_descente|m}",
+          pieceUnit: { one: "tube de {longueur_tube|m}", many: "tubes de {longueur_tube|m}" },
           designation: "Tubes de descente {devis} Ø{diametre_descente|mm#}, longueur {longueur_tube|m}",
           precisionRequires: ["diametre_descente"],
           core: true,

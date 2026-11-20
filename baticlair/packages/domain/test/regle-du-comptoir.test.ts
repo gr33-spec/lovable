@@ -89,8 +89,8 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:developpe",
       "param:developpe_gouttiere",
       "param:diametre_descente",
-      "param:faconnage@bandes-zinc",
       "param:faconnage@couverture-zinc-joint-debout",
+      "param:faconnage@pieces-pliees",
       "param:fixation_crochet",
       "param:nb_descentes",
     ]);
@@ -106,6 +106,8 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:developpe_gouttiere": u("33", "cm"),
       "param:fixation_crochet": u("2"),
       "param:diametre_descente": u("80", "mm"),
+      // La fiche complète compte aussi les angles de la gouttière (étape « Suggestions », 18 novembre 2026) : aucun ici.
+      "param:nb_angles": u("0"),
     });
     expect(v.questions).toEqual([]);
     // §49.1 : dans l'ordre du devis ; les consommables (pointes) ferment la liste.
@@ -114,10 +116,11 @@ describe("la règle du comptoir (§47.8)", () => {
       "Pattes coulissantes joint debout",
       "Pattes fixes joint debout",
       "Voliges sapin 18 mm",
-      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour bande zinc d'égout", // §48.6 et §50.7 (la pièce dite) : feuilles 2 × 1 m, jamais de bobineau pour une bande
+      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", // §48.6 : feuilles 2 × 1 m, jamais de bobineau pour une bande ; le nom ne dit plus l'usage (Greg, 17 novembre 2026)
       "Gouttière zinc demi-ronde dév. 33",
       "Crochets de gouttière bandeau dév. 33",
       "Naissances dév. 33 Ø80",
+      "Talons de gouttière dév. 33", // la fiche complète (tous les articles) : deux talons par ligne droite (§15) ; pour un artisan, proposés à l'étape « Suggestions »
       "Pointes annelées 2,5 × 28 mm",
     ]);
     for (const b of v.toBuy) expect(supplierTest(b.label, b.order?.unit ?? null)).toBeNull();
@@ -143,7 +146,7 @@ describe("la règle du comptoir (§47.8)", () => {
   });
 
   it("l'aspect du zinc : lu au devis (quartz, anthra), naturel quand rien n'est dit (hypothèse), demandé quand le devis dit « prépatiné » sans la teinte", () => {
-    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1") });
+    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1"), "param:longueur_rampant": { value: "5.5", unit: "m" } });
     expect(zinc("Couverture zinc joint debout anthra-zinc").toBuy[0]!.label).toBe("Bobine Anthra-Zinc 0,65 mm, largeur 500 mm");
     const nature = zinc("Couverture zinc joint debout");
     expect(nature.toBuy[0]!.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");

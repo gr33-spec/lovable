@@ -44,7 +44,7 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises fibres-ciment 40×24 | — | Teinte à préciser |
+| Ardoises fibres-ciment 40×24 | 2 336 pièces | Teinte à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 

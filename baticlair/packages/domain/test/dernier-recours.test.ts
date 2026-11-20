@@ -49,7 +49,7 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
   it("je façonne, 6 ml au plus : des feuilles de zinc 2 × 1 m, jamais du zinc au kg (§25.2) : 5,5 m × 0,25 m / 2 m² = 0,69 → 1 feuille", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250", longueur_bande: "5" }));
     expect(order(r, "feuilles-bandes")).toBe(1);
-    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes zinc");
+    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm");
     expect(r.needs.some((n) => n.purchase?.order.unit.many === "kg")).toBe(false);
   });
 

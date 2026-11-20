@@ -21,7 +21,13 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
   (littoral à 5 km, îles, rives d'estuaire près de l'embouchure) : une hypothèse dite et modifiable, jamais une question.
   Sans commune connue : normale.
 
-## roofing-2026.11.20-59 — Tuile canal : 3 % de casse et de coupe (jamais 0 %)
+## roofing-2026.11.20-59 — Base couverture : la fiche, le DTU, la zone par commune (mission du fondateur, 19-20 novembre 2026)
+
+Travail de la branche `claude/amazing-einstein-jhz8k4`, fusionné sur la branche de test. Chaque constante est lue dans
+`referentiels/couverture/fiche-couverture.json` (constantes et tables prouvées par des chiffres confirmés). Les étapes,
+de la plus récente à la plus ancienne :
+
+### Étape — Tuile canal : 3 % de casse et de coupe (jamais 0 %)
 
 - **§5 / §35.3 Tuile canal** : marge de 3 %, lue dans la fiche (`tuile.perte_canal`). Avant : aucune (0 %). La casse à la
   pose d'une tuile terre cuite n'est jamais nulle (1 %, fiches environnementales collectives CTMNC 2014, 2020, 2022), les
@@ -30,7 +36,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
 - Recherche des pertes (`recherche/pertes.md`) : aucun autre pourcentage n'est confirmé par deux sources ; les marges en
   place (ardoise 5 %, tuile 3 %, liteaux 5 %, volige 5 %, bande zinc 5 %) restent celles du référentiel du fondateur.
 
-## roofing-2026.11.19-58 (suite) — Zone du chantier calculée par commune
+### Étape — Zone du chantier calculée par commune
 
 - **§26 / §32.1 Zone climatique** : lue PAR COMMUNE dans la carte des régions (`carte-regions.json`, `zones_communes`,
   34 734 communes : distance à la côte au 1:10 M et trait de côte Histolitt, altitude IGN de la mairie, NF DTU 40.11 et
@@ -41,7 +47,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
   l'Espagne »). Grenoble, 200 m² de 30×22 : 8 547 ardoises, crochets de 9 cm (avant 8 925, 10 cm).
 - Le crochet inox 2,7 mm reste d'office par département littoral (NF DTU 40.11 : Ø 2,4 interdit dans le 22, le 29 et le 56).
 
-## roofing-2026.11.19-58 — Écran sous toiture : surface + 10 % au-dessus de 30 %, + 20 % en dessous
+### Étape — Écran sous toiture : surface + 10 % au-dessus de 30 %, + 20 % en dessous
 
 - **§6 / §28.4 Écran** : m² d'écran = surface × 1,10 au-dessus de 30 % de pente (règle du fondateur, confirmée),
   × 1,20 à 30 % et moins (lés recouverts de 20 cm, abouts et faîtage : NF DTU 40.29 via Edilians, Siplast, Dörken).
@@ -53,7 +59,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
   test du fournisseur.
 - Exemples : 120 m² à 45 % → 132 m², 2 rouleaux (avant 128,57 m², 2 rouleaux) ; à 30 % → 144 m², 2 rouleaux.
 
-## roofing-2026.11.19-57 — Tubes de descente en longueurs de 2 m par défaut
+### Étape — Tubes de descente en longueurs de 2 m par défaut
 
 - **§7 / §15 Tubes de descente** : longueurs de 2 m par défaut, lues dans la fiche (`evacuation.longueur_tube_descente`).
   Règle du fondateur, et la recherche confirme que le 2 m existe en zinc (VMZinc, Rheinzink, NedZink ; standard en
@@ -62,7 +68,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
 - Aide de la question du diamètre : Ø 100 jusqu'à 113 m² de toit (avant 130), Ø 120 jusqu'à 160 m² (NF DTU 40.5 via
   VMZinc, fiche couverture).
 
-## roofing-2026.11.19-56 — Faîtières et arêtiers sans modèle : 3 au ml
+### Étape — Faîtières et arêtiers sans modèle : 3 au ml
 
 - **§5 Faîtière et arêtier courants (40 à 42 cm), modèle non écrit au devis** : 3 au ml, lu dans la fiche
   (`faitage.faitieres_par_ml_sans_modele`). Recherche : 3 au ml pour une faîtière 1/2 ronde ou angulaire sans emboîtement
@@ -70,7 +76,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
   court. Avant : 2,9 au ml (« ml ÷ 0,35 »).
 - Exemples : D-2026-015, faîtières refusées → 30 (avant 29) ; arêtier de 12 m → 36 arêtières et 36 crochets (avant 35).
 
-## roofing-2026.11.19-55 — Tuile à pureau variable : le rampant en rangs entiers
+### Étape — Tuile à pureau variable : le rampant en rangs entiers
 
 - **§5 Pureau par défaut d'une tuile à pureau variable** (le devis ne le dit pas) : le rampant est partagé en un nombre
   ENTIER de rangs au pureau le plus long admis par le fabricant : pureau = max(pureau mini, rampant ÷ arrondi au-dessus
@@ -80,7 +86,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
 - Exemple : HP 10, rampant 5,5 m → 15 rangs, pureau 36,7 cm (avant 31 cm en zone 3). 120 m² : 1 258 tuiles (avant
   1 488) ; 24 m de rives : 66 tuiles de rive (avant 78).
 
-## roofing-2026.11.19-54 — Ardoise : recouvrement du NF DTU 40.11, lu dans la fiche couverture
+### Étape — Ardoise : recouvrement du NF DTU 40.11, lu dans la fiche couverture
 
 - **§3 Recouvrement de l'ardoise au crochet** : le tableau du NF DTU 40.11 (2020, annexe B), relu chez Cupa et Rathscheck
   (132 valeurs identiques), par pente et région, une table par bande de rampant (≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m ;
@@ -97,7 +103,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
   bandes ; avant : 25°). En dessous, l'ouvrage n'est pas calculé et la raison est dite.
 - Rampant : un choix « Plus de 11 m » est ajouté.
 
-## roofing-2026.11.19-53 — Faîtage et arêtier zinc façonnés en longueurs de 2 m (fiche couverture)
+### Étape — Faîtage et arêtier zinc façonnés en longueurs de 2 m (fiche couverture)
 
 - **§3 / §7 Faîtage et arêtier zinc commandés façonnés** : longueurs de 2 m, lues dans la fiche
   (`zinguerie.longueur_faitage_aretier_faconne`). Règle du fondateur (« zinc façonné en 2 m »), confirmée par
@@ -105,7 +111,7 @@ Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`
   Avant : longueurs de 3 m. Exemple : 9 ml d'arêtier zinc → 5 longueurs de 2 m (avant 4 longueurs de 3 m).
 - La marge × 1,05 du zinc linéaire ne change pas ici (sans source : à trancher par le fondateur).
 
-## roofing-2026.11.19-52 — Ardoise : trois constantes lues dans la fiche couverture (mission du fondateur, 2026-11-19)
+### Étape — Ardoise : trois constantes lues dans la fiche couverture (mission du fondateur, 2026-11-19)
 
 Première étape de la bascule « le code lit la fiche et rien d'autre » : ces constantes viennent de
 `referentiels/couverture/constantes.json`, chacune prouvée par des chiffres confirmés de `fiche-couverture.json`.
@@ -120,6 +126,57 @@ Première étape de la bascule « le code lit la fiche et rien d'autre » : ces 
   Rathscheck et le DTU 40.11 via guides. Avant : ardoises × 1,02. Brest : 9 271 crochets (avant 9 457).
 - Aucune autre quantité ne change : seules les lignes de crochets et le pureau au crochet écrit bougent dans
   les comptes rendus (`docs/lot-*`, tableau de Brest).
+
+## roofing-2026.11.19-58 — Zinc à tasseaux : la largeur de bobine ne se demande jamais (recette en ligne, 2026-11-19)
+
+- **Zinc à tasseaux** : la largeur de la bobine (`largeur_bobine_tasseaux`) est `neverAsk`. Sur le site de test, deux lectures sur trois du devis D-2026-024 posaient « bobine de 650 ou de 500 ? » ; la couverture restait en attente. La valeur courante de Greg (650 mm) est dite et se change dans la liste ; écrite au devis, elle est prise.
+- Une question que le modèle pose avec ses mots sur la donnée d'un ouvrage (« largeur de bobine », sur la ligne de la couverture) est cette donnée : écartée comme elle quand elle ne se demande jamais.
+- Une ligne dont un article a été lu et attend seulement une réponse n'est plus dite « je n'ai pas su en tirer les articles ».
+
+## roofing-2026.11.18-57 — Zinc à tasseaux ; une information écrite n'est jamais demandée (Greg, 2026-11-18, devis D-2026-024)
+
+- **Nouvel ouvrage « Couverture zinc à tasseaux »** (`couverture-zinc-tasseaux`). Avant : absent de la fiche ; « couverture zinc à tasseaux, 32 m² » sortait sans aucune fourniture, ou était prise pour du joint debout. Maintenant : de la bobine au mètre linéaire, nombre de bacs = largeur du pan ÷ entraxe des tasseaux, longueur d'un bac = rampant + 15 cm (comme le joint debout, réponse du 2026-10-04).
+- Chiffres de Greg (2026-11-18), retrouvés dans le descriptif type VMZINC « Couverture à tasseaux » : bobine de 650 mm par défaut (500 mm « parfois », au choix), tasseaux de 50 mm, entraxe 620 mm (470 mm pour une bobine de 500). Les pattes à tasseaux se font dans les chutes de zinc : aucune ligne à commander.
+- Tasseaux de bois et couvre-joints : seulement quand le devis les écrit (règle numéro un). Leur quantité (rangs = bacs + 1, sur la longueur du rampant) n'est PAS encore validée : la ligne reste « à chiffrer », sans quantité. À confirmer par Greg.
+- **§7, §36 Règle changée** : le rampant d'une couverture en bacs (joint debout, tasseaux) n'est plus supposé à 5,5 m quand le devis ne le dit pas. Il est pris au devis (« bacs de 4 m », « rampant de 7 m »), sinon demandé, en mètres : « Longueur des bacs (le rampant, de l'égout au faîtage) ? ». Avant : 5,5 m par défaut, avec des boutons « Jusqu'à 5,5 m », « 5,5 à 8 m », « Plus de 8 m ». L'ardoise garde son défaut (il ne règle que le recouvrement).
+- **§49.4 Règle renforcée** : une donnée du toit écrite au devis avec un autre mot (« longueur des bacs » pour le rampant) est cette donnée : jamais demandée. Une question que le modèle pose sous son propre mot (« rampant ») est LA question de la donnée : une seule question, fermée par la réponse. Les mots sont dans la fiche (`textLabels`) et sont donnés au modèle.
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
+## roofing-2026.11.18-56 — Consommables en cases, unité de vente des tubes, plus de « développé ? » (Greg, 2026-11-18)
+
+- **§49.1 point 4, Règle changée** : les consommables de pose (silicone, vis, pattes, étain, décapant…) ne sont plus jamais ajoutés d'office et la question « Consommables de pose : je les ajoute à la liste ? » n'est plus posée. Ils sont proposés en cases à l'étape « Suggestions », une case par article (le silicone de deux pièces : une seule case) ; cochés, ils valent des articles écrits. L'habitude de l'entreprise ne les ajoute plus. Un « oui » déjà donné sur un ancien chantier garde ses consommables. Vaut pour tous les métiers calculés par un tiroir. Avant : question oui / non, ou habitude.
+- La limite de cinq suggestions vaut pour l'ensemble : d'abord les articles de la fiche (naissances, talons, angles, crochets), puis les consommables. Au-delà de cinq, les derniers ne sont pas proposés (sur le D-2026-020 : les pattes de fixation).
+- **§15 Descentes** : les tubes se disent dans leur unité de vente (« 2 tubes de 4 m », jamais « 2 pièces ») ; la précision s'accorde (« 1 descente × 6 m »). Le calcul ne change pas.
+- **§48.6 Feuilles de zinc** : « développé ? » ne s'écrit plus dans la précision d'une ligne ; seul ce qui est connu est dit (« pour 4 ml de bande »). Le développé n'est toujours pas demandé pour des feuilles (fondateur, 2026-10-10) ; il se demande, avec ses boutons, pour une pièce commandée toute faite (inchangé).
+
+## roofing-2026.11.18-55 — L'étape « Suggestions » (Greg, 2026-11-17, points 13 à 17)
+
+- **§49.1 point 5, Règle changée** : après la lecture et avant les questions de précision, une étape « Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste. » : des cases à cocher et « Continuer ». Les propositions viennent de la fiche (`suggested` sur un emplacement), jamais de l'IA ; cinq au plus ; aucune : pas d'étape. Un article coché vaut un article écrit (ses questions se posent ensuite) ; non coché, il n'existe pas. Avant : aucun bloc « Suggestions ».
+- **§49.1 point 3, Règle changée** : la naissance d'une gouttière n'est plus ajoutée d'office (`indissociable`) : elle est proposée dans les suggestions. Avant : ajoutée dès qu'une gouttière était écrite. Cela vaut pour la lecture d'un devis (la discussion) ; l'ancien calcul sans étape « Suggestions » garde la naissance d'office.
+- **§15 Gouttière zinc** : talons (2 pour une ligne droite) et angles (un par angle, « Combien d'angles sur cette gouttière ? ») deviennent des lignes à part, proposées seulement dans les suggestions (« si tu ne les fabriques pas »). Avant : absents de la gouttière zinc. Les crochets non écrits sont proposés aussi.
+- **§15 Gouttière PVC ou alu** : talons, angles et naissances non écrits sont proposés dans les suggestions (mêmes ratios).
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
+## roofing-2026.11.17-54 — Droit au but : une commande claire (Greg, 2026-11-17, après son test du D-2026-020)
+
+- **§49.5 Règle changée** : une seule ligne par article identique, avec le total (toutes les feuilles de zinc réunies, comptées pièce par pièce puis additionnées). Avant : le même article sorti par deux ouvrages écrits restait une ligne par ouvrage. Le nom des feuilles ne dit plus leur usage (« Feuilles zinc naturel 2 × 1 m, 0,65 mm », sans « pour bandes de rive… ») ; l'usage reste dans le détail de l'app.
+- **§49.6 Règle changée** : la précision des feuilles dit la longueur et le développé (« pour 8 ml de faîtage, développé 25 cm »), plus « estimation… ajuste selon ton façonnage ». La ligne reste une estimation, que l'artisan ajuste.
+- **§49.7 Règle changée** : le mortier du solin garde le nom que le devis lui donne (« mortier de ciment ») ; le code ne compte que les sacs de 25 kg (2 kg par mètre, inchangé). Avant : renommé « Mortier d'étanchéité pour solin ».
+- **§34 Règle changée** : le pureau ne se demande JAMAIS (`neverAsk`). Il se calcule : (hauteur de l'ardoise − recouvrement) ÷ 2 ; le recouvrement est celui des crochets écrits (crochet − 1 cm), sinon celui de la table pente × région (§3). Une question du modèle sur le pureau est écartée et ne suspend plus le calcul. Avant : « 48 m² d'ardoises 32×22 et crochets de 11 » restaient « À préciser » quand le modèle demandait le pureau.
+- Le format écrit dans le nom de la fourniture (« Ardoises naturelles 32×22 ») désigne l'ardoise quand la lecture ne l'a pas nommée à part (un seul format possible, jamais un nom de modèle).
+
+## roofing-2026.11.17-53 — Le pliage : une seule réponse pour tout le devis (Greg, 2026-11-17)
+
+- **§48.6 Règle changée** : « Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? » se pose UNE fois pour tout le devis (`groupe` « pieces-pliees » : bandes zinc, abergement, porte-solin, noue, faîtage zinc, bandes cuivre). Avant : une question par pièce de zinguerie écrite au devis (retour du 2026-10-07).
+- S'il plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs (§48.6, inchangé). S'il achète tout fait : des longueurs de pièces façonnées (§1, inchangé). Gouttières, descentes, naissances, crochets : articles normaux dans les deux cas (§48.7, inchangé).
+- L'artisan peut changer ce choix pour une pièce : la réponse de la pièce (« param:faconnage@bandes-zinc__3 ») passe devant celle du devis.
+- Ce qui ne change pas : une pièce dont le devis dit le façonnage (« pliée en Z », « comprend le pliage ») n'a pas de question et garde ce que sa ligne écrit ; les bacs d'une couverture à joint debout gardent leur propre question. Aucun ratio ne change.
+
+## roofing-2026.11.17-52 — Les mots de l'artisan sont sur le bouton (Greg, 2026-11-17 : « le cœur doit s'adapter à n'importe quel métier »)
+
+- **Façonnage** (bacs, bandes zinc, noue, faîtage, cuivre) : chaque bouton porte les mots que l'artisan dit au clavier ou à la voix (`dit`) : « je plie », « moi-même », « je façonne » pour « Je façonne » ; « tout fait », « tout prêt », « j'achète », « commandé » pour « Je commande façonné ». Avant : ces mots étaient écrits dans le lecteur des réponses, commun à tous les métiers.
+- Aucune question, aucun bouton, aucun ratio ne change : s'il plie, des feuilles de zinc 2 × 1 m (§48.6) ; sinon des longueurs toutes prêtes (§1).
+- Deux boutons dits dans la même réponse (« je commande… et je plie ») : la question est reposée avec ses boutons. Avant : « je plie » l'emportait.
 
 ## roofing-2026.10.11-51 — Deux fenêtres de toit, deux tailles (retour du fondateur, 2026-10-11)
 

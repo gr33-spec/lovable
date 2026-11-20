@@ -61,6 +61,64 @@ export function materialOf(designation: string): string | null {
   return text.split(" ").length >= 2 ? text.charAt(0).toLowerCase() + text.slice(1) : null;
 }
 
+/** Les mots d'un libellé d'ouvrage qui ne disent rien du chantier (« en », « à », « au »). */
+const MOTS_VIDES = new Set(["a", "au", "aux", "d", "de", "des", "du", "en", "et", "l", "la", "le", "les", "sur"]);
+const racine = (mot: string) => norm(mot).replace(/[^a-z0-9]/g, "").replace(/(?<=.{3})[sx]$/, "");
+
+/**
+ * LE LIBELLÉ D'UN OUVRAGE, RÉDUIT AUX MOTS ÉCRITS (Greg, 11 novembre 2026 ; règle numéro un) : « Couverture en ardoises au
+ * crochet » ne garde « au crochet » que si le document écrit un crochet, « à emboîtement » que s'il l'écrit. Le libellé
+ * s'arrête au premier mot que le document ne porte pas ; le nom du métier (« Couverture ») est libre. Sans aucun mot
+ * écrit, pas de libellé : le bref reste neutre plutôt que de nommer un matériau ou un système que personne n'a saisi.
+ */
+export function libelleEcrit(libelle: string, metier: string, textes: string): string | null {
+  const ecrits = new Set(textes.split(/[^\p{L}\p{N}]+/u).map(racine).filter(Boolean));
+  const mots = libelle.replace(/\s*\(.*\)$/, "").split(/\s+/).filter(Boolean);
+  const gardes: string[] = [];
+  let porte = false;
+  for (const [i, mot] of mots.entries()) {
+    const r = racine(mot);
+    if (MOTS_VIDES.has(r) || r === "") gardes.push(mot);
+    else if (i === 0 && r.startsWith(racine(metier).slice(0, 6))) gardes.push(mot);
+    else if (ecrits.has(r)) {
+      gardes.push(mot);
+      porte = true;
+    } else break;
+  }
+  while (gardes.length > 0 && MOTS_VIDES.has(racine(gardes[gardes.length - 1]!))) gardes.pop();
+  return porte ? gardes.join(" ") : null;
+}
+
+/**
+ * L'ouvrage que NOMME une fourniture rangée à cet emplacement, réduit aux mots écrits ; null si l'emplacement n'est pas la
+ * fourniture principale de l'ouvrage (un liteau ne nomme pas une couverture en tuiles) ou si rien n'en est écrit.
+ */
+export function ouvrageEcrit(ref: Referential, ouvrage: string, emplacement: string, textes: string): string | null {
+  const w = ref.workItems.find((x) => x.id === baseOf(ouvrage));
+  const famille = w?.slots.find((x) => x.key === emplacement)?.family;
+  if (!w || famille === undefined || !w.triggers.includes(famille)) return null;
+  return libelleEcrit(w.label, METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade, norm(textes));
+}
+
+/**
+ * LES OUVRAGES QUI PEUVENT NOMMER LE CHANTIER : ceux dont une fourniture écrit la fourniture principale (la famille qui
+ * déclenche l'ouvrage), les couvertures d'abord (section « principal »), sans le support (un voligeage se dit « pose sur
+ * voligeage »). Dans l'ordre du tiroir, jamais celui des lignes.
+ */
+export function ouvragesCandidats(ref: Referential, places: readonly { ouvrage: string; emplacement: string }[]): Referential["workItems"] {
+  const nommes = new Set<Referential["workItems"][number]>();
+  for (const p of places) {
+    const w = ref.workItems.find((x) => x.id === baseOf(p.ouvrage));
+    const famille = w?.slots.find((x) => x.key === p.emplacement)?.family;
+    if (w && famille !== undefined && w.triggers.includes(famille)) nommes.add(w);
+  }
+  let candidats = ref.workItems.filter((w) => nommes.has(w));
+  if (candidats.some((w) => w.section === "principal")) candidats = candidats.filter((w) => w.section === "principal");
+  const duSupport = (w: Referential["workItems"][number]) => w.triggers.every((t) => t === "sheathing");
+  if (candidats.some((w) => !duSupport(w))) candidats = candidats.filter((w) => !duSupport(w));
+  return candidats;
+}
+
 export function siteBrief(input: {
   ref: Referential;
   plan: QuotePlan;
@@ -73,17 +131,66 @@ export function siteBrief(input: {
 }): SiteBrief {
   const { ref, plan } = input;
   const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned");
-  // L'ouvrage principal : la plus grande surface du devis, sinon la première ligne reconnue.
+  // L'ouvrage principal : la plus grande surface du devis, sinon la première ligne reconnue. SEULE UNE LIGNE QUI ÉCRIT LA
+  // FOURNITURE PRINCIPALE D'UN OUVRAGE LE NOMME (Greg, 11 novembre 2026) : l'ardoise, la tuile, le zinc, c'est-à-dire
+  // l'emplacement dont la famille déclenche l'ouvrage. Un accessoire commun à plusieurs ouvrages (liteau, écran de
+  // sous-toiture, pointe), rangé dans le premier ouvrage du tiroir qui le porte, ne dit rien du type de couverture : une
+  // liste d'ardoises sortait « Couverture en tuiles à emboîtement ». Sans fourniture principale écrite, le bref est neutre.
+  const principale = (l: (typeof planned)[number]) => {
+    const w = ref.workItems.find((x) => x.id === baseOf(l.workItemId));
+    const famille = w?.slots.find((x) => x.key === l.slot)?.family;
+    return famille !== undefined && w!.triggers.includes(famille);
+  };
   const area = (id: string) => {
     const l = input.lines.find((x) => x.id === id);
     if (!l?.quantity || !/^(m2|m²)$/i.test((l.unit ?? "").trim())) return -1;
     const n = Number(l.quantity.replace(/\s/g, "").replace(",", "."));
     return Number.isFinite(n) ? n : -1;
   };
-  const main = [...planned].sort((a, b) => area(b.ref) - area(a.ref))[0];
-  const work = main ? ref.workItems.find((w) => w.id === baseOf(main.workItemId)) : undefined;
+  // PLUSIEURS OUVRAGES PRINCIPAUX ÉCRITS (ardoises ET tuiles ; Greg, 11 puis 12 novembre 2026) : jamais « le premier de la
+  // liste », et JAMAIS UN OUVRAGE MASQUÉ parce qu'un autre a une plus grande surface. Les ouvrages candidats sont ceux dont
+  // une ligne écrit la fourniture principale, les couvertures d'abord (section « principal »), sans le support (un
+  // voligeage se dit « pose sur voligeage », il ne nomme pas le chantier). Un seul : c'est lui. Plusieurs : TOUS sont
+  // cités, dans l'ordre du tiroir, chacun avec sa surface écrite quand il en a une (« couverture en tuiles (20 m²) et en
+  // ardoises (60 m²) »), sans prêter au chantier les faits d'une de leurs lignes. L'ordre des lignes ne change rien.
+  const ouvrageDe = (l: (typeof planned)[number]) => ref.workItems.find((x) => x.id === baseOf(l.workItemId))!;
+  const principales = planned.filter(principale);
+  const candidats = ouvragesCandidats(ref, principales.map((l) => ({ ouvrage: l.workItemId, emplacement: l.slot })));
+  const surface = (w: Referential["workItems"][number]) => principales.filter((l) => ouvrageDe(l) === w).reduce((t, l) => t + Math.max(0, area(l.ref)), 0);
+  const work = candidats.length === 1 ? candidats[0] : undefined;
+  // La ligne qui porte les faits de l'ouvrage (sa quantité, son matériau) : sa seule ligne, sinon celle dont la surface
+  // écrite est strictement la plus grande. Plusieurs lignes sans surface pour trancher : aucune n'est « la » ligne, le
+  // bref nomme l'ouvrage sans prêter au chantier les faits de l'une d'elles (jamais « la première saisie », jamais un
+  // choix par l'alphabet).
+  const duMeme = work ? principales.filter((l) => ouvrageDe(l) === work).sort((a, b) => area(b.ref) - area(a.ref)) : [];
+  const main = duMeme.length === 1 || (duMeme.length > 1 && area(duMeme[0]!.ref) > area(duMeme[1]!.ref)) ? duMeme[0] : undefined;
   const metier = METIER_NAMES[tradeIdOf(ref.trade)] ?? ref.trade;
-  const label = work ? norm(work.label).startsWith(norm(metier).slice(0, 6)) ? work.label.replace(/\s*\(.*\)$/, "").toLowerCase() : `${metier} (${work.label.replace(/\s*\(.*\)$/, "").toLowerCase()})` : null;
+  const texts = norm([...input.lines.map((l) => l.designation), ...Object.values(input.context ?? {})].join(" \n "));
+  // Le libellé de l'ouvrage, réduit aux mots que le document écrit (jamais « au crochet » sans crochet écrit).
+  // Les mots d'un libellé se cherchent sur les lignes DE CET OUVRAGE (et dans l'en-tête du devis), jamais sur un autre
+  // article : « à emboîtement », écrit sur la ligne d'une faîtière, ne dit rien d'une tuile romane canal.
+  const textesDe = (w: Referential["workItems"][number]) =>
+    norm([...planned.filter((l) => ouvrageDe(l) === w).map((l) => input.lines.find((x) => x.id === l.ref)?.designation ?? ""), ...Object.values(input.context ?? {})].join(" \n "));
+  const nomDe = (w: Referential["workItems"][number]) => {
+    const ecrit = libelleEcrit(w.label, metier, textesDe(w));
+    return ecrit ? (norm(ecrit).startsWith(norm(metier).slice(0, 6)) ? ecrit.toLowerCase() : `${metier} (${ecrit.toLowerCase()})`) : null;
+  };
+  let label: string | null = work ? nomDe(work) : null;
+  if (!work && candidats.length > 1) {
+    const noms = candidats.map(nomDe);
+    // Un ouvrage dont le nom n'est pas écrit ne peut pas être cité : plutôt que de le masquer, le bref reste neutre.
+    if (noms.every((n): n is string => n !== null)) {
+      const premier = noms[0]!.split(" ")[0]!;
+      const parts = candidats.map((w, k) => {
+        const nom = noms[k]!;
+        // « Couverture en tuiles et en ardoises » : le mot commun n'est dit qu'une fois.
+        const court = k > 0 && nom.split(" ")[0] === premier && nom.includes(" ") ? nom.slice(nom.indexOf(" ") + 1) : nom;
+        const m2 = surface(w);
+        return m2 > 0 ? `${court} (${String(Math.round(m2 * 100) / 100).replace(".", ",")} m²)` : court;
+      });
+      label = parts.length === 2 ? parts.join(" et ") : `${parts.slice(0, -1).join(", ")} et ${parts[parts.length - 1]}`;
+    }
+  }
 
   // Une donnée est un FAIT si l'artisan l'a répondue, ou si le devis, un document ou la note la donne.
   const fact = (key: string): { value: Decimal; unit: string } | null => {
@@ -117,7 +224,6 @@ export function siteBrief(input: {
 
   const faits: string[] = [];
   const mainLine = main ? input.lines.find((l) => l.id === main.ref) : undefined;
-  const texts = norm([...input.lines.map((l) => l.designation), ...Object.values(input.context ?? {})].join(" \n "));
   const forme = FORMES.find(([re]) => re.test(texts))?.[1];
   if (mainLine?.quantity) faits.push(`${mainLine.quantity.replace(".", ",")} ${unitText((mainLine.unit ?? "").replace("²", "2"))}${forme ? ` en ${forme}` : ""}`.trim());
   const pente = fact("pente");
@@ -239,13 +345,17 @@ const plainLabel = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0
  * fournisseur. L'ouvrage et sa surface ouvrent le texte, puis le matériau, puis les autres faits en une phrase, puis la
  * ville ; le client et l'adresse, s'ils sont demandés, le ferment. Rien n'est inventé : chaque mot vient d'une ligne du bref.
  */
-export function briefTexte(lines: readonly { cle: string; texte: string }[]): string {
+export function briefTexte(
+  lines: readonly { cle: string; texte: string }[],
+  /** La dernière ligne sans libellé est la ville (elle ferme le bref) : faux quand le chantier n'a ni ville ni situation. */
+  avecVille = true,
+): string {
   // §51.5 : le bref écrit par le modèle en phrases (« fiche-bref-N ») : chaque phrase telle quelle, puis la ville.
   const phrases = lines.filter((l) => /^fiche-bref-\d+$/.test(l.cle));
   if (phrases.length > 0) {
     const rest = lines.filter((l) => !/^fiche-bref-\d+$/.test(l.cle));
     // La ville (sans libellé) ferme le texte ; le client et l'adresse, s'ils sont demandés, viennent après elle.
-    const ville = rest.filter((l) => !/ : /.test(l.texte)).map((l) => `Chantier à ${l.texte.replace(/[.\s]+$/, "")}.`);
+    const ville = (avecVille ? rest.filter((l) => !/ : /.test(l.texte)) : []).map((l) => `Chantier à ${l.texte.replace(/[.\s]+$/, "")}.`);
     const tail = briefTexte(rest.filter((l) => / : /.test(l.texte)));
     return [...phrases.map((p) => `${p.texte.replace(/[.\s]+$/, "")}.`), ...ville, ...(tail ? [tail] : [])].join(" ");
   }
@@ -263,8 +373,9 @@ export function briefTexte(lines: readonly { cle: string; texte: string }[]): st
   const client = take(/^(?:client|maitre)/);
   const adresse = take(/^adresse/);
   take(/^code.?postal/);
-  // La ville et sa situation : la dernière ligne sans libellé.
-  const lastPlain = parts.length > 0 && !parts[parts.length - 1]!.label ? parts.pop() : undefined;
+  // La ville et sa situation : la dernière ligne sans libellé, quand le chantier en a une (sinon ce serait prendre un fait,
+  // « 1200 pièces », pour une ville : « Chantier à 1200 pièces »).
+  const lastPlain = avecVille && parts.length > 0 && !parts[parts.length - 1]!.label ? parts.pop() : undefined;
   const sentences: string[] = [];
   if (ouvrage) sentences.push(`${capitalize(ouvrage.value)}${surface ? `, ${surface.value}` : ""}`);
   else if (surface) sentences.push(`Surface ${surface.value}`);
@@ -292,7 +403,7 @@ export function briefTexte(lines: readonly { cle: string; texte: string }[]): st
  * Renvoie ce qui a été trouvé, ou null si le texte est propre.
  */
 export function priceLeak(text: string): string | null {
-  const patterns = [/€/, /\d[\d\s]*[.,]\d{2}\s*(?:€|eur|euros?)\b/i, /\b(?:HT|TTC|TVA)\b/, /\b(?:remise|montant|prix unitaire|p\.u\.|total)\b/i, /(?<!sans )\bprix\b/i];
+  const patterns = [/€/, /\d[\d\s]*[.,]\d{2}\s*(?:€|eur|euros?)\b/i, /\b(?:HT|TTC|TVA)\b/, /\b(?:remise|montant|prix unitaire|p\.u\.|total)\b/i, /(?<!sans |demande de |meilleurs )\bprix\b/i];
   for (const re of patterns) {
     const m = re.exec(text);
     if (m) return m[0];

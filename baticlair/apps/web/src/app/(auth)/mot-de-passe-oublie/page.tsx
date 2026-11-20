@@ -1,15 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { Button, ErrorNotice, Field, PageTitle } from "@/components/ui";
+import { Turnstile, TURNSTILE_ACTIF } from "@/components/turnstile";
 import { api, ApiError, type Health } from "@/lib/api";
 
 export default function MotDePasseOubliePage() {
+  return (
+    <Suspense>
+      <MotDePasseOublie />
+    </Suspense>
+  );
+}
+
+/** `?choisir=1` (Profil › « Choisir un mot de passe », 19 novembre 2026) : le même chemin, avec ses mots. */
+function MotDePasseOublie() {
+  const choisir = useSearchParams().get("choisir") === "1";
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   useEffect(() => {
     api<Health>("/v1/health")
@@ -26,6 +39,7 @@ export default function MotDePasseOubliePage() {
       await api("/v1/auth/request-password-reset", {
         method: "POST",
         body: { email: String(form.get("email")).trim(), redirectTo: `${window.location.origin}/nouveau-mot-de-passe` },
+        captcha,
       });
       setSent(true);
     } catch (e) {
@@ -37,11 +51,13 @@ export default function MotDePasseOubliePage() {
 
   return (
     <>
-      <PageTitle>Mot de passe oublié</PageTitle>
+      <PageTitle>{choisir ? "Choisir un mot de passe" : "Mot de passe oublié"}</PageTitle>
+      {choisir && !sent ? (
+        <p className="text-[16px] text-muted">On t&apos;envoie un lien pour choisir ton mot de passe. Tu pourras toujours te connecter par lien.</p>
+      ) : null}
       {emailAvailable === false ? (
         <p role="status" className="rounded-3xl bg-warn-bg p-4 font-semibold text-warn">
-          L&apos;envoi d&apos;e-mails n&apos;est pas encore activé sur cette version : la réinitialisation par e-mail est
-          indisponible pour le moment.
+          L&apos;envoi d&apos;e-mails n&apos;est pas encore activé sur cette version : la réinitialisation par e-mail est indisponible pour le moment.
         </p>
       ) : sent ? (
         <p role="status" className="rounded-3xl bg-ok-bg p-4 font-semibold text-ok">
@@ -51,7 +67,8 @@ export default function MotDePasseOubliePage() {
         <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
           {error ? <ErrorNotice error={error} /> : null}
           <Field id="email" name="email" type="email" label="E-mail du compte" autoComplete="email" inputMode="email" required />
-          <Button type="submit" pending={pending}>
+          <Turnstile onToken={setCaptcha} />
+          <Button type="submit" pending={pending} disabled={TURNSTILE_ACTIF && !captcha}>
             Recevoir un lien
           </Button>
         </form>

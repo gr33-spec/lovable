@@ -1,0 +1,41 @@
+﻿Métier;Famille;Produit;Format / dimension / qualité;Désignation envoyée au négoce;Unité;Mots du chantier (recherche);Clé
+Électricité;Câbles;Câble R2V;3G1,5;Câble R2V 3G1,5;couronnes de 100 m;cable, r2v, fil;electricite/cables/cable-r2v/3g1-5
+Électricité;Câbles;Câble R2V;3G2,5;Câble R2V 3G2,5;couronnes de 100 m;cable, r2v, fil;electricite/cables/cable-r2v/3g2-5
+Électricité;Câbles;Câble R2V;3G6;Câble R2V 3G6;couronnes de 100 m;cable, r2v, fil;electricite/cables/cable-r2v/3g6
+Électricité;Câbles;Câble R2V;5G1,5;Câble R2V 5G1,5;couronnes de 100 m;cable, r2v, fil;electricite/cables/cable-r2v/5g1-5
+Électricité;Câbles;Câble R2V;5G2,5;Câble R2V 5G2,5;couronnes de 100 m;cable, r2v, fil;electricite/cables/cable-r2v/5g2-5
+Électricité;Câbles;Fil H07V-U;1,5 mm² · bleu;Fil H07V-U 1,5 mm² · bleu;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/1-5-mm-bleu
+Électricité;Câbles;Fil H07V-U;1,5 mm² · rouge;Fil H07V-U 1,5 mm² · rouge;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/1-5-mm-rouge
+Électricité;Câbles;Fil H07V-U;1,5 mm² · vert-jaune;Fil H07V-U 1,5 mm² · vert-jaune;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/1-5-mm-vert-jaune
+Électricité;Câbles;Fil H07V-U;1,5 mm² · noir;Fil H07V-U 1,5 mm² · noir;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/1-5-mm-noir
+Électricité;Câbles;Fil H07V-U;2,5 mm² · bleu;Fil H07V-U 2,5 mm² · bleu;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/2-5-mm-bleu
+Électricité;Câbles;Fil H07V-U;2,5 mm² · rouge;Fil H07V-U 2,5 mm² · rouge;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/2-5-mm-rouge
+Électricité;Câbles;Fil H07V-U;2,5 mm² · vert-jaune;Fil H07V-U 2,5 mm² · vert-jaune;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/2-5-mm-vert-jaune
+Électricité;Câbles;Fil H07V-U;2,5 mm² · noir;Fil H07V-U 2,5 mm² · noir;couronnes de 100 m;fil, h07vu, conducteur;electricite/cables/fil-h07v-u/2-5-mm-noir
+Électricité;Câbles;Câble RJ45 catégorie 6;;Câble RJ45 catégorie 6;couronnes de 100 m;rj45, cable reseau, ethernet;electricite/cables/cable-rj45-categorie-6
+Électricité;Gaines;Gaine ICTA préfilée;Ø 20 · 3G1,5;Gaine ICTA préfilée Ø 20 · 3G1,5;couronnes de 100 m;gaine prefilee, icta;electricite/gaines/gaine-icta-prefilee/20-3g1-5
+Électricité;Gaines;Gaine ICTA préfilée;Ø 20 · 3G2,5;Gaine ICTA préfilée Ø 20 · 3G2,5;couronnes de 100 m;gaine prefilee, icta;electricite/gaines/gaine-icta-prefilee/20-3g2-5
+Électricité;Gaines;Gaine ICTA;Ø 16;Gaine ICTA Ø 16;couronnes de 100 m;gaine, icta;electricite/gaines/gaine-icta/16
+Électricité;Gaines;Gaine ICTA;Ø 20;Gaine ICTA Ø 20;couronnes de 100 m;gaine, icta;electricite/gaines/gaine-icta/20
+Électricité;Gaines;Gaine ICTA;Ø 25;Gaine ICTA Ø 25;couronnes de 100 m;gaine, icta;electricite/gaines/gaine-icta/25
+Électricité;Appareillage;Interrupteur va-et-vient;blanc;Interrupteur va-et-vient blanc;pièces;interrupteur, va et vient;electricite/appareillage/interrupteur-va-et-vient/blanc
+Électricité;Appareillage;Interrupteur va-et-vient;anthracite;Interrupteur va-et-vient anthracite;pièces;interrupteur, va et vient;electricite/appareillage/interrupteur-va-et-vient/anthracite
+Électricité;Appareillage;Prise de courant 2P+T;blanc;Prise de courant 2P+T blanc;pièces;prise, pc;electricite/appareillage/prise-de-courant-2p-t/blanc
+Électricité;Appareillage;Prise de courant 2P+T;anthracite;Prise de courant 2P+T anthracite;pièces;prise, pc;electricite/appareillage/prise-de-courant-2p-t/anthracite
+Électricité;Appareillage;Boîte d'encastrement;Ø 67 simple;Boîte d'encastrement Ø 67 simple;boîtes de 25;boite, boite encastrement, boite placo;electricite/appareillage/boite-d-encastrement/67-simple
+Électricité;Appareillage;Boîte d'encastrement;Ø 67 double;Boîte d'encastrement Ø 67 double;boîtes de 25;boite, boite encastrement, boite placo;electricite/appareillage/boite-d-encastrement/67-double
+Électricité;Appareillage;Boîte DCL avec douille;;Boîte DCL avec douille;pièces;dcl, point lumineux;electricite/appareillage/boite-dcl-avec-douille
+Électricité;Tableau;Tableau électrique pré-équipé;1 rangée;Tableau électrique pré-équipé 1 rangée;pièces;tableau, coffret;electricite/tableau/tableau-electrique-pre-equipe/1-rangee
+Électricité;Tableau;Tableau électrique pré-équipé;2 rangées;Tableau électrique pré-équipé 2 rangées;pièces;tableau, coffret;electricite/tableau/tableau-electrique-pre-equipe/2-rangees
+Électricité;Tableau;Tableau électrique pré-équipé;3 rangées;Tableau électrique pré-équipé 3 rangées;pièces;tableau, coffret;electricite/tableau/tableau-electrique-pre-equipe/3-rangees
+Électricité;Tableau;Tableau électrique pré-équipé;4 rangées;Tableau électrique pré-équipé 4 rangées;pièces;tableau, coffret;electricite/tableau/tableau-electrique-pre-equipe/4-rangees
+Électricité;Tableau;Disjoncteur divisionnaire;10 A;Disjoncteur divisionnaire 10 A;pièces;disjoncteur, disjoncteurs;electricite/tableau/disjoncteur-divisionnaire/10-a
+Électricité;Tableau;Disjoncteur divisionnaire;16 A;Disjoncteur divisionnaire 16 A;pièces;disjoncteur, disjoncteurs;electricite/tableau/disjoncteur-divisionnaire/16-a
+Électricité;Tableau;Disjoncteur divisionnaire;20 A;Disjoncteur divisionnaire 20 A;pièces;disjoncteur, disjoncteurs;electricite/tableau/disjoncteur-divisionnaire/20-a
+Électricité;Tableau;Disjoncteur divisionnaire;32 A;Disjoncteur divisionnaire 32 A;pièces;disjoncteur, disjoncteurs;electricite/tableau/disjoncteur-divisionnaire/32-a
+Électricité;Tableau;Interrupteur différentiel 30 mA;40 A type AC;Interrupteur différentiel 30 mA 40 A type AC;pièces;differentiel, inter diff;electricite/tableau/interrupteur-differentiel-30-ma/40-a-type-ac
+Électricité;Tableau;Interrupteur différentiel 30 mA;40 A type A;Interrupteur différentiel 30 mA 40 A type A;pièces;differentiel, inter diff;electricite/tableau/interrupteur-differentiel-30-ma/40-a-type-a
+Électricité;Tableau;Interrupteur différentiel 30 mA;63 A type AC;Interrupteur différentiel 30 mA 63 A type AC;pièces;differentiel, inter diff;electricite/tableau/interrupteur-differentiel-30-ma/63-a-type-ac
+Électricité;Éclairage;Spot LED encastrable;blanc chaud;Spot LED encastrable blanc chaud;pièces;spot, led;electricite/eclairage/spot-led-encastrable/blanc-chaud
+Électricité;Éclairage;Spot LED encastrable;blanc neutre;Spot LED encastrable blanc neutre;pièces;spot, led;electricite/eclairage/spot-led-encastrable/blanc-neutre
+Électricité;Éclairage;Hublot LED extérieur;;Hublot LED extérieur;pièces;hublot, applique;electricite/eclairage/hublot-led-exterieur

@@ -61,7 +61,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Gouttière alu anthracite de 25 | 3 longueurs de 4 m (11 ml à couvrir) |  | chiffrable |
 | Naissances alu anthracite de 25 Ø80 | 1 pièce |  | chiffrable |
-| Tubes de descente alu Ø80, longueur 2 m | 3 pièces | 1 descentes × 5 m | chiffrable |
+| Tubes de descente alu Ø80, longueur 2 m | 3 pièces | 1 descente × 5 m | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 

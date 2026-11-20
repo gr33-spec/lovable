@@ -23,7 +23,7 @@ Devis de test :
 **À l'ouverture : 1 verte · 2 orange · 0 grise.**
 
 Questions du comptoir :
-- Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
+- Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
 - J'ai identifié : Tuiles HP10. C'est bien ce modèle ? (Oui / Modifier)
 
 | Ligne orange | Chiffre | Sous-ligne |
@@ -37,7 +37,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Tuiles HP10 | 1 258 pièces (≈ 6 palettes) |  | chiffrable |
 | Arêtiers | 72 pièces |  | chiffrable |
-| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 8 ml de noue : estimation d'après un développé de 50 cm, ajuste selon ton façonnage | chiffrable |
+| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 8 ml de noue, développé 50 cm | chiffrable |
 
 ## Ardoises, arêtier zinc et noue de 66
 
@@ -53,7 +53,7 @@ Devis de test :
 
 Questions du comptoir :
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
-- Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
+- Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? (Je façonne (feuilles ou bobineau) / Je commande façonné)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -70,7 +70,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Ardoises naturelles Espagne 1er choix 30×22 | 6 694 pièces | 150 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 10 cm | 6 694 pièces | un par ardoise commandée | chiffrable |
-| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 4 ml de noue : estimation d'après un développé de 66 cm, ajuste selon ton façonnage | chiffrable |
+| Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 4 ml de noue, développé 66 cm | chiffrable |
 
 À préciser avec vous :
 - Arêtiers (Arêtier zinc dév. 33) · 10 ml

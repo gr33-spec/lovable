@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { cocherLesNaissances } from "./support/suggestions.js";
 import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
 import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
 import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
@@ -112,7 +113,10 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
 
   it("ne demande jamais une quantité : une question à boutons, avec « je ne sais pas »", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const res = await agent.post("/v1/quantitatifs").send(RAPPIDOS);
+    const cree = await agent.post("/v1/quantitatifs").send(RAPPIDOS);
+    // La naissance se coche à l'étape « Suggestions » ; cochée, le calcul demande le nombre de descentes.
+    await cocherLesNaissances(agent, cree.body.id);
+    const res = await agent.get(`/v1/quantitatifs/${cree.body.id}`);
     expect(res.body.etat).toBe("questions");
     expect(res.body.questions.length).toBeGreaterThan(0);
     expect(res.body.questions.length).toBeLessThanOrEqual(4);

@@ -18,5 +18,6 @@ import { DemoController } from "./http/demo.controller.js";
       inject: [ProjectsService, SUPPLIER_REPOSITORY, DocumentsService, PRICE_REQUEST_REPOSITORY, PriceRequestsService],
     },
   ],
+  exports: [DemoService],
 })
 export class DemoModule {}

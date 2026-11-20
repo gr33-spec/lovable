@@ -16,7 +16,7 @@ export function requestContextMiddleware(logger: AppLogger) {
     res.setHeader("x-request-id", requestId);
     const startedAt = process.hrtime.bigint();
 
-    runWithRequestContext({ requestId }, () => {
+    runWithRequestContext({ requestId, ...(req.ip ? { ip: req.ip } : {}) }, () => {
       res.on("finish", () => {
         logger.info(
           {

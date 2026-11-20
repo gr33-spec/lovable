@@ -136,6 +136,9 @@ export interface ScreenRow {
   reason?: string;
   /** Lignes du devis d'où vient la ligne (le croquis, le devis lu). */
   lineIds: string[];
+  /** Greg, 7 novembre 2026 : la famille (le lot) de la ligne n'est pas sûre (aucun lot ne la citait, rangée au lot
+   * principal) ; l'écran dit « Famille à vérifier », seulement sur ces lignes. */
+  familleIncertaine?: boolean;
 }
 
 export interface ScreenGroup {
@@ -205,7 +208,11 @@ function supplyScreen(
     const waits = (item.waitsOn ?? []).map((k) => decisions.find((d) => d.question?.key === k || d.key === `engine:${k}` || d.key === k)).filter((d): d is Decision => !!d);
     // Une décision qui vise la ligne (doublon, article inconnu) la met orange, avec son geste (§49.1, §49.8).
     const lineDecision = decisionFor(item.lineIds);
-    const check = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0 || lineDecision !== undefined;
+    // Recette n° 2 du 14 novembre 2026 (B9) : une ligne écrite SANS quantité est orange « Quantité à préciser » tant que
+    // l'artisan ne l'a pas donnée (§49.2 : jamais verte sur une donnée qui manque) ; avant, elle était verte et partait à « 0 ».
+    const sansQuantite = item.kind === "direct" && !/[1-9]/.test(item.quantity ?? "");
+    const dejaOrange = item.state === "to_confirm" || precise !== undefined || (item.waitsOn?.length ?? 0) > 0 || lineDecision !== undefined;
+    const check = dejaOrange || sansQuantite;
     const decision = waits[0] ?? lineDecision ?? precise;
     // Une ligne déjà orange pour une donnée qui manque ne ressort pas une 2e fois pour son doute de lecture (§49.8).
     for (const d of [decision, precise, ...waits, item.state === "to_confirm" ? decisionFor(item.lineIds) : undefined]) if (d) used.add(d.key);
@@ -215,7 +222,7 @@ function supplyScreen(
       status: check ? "check" : "ok",
       itemKey: item.key,
       ...(decision ? { decisionKey: decision.key } : {}),
-      ...(item.waitsOn?.length && missing ? { reason: missing.text } : {}),
+      ...(item.waitsOn?.length && missing ? { reason: missing.text } : sansQuantite && !dejaOrange ? { reason: "Quantité à préciser" } : {}),
       lineIds: item.lineIds,
     });
   }
@@ -404,7 +411,7 @@ function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
     ...new Map(
       group
         .flatMap((n) => n.assumptions)
-        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key))
+        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key) && !a.shownOnly)
         .map((a) => [a.key, a]),
     ).values(),
   ];
@@ -430,16 +437,9 @@ function aggregate(
     const key = named(n) ? `product:${n.label}` : `${n.workItemId ?? "?"}/${n.slot}`;
     groups.set(key, [...(groups.get(key) ?? []), n]);
   }
-  // §49.5 : deux lignes du devis ne fusionnent jamais. Le même article sorti par deux ouvrages écrits (les feuilles des
-  // bandes de rive, du faîtage et du porte-solin) reste une ligne par ouvrage, chacune avec sa précision.
-  // Retour du fondateur (2026-10-12, §49.9 : « une fourniture = une ligne, additionnée ») : un consommable (silicone, vis,
-  // pointes) n'est pas une ligne du devis ; le même, sorti par deux pièces, fait une seule ligne, besoins additionnés.
-  for (const [key, group] of [...groups]) {
-    const works = [...new Set(group.map((n) => n.workItemId ?? "?"))];
-    if (works.length < 2 || group.every((n) => consumables.has(n.family) || n.consumable)) continue;
-    groups.delete(key);
-    for (const w of works) groups.set(`${key}@${w}`, group.filter((n) => (n.workItemId ?? "?") === w));
-  }
+  // RÈGLE CHANGÉE (Greg, 17 novembre 2026, « droit au but ») : UNE SEULE LIGNE PAR ARTICLE IDENTIQUE, avec le total (toutes
+  // les feuilles de zinc réunies, comptées sur l'ensemble des pièces à plier). Avant (§49.5) : le même article sorti par
+  // deux ouvrages écrits restait une ligne par ouvrage, chacune avec sa précision. L'usage reste dans l'app (`usages`).
   const owner = (n: OwnedNeed) => ouvrages.filter((o) => o.needs.some((x) => x.needId === n.needId)).map((o) => o.lineId);
   const items: PurchaseItem[] = [];
   for (const [key, group] of groups) {

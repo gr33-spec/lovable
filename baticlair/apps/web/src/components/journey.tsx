@@ -1,12 +1,18 @@
 "use client";
 
-import { Check, ChevronLeft, FileUp, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, EtapesIa, Puce, TexteMobiiz, useChampDicte, useFil, useZoneVisible } from "@/components/chat-mobiiz";
+import { api } from "@/lib/api";
+import { useDictee } from "@/lib/dictee";
+import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } from "../../../../packages/domain/src/assistant/reponses-libres-numerotees";
+import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
+import { Check, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ListScene, ReadingStage } from "@/components/chantier-scenes";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
+import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import type { ApiError, Takeoff } from "@/lib/api";
-import { useTyping } from "@/lib/typing";
+import { NOM_APP } from "@/lib/nom";
+import { origineDeLaLigne } from "@/lib/origine-ligne";
 
 /*
  * §50 « Ce que voit l'artisan » (fondateur, 2026-10-09) : TROIS ÉCRANS, rien d'autre.
@@ -21,7 +27,27 @@ import { useTyping } from "@/lib/typing";
  * LA SEULE ACTION D'UN NOUVEAU CHANTIER : déposer le PDF. Une grande zone (toucher pour choisir, ou glisser le fichier
  * sur ordinateur), l'animation, une phrase. Le nom, l'adresse et le client viennent du devis.
  */
-export function DropZone({ onFile, pending, error }: { onFile: (file: File) => void; pending: boolean; error: ApiError | null }) {
+export function DropZone({
+  onFile,
+  pending,
+  error,
+  kind = "devis",
+  small = false,
+  titre,
+  sousTitre,
+}: {
+  onFile: (file: File) => void;
+  pending: boolean;
+  error: ApiError | null;
+  /** « liste » : « Donne ta liste de matériaux », une photo, un PDF ou une capture de ce que l'artisan a déjà compté. */
+  kind?: "devis" | "liste";
+  /** Nouveau cap (22 octobre) : le devis passe en petit bouton sous la liste, « Je n'ai qu'un devis ». */
+  small?: boolean;
+  /** Achat groupé par métier (27 octobre 2026, point 31) : le titre et la phrase du petit bouton. */
+  titre?: string;
+  sousTitre?: string;
+}) {
+  const liste = kind === "liste";
   const id = useId();
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
@@ -32,9 +58,35 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
   };
   // §50.1 : un bouton, « Déposer mon devis » (toucher pour choisir, ou glisser le fichier sur ordinateur). Rien d'autre.
   return (
-    <section aria-label="Dépôt du devis" className="flex flex-col gap-4">
+    <section aria-label={liste ? "Dépôt de la liste" : "Dépôt du devis"} className="flex flex-col gap-4">
       {error ? <ErrorNotice error={error} /> : null}
-      <input ref={input} id={id} type="file" accept="application/pdf,.pdf" className="sr-only" disabled={pending} onChange={(e) => take(e.target.files?.[0])} />
+      {/* La liste : une photo (JPEG, PNG, WebP : l'iPhone convertit tout seul) ou un PDF ; le devis : un PDF. */}
+      <input
+        ref={input}
+        id={id}
+        type="file"
+        aria-label={liste ? "Déposer ma liste" : "Déposer mon devis"}
+        accept={liste ? "image/jpeg,image/png,image/webp,application/pdf,.pdf" : "application/pdf,.pdf"}
+        className="sr-only"
+        disabled={pending}
+        onChange={(e) => take(e.target.files?.[0])}
+      />
+      {small ? (
+        // Le petit bouton « Je n'ai qu'un devis » (nouveau cap, 22 octobre) : le parcours du devis reste, en second.
+        <label
+          htmlFor={id}
+          aria-disabled={pending}
+          className={`pressable flex min-h-16 cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3 shadow-card focus-within:outline-3 focus-within:outline-accent ${pending ? "pointer-events-none opacity-80" : "active:bg-ground"}`}
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ground text-ink">
+            {pending ? <Loader2 size={20} className="animate-spin" aria-hidden="true" /> : <FileUp size={20} aria-hidden="true" />}
+          </span>
+          <span className="flex flex-col">
+            <span className="text-[16px] font-semibold">{pending && liste ? "Je lis ta liste…" : (titre ?? "Je n'ai qu'un devis")}</span>
+            <span className="text-[14px] leading-snug text-muted">{sousTitre ?? "On t'avance la liste, sans garantie, tu la peaufines."}</span>
+          </span>
+        </label>
+      ) : (
       <label
         htmlFor={id}
         aria-disabled={pending}
@@ -48,15 +100,17 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
           setOver(false);
           take(e.dataTransfer.files?.[0]);
         }}
-        className={`flex min-h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-[20px] border-[2.5px] border-dashed px-6 py-6 text-center transition focus-within:ring-2 ${
-          over ? "border-accent bg-accent/5" : "border-accent/30 bg-surface"
-        } ${pending ? "pointer-events-none opacity-80" : "active:scale-[0.99]"}`}
+        className={`pressable flex min-h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed px-6 py-8 text-center focus-within:outline-3 focus-within:outline-accent ${
+          over ? "border-accent bg-accent/5" : "border-line bg-surface"
+        } ${pending ? "pointer-events-none opacity-80" : ""}`}
       >
-        <span className="flex size-16 items-center justify-center rounded-full bg-cta text-white shadow-card">
-          {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
+        <span className={`flex size-16 items-center justify-center rounded-full ${liste ? "bg-ink text-white" : "bg-accent text-on-accent"}`}>
+          {pending ? <Loader2 size={28} className="animate-spin" aria-hidden="true" /> : liste ? <ListChecks size={28} aria-hidden="true" /> : <FileUp size={28} aria-hidden="true" />}
         </span>
-        <span className="font-display text-[20px] font-extrabold tracking-[-0.01em]">Déposer mon devis</span>
+        <span className="text-[22px] leading-tight font-extrabold tracking-[-0.02em]">{pending && liste ? "Je lis ta liste…" : liste ? "Donne ta liste de matériaux" : "J'ai un devis"}</span>
+        {liste && !pending ? <span className="text-[15px] leading-snug text-muted">Une photo, un PDF ou une capture : je la remets au propre.</span> : null}
       </label>
+      )}
     </section>
   );
 }
@@ -64,23 +118,15 @@ export function DropZone({ onFile, pending, error }: { onFile: (file: File) => v
 // ——— 2. L'analyse ———
 
 /**
- * §50.1 : pendant la lecture, une seule phrase : « Je lis ton devis ». Retour du fondateur (2026-10-11) : « une animation
- * plus fun qui prend tout l'écran » : le devis en grand, lu au surligneur et balayé par le scanner, d'où sortent les
- * fournitures (`ReadingStage`). Plein écran, par-dessus le menu ; « Revenir à mes chantiers » laisse la lecture continuer
- * (le serveur prévient quand c'est prêt), on n'y reste jamais coincé.
+ * LE TRAVAIL SE VOIT DANS LA DISCUSSION (Greg, 16 novembre 2026 ; RÈGLE CHANGÉE pour §50.1 : avant, une animation plein
+ * écran, le devis au surligneur et des fournitures qui en sortaient) : « N'hésite pas à revoir l'animation, quelque chose
+ * de plus neutre et plus moderne », « Étapes visibles pendant le travail (« Lecture… », « Vérification… ») ». Le même
+ * écran que les questions : la discussion Mobiiz, une phrase dans une bulle, et l'étape en cours, dépliable. Ce sont les
+ * vraies phases du serveur (la lecture, puis le calcul), jamais une barre qui ferait semblant d'avancer. Plein écran,
+ * par-dessus le menu ; le retour laisse le travail continuer (le serveur prévient quand c'est prêt).
  */
-/** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
-export const LECTURE_LONGUE_MS = 30_000;
-
-export function AnalysisScreen() {
+function DiscussionEnCours({ region, phrase, etape, detail, children }: { region: string; phrase: string; etape: string; detail: string; children?: ReactNode }) {
   const router = useRouter();
-  // Décision du fondateur (2026-10-13, « Je lis ton devis » longtemps, « plus rien ne se passe ») : passé 30 s, la phrase
-  // dit que la lecture continue ; toujours une seule phrase (§50.1).
-  const [longue, setLongue] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setLongue(true), LECTURE_LONGUE_MS);
-    return () => clearTimeout(t);
-  }, []);
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -89,26 +135,68 @@ export function AnalysisScreen() {
     };
   }, []);
   return (
-    <section aria-label="Analyse du devis" className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden bg-chantier text-white">
-      <div className="flex shrink-0 px-4 pt-[max(14px,env(safe-area-inset-top))]">
-        <button
-          type="button"
-          onClick={() => router.push("/chantiers")}
-          aria-label="Revenir à mes chantiers"
-          className="inline-flex size-11 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
-        >
-          <ChevronLeft size={22} aria-hidden="true" />
-        </button>
-      </div>
-      <div className="flex min-h-0 grow flex-col items-center justify-center gap-6 pb-[max(28px,env(safe-area-inset-bottom))]">
-        <div className="origin-center scale-[0.92] min-[400px]:scale-100 sm:scale-[1.15]">
-          <ReadingStage />
-        </div>
-        <h2 aria-live="polite" className="font-display text-[30px] leading-tight font-extrabold tracking-[-0.02em]">
-          {longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"}
-        </h2>
+    <section aria-label={region} className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers?vue=suivi")} libelleFermer="Revenir à mes listes" titreEnTexte />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
+        <Bulle de="mobiiz">
+          <h2 aria-live="polite" className="rounded-[22px] rounded-bl-md px-4 py-2.5 text-[16px] leading-snug font-semibold text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.bulle }}>
+            {phrase}
+          </h2>
+        </Bulle>
+        <EtapesIa etapes={[{ cle: etape, titre: etape, detail }]} fini={false} />
+        {children}
       </div>
     </section>
+  );
+}
+
+/** Au-delà, « Je lis ton devis » devient « Gros devis, j'y suis encore… » (décision du fondateur, 2026-10-13). */
+export const LECTURE_LONGUE_MS = 30_000;
+
+/**
+ * LES LIGNES UNE PAR UNE (Greg, 17 novembre 2026 : « affiche les lignes dès qu'elles sont lues, pour que l'attente se voie
+ * comme une liste qui se construit »). Sous l'étape « Lecture… », les lignes du devis déjà lues, dans l'ordre, avec les
+ * mots du devis (le serveur ne donne que ce qu'il y retrouve). Une photo ou un scan : seulement leur nombre. Ce n'est pas
+ * encore la liste de matériaux : elle vient après les questions et le calcul.
+ */
+function LignesLues({ lignes, total }: { lignes: readonly string[]; total: number }) {
+  const fin = useRef<HTMLLIElement | null>(null);
+  useEffect(() => {
+    fin.current?.scrollIntoView({ block: "nearest" });
+  }, [lignes.length]);
+  if (total <= 0) return null;
+  const titre = `${total} ligne${total > 1 ? "s" : ""} lue${total > 1 ? "s" : ""}`;
+  return (
+    <div role="group" aria-label="Lignes déjà lues" className="ml-10 rounded-2xl border border-[var(--chat-trait)] px-4 py-3">
+      <p aria-live="polite" className="text-[13px] font-semibold text-[var(--chat-texte)] opacity-70">
+        {titre}
+      </p>
+      {lignes.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-1.5">
+          {lignes.map((ligne, i) => (
+            <li key={`${i}-${ligne}`} ref={i === lignes.length - 1 ? fin : null} className="flex items-start gap-2 text-[14px] leading-snug text-[var(--chat-texte)]">
+              <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#FED206]" />
+              <span className="min-w-0 break-words">{ligne}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+export function AnalysisScreen({ lignes = [], total = 0 }: { lignes?: readonly string[]; total?: number } = {}) {
+  // Décision du fondateur (2026-10-13, « Je lis ton devis » longtemps, « plus rien ne se passe ») : passé 30 s, la phrase
+  // dit que la lecture continue ; toujours une seule phrase (§50.1).
+  const [longue, setLongue] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setLongue(true), LECTURE_LONGUE_MS);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <DiscussionEnCours region="Analyse du devis" phrase={longue ? "Gros devis, j'y suis encore…" : "Je lis ton devis"} etape="Lecture…" detail="Je lis ton document ligne par ligne. Tu peux revenir à tes listes : je te préviens quand c'est prêt.">
+      <LignesLues lignes={lignes} total={total} />
+    </DiscussionEnCours>
   );
 }
 
@@ -125,12 +213,12 @@ export function notifyReady(title: string, body: string, tag: string): void {
   if (!document.hidden) return;
   document.title = `✓ ${title}`;
   const restore = () => {
-    document.title = "BatiClair";
+    document.title = NOM_APP;
     document.removeEventListener("visibilitychange", restore);
   };
   document.addEventListener("visibilitychange", restore);
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-  const options = { body, tag, icon: "/icon.svg", data: { url: window.location.href } };
+  const options = { body, tag, icon: "/icon-192.png", data: { url: window.location.href } };
   // Sur téléphone, une notification passe par le service worker ; sur ordinateur, directement.
   const sw = "serviceWorker" in navigator ? navigator.serviceWorker.getRegistration("/sw.js") : Promise.resolve(undefined);
   void sw
@@ -140,14 +228,75 @@ export function notifyReady(title: string, body: string, tag: string): void {
 
 // ——— 4. Le calcul ———
 
-/** Après « Calculer ma liste » : une seule phrase, le temps du calcul ; les lignes du devis se posent une à une dans la liste (`ListScene`), pour tous les métiers. */
+/** Après « Calculer ma liste » : la même discussion, une phrase et l'étape du calcul (les quantités sont calculées par le code, avec les règles du métier). */
 export function CalculScreen() {
+  return <DiscussionEnCours region="Calcul de la liste" phrase="Je prépare ta liste" etape="Vérification des quantités…" detail="Chaque quantité est calculée avec les règles du métier, à partir de ton document et de tes réponses." />;
+}
+
+/**
+ * LE RÉCAPITULATIF (Greg, 16 novembre 2026 : « À la fin : récapitulatif court dans la discussion, puis un bouton "Voir ma
+ * liste" qui ouvre l'écran de liste habituel (le même que la saisie à la main) »). Toujours la même discussion : combien
+ * d'articles, d'où ils viennent (dits, calculés, à vérifier), et un seul bouton. Rien n'est envoyé d'ici.
+ */
+export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { takeoff: Takeoff; onVoir: () => void; onChoix?: (key: string, value: string, unit: string) => void; pending?: boolean }) {
+  const router = useRouter();
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+  const articles = takeoff.purchase.toBuy;
+  const compte = (o: ReturnType<typeof origineDeLaLigne>) => articles.filter((a) => origineDeLaLigne(a) === o).length;
+  const [dits, calcules, aVerifier] = [compte("Dit par toi"), compte("Calculé"), compte("À vérifier")];
+  const detail = [dits ? `${dits} dit${dits > 1 ? "s" : ""} par toi` : null, calcules ? `${calcules} calculé${calcules > 1 ? "s" : ""}` : null, aVerifier ? `${aVerifier} à vérifier` : null].filter(Boolean).join(", ");
   return (
-    <section aria-label="Calcul de la liste" className="flex flex-col items-center gap-5 rounded-[20px] bg-chantier px-5 pt-8 pb-8 text-white shadow-card">
-      <ListScene />
-      <h2 aria-live="polite" className="font-display text-[24px] leading-tight font-extrabold tracking-[-0.02em]">
-        Je prépare ta liste
-      </h2>
+    <section aria-label="Récapitulatif" className="fixed top-0 left-0 z-[45] flex h-dvh w-full flex-col overflow-hidden text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers?vue=suivi")} libelleFermer="Revenir à mes listes" titreEnTexte />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
+        <Bulle de="mobiiz" label="Message de MOBIIZ">
+          <TexteMobiiz>
+            {`Ta liste est prête : ${articles.length} article${articles.length > 1 ? "s" : ""}${detail ? ` (${detail})` : ""}.\n${aVerifier ? "Les lignes à vérifier sont en haut de ta liste." : "Vérifie-la, corrige ce que tu veux, puis envoie-la à tes négoces."}`}
+          </TexteMobiiz>
+        </Bulle>
+        {/* Greg, 17 novembre 2026 : « une seule réponse pour tout le devis ; il peut modifier ce choix pour une pièce dans le
+            récapitulatif ». Les pièces et leurs boutons viennent du serveur (la fiche du métier) : aucun mot de métier ici. */}
+        {onChoix && (takeoff.choixPieces?.length ?? 0) > 0 ? (
+          <>
+            <Bulle de="mobiiz" label="Message de MOBIIZ">
+              <TexteMobiiz>Ton choix vaut pour tout le devis. Tu peux le changer pour une pièce :</TexteMobiiz>
+            </Bulle>
+            <ul aria-label="Ton choix, pièce par pièce" className="flex flex-col gap-3 pl-10">
+              {(takeoff.choixPieces ?? []).map((c) => (
+                <li key={c.key} className="flex flex-col gap-1.5">
+                  <span className="text-[15px] font-semibold">{c.piece}</span>
+                  <div role="group" aria-label={c.piece} className="flex flex-wrap gap-2">
+                    {c.options.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        aria-pressed={o.value === c.value}
+                        disabled={pending}
+                        onClick={() => (o.value === c.value ? undefined : onChoix(c.key, o.value, c.unit))}
+                        className="pressable min-h-11 rounded-full border px-4 text-[15px] font-semibold disabled:opacity-60"
+                        style={o.value === c.value ? { backgroundColor: COULEURS_CHAT.jaune, borderColor: COULEURS_CHAT.jaune, color: "#111111" } : { borderColor: COULEURS_CHAT.trait, backgroundColor: "transparent", color: COULEURS_CHAT.ivoire }}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+        <div className="pl-10">
+          <Button className="shadow-card!" onClick={onVoir}>
+            Voir ma liste
+          </Button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -369,11 +518,43 @@ function cardErrors(error: ApiError | null, sent: readonly string[]): Map<string
   return out;
 }
 
-export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
-  const questions = useMemo(() => counterQuestions(takeoff), [takeoff]);
-  const typing = useTyping();
+type MessageQuestions = { de: "mobiiz" | "moi"; texte: string; cle?: string };
+
+/** Les morceaux d'une réponse écrite (même découpe que le moteur) : pour savoir s'il reste du texte que le code n'a pas rangé. */
+const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m) => m.trim()).filter(Boolean).length;
+
+/**
+ * UN SEUL ÉCRAN, LA DISCUSSION (Greg, 16 novembre 2026 ; RÈGLE CHANGÉE : avant, une conversation en haut et les mêmes
+ * questions en cartes dessous, « réponds avec les numéros »). Tout se passe dans le fil, comme l'assistant : UNE question à
+ * la fois dans une bulle de Mobiiz, ses boutons juste dessous ; l'artisan touche un bouton OU répond au clavier ou à la
+ * voix dans la barre du bas, toujours. Sa réponse s'affiche comme son message, les boutons disparaissent, la question
+ * suivante arrive. Une réponse brève, ou plusieurs d'un coup, est lue par le sens et par l'ordre (le code d'abord, puis le
+ * serveur et son IA pour ce qui reste) ; Mobiiz confirme en UNE ligne et ne pose que ce qui manque. Quand tout est
+ * répondu, « Calculer ma liste » est proposé dans le fil. Le serveur revalide tout au calcul.
+ */
+export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
+  const router = useRouter();
+  const duServeur = useMemo(() => counterQuestions(takeoff), [takeoff]);
+  // Une question déjà répondue et partie au serveur n'est plus dans sa liste : on la garde ici, pour que « toucher une de
+  // ses réponses la rouvre » marche jusqu'au calcul (Greg, 16 novembre 2026).
+  const [memoire, setMemoire] = useState<readonly CounterQuestion[]>(duServeur);
+  const [vues, setVues] = useState(duServeur);
+  if (vues !== duServeur) {
+    setVues(duServeur);
+    const cles = new Set(duServeur.map((q) => q.key));
+    setMemoire((m) => [...m.filter((q) => !cles.has(q.key)), ...duServeur]);
+  }
+  const questions = useMemo(() => {
+    const cles = new Set(duServeur.map((q) => q.key));
+    return [...memoire.filter((q) => !cles.has(q.key)), ...duServeur];
+  }, [memoire, duServeur]);
+  // §50.2 : dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
+  const ordonnees = useMemo(() => {
+    const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
+    return order.flatMap((group) => questions.filter((q) => q.group === group)).map((q) => ({ ...q, simple: questionEnMotsSimples(q.key, q.text, q.options) }));
+  }, [questions]);
   const [given, setGiven] = useState<Record<string, Given>>(() => {
-    // « Comme d'habitude » : la réponse habituelle est déjà cochée, un tap la change.
+    // « Comme d'habitude » : la réponse habituelle est déjà prise, elle se dit en une ligne et se change d'un tap.
     const start: Record<string, Given> = {};
     for (const q of questions) {
       if (q.kind !== "habit" || q.usual === null) continue;
@@ -382,231 +563,313 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit }: { takeoff
     }
     return start;
   });
-  const set = (key: string, g: Given | null) =>
-    setGiven((prev) => {
-      const next = { ...prev };
-      if (g) next[key] = g;
-      else delete next[key];
-      return next;
-    });
   const [retired, setRetired] = useState<ReadonlySet<string>>(() => new Set());
-  const retire = (key: string, out: boolean) =>
-    setRetired((prev) => {
-      const next = new Set(prev);
-      if (out) next.add(key);
-      else next.delete(key);
-      return next;
-    });
-  // Les clés des réponses parties, dans l'ordre : un refus du serveur (`reponses.N`) retrouve sa carte.
+  const [messages, setMessages] = useState<MessageQuestions[]>(() => {
+    const habitudes = questions.filter((q) => q.kind === "habit" && q.usual !== null).map((q) => q.options.find((o) => o.value === q.usual)?.label).filter(Boolean);
+    const aPoser = questions.length - habitudes.length;
+    const tete = aPoser > 1 ? "J'ai lu ton devis. Il me manque quelques réponses pour calculer ta liste." : aPoser === 1 ? "J'ai lu ton devis. Il me manque une réponse pour calculer ta liste." : "J'ai lu ton devis.";
+    return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\nComme d'habitude : ${habitudes.join(", ")}.` : tete }];
+  });
+  const [reflexion, setReflexion] = useState(false);
+  const [autre, setAutre] = useState(false);
+  // « Ma liste · 5 articles » (Greg, 16 novembre 2026) : la liste se construit sous les yeux de l'artisan ; le bandeau
+  // l'ouvre à tout moment, chaque article avec son origine.
+  const [listeOuverte, setListeOuverte] = useState(false);
+  const articles = takeoff.purchase.toBuy;
+  const champ = useChampDicte();
+  const dictee = useDictee(champ.surVoix);
+  const restantes = ordonnees.filter((q) => !given[q.key] && !retired.has(q.key));
+  const courante = restantes[0] ?? null;
+  // Catalogue métier (Greg, 31 octobre 2026) : sur une question de modèle, ce qui se tape propose ses références.
+  const references = useReferencesCatalogue(champ.saisie, Boolean(courante && QUESTION_DE_MODELE.test(courante.text)));
+  // Les cases « Suggestions », quand elles arrivent après la dernière question : le fil descend jusqu'à elles.
+  const aSuggerer = suggestionsAProposer(takeoff);
+  const { fil, enBas } = useFil([messages.length, reflexion, courante?.key, pending, Boolean(aSuggerer)]);
+  const zone = useZoneVisible(enBas);
+
+  // Un refus du serveur nomme la réponse fautive (`reponses.N`) : sa question revient dans le fil, avec la phrase.
   const [sent, setSent] = useState<readonly string[]>([]);
-  const errors = useMemo(() => cardErrors(error, sent), [error, sent]);
-  const firstError = [...errors.keys()][0];
-  useEffect(() => {
-    if (firstError) document.getElementById(`question-${firstError}`)?.scrollIntoView?.({ block: "center" });
-  }, [firstError, error]);
-  const toForm = questions.filter((q) => mandatory(q) && !given[q.key]);
-  const [nudge, setNudge] = useState(false);
-  // §50.2 : groupées par ouvrage, dans l'ordre où l'ouvrage arrive ; le chantier et les consommables à la fin.
-  const order = [...new Set(questions.map((q) => q.group))].sort((a, b) => Number(a === SITE_GROUP || a === CONSUMABLES_GROUP) - Number(b === SITE_GROUP || b === CONSUMABLES_GROUP) || Number(a === CONSUMABLES_GROUP) - Number(b === CONSUMABLES_GROUP));
-
-  return (
-    <section aria-label="Les questions" className="flex flex-col gap-3">
-      {error && errors.size === 0 ? <ErrorNotice error={error} /> : null}
-      {order.map((group) => (
-        <section key={group} aria-label={group} className="flex flex-col gap-2.5">
-          <h3 className="px-1 pt-2 font-display text-[17px] font-extrabold tracking-[-0.01em]">{group}</h3>
-          <ol className="flex flex-col gap-2.5">
-            {questions
-              .filter((q) => q.group === group)
-              .map((q) =>
-                retired.has(q.key) ? (
-                  <RetiredCard key={q.key} question={q} onRestore={() => retire(q.key, false)} />
-                ) : (
-                  <QuestionCard
-                    key={q.key}
-                    question={q}
-                    given={given[q.key] ?? null}
-                    flagged={nudge && toForm.some((x) => x.key === q.key)}
-                    problem={errors.get(q.key) ?? null}
-                    onChange={(g) => set(q.key, g)}
-                    {...(mandatory(q) ? {} : { onRetire: () => retire(q.key, true) })}
-                  />
-                ),
-              )}
-          </ol>
-        </section>
-      ))}
-      {/* Retour du fondateur (2026-10-12, capture iPhone) : le bouton restait accroché au milieu de l'écran une fois le clavier
-          refermé (case « Autre »). Sur téléphone : `position: fixed; bottom: 0`, la zone du geste en marge intérieure, caché
-          pendant la saisie (`useTyping`, qui fait aussi recalculer l'écran à Safari), et la place gardée sous la dernière carte. */}
-      <div aria-hidden="true" className="h-(--calc-space) lg:hidden" />
-      <div
-        role="group"
-        aria-label="Calculer ma liste"
-        data-typing={typing || undefined}
-        className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}z-30 bg-gradient-to-t from-ground from-70% to-transparent pt-6 transition-[translate,opacity] duration-200 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:px-4.5 max-lg:pb-[max(14px,env(safe-area-inset-bottom))] lg:sticky lg:bottom-0 lg:pb-4`}
-      >
-        <div className="mx-auto max-w-2xl">
-          <Button
-            className="w-full shadow-card!"
-            pending={pending}
-            onClick={() => {
-              // §48.6 : le façonnage de chaque pièce de zinc est obligatoire ; la première carte sans réponse se montre.
-              if (toForm.length > 0) {
-                setNudge(true);
-                document.getElementById(`question-${toForm[0]!.key}`)?.scrollIntoView?.({ block: "center", behavior: "smooth" });
-                return;
-              }
-              const answers = counterAnswers(questions, given, retired);
-              setSent(answers.reponses.map((r) => r.question));
-              onSubmit(answers);
-            }}
-          >
-            Calculer ma liste
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/** Une question retirée : sa phrase en une ligne, et « Remettre ». */
-function RetiredCard({ question: q, onRestore }: { question: CounterQuestion; onRestore: () => void }) {
-  return (
-    <li className="flex items-center gap-3 rounded-[20px] bg-surface px-4 py-3 shadow-card">
-      <span className="min-w-0 grow text-[14px] leading-snug text-muted">
-        Question retirée : <span className="font-bold">{q.text}</span>
-      </span>
-      <Button variant="secondary" className="shrink-0" onClick={onRestore}>
-        Remettre
-      </Button>
-    </li>
-  );
-}
-
-function QuestionCard({
-  question: q,
-  given,
-  flagged,
-  problem,
-  onChange,
-  onRetire,
-}: {
-  question: CounterQuestion;
-  given: Given | null;
-  flagged: boolean;
-  /** La phrase d'un refus du serveur sur cette réponse : voyant rouge sur la carte. */
-  problem: string | null;
-  onChange: (g: Given | null) => void;
-  /** La poubelle (absente sur une question obligatoire). */
-  onRetire?: () => void;
-}) {
-  const id = useId();
-  return (
-    <li id={`question-${q.key}`} className={`flex scroll-mt-24 flex-col gap-2.5 rounded-[20px] bg-surface p-4 shadow-card transition ${problem ? "ring-2 ring-danger" : given ? "ring-2 ring-ok/50" : flagged ? "ring-2 ring-warn" : ""}`}>
-      <div className="flex items-start gap-2">
-        <span id={`${id}-q`} className="grow text-[16px] leading-snug font-extrabold">
-          {q.text}
-        </span>
-        {onRetire ? (
-          <button type="button" onClick={onRetire} aria-label="Retirer cette question" className="-mt-1.5 -mr-1.5 flex size-10 shrink-0 items-center justify-center rounded-full text-muted active:scale-95">
-            <Trash2 size={17} aria-hidden="true" />
-          </button>
-        ) : null}
-      </div>
-      {problem ? (
-        <p role="alert" className="flex items-center gap-2 text-[14px] font-bold text-danger">
-          <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full bg-danger" />
-          {problem}
-        </p>
-      ) : null}
-      {q.options.length === 0 ? (
-        // Temps deux : une valeur se tape dans une case, avec son unité (« 60 cm ») ; une réponse sans boutons s'écrit.
-        <OtherAnswer question={{ ...q, free: q.numeric || (q.unit && q.unit !== "u") ? "number" : (q.free ?? "written") }} given={given} onChange={onChange} startOpen />
-      ) : (
-        <div role="group" aria-labelledby={`${id}-q`} className={`grid gap-2 ${q.options.length <= 2 || q.options.every((o) => o.label.length <= 14) ? "grid-cols-2" : "grid-cols-1"}`}>
-          {q.options.map((o) => {
-            const on = given?.value === o.value && !given.custom;
-            const usual = !given && q.usual === o.value;
-            return (
-              <button
-                key={o.value || "aucun"}
-                type="button"
-                aria-pressed={on}
-                onClick={() => onChange(on ? null : { value: o.value, label: o.label })}
-                className={`inline-flex min-h-12 flex-col items-center justify-center rounded-2xl border-2 px-3 py-1.5 text-center text-[15px] leading-tight font-extrabold transition active:scale-[0.98] ${
-                  on ? "border-accent bg-accent text-white" : usual ? "border-accent/50 bg-[#eef2ff] text-ink" : "border-line bg-surface text-ink"
-                }`}
-              >
-                {o.label}
-                {usual ? <span className="text-[11px] font-bold text-accent-text">par défaut</span> : null}
-              </button>
-            );
-          })}
-          {q.free ? <OtherAnswer question={q} given={given} onChange={onChange} /> : null}
-        </div>
-      )}
-    </li>
-  );
-}
-
-/**
- * « Autre » : quand la bonne réponse n'est pas dans les boutons, elle s'écrit (un modèle de tuile, une pente de 38°). Un
- * appui sur « Autre » ouvre la case ; « OK » la garde comme réponse.
- */
-function OtherAnswer({ question: q, given, onChange, startOpen = false }: { question: CounterQuestion; given: Given | null; onChange: (g: Given | null) => void; startOpen?: boolean }) {
-  const id = useId();
-  const [open, setOpen] = useState(startOpen || Boolean(given?.custom));
-  const [value, setValue] = useState(given?.custom ? given.value : "");
-  const numeric = q.free === "number";
-  const unitLabel = q.unit && q.unit !== "u" ? (q.unit === "m2" ? "m²" : q.unit) : "";
-  const clean = value.trim().replace(",", ".");
-  const valid = numeric ? /^\d+(?:\.\d+)?$/.test(clean) && Number(clean) > 0 : value.trim().length >= 2;
-  const save = () => {
-    if (!valid) return;
-    const v = numeric ? clean : value.trim();
-    onChange({ value: v, label: numeric ? `${v.replace(".", ",")}${unitLabel ? (unitLabel === "°" ? "°" : ` ${unitLabel}`) : ""}` : v, custom: true });
-  };
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex min-h-12 items-center justify-center rounded-2xl border-2 border-dashed border-line bg-surface px-3 py-1.5 text-[15px] font-extrabold text-ink active:scale-[0.98]"
-      >
-        Autre
-      </button>
-    );
+  const [vu, setVu] = useState<ApiError | null>(null);
+  if (error && vu !== error) {
+    setVu(error);
+    const fautes = cardErrors(error, sent);
+    if (fautes.size === 0) setMessages((m) => [...m, { de: "mobiiz", texte: error.message || "Le calcul n'est pas parti. Réessaie dans un instant." }]);
+    else {
+      setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => !fautes.has(k))));
+      setMessages((m) => [...m, ...[...fautes.values()].map((texte) => ({ de: "mobiiz" as const, texte }))]);
+    }
   }
+
+  const noter = (q: (typeof ordonnees)[number], g: Given) => {
+    setAutre(false);
+    setGiven((prev) => ({ ...prev, [q.key]: g }));
+    setMessages((m) => [...m, { de: "moi", texte: g.label, cle: q.key }]);
+  };
+  const sansReponse = (q: (typeof ordonnees)[number]) => {
+    setAutre(false);
+    setRetired((prev) => new Set(prev).add(q.key));
+    setMessages((m) => [...m, { de: "moi", texte: "Je ne sais pas", cle: q.key }, { de: "mobiiz", texte: "Pas de souci : la ligne restera à vérifier dans ta liste." }]);
+  };
+  /** Toucher une de ses réponses la rouvre : la question revient dans le fil. */
+  const reprendre = (cle: string) => {
+    setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== cle)));
+    setRetired((prev) => new Set([...prev].filter((k) => k !== cle)));
+    setMessages((m) => [...m, { de: "mobiiz", texte: "D'accord, on reprend cette question." }]);
+  };
+
+  const envoyer = async () => {
+    const texte = champ.saisie.trim();
+    if (!texte || reflexion || pending || restantes.length === 0) return;
+    dictee.arreter();
+    champ.setSaisie("");
+    setAutre(false);
+    setMessages((m) => [...m, { de: "moi", texte }]);
+    const posees = restantes.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.simple.texte, options: q.simple.options, unite: q.unit, libre: q.options.length === 0 && !q.free ? (q.numeric || (q.unit && q.unit !== "u") ? ("number" as const) : ("written" as const)) : q.free, numerique: q.numeric }));
+    // Greg, 17 novembre 2026 : « Je veux les 6 comprises ». Ce qui est DÉJÀ CONNU (l'habitude dite dans le fil : « Comme
+    // d'habitude : 0,65 mm ») et ce que ce devis ne demande pas (la pose des crochets) : jamais posé, mais confirmé, ou
+    // changé, si l'artisan le dit. Les données et leurs boutons viennent du serveur (la fiche du métier).
+    const habitudes = ordonnees.filter((q) => q.kind === "habit" && given[q.key] && !retired.has(q.key) && q.options.length > 0);
+    const dejaLa = new Set(ordonnees.map((q) => q.key.replace(/^engine:/, "")));
+    const dicibles: CounterQuestion[] = (takeoff.dicibles ?? [])
+      .filter((d) => !dejaLa.has(d.key))
+      .map((d) => ({ key: d.key, kind: "habit", text: d.text, options: d.options, unit: d.unit, about: null, hint: null, numeric: false, usual: null, group: SITE_GROUP }));
+    const connues = [...habitudes.map((q) => ({ q, texte: q.simple.texte, options: q.simple.options })), ...dicibles.map((q) => ({ q, texte: q.text, options: q.options }))];
+    const toutes = [...posees, ...connues.map((c, i) => ({ numero: posees.length + i + 1, cle: c.q.key, texte: c.texte, options: c.options, unite: c.q.unit, libre: undefined, numerique: false, connue: true as const }))];
+    let lues: ReponseInterpretee[] = interpreterReponsesNumerotees(toutes, texte);
+    const compris = (rs: readonly ReponseInterpretee[]) => rs.filter((r) => r.statut === "compris").length;
+    const desPosees = (rs: readonly ReponseInterpretee[]) => rs.filter((r) => r.numero <= posees.length);
+    const desConnues = lues.filter((r) => r.numero > posees.length && r.statut === "compris");
+    // Ce que le code n'a pas rangé passe au serveur (son IA, si elle est allumée, puis la revalidation par le code).
+    if (posees.length > 0 && compris(desPosees(lues)) < Math.min(morceauxDe(texte) - desConnues.length, posees.length)) {
+      setReflexion(true);
+      const r = await api<{ ia: boolean; reponses: ReponseInterpretee[] }>("/v1/assistant/interpretation", {
+        method: "POST",
+        body: { questions: posees.map((q) => ({ numero: q.numero, cle: q.cle, texte: q.texte, options: q.options, unite: q.unite, ...(q.libre ? { libre: q.libre } : {}), ...(q.numerique ? { numerique: true } : {}) })), texte: texte.slice(0, 2000) },
+      }).catch(() => null);
+      // Ce que le code a rangé sur un bouton reste ; le serveur ne complète que les questions encore ouvertes.
+      if (r?.ia && r.reponses.length === posees.length) lues = lues.map((c) => (c.statut === "compris" || c.numero > posees.length ? c : (r.reponses.find((x) => x.numero === c.numero && x.statut === "compris") ?? c)));
+      setReflexion(false);
+    }
+    const prises: Record<string, Given> = {};
+    const laissees: string[] = [];
+    const dites: CounterQuestion[] = [];
+    for (const r of lues) {
+      if (r.numero > posees.length) {
+        // Une donnée connue : notée seulement si l'artisan l'a dite ; une donnée que le devis ne demandait pas rejoint
+        // alors les réponses du chantier (elle part au serveur avec les autres).
+        const c = connues[r.numero - posees.length - 1]!;
+        if (r.statut !== "compris" || r.valeur === null) continue;
+        prises[c.q.key] = { value: r.valeur, label: r.libelle ?? r.valeur };
+        if (!dejaLa.has(c.q.key.replace(/^engine:/, ""))) dites.push(c.q);
+        continue;
+      }
+      const q = restantes[r.numero - 1]!;
+      if (r.statut === "compris" && r.valeur !== null) prises[q.key] = { value: r.valeur, label: r.libelle ?? r.valeur, ...(r.libreEcrite ? { custom: true } : {}) };
+      else if (r.statut === "sans_reponse" && r.raison && !mandatory(q)) laissees.push(q.key);
+    }
+    if (dites.length) setMemoire((m) => [...m.filter((q) => !dites.some((d) => d.key === q.key)), ...dites]);
+    if (Object.keys(prises).length) setGiven((prev) => ({ ...prev, ...prises }));
+    if (laissees.length) setRetired((prev) => new Set([...prev, ...laissees]));
+    // UNE ligne : ce qui est compris ; sinon, pourquoi la question posée revient. Jamais la liste de tout.
+    // Dans l'ordre où l'artisan les a dites, autant que possible : les questions posées, puis ce qu'il a ajouté.
+    const notee = phraseNotee(Object.values(prises).map((g) => g.label));
+    const premiere = desPosees(lues)[0];
+    const suite = notee
+      ? notee
+      : laissees.length
+        ? "Pas de souci : la ligne restera à vérifier dans ta liste."
+        : (premiere?.raison ?? "Je n'ai pas compris. Touche un bouton ou redis-le autrement.");
+    setMessages((m) => [...m, { de: "mobiiz", texte: suite }]);
+  };
+
+  const calculer = () => {
+    // Ce qui est déjà parti au serveur ne repart pas.
+    const tout = counterAnswers(questions, given, retired);
+    const answers = { ...tout, reponses: tout.reponses.filter((r) => r.valeur === null || !parties.current.has(`${r.question}=${r.valeur}`)) };
+    setSent(answers.reponses.map((r) => r.question));
+    onSubmit(answers);
+  };
+  // « Quand tout est répondu, elle réfléchit, pose d'éventuelles dernières questions de la même façon, puis propose
+  // "Calculer ma liste" » (Greg, 16 novembre 2026). Recette en ligne du même jour : une réponse peut faire naître une
+  // question du calcul (le nombre de descentes, le façonnage d'une autre pièce). Dès que tout est répondu, les réponses
+  // partent donc au serveur ; ce qu'il lui manque encore arrive dans le fil, AVANT « Calculer ma liste ». Chaque réponse
+  // ne part qu'une fois ; « Je ne sais pas » ne part qu'au calcul.
+  const parties = useRef<Set<string>>(new Set());
+  const dernierEnvoi = useRef<readonly string[]>([]);
+  // Un envoi refusé n'a rien enregistré : ses réponses repartiront avec la réponse corrigée.
+  useEffect(() => {
+    if (!error) return;
+    for (const k of dernierEnvoi.current) parties.current.delete(k);
+    dernierEnvoi.current = [];
+  }, [error]);
+  const [verification, setVerification] = useState(false);
+  const toutRepondu = restantes.length === 0;
+  useEffect(() => {
+    if (!onReponses || !toutRepondu || pending || reflexion) return;
+    const nouvelles = counterAnswers(questions, given, retired).reponses.filter((r) => r.valeur !== null && !parties.current.has(`${r.question}=${r.valeur}`));
+    if (nouvelles.length === 0) return;
+    for (const r of nouvelles) parties.current.add(`${r.question}=${r.valeur}`);
+    dernierEnvoi.current = nouvelles.map((r) => `${r.question}=${r.valeur}`);
+    setSent(nouvelles.map((r) => r.question));
+    setVerification(true);
+    onReponses(nouvelles);
+  }, [onReponses, toutRepondu, pending, reflexion, questions, given, retired]);
+  // La vérification finie : s'il reste une question, elle se dit en une ligne ; sinon « Calculer ma liste » arrive.
+  if (verification && !pending) {
+    setVerification(false);
+    if (!error && courante) setMessages((m) => [...m, { de: "mobiiz", texte: restantes.length > 1 ? "Encore quelques précisions avant de calculer." : "Encore une précision avant de calculer." }]);
+  }
+  const invite = courante ? (autre ? "Écris ta réponse…" : courante.options.length === 0 ? `Écris ta réponse${courante.unit && courante.unit !== "u" ? ` (${courante.unit === "m2" ? "m²" : courante.unit})` : ""}…` : "Réponds ici…") : "Réponds ici…";
+
   return (
-    <form
-      className="col-span-full flex items-center gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        save();
-      }}
-    >
-      <label htmlFor={id} className="sr-only">
-        {numeric ? `Autre valeur : ${q.text}` : `Autre : ${q.text}`}
-      </label>
-      <span className={`flex min-w-0 grow items-center gap-1 rounded-2xl border-2 bg-surface px-3 ${given?.custom ? "border-accent" : "border-line"} focus-within:border-accent`}>
-        <input
-          id={id}
-          autoFocus
-          inputMode={numeric ? "decimal" : "text"}
-          maxLength={numeric ? 8 : q.free === "written" ? 300 : 100}
-          placeholder={numeric ? "Ta valeur" : q.free === "written" ? "Écris ta réponse" : "Écris le modèle"}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={save}
-          className="min-h-12 w-full min-w-0 bg-transparent text-[16px] font-extrabold outline-none"
-        />
-        {numeric && unitLabel ? <span className="shrink-0 text-[14px] font-bold text-muted">{unitLabel}</span> : null}
-      </span>
-      <Button type="submit" className="shrink-0" disabled={!valid}>
-        OK
-      </Button>
-    </form>
+    <div ref={zone} role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat
+        onFermer={() => router.push("/chantiers")}
+        apres={
+          articles.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setListeOuverte(true)}
+              className="pressable flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold whitespace-nowrap text-[var(--chat-texte)]"
+              style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: "var(--chat-voile)" }}
+            >
+              <ListChecks size={16} aria-hidden="true" className="text-[var(--chat-jaune-texte)]" />
+              Ma liste · {articles.length} article{articles.length > 1 ? "s" : ""}
+            </button>
+          ) : null
+        }
+      />
+      {listeOuverte ? (
+        <div role="dialog" aria-modal="true" aria-label="Ma liste" className="absolute top-0 left-0 z-10 flex h-full w-full flex-col" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+          <div className="flex shrink-0 items-center gap-2 border-b px-3 pt-[max(env(safe-area-inset-top),8px)] pb-2" style={{ borderColor: COULEURS_CHAT.trait }}>
+            <p className="min-w-0 grow truncate pl-1 text-[16px] font-bold">
+              Ma liste · {articles.length} article{articles.length > 1 ? "s" : ""}
+            </p>
+            <button type="button" onClick={() => setListeOuverte(false)} aria-label="Fermer ma liste" className="pressable flex size-11 shrink-0 items-center justify-center rounded-full active:bg-[var(--chat-texte)]/10">
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
+          <p className="shrink-0 px-4 pt-3 text-[14px] text-[var(--chat-texte)]/75">Elle se complète avec tes réponses. Tu pourras tout corriger à la fin.</p>
+          <ul aria-label="Articles de ma liste" className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-3 py-3">
+            {articles.map((a) => (
+              <li key={a.key} className="flex items-start gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: COULEURS_CHAT.bulle }}>
+                <span className="flex min-w-0 grow flex-col">
+                  <span className="text-[15px] leading-snug font-semibold break-words">{a.label}</span>
+                  <span className={`text-[13px] ${a.state === "to_confirm" ? "font-bold text-[#FF8A6B]" : "text-[var(--chat-texte)]/70"}`}>{origineDeLaLigne(a)}</span>
+                </span>
+                <span className="shrink-0 text-[15px] font-extrabold tabular-nums">{a.quantity ?? ""}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
+        <section ref={fil} aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
+          {messages.map((m, i) =>
+            m.de === "mobiiz" ? (
+              <Bulle key={i} de="mobiiz" label="Message de MOBIIZ">
+                <TexteMobiiz>{m.texte}</TexteMobiiz>
+              </Bulle>
+            ) : m.cle && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
+              <button key={i} type="button" onClick={() => reprendre(m.cle!)} aria-label={`Modifier ma réponse : ${m.texte}`} className="pressable max-w-[82%] self-end rounded-[22px] rounded-br-md px-4 py-2.5 text-left text-[16px] leading-snug whitespace-pre-line text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+                {m.texte}
+              </button>
+            ) : (
+              <Bulle key={i} de="moi">
+                {m.texte}
+              </Bulle>
+            ),
+          )}
+          {reflexion || verification ? (
+            <p role="status" className="self-start pl-10 text-[14px] font-semibold text-[var(--chat-texte)]/75">
+              {verification ? "Vérification de tes réponses…" : "Réflexion…"}
+            </p>
+          ) : courante ? (
+            <>
+              <Bulle de="mobiiz" label="Question de MOBIIZ">
+                <TexteMobiiz>{courante.simple.texte}</TexteMobiiz>
+              </Bulle>
+              <div role="group" aria-label={courante.simple.texte} className="flex flex-wrap gap-2 pl-10">
+                {courante.simple.options.map((o) => (
+                  <Puce key={`${o.value}:${o.label}`} onClick={() => noter(courante, { value: o.value, label: o.label })}>
+                    {o.label}
+                    {courante.usual === o.value && courante.simple.options.filter((x) => x.value === o.value).length === 1 ? <span className="pl-1.5 text-[12px] font-bold text-[var(--chat-texte)]/70">par défaut</span> : null}
+                  </Puce>
+                ))}
+                {courante.free && courante.options.length > 0 ? (
+                  <Puce
+                    onClick={() => {
+                      setAutre(true);
+                      document.querySelector<HTMLTextAreaElement>("[data-barre-questions] textarea")?.focus();
+                    }}
+                  >
+                    Autre
+                  </Puce>
+                ) : null}
+                {mandatory(courante) ? null : (
+                  <Puce discret onClick={() => sansReponse(courante)}>
+                    Je ne sais pas
+                  </Puce>
+                )}
+              </div>
+            </>
+          ) : aSuggerer && onReponses ? (
+            // Greg, 18 novembre 2026 : « J'aimerais que les suggestions arrivent à la fin, avant le quantitatif ». Une fois
+            // toutes les questions répondues, la carte à cases ; « Continuer », puis « Calculer ma liste » (ou, si une case
+            // cochée demande une précision, sa question d'abord).
+            <>
+              <Bulle de="mobiiz" label="Message de MOBIIZ">
+                <TexteMobiiz>Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+              </Bulle>
+              <CasesSuggestions options={aSuggerer} pending={pending || verification} error={null} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />
+            </>
+          ) : (
+            <>
+              <Bulle de="mobiiz" label="Message de MOBIIZ">
+                <TexteMobiiz>{pending ? "Je calcule ta liste…" : "J'ai tout ce qu'il me faut. Touche une de tes réponses pour la changer, sinon on y va."}</TexteMobiiz>
+              </Bulle>
+              <div className="pl-10">
+                <Button className="shadow-card!" pending={pending} onClick={calculer}>
+                  Calculer ma liste
+                </Button>
+              </div>
+            </>
+          )}
+        </section>
+        <div data-barre-questions>
+          <BarreSaisie
+            valeur={champ.saisie}
+            onChange={champ.setSaisie}
+            onEnvoyer={() => void envoyer()}
+            occupe={reflexion || pending}
+            ecoute={dictee.ecoute}
+            probleme={dictee.probleme}
+            invite={invite}
+            avant={
+              courante ? (
+                <ReferencesCatalogue
+                  question={courante.text}
+                  references={references}
+                  onChoisir={(r) => {
+                    champ.setSaisie("");
+                    noter(courante, { value: r, label: r, custom: true });
+                  }}
+                />
+              ) : null
+            }
+            onDicter={() => {
+              champ.avantDictee();
+              dictee.demarrer();
+            }}
+            onArreter={dictee.arreter}
+            onAnnulerDictee={() => {
+              dictee.annuler();
+              champ.rendre();
+            }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -667,6 +930,99 @@ export function EditableName({ name, onSave, className = "" }: { name: string; o
   );
 }
 
+
+/** La clé de l'étape « Suggestions » (la même que le serveur) et sa réponse quand rien n'est coché. */
+export const CLE_SUGGESTIONS = "suggestions:choisies";
+const AUCUNE_SUGGESTION = "aucune";
+
+/** Les propositions de l'étape « Suggestions », quand le serveur l'ouvre (elle passe avant toute autre question). */
+export function suggestionsAProposer(takeoff: Takeoff): { label: string; value: string }[] | null {
+  const s = takeoff.suggestions ?? [];
+  return s.length > 0 ? s.map((x) => ({ label: x.label, value: x.key })) : null;
+}
+
+/** Les cases de l'étape « Suggestions » : dans la carte seule (aucune question) ou dans le fil, après la dernière question. */
+function CasesSuggestions({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+  const [cochees, setCochees] = useState<ReadonlySet<string>>(() => new Set());
+  const basculer = (v: string) =>
+    setCochees((prev) => {
+      const next = new Set(prev);
+      if (next.has(v)) next.delete(v);
+      else next.add(v);
+      return next;
+    });
+  const n = cochees.size;
+  return (
+    <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
+      <legend className="sr-only">Suggestions</legend>
+      <div className="flex flex-col gap-0.5">
+        <p className="text-[18px] leading-tight font-extrabold tracking-[-0.01em]">Suggestions</p>
+        <p className="text-[15px] leading-snug text-[var(--chat-texte)]/75">Coche ce qu&apos;il te faut, on l&apos;ajoute à ta liste.</p>
+      </div>
+      <ul className="flex flex-col gap-2">
+        {options.map((o) => {
+          const on = cochees.has(o.value);
+          return (
+            <li key={o.value}>
+              <label
+                className="pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[16px] leading-snug font-semibold"
+                style={{ borderColor: on ? COULEURS_CHAT.jaune : COULEURS_CHAT.trait, backgroundColor: on ? "color-mix(in srgb, #FED206 14%, transparent)" : "var(--chat-voile)" }}
+              >
+                <input type="checkbox" checked={on} onChange={() => basculer(o.value)} className="peer sr-only" />
+                <span
+                  aria-hidden="true"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+                  style={{ borderColor: on ? COULEURS_CHAT.jaune : "color-mix(in srgb, var(--chat-texte) 45%, transparent)", backgroundColor: on ? COULEURS_CHAT.jaune : "transparent" }}
+                >
+                  {on ? <Check size={18} strokeWidth={3} className="text-[#111111]" /> : null}
+                </span>
+                <span className="min-w-0 grow break-words">{o.label}</span>
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+      <p aria-live="polite" className="text-[13px] text-[var(--chat-texte)]/70">
+        {n === 0 ? "Rien de coché : ta liste reste telle que ton devis la dit." : n === 1 ? "1 article sera ajouté à ta liste." : `${n} articles seront ajoutés à ta liste.`}
+      </p>
+      {error ? <ErrorNotice error={error} /> : null}
+      <button
+        type="button"
+        onClick={() => onContinuer(n > 0 ? options.filter((o) => cochees.has(o.value)).map((o) => o.value).join(",") : AUCUNE_SUGGESTION)}
+        disabled={pending}
+        className="pressable flex min-h-13 w-full items-center justify-center gap-2 rounded-full px-5 text-[17px] font-extrabold text-[#111111] disabled:opacity-60"
+        style={{ backgroundColor: COULEURS_CHAT.jaune }}
+      >
+        {pending ? <Loader2 size={18} aria-hidden="true" className="animate-spin" /> : null}
+        Continuer
+      </button>
+    </fieldset>
+  );
+}
+
+/**
+ * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 14 à 17) : après la lecture et avant les questions de précision,
+ * une seule étape dans la discussion. Des cases larges, faciles à toucher, un seul bouton « Continuer ». Ce qui est coché
+ * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
+ * serveur), cinq au plus ; aucune proposition : pas d'étape.
+ */
+export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+  const router = useRouter();
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      <EnTeteChat onFermer={() => router.push("/chantiers")} />
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
+        <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
+          <Bulle de="mobiiz" label="Message de MOBIIZ">
+            <TexteMobiiz>J&apos;ai lu ton devis. Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+          </Bulle>
+          <CasesSuggestions options={options} pending={pending} error={error} onContinuer={onContinuer} />
+        </section>
+      </div>
+    </div>
+  );
+}
+
 /** La carte « Lots repérés » ne se montre que pour un devis de plus d'un lot, tant que l'artisan n'a pas dit « C'est bon ». */
 export function lotsAConfirmer(takeoff: Takeoff): boolean {
   return (takeoff.lots?.length ?? 0) > 1 && !takeoff.lotsConfirmes;
@@ -682,11 +1038,16 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
   const [adding, setAdding] = useState(false);
   const ajoutables = (takeoff.metiersAjoutables ?? []).filter((m) => !lots.some((l) => l.metier === m.metier));
   return (
-    <section aria-label="Lots repérés" className="flex flex-col gap-3">
+    <section aria-label="Parties du devis" className="flex flex-col gap-3">
       {error ? <ErrorNotice error={error} /> : null}
-      <div className="flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
-        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Lots repérés : {lots.map((l) => l.libelle).join(" · ")}</h3>
-        <p className="text-[14px] leading-snug text-muted">Une liste par lot. Retire un lot qui n&apos;en est pas un, ajoute celui qui manque.</p>
+      <div className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-card">
+        <h3 className="font-display text-[17px] font-extrabold tracking-[-0.01em]">Parties du devis : {lots.map((l) => l.libelle).join(" · ")}</h3>
+        <p className="text-[14px] leading-snug text-muted">Une liste par partie du devis. Retire une partie en trop, ajoute celle qui manque.</p>
+        {(takeoff.lotsNonLus ?? []).map((phrase) => (
+          <p key={phrase} role="status" className="rounded-2xl bg-warn-bg px-3 py-2 text-[14px] font-semibold text-warn">
+            {phrase}
+          </p>
+        ))}
         <ul className="flex flex-wrap gap-2">
           {lots.map((l) => (
             <li key={l.metier}>
@@ -694,7 +1055,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
                 type="button"
                 disabled={lots.length < 2 || pending}
                 onClick={() => setLots((prev) => prev.filter((x) => x.metier !== l.metier))}
-                aria-label={`Retirer le lot ${l.libelle}`}
+                aria-label={`Retirer la partie ${l.libelle}`}
                 className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-ground px-4 text-[15px] font-bold disabled:opacity-60"
               >
                 {l.libelle}
@@ -704,7 +1065,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
           ))}
         </ul>
         {adding ? (
-          <div role="group" aria-label="Ajouter un lot" className="flex flex-wrap gap-2">
+          <div role="group" aria-label="Ajouter une partie" className="flex flex-wrap gap-2">
             {ajoutables.map((m) => (
               <button
                 key={m.metier}
@@ -722,7 +1083,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
         ) : ajoutables.length > 0 ? (
           <Button variant="ghost" className="self-start px-0" disabled={pending} onClick={() => setAdding(true)}>
             <Plus size={18} aria-hidden="true" />
-            Ajouter un lot
+            Ajouter une partie
           </Button>
         ) : null}
         <Button variant="secondary" pending={pending} onClick={() => onConfirm(lots.map((l) => l.metier))}>
@@ -735,14 +1096,24 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
 }
 
 /** L'étape des questions : sans aucune question à poser, le calcul part tout seul (rien à valider pour rien). */
-export function QuestionsStep({ takeoff, pending, error, onSubmit }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void }) {
-  const none = counterQuestions(takeoff).length === 0;
+export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
+  // Décidé à l'ouverture : une discussion commencée reste ouverte quand ses réponses, enregistrées, ne laissent plus de
+  // question (« Calculer ma liste » y est proposé, jamais lancé tout seul). Elle n'est jamais démontée en route : ses
+  // réponses écrites et ses « Je ne sais pas » vivent en elle jusqu'au calcul.
+  const [commencee, setCommencee] = useState(() => counterQuestions(takeoff).length > 0);
+  // Une question née après coup (une case cochée dans les suggestions qui demande une précision) ouvre la discussion.
+  if (!commencee && counterQuestions(takeoff).length > 0) setCommencee(true);
+  // Sans aucune question : les suggestions d'abord (Greg, 18 novembre 2026 : à la fin, avant le quantitatif), puis le calcul.
+  const aSuggerer = onReponses ? suggestionsAProposer(takeoff) : null;
   const started = useRef(false);
   useEffect(() => {
-    if (!none || started.current) return;
+    if (commencee || aSuggerer || started.current) return;
     started.current = true;
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
-  }, [none, onSubmit]);
-  if (none) return error ? <ErrorNotice error={error} /> : <CalculScreen />;
-  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} />;
+  }, [commencee, aSuggerer, onSubmit]);
+  if (!commencee) {
+    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
+    return error ? <ErrorNotice error={error} /> : <CalculScreen />;
+  }
+  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;
 }
