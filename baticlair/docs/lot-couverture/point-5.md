@@ -50,7 +50,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises fibres-ciment noir 40×24 | 2 336 pièces | Anthracite / noir | chiffrable |
+| Ardoises fibres-ciment noir 40×24 | 2 336 pièces |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 

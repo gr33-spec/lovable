@@ -356,7 +356,8 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Toute ligne « à chiffrer » vient avec la question qui la débloque. Le développé se demande pièce par pièce, au nom de la pièce.
 - Tasseaux (fiche `roofing-2026.11.20-62`) : rangs = bacs − 1 + rives sur tasseau ; question « Ton pan finit comment, de chaque côté ? » (2 / 1 / 0), lue au devis quand il la dit. Sources : RHEINZINK, VMZINC, NedZink (le texte du NF DTU 40.41 est payant : non lu, non recopié).
 - Nouvel ouvrage « Chéneau encaissé zinc » : bobineau au mètre, largeur = développé (question à boutons).
-- Test permanent : `packages/domain/test/meme-devis-meme-liste-d2026-024.test.ts` (trois lectures réelles, mêmes questions, même liste finale).
+- RÈGLE CHANGÉE : la désignation de chaque ligne est reprise du texte du devis (`designationsDuDevis`, à l'enregistrement de la lecture), jamais des mots du modèle. Une question du modèle sur une donnée de la fiche n'est posée que si c'est un doute écrit au devis ; jamais une question qui demande une quantité.
+- Test permanent : `packages/domain/test/meme-devis-meme-liste-d2026-024.test.ts` (huit lectures réelles, dont les cinq rejouées en ligne le 20 novembre : mêmes questions, même liste finale).
 
 ## Décisions du 20 novembre 2026 : carte et retours haptiques
 

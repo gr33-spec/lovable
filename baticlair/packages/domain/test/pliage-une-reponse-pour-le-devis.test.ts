@@ -84,7 +84,10 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
       { ref: "a", designation: "Bande de ventilation en Z en zinc quartz", quantity: "13", unit: "m" },
       { ref: "b", designation: "Habillage de rive en zinc quartz", quantity: "14", unit: "m" },
     ];
-    const v = readQuote(lines, {}, [{ key: "developpe", value: "200", unit: "mm", evidence: "Devis, b (« developpe : 20 cm »)", origin: "devis" as const, line: "b" }]);
+    // Le développé d'une pièce se demande une fois son pliage dit (des feuilles n'en ont pas besoin) : « tout fait ». La
+    // lecture a lu « 20 cm » sur la ligne de la rive, seulement elle.
+    const lu = lectureEnregistree(ROOFING_REFERENTIAL, lines, [{ key: "developpe", value: "200", unit: "mm", evidence: "Devis, b (« developpe : 20 cm »)", origin: "devis" as const, line: "b" } as never], HABITUDES_BANC, {}, undefined, {});
+    const v = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: lu, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, [PLIAGE]: { value: "2", unit: "u" } }, preferences: HABITUDES_BANC, interdits: false }).purchase;
     expect(v.questions.find((d) => /developpe@/.test(d.key))?.question?.text).toBe("Bande de ventilation en Z en zinc quartz : développé de la bande zinc ?");
     expect(v.questions.some((d) => d.key === "engine:param:developpe@bandes-zinc__b")).toBe(false);
   });
