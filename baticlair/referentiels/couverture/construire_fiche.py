@@ -44,6 +44,7 @@ FAMILLES = [
     ("fibres_ciment", "Plaques fibres-ciment", "fibres-ciment.json", None),
     ("accessoires_tuiles", "Accessoires de tuiles : chatières, rives, closoirs, mortier", "accessoires-tuiles.json", None),
     ("ardoise_modeles", "Ardoises : carrières, palettes, faîtage breton, crochets", "ardoise-modeles.json", None),
+    ("fixations", "Fixations : pointes, clous d'ardoise, fixation des tuiles, cuvettes, chatières", "fixations.json", None),
     ("zinguerie_modeles", "Zinguerie et écrans : modèles et références du marché", "zinguerie-modeles.json", None),
     ("sous_face", "Sous-faces et habillages de débord", "sous-faces-etancheite.json", "sous_face"),
     # Même famille, second fichier : ajouté à l'étanchéité déjà lue (toiture-terrasse : SBS, EPDM, PIR, relevés).

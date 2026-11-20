@@ -7,7 +7,7 @@
  "regle_confirmation": "confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.",
  "regles_fondateur": "../../../.claude/skills/regles-metier/SKILL.md",
  "carte_regions": "carte-regions.json",
- "taux_confirme": 90.0,
+ "taux_confirme": 89.8,
  "comptes": {
   "abergement:a_confirmer": 1,
   "abergement:confirme": 11,
@@ -42,6 +42,9 @@
   "fibres_ciment:a_confirmer": 1,
   "fibres_ciment:confirme": 30,
   "fibres_ciment:une_source": 6,
+  "fixations:a_confirmer": 5,
+  "fixations:confirme": 30,
+  "fixations:une_source": 8,
   "pertes:a_confirmer": 10,
   "pertes:confirme": 2,
   "pertes:une_source": 5,
@@ -92283,8 +92286,8 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S570",
-            "S571"
+            "S588",
+            "S589"
            ],
            "libelle_source": "format de rouleau",
            "condition": "1re couche d'un bicouche (ou 2e sous protection rapportée)",
@@ -92295,11 +92298,11 @@
            "ecart": "Deux documents Soprema (une source). La fiche comptoir citait 8 m : c'est la longueur export (voir ecrans-etancheite.json).",
            "preuves": [
             {
-             "source": "S570",
+             "source": "S588",
              "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg"
             },
             {
-             "source": "S571",
+             "source": "S589",
              "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
             }
            ]
@@ -92320,8 +92323,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S572",
-        "S570"
+        "S590",
+        "S588"
        ],
        "libelle_source": "rouleau de 1 × 10 m : existe-t-il ?",
        "condition": "1 × 10 m : Siplast Paracier (bac acier, fixé mécaniquement), Soprema Belgique Soprarock SBS P3 TF (36 kg) ; en France la sous-couche soudée courante fait 6 à 7,5 m",
@@ -92332,11 +92335,11 @@
        "ecart": "Siplast Paracier : voir ecrans-etancheite.json (une source).",
        "preuves": [
         {
-         "source": "S572",
+         "source": "S590",
          "extrait": "Dimensions du rouleau (m) 10 x 1 ; Poids du rouleau (kg) 36"
         },
         {
-         "source": "S570",
+         "source": "S588",
          "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg"
         }
        ]
@@ -92354,7 +92357,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S573"
+        "S591"
        ],
        "libelle_source": "rouleau de 1 × 8 m en France",
        "regions": [
@@ -92364,7 +92367,7 @@
        "raison": "Aucun rouleau de 8 m trouvé au catalogue français (Soprema : 6 × 1 m, autres longueurs à la demande).",
        "preuves": [
         {
-         "source": "S573",
+         "source": "S591",
          "extrait": "Dimensions du rouleau 6mx1m ; d'autres longueurs sont réalisables à la demande"
         }
        ]
@@ -92382,8 +92385,8 @@
        "unite": "cm",
        "statut": "confirme",
        "sources": [
-        "S571",
-        "S574"
+        "S589",
+        "S592"
        ],
        "libelle_source": "recouvrement en about (transversal)",
        "condition": "Soprema (guide) 10 cm mini en bord et en bout de lé ; IKO 15 cm transversal (8 cm longitudinal)",
@@ -92394,11 +92397,11 @@
        "ecart": "La fiche produit Soprema donne un galon longitudinal ≥ 60 mm (confirmé dans ecrans-etancheite.json) ; le guide grand public met 10 cm partout. L'about n'était pas trouvé à la première passe.",
        "preuves": [
         {
-         "source": "S571",
+         "source": "S589",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         },
         {
-         "source": "S574",
+         "source": "S592",
          "extrait": "recouvrement de 8 cm longitudinalement et 15 cm transversalement"
         }
        ]
@@ -92416,8 +92419,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S574",
-        "S571"
+        "S592",
+        "S589"
        ],
        "libelle_source": "décalage des joints de la 2e couche",
        "condition": "joints décalés dans les deux sens (quinconce)",
@@ -92427,11 +92430,11 @@
        ],
        "preuves": [
         {
-         "source": "S574",
+         "source": "S592",
          "extrait": "Le recouvrement de la couche de finition ressort de préférence d'une demi-largeur de bande par rapport au recouvrement dans la sous-couche"
         },
         {
-         "source": "S571",
+         "source": "S589",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         }
        ]
@@ -92443,7 +92446,7 @@
        "unite": "× surface",
        "statut": "une_source",
        "sources": [
-        "S571"
+        "S589"
        ],
        "libelle_source": "majoration pertes et recouvrements",
        "condition": "rouleaux, hors relevés comptés à part",
@@ -92454,7 +92457,7 @@
        "ecart": "Recouvrements seuls : × 1,08 (ecrans-etancheite.json) ; le tiroir utilise × 1,12.",
        "preuves": [
         {
-         "source": "S571",
+         "source": "S589",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         }
        ],
@@ -92491,7 +92494,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S575"
+            "S593"
            ],
            "libelle_source": "formats de nappe",
            "condition": "toitures résidentielles ≤ 150 m² ; nappe d'un seul tenant choisie pour couvrir la terrasse + relevés",
@@ -92502,7 +92505,7 @@
            "controle": "3,05 × 7,62 = 23,24 ; 6,10 × 30,50 = 186,05 (catalogue : 186,05)",
            "preuves": [
             {
-             "source": "S575",
+             "source": "S593",
              "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62"
             }
            ]
@@ -92523,8 +92526,8 @@
        "unite": "l/m²",
        "statut": "confirme",
        "sources": [
-        "S575",
-        "S576"
+        "S593",
+        "S594"
        ],
        "libelle_source": "consommation de colle de contact (solvant)",
        "condition": "Firestone BA 2012 : 2,35 à 2,75 m²/l (bidons 5 l = 10-12,5 m², 10 l = 20-25 m²) ; BA-2016 projetée : canister 22 l = 50-60 m² ; Elevate BA-2012 : ≈ 3 m²/l",
@@ -92536,11 +92539,11 @@
        "controle": "1 ÷ 2,75 = 0,36 l/m² ; 1 ÷ 2,35 = 0,43 l/m² ; 1 ÷ 3 = 0,33 l/m²",
        "preuves": [
         {
-         "source": "S575",
+         "source": "S593",
          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62"
         },
         {
-         "source": "S576",
+         "source": "S594",
          "extrait": "approx. 3m² per litre (application method dependent)"
         }
        ]
@@ -92561,7 +92564,7 @@
            "unite": "l/m²",
            "statut": "une_source",
            "sources": [
-            "S577"
+            "S595"
            ],
            "condition": "seau de 8 l ou pot de 2 l",
            "regions": [
@@ -92570,7 +92573,7 @@
            ],
            "preuves": [
             {
-             "source": "S577",
+             "source": "S595",
              "extrait": "Consommation L/m² 0,25 ; Disponible en seau de 8 litres ou en pot de 2 litres"
             }
            ]
@@ -92591,10 +92594,10 @@
        "unite": "mm",
        "statut": "confirme",
        "sources": [
-        "S578",
-        "S579",
-        "S580",
-        "S581"
+        "S596",
+        "S597",
+        "S598",
+        "S599"
        ],
        "libelle_source": "format de panneau courant",
        "condition": "Utherm Roof L, IKO enertherm ALU, Recticel PowerDeck F ; existent aussi 1200 × 1000 (Knauf Thane OpTTI), 1200 × 2400 (IKO XL), 600 × 600 (Efigreen Alu+)",
@@ -92604,19 +92607,19 @@
        ],
        "preuves": [
         {
-         "source": "S578",
+         "source": "S596",
          "extrait": "1200 mm de longueur pour 600 mm de largeur, épaisseur entre 30 mm et 160 mm"
         },
         {
-         "source": "S579",
+         "source": "S597",
          "extrait": "formats de 1200 x 600 mm et 1200 x 2400 mm, épaisseurs de 30 à 200 mm"
         },
         {
-         "source": "S580",
+         "source": "S598",
          "extrait": "Recticel PowerDeck F Flat Roof Board 1.2m x 600 x 80mm"
         },
         {
-         "source": "S581",
+         "source": "S599",
          "extrait": "panneaux Knauf Thane OpTTI de format 1200 x 1000 mm"
         }
        ]
@@ -92635,7 +92638,7 @@
        "statut": "a_confirmer",
        "sources": [
         "S373",
-        "S582"
+        "S600"
        ],
        "libelle_source": "règle de dimensionnement et trop-plein",
        "condition": "NF DTU 60.11 P3 (2013) tableau 5 : diamètre selon la surface collectée par EEP, majoré selon les NF DTU 43 ; trop-plein obligatoire avec une seule EEP (NF DTU 43.1 §8.6.1, cité par un forum)",
@@ -92650,7 +92653,7 @@
          "extrait": "NF DTU 60.11 P3 tableau 5 : diamètres des EEP et descentes selon la surface collectée par EEP et la majoration liée aux NF DTU série 43"
         },
         {
-         "source": "S582",
+         "source": "S600",
          "extrait": "1 évacuation = 1 trop-plein obligatoire, 2 évacuations ou plus = 1 trop-plein si le GO dit qu'il faut en mettre"
         }
        ]
@@ -92831,10 +92834,10 @@
      "verdict": "corrige",
      "bonne_valeur": "1re couche soudée 6 m (Sopralène Flam 180), 7 m (Elastophène Flam 25), 7,5 m (Siplast) ; 1 × 10 m seulement en 1re couche fixée mécaniquement ou en Belgique ; autoprotégée 6 m ; galon ≥ 6 cm, about 10 à 15 cm",
      "sources": [
-      "S570",
-      "S573",
-      "S572",
-      "S574"
+      "S588",
+      "S591",
+      "S590",
+      "S592"
      ],
      "explication": "Confirme et complète ecrans-etancheite.json (deuxième fichier, mêmes conclusions) ; aucun 1 × 8 m au catalogue français."
     },
@@ -92845,9 +92848,9 @@
      "verdict": "corrige",
      "bonne_valeur": "colle de contact 0,35 à 0,45 l/m² (en litres, bidons 5 / 10 l) ; colle acrylique 0,25 l/m² ; joints : bandes QuickSeam + QuickPrime (≈ 15 ml de joint par litre)",
      "sources": [
-      "S575",
-      "S576",
-      "S577"
+      "S593",
+      "S594",
+      "S595"
      ],
      "explication": "L'ordre de grandeur est juste mais l'unité de vente est le litre ; Firestone vend des nappes d'un seul tenant (pas de joint jusqu'à 9,15 × 30,50 m) et demande + 150 mm sur les relevés."
     },
@@ -92858,10 +92861,10 @@
      "verdict": "corrige",
      "bonne_valeur": "format courant 1200 × 600 = 0,72 m² ; 1200 × 1000 existe (Knauf OpTTI, laine de roche Rockacier)",
      "sources": [
-      "S578",
-      "S579",
-      "S580",
-      "S581"
+      "S596",
+      "S597",
+      "S598",
+      "S599"
      ],
      "explication": "Le format est à demander : avec 1,2 m² au lieu de 0,72, on commande 40 % de panneaux en moins."
     }
@@ -92973,7 +92976,7 @@
      "unite_de_vente": "nappe + bidons de colle",
      "conditionnement": "nappes 3,05 à 9,15 m × 7,62 ou 30,50 m ; colle 5 / 10 / 22 l",
      "sources": [
-      "S575"
+      "S593"
      ],
      "famille": "etancheite"
     }
@@ -107883,6 +107886,1500 @@
    ]
   },
   {
+   "code": "fixations",
+   "libelle": "Fixations : pointes, clous d'ardoise, fixation des tuiles, cuvettes, chatières",
+   "sous_familles": [
+    {
+     "nom": "pointes de liteaux",
+     "regles": [
+      {
+       "id": "pointes_liteau_par_croisement",
+       "attribut": "pointes_par_croisement_liteau_chevron",
+       "valeur": 1,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S400",
+        "S547",
+        "S548",
+        "S67",
+        "S10"
+       ],
+       "condition": "liteau de largeur ≤ 50 mm (18×38, 27×40, 25×27…), à chaque croisement liteau / chevron (ou contre-liteau) ; liteau sur 3 appuis au moins",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        },
+        {
+         "source": "S547",
+         "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3"
+        },
+        {
+         "source": "S548",
+         "extrait": "fixés à l'aide de pointes ou d'agrafes à chaque intersection d'un chevron et d'un liteau"
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      },
+      {
+       "id": "pointes_liteaux_formule_ml",
+       "attribut": "pointes_par_ml_de_liteau",
+       "valeur": "1 ÷ entraxe des chevrons (m) + 1 ÷ longueur d'un liteau (m)",
+       "unite": "u/ml",
+       "statut": "confirme",
+       "sources": [
+        "S400",
+        "S547",
+        "S10"
+       ],
+       "condition": "une pointe par croisement + la pointe de l'about (liteaux aboutés sur chevron, joints décalés) ; ex. entraxe 0,50 m et liteaux de 4 m : 2,25 /ml ; entraxe 0,60 m : 1,92 /ml",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Calcul dérivé de la règle « 1 pointe par croisement » ; le terme « 1 ÷ longueur » compte la pointe d'about (≈ +12 % à 50 cm, +15 % à 60 cm avec des liteaux de 4 m). Sans abouts : 1 ÷ entraxe.",
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        },
+        {
+         "source": "S547",
+         "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      },
+      {
+       "id": "pointes_liteaux_formule_m2",
+       "attribut": "pointes_par_m2_de_toiture",
+       "valeur": "(1 ÷ pureau en m) × (1 ÷ entraxe + 1 ÷ longueur de liteau)",
+       "unite": "u/m²",
+       "statut": "confirme",
+       "sources": [
+        "S400",
+        "S547",
+        "S67"
+       ],
+       "condition": "ardoise pureau 0,115 m, liteaux de 4 m : 19,6 /m² (entraxe 0,50) ou 16,7 /m² (0,60) ; tuile pureau 0,34 m : 6,6 /m² (0,50) ou 5,6 /m² (0,60) ; m² en rampant",
+       "regions": [
+        "France"
+       ],
+       "controle": [
+        "0,115 m : 8,70 ml/m² × 2,25 = 19,6 ; × 1,917 = 16,7",
+        "0,34 m : 2,94 ml/m² × 2,25 = 6,6 ; × 1,917 = 5,6"
+       ],
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        },
+        {
+         "source": "S547",
+         "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3"
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        }
+       ]
+      },
+      {
+       "id": "pointes_diametre_minimal_ardoise",
+       "attribut": "diametre_minimal",
+       "valeur": 2.7,
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S549"
+       ],
+       "condition": "pointes de fixation des liteaux et voliges sous ardoise (NF DTU 40.11 P1-2 §3.3.1.1) ; une pointe 2,0×45 ou 2,5×50 ne convient donc pas sous ardoise",
+       "regions": [
+        "France"
+       ],
+       "raison": "Une seule source lisible (DTU 40.11 2020) ; les DTU tuiles (40.21, 40.23) ne fixent pas ce diamètre dans les textes lus.",
+       "preuves": [
+        {
+         "source": "S549",
+         "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)"
+        }
+       ]
+      },
+      {
+       "id": "pointes_longueur_regle_dtu",
+       "attribut": "longueur_minimale",
+       "valeur": "e ≤ 15 mm : 2,5 × e ; 15 < e ≤ 38 mm : 2 × e (e = épaisseur de la pièce fixée)",
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S67",
+        "S547",
+        "S10"
+       ],
+       "condition": "tableau de pose cité par Koramic (DTU 40.23, tableau 3) ; soit liteau 18 mm ≥ 36 mm, liteau ou contre-liteau 27 mm ≥ 54 mm",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Koramic 2 × e (27 → 54 mm) ; Ministère 2,5 × e pour les voliges (18 → 45 mm, 25 → 63 mm) ; Alsafix (épaisseur à fixer) plus prudent : 27 mm → pointe de 70. Prendre la pointe vendue juste au-dessus du plus long : voir pointes_choix_par_section.",
+       "raison": "Les tableaux DTU sont des images non lisibles en ligne (40.11 P1-2 tableau 1, 40.23 tableau 3) ; seul Koramic recopie les valeurs. Le guide du Ministère dit 2,5 × l'épaisseur pour la volige : plus long que 2 × e.",
+       "preuves": [
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        },
+        {
+         "source": "S547",
+         "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      },
+      {
+       "id": "pointes_epaisseur_a_fixer_alsafix",
+       "attribut": "epaisseur_maxi_a_fixer",
+       "valeur": {
+        "2,5 x 50": 17,
+        "2,8 x 60": 20,
+        "3,1 x 70": 27,
+        "3,1 x 80": 30,
+        "3,6 x 90": 33
+       },
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S550"
+       ],
+       "condition": "pointe tête plate carré torsadée galvanisée à chaud (Alsafix TP CT HDG), selon la fiche fabricant",
+       "regions": [
+        "France"
+       ],
+       "raison": "Colonne « épaisseur à fixer » d'une seule fiche fabricant ; cohérente avec la règle 2 × e (plus prudente).",
+       "preuves": [
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        }
+       ]
+      },
+      {
+       "id": "pointes_choix_par_section",
+       "attribut": "pointe_conseillee",
+       "valeur": {
+        "liteau 18×38 (ardoise, Bretagne)": "2,8 × 60 (2,7 × 60) galva",
+        "liteau 27×40 (tuile)": "3,1 × 70 galva",
+        "contre-liteau 27×38 (sur chevron)": "3,1 × 70 galva",
+        "volige 18 mm": "2,8 × 60 galva, 2 par chevron",
+        "volige 22 à 27 mm": "3,1 × 70 galva, 2 par chevron"
+       },
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S549",
+        "S67",
+        "S10",
+        "S550"
+       ],
+       "condition": "ce qui respecte à la fois Ø ≥ 2,7 (DTU 40.11), longueur ≥ 2 × e (Koramic / DTU 40.23), ≥ 2,5 × e pour la volige (Ministère) et l'épaisseur à fixer Alsafix ; tige torsadée ou annelée conseillée (meilleure tenue)",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "ecart": "Règle croisée de quatre sources ; aucune source ne donne directement « 18×38 → 2,8×60 ». Un 2,5 × 50 suffit en longueur pour un 18 mm sous tuile (36 mm mini) mais pas sous ardoise (Ø 2,7).",
+       "preuves": [
+        {
+         "source": "S549",
+         "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)"
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        },
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        }
+       ]
+      },
+      {
+       "id": "pointes_liteau_sur_contre_liteau",
+       "attribut": "longueur_sur_contre_liteau",
+       "valeur": "à confirmer : la pointe du liteau traverse-t-elle le contre-liteau jusqu'au chevron (27 + 27 mm → 3,1 × 80 ou 3,6 × 90) ou seulement le contre-liteau ?",
+       "unite": "mm",
+       "statut": "a_confirmer",
+       "sources": [
+        "S400"
+       ],
+       "condition": "pose avec écran sous-toiture (NF DTU 40.29)",
+       "regions": [
+        "France"
+       ],
+       "raison": "Le NF DTU 40.29 (écrans) n'est pas lisible en ligne ; DTU 40.11 dit seulement que liteaux et voliges reposent sur des contrelattes.",
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        }
+       ]
+      },
+      {
+       "id": "pointes_tige",
+       "attribut": "types_de_tige_admis",
+       "valeur": "lisse, crénelée (crantée), torsadée ou annelée ; annelée = « clou cranté » ; galvanisée ou inox (chêne, châtaignier : galva ou inox)",
+       "unite": "texte",
+       "statut": "confirme",
+       "sources": [
+        "S549",
+        "S454",
+        "S10"
+       ],
+       "condition": "DTU 40.11 P1-2 §3.3.1.1 ; DTU 40.23 §3.3.1.1.1 (lisse, crantée, torsadée) ; NOTE DTU 40.23 : torsadées ou crantées tiennent mieux",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S549",
+         "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)"
+        },
+        {
+         "source": "S454",
+         "extrait": "[liteaux] fixés par des pointes en acier galvanisé ou inoxydable"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "pointes de voliges",
+     "regles": [
+      {
+       "id": "pointes_volige_par_chevron",
+       "attribut": "pointes_par_chevron",
+       "valeur": 2,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S400",
+        "S10"
+       ],
+       "condition": "élément de plus de 50 mm de large (volige 100 à 200 mm, quelle que soit l'épaisseur)",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      },
+      {
+       "id": "pointes_volige_formule_m2",
+       "attribut": "pointes_par_m2_de_toiture",
+       "valeur": "2 × (1 ÷ (largeur de volige + jeu) en m) × (1 ÷ entraxe des chevrons en m)",
+       "unite": "u/m²",
+       "statut": "confirme",
+       "sources": [
+        "S400",
+        "S10"
+       ],
+       "condition": "jeu entre voliges 5 à 10 mm (DTU 40.11 §4.2.1.1) ; volige 150 + 7 mm : 25,5 /m² (0,50) ou 21,2 /m² (0,60) ; volige 200 + 7 mm : 19,3 /m² (0,50) ou 16,1 /m² (0,60) ; + les pointes d'about",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "controle": [
+        "1 ÷ 0,157 = 6,37 ml/m² × 2 × 2 = 25,5 ; × 2 ÷ 0,6 = 21,2",
+        "1 ÷ 0,207 = 4,83 ml/m² × 2 × 2 = 19,3 ; × 2 ÷ 0,6 = 16,1"
+       ],
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "pointes de contre-liteaux",
+     "regles": [
+      {
+       "id": "pointes_contre_liteau_espacement",
+       "attribut": "espacement_des_pointes",
+       "valeur": "non trouvé (pratique annoncée 1 pointe tous les 30 à 60 cm le long du chevron, sans source)",
+       "unite": "cm",
+       "statut": "a_confirmer",
+       "sources": [],
+       "condition": "contre-liteau cloué dans l'axe du chevron",
+       "regions": [
+        "France"
+       ],
+       "raison": "NF DTU 40.29 non accessible ; les notices d'écran lues (Elos, Siplast Sup'Air, Isover) renvoient au DTU ou au fabricant de couverture sans chiffre."
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "pointes (conditionnement)",
+     "regles": [
+      {
+       "id": "pointes_par_kg_2_5x50",
+       "attribut": "pointes_par_kg",
+       "valeur": 510,
+       "unite": "u/kg",
+       "statut": "confirme",
+       "sources": [
+        "S551",
+        "S550"
+       ],
+       "condition": "2,5 × 50 galvanisée torsadée : ArcelorMittal Sitor 524 ; Alsafix CT HDG 500 (2 500 par boîte de 5 kg) ; tête plate lisse galva 2,4 × 50 : 473",
+       "regions": [
+        "France"
+       ],
+       "controle": [
+        "masse tige π × 1,25² × 50 = 245 mm³ × 7,85 = 1,93 g → 519 /kg (tête comprise ≈ 500)"
+       ],
+       "preuves": [
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        },
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        }
+       ]
+      },
+      {
+       "id": "pointes_par_kg_2_8x60",
+       "attribut": "pointes_par_kg",
+       "valeur": 335,
+       "unite": "u/kg",
+       "statut": "confirme",
+       "sources": [
+        "S550",
+        "S552",
+        "S551"
+       ],
+       "condition": "2,8 × 60 galvanisée : Alsafix CT HDG 340 (1 700 / 5 kg) ; Alsafix TEL HDG 340 ; ArcelorMittal Sitor galva 2,85 × 60 : 336 ; tête plate galva 2,7 × 60 : 312 ; annelée inox 2,8/3,1 × 60 (Alsafix) : 282",
+       "regions": [
+        "France"
+       ],
+       "ecart": "L'annelée se mesure au diamètre extérieur (3,1) : environ 15 % de pointes en moins au kg.",
+       "controle": [
+        "tige π × 1,4² × 60 = 369 mm³ → 2,90 g → 345 /kg"
+       ],
+       "preuves": [
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        },
+        {
+         "source": "S552",
+         "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg"
+        },
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        }
+       ]
+      },
+      {
+       "id": "pointes_par_kg_3_1x70",
+       "attribut": "pointes_par_kg",
+       "valeur": 230,
+       "unite": "u/kg",
+       "statut": "confirme",
+       "sources": [
+        "S550",
+        "S552",
+        "S551"
+       ],
+       "condition": "3,1 × 70 galvanisée : Alsafix CT HDG 234 (1 170 / 5 kg) ; Alsafix TEL HDG 240 ; ArcelorMittal Sitor galva 3,2 × 70 : 228 ; tête plate galva 3,0 × 70 : 216 ; annelée inox 3,1/3,4 × 70 : 244",
+       "regions": [
+        "France"
+       ],
+       "controle": [
+        "tige π × 1,55² × 70 = 528 mm³ → 4,15 g → 241 /kg"
+       ],
+       "preuves": [
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        },
+        {
+         "source": "S552",
+         "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg"
+        },
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        }
+       ]
+      },
+      {
+       "id": "pointes_par_kg_3_1x80",
+       "attribut": "pointes_par_kg",
+       "valeur": 205,
+       "unite": "u/kg",
+       "statut": "confirme",
+       "sources": [
+        "S550",
+        "S551"
+       ],
+       "condition": "3,1 × 80 galvanisée : Alsafix CT HDG 210 (1 048 / 5 kg) ; ArcelorMittal Sitor galva 3,2 × 80 : 200",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        },
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        }
+       ]
+      },
+      {
+       "id": "pointes_par_kg_2_0x45",
+       "attribut": "pointes_par_kg",
+       "valeur": "non trouvé (2,0 × 35 galva tête plate : 974 /kg ; 2,0 × 45 estimé ≈ 750)",
+       "unite": "u/kg",
+       "statut": "a_confirmer",
+       "sources": [
+        "S551"
+       ],
+       "condition": "pointe trop fine pour liteaux et voliges sous ardoise (Ø < 2,7)",
+       "regions": [
+        "France"
+       ],
+       "raison": "Aucun catalogue lu ne vend 2,0 × 45 galva ; l'estimation est un calcul de masse.",
+       "preuves": [
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        }
+       ]
+      },
+      {
+       "id": "pointes_conditionnement",
+       "attribut": "conditionnements",
+       "valeur": [
+        "boîte ou carton de 1 kg",
+        "carton de 2,5 kg",
+        "boîte ou seau de 5 kg"
+       ],
+       "unite": "kg",
+       "statut": "confirme",
+       "sources": [
+        "S551",
+        "S552",
+        "S550",
+        "S553"
+       ],
+       "condition": "pointes en vrac galvanisées : 5 kg pour les torsadées (1 kg sur demande chez ArcelorMittal) ; tête extra-large Alsafix en 1 / 2,5 / 5 kg ; annelées inox en 1 et 5 kg",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        },
+        {
+         "source": "S552",
+         "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg"
+        },
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        },
+        {
+         "source": "S553",
+         "extrait": "TP 2,8/3,1 x 60 … 282 ; TP 3,1/3,4 x 70 … 244 (/kg) ; Cartons de 1 kg et 5 kg"
+        }
+       ]
+      },
+      {
+       "id": "pointes_kg_pour_100m2",
+       "attribut": "kg_pour_100_m2",
+       "valeur": {
+        "ardoise, liteau 18×38, pointe 2,8×60, entraxe 0,50": 5.9,
+        "ardoise, entraxe 0,60": 5.0,
+        "tuile pureau 0,34, liteau 27×40, pointe 3,1×70, entraxe 0,50": 2.9,
+        "tuile, entraxe 0,60": 2.4,
+        "volige 200 mm, pointe 3,1×70, entraxe 0,50": 8.4
+       },
+       "unite": "kg",
+       "statut": "confirme",
+       "sources": [
+        "S400",
+        "S550",
+        "S551"
+       ],
+       "condition": "calcul : pointes/m² × 100 ÷ pointes/kg (335 pour 2,8×60, 230 pour 3,1×70) ; sans perte ; arrondir à la boîte (1, 2,5 ou 5 kg)",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "controle": [
+        "19,6 × 100 ÷ 335 = 5,9 ; 16,7 × 100 ÷ 335 = 5,0",
+        "6,6 × 100 ÷ 230 = 2,9 ; 5,6 × 100 ÷ 230 = 2,4",
+        "19,3 × 100 ÷ 230 = 8,4"
+       ],
+       "preuves": [
+        {
+         "source": "S400",
+         "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)"
+        },
+        {
+         "source": "S550",
+         "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30"
+        },
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "clous d'ardoise naturelle",
+     "regles": [
+      {
+       "id": "clou_ardoise_faitage",
+       "attribut": "clous_par_ardoise_dernier_rang",
+       "valeur": 2,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S7",
+        "S10"
+       ],
+       "condition": "dernier rang sous le faîtage (rive de tête) : 2 clous au moins par ardoise, en pose au crochet comme au clou",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "ecart": "Contredit la règle du fondateur « 1 clou au faîtage ».",
+       "preuves": [
+        {
+         "source": "S7",
+         "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_doublis",
+       "attribut": "clous_par_ardoise_doublis",
+       "valeur": 2,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S225",
+        "S10"
+       ],
+       "condition": "doublis d'égout : 2 clous, pas de crochet",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "preuves": [
+        {
+         "source": "S225",
+         "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous."
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_premier_rang",
+       "attribut": "clous_par_ardoise_premier_rang",
+       "valeur": 2,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S10",
+        "S225"
+       ],
+       "condition": "1er rang d'égout : 2 clous (Ministère) ; CAPEB : crochet ET clous",
+       "regions": [
+        "France"
+       ],
+       "ecart": "CAPEB ne chiffre pas les clous du 1er rang (« au crochet et aux clous ») ; le Ministère dit 2 clous.",
+       "preuves": [
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        },
+        {
+         "source": "S225",
+         "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous."
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_rive",
+       "attribut": "clous_par_ardoise_de_rive",
+       "valeur": 2,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S7",
+        "S10",
+        "S225"
+       ],
+       "condition": "toutes les ardoises de rive latérale, entières et demies : 2 clous (DTU, rive gauche ; Ministère) ; CAPEB rive droite : demie = clou de tête + clou de milieu, entière = clou de tête + crochet",
+       "regions": [
+        "France"
+       ],
+       "ecart": "CAPEB admet 1 clou + 1 crochet pour l'entière en rive droite : compter 2 clous par ardoise de rive reste le maximum sûr.",
+       "preuves": [
+        {
+         "source": "S7",
+         "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        },
+        {
+         "source": "S225",
+         "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous."
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_noue_fendis",
+       "attribut": "clous_par_fendis",
+       "valeur": 1,
+       "unite": "u",
+       "statut": "une_source",
+       "sources": [
+        "S7"
+       ],
+       "condition": "fendis de noue en ardoise : 1 clou de tête ; pied de noue : 2 clous ; noquets : 2 clous",
+       "regions": [
+        "France"
+       ],
+       "raison": "Lu seulement dans le DTU 40.11.",
+       "preuves": [
+        {
+         "source": "S7",
+         "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous"
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_formules",
+       "attribut": "nombre_de_clous",
+       "valeur": "égout : 2 rangs (doublis + 1er rang) × (longueur d'égout ÷ largeur d'ardoise) × 2 ; faîtage : (longueur ÷ largeur) × 2 par versant ; rive : (rampant ÷ pureau) × 2 par rive ; pose au clou : 2 par ardoise",
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S7",
+        "S10",
+        "S225"
+       ],
+       "condition": "pose au crochet en partie courante ; ex. ardoise 32×22, égout 10 m : 2 × 45,5 × 2 = 182 clous",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "preuves": [
+        {
+         "source": "S7",
+         "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous"
+        },
+        {
+         "source": "S10",
+         "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous"
+        },
+        {
+         "source": "S225",
+         "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous."
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_par_kg_galva",
+       "attribut": "clous_par_kg",
+       "valeur": 665,
+       "unite": "u/kg",
+       "statut": "confirme",
+       "sources": [
+        "S551",
+        "S552"
+       ],
+       "condition": "acier galvanisé tête extra-large : 2,7 × 30 = 653 (ArcelorMittal) ; 2,8 × 30 = 680 (Alsafix HDG) ; 2,4/2,5 × 27 : 919 / 880",
+       "regions": [
+        "France"
+       ],
+       "controle": [
+        "repris d'ardoise.json (653, contrôle de masse 642) ; Alsafix 680 : écart 4 %"
+       ],
+       "preuves": [
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        },
+        {
+         "source": "S552",
+         "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg"
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_par_kg_cuivre",
+       "attribut": "clous_par_kg",
+       "valeur": {
+        "3 × 30": 418,
+        "3 × 35": 358,
+        "3 × 27": 464
+       },
+       "unite": "u/kg",
+       "statut": "confirme",
+       "sources": [
+        "S551",
+        "S554"
+       ],
+       "condition": "cuivre carré cranté : 3 × 30 = 420 (ArcelorMittal) et 417 (Alsafix) ; 3 × 35 = 360 / 357 ; 3 × 27 = 464 (Alsafix)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "ArcelorMittal donne 667 au kg pour le 3 × 27 cuivre carré : incohérent (même chiffre que le 2,7 × 27 roulé) ; retenir Alsafix 464.",
+       "preuves": [
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        },
+        {
+         "source": "S554",
+         "extrait": "TEL 3 x 3 x 27 … 464 ; 3 x 3 x 30 … 417 ; 3 x 3 x 35 … 357 (/kg) ; Cartons de 5 kg, Seaux de 5 kg"
+        }
+       ]
+      },
+      {
+       "id": "clou_ardoise_par_kg_inox",
+       "attribut": "clous_par_kg",
+       "valeur": "≈ galva de même dimension (≈ 650 à 680 pour 2,7/2,8 × 30)",
+       "unite": "u/kg",
+       "statut": "a_confirmer",
+       "sources": [],
+       "condition": "acier inoxydable : densité 7,9 contre 7,85, écart < 1 %",
+       "regions": [
+        "France"
+       ],
+       "raison": "Aucun catalogue de clou d'ardoise inox lu ; chiffre déduit par la masse."
+      },
+      {
+       "id": "clou_ardoise_conditionnement",
+       "attribut": "conditionnements",
+       "valeur": [
+        "1 kg",
+        "2,5 kg",
+        "5 kg"
+       ],
+       "unite": "kg",
+       "statut": "confirme",
+       "sources": [
+        "S552",
+        "S551",
+        "S554"
+       ],
+       "condition": "galva TEL : cartons de 1, 2,5 et 5 kg (Alsafix) ; boîte de 5 kg (ArcelorMittal) ; cuivre : 5 kg (Alsafix, ArcelorMittal), 1 kg chez la clouterie Rivierre (ardoise.json)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S552",
+         "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg"
+        },
+        {
+         "source": "S551",
+         "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)"
+        },
+        {
+         "source": "S554",
+         "extrait": "TEL 3 x 3 x 27 … 464 ; 3 x 3 x 30 … 417 ; 3 x 3 x 35 … 357 (/kg) ; Cartons de 5 kg, Seaux de 5 kg"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "fixation des tuiles à emboîtement",
+     "regles": [
+      {
+       "id": "tuiles_egout_toutes_fixees",
+       "attribut": "tuiles_fixees_egout",
+       "valeur": "toutes",
+       "unite": "fraction",
+       "statut": "confirme",
+       "sources": [
+        "S46",
+        "S67",
+        "S555"
+       ],
+       "condition": "1er rang d'égout, quelle que soit la région de vent (Edilians : crochet « PM » réf. CRP03)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S46",
+         "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées."
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        },
+        {
+         "source": "S555",
+         "extrait": "FAÎTAGE, RIVES, ÉGOUTS, PÉNÉTRATION… 100 % DES TUILES FIXÉES"
+        }
+       ]
+      },
+      {
+       "id": "tuiles_rives_toutes_fixees",
+       "attribut": "tuiles_fixees_rives",
+       "valeur": "toutes",
+       "unite": "fraction",
+       "statut": "confirme",
+       "sources": [
+        "S46",
+        "S67",
+        "S555"
+       ],
+       "condition": "tuiles de rive latérales et accessoires de rive : vis + rondelle d'étanchéité (Edilians) ; vissage ou clouage (Koramic)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S46",
+         "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées."
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        },
+        {
+         "source": "S555",
+         "extrait": "FAÎTAGE, RIVES, ÉGOUTS, PÉNÉTRATION… 100 % DES TUILES FIXÉES"
+        }
+       ]
+      },
+      {
+       "id": "tuiles_faitieres_fixees",
+       "attribut": "faitieres_fixees",
+       "valeur": "toutes, 1 crochet ou clip par faîtière / arêtier (voir points-singuliers.json clip_faitiere_par_piece)",
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S46",
+        "S67",
+        "S555"
+       ],
+       "condition": "faîtage à sec : crochet adapté vissé dans la lisse (Edilians)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Koramic se contredit : p. 31 « faîtières et arêtiers ne doivent pas être fixés avec des clous (DTU 40.21) » et p. 19 « avec un clou ou une vis munis d'une étanchéité ». Retenir crochet ou vis, jamais clou nu.",
+       "preuves": [
+        {
+         "source": "S46",
+         "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées."
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        },
+        {
+         "source": "S555",
+         "extrait": "FAÎTAGE, RIVES, ÉGOUTS, PÉNÉTRATION… 100 % DES TUILES FIXÉES"
+        }
+       ]
+      },
+      {
+       "id": "tuiles_rive_vis_par_tuile",
+       "attribut": "vis_par_tuile_de_rive",
+       "valeur": "à confirmer (1 vis + rondelle supposée)",
+       "unite": "u",
+       "statut": "a_confirmer",
+       "sources": [
+        "S46"
+       ],
+       "condition": "tuile de rive individuelle ou rive universelle",
+       "regions": [
+        "France"
+       ],
+       "raison": "Edilians et Koramic disent « par vis » sans dire combien par pièce.",
+       "preuves": [
+        {
+         "source": "S46",
+         "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées."
+        }
+       ]
+      },
+      {
+       "id": "tuiles_courantes_bretagne",
+       "attribut": "tuiles_fixees_partie_courante_bretagne",
+       "valeur": {
+        "22, 29, 56 (région de vent 3), sans écran, pente ≤ 100 %": {
+         "site normal": "1 sur 3",
+         "site exposé": "toutes"
+        },
+        "22, 29, 56, sans écran, 100-175 %": {
+         "site normal": "1 sur 2",
+         "site exposé": "toutes"
+        },
+        "22, 29, 56, avec écran, pente ≤ 175 %": {
+         "site normal": "1 sur 5",
+         "site exposé": "1 sur 5"
+        },
+        "35 (région 2), sans écran, ≤ 100 %": {
+         "site normal": "1 sur 5",
+         "site exposé": "1 sur 3"
+        },
+        "35, sans écran, 100-175 %": {
+         "site normal": "1 sur 3",
+         "site exposé": "toutes"
+        },
+        "35, avec écran, ≤ 100 %": {
+         "site normal": "aucune",
+         "site exposé": "1 sur 5"
+        },
+        "35, avec écran, 100-175 %": {
+         "site normal": "1 sur 5",
+         "site exposé": "1 sur 5"
+        },
+        "toute la Bretagne, pente > 175 %": "toutes"
+       },
+       "unite": "fraction",
+       "statut": "confirme",
+       "sources": [
+        "S556",
+        "S557",
+        "S46",
+        "S67"
+       ],
+       "condition": "bâtiment fermé, hauteur ≤ 15 m, crochetage ou pannetonnage ; tableau DTU 40.21 §5.4 lu chez Edilians et Koramic (tuiles-emboitement.json) appliqué aux régions de vent de regions.json ; Edilians conseille au moins 1 sur 5 partout",
+       "regions": [
+        "Bretagne"
+       ],
+       "ecart": "La région de vent se déduit du département ; la situation exposée (littoral ~5 km, îles, presqu'îles) et la présence d'écran sont à demander ou à lire au devis.",
+       "preuves": [
+        {
+         "source": "S556",
+         "extrait": "tableau de fixation en partie courante (pente, région de vent, site, écran)"
+        },
+        {
+         "source": "S557",
+         "extrait": "22 : vent 3 ; 29 : vent 3 ; 56 : vent 3 ; 35 : vent 2"
+        },
+        {
+         "source": "S46",
+         "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées."
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        }
+       ]
+      },
+      {
+       "id": "tuiles_crochets_formule",
+       "attribut": "nombre_de_fixations",
+       "valeur": "arrondi_sup(tuiles de partie courante × fraction) + tuiles du 1er rang d'égout + tuiles de rive (vis) + 1 par faîtière / arêtier",
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S556",
+        "S46",
+        "S67"
+       ],
+       "condition": "fraction : 1/5, 1/3, 1/2 ou 1 selon le tableau ; partie courante = total − égout − rives",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S556",
+         "extrait": "tableau de fixation en partie courante (pente, région de vent, site, écran)"
+        },
+        {
+         "source": "S46",
+         "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées."
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        }
+       ]
+      },
+      {
+       "id": "tuiles_crochet_mono_par_liteau",
+       "attribut": "crochet_selon_section_de_liteau",
+       "valeur": {
+        "25×27": "Mono 14",
+        "27×40": "Mono 16",
+        "40×40": "Mono 17"
+       },
+       "unite": "référence",
+       "statut": "une_source",
+       "sources": [
+        "S46",
+        "S67"
+       ],
+       "condition": "crochet Mono Edilians (plain carré) ; Koramic : crochet de pannetonnage choisi selon la section, liteau ≤ 40 mm de large",
+       "regions": [
+        "France"
+       ],
+       "raison": "Correspondance propre à Edilians ; Koramic confirme seulement le principe.",
+       "preuves": [
+        {
+         "source": "S46",
+         "extrait": "Mono 14 … liteau de 25x27 ; Mono 16 … 27x40 ; Mono 17 … 40x40"
+        },
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        }
+       ],
+       "portee": "Edilians"
+      },
+      {
+       "id": "tuiles_crochets_par_boite",
+       "attribut": "crochets_par_boite",
+       "valeur": 400,
+       "unite": "u/boîte",
+       "statut": "une_source",
+       "sources": [
+        "S558",
+        "S559",
+        "S560"
+       ],
+       "condition": "crochets inox Dimos (X-Tile, Croch'tuile) : 400 (Croch'tuile aussi en 203) ; crochet tuile canal Frénéhard : 400, 5,6 kg, 144 boîtes par palette",
+       "regions": [
+        "France"
+       ],
+       "raison": "Deux fabricants donnent 400, mais pas pour le même crochet ; aucun conditionnement trouvé pour les crochets Mono / Harpon Edilians (vendus par le négoce, demander l'unité).",
+       "preuves": [
+        {
+         "source": "S558",
+         "extrait": "400 pièces/boîte carton"
+        },
+        {
+         "source": "S559",
+         "extrait": "203 ou 400 unités/boîtes"
+        },
+        {
+         "source": "S560",
+         "extrait": "Conditionnement 400 pièces ; Palettisation 144 boîtes ; Poids de la boîte 5.556 kg"
+        }
+       ]
+      },
+      {
+       "id": "tuiles_vis_dimension",
+       "attribut": "vis_de_tuile",
+       "valeur": "4,5 × 45 ou 4,5 × 60 inox + rondelle EPDM",
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S67"
+       ],
+       "condition": "fixation au vissage (bardage vertical chez Koramic ; rives et forte pente chez Edilians, sans dimension)",
+       "regions": [
+        "France"
+       ],
+       "raison": "Dimension lue seulement chez Koramic, pour le bardage.",
+       "preuves": [
+        {
+         "source": "S67",
+         "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "cuvette / boîte à eau",
+     "regles": [
+      {
+       "id": "cuvette_usage",
+       "attribut": "quand_en_mettre",
+       "valeur": "une cuvette de branchement ou de face réunit deux descentes (ou deux gouttières) en une seule ; une boîte à eau reçoit l'eau d'un chéneau ou d'une sortie d'acrotère (toiture-terrasse), avec trop-plein ; une descente simple sous gouttière n'en a pas (naissance directe)",
+       "unite": "texte",
+       "statut": "confirme",
+       "sources": [
+        "S561",
+        "S562",
+        "S563",
+        "S236",
+        "S235"
+       ],
+       "condition": "jamais calculée : une par point de jonction ou par sortie de chéneau, nombre dit par l'artisan (cohérent avec zinguerie.json cuvette_crapaudine)",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "preuves": [
+        {
+         "source": "S561",
+         "extrait": "Permet de relier deux tuyaux de descente en un seul ; ø 80 mm, ø 100 mm, ø 120 mm"
+        },
+        {
+         "source": "S562",
+         "extrait": "Raccorde deux tuyaux vers un seul diamètre 80 mm."
+        },
+        {
+         "source": "S563",
+         "extrait": "Elle est souvent utilisée sur les toitures en terrasse en sortie d'acrotère."
+        },
+        {
+         "source": "S236",
+         "extrait": "Cuvette de branchement, Cuvette de face, Boîte à eau"
+        },
+        {
+         "source": "S235",
+         "extrait": "Cuvette de branchement VMZINC® ; Cuvette 1/2 ronde de face ; Cuvette 1/2 ronde d'angle ; Cuvette « Nice »"
+        }
+       ]
+      },
+      {
+       "id": "cuvette_diametres",
+       "attribut": "diametres_de_sortie",
+       "valeur": [
+        80,
+        100,
+        120
+       ],
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S563",
+        "S564",
+        "S561",
+        "S562"
+       ],
+       "condition": "Ø 80 et 100 courants (Rheinzink boîte à eau, cuvettes zinc) ; Ø 120 en zinc et cuivre (edilians.eu) ; boîte à eau carrée 200 × 200 × 200",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S563",
+         "extrait": "Elle est souvent utilisée sur les toitures en terrasse en sortie d'acrotère."
+        },
+        {
+         "source": "S564",
+         "extrait": "Conditionnement 1 : 1 Pce ; Conditionnement 2 : 70 Pce"
+        },
+        {
+         "source": "S561",
+         "extrait": "Permet de relier deux tuyaux de descente en un seul ; ø 80 mm, ø 100 mm, ø 120 mm"
+        },
+        {
+         "source": "S562",
+         "extrait": "Raccorde deux tuyaux vers un seul diamètre 80 mm."
+        }
+       ]
+      },
+      {
+       "id": "cuvette_conditionnement",
+       "attribut": "unite_de_vente",
+       "valeur": "pièce (carton de 70 chez Rheinzink)",
+       "unite": "u",
+       "statut": "une_source",
+       "sources": [
+        "S564"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S564",
+         "extrait": "Conditionnement 1 : 1 Pce ; Conditionnement 2 : 70 Pce"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "chatières",
+     "regles": [
+      {
+       "id": "ventilation_ratio_recoupe",
+       "attribut": "section_totale_de_ventilation",
+       "valeur": {
+        "comble perdu, ou au-dessus d'un écran": "1/5000 de la surface projetée = 2 cm²/m²",
+        "comble aménagé sans écran, ou sous l'écran": "1/3000 = 3,3 cm²/m²",
+        "écran non HPV ventilé": "1/5000 au-dessus + 1/3000 sous l'écran"
+       },
+       "unite": "de la surface projetée",
+       "statut": "confirme",
+       "sources": [
+        "S233",
+        "S213",
+        "S400",
+        "S547"
+       ],
+       "condition": "moitié en partie basse, moitié près du faîtage (DTU 40.11 §4.5.2, DTU 40.23 tableau 6) ; même règle déjà dans points-singuliers.json et accessoires-tuiles.json : rien ne change",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "preuves": [
+        {
+         "source": "S233",
+         "extrait": "1/5000 comble perdu ; 1/3000 rampant isolé ; moitié en bas, moitié en haut (relu le 19/11, repris de points-singuliers.json)"
+        },
+        {
+         "source": "S213",
+         "extrait": "V : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée) (repris de points-singuliers.json)"
+        },
+        {
+         "source": "S400",
+         "extrait": "section des orifices fonction de la paroi et de la présence d'un écran ; moitié en partie basse, moitié au voisinage du faîtage"
+        },
+        {
+         "source": "S547",
+         "extrait": "en fonction de la surface projetée ; réparties par moitié entre partie basse et voisinage du faîtage"
+        }
+       ]
+      },
+      {
+       "id": "chatieres_formule_recoupe",
+       "attribut": "nombre_de_chatieres",
+       "valeur": "arrondi_sup(surface projetée (m²) × 2 ou 3,3 cm²/m² ÷ section d'une chatière en cm²), arrondi au nombre pair (moitié en bas, moitié en haut)",
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S233",
+        "S213",
+        "S547"
+       ],
+       "condition": "ex. 100 m² projetés, comble perdu, chatière 50 cm² (HP 10) : 200 ÷ 50 = 4 ; rampant isolé sans écran : 333 ÷ 50 = 7, porté à 8 pour répartir moitié / moitié",
+       "regions": [
+        "France"
+       ],
+       "ecart": "accessoires-tuiles.json donne 7 pour 100 m² à 1/3000 (HP 10) sans arrondir au pair ; la répartition moitié bas / moitié haut demande un nombre pair (8). La surface est PROJETÉE : m² rampant × cos(pente).",
+       "preuves": [
+        {
+         "source": "S233",
+         "extrait": "1/5000 comble perdu ; 1/3000 rampant isolé ; moitié en bas, moitié en haut (relu le 19/11, repris de points-singuliers.json)"
+        },
+        {
+         "source": "S213",
+         "extrait": "V : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée) (repris de points-singuliers.json)"
+        },
+        {
+         "source": "S547",
+         "extrait": "en fonction de la surface projetée ; réparties par moitié entre partie basse et voisinage du faîtage"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "Clous galva : 1 clou par ardoise au faîtage, 2 à l'égout, au doublis et à la rive",
+     "origine": "regles-metier SKILL.md (Clous)",
+     "valeur_actuelle": "faîtage 1 ; égout, doublis, rive 2",
+     "verdict": "corrige",
+     "bonne_valeur": "faîtage (dernier rang) : 2 clous au moins ; égout (doublis et 1er rang) : 2 ; rive : 2 (CAPEB admet 1 clou + 1 crochet pour l'entière en rive droite)",
+     "sources": [
+      "S7",
+      "S10",
+      "S225"
+     ],
+     "explication": "Seul le faîtage change : le DTU 40.11 fixe le dernier rang à 2 clous au moins. Égout, doublis et rive sont confirmés. Déjà signalé dans ardoise.json."
+    },
+    {
+     "ratio": "Clous d'ardoise galva (90 % des cas)",
+     "origine": "regles-metier SKILL.md (Clous)",
+     "valeur_actuelle": "galva",
+     "verdict": "confirme",
+     "bonne_valeur": "galva pour les clous cachés ; inox ou cuivre pour les clous apparents (dernier rang en lignolet, rives débordantes)",
+     "sources": [
+      "S549",
+      "S10"
+     ],
+     "explication": "DTU 40.11 P1-2 §3.3.2.2 (voir ardoise.json)."
+    },
+    {
+     "ratio": "Pointes pour liteaux, contre-liteaux et voliges : en Suggestion",
+     "origine": "regles-metier SKILL.md (Pointes)",
+     "valeur_actuelle": "pas de ratio",
+     "verdict": "confirme",
+     "bonne_valeur": "si coché : liteau 1 pointe par croisement (pointes/m² = (1 ÷ pureau) × (1 ÷ entraxe + 1 ÷ longueur de liteau)), volige 2 par chevron ; 2,8×60 pour 18 mm, 3,1×70 pour 27 mm ; vendu au kg (335 et 230 /kg)",
+     "sources": [
+      "S400",
+      "S547",
+      "S67",
+      "S550",
+      "S551"
+     ],
+     "explication": "Le code peut calculer : environ 6 kg pour 100 m² d'ardoise sur liteaux à 50 cm, 3 kg pour 100 m² de tuiles."
+    },
+    {
+     "ratio": "Fixation des tuiles : ratio selon zone de vent et pente, comment les obtenir reste à décider",
+     "origine": "regles-metier SKILL.md (Fixations)",
+     "valeur_actuelle": "point ouvert",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "région de vent déduite du département (22, 29, 56 → 3 ; 35 → 2), pente lue au devis ; demander seulement « écran ? » et « bord de mer exposé ? » ; égout, rives, faîtage : toujours fixés",
+     "sources": [
+      "S556",
+      "S557",
+      "S46"
+     ],
+     "explication": "Décision du fondateur à prendre : déduire ou demander. Les chiffres sont prêts (tuiles_courantes_bretagne)."
+    },
+    {
+     "ratio": "Dauphin, cuvette (boîte à eau), jonctions : en Suggestion",
+     "origine": "regles-metier SKILL.md (Zinguerie)",
+     "valeur_actuelle": "Suggestion",
+     "verdict": "confirme",
+     "bonne_valeur": "Suggestion ; nombre demandé (une par jonction de deux descentes ou par sortie de chéneau, pas une par descente) ; Ø 80 ou 100",
+     "sources": [
+      "S561",
+      "S563",
+      "S236"
+     ],
+     "explication": "Pas calculable depuis le devis."
+    },
+    {
+     "ratio": "Chatières : le nombre, si ce n'est pas noté",
+     "origine": "regles-metier SKILL.md (Tuile)",
+     "valeur_actuelle": "demandé",
+     "verdict": "confirme",
+     "bonne_valeur": "sinon calculable : surface projetée × 2 (ou 3,3) cm²/m² ÷ section de la chatière, nombre pair",
+     "sources": [
+      "S233",
+      "S213"
+     ],
+     "explication": "Même règle que accessoires-tuiles.json."
+    }
+   ],
+   "comptoir": [
+    {
+     "article": "Pointes de liteaux / voliges",
+     "ce_que_le_vendeur_demande": [
+      "diamètre × longueur (2,8 × 60, 3,1 × 70…)",
+      "finition (galva à chaud, inox)",
+      "tige (lisse, torsadée, annelée)",
+      "tête plate"
+     ],
+     "unite_de_vente": "le kg (boîte)",
+     "conditionnement": "1 kg, 2,5 kg, 5 kg",
+     "sources": [
+      "S551",
+      "S552",
+      "S550"
+     ]
+    },
+    {
+     "article": "Clous d'ardoise",
+     "ce_que_le_vendeur_demande": [
+      "matière (galva, cuivre, inox)",
+      "diamètre × longueur (2,7 × 30 ; cuivre 3 × 30)",
+      "tête extra-large"
+     ],
+     "unite_de_vente": "le kg",
+     "conditionnement": "1, 2,5 ou 5 kg",
+     "sources": [
+      "S552",
+      "S551",
+      "S554"
+     ]
+    },
+    {
+     "article": "Crochets de tuile",
+     "ce_que_le_vendeur_demande": [
+      "modèle de tuile ou de crochet (Mono 14/16/17, Harpon, PM d'égout)",
+      "section du liteau",
+      "inox ou galva"
+     ],
+     "unite_de_vente": "boîte",
+     "conditionnement": "souvent 400 (Dimos) ; sinon demander",
+     "sources": [
+      "S558",
+      "S46"
+     ]
+    },
+    {
+     "article": "Cuvette / boîte à eau",
+     "ce_que_le_vendeur_demande": [
+      "type (branchement, de face, d'angle, boîte à eau carrée)",
+      "diamètre de sortie (80, 100, 120)",
+      "matière (zinc naturel, quartz, cuivre)",
+      "trop-plein"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "à l'unité",
+     "sources": [
+      "S563",
+      "S561"
+     ]
+    }
+   ]
+  },
+  {
    "code": "zinguerie_modeles",
    "libelle": "Zinguerie et écrans : modèles et références du marché",
    "sous_familles": [
@@ -108381,7 +109878,7 @@
            "statut": "une_source",
            "sources": [
             "S241",
-            "S547"
+            "S565"
            ],
            "libelle_source": "écartement maximal",
            "condition": "deuxième passe : toujours aucun fabricant (VMZINC 2026, RHEINZINK 2026, Frénéhard « Nantais SECUR+ ») ne publie d'écartement propre au crochet nantais ; la valeur reste celle du DTU 40.5 lue chez Progineer ; Techniques de l'Ingénieur donne 40 à 50 cm selon l'entraxe des chevrons (toutes gouttières)",
@@ -108396,7 +109893,7 @@
              "extrait": "crochets de même nature métallique, espacés de 0,50 m au maximum"
             },
             {
-             "source": "S547",
+             "source": "S565",
              "extrait": "L'écartement des crochets est de 40 à 50 cm si tel est celui des chevrons"
             }
            ]
@@ -108661,7 +110158,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S548",
+        "S566",
         "S251"
        ],
        "libelle_source": "équerre zinc demi-ronde à 135° vendue toute faite",
@@ -108672,7 +110169,7 @@
        "raison": "en zinc l'angle à 135° se façonne (deux coupes soudées) ou se commande en pliage sur mesure : à faire dire par l'artisan",
        "preuves": [
         {
-         "source": "S548",
+         "source": "S566",
          "extrait": "Angle a coller a 135° 25 gris Nicoll"
         },
         {
@@ -108709,9 +110206,9 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S549",
-            "S550",
-            "S551"
+            "S567",
+            "S568",
+            "S569"
            ],
            "libelle_source": "rouleau, Sd, grammage, bande adhésive, palette",
            "regions": [
@@ -108721,15 +110218,15 @@
            "raison": "deux fiches du même fabricant (une seule source), copies chez des négoces",
            "preuves": [
             {
-             "source": "S549",
+             "source": "S567",
              "extrait": "Dimensions des rouleaux 50 m × 1,50 m (25 rouleaux/palette) ; Valeur Sd env. 0,02 m"
             },
             {
-             "source": "S550",
+             "source": "S568",
              "extrait": "Packaging unit 25 rolls/pallet ; Sd-value approx. 0.02 m"
             },
             {
-             "source": "S551",
+             "source": "S569",
              "extrait": "Valeur Sd env. 0,05 m ; Poids du rouleau env. 12 kg ; Dimension du rouleau 50 m × 1,50 m"
             }
            ]
@@ -108753,7 +110250,7 @@
            "unite": "",
            "statut": "confirme_fabricant",
            "sources": [
-            "S553"
+            "S571"
            ],
            "libelle_source": "rouleau, Sd, grammage, bande adhésive, palette",
            "condition": "fiche française sur doerken.com/fr (fichier « Aufl02 … 250520 »)",
@@ -108765,7 +110262,7 @@
            ],
            "preuves": [
             {
-             "source": "S553",
+             "source": "S571",
              "extrait": "Dimension 50 m × 1,50 m ; Poids du rouleau env. 9,75 kg ; Palettisation 24 rouleaux/palette"
             }
            ]
@@ -108795,7 +110292,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S554"
+            "S572"
            ],
            "libelle_source": "rouleau, Sd, grammage, bande adhésive",
            "condition": "nom français ; « Tyvek Supro » est le nom britannique (voir zm_tyvek_supro)",
@@ -108808,7 +110305,7 @@
            ],
            "preuves": [
             {
-             "source": "S554",
+             "source": "S572",
              "extrait": "Dimensions 1,50 m x 50 m / 11,5 kg ; Masse par unité de surface 145 g/m2 ; Sd 0,02 m"
             }
            ]
@@ -108832,8 +110329,8 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S554",
-            "S555"
+            "S572",
+            "S573"
            ],
            "libelle_source": "rouleau, Sd, grammage",
            "regions": [
@@ -108842,11 +110339,11 @@
            "raison": "deux éditions DuPont concordantes (2012 et 2023) : un seul fabricant",
            "preuves": [
             {
-             "source": "S554",
+             "source": "S572",
              "extrait": "Dimensions 1,50 m x 50 m / 13 kg ; Masse 165 g/m2 ; Sd 0,025 m"
             },
             {
-             "source": "S555",
+             "source": "S573",
              "extrait": "Masse par unité de surface … 165 ; Transmission de la vapeur d'eau … 0,025"
             }
            ]
@@ -108863,7 +110360,7 @@
            "unite": "",
            "statut": "a_confirmer",
            "sources": [
-            "S556"
+            "S574"
            ],
            "libelle_source": "disponibilité en France",
            "condition": "brochure DuPont « Supro » en anglais, sans aucun chiffre ; en France la gamme toiture s'appelle Toiture 60 (R2) et Toiture 90 (R3)",
@@ -108873,7 +110370,7 @@
            "raison": "aucune fiche française ni chiffre Supro ; ne pas confondre avec Toiture 60 sans preuve",
            "preuves": [
             {
-             "source": "S556",
+             "source": "S574",
              "extrait": "Tyvek Supro roofing membrane is a flexible, non-woven sheet"
             }
            ]
@@ -108905,8 +110402,8 @@
            "unite": "",
            "statut": "confirme",
            "sources": [
-            "S557",
-            "S558",
+            "S575",
+            "S576",
             "S331"
            ],
            "libelle_source": "rouleau, Sd, grammage, bande adhésive, palette",
@@ -108920,11 +110417,11 @@
            ],
            "preuves": [
             {
-             "source": "S557",
+             "source": "S575",
              "extrait": "Dimensions 1,50 x 50 m ; Grammage 140 g/m2 ; Poids du rouleau 10,5 kg ; Rouleaux/palette 20 rouleaux"
             },
             {
-             "source": "S558",
+             "source": "S576",
              "extrait": "Nombre rouleaux / palette U 20 20 20"
             },
             {
@@ -108951,7 +110448,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S558"
+            "S576"
            ],
            "libelle_source": "écran de sous-toiture sous la marque Siplast",
            "condition": "Siplast (ICOPAL SAS, Loriol) fabrique les écrans Divoroll vendus sous la marque Monier ; un « écran Siplast » demandé au comptoir = Divoroll (Ecotech, Spirtech)",
@@ -108961,7 +110458,7 @@
            "raison": "absence constatée par recherche, pas une déclaration de Siplast",
            "preuves": [
             {
-             "source": "S558",
+             "source": "S576",
              "extrait": "Usine ICOPAL SAS – BMI Group Les Blaches FR-26270 LORIOL"
             }
            ]
@@ -108990,7 +110487,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S559"
+            "S577"
            ],
            "libelle_source": "rouleau, grammage, classe",
            "condition": "brochure « Nouveauté 2025 », édition janvier 2025, réf. FA960/2025/01 ; Terreal est passé chez Wienerberger (terreal.com redirige vers wienerberger.fr)",
@@ -109003,7 +110500,7 @@
            ],
            "preuves": [
             {
-             "source": "S559",
+             "source": "S577",
              "extrait": "1,5 m 150 g/m² ; 50 m 11 kg ; Certification QB n° : 24-011"
             }
            ]
@@ -109025,7 +110522,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S560"
+            "S578"
            ],
            "libelle_source": "rouleau, grammage, classe",
            "condition": "édition janvier 2025, réf. FA1049/2025/01",
@@ -109038,7 +110535,7 @@
            ],
            "preuves": [
             {
-             "source": "S560",
+             "source": "S578",
              "extrait": "1,5 m 160 g/m² ; 50 m 12 kg ; 45, 60 ou 90 cm"
             }
            ]
@@ -109068,7 +110565,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S561"
+            "S579"
            ],
            "libelle_source": "rouleau, Sd, grammage, palette",
            "condition": "fiche juin 2025 ; marque de négoce (Groupe Samse), hors Bretagne",
@@ -109080,7 +110577,7 @@
            ],
            "preuves": [
             {
-             "source": "S561",
+             "source": "S579",
              "extrait": "Rouleau de 1,50 m x 50 m (75 m²) – 12 kg ; Palette de 24 rouleaux, soit 1 800 m²"
             }
            ]
@@ -109115,7 +110612,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S552"
+            "S570"
            ],
            "libelle_source": "rouleau, Sd, grammage, bande adhésive",
            "condition": "fiche datée 2016-04 ; absent de doerken.com/fr (404 à la passe précédente) : probablement remplacé par DELTA-VENT S / NEOVENT",
@@ -109125,7 +110622,7 @@
            "raison": "fiche de 2016 lue chez un négoce ; palette non publiée (un « 32 rouleaux » vu seulement dans un résumé de moteur de recherche, non retenu)",
            "preuves": [
             {
-             "source": "S552",
+             "source": "S570",
              "extrait": "Masse surfacique env. 130 g/m² ; Valeur Sd env. 0,02 m ; Poids du rouleau env. 10 kg (1,5 m x 50 m)"
             }
            ]
@@ -109145,10 +110642,10 @@
      "verdict": "corrige",
      "bonne_valeur": "pas de nombre commun : 20 (Ecotech 200FR, Spirtech 300), 22 (DELTA-XX PLUS UNIVERSAL), 24 (DELTA-XX PLUS LIGHT, Edilians AERO, Atout Pro R3), 25 (DELTA-VENT S, DELTA-NEO VENT), 18 (DELTA-MAXX PLUS) ; le 25 de l'Ecotech 200FR est contredit par Monier et le CSTB (20)",
      "sources": [
-      "S557",
-      "S558",
-      "S553",
-      "S549"
+      "S575",
+      "S576",
+      "S571",
+      "S567"
      ],
      "explication": "vente au rouleau au comptoir : la palette ne change pas la commande d'un chantier ; ne jamais écrire « 25 » sans le modèle"
     },
@@ -109204,8 +110701,8 @@
      "unite_de_vente": "rouleau 1,50 × 50 m = 75 m²",
      "conditionnement": "palette de 18 à 25 selon le modèle",
      "sources": [
-      "S553",
-      "S557"
+      "S571",
+      "S575"
      ]
     },
     {
@@ -109239,9 +110736,9 @@
        "unite": "mm",
        "statut": "confirme",
        "sources": [
-        "S562",
-        "S563",
-        "S564"
+        "S580",
+        "S581",
+        "S582"
        ],
        "libelle_source": "largeurs de lame",
        "condition": "lame 10 mm d'épaisseur ; 250 mm (frisette, planche) le plus courant ; Deceuninck de 100 à 250",
@@ -109251,15 +110748,15 @@
        ],
        "preuves": [
         {
-         "source": "S562",
+         "source": "S580",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S563",
+         "source": "S581",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S564",
+         "source": "S582",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ]
@@ -109271,10 +110768,10 @@
        "unite": "m",
        "statut": "confirme",
        "sources": [
-        "S562",
-        "S563",
-        "S565",
-        "S564"
+        "S580",
+        "S581",
+        "S583",
+        "S582"
        ],
        "libelle_source": "longueurs vendues",
        "condition": "pro : 4 m (M.E.P, Atout Pro), 6 m (Atout Pro, Deceuninck) ; grande surface de bricolage : 3 m",
@@ -109285,19 +110782,19 @@
        "ecart": "Atout Pro vend au paquet de 10 lames.",
        "preuves": [
         {
-         "source": "S562",
+         "source": "S580",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S563",
+         "source": "S581",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S565",
+         "source": "S583",
          "extrait": "LONGUEUR 4M / 6M ; CONDITIONNEMENT PAQUET DE 10"
         },
         {
-         "source": "S564",
+         "source": "S582",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ]
@@ -109309,7 +110806,7 @@
        "unite": "",
        "statut": "une_source",
        "sources": [
-        "S562"
+        "S580"
        ],
        "libelle_source": "fixation des lames",
        "condition": "entraxe des tasseaux ≤ 60 cm ; à réduire selon coloris et exposition (notice de pose)",
@@ -109319,7 +110816,7 @@
        ],
        "preuves": [
         {
-         "source": "S562",
+         "source": "S580",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         }
        ],
@@ -109332,7 +110829,7 @@
        "unite": "mm",
        "statut": "une_source",
        "sources": [
-        "S566"
+        "S584"
        ],
        "libelle_source": "lame d'air derrière les lames",
        "condition": "minimum, entre montants bois ; ventilation selon le DTU de couverture",
@@ -109342,7 +110839,7 @@
        ],
        "preuves": [
         {
-         "source": "S566",
+         "source": "S584",
          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
         }
        ],
@@ -109378,7 +110875,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S562"
+            "S580"
            ],
            "libelle_source": "format et coloris",
            "condition": "longueurs spéciales sur tarif ; SER254 sous avis technique",
@@ -109388,7 +110885,7 @@
            ],
            "preuves": [
             {
-             "source": "S562",
+             "source": "S580",
              "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
             }
            ]
@@ -109422,8 +110919,8 @@
        "unite": "",
        "statut": "une_source",
        "sources": [
-        "S562",
-        "S564"
+        "S580",
+        "S582"
        ],
        "libelle_source": "accessoires de sous-face",
        "condition": "longueurs des profils non publiées dans le catalogue ; 3 m en grande surface (Tecnoprofils)",
@@ -109433,11 +110930,11 @@
        ],
        "preuves": [
         {
-         "source": "S562",
+         "source": "S580",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S564",
+         "source": "S582",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ],
@@ -109463,8 +110960,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S563",
-        "S567"
+        "S581",
+        "S585"
        ],
        "libelle_source": "largeurs et longueurs",
        "condition": "Deceuninck 150-400 × 9 mm en 6 m (et 5-6 m selon gamme) ; Plastivan 150 à 404 × 18 mm en 5 m",
@@ -109474,11 +110971,11 @@
        ],
        "preuves": [
         {
-         "source": "S563",
+         "source": "S581",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S567",
+         "source": "S585",
          "extrait": "largeurs 150, 175, 200, 225, 250 et 404 mm ; épaisseur 18 mm ; longueur 5 000 mm"
         }
        ]
@@ -109503,7 +111000,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S566"
+            "S584"
            ],
            "condition": "entraxe des points le long de la planche : non trouvé",
            "regions": [
@@ -109512,7 +111009,7 @@
            ],
            "preuves": [
             {
-             "source": "S566",
+             "source": "S584",
              "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
             }
            ]
@@ -109533,8 +111030,8 @@
        "unite": "m",
        "statut": "une_source",
        "sources": [
-        "S568",
-        "S569"
+        "S586",
+        "S587"
        ],
        "libelle_source": "longueur standard des lames",
        "condition": "DAL'ALU SF77 / SF129 (largeur utile 280-290 mm, ≈ 2 kg/m²) ; GutterFrance 310 mm utiles, 0,7 mm",
@@ -109545,11 +111042,11 @@
        "ecart": "La fiche GutterFrance n'a pas pu être ouverte (403) : seule DAL'ALU est lue en entier.",
        "preuves": [
         {
-         "source": "S568",
+         "source": "S586",
          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2"
         },
         {
-         "source": "S569",
+         "source": "S587",
          "extrait": "3000 mm de long, 310 mm de largeur utile, 0,7 mm d'épaisseur, version perforée"
         }
        ]
@@ -109573,7 +111070,7 @@
            "unite": "cm²/m²",
            "statut": "une_source",
            "sources": [
-            "S568"
+            "S586"
            ],
            "libelle_source": "surface ventilée",
            "condition": "version perforée",
@@ -109583,7 +111080,7 @@
            ],
            "preuves": [
             {
-             "source": "S568",
+             "source": "S586",
              "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2"
             }
            ]
@@ -109604,7 +111101,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S566"
+        "S584"
        ],
        "libelle_source": "format standard",
        "condition": "sapin, pin, douglas ; classe d'emploi 3 (ou 2 sous abri)",
@@ -109615,7 +111112,7 @@
        "raison": "Aucun format de lambris bois de sous-face publié par un fabricant ou un négoce breton n'a été trouvé (longueurs de 2 à 5 m selon l'essence) : demander à l'artisan la lame et la longueur.",
        "preuves": [
         {
-         "source": "S566",
+         "source": "S584",
          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
         }
        ]
@@ -109632,9 +111129,9 @@
      "verdict": "a_confirmer",
      "bonne_valeur": "compter en lames de 4 m (PVC 250 mm : 1 m² par lame) ; perte : aucune source ; grilles : selon la section de ventilation du DTU (alu perforé 168-174 cm²/m²)",
      "sources": [
-      "S562",
-      "S563",
-      "S568"
+      "S580",
+      "S581",
+      "S586"
      ],
      "explication": "Les fabricants donnent les formats, pas de taux de perte ni de nombre de grilles au ml."
     },
@@ -109645,9 +111142,9 @@
      "verdict": "corrige",
      "bonne_valeur": "PVC cellulaire en 5 ou 6 m (pas de 2 m chez les fabricants pros) ; fixation par points de 2 pointes inox, 3 points en largeur ≥ 280 mm ; nombre au ml : non trouvé",
      "sources": [
-      "S563",
-      "S567",
-      "S566"
+      "S581",
+      "S585",
+      "S584"
      ],
      "explication": "Longueurs corrigées ; les 4 vis/ml restent sans source."
     }
@@ -109665,8 +111162,8 @@
      "unite_de_vente": "lame ou paquet de 10",
      "conditionnement": "4 m (6 m existe)",
      "sources": [
-      "S562",
-      "S565"
+      "S580",
+      "S583"
      ],
      "famille": "sous_face"
     },
@@ -109681,8 +111178,8 @@
      "unite_de_vente": "pièce",
      "conditionnement": "3 m en grande surface ; longueur pro sur tarif",
      "sources": [
-      "S562",
-      "S564"
+      "S580",
+      "S582"
      ],
      "famille": "sous_face"
     },
@@ -109699,8 +111196,8 @@
      "unite_de_vente": "pièce",
      "conditionnement": "5 ou 6 m",
      "sources": [
-      "S563",
-      "S567"
+      "S581",
+      "S585"
      ],
      "famille": "sous_face"
     },
@@ -109715,7 +111212,7 @@
      "unite_de_vente": "lame ou m²",
      "conditionnement": "3 m",
      "sources": [
-      "S568"
+      "S586"
      ],
      "famille": "sous_face"
     }
@@ -113549,251 +115046,377 @@
   },
   {
    "id": "S547",
+   "titre": "DTU 40.23 (NF P31-204-1, sept. 1996) §4.2.1.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+   "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+   "type": "dtu",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S548",
+   "titre": "DTU 40.22 (NF P31-201-1, mai 1993) §3.2.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+   "url": "https://dtu.golgoth.org/docs/dtu-40-22-p31-201-couverture-en-tuiles-canal-de-terre-cuite/dtu-40-22-nf-p31-201-1-mai-1993/chapitre-3-mise-en-oeuvre-html",
+   "type": "dtu",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S549",
+   "titre": "NF DTU 40.11 P1-2 (déc. 2020) §3.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+   "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-2-decembre-2020/3-materiaux-html",
+   "type": "dtu",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S550",
+   "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+   "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S551",
+   "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+   "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S552",
+   "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+   "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S553",
+   "titre": "Alsafix, fiche « Pointe tête plate annelée inox A4 » (diffusée par Bati-Avenue)",
+   "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/T/P/TP310909S_517c.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S554",
+   "titre": "Alsafix, fiche « Pointe TEL carrée crantée cuivre » (diffusée par Bati-Avenue)",
+   "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/T/L/TL300407S_4268.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S555",
+   "titre": "AQC, Mémo Chantier « Couvertures ardoises et tuiles » (sept. 2021)",
+   "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Couvertures-Ardoises-Tuiles-AQC.pdf",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S556",
+   "titre": "Recherche Mobiiz, tuiles-emboitement.json, entrée fixation_tuiles_dtu_40_21 (Edilians 2024 p. 332 + Koramic 2016 p. 31, statut confirme)",
+   "url": "baticlair/referentiels/couverture/recherche/tuiles-emboitement.json",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S557",
+   "titre": "Recherche Mobiiz, regions.json (régions de vent Eurocode par département, statut confirme)",
+   "url": "baticlair/referentiels/couverture/recherche/regions.json",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S558",
+   "titre": "Dimos, crochet anti-soulèvement X-Tile pour tuiles à emboîtement (fiche Batiproduits)",
+   "url": "https://www.batiproduits.com/fiche/produits/crochet-anti-soulevement-pour-tuiles-a-emboitem-p69087273.html",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S559",
+   "titre": "Dimos, Croch'tuile, crochet invisible pour tuiles à emboîtement (fiche Batiproduits)",
+   "url": "https://www.batiproduits.com/fiche/produits/crochet-de-fixation-invisible-pour-tuiles-a-embo-p69087288.html",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S560",
+   "titre": "Frénéhard & Michaux, fiche « Crochet tuile canal » (diffusée par BigMat)",
+   "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/QAFC1473_fp.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S561",
+   "titre": "edilians.eu, cuvettes 1/2 rondes de face (zinc naturel, quartz, cuivre)",
+   "url": "https://edilians.eu/cuvettes-1-2-rondes-de-face.html",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S562",
+   "titre": "Brico Dépôt, cuvette de branchement en zinc Ø 80 mm",
+   "url": "https://www.bricodepot.fr/p/3416710017585/cuvette-de-branchement-en-zinc-o-80-mm",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S563",
+   "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø80 avec trop-plein » (réf. 11008275, Richardson)",
+   "url": "https://www.richardson.fr/files/richardson/technical_document/889/99368_11008275_fichetechniqu.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S564",
+   "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø100 avec trop-plein » (réf. 11008276, Richardson)",
+   "url": "https://www.richardson.fr/files/richardson/technical_document/6d5/99469_11008276_fichetechniqu.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S565",
    "titre": "Techniques de l'Ingénieur, « Gouttières » (C1075, archive, résumé public)",
    "url": "https://www.techniques-ingenieur.fr/base-documentaire/archives-th12/archives-le-second-oeuvre-et-l-equipement-du-batiment-tiacc/archive-1/evacuation-des-eaux-pluviales-c1075/gouttieres-c1075niv10003.html",
    "type": "guide",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S548",
+   "id": "S566",
    "titre": "Distriartisan, angle à coller à 135° LG25 gris Nicoll (PVC)",
    "url": "https://www.distriartisan.fr/angle-a-coller-a-135-25-gris.html",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S549",
+   "id": "S567",
    "titre": "Dörken, fiche technique DELTA-VENT S / S PLUS (copie diffusée par ABC Maçonnerie)",
    "url": "https://abc-maconnerie.com/client/document/fiche-technique-delta-vent-s_2210.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S550",
+   "id": "S568",
    "titre": "Dörken, technical datasheet DELTA-VENT S (copie epdm24.nl)",
    "url": "https://www.epdm24.nl/wp-content/uploads/2022/10/technical-datasheet-delta-vent-s.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S551",
+   "id": "S569",
    "titre": "Dörken, brochure « écrans de sous-toiture DELTA » (doerken.com/ch/fr, fichier de février 2019)",
    "url": "https://www.doerken.com/ch/fr/content/preview/20962/file/Brochure%20%C3%A9crans%20de%20sous-toiture%20DELTA.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S552",
+   "id": "S570",
    "titre": "Dörken, fiche DELTA-VENT N (2016-04, diffusée par BigMat)",
    "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/BBFUFCWSvnxI3J2tGuzF.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S553",
+   "id": "S571",
    "titre": "Dörken France, fiche technique DELTA-XX PLUS LIGHT (doerken.com/fr, édition 02, 20/05/2025)",
    "url": "https://www.doerken.com/fr/fr/content/preview/30021/file/DOE-0000_Datenblatt_XX-PLUS-LIGHT_FR_Aufl02_LA02_250520.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S554",
+   "id": "S572",
    "titre": "DuPont / Edilians, brochure « Gamme DuPont Tyvek et AirGuard » (avril 2023, edilians.com)",
    "url": "https://edilians.com/media/wysiwyg/uploads/brochure-gamme-dupont-tyvek-airguard.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S555",
+   "id": "S573",
    "titre": "DuPont, fiche technique Tyvek Toiture 90 (2012, copie Econology)",
    "url": "https://www.econology.fr/media/attachment/file/t/d/tds_tyvek_toiture90_1.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S556",
+   "id": "S574",
    "titre": "DuPont, brochure Tyvek Supro (anglais, copie Shopify)",
    "url": "https://cdn.shopify.com/s/files/1/0250/6198/2261/files/dupont-tyvek-brochure.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S557",
+   "id": "S575",
    "titre": "Monier (BMI), fiche technique Ecotech 200 FR (diffusée par BigMat)",
    "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/ECOTECH-200_3561340230412_FT.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S558",
+   "id": "S576",
    "titre": "CSTB, certificat QB25 Ecotech 200 FR, décision n° 19-001 du 30/01/2019 (copie BigMat)",
    "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/certificat-QB-ecotech-200FR-3561340230412.pdf",
    "type": "autre",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S559",
+   "id": "S577",
    "titre": "Terreal / Wienerberger, fiche ESTERRE 150 HPV, édition janvier 2025 (diffusée par Samse, n° 1333143)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1333143.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S560",
+   "id": "S578",
    "titre": "Terreal / Wienerberger, fiche ESTERRE 160 HPV, édition janvier 2025 (diffusée par Samse, n° 1333158)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1333158.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S561",
+   "id": "S579",
    "titre": "Groupe Samse / Atout Pro, fiche Écran de sous-toiture HPV R3 (juin 2025, n° 1853449)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1853449.pdf",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S562",
+   "id": "S580",
    "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
    "url": "https://www.chausson.fr/media/article-document/209262",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S563",
+   "id": "S581",
    "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S564",
+   "id": "S582",
    "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
    "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S565",
+   "id": "S583",
    "titre": "Atout Pro (marque du groupe Samse), lambris PVC d'habillage de sous-faces (11 juillet 2025)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1868643.pdf",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S566",
+   "id": "S584",
    "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
    "url": "https://chausson.fr/media/article-document/273852",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S567",
+   "id": "S585",
    "titre": "Batiproduits, planche de rive PVC cellulaire Plastivan réf. 515200-5.00",
    "url": "https://www.batiproduits.com/fiche/produits/planche-de-rive-cellulaire-ref-515200-5-00-en-p496078144.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S568",
+   "id": "S586",
    "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
    "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S569",
+   "id": "S587",
    "titre": "GutterFrance, fiche sous-face aluminium (distriartisan.fr), lue dans l'aperçu du moteur de recherche (403 en accès direct)",
    "url": "https://distriartisan.fr///media/wysiwyg/documents/FK_Gouttieres/fiche_technique_sous_face.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S570",
+   "id": "S588",
    "titre": "Soprema, fiche Sopralène Flam 180 WPBFR229/b, diffusée par BigMat",
    "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3434550072618-zP63bE2VlR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S571",
+   "id": "S589",
    "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
    "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S572",
+   "id": "S590",
    "titre": "Soprema Belgique, fiche Soprarock SBS P3 TF, diffusée par Gobert",
    "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOPREMA%20FT%20SOPRAROCK%20SBS%20P3%20TF.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S573",
+   "id": "S591",
    "titre": "Soprema, fiche Sopralène Flam 180 AR WPBFR230/1/d, diffusée par Envain Matériaux",
    "url": "https://www.envain-materiaux.fr/ressources/images/articles//ficheTechnique/FT_WPBFR230.1.d.FR_SOPRALENE%20FLAM%20180%20AR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S574",
+   "id": "S592",
    "titre": "IKO Summa, recouvrements (lu dans l'aperçu du moteur de recherche)",
    "url": "https://eu.iko.com/wp-content/uploads/2023/10/IKOSumma_FR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S575",
+   "id": "S593",
    "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S576",
+   "id": "S594",
    "titre": "Permaroof Store (négoce UK), Elevate Bonding Adhesive BA-2012 10 L (lu dans l'aperçu du moteur de recherche)",
    "url": "https://www.permaroofstore.co.uk/adhesives/bonding-adhesive-10l-ba-2012.html",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S577",
+   "id": "S595",
    "titre": "Chausson, fiche colle pour membrane EPDM Flexirub sur bois / béton",
    "url": "https://www.chausson.fr/media/article-document/256531",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S578",
+   "id": "S596",
    "titre": "Batiproduits, Utherm Roof L (Unilin)",
    "url": "https://www.batiproduits.com/fiche/produits/plaque-isolante-pir-pour-toitures-terrasses-uthe-p480752395.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S579",
+   "id": "S597",
    "titre": "Batiproduits, IKO enertherm ALU XL",
    "url": "https://www.batiproduits.com/fiche/produits/panneau-isolant-en-mousse-rigide-pour-toiture-terr-p381379720.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S580",
+   "id": "S598",
    "titre": "Jewson (négoce UK), Recticel PowerDeck F 1200 x 600",
    "url": "https://jewson.co.uk/p/recticel-powerdeck-f-flat-roof-board-1200-x-600-x-80mm-IRPDF080",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S581",
+   "id": "S599",
    "titre": "Knauf, Knauf Thane OpTTI (knauf.com)",
    "url": "https://knauf.com/fr-FR/p/produit/knauf-thane-optti-29945_4091",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S582",
+   "id": "S600",
    "titre": "Forum Construire (forum de professionnels et particuliers) : trop-plein et 1 cm² par m²",
    "url": "https://www.forumconstruire.com/construire/topic-241784.php",
    "type": "autre",
