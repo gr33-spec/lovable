@@ -9,12 +9,6 @@ import { confirmerEmail } from "./confirmer-email";
  */
 const unique = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-// Les analyses offertes se comptent dans le mode par défaut, l'achat groupé automatique : une autre série a pu laisser
-// un autre mode (alors la jauge vaut null) ; comme achat-groupe.spec.ts, on le repose avant chaque test.
-test.beforeEach(async ({ request }) => {
-  expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: "automatique" } })).status()).toBe(200);
-});
-
 async function appel(page: Page, method: string, url: string, body?: unknown): Promise<{ status: number; body: { error?: { details?: { reason?: string } } } & Record<string, unknown> }> {
   return page.evaluate(
     async ({ method, url, body }) => {
