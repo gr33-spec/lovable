@@ -84,7 +84,8 @@ test("passe mobile : Quantitatifs à deux choix, tableau de bord, Publier un bes
   // 4. L'accueil : compte vide, un seul départ ; avec une liste, elle paraît et la carte de départ s'efface.
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bonjour Lise/ })).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ })).toBeVisible();
+  // Accueil premium (Greg, 20 novembre 2026) : « Nouveau quantitatif » toujours là, en premier ; pas de bloc Missions.
+  await expect(page.getByRole("main").getByRole("link", { name: "Nouveau quantitatif", exact: true })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: /^Voir les achats groupés|^Missions entre entreprises/ })).toHaveCount(0);
   await tientSurLEcran(page, "Accueil vide");
   const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Ardoise naturelle 32×22", quantite: "900", unite: "pièces" }] });
@@ -92,7 +93,7 @@ test("passe mobile : Quantitatifs à deux choix, tableau de bord, Publier un bes
   expect((await apiJson(page, "PATCH", `/v1/projects/${q.body.projetId}`, { name: "Toiture de la passe mobile" })).status).toBe(200);
   await page.goto("/");
   await expect(page.getByRole("main").getByText("Toiture de la passe mobile").first()).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Mon activité" }).getByText("Toiture de la passe mobile")).toHaveCount(1);
   for (const lien of await page.getByRole("main").getByRole("link").all()) expect((await lien.boundingBox())!.height, "cible de 44 px sur l'accueil").toBeGreaterThanOrEqual(44);
   await tientSurLEcran(page, "Accueil");
 

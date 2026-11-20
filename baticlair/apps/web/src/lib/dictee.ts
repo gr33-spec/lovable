@@ -25,6 +25,9 @@ function fabrique(): (new () => Reconnaissance) | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
+/** Le navigateur sait-il dicter ? (L'accès « Dicter » de l'accueil ne se montre que s'il marche vraiment.) */
+export const dicteeDisponible = (): boolean => fabrique() !== null;
+
 export const PHRASES_DICTEE = {
   indisponible: "La dictée n'est pas disponible sur ce navigateur. Utilise le micro de ton clavier, ou écris ta réponse.",
   refuse: "Le micro est bloqué. Autorise-le dans les réglages du navigateur, ou écris ta réponse.",

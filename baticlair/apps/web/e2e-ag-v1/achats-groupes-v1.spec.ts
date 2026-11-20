@@ -210,14 +210,15 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
 
   // Une autre entreprise : l'achat correspond ; « ne me convient pas » ne propose pas la zone ; elle rejoint.
   const b = await nouvelArtisan(browser, "Paul");
-  // L'accueil de B (lot UX mobile, 15 novembre 2026) : l'achat ouvert dans son département lui est proposé, par son produit
-  // et le temps qui reste ; aucune entreprise n'est nommée. Celui qui y est déjà (A) ne se le voit pas proposer.
+  // L'accueil de B (accueil premium, Greg, 20 novembre 2026) : un achat ouvert de son métier dans son département, avec
+  // « Rejoindre » ; aucune entreprise nommée ; la règle des 3 (sous 3 entreprises, jamais le volume).
   await b.page.goto("/");
-  // (La base des parcours est partagée : d'autres achats du département peuvent occuper les trois places.)
-  const idees = b.page.getByRole("region", { name: "Achats groupés qui peuvent t'intéresser" });
-  await expect(idees.getByRole("listitem").first()).toBeVisible();
-  expect(await idees.getByRole("listitem").count()).toBeLessThanOrEqual(3);
-  for (const lien of await idees.getByRole("listitem").getByRole("link").all()) await expect(lien).toHaveAccessibleName(/ : .+, Se termine (dans \d+ jours|demain|aujourd'hui)$/);
+  // (La base des parcours est partagée : un autre achat du département peut se fermer plus tôt et passer devant.)
+  const idees = b.page.getByRole("region", { name: "Achats groupés" });
+  await expect(idees.getByRole("link", { name: /^Rejoins les couvreurs /i })).toHaveAttribute("href", "/achats-groupes");
+  await expect(idees.getByRole("link", { name: "Rejoindre", exact: true })).toBeVisible();
+  await expect(idees.getByText(/^En cours de regroupement$|^\d+ entreprises · .+ au total$/)).toBeVisible();
+  await expect(idees).not.toContainText("Toitures");
   await expect(idees.getByRole("link", { name: "Voir tous les achats groupés" })).toHaveAttribute("href", "/achats-groupes");
   expect(await b.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await b.page.goto("/achats-groupes");

@@ -154,13 +154,15 @@ test("un besoin groupé publié : la date réagit tout de suite, puis l'accueil 
   test.info().annotations.push({ type: "latence-publication-ms", description: String(Date.now() - clic) });
   // Le nombre d'entreprises, créateur compris ; le volume à partir de 3 (Greg, 16 novembre 2026).
   await expect(page.getByRole("tabpanel", { name: "Groupées" }).getByText(/^\d+ entreprises? · (en cours de regroupement|[\d\s]+ pièces)/)).toBeVisible();
-  // L'accueil : le besoin y est aussitôt, avec son type écrit ; jamais le nom d'une entreprise.
+  // L'accueil (« Mon activité », accueil premium du 20 novembre 2026) : le besoin y est aussitôt, avec son type écrit ;
+  // la règle des 3 ; jamais le nom d'une entreprise.
   await page.goto("/");
-  const demandes = page.getByRole("region", { name: "Mes demandes en cours" });
-  await expect(demandes.getByRole("link", { name: /^Achat groupé : Ardoise naturelle/ })).toBeVisible();
-  await expect(demandes).toContainText(/\d+ entreprises? · ([\d\s]+ pièces au total|en cours de regroupement)/);
+  const demandes = page.getByRole("region", { name: "Mon activité" });
+  const carte = demandes.getByRole("link", { name: /: Ardoise naturelle/ }).first();
+  await expect(carte).toContainText("Achat groupé");
+  await expect(carte).toContainText(/(\d+ entreprises · [\d\s]+ pièces au total|en cours de regroupement)/);
   await expect(demandes).not.toContainText("Toitures");
-  await demandes.getByRole("link", { name: /^Achat groupé : Ardoise naturelle/ }).click();
+  await carte.click();
   await expect(page).toHaveURL(/\/achats-groupes\/besoins\/[0-9a-f-]{36}/);
   await expect(page.getByText("Entreprises vérifiées")).toBeVisible();
 });

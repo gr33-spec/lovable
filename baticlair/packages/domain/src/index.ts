@@ -17,6 +17,7 @@ export * from "./documents/cost-estimate.js";
 export * from "./documents/modele-pdf.js";
 export * from "./documents/nature.js";
 export * from "./accueil/accueil.js";
+export * from "./accueil/mon-activite.js";
 export * from "./assistant/assistant.js";
 export * from "./assistant/article-compris.js";
 export * from "./assistant/comprehension.js";

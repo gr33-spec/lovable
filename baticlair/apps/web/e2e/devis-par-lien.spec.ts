@@ -245,7 +245,7 @@ test("rappel de suivi à 7 jours : « Où en es-tu avec cette demande ? » sur l
   const tache = await apiJson<{ suivis: number }>(page, "GET", `/v1/internal/demandes-perso?maintenant=${encodeURIComponent(new Date(Date.now() + 8 * 86_400_000).toISOString())}`, undefined, SECRET);
   expect(tache.body.suivis).toBeGreaterThanOrEqual(1);
   await page.goto("/");
-  const afaire = page.getByRole("region", { name: "À faire maintenant", exact: true });
+  const afaire = page.getByRole("region", { name: "Mon activité", exact: true });
   // L'accueil charge plusieurs listes : on lui laisse le temps (la série complète tourne sur une machine chargée).
   await expect(afaire).toContainText("Où en es-tu avec cette demande ?", { timeout: 20_000 });
   await afaire.getByRole("link").filter({ hasText: "Où en es-tu avec cette demande ?" }).first().click();
