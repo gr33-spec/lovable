@@ -351,7 +351,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 ## Décisions du 20 novembre 2026 : carte et retours haptiques
 
-- Carte de l'onboarding : zoom en un seul mouvement mené par le navigateur, flou posé une fois le zoom fini, départements préchargés. Règle changée : sur la carte, les NUMÉROS seuls (avant : noms et numéros mêlés) ; les noms sont dans les boutons dessous et dans la barre « Continuer ». Pas de zoom de la page au double toucher sur l'onboarding.
+- Carte de l'onboarding : zoom en un seul mouvement mené par le navigateur, flou posé une fois le zoom fini, départements préchargés. Règle changée : sur la carte, les NUMÉROS seuls (avant : noms et numéros mêlés) ; les noms dans la barre « Continuer ». Règle changée (même jour) : sous la carte d'une région, plus la liste des départements, seulement le département choisi et « Continuer » ; seuls les départements trop petits pour le pouce (75, 92, 93, 94, et 90, 68, 66) gardent un bouton à leur numéro ; la barre ne montre que le département de la région affichée. Les régions restent en boutons sous la France entière (leurs noms ne tiennent pas sur un téléphone), l'outre-mer aussi. Pas de zoom de la page au double toucher sur l'onboarding.
 - Retours haptiques dans toute l'application (`lib/haptique.ts`, `RetoursHaptiques` dans la mise en page racine) : un léger au choix (région, département, métier, case, onglet), un appui sur un bouton d'action ; jamais sur un simple lien. Android : vibration du navigateur ; iPhone (iOS 18 et plus) : le clic de l'interrupteur natif. Coupables dans Profil › Apparence (« Vibrations au toucher », allumées par défaut, gardées sur l'appareil).
 
 ## À faire avant l'ouverture d'un nouveau métier
