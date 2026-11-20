@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **92.4 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -1473,6 +1473,178 @@ Taux de chiffres confirmés : **92.4 %**. Règle : confirme : deux sources indé
 | longueur_de_bande_par_souche | ≈ périmètre + 1 m ml | devant : L + 2 × 10-15 cm ; côtés : 2 × (P + chevauchement tuile + 10-15 cm) ; arrière : L + 2 × 10-15 cm, en 350 mm de large mini (souvent 2 bandes ou une bande de 370 / 560) | une_source |
 
 - **Monier Wakaflex** (une_source 1) : 
+
+## Fenêtres de toit et raccords
+
+### tailles de fenêtre
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| lecture_du_code_taille | lettre = largeur : C 55, F 66, M 78, P 94, S 114, U 134 cm ; chiffre = hauteur : 01 70, 02 78, 04 98, 06 118, 08 140, 10 160 cm ; « K » = génération après 2001 cm | codes Velux actuels (CK02, MK04…) ; les anciens codes 102, 104, 304, 306, 308, 606, 608, 804, 808 correspondent à C02, C04, M04, M06, M08, S06, S08, U04, U08 | confirme |
+| cotes_exactes_dormant | largeurs 550 / 660 / 780 / 942 / 1140 / 1340 mm ; hauteurs 778 / 978 / 1178 / 1398 / 1600 / 1800 mm mm | cotes extérieures exactes du dormant ; la cote « cm » du comptoir en est l'arrondi (94 = 942 mm, 140 = 1398 mm) | une_source |
+| equivalence_code_taille | 01 = 55×78 ; 02 = 55×98 ; 03 = 66×98 ; 04 = 66×118 ; 05 = 78×98 ; 06 = 78×118 ; 07 = 78×140 ; 13 = 78×160 ; 08 = 94×118 ; 09 = 94×140 ; 10 = 114×118 ; 11 = 114×140 ; 12 = 134×98 ; 17 = 134×140 cm | Fakro FTP-V (bois), FTU-V (PU) : mêmes cotes commerciales que Velux, dormant exact 547 × 781, 777 × 981… (3 mm de moins) | confirme |
+| dimensions_hors_tout | 5/7 = 54×78 ; 5/9 = 54×98 ; 7/9 = 74×98 ; 7/11 = 74×118 ; 7/14 = 74×140 ; 9/11 = 94×118 ; 9/14 = 94×140 ; 11/11 = 114×118 ; 11/14 = 114×140 ; 13/9 = 134×98 ; 13/14 = 134×140 cm | Roto Designo : largeurs 54 et 74 (et non 55 et 78 comme Velux) : une Roto 7/9 ne remplace pas une MK04 sans reprise de chevêtre ; raccords Roto propres à la marque | confirme |
+
+- **Velux CK01** (une_source 1) : dimensions_hors_tout 55 × 70 cm
+- **Velux CK02** (confirme 1) : dimensions_hors_tout 55 × 78 cm
+- **Velux CK04** (confirme 1) : dimensions_hors_tout 55 × 98 cm
+- **Velux FK06** (confirme 1) : dimensions_hors_tout 66 × 118 cm
+- **Velux MK04** (confirme 1) : dimensions_hors_tout 78 × 98 cm
+- **Velux MK06** (confirme 1) : dimensions_hors_tout 78 × 118 cm
+- **Velux MK08** (confirme 1) : dimensions_hors_tout 78 × 140 cm
+- **Velux MK10** (confirme 1) : dimensions_hors_tout 78 × 160 cm
+- **Velux PK06** (confirme 1) : dimensions_hors_tout 94 × 118 cm
+- **Velux PK08** (confirme 1) : dimensions_hors_tout 94 × 140 cm
+- **Velux PK10** (confirme 1) : dimensions_hors_tout 94 × 160 cm
+- **Velux SK06** (confirme 1) : dimensions_hors_tout 114 × 118 cm
+- **Velux SK08** (confirme 1) : dimensions_hors_tout 114 × 140 cm
+- **Velux UK04** (confirme 1) : dimensions_hors_tout 134 × 98 cm
+- **Velux UK08** (confirme 1) : dimensions_hors_tout 134 × 140 cm
+
+### pentes admises
+
+- **Velux GGL / GGU** (confirme 1) : pente_admise 15 à 90 °
+- **Velux GPL / GPU** (confirme 1) : pente_admise 15 à 55 °
+
+### raccords d'étanchéité
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pente_minimale | 20 ° | toute pose encastrée (EDJ, EDN chez Velux ; ELJ chez Fakro) ; pose standard : 15° | confirme |
+| coloris_et_suffixe | 0000 gris (aluminium laqué) ; 0700C1 ocre-jaune ; 0700C2 rouge-brun (EDW, EDJ, EW)  | le coloris se lit dans la fin de la référence : EDW MK04 0000 = gris | confirme |
+| raccord_de_remplacement | EW (tuiles) / EL (ardoises), avec isolant : EW 6000 / EL 6000  | seulement pour les anciennes fenêtres Velux d'avant 2001 (codes 102, 104, 304…) ; pour C02, C04, M04… prendre les raccords classiques EDW, EDL, EDJ, EDN | une_source |
+
+- **Velux EDW** (une_source 1) : couverture_admise tuiles (profilées) jusqu'à 120 mm de relief mm
+- **Velux EDL** (une_source 1) : couverture_admise ardoises et matériaux plats ≤ 8 mm (16 mm en double épaisseur, 2 × 8) mm
+- **Velux EDP** (une_source 1) : couverture_admise tuiles plates de largeur < 300 mm mm
+- **Velux EDJ** (une_source 1) : couverture_admise tuiles (profilées) jusqu'à 90 mm de relief mm
+- **Velux EDN** (une_source 1) : couverture_admise ardoises et matériaux plats < 8 mm (16 mm en double épaisseur) mm
+- **Velux EDS** (une_source 1) : couverture_admise matériaux plats ≤ 2 × 8 mm, conçu pour le raccord au photovoltaïque mm
+- **Velux ZWC** (une_source 1) : nature_article kit de profilés pour fenêtre installée sans raccord (pose standard), même prix toutes tailles
+- **Fakro EZV-F** (une_source 1) : couverture_admise tuiles plates à emboîtement, épaisseur 18 à 45 mm mm
+- **Fakro EHV-P** (une_source 1) : couverture_admise couvertures ondulées / profilées, onde ≤ 90 mm mm
+- **Fakro ELV** (une_source 1) : couverture_admise ardoises et matériaux plats, pose par recouvrement
+- **Fakro ELJ** (une_source 1) : couverture_admise ardoises, pose encastrée, épaisseur ≤ 10 mm (2 × 5 mm) mm
+
+### accessoires d'installation
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| contenu | raccord + BDX + BFX + gouttière centrale ajustable 100 à 160 mm  | fenêtres en combinaison (côte à côte, superposées) ; la gouttière centrale s'ajuste à la largeur du chevron | une_source |
+
+- **Velux BDX** (une_source 1) : quantite_par_fenetre 1 u
+- **Velux BFX** (une_source 1) : quantite_par_fenetre 1 u
+- **Velux BBX** (une_source 1) : quantite_par_fenetre 1 u
+- **Velux LSB / LSC** (une_source 1) : epaisseur_de_toit_max LSB 300 / LSC 400 mm
+
+### conditionnement
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| unite_de_vente | fenêtre à la pièce ; raccord à la pièce, à la taille de la fenêtre ; BDX, BFX, BBX à la pièce, à la taille u | un raccord par fenêtre seule ; combinaisons : raccord de combinaison (EK…) ou Pack PRO+ | confirme |
+
+
+### modèles, finitions, manœuvre
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| finitions | WhiteFinish = bois peint blanc (GGL / GPL) ; EverFinish = polyuréthane blanc (GGU / GPU) ; ClearFinish = bois verni (GGL 3054…)  | le premier groupe de lettres dit la matière : GGL bois, GGU polyuréthane ; L = bois, U = PU | confirme |
+| ouverture | GGL / GGU = rotation (axe central) ; GPL / GPU = projection (ouverture par le bas, 15° à 55°)  | le comptoir demande rotation ou projection | confirme |
+| gamme_vitrage | suffixe 2076 / 0076 = Confort ; 2057 / 0057 = Tout Confort ; 2062 = triple vitrage ; 3054 = gamme bois verni ClearFinish  | le suffixe à 4 chiffres suit le modèle (GGL MK04 2076) ; il fixe le vitrage et le prix | confirme |
+| manoeuvre | manuelle (barre de manœuvre) ; électrique INTEGRA : suffixe …21 (GGU 007621) ; solaire : suffixe …30 (GGU 005730)  | électrique et solaire livrés avec clavier mural (tarif 2024) ; la GPU motorisée n'accepte pas certains accessoires | confirme |
+
+
+## Sécurité en toiture
+
+### crochets de sécurité (NF EN 517)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| types_en_517 | type A : reprend les efforts dans le sens de la pente ; type B : dans le sens de la pente ET dans le plan de la toiture (perpendiculaire)  | crochet de sécurité = ancrage pour échelle de couvreur et EPI ; pour s'y attacher par harnais, prendre un crochet B ou un ancrage EN 795 | confirme |
+| norme | NF EN 517 (remplace la NF P37-403 « crochet de service », annulée)  | toute la France | confirme |
+| entraxe_max_horizontal | 2 m | entre deux crochets de sécurité d'une même rangée, pour circuler en sécurité ; ne jamais s'ancrer sous le travailleur | confirme |
+| distance_aux_points_d_intervention | 1 m | poser des crochets à environ 1 m des endroits à entretenir plus tard (cheminée, fenêtre de toit, antenne) | une_source |
+| fixations_par_crochet | 3 u | 3 pointes annelées (ou 1 axe crampon traversant) sur chevron ; vis à bois : profondeur ≥ 90 mm (swisspor) ; fixations fournies avec le crochet chez Frénéhard | confirme |
+| section_mini_chevron | 4,2 × 6,3 (Tractel) ; 8 × 10 (swisspor) cm | selon le modèle de crochet | a_confirmer |
+| personnes_par_crochet | 1 u | crochet de toiture inclinée swisspor type B ; à vérifier sur la notice des autres marques | une_source |
+| remplacement_apres_chute | remplacer le crochet après qu'il a retenu une chute  |  | une_source |
+| formes_vendues | droit (plat), cambré 25 ou 50 mm, chantourné / torsadé (fixation sur le flanc du chevron)  | la forme suit la couverture (ardoise, tuile plate, tuile à relief) ; galvanisé à chaud ou inox, parfois teinte ardoise | confirme |
+| double_norme | crochet EN 517 (échelle) + anneau EN 795 classe A (EPI antichute) sur la même pièce  | ancrages de toiture combinés Tractel, Frénéhard « Monuments historiques » | confirme |
+| crochets_par_m2 | None u/m² | aucun ratio au m² : le nombre se déduit de la longueur du versant (1 tous les 2 m par rangée) et des points à entretenir | a_confirmer |
+| distance_au_bord | 0.5 m | exemple suisse : un crochet manquant à 50 cm du bord du toit (rive) ; pas de règle française trouvée | une_source |
+| section_ronde_mini | 16 mm | crochet de SERVICE (d'échelle) en Wallonie : rond Ø 16 mm mini, acier galvanisé ou inox AISI 304, écartement ≤ 2,8 m | une_source |
+| vendu_par | crochet à la pièce ; axe crampon 50 / 90 / 130 mm à la pièce ; pointes annelées par lot de 10  | Tractel ; chez Frénéhard les fixations sont livrées avec le crochet | une_source |
+
+
+### lignes de vie et ancrages (NF EN 795)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| classes_en_795 | A : ancrage fixe sur la structure ; B : ancrage provisoire transportable ; C : ligne de vie à câble (support flexible horizontal) ; D : ligne de vie sur rail rigide ; E : corps mort lesté (toiture-terrasse)  | la fiche couverture parle surtout de A (point d'ancrage) et C (ligne de vie câble) | confirme |
+| portee_max_entre_ancrages_intermediaires | 15 m | ligne de vie câble EN 795 type C ; au-delà, ancrage intermédiaire | confirme |
+| portee_max_mono_portee | 30 m | ligne sans ancrage intermédiaire (Tractel Travsmart, Travsafe tout inox) | une_source |
+| utilisateurs_simultanes | 2 à 5 selon le système (Travflex 2 : 2 × 150 kg ; Travsafe : 3 × 150 kg ; Conekt NewPro : 5) u | jamais deux personnes sur un tronçon non certifié multi-utilisateurs | une_source |
+| cable | inox 7 × 19, Ø 10 mm, rupture 53,1 kN (Conekt NewPro) mm |  | une_source |
+| vendu_par | en kit ou sur étude (ancrages d'extrémité, intermédiaires, absorbeur, câble au mètre) ; posée et vérifiée par un installateur  | pas un article de comptoir courant ; le comptoir demande la longueur et le nombre d'ancrages intermédiaires | a_confirmer |
+
+
+### échelles de couvreur
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| elements_et_longueurs | aluminium en éléments emboîtables : 5 × 1,25 m (barreaux tous les 250 mm, 1,25 à 6,25 m) ; 5 × 1,32 m (330 mm, jusqu'à 6,60 m) ; 5 × 1,17 m (390 mm, jusqu'à 5,85 m) m | crochet de faîtage vendu en option ; roulettes pour pousser l'échelle, retournée à 180° au faîtage | une_source |
+| longueurs_vendues | Hailo Safety Roof bois : éléments de 2 m (2 × 2 m, 4 m, 5 m) ; Tubesca-Comabi Evoklip : 6,10 / 6,30 / 6,70 m avec crochets de toit m |  | une_source |
+| norme | NF EN 12951 (échelle de toit fixée à demeure) ; NF EN 516 (passerelles, plateformes de circulation)  | l'échelle de couvreur mobile n'est pas une échelle fixe | une_source |
+
+
+## Plaques fibres-ciment
+
+### plaques ondulées fibres-ciment
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| profil_onde | 177 × 51 (pas × hauteur d'onde), épaisseur 6,5 mm | profil unique des plaques ondulées vendues en France (Eternit, Plakfort, ELOS) | confirme |
+| compatibilite | accessoires 5 ondes et 6 ondes non interchangeables  | demander le nombre d'ondes avant toute faîtière, closoir ou plaque de remplacement | une_source |
+| existence_au_catalogue | pas de plaque 8 ondes dans les gammes France relevées (5 et 6 ondes seulement)  | un devis qui écrit « 8 ondes » vise un ancien profil ou un autre matériau : demander à l'artisan | confirme |
+| longueur_3_05 | hors marque NF et hors Avis technique ; pose et fixation sur 3 pannes  | 5 ondes 3,05 m | confirme |
+| poids_au_m2 | ≈ 14 kg/m² | plaque seule ; ex. Eternit 5 ondes 2,00 m : 25,7 kg ; Edilfibro : 24,8 kg | confirme |
+| pente_minimale | 9 % | toutes zones, avec complément d'étanchéité transversal en dessous de 16 % (voir rampant maxi) | confirme |
+| altitude_maximale | 900 m | au-delà, étude particulière | confirme |
+| recouvrement_transversal | 200 mm | pente < 31 % ; 140 mm admis à partir de 31 % (plaques non prédécoupées) ; maximum 230 mm (coins coupés d'usine) ou 260 mm (coins coupés sur chantier) | confirme |
+| recouvrement_transversal_max | 230 (coins coupés d'usine) / 260 (coupe sur chantier) mm |  | confirme |
+| recouvrement_longitudinal | 45 mm | ≈ 1/4 d'onde, réglé au gabarit : c'est l'écart largeur totale − largeur utile (918 − 873 ; 1095 − 1050) | confirme |
+| entraxe_max_pannes | 1.385 m | quelle que soit la longueur de plaque ; Lu = L − recouvrement (1,585 − 0,200 = 1,385) | confirme |
+| largeur_mini_pannes | bois 65 / métal 40 mm |  | confirme |
+| longueur_utile | 1,585 m → 1,385 ; 1,75 → 1,55 (égout avec débord) ; 2,50 → 2,30 (3 appuis) m | Lu = L − 200 mm ; en partie courante Eternit conseille 1,585 m (6 ondes) pour l'entraxe optimal, 1,25 ou 1,585 au faîtage, 1,75 à l'égout avec débord | confirme |
+| calage_panne_intermediaire | 4 mm | plaque posée sur 3 appuis (longueur > 1,58 m) ; perçage +3 mm sur la panne intermédiaire | confirme |
+| porte_a_faux_max_egout | 350 sans gouttière / 200 avec gouttière mm | mesuré depuis l'axe de la fixation ; gouttière jamais fixée sur les plaques | confirme |
+| longueur_maxi_rampant | 9–9,9 % : 15 m ; 10–12,9 % : 20 ; 13–15,9 % : 25 ; 16–20,9 % : 30 ; 21–25,9 % : 35 ; ≥ 26 % : 40 m | zone I du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière | confirme |
+| longueur_maxi_rampant | 9–9,9 % : 12 m ; 10–12,9 % : 15 ; 13–15,9 % : 20 ; 16–20,9 % : 25 ; 21–25,9 % : 30 ; ≥ 26 % : 35 m | zone II du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière | confirme |
+| longueur_maxi_rampant | 9–9,9 % : 10 m ; 10–12,9 % : 12 ; 13–15,9 % : 15 ; 16–20,9 % : 20 ; 21–25,9 % : 25 ; ≥ 26 % : 30 m | zone III du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière | confirme |
+| complement_d_etancheite | zone I : T sous 16 % ; zone II : T sous 21 % (protégée ou normale), T+L sous 16 % puis T jusqu'à 25,9 % (exposée) ; zone III : T sous 26 % (protégée ou normale), T+L sous 16 % puis T jusqu'à 25,9 % (exposée) ; rien au-delà de 26 %  | T = mastic transversal, L = longitudinal (mastic préformé Ø 9 ou 10, NF P 30-303) ; T+L partout si étanchéité à la neige poudreuse demandée | confirme |
+| zone_climatique_bretagne | zone III : côtes de la Manche et de l'Atlantique jusqu'à Lorient, sur 20 km ; zone II : côte atlantique de Lorient à l'Espagne sur 20 km, transition de 20 km en Bretagne, altitudes 200–500 m ; zone I : intérieur < 200 m  | zones propres au NF DTU 40.37 (plaques), différentes des zones ardoise et tuile | une_source |
+| fixations_par_plaque_et_par_panne | 2 u | en sommet des 2e et 5e ondes, à 50 mm du bord haut de la plaque recouverte ; perçage Ø fixation + 1 mm (+ 3 mm sur panne intermédiaire) | confirme |
+| fixations_au_m2 | 6 ondes : 1,38 ; 5 ondes : 1,65 (+ 2 par plaque sur la panne d'égout) u/m² | calcul : 2 ÷ (largeur utile × entraxe 1,385) ; 2 ÷ (1,050 × 1,385) = 1,38 ; 2 ÷ (0,873 × 1,385) = 1,65 ; plus si plaques sur 3 appuis (2 par panne) | confirme |
+| plaques_au_m2 | 6 ondes 1,585 m : 0,688 ; 5 ondes 1,585 m : 0,827 ; 5 ondes 2,50 m (3 appuis) : 0,498 u/m² | calcul : 1 ÷ (largeur utile × (longueur − 0,200)) en partie courante ; ajouter les rangs d'égout et de faîtage | confirme |
+| type_de_fixation | tirefond galvanisé Ø 8 (ancrage ≥ 50 mm dans le bois) ou vis autoperceuse Ø ≥ 6,3 (panne métal), rondelle d'étanchéité Ø 20 + plaquette mm |  | une_source |
+| faitiere | faîtière à charnière à bords ondulés (2 éléments G et P), une par largeur de plaque, pente 10 à 100 %  | aussi faîtière rigide 148° (pente 30 %, plaques des deux versants alignées), faîtière d'aération, faîtière pare-vent | confirme |
+| closoir | closoir dentelé : longueur utile 870 (5 ondes) / 1047 (6 ondes) ; closoir de ventilation polypropylène : longueur utile 1000, lot de 50 mm | à l'égout et au faîtage ; nombre = longueur ÷ longueur utile | une_source |
+| bande_de_rive | 150 × 20 cm (ELOS 5 ondes, gris ou rouge tuile) cm |  | une_source |
+| securite | feuillards de retenue en polypropylène dans les plaques ; plaques non circulables : planches de répartition  |  | confirme |
+| plaques_par_palette | None u | « livrées conditionnées par lots » ; gerbage 2 palettes maxi | a_confirmer |
+| plaques_anciennes | plaque d'avant 1997 = amiante probable : désamiantage, jamais un remplacement simple  | règle déjà dans le moteur (famille « amiante » prioritaire) | une_source |
+
+- **Toutes marques 5 ondes** (confirme 2) : largeur_totale_et_utile 918 (utile 873) mm; longueurs_vendues 1,25 ; 1,52 ; 1,58 ; 1,75 ; 2,00 ; 2,50 ; 3,05 m
+- **Toutes marques 6 ondes** (confirme 2) : largeur_totale_et_utile 1095 (utile 1050) mm; longueurs_vendues 1,25 ; 1,58 ; 1,75 ; 2,00 ; 2,50 m
+
+### ardoises fibres-ciment (complément à ardoise.json)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pente_minimale | 25 % | 14° ; zone I normale ou protégée, rampant en projection ≤ 15 m ; plus forte en zones II-III et en exposé | confirme |
+| teintes | Cedral : anthracite (Kergoat), anthracite ou brun (Orléane), brun flammé (Pommay), gris / brun / rouge (Tecta) ; Cembrit : noir, brun  | le comptoir demande la gamme et la teinte | confirme |
+| liteaux_ml_par_m2 | 40×24 : 6,67 ; 60×30 : 4,00 ; 33×23 : 8,70 ; 45×30 : 5,71 ml/m² | recouvrement 100 mm : pureau = (longueur − 100) ÷ 2 ; liteaux = 1 ÷ pureau (une file par pureau) | confirme |
+
 
 ## Sous-faces et habillages de débord
 

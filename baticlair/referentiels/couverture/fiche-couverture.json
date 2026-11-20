@@ -7,7 +7,7 @@
  "regle_confirmation": "confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.",
  "regles_fondateur": "../../../.claude/skills/regles-metier/SKILL.md",
  "carte_regions": "carte-regions.json",
- "taux_confirme": 92.4,
+ "taux_confirme": 91.3,
  "comptes": {
   "abergement:a_confirmer": 1,
   "abergement:confirme": 11,
@@ -29,6 +29,11 @@
   "etancheite:confirme": 13,
   "etancheite:confirme_fabricant": 4,
   "etancheite:une_source": 13,
+  "fenetre_toit:confirme": 26,
+  "fenetre_toit:une_source": 19,
+  "fibres_ciment:a_confirmer": 1,
+  "fibres_ciment:confirme": 30,
+  "fibres_ciment:une_source": 6,
   "pertes:a_confirmer": 10,
   "pertes:confirme": 3,
   "pertes:une_source": 4,
@@ -38,6 +43,9 @@
   "sarking:a_confirmer": 2,
   "sarking:confirme": 8,
   "sarking:une_source": 11,
+  "securite:a_confirmer": 3,
+  "securite:confirme": 8,
+  "securite:une_source": 12,
   "sous_face:a_confirmer": 1,
   "sous_face:confirme": 3,
   "sous_face:une_source": 7,
@@ -92263,8 +92271,8 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S478",
-            "S479"
+            "S521",
+            "S522"
            ],
            "libelle_source": "format de rouleau",
            "condition": "1re couche d'un bicouche (ou 2e sous protection rapportée)",
@@ -92275,11 +92283,11 @@
            "ecart": "Deux documents Soprema (une source). La fiche comptoir citait 8 m : c'est la longueur export (voir ecrans-etancheite.json).",
            "preuves": [
             {
-             "source": "S478",
+             "source": "S521",
              "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg"
             },
             {
-             "source": "S479",
+             "source": "S522",
              "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
             }
            ]
@@ -92300,8 +92308,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S480",
-        "S478"
+        "S523",
+        "S521"
        ],
        "libelle_source": "rouleau de 1 × 10 m : existe-t-il ?",
        "condition": "1 × 10 m : Siplast Paracier (bac acier, fixé mécaniquement), Soprema Belgique Soprarock SBS P3 TF (36 kg) ; en France la sous-couche soudée courante fait 6 à 7,5 m",
@@ -92312,11 +92320,11 @@
        "ecart": "Siplast Paracier : voir ecrans-etancheite.json (une source).",
        "preuves": [
         {
-         "source": "S480",
+         "source": "S523",
          "extrait": "Dimensions du rouleau (m) 10 x 1 ; Poids du rouleau (kg) 36"
         },
         {
-         "source": "S478",
+         "source": "S521",
          "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg"
         }
        ]
@@ -92334,7 +92342,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S481"
+        "S524"
        ],
        "libelle_source": "rouleau de 1 × 8 m en France",
        "regions": [
@@ -92344,7 +92352,7 @@
        "raison": "Aucun rouleau de 8 m trouvé au catalogue français (Soprema : 6 × 1 m, autres longueurs à la demande).",
        "preuves": [
         {
-         "source": "S481",
+         "source": "S524",
          "extrait": "Dimensions du rouleau 6mx1m ; d'autres longueurs sont réalisables à la demande"
         }
        ]
@@ -92362,8 +92370,8 @@
        "unite": "cm",
        "statut": "confirme",
        "sources": [
-        "S479",
-        "S482"
+        "S522",
+        "S525"
        ],
        "libelle_source": "recouvrement en about (transversal)",
        "condition": "Soprema (guide) 10 cm mini en bord et en bout de lé ; IKO 15 cm transversal (8 cm longitudinal)",
@@ -92374,11 +92382,11 @@
        "ecart": "La fiche produit Soprema donne un galon longitudinal ≥ 60 mm (confirmé dans ecrans-etancheite.json) ; le guide grand public met 10 cm partout. L'about n'était pas trouvé à la première passe.",
        "preuves": [
         {
-         "source": "S479",
+         "source": "S522",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         },
         {
-         "source": "S482",
+         "source": "S525",
          "extrait": "recouvrement de 8 cm longitudinalement et 15 cm transversalement"
         }
        ]
@@ -92396,8 +92404,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S482",
-        "S479"
+        "S525",
+        "S522"
        ],
        "libelle_source": "décalage des joints de la 2e couche",
        "condition": "joints décalés dans les deux sens (quinconce)",
@@ -92407,11 +92415,11 @@
        ],
        "preuves": [
         {
-         "source": "S482",
+         "source": "S525",
          "extrait": "Le recouvrement de la couche de finition ressort de préférence d'une demi-largeur de bande par rapport au recouvrement dans la sous-couche"
         },
         {
-         "source": "S479",
+         "source": "S522",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         }
        ]
@@ -92423,7 +92431,7 @@
        "unite": "× surface",
        "statut": "une_source",
        "sources": [
-        "S479"
+        "S522"
        ],
        "libelle_source": "majoration pertes et recouvrements",
        "condition": "rouleaux, hors relevés comptés à part",
@@ -92434,7 +92442,7 @@
        "ecart": "Recouvrements seuls : × 1,08 (ecrans-etancheite.json) ; le tiroir utilise × 1,12.",
        "preuves": [
         {
-         "source": "S479",
+         "source": "S522",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         }
        ],
@@ -92471,7 +92479,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S483"
+            "S526"
            ],
            "libelle_source": "formats de nappe",
            "condition": "toitures résidentielles ≤ 150 m² ; nappe d'un seul tenant choisie pour couvrir la terrasse + relevés",
@@ -92482,7 +92490,7 @@
            "controle": "3,05 × 7,62 = 23,24 ; 6,10 × 30,50 = 186,05 (catalogue : 186,05)",
            "preuves": [
             {
-             "source": "S483",
+             "source": "S526",
              "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62"
             }
            ]
@@ -92503,8 +92511,8 @@
        "unite": "l/m²",
        "statut": "confirme",
        "sources": [
-        "S483",
-        "S484"
+        "S526",
+        "S527"
        ],
        "libelle_source": "consommation de colle de contact (solvant)",
        "condition": "Firestone BA 2012 : 2,35 à 2,75 m²/l (bidons 5 l = 10-12,5 m², 10 l = 20-25 m²) ; BA-2016 projetée : canister 22 l = 50-60 m² ; Elevate BA-2012 : ≈ 3 m²/l",
@@ -92516,11 +92524,11 @@
        "controle": "1 ÷ 2,75 = 0,36 l/m² ; 1 ÷ 2,35 = 0,43 l/m² ; 1 ÷ 3 = 0,33 l/m²",
        "preuves": [
         {
-         "source": "S483",
+         "source": "S526",
          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62"
         },
         {
-         "source": "S484",
+         "source": "S527",
          "extrait": "approx. 3m² per litre (application method dependent)"
         }
        ]
@@ -92541,7 +92549,7 @@
            "unite": "l/m²",
            "statut": "une_source",
            "sources": [
-            "S485"
+            "S528"
            ],
            "condition": "seau de 8 l ou pot de 2 l",
            "regions": [
@@ -92550,7 +92558,7 @@
            ],
            "preuves": [
             {
-             "source": "S485",
+             "source": "S528",
              "extrait": "Consommation L/m² 0,25 ; Disponible en seau de 8 litres ou en pot de 2 litres"
             }
            ]
@@ -92571,10 +92579,10 @@
        "unite": "mm",
        "statut": "confirme",
        "sources": [
-        "S486",
-        "S487",
-        "S488",
-        "S489"
+        "S529",
+        "S530",
+        "S531",
+        "S532"
        ],
        "libelle_source": "format de panneau courant",
        "condition": "Utherm Roof L, IKO enertherm ALU, Recticel PowerDeck F ; existent aussi 1200 × 1000 (Knauf Thane OpTTI), 1200 × 2400 (IKO XL), 600 × 600 (Efigreen Alu+)",
@@ -92584,19 +92592,19 @@
        ],
        "preuves": [
         {
-         "source": "S486",
+         "source": "S529",
          "extrait": "1200 mm de longueur pour 600 mm de largeur, épaisseur entre 30 mm et 160 mm"
         },
         {
-         "source": "S487",
+         "source": "S530",
          "extrait": "formats de 1200 x 600 mm et 1200 x 2400 mm, épaisseurs de 30 à 200 mm"
         },
         {
-         "source": "S488",
+         "source": "S531",
          "extrait": "Recticel PowerDeck F Flat Roof Board 1.2m x 600 x 80mm"
         },
         {
-         "source": "S489",
+         "source": "S532",
          "extrait": "panneaux Knauf Thane OpTTI de format 1200 x 1000 mm"
         }
        ]
@@ -92615,7 +92623,7 @@
        "statut": "a_confirmer",
        "sources": [
         "S373",
-        "S490"
+        "S533"
        ],
        "libelle_source": "règle de dimensionnement et trop-plein",
        "condition": "NF DTU 60.11 P3 (2013) tableau 5 : diamètre selon la surface collectée par EEP, majoré selon les NF DTU 43 ; trop-plein obligatoire avec une seule EEP (NF DTU 43.1 §8.6.1, cité par un forum)",
@@ -92630,7 +92638,7 @@
          "extrait": "NF DTU 60.11 P3 tableau 5 : diamètres des EEP et descentes selon la surface collectée par EEP et la majoration liée aux NF DTU série 43"
         },
         {
-         "source": "S490",
+         "source": "S533",
          "extrait": "1 évacuation = 1 trop-plein obligatoire, 2 évacuations ou plus = 1 trop-plein si le GO dit qu'il faut en mettre"
         }
        ]
@@ -92811,10 +92819,10 @@
      "verdict": "corrige",
      "bonne_valeur": "1re couche soudée 6 m (Sopralène Flam 180), 7 m (Elastophène Flam 25), 7,5 m (Siplast) ; 1 × 10 m seulement en 1re couche fixée mécaniquement ou en Belgique ; autoprotégée 6 m ; galon ≥ 6 cm, about 10 à 15 cm",
      "sources": [
-      "S478",
-      "S481",
-      "S480",
-      "S482"
+      "S521",
+      "S524",
+      "S523",
+      "S525"
      ],
      "explication": "Confirme et complète ecrans-etancheite.json (deuxième fichier, mêmes conclusions) ; aucun 1 × 8 m au catalogue français."
     },
@@ -92825,9 +92833,9 @@
      "verdict": "corrige",
      "bonne_valeur": "colle de contact 0,35 à 0,45 l/m² (en litres, bidons 5 / 10 l) ; colle acrylique 0,25 l/m² ; joints : bandes QuickSeam + QuickPrime (≈ 15 ml de joint par litre)",
      "sources": [
-      "S483",
-      "S484",
-      "S485"
+      "S526",
+      "S527",
+      "S528"
      ],
      "explication": "L'ordre de grandeur est juste mais l'unité de vente est le litre ; Firestone vend des nappes d'un seul tenant (pas de joint jusqu'à 9,15 × 30,50 m) et demande + 150 mm sur les relevés."
     },
@@ -92838,10 +92846,10 @@
      "verdict": "corrige",
      "bonne_valeur": "format courant 1200 × 600 = 0,72 m² ; 1200 × 1000 existe (Knauf OpTTI, laine de roche Rockacier)",
      "sources": [
-      "S486",
-      "S487",
-      "S488",
-      "S489"
+      "S529",
+      "S530",
+      "S531",
+      "S532"
      ],
      "explication": "Le format est à demander : avec 1,2 m² au lieu de 0,72, on commande 40 % de panneaux en moins."
     }
@@ -92953,7 +92961,7 @@
      "unite_de_vente": "nappe + bidons de colle",
      "conditionnement": "nappes 3,05 à 9,15 m × 7,62 ou 30,50 m ; colle 5 / 10 / 22 l",
      "sources": [
-      "S483"
+      "S526"
      ],
      "famille": "etancheite"
     }
@@ -98870,6 +98878,3278 @@
    "perimetre": "Abergements de souche et de cheminée (zinc, plomb, préfabriqués, bandes souples), noquets, bande porte-solin, plomb laminé. Les bandes zinc façonnées (2 m), le mortier de solin et l'étain sont dans zinguerie.json et points-singuliers.json."
   },
   {
+   "code": "fenetre_toit",
+   "libelle": "Fenêtres de toit et raccords",
+   "sous_familles": [
+    {
+     "nom": "tailles de fenêtre",
+     "regles": [
+      {
+       "id": "velux_code_taille_lecture",
+       "attribut": "lecture_du_code_taille",
+       "valeur": "lettre = largeur : C 55, F 66, M 78, P 94, S 114, U 134 cm ; chiffre = hauteur : 01 70, 02 78, 04 98, 06 118, 08 140, 10 160 cm ; « K » = génération après 2001",
+       "unite": "cm",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S473",
+        "S471"
+       ],
+       "condition": "codes Velux actuels (CK02, MK04…) ; les anciens codes 102, 104, 304, 306, 308, 606, 608, 804, 808 correspondent à C02, C04, M04, M06, M08, S06, S08, U04, U08",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Correspondance codes dimensionnels des fenêtres à remplacer 102 6/104 1/304 14/306 2/308 4/606 10/608 7/804 8/808"
+        },
+        {
+         "source": "S473",
+         "extrait": "External frame sizes (w×h)mm 472 550 660 780 942 1140 1340 … 778 978 1178 1398 1600 1800"
+        },
+        {
+         "source": "S471",
+         "extrait": "CK02 | 01 550 x 780 … MK04 | 05 780 x 980 … UK08 | 17 1340 x 1400"
+        }
+       ],
+       "portee": "Velux"
+      },
+      {
+       "id": "velux_cotes_dormant_mm",
+       "attribut": "cotes_exactes_dormant",
+       "valeur": "largeurs 550 / 660 / 780 / 942 / 1140 / 1340 mm ; hauteurs 778 / 978 / 1178 / 1398 / 1600 / 1800 mm",
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S473",
+        "S470"
+       ],
+       "condition": "cotes extérieures exactes du dormant ; la cote « cm » du comptoir en est l'arrondi (94 = 942 mm, 140 = 1398 mm)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Kingspan écrit 940 x 1180 / 940 x 1400 pour PK06 / PK08 (cote arrondie) ; Velux donne 942 mm.",
+       "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026).",
+       "controle": "pas de calcul au m² possible ; deux documents Velux (guide 2026, tarif France 2024) concordants, arrondi au cm vérifié pour les 6 largeurs et 6 hauteurs",
+       "preuves": [
+        {
+         "source": "S473",
+         "extrait": "Roof windows External frame sizes (w×h)mm 472 550 660 780 942 1140 1340"
+        },
+        {
+         "source": "S470",
+         "extrait": "Cotes hors tout largeur x hauteur en cm 55x78 … 94x140 … 134x140"
+        }
+       ],
+       "portee": "Velux"
+      },
+      {
+       "id": "fakro_codes_taille",
+       "attribut": "equivalence_code_taille",
+       "valeur": "01 = 55×78 ; 02 = 55×98 ; 03 = 66×98 ; 04 = 66×118 ; 05 = 78×98 ; 06 = 78×118 ; 07 = 78×140 ; 13 = 78×160 ; 08 = 94×118 ; 09 = 94×140 ; 10 = 114×118 ; 11 = 114×140 ; 12 = 134×98 ; 17 = 134×140",
+       "unite": "cm",
+       "statut": "confirme",
+       "sources": [
+        "S472",
+        "S471"
+       ],
+       "condition": "Fakro FTP-V (bois), FTU-V (PU) : mêmes cotes commerciales que Velux, dormant exact 547 × 781, 777 × 981… (3 mm de moins)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S472",
+         "extrait": "Dimensions commerciales/côtes extérieures[cm] 55x78 … 134x140 ; Code dimensionnel 01 02 03 04 05 06 07 13 08 09 10 11 12 17"
+        },
+        {
+         "source": "S471",
+         "extrait": "Type de produit (no. de type Velux | Fakro) CK02 | 01 … MK04 | 05 … SK06 | 10 … UK08 | 17"
+        }
+       ],
+       "portee": "Fakro"
+      },
+      {
+       "id": "roto_tailles",
+       "attribut": "dimensions_hors_tout",
+       "valeur": "5/7 = 54×78 ; 5/9 = 54×98 ; 7/9 = 74×98 ; 7/11 = 74×118 ; 7/14 = 74×140 ; 9/11 = 94×118 ; 9/14 = 94×140 ; 11/11 = 114×118 ; 11/14 = 114×140 ; 13/9 = 134×98 ; 13/14 = 134×140",
+       "unite": "cm",
+       "statut": "confirme",
+       "sources": [
+        "S475",
+        "S487"
+       ],
+       "condition": "Roto Designo : largeurs 54 et 74 (et non 55 et 78 comme Velux) : une Roto 7/9 ne remplace pas une MK04 sans reprise de chevêtre ; raccords Roto propres à la marque",
+       "regions": [
+        "France"
+       ],
+       "ecart": "La Centrale Éco liste les tailles du Designo R4 ; la fiche Roto est celle du R6 : mêmes codes, mêmes cotes pour les tailles communes.",
+       "preuves": [
+        {
+         "source": "S475",
+         "extrait": "Dimension hors tout in mm (B x H) 5/7 540/780 … 7/9 740/980 … 11/11 1140/1180 … 13/9 1340/980"
+        },
+        {
+         "source": "S487",
+         "extrait": "11/11 - 114 x 118 cm, 11/14 - 114 x 140 cm, 13/9 - 134 x 98 cm, 5/7 - 54 x 78 cm … 7/9 - 74 x 98 cm"
+        }
+       ],
+       "portee": "Roto"
+      }
+     ],
+     "marques": [
+      {
+       "nom": "Velux",
+       "groupe": "Velux",
+       "modeles": [
+        {
+         "nom": "CK01",
+         "attributs": [
+          {
+           "id": "velux_ck01_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "55 × 70",
+           "unite": "cm",
+           "statut": "une_source",
+           "sources": [
+            "S470"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.39 m² (à retirer de la surface couverte) ; taille courte, absente des tables Kingspan et Fakro relevées",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … CK01 … 55x70 (fenêtres Tout Confort)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "CK02",
+         "attributs": [
+          {
+           "id": "velux_ck02_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "55 × 78",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.43 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … CK02 … 55x78"
+            },
+            {
+             "source": "S471",
+             "extrait": "CK02 | 01 … Dimensions fenêtre de toiture l x h en mm 550 x 780"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 55x78 … Code dimensionnel 01"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "CK04",
+         "attributs": [
+          {
+           "id": "velux_ck04_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "55 × 98",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.54 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … CK04 … 55x98"
+            },
+            {
+             "source": "S471",
+             "extrait": "CK04 | 02 … Dimensions fenêtre de toiture l x h en mm 550 x 980"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 55x98 … Code dimensionnel 02"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "FK06",
+         "attributs": [
+          {
+           "id": "velux_fk06_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "66 × 118",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.78 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "ecart": "FK06 et MK10 ne sont pas dans le tableau de prix GGL France 2024 (seulement dans les tableaux d'accessoires) : taille à vérifier en stock en Bretagne.",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "FK06 FK08 MK06 (codes des fenêtres d'une verrière 2en1)"
+            },
+            {
+             "source": "S471",
+             "extrait": "FK06 | 04 … Dimensions fenêtre de toiture l x h en mm 660 x 1180"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 66x118 … Code dimensionnel 04"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "MK04",
+         "attributs": [
+          {
+           "id": "velux_mk04_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "78 × 98",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.76 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … MK04 … 78x98"
+            },
+            {
+             "source": "S471",
+             "extrait": "MK04 | 05 … Dimensions fenêtre de toiture l x h en mm 780 x 980"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x98 … Code dimensionnel 05"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "MK06",
+         "attributs": [
+          {
+           "id": "velux_mk06_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "78 × 118",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.92 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … MK06 … 78x118"
+            },
+            {
+             "source": "S471",
+             "extrait": "MK06 | 06 … Dimensions fenêtre de toiture l x h en mm 780 x 1180"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x118 … Code dimensionnel 06"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "MK08",
+         "attributs": [
+          {
+           "id": "velux_mk08_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "78 × 140",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.09 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … MK08 … 78x140"
+            },
+            {
+             "source": "S471",
+             "extrait": "MK08 | 07 … Dimensions fenêtre de toiture l x h en mm 780 x 1400"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x140 … Code dimensionnel 07"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "MK10",
+         "attributs": [
+          {
+           "id": "velux_mk10_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "78 × 160",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.25 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "ecart": "FK06 et MK10 ne sont pas dans le tableau de prix GGL France 2024 (seulement dans les tableaux d'accessoires) : taille à vérifier en stock en Bretagne.",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Codes dimensionnels des stores MK10 M04 PK10 P04 SK10 S04"
+            },
+            {
+             "source": "S471",
+             "extrait": "MK10 | 13 … Dimensions fenêtre de toiture l x h en mm 780 x 1600"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x160 … Code dimensionnel 13"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "PK06",
+         "attributs": [
+          {
+           "id": "velux_pk06_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "94 × 118",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.11 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … PK06 … 94x118"
+            },
+            {
+             "source": "S471",
+             "extrait": "PK06 | 08 … Dimensions fenêtre de toiture l x h en mm 940 x 1180"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 94x118 … Code dimensionnel 08"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "PK08",
+         "attributs": [
+          {
+           "id": "velux_pk08_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "94 × 140",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.32 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … PK08 … 94x140"
+            },
+            {
+             "source": "S471",
+             "extrait": "PK08 | 09 … Dimensions fenêtre de toiture l x h en mm 940 x 1400"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 94x140 … Code dimensionnel 09"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "PK10",
+         "attributs": [
+          {
+           "id": "velux_pk10_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "94 × 160",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.50 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … PK10 … 94x160"
+            },
+            {
+             "source": "S471",
+             "extrait": "PK10 | - … Dimensions fenêtre de toiture l x h en mm 940 x 1600"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "SK06",
+         "attributs": [
+          {
+           "id": "velux_sk06_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "114 × 118",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.34 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … SK06 … 114x118"
+            },
+            {
+             "source": "S471",
+             "extrait": "SK06 | 10 … Dimensions fenêtre de toiture l x h en mm 1140 x 1180"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 114x118 … Code dimensionnel 10"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "SK08",
+         "attributs": [
+          {
+           "id": "velux_sk08_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "114 × 140",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.60 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … SK08 … 114x140"
+            },
+            {
+             "source": "S471",
+             "extrait": "SK08 | 11 … Dimensions fenêtre de toiture l x h en mm 1140 x 1400"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 114x140 … Code dimensionnel 11"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "UK04",
+         "attributs": [
+          {
+           "id": "velux_uk04_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "134 × 98",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.31 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … UK04 … 134x98"
+            },
+            {
+             "source": "S471",
+             "extrait": "UK04 | 12 … Dimensions fenêtre de toiture l x h en mm 1340 x 980"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 134x98 … Code dimensionnel 12"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "UK08",
+         "attributs": [
+          {
+           "id": "velux_uk08_dimensions",
+           "attribut": "dimensions_hors_tout",
+           "valeur": "134 × 140",
+           "unite": "cm",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S471",
+            "S472"
+           ],
+           "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.88 m² (à retirer de la surface couverte)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Cotes hors tout largeur x hauteur en cm … UK08 … 134x140"
+            },
+            {
+             "source": "S471",
+             "extrait": "UK08 | 17 … Dimensions fenêtre de toiture l x h en mm 1340 x 1400"
+            },
+            {
+             "source": "S472",
+             "extrait": "Dimensions commerciales/côtes extérieures [cm] 134x140 … Code dimensionnel 17"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "pentes admises",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Velux",
+       "groupe": "Velux",
+       "modeles": [
+        {
+         "nom": "GGL / GGU",
+         "attributs": [
+          {
+           "id": "velux_ggl_ggu_pente",
+           "attribut": "pente_admise",
+           "valeur": "15 à 90",
+           "unite": "°",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S474",
+            "S472",
+            "S475"
+           ],
+           "condition": "fenêtre à rotation GGL (bois) / GGU (polyuréthane) ; pente minimale 15°",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Fenêtre à rotation GGL 2057 WhiteFinish … Pente de toit : 15° - 90°"
+            },
+            {
+             "source": "S474",
+             "extrait": "15°–90° pente de toit (raccord EDW, pose standard)"
+            },
+            {
+             "source": "S472",
+             "extrait": "pente de toiture admise: 15°- 90° (Fakro FTP-V, rotation, même règle chez un autre fabricant)"
+            },
+            {
+             "source": "S475",
+             "extrait": "Pentes de toit admissibles: de 15° à 90° (Roto Designo R6)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "GPL / GPU",
+         "attributs": [
+          {
+           "id": "velux_gpl_gpu_pente",
+           "attribut": "pente_admise",
+           "valeur": "15 à 55",
+           "unite": "°",
+           "statut": "confirme",
+           "sources": [
+            "S470",
+            "S472"
+           ],
+           "condition": "fenêtre à projection GPL / GPU : au-delà de 55° prendre une rotation",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Fenêtre à projection … Pente de toit : 15° - 55°"
+            },
+            {
+             "source": "S472",
+             "extrait": "pente de toiture admise: 15°-55° (fenêtre Fakro à projection, même fiche)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "raccords d'étanchéité",
+     "regles": [
+      {
+       "id": "velux_raccord_pente_mini_encastre",
+       "attribut": "pente_minimale",
+       "valeur": 20,
+       "unite": "°",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S478"
+       ],
+       "condition": "toute pose encastrée (EDJ, EDN chez Velux ; ELJ chez Fakro) ; pose standard : 15°",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Raccords en création d'ouverture - Pose encastrée … Pente de toit 20°"
+        },
+        {
+         "source": "S478",
+         "extrait": "pose par recouvrement et plus encastrée. Épaisseur maximale 10 mm (2x5mm). Pentes de toiture admissibles: 20-90°"
+        }
+       ]
+      },
+      {
+       "id": "velux_raccord_coloris",
+       "attribut": "coloris_et_suffixe",
+       "valeur": "0000 gris (aluminium laqué) ; 0700C1 ocre-jaune ; 0700C2 rouge-brun (EDW, EDJ, EW)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S479"
+       ],
+       "condition": "le coloris se lit dans la fin de la référence : EDW MK04 0000 = gris",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Autres coloris disponibles : Ocre-jaune : EDW/EW 0700C1 Rouge-brun : EDJ/EDW/EW 0700C2"
+        },
+        {
+         "source": "S479",
+         "extrait": "Raccord fenêtre de toit simple sur tuiles Velux EDW CK02 ocre"
+        }
+       ],
+       "portee": "Velux"
+      },
+      {
+       "id": "velux_raccord_remplacement",
+       "attribut": "raccord_de_remplacement",
+       "valeur": "EW (tuiles) / EL (ardoises), avec isolant : EW 6000 / EL 6000",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S470"
+       ],
+       "condition": "seulement pour les anciennes fenêtres Velux d'avant 2001 (codes 102, 104, 304…) ; pour C02, C04, M04… prendre les raccords classiques EDW, EDL, EDJ, EDN",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Les raccords remplacement s'utilisent pour les anciens modèles de fenêtres VELUX (avant 2001) sauf FV et TTP."
+        }
+       ],
+       "portee": "Velux"
+      }
+     ],
+     "marques": [
+      {
+       "nom": "Velux",
+       "groupe": "Velux",
+       "modeles": [
+        {
+         "nom": "EDW",
+         "attributs": [
+          {
+           "id": "velux_raccord_edw",
+           "attribut": "couverture_admise",
+           "valeur": "tuiles (profilées) jusqu'à 120 mm de relief",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S470",
+            "S474"
+           ],
+           "condition": "pose standard (traditionnelle), pente ≥ 15° ; aussi adaptable sur bac acier (Velux : « privilégier l'EDW »)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026).",
+           "controle": "pas de calcul possible ; tarif France 2024 et fiche technique 06/24 (contenthub.velux.com) concordants",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "EDW 0000* Tuiles ≤ 120 mm relief … Pente de toit 15°"
+            },
+            {
+             "source": "S474",
+             "extrait": "Pour matériel de couverture profilé jusqu'à 120 mm de hauteur de profil."
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "EDL",
+         "attributs": [
+          {
+           "id": "velux_raccord_edl",
+           "attribut": "couverture_admise",
+           "valeur": "ardoises et matériaux plats ≤ 8 mm (16 mm en double épaisseur, 2 × 8)",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S470",
+            "S474",
+            "S476"
+           ],
+           "condition": "pose standard, pente ≥ 15° ; ardoise naturelle ou fibres-ciment",
+           "regions": [
+            "France"
+           ],
+           "ecart": "« < 8 mm » (tarif) et « ≤ 8 mm » (descriptif) : même limite ; 16 mm = deux épaisseurs au recouvrement.",
+           "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026).",
+           "controle": "pas de calcul possible ; trois documents Velux concordants",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "EDL 0000 Ardoises < 8 mm … Pente de toit 15°"
+            },
+            {
+             "source": "S474",
+             "extrait": "Pour matériel de couverture plat jusqu'à 16 mm de hauteur totale (2 × 8 mm)"
+            },
+            {
+             "source": "S476",
+             "extrait": "matériaux de couverture plats d'épaisseur inférieure ou égale à 8 mm (ardoises, bardeaux, plaques asphaltées…)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "EDP",
+         "attributs": [
+          {
+           "id": "velux_raccord_edp",
+           "attribut": "couverture_admise",
+           "valeur": "tuiles plates de largeur < 300 mm",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S470"
+           ],
+           "condition": "pose standard, pente ≥ 25° (et non 15°)",
+           "regions": [
+            "France"
+           ],
+           "ecart": "En Suisse, Velux vend un EDB « pour couverture double avec petites tuiles plates jusqu'à 2x 19 mm », 25°–90° : même pente mini, autre référence.",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "EDP 0000 Tuiles plates l.< 300 mm … Pente de toit 15° (sauf EDP 25°)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "EDJ",
+         "attributs": [
+          {
+           "id": "velux_raccord_edj",
+           "attribut": "couverture_admise",
+           "valeur": "tuiles (profilées) jusqu'à 90 mm de relief",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S470",
+            "S477"
+           ],
+           "condition": "pose encastrée (abaissée), pente ≥ 20°",
+           "regions": [
+            "France"
+           ],
+           "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026).",
+           "controle": "pas de calcul possible ; tarif France 2024 et fiche 06/24 concordants",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Raccords en création d'ouverture - Pose encastrée … Pente de toit 20° … EDJ 0000* Tuiles ≤ 90 mm relief"
+            },
+            {
+             "source": "S477",
+             "extrait": "EDJ … 20°–90° pente de toit … profilé jusqu'à 90 mm de hauteur de profil"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "EDN",
+         "attributs": [
+          {
+           "id": "velux_raccord_edn",
+           "attribut": "couverture_admise",
+           "valeur": "ardoises et matériaux plats < 8 mm (16 mm en double épaisseur)",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S470",
+            "S477"
+           ],
+           "condition": "pose encastrée, pente ≥ 20°",
+           "regions": [
+            "France"
+           ],
+           "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026).",
+           "controle": "pas de calcul possible ; deux documents Velux concordants",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "EDN 0000 Ardoises < 8 mm (pose encastrée, Pente de toit 20°)"
+            },
+            {
+             "source": "S477",
+             "extrait": "EDN … 20°–90° pente de toit … plat jusqu'à 16 mm de hauteur totale"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "EDS",
+         "attributs": [
+          {
+           "id": "velux_raccord_eds",
+           "attribut": "couverture_admise",
+           "valeur": "matériaux plats ≤ 2 × 8 mm, conçu pour le raccord au photovoltaïque",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S474"
+           ],
+           "condition": "pose standard, 15°–90° ; absent du tarif France 2024 (fiche suisse)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S474",
+             "extrait": "EDS … Pour matériel de couverture plat jusqu'à 16 mm de hauteur totale (2 × 8 mm) • Idéal pour le raccordement aux systèmes PV"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "ZWC",
+         "attributs": [
+          {
+           "id": "velux_zwc",
+           "attribut": "nature_article",
+           "valeur": "kit de profilés pour fenêtre installée sans raccord (pose standard), même prix toutes tailles",
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S470"
+           ],
+           "condition": "ZWC n'est pas un raccord d'étanchéité de couverture ; sur bac acier Velux conseille l'EDW",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Réf. ZWC Kits profilés pour fenêtres installées sans raccords. Pose standard uniquement (57 € HT** toutes tailles)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Fakro",
+       "groupe": "Fakro",
+       "modeles": [
+        {
+         "nom": "EZV-F",
+         "attributs": [
+          {
+           "id": "fakro_raccord_ezv",
+           "attribut": "couverture_admise",
+           "valeur": "tuiles plates à emboîtement, épaisseur 18 à 45 mm",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S484"
+           ],
+           "condition": "pose standard, 15°–90°",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S484",
+             "extrait": "Raccord destiné à la pose avec des tuiles plates à emboîtement. Épaisseur de tuile admissible : 18 mm à 45 mm"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "EHV-P",
+         "attributs": [
+          {
+           "id": "fakro_raccord_ehv",
+           "attribut": "couverture_admise",
+           "valeur": "couvertures ondulées / profilées, onde ≤ 90 mm",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S485"
+           ],
+           "condition": "pose standard, 15°–90° (équivalent EDW, relief maxi plus faible : 90 contre 120)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S485",
+             "extrait": "Hauteur maximale d'onde pour matériau de couverture : 90 mm. Pentes de toiture admissibles: 15-90°"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "ELV",
+         "attributs": [
+          {
+           "id": "fakro_raccord_elv",
+           "attribut": "couverture_admise",
+           "valeur": "ardoises et matériaux plats, pose par recouvrement",
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S486"
+           ],
+           "condition": "pose standard, 15°–90° (équivalent EDL)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S486",
+             "extrait": "Raccord destiné aux matériaux de couverture plates (ardoises) - pose par recouvrement. Pentes de toiture admissibles: 15-90°"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "ELJ",
+         "attributs": [
+          {
+           "id": "fakro_raccord_elj",
+           "attribut": "couverture_admise",
+           "valeur": "ardoises, pose encastrée, épaisseur ≤ 10 mm (2 × 5 mm)",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S478"
+           ],
+           "condition": "20°–90° (équivalent EDN, épaisseur plus faible : 2×5 contre 2×8)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S478",
+             "extrait": "Épaisseur maximale 10 mm (2x5mm). Pentes de toiture admissibles: 20-90°"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "accessoires d'installation",
+     "regles": [
+      {
+       "id": "velux_pack_pro_plus",
+       "attribut": "contenu",
+       "valeur": "raccord + BDX + BFX + gouttière centrale ajustable 100 à 160 mm",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S470"
+       ],
+       "condition": "fenêtres en combinaison (côte à côte, superposées) ; la gouttière centrale s'ajuste à la largeur du chevron",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Pack PRO+ contenant le bloc isolant BDX, la collerette d'étanchéité BFX et une gouttière centrale ajustable … entre 100 - 160 mm"
+        }
+       ],
+       "portee": "Velux"
+      }
+     ],
+     "marques": [
+      {
+       "nom": "Velux",
+       "groupe": "Velux",
+       "modeles": [
+        {
+         "nom": "BDX",
+         "attributs": [
+          {
+           "id": "velux_bdx_un_par_fenetre",
+           "attribut": "quantite_par_fenetre",
+           "valeur": 1,
+           "unite": "u",
+           "statut": "une_source",
+           "sources": [
+            "S470",
+            "S474"
+           ],
+           "condition": "bloc isolant BDX (mousse sur précadre) : BDX 0000 pose traditionnelle, BDX 0000F pose encastrée ; un par fenêtre, même en combinaison ; incompatible avec les raccords EW/EL",
+           "regions": [
+            "France"
+           ],
+           "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026).",
+           "controle": "pas de calcul ; deux documents Velux",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Pour les combinaisons de fenêtres, commander un BDX par fenêtre … Incompatibles avec les raccords EW/EL."
+            },
+            {
+             "source": "S474",
+             "extrait": "2... = raccordement Profiset pour montage individuel (BDX et BFX inclus)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "BFX",
+         "attributs": [
+          {
+           "id": "velux_bfx_un_par_fenetre",
+           "attribut": "quantite_par_fenetre",
+           "valeur": 1,
+           "unite": "u",
+           "statut": "une_source",
+           "sources": [
+            "S470"
+           ],
+           "condition": "collerette d'étanchéité à l'écran de sous-toiture BFX 1000 (traditionnelle) / 1000F (encastrée), avec renvoi d'eau ; un par fenêtre",
+           "regions": [
+            "France"
+           ],
+           "ecart": "En Suisse (fiches 06/24) les raccords « 1… » incluent le BFX ; en France le tarif 2024 vend le BFX à part (et dans le Pack PRO+). Vérifier au comptoir si le raccord pris l'inclut.",
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Collerette d'étanchéité pour écran de sous-toiture BFX 1000F Pose encastrée … BFX 1000 Pose traditionnelle"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "BBX",
+         "attributs": [
+          {
+           "id": "velux_bbx_un_par_fenetre",
+           "attribut": "quantite_par_fenetre",
+           "valeur": 1,
+           "unite": "u",
+           "statut": "une_source",
+           "sources": [
+            "S470"
+           ],
+           "condition": "collerette pare-vapeur BBX 0000 (film polyéthylène de 50 cm soudé aux angles) ; un par fenêtre ; incluse dans l'habillage LSB / LSC",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Collerette pare-vapeur BBX … Film polyéthylène de 50 cm soudé dans les 4 angles … commander un BBX par fenêtre"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "LSB / LSC",
+         "attributs": [
+          {
+           "id": "velux_habillage_epaisseur",
+           "attribut": "epaisseur_de_toit_max",
+           "valeur": "LSB 300 / LSC 400",
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S470"
+           ],
+           "condition": "habillage intérieur PVC blanc prêt à poser ; au-delà, nous consulter",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S470",
+             "extrait": "Habillage en PVC blanc pour une épaisseur de toit jusqu'à 300 mm (réf. LSB) ou jusqu'à 400 mm (réf. LSC)."
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "conditionnement",
+     "regles": [
+      {
+       "id": "fenetre_toit_unite_de_vente",
+       "attribut": "unite_de_vente",
+       "valeur": "fenêtre à la pièce ; raccord à la pièce, à la taille de la fenêtre ; BDX, BFX, BBX à la pièce, à la taille",
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S480"
+       ],
+       "condition": "un raccord par fenêtre seule ; combinaisons : raccord de combinaison (EK…) ou Pack PRO+",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Prix € HT par taille : GGL 2057 … EDW 0000 … BDX 0000 … BBX 0000 (une ligne de prix par taille)"
+        },
+        {
+         "source": "S480",
+         "extrait": "115€00 TTC/La pièce (raccord EDW SK06)"
+        }
+       ],
+       "portee": "Velux"
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "modèles, finitions, manœuvre",
+     "regles": [
+      {
+       "id": "velux_finitions",
+       "attribut": "finitions",
+       "valeur": "WhiteFinish = bois peint blanc (GGL / GPL) ; EverFinish = polyuréthane blanc (GGU / GPU) ; ClearFinish = bois verni (GGL 3054…)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S481",
+        "S482"
+       ],
+       "condition": "le premier groupe de lettres dit la matière : GGL bois, GGU polyuréthane ; L = bois, U = PU",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "GGL 2057 WhiteFinish … GGU 0057 EverFinish … ClearFinish Bois vernis durable et résistant."
+        },
+        {
+         "source": "S481",
+         "extrait": "VELUX Tout Confort Everfinish - polyuréthane … (GGU 0057 MK04)"
+        },
+        {
+         "source": "S482",
+         "extrait": "VELUX Confort Whitefinish - bois peint en blanc … (GGL 2076 MK04)"
+        }
+       ],
+       "portee": "Velux"
+      },
+      {
+       "id": "velux_ouvertures",
+       "attribut": "ouverture",
+       "valeur": "GGL / GGU = rotation (axe central) ; GPL / GPU = projection (ouverture par le bas, 15° à 55°)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S481"
+       ],
+       "condition": "le comptoir demande rotation ou projection",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Fenêtre à projection GPL 2057 … Fenêtre à rotation GGL 2057"
+        },
+        {
+         "source": "S481",
+         "extrait": "Fenêtre de toit à rotation VELUX … (GGU 0057 MK04)"
+        }
+       ],
+       "portee": "Velux"
+      },
+      {
+       "id": "velux_gammes_vitrage",
+       "attribut": "gamme_vitrage",
+       "valeur": "suffixe 2076 / 0076 = Confort ; 2057 / 0057 = Tout Confort ; 2062 = triple vitrage ; 3054 = gamme bois verni ClearFinish",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S482"
+       ],
+       "condition": "le suffixe à 4 chiffres suit le modèle (GGL MK04 2076) ; il fixe le vitrage et le prix",
+       "regions": [
+        "France"
+       ],
+       "ecart": "« 2062 triple vitrage » lu sur une seule ligne du tarif (fenêtre patrimoine) : à recouper.",
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "Fenêtres Confort GGL 2076 … Fenêtres Tout Confort Fenêtre à rotation GGL 2057 … GGL 2062 WhiteFinish"
+        },
+        {
+         "source": "S482",
+         "extrait": "Fenêtre de toit à rotation VELUX Confort Whitefinish … (GGL 2076 MK04)"
+        }
+       ],
+       "portee": "Velux"
+      },
+      {
+       "id": "velux_manoeuvre",
+       "attribut": "manoeuvre",
+       "valeur": "manuelle (barre de manœuvre) ; électrique INTEGRA : suffixe …21 (GGU 007621) ; solaire : suffixe …30 (GGU 005730)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S470",
+        "S483"
+       ],
+       "condition": "électrique et solaire livrés avec clavier mural (tarif 2024) ; la GPU motorisée n'accepte pas certains accessoires",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S470",
+         "extrait": "GGU 005730 Tout Confort - EverFinish - Solaire … GGU 007621 (motorisée)"
+        },
+        {
+         "source": "S483",
+         "extrait": "VELUX … Integra electric white poly finish centre pivot roof window … GGU FK06 007021U"
+        }
+       ],
+       "portee": "Velux"
+      }
+     ],
+     "marques": []
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "FENETRES : CK02 55×78, CK04 55×98, FK06 66×118, MK04 78×98, MK06 78×118, MK08 78×140, PK06 94×118, PK08 94×140, SK06 114×118, SK08 114×140, UK04 134×98",
+     "origine": "baticlair/packages/domain/src/referential/data/roofing.ts (const FENETRES, ~l. 781)",
+     "valeur_actuelle": "11 tailles",
+     "verdict": "confirme",
+     "bonne_valeur": "les 11 tailles sont justes ; manquent PK10 94×160, UK08 134×140 (tarif France 2024), MK10 78×160 et CK01 55×70",
+     "sources": [
+      "S470",
+      "S471"
+     ],
+     "explication": "Cotes hors tout Velux, recoupées par Kingspan et Fakro (mêmes cotes commerciales)."
+    },
+    {
+     "ratio": "Raccord : « Pour tuiles (mécaniques, canal) » / « Pour ardoises » / « Pour tuiles plates »",
+     "origine": "roofing.ts (choix du raccord, ~l. 760)",
+     "valeur_actuelle": "3 choix",
+     "verdict": "confirme",
+     "bonne_valeur": "tuiles → EDW (relief ≤ 120 mm, 15°) ; ardoises → EDL (≤ 8 mm, 15°) ; tuiles plates (largeur < 300 mm) → EDP (pente ≥ 25°) ; pose encastrée → EDJ / EDN (20°) ; bac acier → EDW",
+     "sources": [
+      "S470",
+      "S474"
+     ],
+     "explication": "Les trois choix existent tels quels ; ajouter la pose (standard / encastrée) et le bac acier si le devis le dit."
+    },
+    {
+     "ratio": "Raccord d'étanchéité : d'office avec le Velux, choisi selon la couverture",
+     "origine": "regles-metier SKILL.md § Velux",
+     "valeur_actuelle": "1 raccord par fenêtre",
+     "verdict": "confirme",
+     "bonne_valeur": "1 raccord par fenêtre seule, à la taille de la fenêtre ; combinaison : raccord de combinaison ou Pack PRO+",
+     "sources": [
+      "S470",
+      "S480"
+     ],
+     "explication": "Le raccord se vend à la pièce, par taille de fenêtre."
+    },
+    {
+     "ratio": "En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur",
+     "origine": "regles-metier SKILL.md § Velux et § Suggestions",
+     "valeur_actuelle": "BDX, BBX, volet, store, habillage",
+     "verdict": "confirme",
+     "bonne_valeur": "même liste + collerette d'écran BFX (vendue à part en France) ; 1 de chaque par fenêtre, à la taille de la fenêtre",
+     "sources": [
+      "S470",
+      "S474"
+     ],
+     "explication": "BFX manque à la liste des Suggestions ; en France il n'est pas dans le raccord EDW 0000 d'après le tarif 2024 (à vérifier au comptoir)."
+    },
+    {
+     "ratio": "On retire toujours la surface du Velux de la surface d'ardoise ou de tuile",
+     "origine": "regles-metier SKILL.md § Velux",
+     "valeur_actuelle": "surface de la fenêtre",
+     "verdict": "confirme",
+     "bonne_valeur": "surface hors tout : CK02 0,43 ; MK04 0,76 ; MK06 0,92 ; MK08 1,09 ; PK08 1,32 ; SK06 1,35 ; UK04 1,31 m²",
+     "sources": [
+      "S470",
+      "S471"
+     ],
+     "explication": "Largeur × hauteur hors tout ; les coupes autour restent dans la perte du toit."
+    },
+    {
+     "ratio": "Raccord des Velux : ZWC (ligne fourniture) ou Pratikal (ligne pose)",
+     "origine": "lecture/exemples/de00000071.ts et lecture/controles.ts:122",
+     "valeur_actuelle": "ZWC traité comme un raccord",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "ZWC = kit de profilés pour fenêtre posée sans raccord (pose standard, toutes tailles), pas un raccord de couverture ; sur bac acier, Velux conseille l'EDW",
+     "sources": [
+      "S470"
+     ],
+     "explication": "La question posée à l'artisan reste bonne (le devis dit deux choses) ; le libellé « raccord ZWC » est à revoir avec le fondateur."
+    }
+   ],
+   "comptoir": [
+    {
+     "article": "Fenêtre de toit Velux",
+     "ce_que_le_vendeur_demande": [
+      "taille (code : CK02, MK04, MK06, MK08, PK08, SK06, UK04…) ou cotes hors tout en cm",
+      "ouverture : rotation (GGL / GGU) ou projection (GPL / GPU, pente ≤ 55°)",
+      "finition : bois peint blanc WhiteFinish, polyuréthane EverFinish, ou bois verni ClearFinish",
+      "gamme vitrage : Confort (2076 / 0076) ou Tout Confort (2057 / 0057)",
+      "manœuvre : manuelle, électrique INTEGRA, solaire",
+      "nombre"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "1 fenêtre par carton",
+     "sources": [
+      "S470",
+      "S481"
+     ]
+    },
+    {
+     "article": "Raccord d'étanchéité Velux",
+     "ce_que_le_vendeur_demande": [
+      "couverture : tuiles ≤ 120 mm (EDW), ardoises ≤ 8 mm (EDL), tuiles plates < 300 mm (EDP, pente ≥ 25°)",
+      "pose standard ou encastrée (EDJ / EDN, pente ≥ 20°)",
+      "taille = celle de la fenêtre",
+      "coloris : gris 0000, ocre 0700C1, rouge-brun 0700C2",
+      "fenêtre seule ou combinaison"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "1 raccord (BFX à part en France d'après le tarif 2024)",
+     "sources": [
+      "S470",
+      "S480"
+     ]
+    },
+    {
+     "article": "Accessoires d'installation Velux (BDX, BFX, BBX, LSB / LSC)",
+     "ce_que_le_vendeur_demande": [
+      "taille de la fenêtre",
+      "pose standard ou encastrée (BDX 0000 / 0000F, BFX 1000 / 1000F)",
+      "épaisseur de toit pour l'habillage (≤ 300 LSB, ≤ 400 LSC)"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "1 par fenêtre ; Pack PRO+ (raccord + BDX + BFX + gouttière centrale) pour les combinaisons",
+     "sources": [
+      "S470",
+      "S474"
+     ]
+    },
+    {
+     "article": "Fenêtre de toit Fakro ou Roto",
+     "ce_que_le_vendeur_demande": [
+      "marque (les raccords ne sont pas interchangeables)",
+      "taille : Fakro = cotes Velux (code 05 = 78×98) ; Roto = 54 / 74 / 94 / 114 / 134 de large (7/9 = 74×98)",
+      "raccord Fakro : EZV (tuiles plates 18–45 mm), EHV (ondulé ≤ 90 mm), ELV (ardoise), ELJ (ardoise encastrée)"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "1 fenêtre, 1 raccord",
+     "sources": [
+      "S472",
+      "S475"
+     ]
+    }
+   ],
+   "regle_confirmation": "Données propres à un modèle Velux : confirme_fabricant quand deux documents Velux distincts concordent (aucun calcul au m² possible, le contrôle se limite à la concordance) ; confirme quand un fabricant tiers (Kingspan, Fakro, Roto) ou un négoce les recoupe.",
+   "perimetre": "Fenêtres de toit (Velux surtout ; Fakro, Roto), raccords d'étanchéité, accessoires d'installation, ce que le comptoir demande. Velux.fr était hors ligne le 20/11/2026 (incident de sécurité) : les données Velux viennent du tarif France 2024 et des fiches de contenthub.velux.com."
+  },
+  {
+   "code": "securite",
+   "libelle": "Sécurité en toiture",
+   "sous_familles": [
+    {
+     "nom": "crochets de sécurité (NF EN 517)",
+     "regles": [
+      {
+       "id": "crochet_securite_types_en517",
+       "attribut": "types_en_517",
+       "valeur": "type A : reprend les efforts dans le sens de la pente ; type B : dans le sens de la pente ET dans le plan de la toiture (perpendiculaire)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S488",
+        "S489",
+        "S490"
+       ],
+       "condition": "crochet de sécurité = ancrage pour échelle de couvreur et EPI ; pour s'y attacher par harnais, prendre un crochet B ou un ancrage EN 795",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S488",
+         "extrait": "crochet de type A : leur rôle est d'absorber les efforts de traction agissant dans le sens de la pente de la couverture"
+        },
+        {
+         "source": "S489",
+         "extrait": "crochets de sécurité de type B conformément à la norme EN 517:2006"
+        },
+        {
+         "source": "S490",
+         "extrait": "la norme EN 517 : 2006 classes A et B pour les crochets de sécurité"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_norme",
+       "attribut": "norme",
+       "valeur": "NF EN 517 (remplace la NF P37-403 « crochet de service », annulée)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S491",
+        "S488"
+       ],
+       "condition": "toute la France",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S491",
+         "extrait": "NF P37-403 … annulée, remplacée par NF EN 517 (statut affiché sur la notice AFNOR)"
+        },
+        {
+         "source": "S488",
+         "extrait": "NBN EN 517 : Accessoires préfabriqués pour couverture - Crochets de sécurité. Avril 2006"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_espacement",
+       "attribut": "entraxe_max_horizontal",
+       "valeur": 2,
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S492",
+        "S493"
+       ],
+       "condition": "entre deux crochets de sécurité d'une même rangée, pour circuler en sécurité ; ne jamais s'ancrer sous le travailleur",
+       "regions": [
+        "France"
+       ],
+       "ecart": "La FARCC wallonne donne 2,8 m maximum pour des crochets de SERVICE (d'échelle), qu'elle ne considère pas comme des crochets de sécurité : autre usage.",
+       "preuves": [
+        {
+         "source": "S492",
+         "extrait": "Ils doivent être positionnés tous les deux mètres pour assurer une protection efficace et ne jamais être utilisés en dessous du travailleur."
+        },
+        {
+         "source": "S493",
+         "extrait": "respecter un entraxe maximum de 2 mètres entre chaque crochet de sécurité"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_pres_points_intervention",
+       "attribut": "distance_aux_points_d_intervention",
+       "valeur": 1,
+       "unite": "m",
+       "statut": "une_source",
+       "sources": [
+        "S493"
+       ],
+       "condition": "poser des crochets à environ 1 m des endroits à entretenir plus tard (cheminée, fenêtre de toit, antenne)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S493",
+         "extrait": "Poser des crochets de sécurité à 1 mètre des endroits qui nécessiteront des interventions ultérieures"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_fixations",
+       "attribut": "fixations_par_crochet",
+       "valeur": 3,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S492",
+        "S494",
+        "S489"
+       ],
+       "condition": "3 pointes annelées (ou 1 axe crampon traversant) sur chevron ; vis à bois : profondeur ≥ 90 mm (swisspor) ; fixations fournies avec le crochet chez Frénéhard",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S492",
+         "extrait": "se fixent sur le dessus de la poutre ou chevron en bois avec 3 clous annelés ou un axe crampon"
+        },
+        {
+         "source": "S494",
+         "extrait": "fixé sur chevron à l'aide d'au moins 3 pointes annelées"
+        },
+        {
+         "source": "S489",
+         "extrait": "3 vis à bois par crochet (fournies) • Profondeur de vissage d'au moins 90 mm"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_section_chevron",
+       "attribut": "section_mini_chevron",
+       "valeur": "4,2 × 6,3 (Tractel) ; 8 × 10 (swisspor)",
+       "unite": "cm",
+       "statut": "a_confirmer",
+       "sources": [
+        "S492",
+        "S489"
+       ],
+       "condition": "selon le modèle de crochet",
+       "regions": [
+        "France"
+       ],
+       "ecart": "4,2 × 6,3 cm (Tractel, crochet plat cloué) contre 8 × 10 cm (swisspor, crochet vissé) : la valeur dépend du modèle.",
+       "raison": "Les deux fabricants donnent des sections très différentes, propres à leur modèle ; pas de règle générale.",
+       "preuves": [
+        {
+         "source": "S492",
+         "extrait": "Section mini de la poutre 4.2 X6.3 cm"
+        },
+        {
+         "source": "S489",
+         "extrait": "Section des chevrons min. 8 x 10 cm"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_personnes",
+       "attribut": "personnes_par_crochet",
+       "valeur": 1,
+       "unite": "u",
+       "statut": "une_source",
+       "sources": [
+        "S489"
+       ],
+       "condition": "crochet de toiture inclinée swisspor type B ; à vérifier sur la notice des autres marques",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S489",
+         "extrait": "Les crochets de sécurité en toiture inclinée peuvent être utilisés par une personne au maximum à la fois."
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_remplacement",
+       "attribut": "remplacement_apres_chute",
+       "valeur": "remplacer le crochet après qu'il a retenu une chute",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S493"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S493",
+         "extrait": "Le crochet doit être remplacé après avoir reçu une chute"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_formes",
+       "attribut": "formes_vendues",
+       "valeur": "droit (plat), cambré 25 ou 50 mm, chantourné / torsadé (fixation sur le flanc du chevron)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S490",
+        "S492"
+       ],
+       "condition": "la forme suit la couverture (ardoise, tuile plate, tuile à relief) ; galvanisé à chaud ou inox, parfois teinte ardoise",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S490",
+         "extrait": "peuvent être droits, cambrés (25 ou 50 mm) ou chantournés"
+        },
+        {
+         "source": "S492",
+         "extrait": "Ancrage toiture plat … Ancrage toiture cambré … Ancrage toiture torsadé"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_combine_en795",
+       "attribut": "double_norme",
+       "valeur": "crochet EN 517 (échelle) + anneau EN 795 classe A (EPI antichute) sur la même pièce",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S492",
+        "S494"
+       ],
+       "condition": "ancrages de toiture combinés Tractel, Frénéhard « Monuments historiques »",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S492",
+         "extrait": "conformes à la norme EN795 A … et EN 517 pour l'accrochage des échelles de toiture sur le crochet"
+        },
+        {
+         "source": "S494",
+         "extrait": "517 classe A relative aux crochets de sécurité et NF EN 795 classe A2"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_nombre_par_m2",
+       "attribut": "crochets_par_m2",
+       "valeur": null,
+       "unite": "u/m²",
+       "statut": "a_confirmer",
+       "sources": [
+        "S492",
+        "S493"
+       ],
+       "condition": "aucun ratio au m² : le nombre se déduit de la longueur du versant (1 tous les 2 m par rangée) et des points à entretenir",
+       "regions": [
+        "France"
+       ],
+       "raison": "Aucune source (fabricant, DTU, INRS) ne donne un nombre de crochets au m² ; nombre de rangées non chiffré en France. Règle fondateur : demander le nombre à l'artisan.",
+       "preuves": [
+        {
+         "source": "S492",
+         "extrait": "Ils doivent être positionnés tous les deux mètres"
+        },
+        {
+         "source": "S493",
+         "extrait": "respecter un entraxe maximum de 2 mètres"
+        }
+       ]
+      },
+      {
+       "id": "crochet_securite_bord_toit",
+       "attribut": "distance_au_bord",
+       "valeur": 0.5,
+       "unite": "m",
+       "statut": "une_source",
+       "sources": [
+        "S495"
+       ],
+       "condition": "exemple suisse : un crochet manquant à 50 cm du bord du toit (rive) ; pas de règle française trouvée",
+       "regions": [
+        "Suisse"
+       ],
+       "preuves": [
+        {
+         "source": "S495",
+         "extrait": "Manque un crochet à 50 cm du bord du toit"
+        }
+       ]
+      },
+      {
+       "id": "crochet_service_section",
+       "attribut": "section_ronde_mini",
+       "valeur": 16,
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S488"
+       ],
+       "condition": "crochet de SERVICE (d'échelle) en Wallonie : rond Ø 16 mm mini, acier galvanisé ou inox AISI 304, écartement ≤ 2,8 m",
+       "regions": [
+        "Belgique"
+       ],
+       "preuves": [
+        {
+         "source": "S488",
+         "extrait": "auront une section circulaire d'un diamètre minimum de 16 mm … L'écartement entre les crochets sera de maximum 2,8 m."
+        }
+       ]
+      },
+      {
+       "id": "crochet_tractel_accessoires",
+       "attribut": "vendu_par",
+       "valeur": "crochet à la pièce ; axe crampon 50 / 90 / 130 mm à la pièce ; pointes annelées par lot de 10",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S492"
+       ],
+       "condition": "Tractel ; chez Frénéhard les fixations sont livrées avec le crochet",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S492",
+         "extrait": "66928 Axe crampon – 50mm … 66948 Axe crampon – 130mm … 66958 Lot de 10 pointes annelées"
+        }
+       ],
+       "portee": "Tractel"
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "lignes de vie et ancrages (NF EN 795)",
+     "regles": [
+      {
+       "id": "en795_classes",
+       "attribut": "classes_en_795",
+       "valeur": "A : ancrage fixe sur la structure ; B : ancrage provisoire transportable ; C : ligne de vie à câble (support flexible horizontal) ; D : ligne de vie sur rail rigide ; E : corps mort lesté (toiture-terrasse)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S496",
+        "S497",
+        "S498"
+       ],
+       "condition": "la fiche couverture parle surtout de A (point d'ancrage) et C (ligne de vie câble)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S496",
+         "extrait": "certain anchor types can no longer claim EN 795 compliance (rail rigide D, ancrages lestés E)"
+        },
+        {
+         "source": "S497",
+         "extrait": "classe (A/B/C/D/E) … norme EN 795 (marquage de l'ancrage)"
+        },
+        {
+         "source": "S498",
+         "extrait": "conforme à la norme EN 795 : 2012 et la spécification technique TS16415 : 2013 type C"
+        }
+       ]
+      },
+      {
+       "id": "ligne_de_vie_portee_max",
+       "attribut": "portee_max_entre_ancrages_intermediaires",
+       "valeur": 15,
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S498",
+        "S499"
+       ],
+       "condition": "ligne de vie câble EN 795 type C ; au-delà, ancrage intermédiaire",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S498",
+         "extrait": "espacements entre points intermédiaires maximale de 15 m"
+        },
+        {
+         "source": "S499",
+         "extrait": "distance maximale entre les ancres : 15 m"
+        }
+       ]
+      },
+      {
+       "id": "ligne_de_vie_mono_portee",
+       "attribut": "portee_max_mono_portee",
+       "valeur": 30,
+       "unite": "m",
+       "statut": "une_source",
+       "sources": [
+        "S499"
+       ],
+       "condition": "ligne sans ancrage intermédiaire (Tractel Travsmart, Travsafe tout inox)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S499",
+         "extrait": "la distance maximale entre les ancres d'extrémité pour une installation mono-portée est de 30m"
+        }
+       ],
+       "portee": "Tractel"
+      },
+      {
+       "id": "ligne_de_vie_utilisateurs",
+       "attribut": "utilisateurs_simultanes",
+       "valeur": "2 à 5 selon le système (Travflex 2 : 2 × 150 kg ; Travsafe : 3 × 150 kg ; Conekt NewPro : 5)",
+       "unite": "u",
+       "statut": "une_source",
+       "sources": [
+        "S500",
+        "S501",
+        "S498"
+       ],
+       "condition": "jamais deux personnes sur un tronçon non certifié multi-utilisateurs",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Chiffre propre à chaque système : pas de valeur commune ; chaque source ne parle que de son produit.",
+       "preuves": [
+        {
+         "source": "S500",
+         "extrait": "multi-utilisateurs : 2 utilisateurs 150kg, 3 utilisateurs 100kg"
+        },
+        {
+         "source": "S501",
+         "extrait": "3 x utilisateurs 150 kg, 5 x utilisateurs 100 kg"
+        },
+        {
+         "source": "S498",
+         "extrait": "jusqu'à 5 utilisateurs en simultané"
+        }
+       ]
+      },
+      {
+       "id": "ligne_de_vie_cable",
+       "attribut": "cable",
+       "valeur": "inox 7 × 19, Ø 10 mm, rupture 53,1 kN (Conekt NewPro)",
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S498"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S498",
+         "extrait": "câble Inox 7x19 torons de diamètre 10 mm … charge de rupture de 53,1 kN"
+        }
+       ],
+       "portee": "Échelle Européenne"
+      },
+      {
+       "id": "ligne_de_vie_vendue",
+       "attribut": "vendu_par",
+       "valeur": "en kit ou sur étude (ancrages d'extrémité, intermédiaires, absorbeur, câble au mètre) ; posée et vérifiée par un installateur",
+       "unite": "",
+       "statut": "a_confirmer",
+       "sources": [
+        "S498"
+       ],
+       "condition": "pas un article de comptoir courant ; le comptoir demande la longueur et le nombre d'ancrages intermédiaires",
+       "regions": [
+        "France"
+       ],
+       "raison": "Composition des kits et longueurs vendues non relevées chez un négoce breton.",
+       "preuves": [
+        {
+         "source": "S498",
+         "extrait": "implantations … espacements entre points intermédiaires maximale de 15 m"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "échelles de couvreur",
+     "regles": [
+      {
+       "id": "echelle_couvreur_centaure",
+       "attribut": "elements_et_longueurs",
+       "valeur": "aluminium en éléments emboîtables : 5 × 1,25 m (barreaux tous les 250 mm, 1,25 à 6,25 m) ; 5 × 1,32 m (330 mm, jusqu'à 6,60 m) ; 5 × 1,17 m (390 mm, jusqu'à 5,85 m)",
+       "unite": "m",
+       "statut": "une_source",
+       "sources": [
+        "S502",
+        "S503",
+        "S504"
+       ],
+       "condition": "crochet de faîtage vendu en option ; roulettes pour pousser l'échelle, retournée à 180° au faîtage",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Trois négoces, une seule fiche fabricant (Centaure) : une source.",
+       "preuves": [
+        {
+         "source": "S502",
+         "extrait": "cinq éléments de 1,25 m … longueurs possibles de 1,25 à 6,25 m"
+        },
+        {
+         "source": "S503",
+         "extrait": "écartement 33cm 6,60 m ; crochet de faîtage vendu en option"
+        },
+        {
+         "source": "S504",
+         "extrait": "entraxe 390 mm, cinq éléments de 1,17 m"
+        }
+       ],
+       "portee": "Centaure"
+      },
+      {
+       "id": "echelle_couvreur_autres",
+       "attribut": "longueurs_vendues",
+       "valeur": "Hailo Safety Roof bois : éléments de 2 m (2 × 2 m, 4 m, 5 m) ; Tubesca-Comabi Evoklip : 6,10 / 6,30 / 6,70 m avec crochets de toit",
+       "unite": "m",
+       "statut": "une_source",
+       "sources": [
+        "S505",
+        "S506"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S505",
+         "extrait": "Échelle de toit bois - Safety Roof 2x2m - 150kg HAILO"
+        },
+        {
+         "source": "S506",
+         "extrait": "Échelle de couvreur de 6.10m de longueur : échelle avec crochets de toit - EVOKLIP/250"
+        }
+       ]
+      },
+      {
+       "id": "echelle_toit_fixe_norme",
+       "attribut": "norme",
+       "valeur": "NF EN 12951 (échelle de toit fixée à demeure) ; NF EN 516 (passerelles, plateformes de circulation)",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S507"
+       ],
+       "condition": "l'échelle de couvreur mobile n'est pas une échelle fixe",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S507",
+         "extrait": "NF EN 12951 Accessoires préfabriqués pour couverture - Échelles de toit fixées à demeure"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "Famille « Sécurité et accès (crochets de sécurité, échelle de toit, ligne de vie) » : mots-clés seulement, aucun ratio",
+     "origine": "baticlair/packages/domain/src/referential/data/roofing.ts (~l. 1500) et src/trades/roofing.ts:26",
+     "valeur_actuelle": "pas de calcul",
+     "verdict": "confirme",
+     "bonne_valeur": "demander le nombre de crochets à l'artisan (règle fondateur : quantité trop particulière) ; repère pour la question : 1 crochet tous les 2 m par rangée, à 1 m des points à entretenir",
+     "sources": [
+      "S492",
+      "S493"
+     ],
+     "explication": "Aucune source ne donne un nombre au m² ; l'entraxe 2 m est le seul chiffre recoupé."
+    }
+   ],
+   "comptoir": [
+    {
+     "article": "Crochet de sécurité de toiture (NF EN 517)",
+     "ce_que_le_vendeur_demande": [
+      "couverture : ardoise (plat ou cambré 25), tuile plate, tuile à relief (cambré 50 ou chantourné)",
+      "type A (échelle) ou B (aussi harnais), ou combiné EN 795 A",
+      "matière : galvanisé, inox, teinte ardoise",
+      "nombre"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "à la pièce, fixations fournies (Frénéhard) ou à part : pointes annelées par 10, axe crampon (Tractel)",
+     "sources": [
+      "S490",
+      "S492"
+     ]
+    },
+    {
+     "article": "Échelle de couvreur",
+     "ce_que_le_vendeur_demande": [
+      "matière : aluminium ou bois",
+      "longueur (nombre d'éléments)",
+      "entraxe des barreaux (250 / 330 / 390 mm)",
+      "crochet de faîtage"
+     ],
+     "unite_de_vente": "pièce (kit d'éléments)",
+     "conditionnement": "éléments emboîtables, crochet de faîtage en option",
+     "sources": [
+      "S502",
+      "S503"
+     ]
+    },
+    {
+     "article": "Ligne de vie et points d'ancrage (EN 795)",
+     "ce_que_le_vendeur_demande": [
+      "longueur de la ligne",
+      "nombre d'ancrages intermédiaires (≤ 15 m entre deux)",
+      "nombre d'utilisateurs",
+      "support (charpente bois, béton, bac acier)"
+     ],
+     "unite_de_vente": "kit ou sur étude",
+     "conditionnement": "ancrages, câble, absorbeur, chariot : selon le fabricant",
+     "sources": [
+      "S498",
+      "S499"
+     ]
+    }
+   ],
+   "perimetre": "Crochets de sécurité NF EN 517, crochets de service, ancrages et lignes de vie NF EN 795, échelles de couvreur. Aucune règle française chiffrée de nombre de crochets au m² trouvée (ni DTU, ni INRS) : on demande le nombre."
+  },
+  {
+   "code": "fibres_ciment",
+   "libelle": "Plaques fibres-ciment",
+   "sous_familles": [
+    {
+     "nom": "plaques ondulées fibres-ciment",
+     "regles": [
+      {
+       "id": "po_profil_onde",
+       "attribut": "profil_onde",
+       "valeur": "177 × 51 (pas × hauteur d'onde), épaisseur 6,5",
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S510"
+       ],
+       "condition": "profil unique des plaques ondulées vendues en France (Eternit, Plakfort, ELOS)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Les plaques ondulées 177 x 51 FR existent en deux profils : 5 et 6 ondes."
+        },
+        {
+         "source": "S509",
+         "extrait": "5 ONDES … 6,5 … 918 … 873 mm"
+        },
+        {
+         "source": "S510",
+         "extrait": "« Couverture en plaques ondulées en fibres-ciment » (référence de pose citée par les deux fabricants)"
+        }
+       ]
+      },
+      {
+       "id": "po_5_6_incompatibles",
+       "attribut": "compatibilite",
+       "valeur": "accessoires 5 ondes et 6 ondes non interchangeables",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S508"
+       ],
+       "condition": "demander le nombre d'ondes avant toute faîtière, closoir ou plaque de remplacement",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "la gamme des plaques et accessoires 5 ondes et la gamme des plaques et accessoires 6 ondes sont incompatibles."
+        }
+       ],
+       "portee": "Eternit"
+      },
+      {
+       "id": "po_8_ondes",
+       "attribut": "existence_au_catalogue",
+       "valeur": "pas de plaque 8 ondes dans les gammes France relevées (5 et 6 ondes seulement)",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "un devis qui écrit « 8 ondes » vise un ancien profil ou un autre matériau : demander à l'artisan",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Les plaques ondulées 177 x 51 FR existent en deux profils : 5 et 6 ondes."
+        },
+        {
+         "source": "S509",
+         "extrait": "gamme PLAKFORT 5 et 6 ONDES"
+        }
+       ]
+      },
+      {
+       "id": "po_305_hors_nf",
+       "attribut": "longueur_3_05",
+       "valeur": "hors marque NF et hors Avis technique ; pose et fixation sur 3 pannes",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S509",
+        "S512"
+       ],
+       "condition": "5 ondes 3,05 m",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S509",
+         "extrait": "Plaques ondulées Plakfort 5 ondes en longueur 3,05 m hors NF: pose et fixations sur 3 pannes."
+        },
+        {
+         "source": "S512",
+         "extrait": "les plaques ondulées en longueur 3,05 m ne bénéficient ni de l'Avis Technique, ni d'un certificat de marque NF"
+        }
+       ]
+      },
+      {
+       "id": "po_poids_m2",
+       "attribut": "poids_au_m2",
+       "valeur": "≈ 14",
+       "unite": "kg/m²",
+       "statut": "confirme",
+       "sources": [
+        "S512",
+        "S509"
+       ],
+       "condition": "plaque seule ; ex. Eternit 5 ondes 2,00 m : 25,7 kg ; Edilfibro : 24,8 kg",
+       "regions": [
+        "France"
+       ],
+       "ecart": "13,5 (Edilfibro) à 14 kg/m² (Eternit).",
+       "preuves": [
+        {
+         "source": "S512",
+         "extrait": "Poids : 14 kg/m²"
+        },
+        {
+         "source": "S509",
+         "extrait": "Léger (13,5 kg/m2 environ)"
+        }
+       ]
+      },
+      {
+       "id": "po_pente_minimale",
+       "attribut": "pente_minimale",
+       "valeur": 9,
+       "unite": "%",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S510"
+       ],
+       "condition": "toutes zones, avec complément d'étanchéité transversal en dessous de 16 % (voir rampant maxi)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Pente mini. : 9 %"
+        },
+        {
+         "source": "S509",
+         "extrait": "9 ≤ p < 10 … 15 … t (tableau des pentes et des recouvrements)"
+        },
+        {
+         "source": "S510",
+         "extrait": "tableau pentes / recouvrements cité par Eternit et Edilfibro"
+        }
+       ]
+      },
+      {
+       "id": "po_altitude_max",
+       "attribut": "altitude_maximale",
+       "valeur": 900,
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "au-delà, étude particulière",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Altitude maxi. : 900 m"
+        },
+        {
+         "source": "S509",
+         "extrait": "L'emploi au-delà de 900 m d'altitude"
+        }
+       ]
+      },
+      {
+       "id": "po_recouvrement_transversal",
+       "attribut": "recouvrement_transversal",
+       "valeur": 200,
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S510"
+       ],
+       "condition": "pente < 31 % ; 140 mm admis à partir de 31 % (plaques non prédécoupées) ; maximum 230 mm (coins coupés d'usine) ou 260 mm (coins coupés sur chantier)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Recouvrement transversal minimum de 200 mm pour les pentes inférieures à 31 % et de 140 mm pour les pentes supérieures ou égales à 31 %."
+        },
+        {
+         "source": "S509",
+         "extrait": "Pour les pentes supérieures ou égales à 31% le recouvrement transversal minimal peut être réduit à 140 mm"
+        },
+        {
+         "source": "S510",
+         "extrait": "tableau des pentes et des recouvrements (NF DTU 40.37) repris par Edilfibro : 200 mm"
+        }
+       ]
+      },
+      {
+       "id": "po_recouvrement_transversal_max",
+       "attribut": "recouvrement_transversal_max",
+       "valeur": "230 (coins coupés d'usine) / 260 (coupe sur chantier)",
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Recouvrement transversal maximum de 230 mm pour les Coloronde FR 6 ondes coins coupés et de 260 mm"
+        },
+        {
+         "source": "S509",
+         "extrait": "Dans le cas des plaques livrées avec coins coupés, cette valeur est ramenée à 230 mm."
+        }
+       ]
+      },
+      {
+       "id": "po_recouvrement_longitudinal",
+       "attribut": "recouvrement_longitudinal",
+       "valeur": 45,
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "≈ 1/4 d'onde, réglé au gabarit : c'est l'écart largeur totale − largeur utile (918 − 873 ; 1095 − 1050)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Le texte Eternit dit « environ 1/2 onde », son dessin coté et les largeurs donnent 45 mm (1/4 d'onde de 177) : on retient 45 mm, cohérent avec la largeur utile.",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Rl : recouvrement longitudinal … Rl = 45 environ"
+        },
+        {
+         "source": "S509",
+         "extrait": "918 … 873 mm ; 1095 … 1050 mm"
+        }
+       ]
+      },
+      {
+       "id": "po_entraxe_pannes",
+       "attribut": "entraxe_max_pannes",
+       "valeur": 1.385,
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "quelle que soit la longueur de plaque ; Lu = L − recouvrement (1,585 − 0,200 = 1,385)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "ELOS (Chausson) annonce 1,32 m pour ses plaques de 1,52 m (1,52 − 0,20) et 0,90 / 1,15 m en pose sur 3 appuis pour 2,00 / 2,50 m : même règle, appliquée à la longueur.",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Les règles de l'art imposent un entraxe maximum de 1,385 m, quelle que soit la longueur des plaques."
+        },
+        {
+         "source": "S509",
+         "extrait": "Acier 1385 … Bois 1385 (écartement maxi entre axes, mm)"
+        }
+       ]
+      },
+      {
+       "id": "po_largeur_pannes",
+       "attribut": "largeur_mini_pannes",
+       "valeur": "bois 65 / métal 40",
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "pannes bois : largeur mini. 65 mm … pannes métal : largeur mini. 40 mm."
+        },
+        {
+         "source": "S509",
+         "extrait": "Acier 1385 40 ; Bois 1385 65 (largeur mini, mm)"
+        }
+       ]
+      },
+      {
+       "id": "po_longueur_utile_courante",
+       "attribut": "longueur_utile",
+       "valeur": "1,585 m → 1,385 ; 1,75 → 1,55 (égout avec débord) ; 2,50 → 2,30 (3 appuis)",
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S511"
+       ],
+       "condition": "Lu = L − 200 mm ; en partie courante Eternit conseille 1,585 m (6 ondes) pour l'entraxe optimal, 1,25 ou 1,585 au faîtage, 1,75 à l'égout avec débord",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "en partie courante, plaques de 1,585 m pour un entraxe optimisé de 1,385 m … à l'égout, plaques de 1,75 m (avec débord)"
+        },
+        {
+         "source": "S511",
+         "extrait": "Les plaques PO5 ELOS de longueur 1,75 m sont utilisées en égout lorsque d'un débord de plaques est nécessaire."
+        }
+       ]
+      },
+      {
+       "id": "po_calage_3_appuis",
+       "attribut": "calage_panne_intermediaire",
+       "valeur": 4,
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S509",
+        "S511"
+       ],
+       "condition": "plaque posée sur 3 appuis (longueur > 1,58 m) ; perçage +3 mm sur la panne intermédiaire",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S509",
+         "extrait": "un calage est obligatoire en cas d'écart de planitude ≥4 mm"
+        },
+        {
+         "source": "S511",
+         "extrait": "La pose sur 3 appuis nécessite une cale de 4mm sur la panne intermédiaire."
+        }
+       ]
+      },
+      {
+       "id": "po_porte_a_faux_egout",
+       "attribut": "porte_a_faux_max_egout",
+       "valeur": "350 sans gouttière / 200 avec gouttière",
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "mesuré depuis l'axe de la fixation ; gouttière jamais fixée sur les plaques",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Égout avec closoir ondulé … 350 maxi … 200 maxi (sur gouttière)"
+        },
+        {
+         "source": "S509",
+         "extrait": "ne doit pas excéder 0,35 m, lorsque la toiture ne comporte pas de gouttière et 0,20 m lorsqu'elle en comporte une"
+        }
+       ]
+      },
+      {
+       "id": "po_rampant_max_zone_I",
+       "attribut": "longueur_maxi_rampant",
+       "valeur": "9–9,9 % : 15 m ; 10–12,9 % : 20 ; 13–15,9 % : 25 ; 16–20,9 % : 30 ; 21–25,9 % : 35 ; ≥ 26 % : 40",
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S510"
+       ],
+       "condition": "zone I du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "ZONE I … longueur maxi. du rampant (m) … 9 à 9,9 … 26 et plus"
+        },
+        {
+         "source": "S509",
+         "extrait": "Zone I … Longueur maximale du rampant (m) … 9 ≤ p < 10 … 26 ≤ p"
+        },
+        {
+         "source": "S510",
+         "extrait": "tableau pentes / longueur de rampant repris à l'identique par Eternit (2015) et Edilfibro (2016)"
+        }
+       ]
+      },
+      {
+       "id": "po_rampant_max_zone_II",
+       "attribut": "longueur_maxi_rampant",
+       "valeur": "9–9,9 % : 12 m ; 10–12,9 % : 15 ; 13–15,9 % : 20 ; 16–20,9 % : 25 ; 21–25,9 % : 30 ; ≥ 26 % : 35",
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S510"
+       ],
+       "condition": "zone II du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière",
+       "regions": [
+        "Bretagne",
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "ZONE II … longueur maxi. du rampant (m) … 9 à 9,9 … 26 et plus"
+        },
+        {
+         "source": "S509",
+         "extrait": "Zone II … Longueur maximale du rampant (m) … 9 ≤ p < 10 … 26 ≤ p"
+        },
+        {
+         "source": "S510",
+         "extrait": "tableau pentes / longueur de rampant repris à l'identique par Eternit (2015) et Edilfibro (2016)"
+        }
+       ]
+      },
+      {
+       "id": "po_rampant_max_zone_III",
+       "attribut": "longueur_maxi_rampant",
+       "valeur": "9–9,9 % : 10 m ; 10–12,9 % : 12 ; 13–15,9 % : 15 ; 16–20,9 % : 20 ; 21–25,9 % : 25 ; ≥ 26 % : 30",
+       "unite": "m",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S510"
+       ],
+       "condition": "zone III du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière",
+       "regions": [
+        "Bretagne",
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "ZONE III … longueur maxi. du rampant (m) … 9 à 9,9 … 26 et plus"
+        },
+        {
+         "source": "S509",
+         "extrait": "Zone III … Longueur maximale du rampant (m) … 9 ≤ p < 10 … 26 ≤ p"
+        },
+        {
+         "source": "S510",
+         "extrait": "tableau pentes / longueur de rampant repris à l'identique par Eternit (2015) et Edilfibro (2016)"
+        }
+       ]
+      },
+      {
+       "id": "po_complement_etancheite",
+       "attribut": "complement_d_etancheite",
+       "valeur": "zone I : T sous 16 % ; zone II : T sous 21 % (protégée ou normale), T+L sous 16 % puis T jusqu'à 25,9 % (exposée) ; zone III : T sous 26 % (protégée ou normale), T+L sous 16 % puis T jusqu'à 25,9 % (exposée) ; rien au-delà de 26 %",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "T = mastic transversal, L = longitudinal (mastic préformé Ø 9 ou 10, NF P 30-303) ; T+L partout si étanchéité à la neige poudreuse demandée",
+       "regions": [
+        "Bretagne",
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "complément d'étanchéité : T= transversal L= longitudinal ; Mastic préformé Ø 9 ou 10 (NF P 30 303)"
+        },
+        {
+         "source": "S509",
+         "extrait": "b) T: complément d'étanchéité transversal - L: complément d'étanchéité longitudinal."
+        }
+       ]
+      },
+      {
+       "id": "po_zones_bretagne",
+       "attribut": "zone_climatique_bretagne",
+       "valeur": "zone III : côtes de la Manche et de l'Atlantique jusqu'à Lorient, sur 20 km ; zone II : côte atlantique de Lorient à l'Espagne sur 20 km, transition de 20 km en Bretagne, altitudes 200–500 m ; zone I : intérieur < 200 m",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S508"
+       ],
+       "condition": "zones propres au NF DTU 40.37 (plaques), différentes des zones ardoise et tuile",
+       "regions": [
+        "Bretagne"
+       ],
+       "ecart": "Edilfibro montre la carte sans la décrire : une seule description écrite (Eternit).",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Zone III : côtes de la mer du Nord, de la Manche et de l'Atlantique jusqu'à Lorient, sur une profondeur de 20 km."
+        }
+       ]
+      },
+      {
+       "id": "po_fixations_par_plaque",
+       "attribut": "fixations_par_plaque_et_par_panne",
+       "valeur": 2,
+       "unite": "u",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509",
+        "S511"
+       ],
+       "condition": "en sommet des 2e et 5e ondes, à 50 mm du bord haut de la plaque recouverte ; perçage Ø fixation + 1 mm (+ 3 mm sur panne intermédiaire)",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Les fixations sont toujours au nombre de 2 par plaque et par panne d'appui. Elles sont situées en 2e et 5e onde."
+        },
+        {
+         "source": "S509",
+         "extrait": "Les fixations sont au nombre de deux par plaque et par panne d'appui"
+        },
+        {
+         "source": "S511",
+         "extrait": "La fixation est assurée par tirefonds en 2 points (sur la 2ème et 5ème onde)"
+        }
+       ]
+      },
+      {
+       "id": "po_fixations_au_m2",
+       "attribut": "fixations_au_m2",
+       "valeur": "6 ondes : 1,38 ; 5 ondes : 1,65 (+ 2 par plaque sur la panne d'égout)",
+       "unite": "u/m²",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "calcul : 2 ÷ (largeur utile × entraxe 1,385) ; 2 ÷ (1,050 × 1,385) = 1,38 ; 2 ÷ (0,873 × 1,385) = 1,65 ; plus si plaques sur 3 appuis (2 par panne)",
+       "regions": [
+        "France"
+       ],
+       "controle": "calcul fait sur deux règles confirmées (2 fixations par plaque et par panne, entraxe 1,385 m) et les largeurs utiles confirmées",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "2 par plaque et par panne d'appui … entraxe maximum de 1,385 m … largeur utile lu = 1050 mm"
+        },
+        {
+         "source": "S509",
+         "extrait": "deux par plaque et par panne d'appui … Ecartement maxi entre axes 1385 … 873 mm"
+        }
+       ]
+      },
+      {
+       "id": "po_plaques_au_m2",
+       "attribut": "plaques_au_m2",
+       "valeur": "6 ondes 1,585 m : 0,688 ; 5 ondes 1,585 m : 0,827 ; 5 ondes 2,50 m (3 appuis) : 0,498",
+       "unite": "u/m²",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S509"
+       ],
+       "condition": "calcul : 1 ÷ (largeur utile × (longueur − 0,200)) en partie courante ; ajouter les rangs d'égout et de faîtage",
+       "regions": [
+        "France"
+       ],
+       "controle": "1/(1,050 × 1,385) = 0,688 ; 1/(0,873 × 1,385) = 0,827 ; 1/(0,873 × 2,30) = 0,498",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "E = Lu = L - Rt (toujours inférieur à 1,385 m) … largeur utile lu = 1050 mm"
+        },
+        {
+         "source": "S509",
+         "extrait": "873 mm … 1050 mm … RECOUVREMENT: 200 à 230 mm."
+        }
+       ]
+      },
+      {
+       "id": "po_fixation_nature",
+       "attribut": "type_de_fixation",
+       "valeur": "tirefond galvanisé Ø 8 (ancrage ≥ 50 mm dans le bois) ou vis autoperceuse Ø ≥ 6,3 (panne métal), rondelle d'étanchéité Ø 20 + plaquette",
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S509"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S509",
+         "extrait": "galvanisé à chaud Ø 8 profondeur d'ancrage: au moins 50 mm … Ø ≥ 6,3 mm pannes métal"
+        }
+       ],
+       "portee": "Edilfibro"
+      },
+      {
+       "id": "po_faitiere_charniere",
+       "attribut": "faitiere",
+       "valeur": "faîtière à charnière à bords ondulés (2 éléments G et P), une par largeur de plaque, pente 10 à 100 %",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S508",
+        "S511"
+       ],
+       "condition": "aussi faîtière rigide 148° (pente 30 %, plaques des deux versants alignées), faîtière d'aération, faîtière pare-vent",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Faîtière ELOS 70 × 92 cm (5 ondes) ; Eternit en 5 et 6 ondes.",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Faîtière à charnière à bords ondulés complète … Pente : 10 à 100 %"
+        },
+        {
+         "source": "S511",
+         "extrait": "FAITIERE CHARNIERE PO5 ELOS GRIS 70 X 92"
+        }
+       ]
+      },
+      {
+       "id": "po_closoirs",
+       "attribut": "closoir",
+       "valeur": "closoir dentelé : longueur utile 870 (5 ondes) / 1047 (6 ondes) ; closoir de ventilation polypropylène : longueur utile 1000, lot de 50",
+       "unite": "mm",
+       "statut": "une_source",
+       "sources": [
+        "S508"
+       ],
+       "condition": "à l'égout et au faîtage ; nombre = longueur ÷ longueur utile",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Closoir dentelé 6 ondes : Lu = 1047 mm … 5 ondes : Lu = 870 mm … Closoir de ventilation en polypropylène Lu = 1000 mm 50 éléments"
+        }
+       ],
+       "portee": "Eternit"
+      },
+      {
+       "id": "po_bande_rive",
+       "attribut": "bande_de_rive",
+       "valeur": "150 × 20 cm (ELOS 5 ondes, gris ou rouge tuile)",
+       "unite": "cm",
+       "statut": "une_source",
+       "sources": [
+        "S511"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S511",
+         "extrait": "BANDE DE RIVE PO5 ELOS GRIS 150 X 20"
+        }
+       ],
+       "portee": "ELOS (Chausson)"
+      },
+      {
+       "id": "po_feuillards",
+       "attribut": "securite",
+       "valeur": "feuillards de retenue en polypropylène dans les plaques ; plaques non circulables : planches de répartition",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S511",
+        "S508"
+       ],
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S511",
+         "extrait": "équipées de feuillards en polypropylène au niveau de chaque flanc d'onde"
+        },
+        {
+         "source": "S508",
+         "extrait": "plaques fibres-ciment sans amiante, équipées de feuillards en polypropylène … incorporés au niveau de chaque onde"
+        }
+       ]
+      },
+      {
+       "id": "po_conditionnement",
+       "attribut": "plaques_par_palette",
+       "valeur": null,
+       "unite": "u",
+       "statut": "a_confirmer",
+       "sources": [
+        "S508"
+       ],
+       "condition": "« livrées conditionnées par lots » ; gerbage 2 palettes maxi",
+       "regions": [
+        "France"
+       ],
+       "raison": "Nombre de plaques par lot ou palette non publié dans les documents lus ; à demander au négoce breton.",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Les plaques ondulées 177 x 51 FR sont livrées conditionnées par lots. • Gerbage : 2 palettes maxi."
+        }
+       ]
+      },
+      {
+       "id": "po_amiante",
+       "attribut": "plaques_anciennes",
+       "valeur": "plaque d'avant 1997 = amiante probable : désamiantage, jamais un remplacement simple",
+       "unite": "",
+       "statut": "une_source",
+       "sources": [
+        "S508"
+       ],
+       "condition": "règle déjà dans le moteur (famille « amiante » prioritaire)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "La date de 1997 (interdiction de l'amiante en France) n'est pas dans les sources lues ici.",
+       "preuves": [
+        {
+         "source": "S508",
+         "extrait": "Les plaques ondulées 177 x 51 FR sont des plaques fibres-ciment sans amiante, équipées de feuillards en polypropylène"
+        }
+       ]
+      }
+     ],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "5 ondes",
+         "attributs": [
+          {
+           "id": "po5_largeurs",
+           "attribut": "largeur_totale_et_utile",
+           "valeur": "918 (utile 873)",
+           "unite": "mm",
+           "statut": "confirme",
+           "sources": [
+            "S508",
+            "S509",
+            "S511"
+           ],
+           "condition": "plaque 5 ondes (PO5) ; la largeur utile sert au calcul",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S508",
+             "extrait": "largeur totale lt = 918 mm (largeur utile lu = 873 mm)"
+            },
+            {
+             "source": "S509",
+             "extrait": "918 … 873 mm (5 ondes)"
+            },
+            {
+             "source": "S511",
+             "extrait": "PLAQUE PO5 ELOS 152/92 GRIS 152 X 92"
+            }
+           ],
+           "portee": "Eternit, Edilfibro, ELOS"
+          },
+          {
+           "id": "po5_longueurs",
+           "attribut": "longueurs_vendues",
+           "valeur": "1,25 ; 1,52 ; 1,58 ; 1,75 ; 2,00 ; 2,50 ; 3,05",
+           "unite": "m",
+           "statut": "confirme",
+           "sources": [
+            "S508",
+            "S509",
+            "S511"
+           ],
+           "condition": "5 ondes ; 3,05 m hors marque NF et hors Avis technique, posée sur 3 pannes",
+           "regions": [
+            "France"
+           ],
+           "ecart": "Eternit écrit 1,52 / 1,58, Edilfibro 1,525 / 1,585 : même plaque. ELOS (Chausson) n'a que 1,52 à 2,50.",
+           "preuves": [
+            {
+             "source": "S508",
+             "extrait": "Longueur 1 m 25 1 m 52 1 m 58 1 m 75 2 m 00 2 m 50 3 m 05"
+            },
+            {
+             "source": "S509",
+             "extrait": "Longueur m 1,25 1,525 1,585 1,75 2,00 2,50 3,05 *"
+            },
+            {
+             "source": "S511",
+             "extrait": "1m52 (152/92) - 1m75 (175/92) - 2m00 (200/92) - 2m50 (250/92)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "6 ondes",
+         "attributs": [
+          {
+           "id": "po6_largeurs",
+           "attribut": "largeur_totale_et_utile",
+           "valeur": "1095 (utile 1050)",
+           "unite": "mm",
+           "statut": "confirme",
+           "sources": [
+            "S508",
+            "S509"
+           ],
+           "condition": "plaque 6 ondes (PO6), la plus courante en neuf (coins coupés d'usine)",
+           "regions": [
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S508",
+             "extrait": "largeur totale lt = 1095 mm (largeur utile lu = 1050 mm)"
+            },
+            {
+             "source": "S509",
+             "extrait": "1095 … 1050 mm (6 ondes)"
+            }
+           ],
+           "portee": "Eternit, Edilfibro"
+          },
+          {
+           "id": "po6_longueurs",
+           "attribut": "longueurs_vendues",
+           "valeur": "1,25 ; 1,58 ; 1,75 ; 2,00 ; 2,50",
+           "unite": "m",
+           "statut": "confirme",
+           "sources": [
+            "S508",
+            "S509"
+           ],
+           "condition": "6 ondes (pas de 1,52 ni de 3,05)",
+           "regions": [
+            "France"
+           ],
+           "ecart": "Edilfibro donne aussi un poids pour 1,525 m en 6 ondes ; Eternit non : 1,52 m en 6 ondes chez Edilfibro seulement.",
+           "preuves": [
+            {
+             "source": "S508",
+             "extrait": "Poids en kg … 6 ondes 19,2 - 24,3 26,8 30,7 38,3 - (1,25 / 1,52 / 1,58 / 1,75 / 2,00 / 2,50 / 3,05)"
+            },
+            {
+             "source": "S509",
+             "extrait": "6 Ondes 18,3 22,6 23,5 26,0 29,7 37,1 -"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "ardoises fibres-ciment (complément à ardoise.json)",
+     "regles": [
+      {
+       "id": "ardoise_fc_pente_minimale",
+       "attribut": "pente_minimale",
+       "valeur": 25,
+       "unite": "%",
+       "statut": "confirme",
+       "sources": [
+        "S42",
+        "S43"
+       ],
+       "condition": "14° ; zone I normale ou protégée, rampant en projection ≤ 15 m ; plus forte en zones II-III et en exposé",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S42",
+         "extrait": "La pente ne sera jamais inférieure à 0,25 m par mètre (25 % ou 14°), pente minimale pour les ardoises fibres-ciment"
+        },
+        {
+         "source": "S43",
+         "extrait": "tableau de recouvrement : première ligne de pente 25 à 27 % (ardoises rectangulaires)"
+        }
+       ],
+       "portee": "Cedral, Cembrit"
+      },
+      {
+       "id": "ardoise_fc_teintes",
+       "attribut": "teintes",
+       "valeur": "Cedral : anthracite (Kergoat), anthracite ou brun (Orléane), brun flammé (Pommay), gris / brun / rouge (Tecta) ; Cembrit : noir, brun",
+       "unite": "",
+       "statut": "confirme",
+       "sources": [
+        "S42",
+        "S43"
+       ],
+       "condition": "le comptoir demande la gamme et la teinte",
+       "regions": [
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S42",
+         "extrait": "Kergoat … Anthracite … Pommay … Flammé brun"
+        },
+        {
+         "source": "S43",
+         "extrait": "Noir … Brun (coloris des ardoises Dolmen et Bravan)"
+        }
+       ]
+      },
+      {
+       "id": "ardoise_fc_liteaux",
+       "attribut": "liteaux_ml_par_m2",
+       "valeur": "40×24 : 6,67 ; 60×30 : 4,00 ; 33×23 : 8,70 ; 45×30 : 5,71",
+       "unite": "ml/m²",
+       "statut": "confirme",
+       "sources": [
+        "S42",
+        "S43"
+       ],
+       "condition": "recouvrement 100 mm : pureau = (longueur − 100) ÷ 2 ; liteaux = 1 ÷ pureau (une file par pureau)",
+       "regions": [
+        "France"
+       ],
+       "controle": "40×24 : (400−100)/2 = 150 → 6,67 ; 60×30 : 250 → 4,00 ; 33×23 : 115 → 8,70 ; 45×30 : 175 → 5,71",
+       "preuves": [
+        {
+         "source": "S42",
+         "extrait": "L'écartement des liteaux dépend du recouvrement choisi … E=P (entraxe des liteaux = pureau)"
+        },
+        {
+         "source": "S43",
+         "extrait": "Pureau … Recouvrement … Faux pureau (schéma de pose au crochet)"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "Ardoise fibres-ciment : 40×24, 40×27, 60×30, 60×40 ; liteaux 6,67 / 6,67 / 4 / 4 ml/m² (recouvrement 100 mm)",
+     "origine": "baticlair/packages/domain/src/referential/data/roofing.ts (~l. 1790, ardoise-fc)",
+     "valeur_actuelle": "liteaux 6,67 et 4",
+     "verdict": "confirme",
+     "bonne_valeur": "liteaux 6,67 (40×24) et 4,00 (60×30) justes ; 40×27 et 60×40 hors gamme France (voir ardoise.json) ; ajouter 33×23 (8,70) et 45×30 (5,71)",
+     "sources": [
+      "S42",
+      "S43"
+     ],
+     "explication": "1 ÷ pureau ; les nombres d'ardoises au m² sont déjà corrigés dans ardoise.json."
+    },
+    {
+     "ratio": "Question « Ardoises fibres-ciment : bleu-noir, noir ou brun ? »",
+     "origine": "roofing.ts (TEINTE_FC_PARAM, ~l. 955)",
+     "valeur_actuelle": "bleu-noir / noir / brun",
+     "verdict": "corrige",
+     "bonne_valeur": "noir ou anthracite, brun (et gris, rouge en Tecta) ; « bleu-noir » n'apparaît chez aucun des deux fabricants",
+     "sources": [
+      "S42",
+      "S43"
+     ],
+     "explication": "Boutons : « anthracite / noir », « brun », « autre (gamme à préciser) »."
+    },
+    {
+     "ratio": "Famille plaques ondulées (« fibrociment », « plaque ondulee ») rangée avec le bac acier : plaque à la longueur, vis par boîte de 100",
+     "origine": "baticlair/packages/domain/src/trades/roofing.ts:225 et referential/data/roofing.ts (plaque-bac-acier, vis-bac-acier)",
+     "valeur_actuelle": "pas de règle fibres-ciment",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "plaques fibres-ciment : longueurs fixes (1,25 à 2,50 m), largeur utile 873 / 1050 mm, 2 fixations par plaque et par panne (≈ 1,38 / m² en 6 ondes), entraxe ≤ 1,385 m, recouvrement 200 mm",
+     "sources": [
+      "S508",
+      "S509"
+     ],
+     "explication": "Le fibres-ciment ne se vend pas « à la longueur du rampant » comme le bac acier : décision du fondateur à prendre (famille séparée ?)."
+    }
+   ],
+   "comptoir": [
+    {
+     "article": "Plaque ondulée fibres-ciment",
+     "ce_que_le_vendeur_demande": [
+      "5 ou 6 ondes (accessoires non interchangeables)",
+      "longueur (1,25 / 1,52 / 1,58 / 1,75 / 2,00 / 2,50 ; 3,05 en 5 ondes hors NF)",
+      "teinte : naturelle (grise), Coloronde (peinte), Coloragri ; coins coupés ou non",
+      "nombre de plaques"
+     ],
+     "unite_de_vente": "plaque",
+     "conditionnement": "par lots / palettes (nombre non publié : à confirmer)",
+     "sources": [
+      "S508",
+      "S511"
+     ]
+    },
+    {
+     "article": "Fixations de plaques ondulées",
+     "ce_que_le_vendeur_demande": [
+      "support : panne bois (tirefond Ø 8) ou métal (vis autoperceuse Ø ≥ 6,3)",
+      "longueur de la fixation (hauteur d'onde 51 + support)",
+      "nombre (2 par plaque et par panne)",
+      "rondelles d'étanchéité et plaquettes"
+     ],
+     "unite_de_vente": "boîte ou pièce",
+     "conditionnement": "à confirmer au négoce",
+     "sources": [
+      "S509",
+      "S508"
+     ]
+    },
+    {
+     "article": "Faîtières, closoirs, bandes de rive fibres-ciment",
+     "ce_que_le_vendeur_demande": [
+      "5 ou 6 ondes",
+      "type de faîtière : à charnière (pente 10–100 %), rigide 148°, d'aération",
+      "teinte",
+      "longueur de faîtage (une faîtière par largeur de plaque)"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "closoir de ventilation par 50",
+     "sources": [
+      "S508",
+      "S511"
+     ]
+    }
+   ],
+   "perimetre": "Plaques ondulées fibres-ciment (profil 177 × 51, 5 et 6 ondes, NF DTU 40.37) et compléments pour les ardoises fibres-ciment. Les nombres d'ardoises au m², recouvrements, crochets et palettes des ardoises fibres-ciment sont déjà dans ardoise.json (sous-famille « ardoise fibres-ciment ») : non recopiés ici."
+  },
+  {
    "code": "sous_face",
    "libelle": "Sous-faces et habillages de débord",
    "sous_familles": [
@@ -98883,9 +102163,9 @@
        "unite": "mm",
        "statut": "confirme",
        "sources": [
-        "S470",
-        "S471",
-        "S472"
+        "S513",
+        "S514",
+        "S515"
        ],
        "libelle_source": "largeurs de lame",
        "condition": "lame 10 mm d'épaisseur ; 250 mm (frisette, planche) le plus courant ; Deceuninck de 100 à 250",
@@ -98895,15 +102175,15 @@
        ],
        "preuves": [
         {
-         "source": "S470",
+         "source": "S513",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S471",
+         "source": "S514",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S472",
+         "source": "S515",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ]
@@ -98915,10 +102195,10 @@
        "unite": "m",
        "statut": "confirme",
        "sources": [
-        "S470",
-        "S471",
-        "S473",
-        "S472"
+        "S513",
+        "S514",
+        "S516",
+        "S515"
        ],
        "libelle_source": "longueurs vendues",
        "condition": "pro : 4 m (M.E.P, Atout Pro), 6 m (Atout Pro, Deceuninck) ; grande surface de bricolage : 3 m",
@@ -98929,19 +102209,19 @@
        "ecart": "Atout Pro vend au paquet de 10 lames.",
        "preuves": [
         {
-         "source": "S470",
+         "source": "S513",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S471",
+         "source": "S514",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S473",
+         "source": "S516",
          "extrait": "LONGUEUR 4M / 6M ; CONDITIONNEMENT PAQUET DE 10"
         },
         {
-         "source": "S472",
+         "source": "S515",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ]
@@ -98953,7 +102233,7 @@
        "unite": "",
        "statut": "une_source",
        "sources": [
-        "S470"
+        "S513"
        ],
        "libelle_source": "fixation des lames",
        "condition": "entraxe des tasseaux ≤ 60 cm ; à réduire selon coloris et exposition (notice de pose)",
@@ -98963,7 +102243,7 @@
        ],
        "preuves": [
         {
-         "source": "S470",
+         "source": "S513",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         }
        ],
@@ -98976,7 +102256,7 @@
        "unite": "mm",
        "statut": "une_source",
        "sources": [
-        "S474"
+        "S517"
        ],
        "libelle_source": "lame d'air derrière les lames",
        "condition": "minimum, entre montants bois ; ventilation selon le DTU de couverture",
@@ -98986,7 +102266,7 @@
        ],
        "preuves": [
         {
-         "source": "S474",
+         "source": "S517",
          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
         }
        ],
@@ -99022,7 +102302,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S470"
+            "S513"
            ],
            "libelle_source": "format et coloris",
            "condition": "longueurs spéciales sur tarif ; SER254 sous avis technique",
@@ -99032,7 +102312,7 @@
            ],
            "preuves": [
             {
-             "source": "S470",
+             "source": "S513",
              "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
             }
            ]
@@ -99066,8 +102346,8 @@
        "unite": "",
        "statut": "une_source",
        "sources": [
-        "S470",
-        "S472"
+        "S513",
+        "S515"
        ],
        "libelle_source": "accessoires de sous-face",
        "condition": "longueurs des profils non publiées dans le catalogue ; 3 m en grande surface (Tecnoprofils)",
@@ -99077,11 +102357,11 @@
        ],
        "preuves": [
         {
-         "source": "S470",
+         "source": "S513",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S472",
+         "source": "S515",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ],
@@ -99107,8 +102387,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S471",
-        "S475"
+        "S514",
+        "S518"
        ],
        "libelle_source": "largeurs et longueurs",
        "condition": "Deceuninck 150-400 × 9 mm en 6 m (et 5-6 m selon gamme) ; Plastivan 150 à 404 × 18 mm en 5 m",
@@ -99118,11 +102398,11 @@
        ],
        "preuves": [
         {
-         "source": "S471",
+         "source": "S514",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S475",
+         "source": "S518",
          "extrait": "largeurs 150, 175, 200, 225, 250 et 404 mm ; épaisseur 18 mm ; longueur 5 000 mm"
         }
        ]
@@ -99147,7 +102427,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S474"
+            "S517"
            ],
            "condition": "entraxe des points le long de la planche : non trouvé",
            "regions": [
@@ -99156,7 +102436,7 @@
            ],
            "preuves": [
             {
-             "source": "S474",
+             "source": "S517",
              "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
             }
            ]
@@ -99177,8 +102457,8 @@
        "unite": "m",
        "statut": "une_source",
        "sources": [
-        "S476",
-        "S477"
+        "S519",
+        "S520"
        ],
        "libelle_source": "longueur standard des lames",
        "condition": "DAL'ALU SF77 / SF129 (largeur utile 280-290 mm, ≈ 2 kg/m²) ; GutterFrance 310 mm utiles, 0,7 mm",
@@ -99189,11 +102469,11 @@
        "ecart": "La fiche GutterFrance n'a pas pu être ouverte (403) : seule DAL'ALU est lue en entier.",
        "preuves": [
         {
-         "source": "S476",
+         "source": "S519",
          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2"
         },
         {
-         "source": "S477",
+         "source": "S520",
          "extrait": "3000 mm de long, 310 mm de largeur utile, 0,7 mm d'épaisseur, version perforée"
         }
        ]
@@ -99217,7 +102497,7 @@
            "unite": "cm²/m²",
            "statut": "une_source",
            "sources": [
-            "S476"
+            "S519"
            ],
            "libelle_source": "surface ventilée",
            "condition": "version perforée",
@@ -99227,7 +102507,7 @@
            ],
            "preuves": [
             {
-             "source": "S476",
+             "source": "S519",
              "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2"
             }
            ]
@@ -99248,7 +102528,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S474"
+        "S517"
        ],
        "libelle_source": "format standard",
        "condition": "sapin, pin, douglas ; classe d'emploi 3 (ou 2 sous abri)",
@@ -99259,7 +102539,7 @@
        "raison": "Aucun format de lambris bois de sous-face publié par un fabricant ou un négoce breton n'a été trouvé (longueurs de 2 à 5 m selon l'essence) : demander à l'artisan la lame et la longueur.",
        "preuves": [
         {
-         "source": "S474",
+         "source": "S517",
          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
         }
        ]
@@ -99276,9 +102556,9 @@
      "verdict": "a_confirmer",
      "bonne_valeur": "compter en lames de 4 m (PVC 250 mm : 1 m² par lame) ; perte : aucune source ; grilles : selon la section de ventilation du DTU (alu perforé 168-174 cm²/m²)",
      "sources": [
-      "S470",
-      "S471",
-      "S476"
+      "S513",
+      "S514",
+      "S519"
      ],
      "explication": "Les fabricants donnent les formats, pas de taux de perte ni de nombre de grilles au ml."
     },
@@ -99289,9 +102569,9 @@
      "verdict": "corrige",
      "bonne_valeur": "PVC cellulaire en 5 ou 6 m (pas de 2 m chez les fabricants pros) ; fixation par points de 2 pointes inox, 3 points en largeur ≥ 280 mm ; nombre au ml : non trouvé",
      "sources": [
-      "S471",
-      "S475",
-      "S474"
+      "S514",
+      "S518",
+      "S517"
      ],
      "explication": "Longueurs corrigées ; les 4 vis/ml restent sans source."
     }
@@ -99309,8 +102589,8 @@
      "unite_de_vente": "lame ou paquet de 10",
      "conditionnement": "4 m (6 m existe)",
      "sources": [
-      "S470",
-      "S473"
+      "S513",
+      "S516"
      ],
      "famille": "sous_face"
     },
@@ -99325,8 +102605,8 @@
      "unite_de_vente": "pièce",
      "conditionnement": "3 m en grande surface ; longueur pro sur tarif",
      "sources": [
-      "S470",
-      "S472"
+      "S513",
+      "S515"
      ],
      "famille": "sous_face"
     },
@@ -99343,8 +102623,8 @@
      "unite_de_vente": "pièce",
      "conditionnement": "5 ou 6 m",
      "sources": [
-      "S471",
-      "S475"
+      "S514",
+      "S518"
      ],
      "famille": "sous_face"
     },
@@ -99359,7 +102639,7 @@
      "unite_de_vente": "lame ou m²",
      "conditionnement": "3 m",
      "sources": [
-      "S476"
+      "S519"
      ],
      "famille": "sous_face"
     }
@@ -102654,146 +105934,447 @@
   },
   {
    "id": "S470",
+   "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+   "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S471",
+   "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+   "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S472",
+   "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+   "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S473",
+   "titre": "VELUX, Size guide (Royaume-Uni, PDF du 20/04/2026), cotes extérieures du dormant en mm",
+   "url": "https://contenthub.velux.com/api/public/content/1550c-d6210-07441_downloadOriginal",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S474",
+   "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+   "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S475",
+   "titre": "Roto, « Designo R6 – fiche technique » (FR), hébergée par benz24.fr",
+   "url": "https://benz24.fr/media/documents/05/05f33e6a8cd9be667318bccaa85c50d0/3fddda9268951922e73e50842c1e0670.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S476",
+   "titre": "VELUX France, descriptif « Raccord EDL pour ardoises, pose traditionnelle » (VF 6126-1212), hébergé par Envain Matériaux",
+   "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/raccord-ardoises-edl-VELUX.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S477",
+   "titre": "VELUX, fiches techniques raccords EDJ / EDN, montage abaissé (réf. 1-F-06/24, 2-F-06/24), contenthub.velux.com",
+   "url": "https://contenthub.velux.com/api/public/content/2af6a-8b782-79452_downloadOriginal",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S478",
+   "titre": "FAKRO, fiche technique raccord ELJ (FR), hébergée par Eurabo",
+   "url": "https://www.eurabo.be/files/attachments/.6408/02FR_Fakro_ELJ_fiche_techn.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S479",
+   "titre": "Castorama, « Raccord fenêtre de toit simple sur tuiles Velux EDW CK02 ocre »",
+   "url": "https://www.castorama.fr/raccord-fenetre-de-toit-simple-sur-tuiles-velux-edw-ck02-ocre/5702326706349_CAFR.prd",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S480",
+   "titre": "Brico Dépôt, « Raccord d'étanchéité EDW SK06 gris pour fenêtre de toit haut. 118 x larg. 114 cm »",
+   "url": "https://www.bricodepot.fr/p/5702326243905/raccord-d-etancheite-edw-sk06-gris-pour-fenetre-de-toit-haut-118-x-larg-114-cm",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S481",
+   "titre": "Castorama, « Fenêtre de toit à rotation VELUX Tout Confort Everfinish - polyuréthane L. 78 x H. 98 cm (GGU 0057 MK04) »",
+   "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-tout-confort-everfinish-polyurethane-l-78-x-h-98-cm-ggu-0057-mk04-/5702327001092_CAFR.prd",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S482",
+   "titre": "Castorama, « Fenêtre de toit à rotation VELUX Confort Whitefinish - bois peint en blanc L. 78 x H. 98 cm (GGL 2076 MK04) »",
+   "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-confort-whitefinish-bois-peint-en-blanc-l-78-x-h-98-cm-ggl-2076-mk04-/5702328300033_CAFR.prd",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S483",
+   "titre": "MKM (négoce, Royaume-Uni), fiche « VELUX 660mm x 1180mm Integra electric … GGU FK06 007021U »",
+   "url": "https://checkout.mkm.com/content/products/pdf/12019/velux-660mm-x-1180mm-integra-electric-white-poly-finish-centre-pivot-roof-window-70-pane-ggu-fk06-007021u-t003753_TechData_1.pdf",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S484",
+   "titre": "FAKRO, fiche technique raccord EZV-F (FR), hébergée par Eurabo",
+   "url": "https://www.eurabo.be/files/attachments/.6412/02FR_Fakro_EZV_F_fiche_techn.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S485",
+   "titre": "FAKRO, fiche technique raccord EHV-P (FR), hébergée par Eurabo",
+   "url": "https://www.eurabo.be/files/attachments/.6402/02FR_Fakro_EHV_P_fiche_techn.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S486",
+   "titre": "FAKRO, fiche technique raccord ELV (FR), hébergée par Eurabo",
+   "url": "https://www.eurabo.be/files/attachments/.6410/02FR_Fakro_ELV_fiche_techn.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S487",
+   "titre": "La Centrale Éco (négoce), fiche « Fenêtre de toit PVC Roto Designo R4 », tailles proposées",
+   "url": "https://lacentrale-eco.com/en/fenetre-et-porte/fenetre-pvc-et-bois/fenetre-de-toit-pvc-roto-designo-r4.html",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S488",
+   "titre": "Agence wallonne du Patrimoine, FARCC 1.7 « Crochets de service (d'échelle) : spécifications produit et mise en œuvre » (2020)",
+   "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-7-crochet-de-service-dechelle-specifications-produit-et-mise-en-oeuvre.pdf",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S489",
+   "titre": "swisspor, « SAFSYS Crochets DH-DD, instructions de montage » (FR, v2)",
+   "url": "https://www.swisspor.com/api-media/11634/download/SAFSYS%20Crochets%20DH-DD%20instructions%20de%20montage.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S490",
+   "titre": "Batiproduits, fiche « Crochets de sécurité et Ancrage | Secur+ » (Frénéhard & Michaux)",
+   "url": "https://www.batiproduits.com/fiche/produits/crochets-de-securite-et-ancrage-secur-p69039028.html",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S491",
+   "titre": "AFNOR Boutique, notice NF P37-403 « Accessoires de couverture, crochet de service » (statut de la norme)",
+   "url": "https://www.boutique.afnor.org/en-gb/standard/nf-p37403/roofing-accessories-service-hook-for-roofs/fa006585/65643",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S492",
+   "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+   "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S493",
+   "titre": "Frénéhard & Michaux, notice crochets de sécurité SECUR+ (A5, 24-10), diffusée par Distriartisan (403 au robot, lue par le moteur de recherche)",
+   "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/-CROCHET-SECU-A5-24-10.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S494",
+   "titre": "Frénéhard & Michaux, fiche crochet de sécurité cambré 25 « Monuments historiques » (MLFSEMHCA25), diffusée par Distriartisan (lue par le moteur de recherche)",
+   "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/MLFSEMHCA2501.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S495",
+   "titre": "Commune d'Ollon (Suisse), « Crochets de sécurité sur toiture » (exemples de pose, OTConst)",
+   "url": "https://www.ollon.ch/data/dataimages/Upload/Crochets-securite-sur-toiture.pdf",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S496",
+   "titre": "Petzl, « Certification of anchors » (types d'ancrage EN 795)",
+   "url": "https://petzl.com/CA/en/Sport/Certification-of-anchors",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S497",
+   "titre": "Frareg, « Recommandation ancrage » (classes EN 795)",
+   "url": "https://frareg.com/cms/wp-content/uploads/recommandation_ancrage.pdf",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S498",
+   "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+   "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S499",
+   "titre": "Tractel, fiche technique Travsmart EN 795:2012 150 kg (T2212, 03/2023) (lue par le moteur de recherche)",
+   "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travsmart%20150kg/T2212%20TS%20Travsmart%20EN795%202012_150kg%20d%C3%A9taill%C3%A9e.ind%2001.03%2023%20FR.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S500",
+   "titre": "Tractel, fiche technique Travflex 2 150 kg (T-2800, 07/2021) (lue par le moteur de recherche)",
+   "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travflex%E2%84%A2%202%20150kg/T-2800_TS_Travflex_2_150kg.ind-01.07-21%20FR.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S501",
+   "titre": "Tractel, fiche technique Travsafe 150 kg (T2589) (lue par le moteur de recherche)",
+   "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travsafe%E2%84%A2%20150kg/T2589-%20FT%20Travsafe_ind01_FR.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S502",
+   "titre": "Centaure, fiche produit échelle de toit aluminium (réf. 485025), diffusée par Sonepar",
+   "url": "https://res.cloudinary.com/sonepar-fr/raw/upload/s---8vuKGwX--/v1/documents/6024/Fiche_produit_echelle_toit_alu.pdf",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S503",
+   "titre": "Auchan, « Centaure échelle de toit aluminium écartement 33 cm 6,60 m »",
+   "url": "https://www.auchan.fr/centaure-echelle-de-toit-aluminium-ecartement-33cm-6-60-m/pr-9a6288dc-f95c-42d2-951c-eeb1d381e394",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S504",
+   "titre": "Bati-Avenue, fiche produit échelle de toit aluminium Centaure (catalogue 2016)",
+   "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/f/i/fiche_produit_echelle_de_toit_aluminium_1466.pdf",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S505",
+   "titre": "Bricomarché, « Échelle de toit bois - Safety Roof 2x2m - 150kg HAILO »",
+   "url": "https://www.bricomarche.com/p/echelle-de-toit-safety-roof-2-2m/3700867910180",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S506",
+   "titre": "Bricomarché, « Échelle de couvreur de 6.10m de longueur : échelle avec crochets de toit - EVOKLIP/250 TUBESCA COMABI »",
+   "url": "https://www.bricomarche.com/p/echelle-de-couvreur-de-6.10m-de-longueur-echelle-avec-crochets-de-toit-evoklip/250/3178740192808",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S507",
+   "titre": "AFNOR Boutique, NF EN 12951 « Échelles de toit fixées à demeure »",
+   "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-en-12951/accessoires-prefabriques-pour-couverture-echelles-de-toit-fixes-a-demeure-sp/fa123214/25324",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S508",
+   "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+   "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S509",
+   "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+   "url": "https://www.chausson.fr/media/article-document/234766",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S510",
+   "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+   "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+   "type": "dtu",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S511",
+   "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+   "url": "https://www.chausson.fr/media/article-document/260791",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S512",
+   "titre": "Batiproduits, fiche Eternit « Plaques ondulées en fibres-ciment pour couverture | PO5 & PO6 Teinte Naturelle »",
+   "url": "https://www.batiproduits.com/fiche/produits/les-plaques-ondulees-en-fibres-ciment-en-teinte-n-p434461548.html",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S513",
    "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
    "url": "https://www.chausson.fr/media/article-document/209262",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S471",
+   "id": "S514",
    "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S472",
+   "id": "S515",
    "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
    "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S473",
+   "id": "S516",
    "titre": "Atout Pro (marque du groupe Samse), lambris PVC d'habillage de sous-faces (11 juillet 2025)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1868643.pdf",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S474",
+   "id": "S517",
    "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
    "url": "https://chausson.fr/media/article-document/273852",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S475",
+   "id": "S518",
    "titre": "Batiproduits, planche de rive PVC cellulaire Plastivan réf. 515200-5.00",
    "url": "https://www.batiproduits.com/fiche/produits/planche-de-rive-cellulaire-ref-515200-5-00-en-p496078144.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S476",
+   "id": "S519",
    "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
    "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S477",
+   "id": "S520",
    "titre": "GutterFrance, fiche sous-face aluminium (distriartisan.fr), lue dans l'aperçu du moteur de recherche (403 en accès direct)",
    "url": "https://distriartisan.fr///media/wysiwyg/documents/FK_Gouttieres/fiche_technique_sous_face.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S478",
+   "id": "S521",
    "titre": "Soprema, fiche Sopralène Flam 180 WPBFR229/b, diffusée par BigMat",
    "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3434550072618-zP63bE2VlR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S479",
+   "id": "S522",
    "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
    "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S480",
+   "id": "S523",
    "titre": "Soprema Belgique, fiche Soprarock SBS P3 TF, diffusée par Gobert",
    "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOPREMA%20FT%20SOPRAROCK%20SBS%20P3%20TF.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S481",
+   "id": "S524",
    "titre": "Soprema, fiche Sopralène Flam 180 AR WPBFR230/1/d, diffusée par Envain Matériaux",
    "url": "https://www.envain-materiaux.fr/ressources/images/articles//ficheTechnique/FT_WPBFR230.1.d.FR_SOPRALENE%20FLAM%20180%20AR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S482",
+   "id": "S525",
    "titre": "IKO Summa, recouvrements (lu dans l'aperçu du moteur de recherche)",
    "url": "https://eu.iko.com/wp-content/uploads/2023/10/IKOSumma_FR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S483",
+   "id": "S526",
    "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S484",
+   "id": "S527",
    "titre": "Permaroof Store (négoce UK), Elevate Bonding Adhesive BA-2012 10 L (lu dans l'aperçu du moteur de recherche)",
    "url": "https://www.permaroofstore.co.uk/adhesives/bonding-adhesive-10l-ba-2012.html",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S485",
+   "id": "S528",
    "titre": "Chausson, fiche colle pour membrane EPDM Flexirub sur bois / béton",
    "url": "https://www.chausson.fr/media/article-document/256531",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S486",
+   "id": "S529",
    "titre": "Batiproduits, Utherm Roof L (Unilin)",
    "url": "https://www.batiproduits.com/fiche/produits/plaque-isolante-pir-pour-toitures-terrasses-uthe-p480752395.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S487",
+   "id": "S530",
    "titre": "Batiproduits, IKO enertherm ALU XL",
    "url": "https://www.batiproduits.com/fiche/produits/panneau-isolant-en-mousse-rigide-pour-toiture-terr-p381379720.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S488",
+   "id": "S531",
    "titre": "Jewson (négoce UK), Recticel PowerDeck F 1200 x 600",
    "url": "https://jewson.co.uk/p/recticel-powerdeck-f-flat-roof-board-1200-x-600-x-80mm-IRPDF080",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S489",
+   "id": "S532",
    "titre": "Knauf, Knauf Thane OpTTI (knauf.com)",
    "url": "https://knauf.com/fr-FR/p/produit/knauf-thane-optti-29945_4091",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S490",
+   "id": "S533",
    "titre": "Forum Construire (forum de professionnels et particuliers) : trop-plein et 1 cm² par m²",
    "url": "https://www.forumconstruire.com/construire/topic-241784.php",
    "type": "autre",

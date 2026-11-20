@@ -37,7 +37,7 @@ describe("recouvrement du NF DTU 40.11 (fiche couverture, 2026-11-19)", () => {
 
 describe("situation exposée (NF DTU 40.11 2020, Cupa, Rathscheck ; fiche couverture, 2026-11-20)", () => {
   const expose = (zone: string, pente = "45") =>
-    computeWorkItem(REFERENTIEL_COMPLET, input({ zone: { value: zone, unit: "u", origin: "artisan" }, pente: { value: pente, unit: "°", origin: "artisan" }, situation: { value: "2", unit: "u", origin: "document", evidence: "Commune au bord de mer" } }));
+    computeWorkItem(REFERENTIEL_COMPLET, input({ zone: { value: zone, unit: "u", origin: "artisan" }, pente: { value: pente, unit: "°", origin: "artisan" }, situation: { value: "2", unit: "u", origin: "devis", evidence: "Commune au bord de mer" } }));
   it("région III exposée : supplement_expose et coef_expose, la plus forte de R + 10 mm et R × 1,10 (45° : 89 → 99 mm)", () => {
     expect(need(expose("3"), "ardoises").trace.find((t) => t.label === "Recouvrement")?.value).toBe("99");
     // 30° : 119 → max(129, 130,9) = 131 mm (au mm supérieur).
