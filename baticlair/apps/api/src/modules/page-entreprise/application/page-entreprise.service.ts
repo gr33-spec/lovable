@@ -159,8 +159,9 @@ export class PageEntrepriseService {
   }
 
   private async adressePrise(adresse: string): Promise<boolean> {
-    const [p, a] = await Promise.all([this.prisma.pageEntreprise.count({ where: { adresse } }), this.prisma.ancienneAdressePage.count({ where: { adresse } })]);
-    return p + a > 0;
+    // Une adresse d'une entreprise supprimée reste réservée pour toujours (Greg, 19 novembre 2026).
+    const [p, a, r] = await Promise.all([this.prisma.pageEntreprise.count({ where: { adresse } }), this.prisma.ancienneAdressePage.count({ where: { adresse } }), this.prisma.adressePageReservee.count({ where: { adresse } })]);
+    return p + a + r > 0;
   }
 
   private vuePhoto(p: PhotoRow): PhotoPublique {
@@ -338,7 +339,7 @@ export class PageEntrepriseService {
     const faute = refusAdresse(adresse);
     if (faute) throw refus("adresse_invalide", faute, "adresse");
     const ancienne = await this.prisma.ancienneAdressePage.findUnique({ where: { adresse } });
-    if ((ancienne && ancienne.companyId !== t.companyId) || (await this.prisma.pageEntreprise.count({ where: { adresse } }))) throw new DomainError("conflict", "Address taken", { reason: "adresse_prise", phrase: "Cette adresse est déjà prise." });
+    if ((ancienne && ancienne.companyId !== t.companyId) || (await this.prisma.pageEntreprise.count({ where: { adresse } })) || (await this.prisma.adressePageReservee.count({ where: { adresse } }))) throw new DomainError("conflict", "Address taken", { reason: "adresse_prise", phrase: "Cette adresse est déjà prise." });
     await this.prisma.$transaction(async (tx) => {
       // Revenir à une de SES anciennes adresses la libère de la liste des redirections.
       if (ancienne) await tx.ancienneAdressePage.delete({ where: { adresse } });

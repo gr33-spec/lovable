@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { api, ApiError, type Project } from "@/lib/api";
+import { titreCourt } from "@/lib/titres";
 
 /**
  * « MES LISTES » (Greg, 1er novembre 2026) : la carte d'une liste (entièrement cliquable, avec un vrai bouton « … », jamais
@@ -40,7 +41,7 @@ export function CarteListe({
   // Téléphone (375 px) : le statut passe sous le nom, à côté de la ligne d'infos ; rien ne déborde sur le « … ».
   const corps = (
     <span className="flex min-w-0 grow flex-col gap-1">
-      <span className="truncate text-[16px] font-extrabold">{projet.name}</span>
+      <span className="text-[16px] font-extrabold break-words">{titreCourt(projet.name, 64)}</span>
       {lieu ? <span className="truncate text-[14px] text-muted">{lieu}</span> : null}
       <span className="flex min-w-0 items-center gap-2">
         {statut ? <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-bold whitespace-nowrap ${ton}`}>{statut}</span> : null}
