@@ -349,6 +349,11 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Aucun nom d'entreprise tant que le SIRET n'est pas validé (parcours « essai ») : le nom est vide en base, l'en-tête n'affiche rien ; l'annuaire donne le nom à la confirmation ; l'adresse Mobiiz attend ce nom (créée au premier besoin). E-mails d'identité : « Bonjour, » quand il n'y a pas de nom.
 - Message pour un autre métier : gardé.
 
+## Décisions du 20 novembre 2026 : carte et retours haptiques
+
+- Carte de l'onboarding : zoom en un seul mouvement mené par le navigateur, flou posé une fois le zoom fini, départements préchargés. Règle changée : sur la carte, les NUMÉROS seuls (avant : noms et numéros mêlés) ; les noms sont dans les boutons dessous et dans la barre « Continuer ». Pas de zoom de la page au double toucher sur l'onboarding.
+- Retours haptiques dans toute l'application (`lib/haptique.ts`, `RetoursHaptiques` dans la mise en page racine) : un léger au choix (région, département, métier, case, onglet), un appui sur un bouton d'action ; jamais sur un simple lien. Android : vibration du navigateur ; iPhone (iOS 18 et plus) : le clic de l'interrupteur natif. Coupables dans Profil › Apparence (« Vibrations au toucher », allumées par défaut, gardées sur l'appareil).
+
 ## À faire avant l'ouverture d'un nouveau métier
 
 - Un bouton admin « Prévenir les inscrits de ce métier », qui envoie un e-mail à tous les inscrits de ce métier (entreprises du métier et ancienne liste d'attente). Pas encore codé (Greg, 20 novembre 2026).

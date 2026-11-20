@@ -259,3 +259,26 @@ test("aucun nom d'entreprise avant le SIRET ; « Voici ton adresse Mobiiz » au 
   await expect(feuille).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Voici ton adresse Mobiiz :" })).toHaveCount(0);
 });
+
+test("retours haptiques : un léger au choix d'une région ou d'un département, un appui sur « Continuer » ; rien quand ils sont coupés", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { __vibrations: number[] }).__vibrations = [];
+    Object.defineProperty(navigator, "vibrate", { configurable: true, value: (ms: number) => ((window as unknown as { __vibrations: number[] }).__vibrations.push(ms), true) });
+  });
+  await page.goto("/commencer");
+  const vibrations = () => page.evaluate(() => (window as unknown as { __vibrations: number[] }).__vibrations);
+  await page.locator('path[data-region="53"]').click();
+  await page.locator('g[data-departement="22"]').click();
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await expect.poll(vibrations).toEqual([8, 8, 14]);
+  // Les numéros seuls sur la carte, les noms dans les boutons dessous.
+  await page.getByRole("button", { name: "Retour" }).click();
+  await expect(page.locator(".mzo-noms-deps text")).toHaveText(["22", "29", "35", "56"]);
+  await expect(page.locator('button[data-pastille="22"]')).toContainText("Côtes-d'Armor");
+  // Coupées (Profil › Apparence) : plus rien.
+  await page.evaluate(() => localStorage.setItem("mobiiz-vibrations", "non"));
+  await page.locator('button[data-pastille="29"]').click();
+  await page.waitForTimeout(200);
+  // Le dernier retour est celui de « Retour » (un appui) ; rien après la coupure.
+  expect(await vibrations()).toEqual([8, 8, 14, 14]);
+});

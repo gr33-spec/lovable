@@ -267,28 +267,25 @@ export function CarteFrance({
                         </g>
                       );
                     })}
-                    {/* Les noms par-dessus tous les contours : un département voisin ne les coupe jamais. */}
+                    {/* Les numéros par-dessus tous les contours : un département voisin ne les coupe jamais. */}
                     <g className="mzo-noms-deps" aria-hidden="true">
                       {depsAffiches.map((d) => {
-                        // Le nom tient dans son département : réduit au besoin (jusqu'aux trois quarts), sinon le numéro seul.
-                        const largeur = d.boite[2] - d.boite[0];
-                        const ajuste = Math.min(1, (largeur * 0.9) / (d.nom.length * police * 0.56));
-                        const petit = largeur < cible[2] / 7 || ajuste < 0.72;
+                        // Les NUMÉROS seuls sur la carte (retour de Greg, 20 novembre 2026 : noms et numéros mêlés, « pas
+                        // clair ») : gros et lisibles ; les noms sont dans les boutons dessous et dans la barre « Continuer ».
+                        // Un petit département (Paris, la petite couronne) garde un numéro plus petit qui tient dedans.
+                        const largeur = Math.min(d.boite[2] - d.boite[0], d.boite[3] - d.boite[1]);
+                        const taille = Math.min(police * 1.25, largeur * 0.55);
                         return (
                           <text
                             key={d.code}
                             x={d.centre[0]}
                             y={d.centre[1]}
                             textAnchor="middle"
+                            dominantBaseline="central"
                             className={d.code === departement ? "on" : undefined}
-                            fontSize={petit ? police * 0.85 : police * ajuste}
+                            fontSize={taille}
                           >
-                            {petit ? d.code : d.nom}
-                            {petit ? null : (
-                              <tspan x={d.centre[0]} dy={police * 1.15} fontSize={police * 0.8} className="mzo-code">
-                                {d.code}
-                              </tspan>
-                            )}
+                            {d.code}
                           </text>
                         );
                       })}

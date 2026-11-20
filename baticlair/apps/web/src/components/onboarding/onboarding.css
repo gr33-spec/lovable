@@ -10,6 +10,8 @@
   --mzo-texte-carte: #fbf8f3;
   --mzo-fond: #6f655a;
   min-height: 100dvh;
+  /* Pas de zoom de la page au double toucher (Safari) : la carte se touche vite ; le zoom à deux doigts reste possible. */
+  touch-action: manipulation;
 }
 .mzo.app-clair {
   --mzo-fond-carte: #ffffff;
@@ -132,8 +134,8 @@
 .mzo .mzo-noms-deps text.on {
   fill: #15120e;
 }
-.mzo .mzo-noms-deps .mzo-code {
-  opacity: 0.7;
+.mzo .mzo-noms-deps text {
+  letter-spacing: -0.01em;
 }
 @keyframes mzo-apparait {
   from {
