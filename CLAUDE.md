@@ -354,7 +354,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - RÈGLE CHANGÉE (§51.5, tous métiers) : les questions sont décidées par le code d'après la fiche du métier (ce que le négoce exige pour chaque ligne), jamais par la lecture. Une question du modèle n'est gardée que pour une donnée que la fiche ne connaît pas, ou un doute écrit au devis (deux valeurs écrites) ; sinon elle prend le texte et les boutons de la fiche. Toujours l'ordre du calcul. Avant : les questions du modèle, dans son ordre.
 - RÈGLE CHANGÉE : les lignes « fourniture et pose » sont rattachées à leur ouvrage par les mots de la fiche, dans le code (`lecture/par-le-code.ts`). Avant : l'ouvrage venait du modèle.
 - Toute ligne « à chiffrer » vient avec la question qui la débloque. Le développé se demande pièce par pièce, au nom de la pièce.
-- Tasseaux (fiche `roofing-2026.11.20-61`) : rangs = bacs − 1 + rives sur tasseau ; question « Ton pan finit comment, de chaque côté ? » (2 / 1 / 0), lue au devis quand il la dit. Sources : RHEINZINK, VMZINC, NedZink (le texte du NF DTU 40.41 est payant : non lu, non recopié).
+- Tasseaux (fiche `roofing-2026.11.20-62`) : rangs = bacs − 1 + rives sur tasseau ; question « Ton pan finit comment, de chaque côté ? » (2 / 1 / 0), lue au devis quand il la dit. Sources : RHEINZINK, VMZINC, NedZink (le texte du NF DTU 40.41 est payant : non lu, non recopié).
 - Nouvel ouvrage « Chéneau encaissé zinc » : bobineau au mètre, largeur = développé (question à boutons).
 - Test permanent : `packages/domain/test/meme-devis-meme-liste-d2026-024.test.ts` (trois lectures réelles, mêmes questions, même liste finale).
 

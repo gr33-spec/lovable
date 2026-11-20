@@ -1,8 +1,8 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.20-61`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.20-62`.
 
-203 règles de calcul : 77 constantes, 8 tables, 31 valeurs intermédiaires, 87 besoins. Règles sans test qui les cite : 0.
+206 règles de calcul : 79 constantes, 8 tables, 31 valeurs intermédiaires, 88 besoins. Règles sans test qui les cite : 0.
 
 Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à défaut, ceux qui citent sa section (« par §x »).
 
@@ -28,7 +28,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | 1,1 u | Écran au-dessus de 30 % de pente (surface + 10 %, fiche couverture) et marge des bandes de plomb (ml × 1,1, §12). |
 | 2 m | Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes. |
 | 1 m | Largeur d'une feuille de zinc et largeur utile d'un bac acier 1000. |
-| 6 m | Seuil du bobineau (au-delà de 6 ml) et longueur d'un rouleau de plomb. |
+| 10 m | Longueur d'un rouleau de bande de plomb (jusqu'à 30 cm de large) et longueur maximale d'un bac de joint debout. |
 | 500 mm | Bobineau 500 (bandes), bobine 500 du joint debout (bacs), bobine de cuivre 500, bobine étroite du zinc à tasseaux : quatre produits. |
 | 650 mm | Bobineau 650 (bandes) et bobine 650 du joint debout (bacs). |
 | 3 u/m | Pattes de bande zinc (§1, §3) et vis de rive du bac acier (§8). |
@@ -73,6 +73,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `fixations_par_patte` | 2 u | §36.2 | couverture-zinc-joint-debout | document-d2026-018.test.ts (par §36.2) |
 | Constante | `flacons_decapant` | 1 u | §25.3, §25.7 | gouttiere | regles-sans-test-audit.test.ts |
 | Constante | `jeu_tete_crochet` | 5 mm | §3, §34 | couverture-ardoises-crochet | ardoise-cupa.test.ts (par §3, §34), couvreur-ardoises-ouvrages-comptes.test.ts (par §3, §34), hypotheses-par-defaut.test.ts (par §3, §34) |
+| Constante | `largeur_bande_plomb_max` | 30 cm | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
 | Constante | `largeur_courante` | 650 mm | §7, §36 | couverture-zinc-joint-debout | couverture-regions.test.ts (par §7, §36), dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |
 | Constante | `largeur_etroite` | 500 mm | §7 | couverture-zinc-tasseaux | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
 | Constante | `largeur_feuille` | 1 m | §48.6 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, bandes-cuivre, abergement-cheminee, cheneau-encaisse | bobineau.test.ts (par §48.6), chantier-test-45-5.test.ts (par §48.6), dernier-recours.test.ts (par §48.6) |
@@ -100,7 +101,8 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Constante | `r160` | 160 mm | §5 | couverture-tuiles-canal | lot-couverture-1.test.ts (par §5), tuiles-canal.test.ts (par §5) |
 | Constante | `r170` | 170 mm | §5 | couverture-tuiles-canal | lot-couverture-1.test.ts (par §5), tuiles-canal.test.ts (par §5) |
 | Constante | `rampant_max_bac` | 10 m | §7 | couverture-zinc-joint-debout | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
-| Constante | `rouleau_plomb` | 6 m | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
+| Constante | `rouleau_plomb` | 10 m | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
+| Constante | `rouleau_plomb_large` | 5 m | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
 | Constante | `seuil_070` | 0,7 mm | §1, §7, §25, §49.7, §36 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, abergement-cheminee, couverture-zinc-tasseaux, couverture-zinc-joint-debout, cheneau-encaisse | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §36), couverture-regions.test.ts (par §1, §7, §25, §49.7, §36), dernier-recours.test.ts (par §1, §7, §25, §49.7, §36) |
 | Constante | `seuil_080` | 0,8 mm | §1, §7, §25, §49.7, §36 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, abergement-cheminee, couverture-zinc-joint-debout, cheneau-encaisse | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §36), couverture-regions.test.ts (par §1, §7, §25, §49.7, §36), dernier-recours.test.ts (par §1, §7, §25, §49.7, §36) |
 | Constante | `seuil_bobineau` | 6 m | §1, §7, §25, §49.7, §12, §36 | faitage-zinc, noue, bandes-zinc, bande-porte-solin, bandes-cuivre, abergement-cheminee, cheneau-encaisse | chantier-test-45-5.test.ts (par §1, §7, §25, §49.7, §12, §36), couverture-regions.test.ts (par §1, §7, §25, §49.7, §12, §36), dernier-recours.test.ts (par §1, §7, §25, §49.7, §12, §36) |
@@ -226,6 +228,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `profil` | `longueur_gouttiere` | §7, §25, §15 | gouttiere, gouttiere-pvc-alu | image-profil.test.ts, lecture-de00000071.test.ts, lot-couverture-4.test.ts, page-entreprise.test.ts, rampant-long-panneaux-habitudes.test.ts, temps-deux-questions.test.ts, trades.test.ts, achat-groupe.test.ts, chiffrement-fichiers.test.ts, demande-de-devis-45.test.ts, email-artisan-jamais-imprime.test.ts, image-profil.test.ts, isolation-toutes-routes.test.ts, lecture-51-5.test.ts, missions-coupees.test.ts, missions.test.ts, page-entreprise.test.ts, prompt-lecture.test.ts, rgpd.test.ts |
 | Besoin | `raccords` | `nb_fenetres` | §11 | fenetre-de-toit | catalogues-par-metier.test.ts, lecture-de00000071.test.ts, catalogues-par-metier.test.ts, fiches-epreuves-faux-lecteur.test.ts, lecture-51-5.test.ts |
 | Besoin | `rouleaux-plomb` | `arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)` | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
+| Besoin | `rouleaux-plomb-larges` | `arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb_large)` | §12 | bandes-plomb | lot-couverture-8.test.ts (par §12) |
 | Besoin | `talons` | `regle.talons_par_ligne` | §7, §25 | gouttiere | etape-suggestions.test.ts, lot-couverture-3.test.ts, regle-du-comptoir.test.ts, etape-suggestions.test.ts |
 | Besoin | `talons` | `regle.talons_par_ligne * nb_lignes` | §15 | gouttiere-pvc-alu | etape-suggestions.test.ts, lot-couverture-3.test.ts, regle-du-comptoir.test.ts, etape-suggestions.test.ts |
 | Besoin | `tasseaux-zinc` | `nb_rangs * longueur_rampant` | §7 | couverture-zinc-tasseaux | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |

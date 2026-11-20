@@ -39,7 +39,7 @@ Devis de test :
 **À l'ouverture : 0 verte · 1 orange · 0 grise.**
 
 Questions du comptoir :
-- Ardoises fibres-ciment : bleu-noir, noir ou brun ? (Bleu-noir / Noir / Brun)
+- Ardoises fibres-ciment : anthracite (noir) ou brun ? (Anthracite / noir / Brun)
 - Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ? (Ardoises fibres-ciment 40×24 / Ardoises fibres-ciment 40×27 / Ardoises fibres-ciment 60×30 / Ardoises fibres-ciment 60×40)
 
 | Ligne orange | Chiffre | Sous-ligne |
@@ -50,7 +50,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises fibres-ciment bleu-noir 40×24 | 2 336 pièces |  | chiffrable |
+| Ardoises fibres-ciment noir 40×24 | 2 336 pièces | Anthracite / noir | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 

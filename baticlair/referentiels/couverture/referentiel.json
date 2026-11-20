@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.20-61",
+  "version": "roofing-2026.11.20-62",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -8375,14 +8375,10 @@
           "label": "Teinte de l'ardoise fibres-ciment",
           "unit": "u",
           "kind": "site_data",
-          "question": "Ardoises fibres-ciment : bleu-noir, noir ou brun ?",
+          "question": "Ardoises fibres-ciment : anthracite (noir) ou brun ?",
           "choices": [
             {
-              "label": "Bleu-noir",
-              "value": "1"
-            },
-            {
-              "label": "Noir",
+              "label": "Anthracite / noir",
               "value": "2"
             },
             {
@@ -8405,7 +8401,8 @@
                 "noire",
                 "noires",
                 "teinte noir",
-                "coloris noir"
+                "coloris noir",
+                "anthracite"
               ]
             },
             {
@@ -12613,26 +12610,76 @@
         },
         "rouleau_plomb": {
           "kind": "installation_condition",
-          "value": "6",
+          "value": "10",
           "unit": "m",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
-            "status": "draft",
-            "note": "§12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer."
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture : Le Plomb Français, D'Huart Industrie",
+            "note": "Bandes de plomb vendues en 10, 5 et 2 m ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer."
           },
           "version": 1,
-          "label": "rouleau de plomb de {v}"
+          "label": "rouleau de plomb de {v} (bande jusqu'à 30 cm)"
+        },
+        "rouleau_plomb_large": {
+          "kind": "installation_condition",
+          "value": "5",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture : Le Plomb Français, D'Huart Industrie",
+            "note": "Bandes de plomb vendues en 10, 5 et 2 m ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer."
+          },
+          "version": 1,
+          "label": "rouleau de plomb de {v} (bande de plus de 30 cm)"
+        },
+        "largeur_bande_plomb_max": {
+          "kind": "installation_condition",
+          "value": "30",
+          "unit": "cm",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture : Le Plomb Français, D'Huart Industrie",
+            "note": "Bandes de plomb vendues en 10, 5 et 2 m ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer."
+          },
+          "version": 1,
+          "label": "bande de plomb en rouleau de 10 m jusqu'à {v} de large"
         }
       },
       "needs": [
         {
           "id": "rouleaux-plomb",
           "slot": "plomb",
+          "when": "largeur_plomb <= regle.largeur_bande_plomb_max",
           "formula": "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)",
           "unit": "u",
           "core": true,
           "exclusions": "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
-          "designation": "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 6 m",
+          "designation": "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 10 m",
+          "precision": "{longueur_plomb|ml} de bande",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "rouleaux-plomb-larges",
+          "slot": "plomb",
+          "when": "largeur_plomb > regle.largeur_bande_plomb_max",
+          "formula": "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb_large)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
+          "designation": "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 5 m",
           "precision": "{longueur_plomb|ml} de bande",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {

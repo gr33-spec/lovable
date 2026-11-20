@@ -3122,7 +3122,7 @@
   "metier": "roofing",
   "lignes": [
    {
-    "designation": "Plomb laminé 2 mm, rouleau largeur 50 cm × 6 m",
+    "designation": "Plomb laminé 2 mm, rouleau largeur 50 cm × 5 m",
     "quantite": "3 rouleaux",
     "unite": "rouleaux",
     "etat": "ok",
@@ -4616,7 +4616,7 @@
   "metier": "roofing",
   "lignes": [
    {
-    "designation": "Plomb laminé 1,5 mm, rouleau largeur 30 cm × 6 m",
+    "designation": "Plomb laminé 1,5 mm, rouleau largeur 30 cm × 10 m",
     "quantite": "1 rouleau",
     "unite": "rouleau",
     "etat": "ok",
@@ -5448,7 +5448,7 @@
   "metier": "roofing",
   "lignes": [
    {
-    "designation": "Plomb laminé 1,5 mm, rouleau largeur 40 cm × 6 m",
+    "designation": "Plomb laminé 1,5 mm, rouleau largeur 40 cm × 5 m",
     "quantite": "2 rouleaux",
     "unite": "rouleaux",
     "etat": "ok",

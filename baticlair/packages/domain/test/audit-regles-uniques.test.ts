@@ -25,7 +25,7 @@ const MEME_VALEUR_AUTRE_REGLE: Record<string, string> = {
   "1.1 u": "Écran au-dessus de 30 % de pente (surface + 10 %, fiche couverture) et marge des bandes de plomb (ml × 1,1, §12).",
   "2 m": "Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes.",
   "1 m": "Largeur d'une feuille de zinc et largeur utile d'un bac acier 1000.",
-  "6 m": "Seuil du bobineau (au-delà de 6 ml) et longueur d'un rouleau de plomb.",
+  "10 m": "Longueur d'un rouleau de bande de plomb (jusqu'à 30 cm de large) et longueur maximale d'un bac de joint debout.",
   "500 mm": "Bobineau 500 (bandes), bobine 500 du joint debout (bacs), bobine de cuivre 500, bobine étroite du zinc à tasseaux : quatre produits.",
   "650 mm": "Bobineau 650 (bandes) et bobine 650 du joint debout (bacs).",
   "3 u/m": "Pattes de bande zinc (§1, §3) et vis de rive du bac acier (§8).",

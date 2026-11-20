@@ -1,6 +1,6 @@
 # Référentiel couverture — CHANGELOG
 
-## roofing-2026.11.20-61 — Tasseaux sourcés, chéneau encaissé, questions décidées par le code (Greg, 2026-11-20, devis D-2026-024)
+## roofing-2026.11.20-62 — Tasseaux sourcés, chéneau encaissé, questions décidées par le code (Greg, 2026-11-20, devis D-2026-024)
 
 - **Zinc à tasseaux, tasseaux et couvre-joints** : la quantité est chiffrée. Rangs = bacs − 1 + rives sur tasseau ; chaque rang fait la longueur du rampant. Sources recoupées : RHEINZINK « Tasseau, pose et pliage » (§1.6.4, §1.6.5, §1.15), VMZINC « Toiture Delta » (rive à tasseau : couvre-joint, tasseau de rive, patte, bande de rive), NedZink « Conseils de zinc » (rive : le premier et le dernier bac relevés contre un tasseau). Une rive a son tasseau, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm) sans tasseau. Le texte du NF DTU 40.41 est payant et protégé : il n'est ni lu ni recopié. Avant : « à chiffrer », sans quantité, en attendant Greg (« bacs + 1 »).
 - **Nouvelle question, une fois, à boutons** : « Ton pan finit comment, de chaque côté ? » (`nb_rives_tasseau` : « Une rive de chaque côté » = 2, « Une rive et un mur » = 1, « Un mur de chaque côté » = 0). Lue au devis quand il le dit (« 2 côtés », « deux rives »). Exemple : 8 m de pan, rampant 4 m, entraxe 620 → 13 bacs ; 2 rives → 14 rangs = 56 ml de tasseaux et de couvre-joints ; 1 rive → 52 ml ; 0 → 48 ml.
@@ -10,6 +10,18 @@
 - Le développé se demande pièce par pièce, au nom de la pièce (« Habillages de rive : développé… », « Faîtage en bande zinc : développé… »). Avant : une seule question « Développé de la bande zinc ? ».
 - Effets sur les comptes rendus : DE00000071 passe de 5 à 7 questions (pose des crochets, Ø des descentes, que le calcul demande) ; Brest et les lots ne changent que l'ordre des questions ; au banc des 179 lectures, la qualité d'ardoise et la longueur des bacs, que la lecture oubliait parfois, sont demandées (la ligne attend sa réponse, orange).
 - Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
+## roofing-2026.11.20-61 — Plomb en rouleaux de 10 m et de 5 m ; teintes de l'ardoise fibres-ciment
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| §12 Rouleau de plomb, bande jusqu'à 30 cm | 6 m (à confirmer) | 10 m (`rouleau_plomb`) | Le Plomb Français, D'Huart Industrie (fiches bandes de plomb, 20/11/2026) |
+| §12 Rouleau de plomb, bande de plus de 30 cm | 6 m (à confirmer) | 5 m (`rouleau_plomb_large`, seuil `largeur_bande_plomb_max` 30 cm) | mêmes fabricants |
+| Exemple : 5 ml de solin plomb, 30 cm | 1 rouleau de 6 m | 1 rouleau de 10 m | |
+| Exemple : 12 ml de bande 50 cm | 3 rouleaux de 6 m | 3 rouleaux de 5 m | |
+| Question teinte ardoise fibres-ciment | bleu-noir / noir / brun | anthracite (noir) / brun ; « bleu-noir » écrit au devis reste lu tel quel | Cedral (manuel de pose), Cembrit (documentation technique) |
+
+Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`.
 
 ## roofing-2026.11.20-60 — Ardoise en situation exposée : recouvrement majoré en région III
 
