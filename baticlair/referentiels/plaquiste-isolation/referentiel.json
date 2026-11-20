@@ -2160,6 +2160,39 @@
           "primary": true
         }
       ]
+    },
+    {
+      "id": "entretoise-prf",
+      "family": "splice",
+      "label": "Entretoise PRF Placo (montage plafond feu Placo)",
+      "shortLabel": "Entretoises PRF Placo",
+      "aliases": [
+        "entretoise prf"
+      ],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "entretoise",
+            "many": "entretoises"
+          },
+          "contains": {
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Mobiiz (définition)"
+            },
+            "version": 1,
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u"
+          },
+          "primary": true
+        }
+      ]
     }
   ],
   "workItems": [
@@ -3753,7 +3786,7 @@
           "unit": "u",
           "core": true,
           "designation": "Plaques {marque_systeme} {type_plaque} BA13 1,20 × {longueur_plaque|m}",
-          "precision": "{couches} sur {longueur_cloison|m} de cloison, hauteur {hauteur|m} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "precision": "{couches} sur {longueur_cloison|m} de cloison, hauteur {hauteur|m} ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
           "exclusions": "Vides de portes non déduits (le devis vend la surface pleine) ; hors huisseries.",
           "source": "snip-fc18",
           "verification": {
@@ -3791,7 +3824,7 @@
           "unit": "u",
           "core": true,
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m} {marque_systeme}",
-          "precision": "{montage} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "precision": "{montage} ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
           "short": "montants",
           "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.",
           "source": "snip-fc18",
@@ -3827,7 +3860,7 @@
           "formula": "longueur_cloison * regle.rails_par_cloison * regle.chute_ossature",
           "unit": "ml",
           "core": true,
-          "precision": "rails haut et bas ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "precision": "rails haut et bas ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
           "short": "rails",
           "source": "snip-fc18",
           "verification": {
@@ -3874,7 +3907,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TTPC 25 {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "vis-ttpc-35",
@@ -3900,7 +3933,7 @@
           "core": true,
           "when": "si(ei >= 1, si(couches >= 2, 1, 0), 0)",
           "short": "vis TTPC 35",
-          "precision": "2e peau ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "precision": "2e peau ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
@@ -3945,7 +3978,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TRPF 13 {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "fixations-clous",
@@ -3996,7 +4029,27 @@
             "note": "Recherche du 2026-11-19 — 2 sources : 1,05 m²/m² : SNIP et Placo."
           },
           "version": 1,
-          "when": "si(ei >= 1, si(couches < 2, 0, 1), 1)"
+          "when": "ei < 1"
+        },
+        {
+          "id": "isolant-feu",
+          "slot": "isolant",
+          "formula": "surface * regle.isolant_par_m2",
+          "unit": "m2",
+          "core": false,
+          "short": "isolant",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,05 m²/m² : SNIP et Placo."
+          },
+          "version": 1,
+          "when": "si(couches >= 2, si(ei >= 1, 1, 0), 0)",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Laine minérale 45 mm {marque_systeme}",
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "bande",
@@ -8842,10 +8895,10 @@
           ],
           "display": {
             "0": "sans exigence feu",
-            "30": "EI 30",
-            "60": "EI 60",
-            "90": "EI 90",
-            "120": "EI 120"
+            "30": "REI 30",
+            "60": "REI 60",
+            "90": "REI 90",
+            "120": "REI 120"
           },
           "textValues": [
             {
@@ -9047,7 +9100,7 @@
           "usual": {
             "text": "2 TTPC 35 par suspente.",
             "source": "placo-integrale-plafonds-2023",
-            "productId": "vis-ttpc-35-bois"
+            "productId": "vis-ttpc-35"
           }
         },
         {
@@ -9225,6 +9278,20 @@
             "text": "Enduit prêt à l'emploi, seau de 25 kg.",
             "source": "placo-integrale-2023-bande",
             "productId": "enduit-pate"
+          }
+        },
+        {
+          "key": "entretoise_prf",
+          "family": "splice",
+          "label": "Entretoises PRF",
+          "formOf": "plafond",
+          "keywords": [
+            "entretoise"
+          ],
+          "usual": {
+            "text": "Entretoises PRF tous les 0,60 m (montage feu Placo).",
+            "source": "placo-pv-feu",
+            "productId": "entretoise-prf"
           }
         }
       ],
@@ -9516,6 +9583,18 @@
           "unit": "kg/m2",
           "label": "{v} d'enduit prêt à l'emploi par m²"
         },
+        "entretoises_prf": {
+          "source": "placo-pv-feu",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Montage plafond feu Placo PRF : 2,6 entretoises PRF par m² (Placo Intégrale Plafonds 2023 p. 102-104) ; propre au système Placo (recherche/11 §4.3). Conditionnement non relevé : à la pièce."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "2.6",
+          "unit": "u/m2",
+          "label": "{v} entretoises PRF par m²"
+        },
         "vis_feu": {
           "source": "placo-pv-feu",
           "verification": {
@@ -9634,7 +9713,7 @@
           "precisionRequires": [
             "marque_systeme"
           ],
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "fourrures",
@@ -9665,7 +9744,7 @@
           },
           "version": 1,
           "short": "fourrures",
-          "precision": "entraxe {entraxe_fourrures|cm} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "precision": "entraxe {entraxe_fourrures|cm} ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
           "when": "ei >= 1",
           "precisionRequires": [
             "marque_systeme"
@@ -9707,7 +9786,7 @@
             "marque_systeme"
           ],
           "designation": "Suspentes longues {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "suspentes-secables",
@@ -9744,7 +9823,7 @@
             "marque_systeme"
           ],
           "designation": "Suspentes sécables {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "vis-suspentes",
@@ -9809,7 +9888,7 @@
             "marque_systeme"
           ],
           "designation": "Éclisses de fourrure {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "corniere",
@@ -9846,7 +9925,7 @@
             "marque_systeme"
           ],
           "designation": "Cornières de rive, longueur 3 m {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "vis-ttpc-25",
@@ -9881,7 +9960,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TTPC 25 {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "vis-ttpc-35",
@@ -9916,7 +9995,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TTPC 35 {marque_systeme}",
-          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
+          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         },
         {
           "id": "fixations-clous",
@@ -10012,6 +10091,25 @@
             "note": "Recherche du 2026-11-19 — 2 sources : Formule : m² × ratio Placo."
           },
           "version": 1
+        },
+        {
+          "id": "entretoises-prf",
+          "slot": "entretoise_prf",
+          "formula": "surface * regle.entretoises_prf",
+          "unit": "u",
+          "core": true,
+          "source": "placo-pv-feu",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
+          },
+          "version": 1,
+          "when": "si(ei >= 1, si(marque_systeme < 2, 1, 0), 0)",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "short": "entretoises PRF",
+          "precision": "montage feu Placo PRF, une entretoise tous les 0,60 m"
         }
       ]
     },

@@ -87,14 +87,14 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
-| Plaques Placo feu BA13 1,20 × 3 m | 70 plaques | 70 pièces | 2 plaques par face sur 20 m de cloison, hauteur 3 m ; système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Montants M48 longueur 2,99 m Placo | 37 montants | 37 pièces | montants simples à 60 cm ; système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Rails R48, longueur 3 m Placo | 14 longueurs de 3 m | 42 ml | rails haut et bas ; système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Vis TTPC 25 Placo | 1 boîte de 1000 | 600 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Vis TTPC 35 Placo | 2 boîtes de 1000 | 1620 pièces | 2e peau ; système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Vis TRPF 13 Placo | 1 boîte de 500 | 120 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Plaques Placo feu BA13 1,20 × 3 m | 70 plaques | 70 pièces | 2 plaques par face sur 20 m de cloison, hauteur 3 m ; système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Montants M48 longueur 2,99 m Placo | 37 montants | 37 pièces | montants simples à 60 cm ; système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Rails R48, longueur 3 m Placo | 14 longueurs de 3 m | 42 ml | rails haut et bas ; système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Vis TTPC 25 Placo | 1 boîte de 1000 | 600 pièces | système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Vis TTPC 35 Placo | 2 boîtes de 1000 | 1620 pièces | 2e peau ; système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Vis TRPF 13 Placo | 1 boîte de 500 | 120 pièces | système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 71 pièces | une fixation tous les 60 cm |
-| GR 32 Nu 45 | 6 colis de 12,15 m² | 63 m² |  |
+| Laine minérale 45 mm Placo | 6 colis de 12,15 m² | 63 m² | système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Bande à joint | 2 rouleaux de 150 m | 168 ml | joints jointoyés avec bande |
 | Enduit poudre | 2 sacs de 25 kg | 39,6 kg |  |
 
@@ -113,7 +113,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 4,8 m ; Plaques par face : 1 plaque par face ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Clous de fixation : Clous + gaz béton
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 4,8 m ; Plaques par face : 1 plaque par face ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Clous de fixation : Clous + gaz béton
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -129,7 +129,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Enduit poudre | 1 sac de 25 kg | 9,9 kg |  |
 | Fourrures F530 | 6 longueurs de 3 m | 18 ml | entraxe 40 cm |
 | Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 17 pièces |  |
-| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 34 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 34 pièces |  |
 | Éclisses | 1 boîte de 50 | 6 pièces |  |
 | Cornières de rive | 5 longueurs de 3 m | 12,6 ml |  |
 
@@ -263,7 +263,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Couches : 1
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Couches : 1
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -272,7 +272,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Plaques BA13 standard 1,20 × 2,5 m | 9 plaques | 9 pièces |  |
 | Fourrures F530 | 15 longueurs de 3 m | 44,75 ml | entraxe 60 cm |
 | Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 39 pièces |  |
-| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 78 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 78 pièces |  |
 | Éclisses | 1 boîte de 50 | 14,92 pièces |  |
 | Cornières de rive | 8 longueurs de 3 m | 23,36 ml |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 300 pièces |  |
@@ -295,23 +295,24 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Entretoises PRF : Entretoises PRF Placo
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
-| Plaques Placo feu BA13 1,20 × 2,5 m | 28 plaques | 28 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Fourrures, longueur 3 m Placo | 24 longueurs de 3 m | 71,6 ml | entraxe 60 cm ; système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Suspentes sécables Placo | 2 boîtes de 50 | 63 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Plaques Placo feu BA13 1,20 × 2,5 m | 28 plaques | 28 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Fourrures, longueur 3 m Placo | 24 longueurs de 3 m | 71,6 ml | entraxe 60 cm ; système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Suspentes sécables Placo | 2 boîtes de 50 | 63 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Chevilles métal 6 × 40 | 1 boîte de 100 | 63 pièces |  |
-| Éclisses de fourrure Placo | 1 boîte de 50 | 23,87 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
-| Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Éclisses de fourrure Placo | 1 boîte de 50 | 23,87 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
+| Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu Placo REI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 45 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 13,2 kg |  |
+| Entretoises PRF Placo | 104 entretoises | 104 pièces | montage feu Placo PRF, une entretoise tous les 0,60 m |
 
 ## PI-11 — Combles perdus : soufflage laine de verre R 7
 
@@ -373,7 +374,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Couches : 1 ; Membrane pare-vapeur : Membrane pare-vapeur ; Adhésif de membrane : Adhésif membrane ; Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Couches : 1 ; Membrane pare-vapeur : Membrane pare-vapeur ; Adhésif de membrane : Adhésif membrane ; Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Vis de suspente (TTPC 35) : Vis TTPC 35 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -385,7 +386,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Plaques BA13 standard 1,20 × 2,5 m | 18 plaques | 18 pièces |  |
 | Fourrures F530 | 30 longueurs de 3 m | 89,5 ml | entraxe 60 cm |
 | Suspentes sécables (plénum 80 à 580 mm) | 2 boîtes de 50 | 78 pièces |  |
-| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 156 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 156 pièces |  |
 | Éclisses | 1 boîte de 50 | 29,83 pièces |  |
 | Cornières de rive | 12 longueurs de 3 m | 33,08 ml |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 600 pièces |  |

@@ -790,7 +790,7 @@ def plafond():
         slot("fourrure", "furring", "Fourrures", "fourrure-f530", "Fourrures F 530 de 3 m.", "placo-f530", "plafond", ["fourrure", "f530"]),
         slot("suspente", "hanger", "Suspentes longues", "suspente-longue", "Suspente longue 171, boîte de 100.", "placo-suspentes", "plafond", ["suspente"]),
         slot("suspente_secable", "hanger", "Suspentes sécables", "suspente-secable", "Suspente sécable.", "placo-suspentes", "plafond", ["secable"]),
-        slot("vis_suspente", "screw_board", "Vis de suspente (TTPC 35)", "vis-ttpc-35-bois", "2 TTPC 35 par suspente.", "placo-integrale-plafonds-2023", "plafond", ["vis 35"]),
+        slot("vis_suspente", "screw_board", "Vis de suspente (TTPC 35)", "vis-ttpc-35", "2 TTPC 35 par suspente.", "placo-integrale-plafonds-2023", "plafond", ["vis 35"]),
         slot("cheville_suspente", "hanger_anchor", "Chevilles de suspente", "cheville-metal-6x40", "Cheville métallique 6 × 40.", "placo-integrale-plafonds-2023", "plafond", ["cheville metal"]),
         slot("eclisse", "splice", "Éclisses", "eclisse-f530", "Éclisses F 530.", "placo-eclisse", "plafond", ["eclisse"]),
         slot("corniere", "perimeter_angle", "Cornière de rive", "corniere-cr2", "Cornière CR2 de 3 m.", "placo-cr2", "plafond", ["corniere", "cr2"]),
@@ -982,10 +982,11 @@ def _quand(when, extra):
     return f"si({extra}, si({when}, 1, 0), 0)"
 
 
-def coupe_feu(work, articles, noms):
+def coupe_feu(work, articles, noms, plafond_rei=False):
     """Chaque besoin d'article du système existe en deux : standard (ei < 1) et coupe-feu (ei >= 1), où la ligne porte
     la marque et attend sa réponse (precisionRequires). `noms` : désignation de base des besoins qui n'en ont pas."""
-    work["params"] = work["params"] + [EI, MARQUE]
+    ei = dict(EI, display={"0": "sans exigence feu", "30": "REI 30", "60": "REI 60", "90": "REI 90", "120": "REI 120"}) if plafond_rei else EI
+    work["params"] = work["params"] + [ei, MARQUE]
     out = []
     for n in work["needs"]:
         if n["id"] not in articles:
@@ -995,7 +996,7 @@ def coupe_feu(work, articles, noms):
         feu = dict(n, id=n["id"] + "-feu", when=_quand(n.get("when"), "ei >= 1"), precisionRequires=["marque_systeme"])
         base = n.get("designation") or noms[n["id"]]
         feu["designation"] = base.replace("BA13 {type_plaque}", "{marque_systeme} {type_plaque} BA13") if "{type_plaque}" in base else f"{base} {{marque_systeme}}"
-        feu["precision"] = ((n.get("precision") + " ; ") if n.get("precision") else "") + "système coupe-feu {ei}, marque unique selon son procès-verbal"
+        feu["precision"] = ((n.get("precision") + " ; ") if n.get("precision") else "") + "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
         out += [std, feu]
     work["needs"] = out
     return work
@@ -1045,21 +1046,26 @@ def coffrage():
 
 
 def referentiel():
-    cl = coupe_feu(cloison(), ["plaques", "montants", "rails", "vis-ttpc-25", "vis-ttpc-35", "vis-trpf"],
-                   {"rails": "Rails R{montant|mm#}, longueur 3 m", "vis-ttpc-25": "Vis TTPC 25", "vis-ttpc-35": "Vis TTPC 35", "vis-trpf": "Vis TRPF 13"})
+    cl = coupe_feu(cloison(), ["plaques", "montants", "rails", "vis-ttpc-25", "vis-ttpc-35", "vis-trpf", "isolant"],
+                   {"rails": "Rails R{montant|mm#}, longueur 3 m", "vis-ttpc-25": "Vis TTPC 25", "vis-ttpc-35": "Vis TTPC 35", "vis-trpf": "Vis TRPF 13", "isolant": "Laine minérale 45 mm"})
     pl = coupe_feu(plafond(), ["plaques", "fourrures", "suspentes-longues", "suspentes-secables", "eclisses", "corniere", "vis-ttpc-25", "vis-ttpc-35"],
-                   {"fourrures": "Fourrures, longueur 3 m", "suspentes-longues": "Suspentes longues", "suspentes-secables": "Suspentes sécables", "eclisses": "Éclisses de fourrure", "corniere": "Cornières de rive, longueur 3 m", "vis-ttpc-25": "Vis TTPC 25", "vis-ttpc-35": "Vis TTPC 35"})
+                   {"fourrures": "Fourrures, longueur 3 m", "suspentes-longues": "Suspentes longues", "suspentes-secables": "Suspentes sécables", "eclisses": "Éclisses de fourrure", "corniere": "Cornières de rive, longueur 3 m", "vis-ttpc-25": "Vis TTPC 25", "vis-ttpc-35": "Vis TTPC 35"}, plafond_rei=True)
     for w in (cl, pl):
         w["params"] = [dict(x, default=TYPE_PLAQUE_FEU_DEFAUT) if x["key"] == "type_plaque" else x for x in w["params"]]
     # Cloison coupe-feu en 72/48 : laine minérale obligatoire (Placo RS 15-019 / 15-020, Siniat EFR-24-005466, Knauf 06-V-263).
     PRODUCTS.append(produit("laine-minerale-pv", "insulation", "Laine minérale 45 mm du système coupe-feu (selon son procès-verbal)", "Laine minérale 45 mm (PV)",
                             [{"id": "m2", "label": {"one": "m²", "many": "m²"}, "contains": un(1, "m2"), "primary": True}], ["laine minerale pv"]))
     cl["slots"].append(slot("laine_feu", "insulation", "Laine minérale du système coupe-feu", "laine-minerale-pv", "Laine minérale 45 mm exigée par le PV.", "placo-pv-feu", "cloison", ["laine minerale"]))
-    cl["needs"] = [dict(n, when=_quand(n.get("when"), "si(ei >= 1, si(couches < 2, 0, 1), 1)")) if n["id"] == "isolant" else n for n in cl["needs"]]
+    cl["needs"] = [dict(n, when=_quand(n.get("when"), "couches >= 2")) if n["id"] == "isolant-feu" else n for n in cl["needs"]]
     cl["needs"].append(besoin("laine-feu", "laine_feu", "surface * regle.isolant_par_m2", "m2", "placo-pv-feu", OK2("Laine minérale 45 mm obligatoire en 72/48 coupe-feu : Placo (RS 15-019, RS 15-020), Siniat (LV 45, EFR-24-005466), Knauf (« avec laine minérale uniquement »), recherche/11 §4.1 point 3."),
                               when="si(ei >= 1, si(couches < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], designation="Laine minérale 45 mm {marque_systeme} (selon le PV)", short="laine du système coupe-feu"))
     # Plafond coupe-feu : deux plaques par défaut (REI 60 : Placo PRF 2 Placoflam, Siniat 2 Prégyflam) ; peau visible vissée à 15 cm.
     # Plafond coupe-feu : le nombre de plaques reste lu au devis (une valeur par défaut calculée laisserait la 2e peau « possible » dans les conditions du moteur).
+    PRODUCTS.append(produit("entretoise-prf", "splice", "Entretoise PRF Placo (montage plafond feu Placo)", "Entretoises PRF Placo", piece("entretoise", "entretoises"), ["entretoise prf"]))
+    pl["slots"].append(slot("entretoise_prf", "splice", "Entretoises PRF", "entretoise-prf", "Entretoises PRF tous les 0,60 m (montage feu Placo).", "placo-pv-feu", "plafond", ["entretoise"]))
+    pl["constants"]["entretoises_prf"] = regle("2.6", "u/m2", "placo-pv-feu", UNE("Montage plafond feu Placo PRF : 2,6 entretoises PRF par m² (Placo Intégrale Plafonds 2023 p. 102-104) ; propre au système Placo (recherche/11 §4.3). Conditionnement non relevé : à la pièce."), label="{v} entretoises PRF par m²")
+    pl["needs"].append(besoin("entretoises-prf", "entretoise_prf", "surface * regle.entretoises_prf", "u", "placo-pv-feu", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."),
+                              when="si(ei >= 1, si(marque_systeme < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], short="entretoises PRF", precision="montage feu Placo PRF, une entretoise tous les 0,60 m"))
     pl["constants"]["vis_feu"] = regle("23", "u/m2", "placo-pv-feu", UNE("Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."), label="{v} vis par m² (montage feu)")
     pl["needs"] = [dict(n, formula="surface * regle.vis_feu") if n["id"] == "vis-ttpc-35-feu" else n for n in pl["needs"]]
     work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur(), coffrage()]
