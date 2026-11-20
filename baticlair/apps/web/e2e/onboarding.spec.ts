@@ -20,6 +20,12 @@ async function appel(page: Page, method: string, url: string, body?: unknown): P
   );
 }
 
+// Le mode par défaut, comme les autres séries : l'achat groupé automatique (une série interrompue a pu en laisser un autre) ;
+// les analyses offertes se comptent dans ce mode.
+test.beforeEach(async ({ request }) => {
+  expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: "automatique" } })).status()).toBe(200);
+});
+
 /** La carte : région puis département, au toucher (tracés) ou par les boutons. */
 async function choisirDepartement(page: Page, region: string, departement: string, { parLaCarte = true } = {}) {
   if (parLaCarte) await page.locator(`path[data-region="${region}"]`).click();
