@@ -11,10 +11,10 @@
   },
   {
    "donnee": "matériau",
-   "valeur": "Zinc quartz ép. 0,70 mm",
+   "valeur": "Zinc quartz épaisseur 0,70 mm",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 2 : « zinc quartz ép. 0,70 mm »"
+   "preuve": "ligne 2 : « zinc quartz épaisseur 0,70 mm »"
   },
   {
    "donnee": "surface",
@@ -42,7 +42,7 @@
    "valeur": "1 (une rive et un mur)",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 2 : « rive sur tasseau d'un seul côté » ; ligne 4 : « contre le mur de la maison »"
+   "preuve": "ligne 2 : « rive sur tasseau 1 côté (l'autre côté contre le mur de la maison) »"
   },
   {
    "donnee": "support",
@@ -63,7 +63,7 @@
    "valeur": "tasseaux bois",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 3 : « Tasseaux bois »"
+   "preuve": "ligne 3 : « tasseaux bois »"
   },
   {
    "donnee": "couvre-joints",
@@ -74,10 +74,10 @@
   },
   {
    "donnee": "bande de solin",
-   "valeur": "zinc quartz, 5 ml, développé 200",
+   "valeur": "zinc quartz, 5 ml, développé 200 mm",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 4 : « Bande de solin zinc quartz […] développé 200 » « 5 ml »"
+   "preuve": "ligne 4 : « Bande de solin zinc quartz […] développé 200 mm », 5 ml"
   },
   {
    "donnee": "façonnage",
@@ -95,10 +95,10 @@
   },
   {
    "donnee": "chéneau",
-   "valeur": "encaissé, zinc quartz ép. 0,70 mm, façonné et soudé sur place",
+   "valeur": "encaissé, zinc quartz épaisseur 0,70 mm",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 5 : « Chéneau encaissé zinc quartz ép. 0,70 mm, façonné et soudé sur place »"
+   "preuve": "ligne 5 : « Chéneau encaissé zinc quartz épaisseur 0,70 mm »"
   },
   {
    "donnee": "développé du chéneau",
@@ -138,10 +138,10 @@
  ],
  "bref": [
   "Couverture zinc à tasseaux d'une extension neuve, un pan, sur voligeage existant.",
-  "45 m2 de couverture en zinc quartz ép. 0,70 mm, bacs de 5 m, rive sur tasseau d'un seul côté.",
+  "45 m2 de couverture en zinc quartz épaisseur 0,70 mm, bacs de 5 m, rive sur tasseau 1 côté, l'autre côté contre le mur de la maison.",
   "Tasseaux bois et couvre-joints zinc quartz.",
-  "5 ml de bande de solin zinc quartz, développé 200, contre le mur de la maison.",
-  "9 ml de chéneau encaissé zinc quartz ép. 0,70 mm, façonné et soudé sur place.",
+  "5 ml de bande de solin zinc quartz, développé 200 mm, contre le mur de la maison.",
+  "9 ml de chéneau encaissé zinc quartz épaisseur 0,70 mm.",
   "1 descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m."
  ],
  "questions": [],
@@ -156,13 +156,13 @@
   },
   {
    "ref": "2",
-   "designation": "Couverture zinc à tasseaux sur voligeage existant, zinc quartz ép. 0,70 mm, un pan, bacs de 5 m, rive sur tasseau d'un seul côté",
+   "designation": "Couverture zinc à tasseaux sur voligeage existant, zinc quartz épaisseur 0,70 mm, un pan, bacs de 5 m, rive sur tasseau 1 côté (l'autre côté contre le mur de la maison)",
    "quantite": "45",
    "unite": "m2",
    "role": "fourniture_et_pose",
    "fournitures": [
     {
-     "nom": "Zinc quartz ép. 0,70 mm pour couverture à tasseaux, bacs de 5 m",
+     "nom": "Zinc quartz épaisseur 0,70 mm pour couverture à tasseaux, bacs de 5 m",
      "quantite": "45",
      "unite": "m2",
      "ouvrage": "couverture-zinc-tasseaux",
@@ -191,16 +191,16 @@
      ],
      "attend": [],
      "a_preciser": [],
-     "precision": ""
+     "precision": "sur voligeage existant, rive sur tasseau 1 côté"
     }
    ]
   },
   {
    "ref": "3",
-   "designation": "Tasseaux bois et couvre-joints zinc quartz",
+   "designation": "Fourniture des tasseaux bois et des couvre-joints zinc quartz (pose comprise au poste 2)",
    "quantite": "1",
    "unite": "ens",
-   "role": "fourniture_et_pose",
+   "role": "fourniture",
    "fournitures": [
     {
      "nom": "Tasseaux bois",
@@ -233,13 +233,13 @@
   },
   {
    "ref": "4",
-   "designation": "Bande de solin zinc quartz contre le mur de la maison, développé 200",
+   "designation": "Bande de solin zinc quartz contre le mur de la maison, développé 200 mm",
    "quantite": "5",
    "unite": "ml",
    "role": "fourniture_et_pose",
    "fournitures": [
     {
-     "nom": "Bande de solin zinc quartz, développé 200",
+     "nom": "Bande de solin zinc quartz, développé 200 mm",
      "quantite": "5",
      "unite": "ml",
      "ouvrage": "bandes-zinc",
@@ -266,13 +266,13 @@
   },
   {
    "ref": "5",
-   "designation": "Chéneau encaissé zinc quartz ép. 0,70 mm, façonné et soudé sur place",
+   "designation": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
    "quantite": "9",
    "unite": "ml",
    "role": "fourniture_et_pose",
    "fournitures": [
     {
-     "nom": "Chéneau encaissé zinc quartz ép. 0,70 mm",
+     "nom": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
      "quantite": "9",
      "unite": "ml",
      "ouvrage": "cheneau-encaisse",

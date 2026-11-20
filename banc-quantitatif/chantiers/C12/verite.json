@@ -1,0 +1,141 @@
+{
+ "id": "C12",
+ "commune": "Quimper",
+ "code_postal": "29000",
+ "nature": "rénovation",
+ "resume": "Maison mitoyenne d'un côté, toit à deux pans. L'ancienne couverture en ardoises fibres-ciment est déposée et remplacée par des tuiles HP10 ardoisées. Faîtage 9 m, rampant 6 m des deux côtés ; 2,15 m du pan arrière sont couverts par une extension en zinc qui n'est pas refaite (13 m²), d'où 95 m² de tuiles (9 × 12 = 108 m², moins 13 m²). Un seul pignon libre : 2 rives de 6 m.",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-tuiles-emboitement",
+   "libelle": "Couverture en tuiles terre cuite à emboîtement",
+   "surface": 95,
+   "pente": 35,
+   "longueur_rampant": 6,
+   "nombre_de_pans": 2,
+   "longueur_faitage_m": 9,
+   "tuile": {
+    "modele": "HP10",
+    "fabricant": "Edilians (Huguenot Fenal)",
+    "matiere": "terre cuite",
+    "teinte": "ardoisé",
+    "produit": "HP10",
+    "tuiles_au_m2": 10
+   },
+   "pureau": 37,
+   "entraxe_supports": null,
+   "zone": 3,
+   "liteaux": {"section": "27×40", "essence": "sapin traité classe 2", "surface_lattee_m2": 95},
+   "contre_liteaux": {"section": "27×40", "poses": true, "ecrits_au_devis": false},
+   "ecran": {"type": "HPV", "rouleau": "1,50 × 50 m", "surface_m2": 95},
+   "rives": {
+    "nombre": 2,
+    "longueur_par_rive_m": 6,
+    "longueur_rives": 12,
+    "piece": "tuiles de rive HP10 ardoisé, à rabat",
+    "cotes": "1 rive gauche et 1 rive droite (pignon libre, une par pan)"
+   },
+   "depose": "ancienne couverture en ardoises fibres-ciment et anciens liteaux, 95 m², évacuée en déchetterie"
+  },
+  {
+   "ouvrage": "faitage",
+   "libelle": "Faîtage à sec",
+   "longueur_faitage": 9,
+   "pose": "à sec, sur closoir ventilé",
+   "faitiere": "faîtière demi-ronde à emboîtement terre cuite ardoisé (gamme HP10)",
+   "closoir": "closoir ventilé alu plissé, rouleau de 5 m (2 rouleaux)",
+   "fixation": "un crochet inox par faîtière, sur lisse de rehausse",
+   "abouts": 2
+  },
+  {
+   "ouvrage": "fenetre-de-toit",
+   "libelle": "Fenêtres de toit, pan avant (2 chambres)",
+   "nb_fenetres": 2,
+   "marque": "Velux",
+   "modele": "GGL",
+   "code_taille": "SK06",
+   "taille_fenetre": "114x118",
+   "finition": "bois peint blanc (GGL 2076)",
+   "raccord_couverture": 1,
+   "raccord": "raccord pour tuiles EDW SK06 0000",
+   "particularites": "créations : chevêtres par le charpentier, hors devis"
+  },
+  {
+   "ouvrage": "fenetre-de-toit",
+   "libelle": "Fenêtre de toit, pan arrière (salle d'eau)",
+   "nb_fenetres": 1,
+   "marque": "Velux",
+   "modele": "GGL",
+   "code_taille": "CK02",
+   "taille_fenetre": "55x78",
+   "finition": "bois peint blanc (GGL 2076)",
+   "raccord_couverture": 1,
+   "raccord": "raccord pour tuiles EDW CK02 0000"
+  },
+  {
+   "ouvrage": "sortie-de-toit",
+   "libelle": "Sortie de toit de VMC",
+   "nb_sorties": 1,
+   "diametre_sortie": 125,
+   "usage_sortie": 2,
+   "support_sortie": 1,
+   "piece": "tuile à douille HP10 ardoisé avec lanterne Ø125",
+   "teinte": "ardoisé"
+  },
+  {
+   "ouvrage": "bandes-plomb",
+   "libelle": "Bavette plomb sous les fenêtres de toit",
+   "longueur_plomb": 4,
+   "largeur_plomb": 30,
+   "epaisseur_plomb": 1.5,
+   "detail": "1,40 m sous chaque SK06 (2 × 1,40) et 0,80 m sous la CK02, plus les recouvrements : 4 ml en tout",
+   "particularites": "plomb laminé en rouleau, patiné à l'huile de patine"
+  }
+ ],
+ "faconnage": "sans objet : aucune pièce de zinc à plier sur ce chantier (le plomb se bat sur place)",
+ "ne_sait_pas": [
+  "l'entraxe des chevrons (il ne le verra qu'une fois l'ancienne couverture déposée)",
+  "l'état de la volige et des chevrons sous les ardoises fibro",
+  "si le client veut des volets ou des stores sur les fenêtres de toit"
+ ],
+ "ecrit_au_devis": [
+  "entreprise, client, adresse du chantier à Quimper (29000), numéro et date du devis",
+  "objet : réfection couverture tuiles",
+  "échafaudage de pied, protections, montage, location, repli : 1 forfait",
+  "dépose de l'ancienne couverture ardoises fibro et liteaux, évacuation en déchetterie : 95 m2",
+  "fourniture et pose d'un écran sous-toiture : 95 m2",
+  "fourniture et pose de liteaux : 95 m2 (ni section, ni pureau)",
+  "fourniture et pose de tuiles terre cuite HP10 ardoisé : 95 m2, pente 35°, rampant 6 m",
+  "fourniture et pose de tuiles de rive HP10 ardoisé : 2 rives de 6 m (mesure dans le texte, quantité 1 ens)",
+  "faîtage à sec : 9 ml",
+  "2 fenêtres de toit Velux GGL SK06 114x118 avec raccord tuiles",
+  "1 fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles",
+  "1 sortie de toit Ø125 pour VMC",
+  "bavette plomb largeur 30 sous fenêtres de toit, 4 ml en tout (mesure dans le texte, quantité 1 ens)",
+  "nettoyage du chantier et repli : 1 forfait",
+  "prix, total HT, TVA 10 %, total TTC, conditions"
+ ],
+ "tu_au_devis": [
+  "le fabricant de la tuile (Edilians, Huguenot Fenal)",
+  "le pureau de pose : 37 cm",
+  "la section des liteaux : 27×40 sapin traité",
+  "le type d'écran : HPV, rouleaux de 1,50 × 50 m",
+  "la zone : bord de mer (zone 3)",
+  "le nombre de pans (2) et la partie en zinc conservée (13 m²)",
+  "une rive gauche et une rive droite",
+  "le modèle de faîtière (demi-ronde à emboîtement ardoisé)",
+  "la finition des Velux (blanc 2076) et la référence des raccords (EDW)",
+  "l'épaisseur du plomb : 1,5 mm",
+  "le détail de la bavette (2 × 1,40 m + 0,80 m)",
+  "la pièce de la sortie de toit (tuile à douille et lanterne ardoisées)"
+ ],
+ "oublis": [
+  "contre-liteaux 27×40 sur l'écran",
+  "closoir ventilé de faîtage (9 ml, 2 rouleaux de 5 m)",
+  "crochets de faîtière (un par faîtière)",
+  "abouts de faîtage (2)",
+  "lisse de rehausse de faîtage",
+  "pointes et vis de fixation des liteaux et des tuiles",
+  "tuiles chatières de ventilation",
+  "huile de patine pour le plomb"
+ ]
+}

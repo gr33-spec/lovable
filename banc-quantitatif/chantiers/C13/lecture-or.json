@@ -91,7 +91,7 @@
    "valeur": "1 cheminée, zinc",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 6 : « abergt cheminée zn »"
+   "preuve": "ligne 6 : « 1 abergt cheminée zn »"
   },
   {
    "donnee": "développé des bandes de rive",
@@ -102,6 +102,13 @@
   },
   {
    "donnee": "périmètre de la cheminée",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "développé des bandes porte-solin",
    "valeur": "",
    "origine": "manquante",
    "regle": "",
@@ -123,7 +130,7 @@
   "1 descente Ø80, hauteur 5 m.",
   "1 dauphin.",
   "Abergement zinc d'une cheminée.",
-  "Le développé des bandes de rive, le périmètre de la cheminée et le façonnage ne sont pas écrits."
+  "Le développé des bandes de rive et des porte-solin, le périmètre de la cheminée et le façonnage ne sont pas écrits."
  ],
  "questions": [],
  "lignes": [
@@ -291,15 +298,15 @@
   },
   {
    "ref": "6",
-   "designation": "abergt cheminée zn",
-   "quantite": "",
+   "designation": "1 abergt cheminée zn",
+   "quantite": "1",
    "unite": "",
    "role": "fourniture_et_pose",
    "fournitures": [
     {
      "nom": "Abergement de cheminée zinc",
-     "quantite": "",
-     "unite": "",
+     "quantite": "1",
+     "unite": "u",
      "ouvrage": "abergement-cheminee",
      "emplacement": "abergement",
      "donnees": [

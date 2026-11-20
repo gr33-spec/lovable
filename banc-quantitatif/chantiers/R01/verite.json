@@ -1,0 +1,137 @@
+{
+ "id": "R01",
+ "commune": "Montreuil",
+ "code_postal": "93100",
+ "nature": "rénovation",
+ "batiment": "Extension arrière de maison de ville, toit monopente 8 m de long × 4 m de rampant (32 m²), égout contre le mur mitoyen du voisin (chéneau encaissé), tête de pan à l'air libre, hauteur à l'égout 3 m environ",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-zinc-tasseaux",
+   "surface": 32,
+   "longueur_pan": 8,
+   "longueur_rampant": 4,
+   "pente": "environ 10° (18 %)",
+   "materiau": "zinc prépatiné anthracite (Anthra-Zinc)",
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "largeur_bobine_tasseaux": 650,
+   "nb_rives_tasseau": 2,
+   "tasseaux": "tasseaux sapin trapézoïdaux de 50 mm",
+   "couvre_joints": "couvre-joints zinc anthracite pour tasseaux de 50 mm, éléments de 1 m",
+   "entraxe_tasseaux": "environ 58 cm (bobine de 650)",
+   "pattes": "pattes à tasseaux zinc, une tous les 50 cm",
+   "support": "voligeage sapin 18 mm existant, conservé",
+   "ecran": "aucun (zinc sur volige ventilée en sous-face)"
+  },
+  {
+   "ouvrage": "cheneau-encaisse",
+   "longueur_cheneau": 8,
+   "developpe_cheneau": 650,
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "position": "en bas de pan, contre le mur mitoyen",
+   "facon": "façonné et soudé sur place, 1 naissance soudée Ø80, 2 talons",
+   "fond": "fond de chéneau en bois existant conservé"
+  },
+  {
+   "ouvrage": "bandes-zinc",
+   "piece": "bandes de rive",
+   "longueur_bande": 8,
+   "detail": "2 rives de 4 m",
+   "developpe": 250,
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "faconnage": 1
+  },
+  {
+   "ouvrage": "faitage-zinc",
+   "piece": "bande de faîtage ventilée (tête de monopente)",
+   "longueur_faitage": 8,
+   "developpe": 330,
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "faconnage": 1
+  },
+  {
+   "ouvrage": "abergement-cheminee",
+   "nb_cheminees": 2,
+   "perimetre_cheminee": 2,
+   "detail": "2 souches maçonnées 50 × 50 cm ; bandes porte-solin avec bavette au périmètre, joint mastic polyuréthane en tête (1 cartouche par souche)",
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65
+  },
+  {
+   "ouvrage": "descente",
+   "matiere": "zinc anthracite",
+   "nb_descentes": 1,
+   "diametre_descente": 80,
+   "hauteur_descente": 3,
+   "longueur_tube": 2,
+   "dauphin": 0,
+   "pied": "raccordée sur regard existant, sans dauphin",
+   "coudes_par_descente": 2,
+   "bagues": "2 bagues simples Ø80",
+   "colliers": "un collier tous les 2 m, plus un (3)",
+   "raccordement": "moignon soudé au chéneau"
+  },
+  {
+   "ouvrage": "sortie-de-toit",
+   "nb_sorties": 1,
+   "diametre_sortie": 125,
+   "usage_sortie": 2,
+   "support_sortie": 2,
+   "detail": "VMC, platine zinc anthracite soudée + chapeau"
+  },
+  {
+   "ouvrage": "sortie-de-toit",
+   "nb_sorties": 1,
+   "diametre_sortie": 100,
+   "usage_sortie": 2,
+   "support_sortie": 2,
+   "detail": "ventilation de chute (évent), platine zinc anthracite soudée + chapeau"
+  }
+ ],
+ "faconnage": 1,
+ "faconnage_texte": "Il plie lui-même rives, faîtage et chéneau (plieuse à l'atelier, soudure sur place) ; couvre-joints, descente, sorties de toit et porte-solins achetés tout faits",
+ "ne_sait_pas": [
+  "l'état du voligeage sous l'ancienne couverture (à voir après la dépose : remplacement partiel possible)",
+  "la nature exacte de l'ancienne couverture sous le bitume (une ou deux couches à déposer)"
+ ],
+ "ecrit_au_devis": [
+  "devis D-2026-024 du 12 mars 2026, client à Montreuil (93100)",
+  "couverture zinc à tasseaux, zinc prépatiné anthracite, sur tasseaux bois et couvre-joints, bacs de 4 m, 32 m²",
+  "chéneau encaissé en zinc anthracite contre mur mitoyen, façonnage et soudures, 8 m",
+  "bandes de rive en zinc anthracite pour les 2 côtés (2 x 4 m), 8 m",
+  "bande de faîtage ventilée en zinc anthracite sur toute la longueur, 8 m",
+  "bandes porte-solin avec bavette et joint mastic d'étanchéité pour entourage de cheminées, 2 unités",
+  "descente d'eaux pluviales Ø80 en zinc anthracite avec bagues, colliers et raccordement au chéneau, 1 unité",
+  "sortie de toit zinc anthracite Ø125 avec chapeau pour VMC, 1 unité",
+  "sortie de toit zinc anthracite Ø100 avec chapeau pour chute/évent, 1 unité",
+  "dépose de l'ancienne couverture et évacuation des gravats, 32 m²",
+  "échafaudage de sécurité, hauteur 3 m environ, 1 unité"
+ ],
+ "tu_au_devis": [
+  "épaisseur du zinc : 0,65 mm partout",
+  "largeur de bobine des bacs : 650 mm",
+  "tasseaux de 50 mm",
+  "développé du chéneau : 65 cm (developpe_cheneau: 650)",
+  "développé des bandes de rive : 25 cm (developpe: 250)",
+  "développé de la bande de faîtage : 33 cm (developpe: 330)",
+  "façonnage : il plie lui-même rives et faîtage (faconnage: 1)",
+  "périmètre d'une cheminée : 2 m",
+  "hauteur de la descente : 3 m",
+  "tubes de descente en longueurs de 2 m",
+  "pas de dauphin (dauphin: 0)",
+  "2 coudes par descente",
+  "voligeage existant conservé",
+  "rénovation, toit monopente 8 × 4 m"
+ ],
+ "oublis": [
+  "pattes à tasseaux et pattes de fixation des bandes (rive, faîtage)",
+  "coudes de descente (2)",
+  "naissance / moignon Ø80 du chéneau et talons",
+  "étain et décapant pour les soudures",
+  "pointes et vis de fixation des tasseaux",
+  "voliges de remplacement éventuelles"
+ ]
+}

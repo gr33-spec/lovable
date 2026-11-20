@@ -35,7 +35,9 @@
       "unite_longueur": "ml",
       "faconnage": 2,
       "achat": "2 bandes porte-solin du commerce de 3 m",
-      "solin": "solin au mortier bâtard par-dessus, mastic en tête"
+      "solin": "solin au mortier bâtard par-dessus, mastic en tête",
+      "developpe": 100,
+      "developpe_libelle": "développé 100 mm (dév. 10), bande du commerce"
     },
     {
       "ouvrage": "gouttiere",
@@ -106,11 +108,12 @@
     "gouttière demi-ronde zinc de 25 : 14 (sans unité)",
     "1 descente Ø80, hauteur 5 m",
     "1 dauphin",
-    "abergement de la cheminée, zinc (1 cheminée)",
+    "1 abergement de cheminée, zinc (« 1 abergt cheminée zn »)",
     "gravats et vieux zinc évacués par l'entreprise (conditions)"
   ],
   "tu_au_devis": [
     "développé des bandes de rive : 250 mm",
+    "développé des bandes porte-solin : 100 mm",
     "il achète ses pièces toutes faites (façonnage : 2)",
     "épaisseur du zinc 0,65, zinc naturel",
     "tubes de descente en longueurs de 2 m",
@@ -130,5 +133,11 @@
     "mortier de solin et mastic pour les porte-solin",
     "étain à souder et décapant"
   ],
-  "note_naissances": "1 naissance Ø80 de 25 : non écrite au devis, accessoire indissociable de la gouttière (§49.1 point 3), que le code doit sortir d'office."
+  "note_naissances": "1 naissance Ø80 de 25 : non écrite au devis, accessoire indissociable de la gouttière (§49.1 point 3), que le code doit sortir d'office.",
+  "reponses_attendues": {
+    "faconnage": "2 (je commande façonné)",
+    "developpe (bandes de rive)": "250",
+    "developpe (porte-solin)": "100",
+    "perimetre_cheminee": "je ne sais pas"
+  }
 }

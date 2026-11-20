@@ -2,15 +2,69 @@
  "metier": "roofing",
  "lots": [],
  "fiche": [
-  {"donnee": "ouvrage", "valeur": "réfection d'une toiture en tuiles canal, rénovation", "origine": "lue", "regle": "", "preuve": "objet : « refection toiture tuiles canal »"},
-  {"donnee": "matériau", "valeur": "tuiles canal terre cuite, courants et couverts", "origine": "lue", "regle": "", "preuve": "ligne 2 : « tuilles canal terre cuite, courants et couverts »"},
-  {"donnee": "surface", "valeur": "85 m2", "origine": "lue", "regle": "", "preuve": "ligne 2 : « sur 85m2 »"},
-  {"donnee": "liteaux", "valeur": "liteaux neufs sur toute la toiture, 85 m2", "origine": "lue", "regle": "", "preuve": "ligne 3 : « Liteaux neufs sur toute la toiture 85m2 »"},
-  {"donnee": "longueur des rives", "valeur": "12 ml", "origine": "lue", "regle": "", "preuve": "ligne 4 : « rives 2 x 6ml soit 12ml »"},
-  {"donnee": "longueur du faîtage", "valeur": "9 ml", "origine": "lue", "regle": "", "preuve": "ligne 5 : « Faitage 9ml »"},
-  {"donnee": "pose du faîtage", "valeur": "scellé au mortier", "origine": "lue", "regle": "", "preuve": "ligne 5 : « scellé au mortier »"},
-  {"donnee": "dépose", "valeur": "anciennes tuiles et vieux liteaux, évacuation en déchetterie", "origine": "lue", "regle": "", "preuve": "ligne 1 : « Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie »"},
-  {"donnee": "recouvrement des tuiles canal", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""}
+  {
+   "donnee": "ouvrage",
+   "valeur": "réfection d'une toiture en tuiles canal, rénovation",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « refection toiture tuilles canal »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "tuiles canal terre cuite, courants et couverts",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « tuilles canal terre cuite, courants et couverts »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "85 m2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « sur 85m2 »"
+  },
+  {
+   "donnee": "liteaux",
+   "valeur": "liteaux neufs sur toute la toiture, 85 m2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Liteaux neufs sur toute la toiture 85m2 »"
+  },
+  {
+   "donnee": "longueur des rives",
+   "valeur": "12 ml",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « rives 2 x 6ml soit 12ml »"
+  },
+  {
+   "donnee": "longueur du faîtage",
+   "valeur": "9 ml",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « Faitage 9ml »"
+  },
+  {
+   "donnee": "pose du faîtage",
+   "valeur": "scellé au mortier",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « scellé au mortier »"
+  },
+  {
+   "donnee": "dépose",
+   "valeur": "anciennes tuiles et vieux liteaux, évacuation en déchetterie",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie »"
+  },
+  {
+   "donnee": "recouvrement des tuiles canal",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
  ],
  "bref": [
   "Réfection d'une toiture en tuiles canal sur une maison existante.",
@@ -24,31 +78,165 @@
  ],
  "questions": [],
  "lignes": [
-  {"ref": "1", "designation": "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie", "quantite": "", "unite": "", "role": "hors_quantitatif", "fournitures": []},
-  {"ref": "2", "designation": "Fourniturre et pose de tuilles canal terre cuite, courants et couverts, sur 85m2", "quantite": "85", "unite": "m2", "role": "fourniture_et_pose", "fournitures": [
-   {"nom": "Tuiles canal terre cuite, courants et couverts", "quantite": "85", "unite": "m2", "ouvrage": "couverture-tuiles-canal", "emplacement": "tuile", "donnees": [{"cle": "surface", "valeur": "85"}], "attend": ["recouvrement_canal"], "a_preciser": ["modèle", "teinte"], "precision": ""}
-  ]},
-  {"ref": "3", "designation": "Liteaux neufs sur toute la toiture 85m2", "quantite": "85", "unite": "m2", "role": "fourniture_et_pose", "fournitures": [
-   {"nom": "Liteaux", "quantite": "85", "unite": "m2", "ouvrage": "couverture-tuiles-canal", "emplacement": "liteau", "donnees": [{"cle": "surface", "valeur": "85"}], "attend": ["recouvrement_canal"], "a_preciser": ["section"], "precision": ""}
-  ]},
-  {"ref": "4", "designation": "Les rives 2 x 6ml soit 12ml", "quantite": "12", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
-   {"nom": "Rives de tuiles canal", "quantite": "12", "unite": "ml", "ouvrage": "couverture-tuiles-canal", "emplacement": "rive", "donnees": [{"cle": "longueur_rives", "valeur": "12"}], "attend": [], "a_preciser": [], "precision": "2 x 6 ml"}
-  ]},
-  {"ref": "5", "designation": "Faitage 9ml scellé au mortier", "quantite": "9", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
-   {"nom": "Faîtage", "quantite": "9", "unite": "ml", "ouvrage": "faitage", "emplacement": "faitiere", "donnees": [{"cle": "longueur_faitage", "valeur": "9"}], "attend": [], "a_preciser": [], "precision": "scellé au mortier"},
-   {"nom": "Mortier", "quantite": "", "unite": "", "ouvrage": "", "emplacement": "", "donnees": [], "attend": [], "a_preciser": [], "precision": "pour sceller le faîtage"}
-  ]},
-  {"ref": "6", "designation": "Divers et imprevus", "quantite": "", "unite": "", "role": "hors_quantitatif", "fournitures": []}
+  {
+   "ref": "1",
+   "designation": "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Fourniturre et pose de tuilles canal terre cuite, courants et couverts, sur 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuiles canal terre cuite, courants et couverts",
+     "quantite": "85",
+     "unite": "m2",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85"
+      }
+     ],
+     "attend": [
+      "recouvrement_canal"
+     ],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Liteaux neufs sur toute la toiture 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Liteaux",
+     "quantite": "85",
+     "unite": "m2",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "liteau",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85"
+      }
+     ],
+     "attend": [
+      "recouvrement_canal"
+     ],
+     "a_preciser": [
+      "section"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Les rives 2 x 6ml soit 12ml",
+   "quantite": "12",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Rives",
+     "quantite": "12",
+     "unite": "ml",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "rive",
+     "donnees": [
+      {
+       "cle": "longueur_rives",
+       "valeur": "12"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "2 x 6 ml"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faitage 9ml scellé au mortier",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtage",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "9"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "scellé au mortier"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Divers et imprevus",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
  ],
  "contexte": [
-  {"cle": "entreprise", "valeur": "Guilbaud Couverture"},
-  {"cle": "client", "valeur": "Mme Raffin"},
-  {"cle": "adresse", "valeur": "23 rue des Sauniers"},
-  {"cle": "ville", "valeur": "Les Sables-d'Olonne"},
-  {"cle": "code postal", "valeur": "85100"},
-  {"cle": "numéro du devis", "valeur": "2026-094"},
-  {"cle": "date", "valeur": "16/11/2026"},
-  {"cle": "neuf ou rénovation", "valeur": "rénovation"}
+  {
+   "cle": "entreprise",
+   "valeur": "Guilbaud Couverture"
+  },
+  {
+   "cle": "client",
+   "valeur": "Mme Raffin"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "23 rue des Sauniers"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Les Sables-d'Olonne"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "85100"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "2026-094"
+  },
+  {
+   "cle": "date",
+   "valeur": "16/11/2026"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation"
+  }
  ],
  "notes": []
 }

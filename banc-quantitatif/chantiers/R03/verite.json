@@ -1,0 +1,149 @@
+{
+ "id": "R03",
+ "commune": "Honfleur",
+ "code_postal": "14600",
+ "nature": "neuf (extension neuve adossée à une maison existante, verrière existante conservée)",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-ardoises-crochet",
+   "description": "Couverture de l'extension en ardoises naturelles au crochet : deux versants à 30° adossés au mur de la maison, terminés côté jardin par deux demi-croupes à 45°",
+   "surface": 48,
+   "surface_detail": "2 versants de 6,50 m × 3,30 m de rampant = 42,9 m² + 2 demi-croupes ≈ 5,1 m²",
+   "pente": 30,
+   "pente_demi_croupes": 45,
+   "longueur_rampant": 3.3,
+   "longueur_egout_par_versant": 6.5,
+   "materiau": "ardoise naturelle",
+   "format": "32x22",
+   "qualite_ardoise": 1,
+   "qualite_ardoise_mot": "Espagne 1er choix",
+   "epaisseur_ardoise_mm": "3,5",
+   "teinte": "gris-noir",
+   "pureau": 10.75,
+   "recouvrement_cm": 10.5,
+   "ardoises_par_m2": 42.1,
+   "longueur_crochet": 11,
+   "crochets": "inox, de 11, agrafe",
+   "diametre_crochet": 1,
+   "liteaux": "sapin traité 18×40, au pureau de 10,75 cm",
+   "contre_liteaux": "27×40 sur chevrons",
+   "ecran": "écran sous-toiture HPV, rouleau 1,5 × 50 m",
+   "entraxe_supports": 45,
+   "zone": 2,
+   "situation": 1
+  },
+  {
+   "ouvrage": "gouttiere",
+   "profil": "havraise",
+   "matiere": "zinc naturel",
+   "developpe_gouttiere": 25,
+   "longueur_gouttiere": 10,
+   "lignes": [
+    {
+     "repere": "égout versant jardin",
+     "longueur": 6.5
+    },
+    {
+     "repere": "retour au-dessus de la verrière",
+     "longueur": 3.5
+    }
+   ],
+   "nb_angles": 1,
+   "angle": "1 retour d'angle extérieur à 90°",
+   "nb_descentes": 2,
+   "naissances": 2,
+   "talons": 2,
+   "fixation_crochet": 1,
+   "crochets": "20 crochets havraise acier galvanisé, pose sur chevrons, tous les 50 cm",
+   "soudures": "jonctions et naissances soudées à l'étain"
+  },
+  {
+   "ouvrage": "descente",
+   "matiere": "zinc naturel",
+   "nb_descentes": 2,
+   "diametre_descente": 80,
+   "hauteur_descente": 3,
+   "longueur_tube": 2,
+   "coudes_par_descente": 2,
+   "coudes": "4 coudes zinc Ø 80 (un dévoiement par descente)",
+   "dauphin": 0,
+   "dauphin_mot": "pas de dauphin, raccord direct sur regards pluviaux",
+   "colliers": "colliers zinc Ø 80 à bride, 2 par descente"
+  },
+  {
+   "ouvrage": "bandes-zinc",
+   "piece": "bandes de rive de la verrière conservée",
+   "longueur_bande": 4,
+   "detail": "2 côtés de 2,00 m",
+   "developpe": 200,
+   "epaisseur_zinc": 0.65,
+   "aspect_zinc": 1,
+   "faconnage": 1
+  },
+  {
+   "ouvrage": "faitage-zinc",
+   "longueur_faitage": 8,
+   "detail": "faîtage 6,50 m + raccords des deux demi-croupes",
+   "developpe": 250,
+   "epaisseur_zinc": 0.65,
+   "aspect_zinc": 1,
+   "faconnage": 1,
+   "pattes": "3 pattes par mètre"
+  },
+  {
+   "ouvrage": "bande-porte-solin",
+   "longueur_bande": 4,
+   "detail": "contre le mur existant de la maison",
+   "developpe": 100,
+   "epaisseur_zinc": 0.65,
+   "aspect_zinc": 1,
+   "faconnage": 1,
+   "mortier": "mortier de ciment, sac de 25 kg"
+  }
+ ],
+ "faconnage": 1,
+ "faconnage_mot": "je façonne : il plie lui-même ses bandes (rive, faîtage, porte-solin) dans des feuilles de zinc 2 × 1 m",
+ "ne_sait_pas": [
+  "le Ø exact des regards pluviaux existants en pied de descente (à vérifier à l'ouverture)",
+  "si le client voudra finalement des dauphins fonte en pied de descente"
+ ],
+ "ecrit_au_devis": [
+  "ardoises naturelles de format 32x22, 48 m², pour la couverture de l'extension",
+  "crochets de fixation en inox de 11",
+  "pente 30° au rampant, 45° aux demi-croupes",
+  "gouttière de type Havraise en zinc, 10 m, y compris retour d'angle et gouttière au-dessus de la verrière",
+  "20 crochets de gouttière havraise en acier galvanisé ou zinc, fixation sur chevrons, espacement tous les 50 cm",
+  "soudures et raccordements de la gouttière (ligne de pose)",
+  "bandes de rive en zinc pour la verrière conservée, 4 m, façonnage et pose",
+  "bande de faîtage zinc, développé 25 cm, 8 m",
+  "bande porte-solin en zinc et mortier de ciment, 4 m, solin contre le mur existant",
+  "tuyaux de descente zinc Ø 80 mm, 6 m : 2 descentes de 3 mètres",
+  "4 coudes zinc Ø 80 mm : 2 jeux de 2 coudes",
+  "numéro D-2026-020, date 06/10/2026"
+ ],
+ "tu_au_devis": [
+  "pureau de 10,75 cm",
+  "qualité et teinte de l'ardoise (Espagne 1er choix, gris-noir)",
+  "développé de la gouttière havraise (25)",
+  "nombre exact d'angles de gouttière dit seulement « retour d'angle » (1)",
+  "matière des crochets de gouttière (acier galvanisé)",
+  "développé des bandes de rive (20 cm)",
+  "développé de la bande porte-solin (10 cm)",
+  "épaisseur et aspect du zinc (0,65 mm, naturel)",
+  "il façonne aussi le faîtage et la porte-solin (le devis ne le dit que pour les rives)",
+  "tubes de descente en longueurs de 2 m",
+  "pas de dauphin",
+  "entraxe des chevrons 45 cm",
+  "longueur du rampant 3,30 m"
+ ],
+ "oublis": [
+  "liteaux 18×40",
+  "contre-liteaux 27×40",
+  "écran sous-toiture HPV",
+  "talons de gouttière",
+  "colliers de descente Ø 80",
+  "pattes de fixation du faîtage zinc",
+  "étain et décapant pour les soudures",
+  "mastic silicone du solin"
+ ]
+}

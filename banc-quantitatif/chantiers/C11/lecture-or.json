@@ -84,7 +84,7 @@
    "valeur": "4",
    "origine": "lue",
    "regle": "",
-   "preuve": "ligne 7 : « 4 descentes » ; ligne 8 : 4 u"
+   "preuve": "ligne 7 : « y compris 4 angles et 4 descentes »"
   },
   {
    "donnee": "diamètre des descentes",
@@ -143,7 +143,7 @@
   "4 ml de faîtage zinc.",
   "3 ml de noues zinc sur la lucarne : 2 noues de 1,50 m.",
   "44 ml de gouttière demi-ronde zinc de 25 sur le pourtour, 4 angles, 4 descentes.",
-  "4 descentes zinc Ø80, hauteur non écrite.",
+  "Descentes zinc Ø80 : les 4 de la gouttière, hauteur non écrite.",
   "Échafaudage, dépose et nettoyage : rien à acheter."
  ],
  "questions": [],
@@ -178,6 +178,10 @@
      "ouvrage": "couverture-ardoises-crochet",
      "emplacement": "ardoise",
      "donnees": [
+      {
+       "cle": "produit",
+       "valeur": "ardoise-35x25"
+      },
       {
        "cle": "surface",
        "valeur": "160"
@@ -355,14 +359,14 @@
   {
    "ref": "8",
    "designation": "Descentes zinc Ø80",
-   "quantite": "4",
-   "unite": "u",
+   "quantite": "1",
+   "unite": "ens",
    "role": "fourniture_et_pose",
    "fournitures": [
     {
      "nom": "Descente zinc Ø80",
-     "quantite": "4",
-     "unite": "u",
+     "quantite": "",
+     "unite": "",
      "ouvrage": "descente",
      "emplacement": "tube",
      "donnees": [

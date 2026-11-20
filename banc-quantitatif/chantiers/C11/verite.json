@@ -1,0 +1,130 @@
+{
+ "id": "C11",
+ "commune": "Dinan",
+ "code_postal": "22100",
+ "nature": "rénovation",
+ "description": "Maison à 4 pans (toit en croupe), environ 13 × 9 m à l'égout, réfection complète de la couverture ardoise, 1 lucarne en façade.",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-ardoises-crochet",
+   "libelle": "Couverture en ardoise naturelle au crochet",
+   "surface": 160,
+   "surface_detail": "4 pans, environ 153 m², plus la lucarne et ses jouées, environ 7 m²",
+   "pente": 40,
+   "longueur_rampant": 6.5,
+   "materiau": "ardoise naturelle",
+   "format": "35×25",
+   "produit": "ardoise-35x25",
+   "qualite_ardoise": 1,
+   "qualite_ardoise_libelle": "Espagne 1er choix",
+   "teinte": "gris-noir",
+   "crochets": "inox, longueur 11 cm",
+   "longueur_crochet": 11,
+   "diametre_crochet": 2.7,
+   "pureau": 12,
+   "liteaux": "sapin traité 18×40, remplacés en totalité",
+   "ecran": "écran HPV posé sur toute la surface",
+   "support": "chevrons, entraxe 45 cm",
+   "entraxe_supports": 45,
+   "zone": 2,
+   "situation": 1
+  },
+  {
+   "ouvrage": "aretier",
+   "libelle": "Arêtiers en bande zinc",
+   "nb_aretiers": 4,
+   "longueur_par_aretier": 7.5,
+   "longueur_aretier": 30,
+   "aretier_matiere": 2,
+   "developpe_aretier": 330,
+   "epaisseur_zinc": 0.65,
+   "aspect_zinc": 1
+  },
+  {
+   "ouvrage": "faitage-zinc",
+   "libelle": "Faîtage en bande zinc",
+   "longueur_faitage": 4,
+   "developpe": 330,
+   "epaisseur_zinc": 0.65,
+   "aspect_zinc": 1
+  },
+  {
+   "ouvrage": "noue",
+   "libelle": "Noues zinc de la lucarne",
+   "nb_noues": 2,
+   "longueur_par_noue": 1.5,
+   "longueur_noue": 3,
+   "developpe_noue": 500,
+   "epaisseur_zinc": 0.65,
+   "aspect_zinc": 1
+  },
+  {
+   "ouvrage": "gouttiere",
+   "libelle": "Gouttière demi-ronde zinc sur le pourtour",
+   "profil": "demi-ronde",
+   "matiere": "zinc naturel",
+   "developpe_gouttiere": 25,
+   "longueur_gouttiere": 44,
+   "longueur_par_ligne": [13, 9, 13, 9],
+   "nb_angles": 4,
+   "angles": "4 angles extérieurs à 90°",
+   "nb_descentes": 4,
+   "diametre_descente": 80,
+   "fixation_crochet": 1,
+   "fixation_crochet_libelle": "crochets sur les chevrons"
+  },
+  {
+   "ouvrage": "descente",
+   "libelle": "Descentes d'eau pluviale zinc",
+   "nb_descentes": 4,
+   "diametre_descente": 80,
+   "hauteur_descente": 5.5,
+   "longueur_tube": 2,
+   "dauphin": 1,
+   "dauphin_libelle": "dauphin fonte de 1 m en pied de chaque descente",
+   "coudes_par_descente": 2
+  }
+ ],
+ "faconnage": 1,
+ "faconnage_libelle": "il plie lui-même les arêtiers, le faîtage et les noues dans des feuilles de zinc 2 × 1 m",
+ "ne_sait_pas": [
+  "l'état des chevrons sous l'ancienne couverture (il le verra à la dépose)"
+ ],
+ "ecrit_au_devis": [
+  "chantier à Dinan (22100), objet : réfection de la couverture en ardoise, maison à 4 pans",
+  "installation de chantier : échafaudage de pied sur le pourtour, filets et protections, 1 forfait",
+  "dépose de la couverture ardoise existante, tri et évacuation : 160 m²",
+  "ardoise naturelle 35×25, pose au crochet inox, pente 40°, rampant 6,50 m : 160 m²",
+  "arêtiers en bande zinc développé 330, 4 arêtiers de 7,50 m : 30 ml",
+  "faîtage zinc : 4 ml",
+  "noues zinc de la lucarne, 2 noues de 1,50 m : 3 ml",
+  "gouttière demi-ronde zinc de 25 sur le pourtour, y compris 4 angles et 4 descentes : 44 ml",
+  "descentes zinc Ø80 : 1 ens (ni nombre ni hauteur sur cette ligne)",
+  "nettoyage du chantier, repli de l'échafaudage : 1 forfait",
+  "unités écrites « m² », « ml », « ens », « forfait »"
+ ],
+ "tu_au_devis": [
+  "hauteur d'une descente : 5,50 m (hauteur_descente 5.5)",
+  "dauphin fonte en pied de chaque descente (dauphin 1), 2 coudes par descente, tubes de 2 m",
+  "façonnage : il plie lui-même (faconnage 1)",
+  "développé du faîtage zinc : 330 mm (developpe 330)",
+  "développé des noues : 500 mm (developpe_noue 500)",
+  "zinc naturel 0,65 mm pour toutes les pièces",
+  "crochets d'ardoise inox de 11 cm, diamètre 2,7 mm",
+  "ardoise d'Espagne 1er choix, pureau 12 cm",
+  "liteaux 18×40 et écran HPV remplacés (compris dans son prix au m², non écrits)",
+  "chevrons à entraxe 45 cm ; crochets de gouttière sur chevrons (fixation_crochet 1)",
+  "longueurs de gouttière par façade : 13 m, 9 m, 13 m, 9 m",
+  "chantier à environ 20 km de la mer (zone 2), situation normale"
+ ],
+ "oublis": [
+  "liteaux sapin traité 18×40 (environ 1 330 ml)",
+  "écran sous-toiture HPV (160 m²)",
+  "pointes pour liteaux",
+  "pattes de fixation des bandes d'arêtier et de faîtage",
+  "crochets de gouttière, talons et naissances Ø80",
+  "étain et décapant pour les soudures de gouttière",
+  "coudes et colliers de descente Ø80",
+  "4 dauphins fonte Ø80"
+ ]
+}

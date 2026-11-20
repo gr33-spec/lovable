@@ -1,0 +1,81 @@
+{
+ "id": "R04",
+ "commune": "Cholet",
+ "code_postal": "49300",
+ "nature": "rénovation",
+ "contexte": "Réparation après coup de vent sur une maison individuelle des années 1990, toiture 2 pans en tuiles terre cuite mécaniques. Versant ouest touché : tuiles cassées, tuiles déplacées, rive droite arrachée en bas de pan.",
+ "ouvrages": [
+  {
+   "nom": "Remplacement de tuiles cassées",
+   "ouvrage_fiche": "couverture-tuiles-emboitement",
+   "emplacement": "tuile",
+   "nb_tuiles": 20,
+   "unite": "u",
+   "materiau": "terre cuite",
+   "type": "tuile mécanique à emboîtement grand moule",
+   "modele": "Edilians HP10 Huguenot",
+   "teinte": "rouge nuancé",
+   "format": "10 tuiles au m²",
+   "pureau": 37,
+   "largeur_utile_cm": 27,
+   "pente": 35,
+   "longueur_rampant": 5.8,
+   "longueur_versant": 11.5,
+   "surface_versant": 66.7,
+   "surface_touchee": "environ 2 m² de tuiles cassées, éparses sur le versant ouest",
+   "support": "liteaux 27×40 existants conservés, écran sous-toiture existant intact",
+   "fixation": "tuiles simplement accrochées au liteau, sans fixation (hors rives et égout)",
+   "acces": "échelle de toit et échelle de couvreur, pas d'échafaudage"
+  },
+  {
+   "nom": "Repositionnement des tuiles déplacées",
+   "duree_h": 1.5,
+   "nb_tuiles_deplacees": "une quarantaine, sur 3 rangs en haut du versant ouest",
+   "fourniture": "aucune"
+  },
+  {
+   "nom": "Refixation de la rive arrachée",
+   "ouvrage_fiche": "couverture-tuiles-emboitement",
+   "emplacement": "rive",
+   "element": "tuiles de rive à rabat droites HP10 (rive droite du versant ouest)",
+   "nb_tuiles_de_rive_arrachees": 4,
+   "longueur_rive_touchee": 1.5,
+   "etat": "les 4 tuiles de rive sont entières, récupérées au sol et dans la gouttière : elles sont reposées, aucune tuile de rive neuve",
+   "fixations": "8 vis inox 6×80 à rondelle d'étanchéité (2 par tuile de rive), vissées dans le chevron de rive",
+   "planche_de_rive": "bois, saine, conservée"
+  },
+  {
+   "nom": "Évacuation des déchets",
+   "volume": "environ 60 kg de tuiles cassées, 3 sacs à gravats",
+   "destination": "déchetterie professionnelle de Cholet",
+   "fourniture": "aucune"
+  }
+ ],
+ "faconnage": "sans objet : aucune pièce de zinc pliée sur ce chantier",
+ "ne_sait_pas": [
+  "l'état du dernier liteau sous la rive arrachée : il ne le saura qu'en découvrant, il se peut qu'il faille en changer un bout"
+ ],
+ "ecrit_au_devis": [
+  "20 u de remplacement unitaire de tuile cassée ou défectueuse, avec accès toit, dépose de la tuile abîmée et pose d'une tuile neuve identique",
+  "la tuile est une tuile terre cuite mécanique",
+  "main d'œuvre couvreur comprise",
+  "1,5 h de repositionnement et alignement des tuiles déplacées sur le versant",
+  "1 u de refixation mécanique et consolidation de l'élément de rive de toit arraché",
+  "les petites fournitures de fixation de la rive sont comprises",
+  "1 fft de descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+ ],
+ "tu_au_devis": [
+  "le modèle et la teinte de la tuile : Edilians HP10 Huguenot, rouge nuancé",
+  "le format (grand moule, 10 au m², pureau 37 cm)",
+  "la pente (35°) et le rampant (5,80 m)",
+  "le versant concerné (ouest) et sa surface (66,7 m²)",
+  "la nature de l'élément de rive : tuiles de rive à rabat droites, 4 pièces, reposées (pas remplacées)",
+  "le type et le nombre de fixations : 8 vis inox 6×80 à rondelle d'étanchéité",
+  "le nombre de tuiles déplacées (une quarantaine)",
+  "l'accès par échelle de toit, sans échafaudage"
+ ],
+ "oublis": [
+  "2 ou 3 tuiles d'avance en plus des 20 (casse à la pose)",
+  "un liteau 27×40 de 4 m au cas où le liteau sous la rive serait abîmé"
+ ]
+}

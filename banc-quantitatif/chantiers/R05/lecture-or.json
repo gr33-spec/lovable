@@ -1,0 +1,377 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "réfection de la couverture en ardoises naturelles",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « réfection de la couverture » ; ligne 2 : « Ardoises naturelles 30x22 »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "200 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « 200 m² »"
+  },
+  {
+   "donnee": "ardoise",
+   "valeur": "naturelle, format 30x22",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « Ardoises naturelles 30x22 »"
+  },
+  {
+   "donnee": "liteaux",
+   "valeur": "liteaux bois pour ardoises, sur 200 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Liteaux bois pour ardoises », « 200 m² »"
+  },
+  {
+   "donnee": "gouttière",
+   "valeur": "zinc, de 25, sur bandeau",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Gouttière de 25, bandeau en zinc »"
+  },
+  {
+   "donnee": "longueur de gouttière",
+   "valeur": "17 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « 17 m »"
+  },
+  {
+   "donnee": "faîtage",
+   "valeur": "bande zinc, 17 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Faîtage zinc », « 17 m »"
+  },
+  {
+   "donnee": "jouées de lucarnes",
+   "valeur": "6, en ardoises",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « Ardoises pour jouées de lucarnes », « 6 unités »"
+  },
+  {
+   "donnee": "cheminées",
+   "valeur": "2, entourage zinc et solin",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « Entourage de cheminée zinc et solin », « 2 unités »"
+  },
+  {
+   "donnee": "chatières",
+   "valeur": "12",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « Chatières de ventilation », « 12 unités »"
+  },
+  {
+   "donnee": "neuf ou rénovation",
+   "valeur": "rénovation",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « réfection de la couverture » ; conditions : « travaux de rénovation »"
+  },
+  {
+   "donnee": "pente",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "rampant",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "crochets d'ardoise",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "qualité de l'ardoise",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "nombre de descentes",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "diamètre des descentes",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "développé du faîtage zinc",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "périmètre d'une cheminée",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Réfection d'une couverture en ardoises naturelles, 200 m².",
+  "Liteaux bois pour ardoises sur 200 m².",
+  "200 m² d'ardoises naturelles 30x22.",
+  "17 m de gouttière de 25 en zinc, sur bandeau.",
+  "17 m de faîtage zinc.",
+  "6 jouées de lucarnes en ardoises.",
+  "2 entourages de cheminée zinc et solin.",
+  "12 chatières de ventilation.",
+  "La pente, le rampant, les crochets d'ardoise et le nombre de descentes ne sont pas écrits."
+ ],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Liteaux bois pour ardoises",
+   "quantite": "200",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Liteaux bois pour ardoises",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "liteau",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "200"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "section"
+     ],
+     "precision": "200 m² de toiture à liteauner, pas 200 m² de liteaux"
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Ardoises naturelles 30x22",
+   "quantite": "200",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises naturelles 30x22",
+     "quantite": "200",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "200"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Gouttière de 25, bandeau en zinc",
+   "quantite": "17",
+   "unite": "m",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttière zinc de 25",
+     "quantite": "17",
+     "unite": "ml",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "17"
+      },
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "25"
+      },
+      {
+       "cle": "fixation_crochet",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "profil"
+     ],
+     "precision": "sur bandeau"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Faîtage zinc",
+   "quantite": "17",
+   "unite": "m",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtage zinc",
+     "quantite": "17",
+     "unite": "ml",
+     "ouvrage": "faitage-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "17"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Ardoises pour jouées de lucarnes",
+   "quantite": "6",
+   "unite": "unités",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises pour jouées de lucarnes",
+     "quantite": "6",
+     "unite": "u",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "surface d'une jouée"
+     ],
+     "precision": "6 jouées de lucarnes à habiller, pas 6 ardoises"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Entourage de cheminée zinc et solin",
+   "quantite": "2",
+   "unite": "unités",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Entourage de cheminée zinc et solin",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "abergement-cheminee",
+     "emplacement": "abergement",
+     "donnees": [
+      {
+       "cle": "nb_cheminees",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Chatières de ventilation",
+   "quantite": "12",
+   "unite": "unités",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Chatières de ventilation",
+     "quantite": "12",
+     "unite": "u",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "matière",
+      "modèle"
+     ],
+     "precision": ""
+    }
+   ]
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "entreprise",
+   "valeur": "Couverture Le Goff & Fils"
+  },
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Hervé Marchand"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "7, chemin de la Fontaine"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Vitré"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "35500"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D-2026-1184"
+  },
+  {
+   "cle": "date",
+   "valeur": "28/09/2026"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation"
+  }
+ ],
+ "notes": []
+}
