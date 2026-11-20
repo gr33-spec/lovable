@@ -263,7 +263,7 @@ Quantités pour 1 m² d'ouvrage (une face mesurée, vides non déduits), pertes 
 | **72/48** (M48-35) | 1 BA13 + M48 + laine 45 + 1 BA13 | EI 30 | 37 à 39 dB (31 sans laine) | **2,50 / 3,05 / 2,75 / 3,40** | ✔✔ | [R03-S5 (DTU 2022), S6, S20] |
 | 72/48 (M48-50) | idem | EI 30 | — | 2,55 / 3,20 / 2,95 / 3,60 | ✔✔ | [R03-S5, S4, S20] |
 | 72/48 Placo « 2,60 m » | **ML 48-50** obligatoire | EI 30 | 39 dB | 2,60 en simples 0,60 | ✔✔ | [R03-S8, S9, S10] |
-| **98/48** (M48-35) | 2 BA13 par face | EI 60 | 45 à 47 dB | **3,00 / 3,70 / 3,40 / 4,15** | ✔✔ ; ≠ doublés 0,60 : 3,70 (Rockwool) contre 3,75 (Siniat, Pladur), 3,70 retenu | [R03-S5, S4, S20, S17] |
+| **98/48** (M48-35) | 2 BA13 par face | EI 60 | 45 à 47 dB | **3,00 / 3,75 / 3,40 / 4,15** | ✔✔ ; règle changée le 20/11 : avant 3,70 (guide Rockwool seul), 3,75 chez Placo (sp00020105), Siniat et Pladur [R09 n° 30] | [R03-S5, S4, S20, S17 ; R09] |
 | 98/48 (M48-50) | idem | EI 60 | — | 3,10 / 3,85 / 3,55 / 4,30 | ✔✔ | [R03 §1.1] |
 | 100/70 | **1 BA15** par face, M70-50 | — | 39-41 dB | 3,55 / 4,45 / 4,05 / 5,05 | ✔✔ | [R03-S12, S20] |
 | 120/70 (M70-40) | 2 BA13 par face | EI 60 | 47 dB | 3,90 / 4,90 / 4,45 / 5,40 | ✔✔ | [R03-S5, S20, S4] |
@@ -289,10 +289,10 @@ Quantités pour 1 m² d'ouvrage (une face mesurée, vides non déduits), pertes 
 | Article | Simples 0,60 | Simples 0,40 | Doublés 0,60 | Doublés 0,40 | État | Sources |
 |---|---|---|---|---|---|---|
 | Plaques | 2,10 m² | 2,10 | 2,10 | 2,10 | ✔✔ | [R02-S1 ; R03-S8, S20] |
-| Montants | 2,10 ml (SNIP, Placo) ; 1,75 ml (Pladur) | 2,89 ; 2,63 (Pladur) | 3,68 ; 3,50 (Pladur) | 5,25 | ≠ : SNIP et Placo comptent les montants de départ, d'about et d'huisserie, Pladur non | [R02 D.1 ; R03 §1.3] |
+| Montants | 2,10 ml | 2,89 | 3,68 | 5,25 | ✔✔ SNIP et Placo Intégrale 2021-22. Formule : n = L ÷ entraxe + 1 montants, et en doublés les deux montants de bout ne se doublent pas : (n + (n − 2)) × 1,05 [R09 n° 35] ; montants d'huisserie non compris | [R02 D.1 ; R09] |
 | Rails | 0,84 ml à H 2,50 (= 2 ÷ H × 1,05) | idem | idem | idem | ✔✔ | [R02-S1 ; R03-S20] |
-| Vis TTPC 25 | 30 | 37 | 35 | 47 | ≠ : SNIP 30 (vis des rails comprises, 5 par ml) contre 22 (Placo, ancienne fiche), 25 (Gypso), 41 (Pladur) ; **30 retenu** (document de la profession le plus récent) | [R02 D.1 ; R02b] |
-| Vis TRPF 13 | 2 | 3 | 5 | 7 | ✔✔ pour 2 ; ≠ doublés (Placo 6 / 10) | [R02 D.1] |
+| Vis TTPC 25 | 30 | 37 | 35 | 47 | ✔✔ : SNIP et fiches solutions Placo actuelles (29,19 et 36,75 vis/m², vis des rails comprises) ; doublés : SNIP et guide Chausson ; le « 22 » venait d'une ancienne fiche Placo [R09 n° 6, 31 ; R13 A1-A2] | [R02 D.1 ; R09 ; R13] |
+| Vis TRPF 13 | 2 | 3 | **6** | 7 | ✔✔ pour 2 et 6 (Placo + Chausson ; avant 5, SNIP) ; ≠ à 0,40 doublés (7 SNIP, 8 Chausson, 10 Placo) [R13 A4] | [R02 D.1 ; R13] |
 | Isolant | 1,05 m² | — | — | — | ✔✔ | [R02-S1 ; R03-S8] |
 | Bande | 2,80 ml | — | — | — | ✔✔ (Placo) ; ≠ Siniat 2,2 (joints seuls), Pladur 3,5 (angles compris) | [R05 A.2] |
 | Enduit | 0,66 kg en poudre ; 0,94 kg prêt à l'emploi | — | — | — | ✔✔ | [R05 B.4] |
@@ -325,7 +325,7 @@ Exigence entre logements neufs : DnT,A ≥ 53 dB (50 dB vers une cuisine ou une 
 | Donnée | Valeur | État | Sources |
 |---|---|---|---|
 | Complexes | 1,05 m²/m², vendus au panneau de 1,20 m, longueur = hauteur − 1 cm | ✔✔ | [R03-S41, Placotherm] |
-| Mortier adhésif (MAP) | **1,8 kg/m²** : 10 plots de 10 cm par m² (PSE) ; 15 plots/m² sur laine minérale | ≠ : la fiche produit MAP Formule + de 2025 dit « 2 à 3 kg/m² minimum » (supports irréguliers), Pladur 2,5, Knauf Mak 3 ≈ 2,1-2,3 ; 1,8 retenu (Siniat 2026 et Placo système 2017) **à trancher par un plaquiste** | [R05 C ; R03 §4.1] |
+| Mortier adhésif (MAP) | **1,8 kg/m²** sur mur plan avec complexe PSE (10 plots de 10 cm, ≥ 15 mm d'épaisseur) ; **2,5 kg/m²** sur mur irrégulier ou complexe en laine minérale | ✔✔ : 1,8 = Siniat Prégycolle 120 (2026) et Placo (doublage 2017, Placotherm+) ; 2,5 = Placo DuoPass, Pladur, Knauf Mak 3. Le « 2 à 3 kg/m² » de la fiche produit MAP vaut pour tous les usages du mortier. Question « Ton mur est plan, ou irrégulier ? » (par défaut : plan ; « Calibel », « laine », « rénovation » lus au devis donnent 2,5) [R12] | [R05 C ; R03 §4.1 ; R12] |
 | Planéité du support | 0-5 mm sans serrage ; 5-10 mm avec serrage ; plus de 10 mm : isolant entaillé ; collage plaque sur plaque supprimé (DTU 2022) | ✔✔ | [R03 §4.1] |
 | Hauteur | complexes superposés au-delà de 2,50-3,00 m ; tasseau bois au-delà de 3,60 m (habitation) | ✔✔ | [R03 §4.1] |
 | Bande et enduit | 1,40 ml/m² ; 0,33 kg/m² (poudre) ou 0,47 kg/m² (prêt à l'emploi) | ✔✔ | [R05 A.2, B.4] |
@@ -334,7 +334,7 @@ Exigence entre logements neufs : DnT,A ≥ 53 dB (50 dB vers une cuisine ou une 
 
 | Donnée | Valeur | État |
 |---|---|---|
-| Fourrures verticales | entraxe 0,60 ; une fourrure de 3 m par file jusqu'à 3,00 m de haut | ✔✔ entraxe ; ≠ ml/m² : Pladur 1,75, SNIP 2,00-2,52, Placo 2,5 (fourrure horizontale de départ comptée) |
+| Fourrures | verticales à 0,60, une fourrure de 3 m par file jusqu'à 3,00 m ; **plus la fourrure horizontale chevillée au mur qui porte les appuis** (une par ligne d'appuis) | ✔✔ SNIP p. 11 et notice Isover Optima2 [R09 n° 40-41] ; règle changée le 20/11 (avant : verticales seules) |
 | Appuis | une ligne jusqu'à 2,70 m, deux jusqu'à 4,50 m ; un appui par fourrure et par ligne (≈ 0,8/m² à 2,50 m, SNIP 0,80) | ≠ : Placo (ancien) 2/m², Pladur 1 |
 | Appui choisi | selon l'épaisseur de l'isolant (Optima2 75 à 140) | ✔✔ |
 | Rails F 530 haut et bas | 2 × longueur × 1,05, en longueurs de 2,35 m | ✔✔ |
@@ -356,11 +356,12 @@ Exigence entre logements neufs : DnT,A ≥ 53 dB (50 dB vers une cuisine ou une 
 | Article | Entraxe 0,60 | 0,50 | 0,40 | État | Sources |
 |---|---|---|---|---|---|
 | Plaques | 1,05 m² par peau | idem | idem | ✔✔ | [R03-S47, S41] |
-| Fourrures | **1,79 ml** (SNIP) ; 2,0 (Placo 2023) ; 1,75 (Pladur) | 2,10 | 3,0 (Placo) | ≠ ; SNIP retenu à 0,60 | [R02 D.5 ; R03 §5.1] |
-| Suspentes | **1,8** (Placo 2023) ; 1,56 (SNIP) ; 1,46 (Pladur) | 2,2 (Placo) ; 1,84 (SNIP) | 2,7 (Placo) | ≠ : l'écart tient à la taille de la pièce (suspentes de bout de fourrure) ; Placo retenu, plus sûr pour les petites pièces [R02b] | [R02 D.5 ; R03 §5.1 ; R02b] |
-| Éclisses | 0,21 | 0,25 | — | ✔ | [R02 D.5] |
-| Vis TTPC 25 (1 BA13) | **12** (SNIP) ; 10 (Placo) ; 8 (Pladur) | 14 | 15 (Placo) | ≠ | [R02 D.5 ; R03 §5.1] |
-| Vis, 2 BA13 | 1re peau 8 (TTPC 25) ; 2e peau 12 (TTPC 35) | — | — | ✔✔ ordre de grandeur | [R02 D.5 ; R03 §5.1] |
+| Fourrures | **1,79 ml** | 2,10 | 3,0 (Placo seul ✔) | ✔✔ à 0,60 : SNIP et fiche Placo sp00012110 (le « 2 » de l'Intégrale 2023 est un arrondi) ; ✔✔ à 0,50 | [R09 n° 46 ; R13 E1] |
+| Suspentes | **1,56** | 1,84 | 2,7 | ✔✔ à 0,60 : SNIP et fiche Placo sp00012110 (règle changée le 20/11 : avant 1,8). L'écart 1,56 / 1,8 vient de la taille de la pièce : une petite pièce (4 × 4 m) demande environ 1,75 ; la boîte de 100 couvre l'écart. ✔ à 0,50 (Pladur 1,75 à 5 % près) ; ✔✔ à 0,40 (Placo + calcul à la pièce 2,63) | [R09 n° 47-48 ; R13 E1-E2] |
+| Éclisses | une par aboutage : fourrures (ml) ÷ 3 m (fourrures commandées en 3 m) | idem | idem | ✔✔ (calcul ; le 0,21/m² du SNIP suppose des fourrures de 5,30 m) ; règle changée le 20/11 | [R13 E3] |
+| Vis TTPC 25 (1 BA13) | **12** (SNIP) ; 10 (Placo 2023) ; 15 (Placo sp00012110) ; 8 (Pladur) | **14** ✔✔ (SNIP + Chausson) | 15 (Placo seul) | ≠ à 0,60 : chaque marque compte ses vis de rive à sa façon ; SNIP retenu | [R02 D.5 ; R13 E4-E6] |
+| Vis, 2 BA13 | 1re peau 8 à 0,60 (SNIP, gardé pour la marge ; Placo 3) ; **4 à 0,50** ✔✔ (Placo + Pladur) ; 2e peau 12 (TTPC 35) | — | — | ✔✔ / ≠ | [R02 D.5 ; R13 E7] |
+| Vis TRPF | **0** : suspentes et éclisses Stil F 530 clipsées, sans vis (règle changée le 20/11 : avant 4/m², SNIP, qui suppose des suspentes vissées) | idem | idem | ✔✔ Placo Intégrale 2023 p. 103-105 et Pladur 2019 | [R09 n° 61] |
 | Cornière ou rail de rive | au périmètre réel (SNIP 0,47 ml/m² pour une pièce de 8 × 10 m) | — | — | ? (la fiche **estime** le périmètre d'une pièce carrée et le dit) | [R02 D.5 ; R05 D] |
 | Bande / enduit | 1,40 ml ; 0,33 / 0,47 kg | idem | idem | ✔✔ | [R05] |
 
@@ -531,11 +532,11 @@ Le nombre de sacs se lit sur le **certificat ACERMI** du produit, jamais par une
 
 | Produit | Sac | Sacs pour 100 m² : R 5 / 6 / 7 / 8 / 10 | Épaisseur à souffler à R 7 | État | Sources |
 |---|---|---|---|---|---|
-| Isover Comblissimo (laine de verre) | 17,3 kg | 15,6 / 18,7 / **21,8** / 24,9 / 31,2 | 330 mm | ✔ (ACERMI 07/D/018/474/28, 2025) ; R 10 ✔✔ (fiche Isover 2026) ; ≠ ancienne brochure −1 % | [R04-S41, S42] |
-| Knauf Supafil Loft 045 | 16,6 kg | 16,4 / 19,7 / 23,0 / 26,3 / 32,9 | 320 mm | ✔✔ | [R04-S43] |
+| Isover Comblissimo (laine de verre) | 17,3 kg | 15,6 / 18,7 / **21,8** / 24,9 / 31,2 | 330 mm | ✔✔ (ACERMI 07/D/018/474/28, 2025, et fiche Isover 2026 à 1 % près) [R10 n° 25 ; R13 F3] | [R04-S41, S42] |
+| Knauf Supafil Loft 045 | 16,6 kg | 16,4 / 19,7 / 23,0 / 26,3 / 32,9 | 320 mm | ✔ (certificat ACERMI seul ; fiche Knauf illisible) | [R04-S43 ; R13 F4] |
 | URSA Purefloc Loft 47 | 16,6 kg | 15,0 / 18,0 / 21,0 / 24,0 / 30,0 | 335 mm | ✔ | [R04-S44] |
-| Rockwool Jetrock 2 (laine de roche) | 20 kg | 21,1 / 25,3 / 29,6 / 33,8 / 42,2 | 315 mm | ✔ | [R04-S45] |
-| Soprema Thermacell **Cristal** (ouate, SH20) | 12,5 kg | 40 / 48 / **56** / 64 / 80 (sacs de 10 kg : 50 à 100) | 350 → 280 mm | ✔ | [R04-S47] |
+| Rockwool Jetrock 2 (laine de roche) | 20 kg | 21,1 / 25,3 / 29,6 / 33,8 / 42,2 | 315 mm | ✔✔ (ACERMI et fiche Rockwool 01/2026, identiques) | [R04-S45 ; R10 ; R13 F1] |
+| Soprema Thermacell **Cristal** (ouate, SH20) | 12,5 kg | 40 / 48 / **56** / 64 / 80 (sacs de 10 kg : 50 à 100) | 350 → 280 mm | ✔✔ (ACERMI et fiche Soprema INSFR0303-3/b, brochure 06/2025) | [R04-S47 ; R10 ; R13 F2] |
 | Soprema Thermacell (sans « Cristal », SH25) | 12,5 kg | R 7 : **64** sacs | 345 → 273 mm | ✔ (un autre certificat : ne pas confondre) | [R04-S48] |
 | Igloo, Ouattitude N (ouate) | 12,5 kg (10 / 10,8 / 11,5 existent) | 50 / 60 / 69 / 79 / 99 | 360 → 280 mm | ✔ | [R04-S49] |
 | Cellaouate / Breizhouate (ouate **bretonne**, près de Morlaix) | 14 kg (10 kg) | 44 / 52 / 61 / 69 / 86 | 335 → 273 mm | ✔ | [R04-S50] |
@@ -633,7 +634,7 @@ Notations : S = surface du devis ; H = hauteur sous plafond ; L = S ÷ H. Arrond
 | Ouvrage (`id`) | Article | Formule |
 |---|---|---|
 | `cloison-distributive` | plaques | ⌈ L × 2 × plaques par face × 1,05 ÷ 1,20 ⌉ ; longueur = plus petite de 2,50 / 2,60 / 2,70 / 2,80 / 3,00 / 3,20 / 3,60 ≥ H − 1 cm |
-| | montants | ⌈ (L ÷ entraxe + 1) × (2 si doublés) × 1,05 ⌉ ; longueur Placo ≥ H − 1 cm ; montage par défaut selon la hauteur (5.1) |
+| | montants | ⌈ (n + (doublés − 1) × (n − 2)) × 1,05 ⌉ avec n = L ÷ entraxe + 1 ; longueur Placo ≥ H − 1 cm ; montage par défaut selon la hauteur (5.1) |
 | | rails | 2 × L × 1,05 → longueurs de 3 m |
 | | vis TTPC 25 / 35, TRPF | S × ratio SNIP du montage (5.1) |
 | | fixations de rail | ⌈ 2 × L × 1,05 ÷ 0,60 ⌉, clous ou chevilles selon l'habitude |
@@ -643,10 +644,10 @@ Notations : S = surface du devis ; H = hauteur sous plafond ; L = S ÷ H. Arrond
 | | montants | ⌈ (L ÷ 0,60 + 1) × 2 files × 1,05 ⌉ |
 | | rails | 2 × L × (1 file SAA, 2 files SAD) × 1,05 |
 | `doublage-colle` | complexes | ⌈ L × 1,05 ÷ 1,20 ⌉ |
-| | MAP | S × 1,8 kg → sacs de 25 kg |
+| | MAP | S × 1,8 kg (mur plan) ou 2,5 kg (mur irrégulier, laine) → sacs de 25 kg |
 | | bande / enduit | S × 1,40 ; S × 0,33 / 0,47 |
 | `doublage-fourrures` | plaques | ⌈ L × 1,05 ÷ 1,20 ⌉ |
-| | fourrures | N = ⌈ (L ÷ 0,60 + 1) × 1,05 ⌉ files, une longueur de 3 m par file (H ≤ 3 m) |
+| | fourrures | N = ⌈ (L ÷ 0,60 + 1) × 1,05 ⌉ files verticales, une longueur de 3 m par file (H ≤ 3 m), + L × lignes d'appuis × 1,05 (fourrure horizontale) |
 | | appuis | N × lignes (1 jusqu'à 2,70 m, 2 jusqu'à 4,50 m) ; modèle selon l'épaisseur d'isolant |
 | | rails F 530 | 2 × L × 1,05 → longueurs de 2,35 m |
 | | vis | S × 15 TTPC, S × 2 TRPF |
@@ -654,9 +655,9 @@ Notations : S = surface du devis ; H = hauteur sous plafond ; L = S ÷ H. Arrond
 | `contre-cloison-montants` | comme la cloison, une face | montage par défaut selon les hauteurs de contre-cloison (5.3) ; vis 15 / 19 |
 | `plafond-fourrures` | plaques | ⌈ S × plaques × 1,05 ÷ (1,20 × 2,50) ⌉ |
 | | fourrures | S × 1,79 / 2,10 / 3,0 (entraxe 60 / 50 / 40) |
-| | suspentes | ⌈ S × 1,8 / 2,2 / 2,7 ⌉ ; longues (plénum < 15 cm) ou sécables |
+| | suspentes | ⌈ S × 1,56 / 1,84 / 2,7 ⌉ ; longues (plénum < 15 cm) ou sécables ; plus de vis TRPF (clipsées) |
 | | fixation des suspentes | bois : 2 TTPC 35 par suspente ; béton : 1 cheville métallique |
-| | éclisses | S × 0,21 / 0,25 |
+| | éclisses | fourrures (ml) ÷ 3 m |
 | | cornière | S × périmètre par m² d'une pièce carrée × 1,05 (estimation dite) |
 | | vis | 12 / 14 / 15 par m² ; 2 BA13 : 8 + 12 TTPC 35 |
 | `joints-seuls` | bande / enduit | S × 1,40 ; S × 0,33 / 0,47 |
@@ -676,6 +677,9 @@ Les questions sont dans l'ordre du plus gros levier, et posées **seulement si l
 |---|---|---|---|---|---|
 | 1 | `hauteur` | « Hauteur sous plafond ? » | 2,50 m / 2,60 m / 2,70 m / 2,80 m / 3,00 m | cloisons, doublages, contre-cloisons, séparatives | change la longueur des plaques et des montants, et le montage |
 | 2 | `support` | « Ton plafond est fixé sous quoi ? » | Solives ou charpente bois / Dalle béton | plafond | change la fixation des suspentes |
+| 2 bis | `marque_systeme` | « Ton système coupe-feu, c'est quelle marque ? » | Placo / Knauf / Siniat / Autre | ouvrage coupe-feu (`ei` écrit : EI, REI, CF, PV) | décision de Greg du 20/11 : toute la liste suit la marque, jamais « ou équivalent » |
+| 2 ter | `ei` | « Quel classement coupe-feu ? » | Pas de coupe-feu / EI 30 / EI 60 / EI 90 / EI 120 | cloison, plafond | **jamais posée en pratique** : lue au devis, par défaut « pas d'exigence feu écrite » |
+| 2 quater | `support_mur` | « Ton mur est plan, ou irrégulier (mur ancien) ? » | Plan / Irrégulier | doublage collé | **par défaut : plan** ; change le mortier adhésif (1,8 ou 2,5 kg/m²) |
 | 3 | `produit_vrac` | « Quel isolant à souffler ? » | Comblissimo (17,3 kg) / Supafil (16,6 kg) / Jetrock (20 kg) / Thermacell Cristal (12,5 kg) / Igloo (12,5 kg) | soufflage | le nombre de sacs dépend du certificat |
 | 4 | `r_vise` | « Quel R visé ? » | R 5 / R 6 / R 7 / R 8 / R 10 | soufflage | nombre de sacs |
 | 5 | (comptoir) complexe | « Quel complexe : isolant et épaisseur (ex. PSE 10+80, laine de verre 10+100) ? » | réponse écrite | doublage collé | l'article |
