@@ -19,9 +19,9 @@ describe("base de référence couverture", () => {
 
   it("est classée par famille, du toit à la zinguerie et au bois", () => {
     const codes = lue.base.familles.map((f) => f.code);
-    expect(codes.length).toBe(11);
+    expect(codes.length).toBe(13);
     expect(codes.slice(0, 2)).toEqual(["ardoise", "tuile_emboitement"]);
-    expect(codes.at(-1)).toBe("bois_couverture");
+    expect(codes.slice(-3)).toEqual(["bois_couverture", "pertes", "comptoir_exposee"]);
   });
 
   it("connaît les modèles que les artisans écrivent (HP10, PV10, ardoise 32×22)", () => {
@@ -35,7 +35,8 @@ describe("base de référence couverture", () => {
     for (const c of tousLesChiffres(lue.base)) {
       if (c.chiffre.statut !== "confirme_fabricant") continue;
       expect(c.chiffre.sources.length, c.chiffre.id).toBeGreaterThan(0);
-      if (c.famille.startsWith("tuile")) expect(c.chiffre.controle?.some((t) => !t.startsWith("ÉCHEC")), c.chiffre.id).toBe(true);
+      const controle = c.chiffre.controle as string[] | undefined;
+      if (c.famille.startsWith("tuile")) expect(controle?.some((t) => !t.startsWith("ÉCHEC")), c.chiffre.id).toBe(true);
     }
   });
 

@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.20-59 — Tuile canal : 3 % de casse et de coupe (jamais 0 %)
+
+- **§5 / §35.3 Tuile canal** : marge de 3 %, lue dans la fiche (`tuile.perte_canal`). Avant : aucune (0 %). La casse à la
+  pose d'une tuile terre cuite n'est jamais nulle (1 %, fiches environnementales collectives CTMNC 2014, 2020, 2022), les
+  coupes s'y ajoutent ; 3 % = la marge des tuiles du référentiel du fondateur. Modifiable par l'entreprise.
+- Exemple : Canal Gironde 50, R 150, 100 m² → 2 617 tuiles (avant 2 540).
+- Recherche des pertes (`recherche/pertes.md`) : aucun autre pourcentage n'est confirmé par deux sources ; les marges en
+  place (ardoise 5 %, tuile 3 %, liteaux 5 %, volige 5 %, bande zinc 5 %) restent celles du référentiel du fondateur.
+
 ## roofing-2026.11.19-58 (suite) — Zone du chantier calculée par commune
 
 - **§26 / §32.1 Zone climatique** : lue PAR COMMUNE dans la carte des régions (`carte-regions.json`, `zones_communes`,

@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **94.4 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **93.4 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -1164,6 +1164,138 @@ Taux de chiffres confirmés : **94.4 %**. Règle : confirme : deux sources indé
 ### planche de rive
 
 - **Toutes marques sapin blanc du Nord (Silverwood, Protac)** (une_source 1) : 
+
+## Pertes de casse et de coupe
+
+### méthode
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| methode_de_metre_des_points_singuliers | surface de couverture + plus-values des points singuliers (m² par ml) = surface à considérer ; quantité = surface à considérer × éléments au m² ; puis + % de casse  | couverture en petits éléments (ardoise au crochet dans le manuel ; le guide Culture fait de même pour l'ardoise clouée ou au crochet) | confirme |
+
+
+### ardoise naturelle
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| plus_values_par_ml_m2_a_ajouter_a_la_surface | {'egout_droit': 'pureau × longueur', 'egout_biais': '2 pureaux × longueur', 'rive_tranchis_droit': 0.16, 'rive_tranchis_biais': 0.25, 'rive_tranchis_circulaire': 0.33, 'aretier_rang_doublage_2_rives': 0.66, 'aretier_ardoises_biaises_2_rives': 0.66, 'noue_fendis_renvers_1_ou_2_tranchis': 1.5, 'noue_renvers_rond_ou_1_tranchis': 1.5, 'deversee_1_tranchis': 0.33, 'deversee_2_tranchis': 0.5, 'tourelle': 'circonférence de base × hauteur'} m² par ml | ardoise au crochet ; exemple du manuel : versant 39 m², égout 5 m, tranchis droit 6 m, tranchis biais 6,32 m → 3,15 m² de plus-values (+8 %) → 42,15 m² | une_source |
+| perte_casse_et_coupes | 5 % | toit simple (deux pans, sans ouverture), après plus-values ou à défaut sur la surface | une_source |
+| perte_casse_et_coupes_toit_complique | 7 % (lucarnes, fenêtres de toit) ; 10 % et plus (croupes, noues, arêtiers, tourelles) % | sans plus-values comptées à part | a_confirmer |
+| crochets_d_ardoise | 1 crochet par ardoise ; surplus 0 à 10 % selon la source u | pose au crochet | a_confirmer |
+
+
+### ardoise fibres-ciment
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| perte_casse_et_coupes | 5 % | toit simple | a_confirmer |
+
+
+### tuiles terre cuite (emboîtement, plates, canal)
+
+- **CTMNC (FDES collectives des fabricants français de tuiles terre cuite) tuile à emboîtement ; tuile canal et tuile plate ; tuile terre cuite (2014)** (confirme 1) : taux_de_casse_a_la_mise_en_oeuvre_hypothese_fdes_module_a5 1 %
+
+### tuiles à emboîtement (grand moule, petit moule, romanes, béton)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| perte_casse_et_coupes | 3 à 5 % | toit simple à deux pans, rives en tuiles de rive comptées à part | a_confirmer |
+
+
+### toutes tuiles
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| perte_casse_et_coupes_toit_complique | 7 à 10 % et plus (noues, arêtiers, croupes, lucarnes, fenêtres de toit) % |  | a_confirmer |
+
+
+### tuiles plates
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| perte_casse_et_coupes | 5 % | toit simple | a_confirmer |
+
+
+### tuiles canal
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| perte_casse_et_coupes_courant_et_couvert | au moins 1 % (casse) ; 5 % courant en formation % |  | a_confirmer |
+
+
+### faîtières, arêtiers, tuiles de rive
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| methode | ml × pièces au ml du modèle, arrondi à la pièce supérieure ; casse 1 % (FDES) ; aucun % de coupe trouvé  |  | a_confirmer |
+
+
+### liteaux et contre-liteaux
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| chute_d_aboutage | longueur vendue ÷ longueur utile (multiple de l'entraxe des chevrons) : 0 % si la longueur tombe juste (4,20 m sur chevrons à 60 cm), 10 % pour 4,00 m sur 60 cm % | liteaux aboutés sur chevron (DTU 40.11 cité par les guides : appui de 35 mm, divisé par deux aux jonctions) | une_source |
+
+
+### voliges
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| perte_coupes_et_chutes | 5 à 10 % | plus haut sur croupes, lucarnes ; plus la chute d'aboutage (comme les liteaux) | a_confirmer |
+
+
+### écran sous toiture
+
+- **Siplast Sup'Air, Def'X R1** (une_source 1) : consommation_recouvrements_compris 1,10 à 1,20 m²/m²
+
+### zinc en bandes (faîtage, rive, égout, noue)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| methode | ml + recouvrement à chaque jonction, arrondi à la longueur de 2 m ; avec 5 cm de recouvrement : +2,5 % ; avec 10 cm : +5 %  | bandes façonnées vendues en 2 m | a_confirmer |
+
+
+### gouttières zinc
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| methode | ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus  |  | confirme |
+
+
+## Points du comptoir et situation exposée
+
+### faîtage ardoise
+
+- **Edilians Faîtière Armor 33 (réf. 729)** (confirme 2, une_source 1) : pieces_par_ml 3 u/ml; recouvrement_entre_faitieres 40 mm
+- **Edilians Faîtière Armor 33 Émaillé Brun** (une_source 1) : conditionnement 176 u/palette
+- **Edilians Faîtière ardoise de 40 Ouverture 17 (réf. 720)** (une_source 1) : pieces_par_ml 2.5 u/ml
+
+### ardoise naturelle
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| part_crochets_pointe | 0.2 fraction | pose à l'agrafe sur liteaux : pointes là où l'agrafe ne passe pas (au droit de chaque chevron ou contre-liteau) et sur les parties voligées (égout : doublis et 1er rang) ; rives : ardoises à 2 clous, pas de crochet ; sur voligeage jointif : 100 % de pointes | une_source |
+
+- **Toutes marques tous formats** (a_confirmer 2, confirme 1) : ardoises_par_palette_estimation ≈ 1 350 kg ÷ poids unitaire (poids = L × l × e × 2,8 g/cm³) u/palette; majoration_recouvrement R + 10 mm (retenir max(R + 10 mm, R × 1,10)) mm; majoration_recouvrement R × 1,10 arrondi au mm supérieur (≈ + 7 à + 10 mm) mm
+- **Toutes marques 27x18** (une_source 1) : ardoises_par_palette 2800 u/palette
+- **Toutes marques 40x22** (une_source 1) : ardoises_par_palette 1500 u/palette
+- **Toutes marques 35x25** (une_source 1) : ardoises_par_palette 800 u/palette
+- **Toutes marques 40x25** (une_source 1) : ardoises_par_palette 950 u/palette
+- **Toutes marques 46x30** (une_source 1) : ardoises_par_palette 700 u/palette
+- **Toutes marques 30x20** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques 33x23** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques 35x22** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques 45x30** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques 50x25** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Cupa Cupa 10 Excellence 40×22** (confirme 1) : unite_de_vente au mille (MIL)
+
+### gouttière
+
+- **Toutes marques pendante, nantaise, havraise** (confirme 1) : ecartement_crochets 0.5 m
+
+### tuile terre cuite
+
+- **Toutes marques DTU 40.21 / 40.211** (confirme 1) : effet_situation_exposee pente minimale plus forte (colonne « exposé » des tableaux), pas de majoration de recouvrement
 
 ## Carte des régions
 

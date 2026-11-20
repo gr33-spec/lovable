@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-58",
+  "version": "roofing-2026.11.20-59",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -17225,6 +17225,18 @@
       },
       "version": 1,
       "note": "Tuiles mécaniques."
+    },
+    {
+      "family": "roof_tile_canal",
+      "rate": "3",
+      "source": "fiche-couverture",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-11-19",
+        "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+      },
+      "version": 1,
+      "note": "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)."
     },
     {
       "family": "batten",
