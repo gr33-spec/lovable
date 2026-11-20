@@ -30,9 +30,8 @@ test.beforeEach(async ({ request }) => {
  * La carte : région puis département, au toucher. RÈGLE CHANGÉE (Greg, 20 novembre 2026) : sous la carte, plus la liste
  * des départements ; seuls les trop petits (Paris, la petite couronne) ont un bouton (`parLaCarte: false`).
  */
-async function choisirDepartement(page: Page, region: string, departement: string, { parLaCarte = true, regionParBouton = false } = {}) {
-  if (regionParBouton) await page.locator(`button[data-pastille-region="${region}"]`).click();
-  else await page.locator(`path[data-region="${region}"]`).click();
+async function choisirDepartement(page: Page, region: string, departement: string, { parLaCarte = true } = {}) {
+  await page.locator(`path[data-region="${region}"]`).click();
   await page.locator(`g[data-departement="${departement}"]`).waitFor();
   if (parLaCarte) await page.locator(`g[data-departement="${departement}"]`).click();
   else await page.locator(`button[data-pastille="${departement}"]`).click();
@@ -77,7 +76,9 @@ test("la carte : 13 régions et l'outre-mer ; une région se zoome en départeme
   await expect(page.getByRole("heading", { name: "Tu travailles où ?" })).toBeVisible();
   await expect(page.locator("g[data-departement]")).toHaveCount(0);
   // Les petits départements d'Île-de-France : au pouce, par les boutons.
-  await choisirDepartement(page, "11", "75", { parLaCarte: false, regionParBouton: true });
+  // Plus de boutons des régions sous la France (Greg, 20 novembre 2026) : seulement l'outre-mer.
+  await expect(page.locator("button[data-pastille-region]")).toHaveCount(5);
+  await choisirDepartement(page, "11", "75", { parLaCarte: false });
   await expect(page.getByText("Paris (75)")).toBeVisible();
   // Seuls les petits départements ont leur bouton ; jamais toute la liste sous la carte.
   await expect(page.locator("button[data-pastille]")).toHaveText(["75", "92", "93", "94"]);

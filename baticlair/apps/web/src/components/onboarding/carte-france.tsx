@@ -303,24 +303,11 @@ export function CarteFrance({
         </div>
       )}
 
-      {/* Les régions en boutons (leurs noms ne tiennent pas sur la carte d'un téléphone) ; l'outre-mer, qui n'est pas sur la carte. */}
+      {/* RÈGLE CHANGÉE (Greg, 20 novembre 2026 : « ici on laisse juste outre-mer ») : les régions se touchent sur la carte ; sous la
+          France entière, seulement l'outre-mer, qui n'est pas sur la carte. */}
       {!choix ? (
         <>
-          <ul className="mzo-pastilles" aria-label="Choisis ta région">
-            {REGIONS_CARTE.map((r) => (
-              <li key={r.code}>
-                <button
-                  type="button"
-                  data-pastille-region={r.code}
-                  onPointerDown={() => void chargerDepartements(r.code).catch(() => undefined)}
-                  onClick={() => choisirRegion(r)}
-                >
-                  {r.nom}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-[13px] font-semibold text-muted">Outre-mer</p>
+          <p className="mt-1 text-[13px] font-semibold text-muted">Outre-mer</p>
           <ul className="mzo-pastilles" aria-label="Outre-mer">
             {OUTRE_MER.map((o) => (
               <li key={o.code}>
