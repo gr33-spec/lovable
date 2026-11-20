@@ -227,7 +227,7 @@ function EtapeCompte({ departement, metier, onFait }: { departement: string; met
       }
       const c = await api<{ id: string }>("/v1/companies", {
         method: "POST",
-        body: { name: "Mon entreprise", trades: [metier], departement, telephone: telephone.trim(), parcours: "essai" },
+        body: { name: "", trades: [metier], departement, telephone: telephone.trim(), parcours: "essai" },
         idempotencyKey: cle.current,
       });
       setActiveCompanyId(c.id);

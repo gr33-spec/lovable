@@ -57,6 +57,46 @@ describe("nouvel onboarding", { timeout: 120_000 }, () => {
     expect(r.body.error.details).toMatchObject({ reason: "portable_invalide" });
   });
 
+  it("aucun nom d'entreprise avant le SIRET : ni en base, ni dans Mon site, ni dans l'aperçu du PDF ; l'adresse Mobiiz attend le vrai nom", async () => {
+    const { agent, companyId } = await essai("yann@toitures.fr");
+    expect((await ctx.prisma.company.findUniqueOrThrow({ where: { id: companyId } })).name).toBe("");
+    expect(await ctx.prisma.adresseMobiiz.count({ where: { companyId } })).toBe(0);
+    const me = (await agent.get("/v1/me").expect(200)).body;
+    expect(me.companies[0].name).toBe("");
+    const page = await agent.get("/v1/ma-page");
+    expect(page.status).toBe(200);
+    expect(JSON.stringify(page.body)).not.toMatch(/Mon entreprise/);
+    const pdf = await agent.get("/v1/price-requests/settings/apercu.pdf");
+    expect(pdf.status).toBe(200);
+    // Confirmée : le nom vient de l'annuaire (ici, le faux annuaire des tests ne donne pas de nom : il reste vide), et
+    // l'adresse Mobiiz se fabrique au premier besoin.
+    await agent.put("/v1/company/identite").send({ siret: SIRET, prenom: "Yann", telephone: "06 12 34 56 78" }).expect(200);
+    const a = (await agent.get("/v1/company/adresse-mobiiz").expect(200)).body;
+    expect(a.vueLe).toBeNull();
+    await agent.post("/v1/company/adresse-mobiiz/vue").expect(200);
+    expect((await agent.get("/v1/company/adresse-mobiiz").expect(200)).body.vueLe).not.toBeNull();
+  });
+
+  it("le lien de connexion : un e-mail avec un lien à usage unique qui connecte ; jamais un compte créé", async () => {
+    await essai("yann@toitures.fr");
+    ctx.emails.sent.length = 0;
+    const visiteur = request.agent(ctx.app.getHttpServer());
+    await visiteur.post("/v1/auth/sign-in/magic-link").set("origin", WEB_ORIGIN).send({ email: "yann@toitures.fr", callbackURL: "/" }).expect(200);
+    const mail = ctx.emails.sent.find((m) => m.to === "yann@toitures.fr" && /lien de connexion/.test(m.subject));
+    expect(mail?.text).toMatch(/15 minutes/);
+    const lien = new URL(/https?:\/\/\S+/.exec(mail!.text)![0]);
+    const ouvre = await visiteur.get(`${lien.pathname}${lien.search}`);
+    expect(ouvre.status).toBe(302);
+    expect((await visiteur.get("/v1/me").expect(200)).body.user.email).toBe("yann@toitures.fr");
+    // Une seconde ouverture du même lien ne connecte personne.
+    const autre = request.agent(ctx.app.getHttpServer());
+    await autre.get(`${lien.pathname}${lien.search}`);
+    await autre.get("/v1/me").expect(401);
+    // Une adresse inconnue : rien n'est créé.
+    await request(ctx.app.getHttpServer()).post("/v1/auth/sign-in/magic-link").set("origin", WEB_ORIGIN).send({ email: "inconnu@exemple.fr", callbackURL: "/" });
+    expect(await ctx.prisma.user.count({ where: { email: "inconnu@exemple.fr" } })).toBe(0);
+  });
+
   it("les 3 analyses offertes sont celles d'avant, pour le nouvel arrivant aussi", async () => {
     const { agent } = await essai("yann@toitures.fr");
     const { agent: ancien } = await signUpWithCompany(ctx.app, "ancien@toitures.fr", "Toitures Ancien");

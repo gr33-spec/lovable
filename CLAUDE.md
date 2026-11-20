@@ -272,6 +272,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - « Je ne sais pas » à la longueur des bacs : l'ouvrage qui a une valeur courante pour le rampant (les ardoises, dont il ne règle que le recouvrement) la reprend et reste chiffré ; les bacs restent à préciser dans la liste. Test `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts`.
 - Une qualité qui se nomme (« Ardoise d'Angers ») est acceptée même quand sa question n'est plus ouverte au moment où les réponses arrivent d'un coup (avant : refusée « pas un nombre », puis reposée).
 - La discussion des questions n'est jamais fermée en route : les cases « Suggestions » s'affichent dans son fil.
+- Recette en ligne du 19 novembre 2026 (D-2026-024) : la largeur de bobine ne se demande plus (défaut affiché 650, jamais « à confirmer », modifiable) ; une ligne « Fourniture et pose » que le modèle détaille en articles sans quantité d'un même ouvrage (bobine, tasseaux, couvre-joints) donne sa surface au premier : la couverture est chiffrée ; un nombre que le code calcule (rangs de tasseaux, nombre de bacs) n'est jamais demandé. Test `zinc-a-tasseaux.test.ts`.
 - Constat du 18 novembre : trois lectures du même devis donnent trois listes différentes. À faire : D-2026-024 au jeu de test, puis stabiliser (prompt, clés de la fiche).
 
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
@@ -340,3 +341,14 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Les entreprises créées ainsi portent `parcours_inscription = essai`. Pour elles seulement : le SIRET n'est demandé qu'au moment d'envoyer aux négoces, de grouper ou de commander (« Pour que les négoces sachent à qui ils répondent… »), l'entreprise trouvée (nom, adresse, activité) se confirme (« C'est bien mon entreprise » / « Ce n'est pas la mienne »), et rien ne part avant : 403 `identite_a_confirmer` sur l'envoi, l'ajout de négoces, la commande, la demande perso (`IdentiteConfirmeeGuard`) ; achats groupés : SIRET compté seulement une fois confirmé. Département de l'entreprise ≠ celui de la carte : l'artisan choisit lequel garder (`PATCH /v1/company/departement`). Les comptes d'avant ne sont pas touchés.
 - Zone des achats groupés : le département choisi d'abord, sinon le code postal de l'adresse (RÈGLE CHANGÉE : avant, le code postal d'abord).
 - L'inscription complète `/inscription` reste servie (parcours de test), plus liée ; « Bientôt disponible » et la liste d'attente sont retirés de l'écran (données gardées). Admin › « Métiers et départements des inscrits » (`/admin/liste-attente`).
+
+## Décisions du 20 novembre 2026 : réponses de Greg sur l'onboarding
+
+- Connexion (RÈGLE CHANGÉE : avant, le mot de passe seul) : sur `/connexion`, d'abord « Recevoir un lien de connexion » (lien par e-mail, 15 minutes, usage unique, jamais une création de compte ; plugin `magicLink` de better-auth, déjà installé) ; le mot de passe reste possible. Profil › Sécurité : « Choisir un mot de passe » (un lien par e-mail, le chemin de « Mot de passe oublié », anti-robot compris). Comptes existants inchangés.
+- « Voici ton adresse Mobiiz » (RÈGLE CHANGÉE : avant, juste après l'inscription) : au premier envoi aux négoces, une seule fois, dans la feuille d'envoi, après la validation de l'entreprise. L'inscription complète `/inscription` le montre encore à l'inscription.
+- Aucun nom d'entreprise tant que le SIRET n'est pas validé (parcours « essai ») : le nom est vide en base, l'en-tête n'affiche rien ; l'annuaire donne le nom à la confirmation ; l'adresse Mobiiz attend ce nom (créée au premier besoin). E-mails d'identité : « Bonjour, » quand il n'y a pas de nom.
+- Message pour un autre métier : gardé.
+
+## À faire avant l'ouverture d'un nouveau métier
+
+- Un bouton admin « Prévenir les inscrits de ce métier », qui envoie un e-mail à tous les inscrits de ce métier (entreprises du métier et ancienne liste d'attente). Pas encore codé (Greg, 20 novembre 2026).

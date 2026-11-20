@@ -7,7 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
-import { RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
+import { ContenuAdresseMobiiz, RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
 import { OfferLines, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
 import { Badge, Button, Card, ErrorNotice, Spinner, INPUT } from "@/components/ui";
@@ -1008,6 +1008,21 @@ function NewRequest({
   const setDueDate = (v: string) => b.modifier((d) => ({ ...d, dueDate: v }));
   // Lot final, points 1 et 4 : « Avant d'envoyer » la première fois, puis « À qui j'envoie ? », puis l'aperçu du mail.
   const identite = useIdentite();
+  // « Voici ton adresse Mobiiz », une seule fois, au premier envoi (Greg, 19 novembre 2026). L'état n'est lu qu'une fois
+  // l'entreprise confirmée (l'adresse se fabrique alors avec son vrai nom) ; « inconnu » le temps de la réponse.
+  const [adresseEtat, setAdresseEtat] = useState<"inconnu" | "a-voir" | "vue">("inconnu");
+  const [vuePending, setVuePending] = useState(false);
+  const dejaVue = useCallback(() => setAdresseEtat("vue"), []);
+  const identiteComplete = !!identite.data?.complete;
+  useEffect(() => {
+    if (!previewing || !identiteComplete || adresseEtat !== "inconnu") return;
+    const c = new AbortController();
+    api<{ vueLe: string | null }>("/v1/company/adresse-mobiiz", { signal: c.signal }).then(
+      (a) => setAdresseEtat(a.vueLe ? "vue" : "a-voir"),
+      () => setAdresseEtat("vue"),
+    );
+    return () => c.abort();
+  }, [previewing, identiteComplete, adresseEtat]);
   const [enregistre, setEnregistre] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
@@ -1115,6 +1130,30 @@ function NewRequest({
             }}
           >
             <EtapeIdentite identite={identite.data} onFait={(i) => identite.setData(i)} onPending={setEnregistre} />
+          </SendSheet>
+        ) : identite.data && adresseEtat === "inconnu" ? null : identite.data && adresseEtat === "a-voir" ? (
+          <SendSheet
+            key="adresse"
+            titre="Voici ton adresse Mobiiz :"
+            principal={{
+              label: "C'est compris",
+              pending: vuePending,
+              onClick: () => {
+                setVuePending(true);
+                void api("/v1/company/adresse-mobiiz/vue", { method: "POST" })
+                  .catch(() => undefined)
+                  .finally(() => {
+                    setVuePending(false);
+                    setAdresseEtat("vue");
+                  });
+              },
+            }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            <ContenuAdresseMobiiz onDejaVue={dejaVue} />
           </SendSheet>
         ) : etape === "negoces" ? (
           <SendSheet key="negoces"

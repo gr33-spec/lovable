@@ -231,8 +231,13 @@ export function lignesDeLecture(lecture: LectureDevis, ids?: ReadonlyMap<string,
     // « Fourniture et pose couverture zinc à tasseaux, 32 m² » (recette en ligne du 19 novembre 2026, D-2026-024) : le
     // modèle nomme l'article SANS quantité, puisque la quantité est celle de la ligne. Seul sur sa ligne, il la prend : c'est
     // l'article écrit. Avant : la ligne restait « sans fourniture », et la couverture n'était jamais chiffrée.
-    const seul = ligne.role === "fourniture_et_pose" && !SANS_ACHAT.test(normalizeText(ligne.designation)) && ligne.fournitures.length === 1 && ligne.fournitures[0]!.quantite === null && ligne.quantite !== null;
-    const fournitures = seul ? [{ ...ligne.fournitures[0]!, quantite: ligne.quantite, unite: ligne.fournitures[0]!.unite ?? ligne.unite }] : ligne.fournitures;
+    // De même quand le modèle détaille l'ouvrage en plusieurs articles sans quantité, tous du MÊME ouvrage (« zinc en
+    // bobine », « tasseaux bois », « couvre-joints », recette en ligne du 19 novembre 2026) : le premier prend la quantité
+    // de la ligne, qui mesure l'ouvrage ; les autres sont cités, et le calcul les compte. Avant : la ligne restait « à
+    // chiffrer », la surface de 32 m² perdue.
+    const memeOuvrage = ligne.fournitures.length > 1 && ligne.fournitures[0]!.ouvrage !== null && ligne.fournitures.every((f) => f.ouvrage === ligne.fournitures[0]!.ouvrage);
+    const seul = ligne.role === "fourniture_et_pose" && !SANS_ACHAT.test(normalizeText(ligne.designation)) && (ligne.fournitures.length === 1 || memeOuvrage) && ligne.fournitures.every((f) => f.quantite === null) && ligne.quantite !== null;
+    const fournitures = seul ? [{ ...ligne.fournitures[0]!, quantite: ligne.quantite, unite: ligne.fournitures[0]!.unite ?? ligne.unite }, ...ligne.fournitures.slice(1)] : ligne.fournitures;
     const written = fournitures.filter((f) => f.quantite !== null);
     // Une ligne de pose qui ne fait que citer (« soudures » : l'étain) reste une ligne sans fourniture, avec ce qu'elle cite.
     if (written.length === 0 && (ligne.role === "pose" || ligne.role === "fourniture_et_pose")) {
@@ -789,7 +794,9 @@ export function ecranDeLecture(input: {
   // §51.2 : les questions sont celles du modèle, et seulement elles (le moteur ne demande rien de lui-même).
   // Une donnée que la fiche du métier interdit de demander (`neverAsk` : le pureau) n'est jamais une question, même quand
   // le modèle la pose : elle se calcule, et ce qu'il lui faut (le format, la taille des crochets) se demande à sa place.
-  const interdites = new Set(ref.workItems.flatMap((w) => w.params.filter((p) => p.neverAsk).map((p) => p.key)));
+  // Une valeur que le CODE calcule (`derived` d'un ouvrage : le nombre de bacs, les rangs de tasseaux) ne se demande jamais
+  // non plus : c'est une quantité (« Combien de rangs de tasseaux ? », recette en ligne du 19 novembre 2026, D-2026-024).
+  const interdites = new Set(ref.workItems.flatMap((w) => [...w.params.filter((p) => p.neverAsk).map((p) => p.key), ...(w.derived ?? []).map((d) => d.key)]));
   // Les consommables se cochent à l'étape « Suggestions » : la question oui / non du modèle n'est plus posée.
   const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q0) => {
     const q = rattacherQuestion(ref, plan, q0, lignes);

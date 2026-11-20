@@ -42,11 +42,14 @@ export class TenancyService {
     const dep = departement ? (departementConnu(departement)?.code ?? null) : null;
     // Le nouvel onboarding : le portable est exigé (06 ou 07), il sert ensuite de numéro de l'entreprise.
     if (essai.parcours === PARCOURS_ESSAI && !portableValide(essai.telephone)) throw new DomainError("validation_failed", "Mobile phone expected", { reason: "portable_invalide" });
-    const vue = await this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades), dep, {
+    // Nouvel onboarding (Greg, 19 novembre 2026) : AUCUN nom d'entreprise tant que le SIRET n'est pas validé ; c'est
+    // l'annuaire qui le donne à la confirmation. L'adresse Mobiiz attend aussi ce nom (créée au premier envoi).
+    const essaiOuvert = essai.parcours === PARCOURS_ESSAI;
+    const vue = await this.companies.createWithOwner(essaiOuvert ? "" : normalizeCompanyName(rawName), userId, normalizeTrades(trades), dep, {
       phone: essai.telephone && portableValide(essai.telephone) ? portableLisible(essai.telephone) : null,
       parcoursInscription: essai.parcours === PARCOURS_ESSAI ? PARCOURS_ESSAI : null,
     });
-    await this.apresCreation(vue.companyId).catch(() => undefined);
+    if (!essaiOuvert) await this.apresCreation(vue.companyId).catch(() => undefined);
     return vue;
   }
 
