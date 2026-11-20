@@ -348,4 +348,8 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
   - question « Ton mur est plan ? » gardée pour le mortier adhésif ;
   - en coupe-feu, un négoce sans la marque peut proposer un système complet d'une autre marque avec son PV, signalé à l'artisan, jamais de mélange ;
   - coffrages : règle acceptée, lignes « à vérifier » avec le calcul visible.
+- Recherche « montage et cornière » (20 novembre 2026, version `-5`, Greg : « c'est à toi de chercher, n'invente rien ») : plus aucune question technique pour Greg.
+  - Montage par défaut tiré de la hauteur (DTU 25.41). Au-delà du tableau, les montants sortent « à vérifier ».
+  - Le périmètre d'un plafond écrit au devis est lu. Sinon il est estimé et dit comme hypothèse.
+  - Détail : `recherche/18-trancher-montage-corniere.md`.
 
