@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-4` (fichier machine `referentiel.json`), après les réponses de Greg et la cinquième vague du 20 novembre 2026 : **91 % des chiffres confirmés** (88 % par deux sources, 3 % validés par Greg), 90 % avec l'ouvrage « coffrage » encore à vérifier |
+| Version | `plaquiste-isolation-2026.11.20-5` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -832,13 +832,14 @@ Résultat : 2 bloquants, 12 gênants, 9 détails.
 Le détail est dans `recherche/09` à `17`.
 
 1. **Coffrages** : règle acceptée par Greg, lignes « à vérifier » avec le calcul visible ; à confirmer par un plaquiste.
-2. **Périmètre d'un plafond** non écrit au devis : pièce supposée carrée. Aucune règle publiable.
+2. **Périmètre d'un plafond** non écrit au devis : estimé, pièce supposée carrée, dit comme hypothèse, ligne orange. Le périmètre écrit au devis est lu (recherche/18 §2).
 3. **Vis de plafond** :
-   - à 0,60 : SNIP 12, Placo 10 ou 15, Pladur 8 ;
+   - à 0,60 : 12 retenu (SNIP, vis de rive comprises) ; Placo 10 et Pladur 8 sans les vis de rive : écart expliqué, une source chiffrée (recherche/18 §3) ;
    - à 0,40 : Placo seul (15) ;
    - 1re peau d'un plafond en 2 BA13 : 8 (SNIP), le 3 de Placo contredit par sa propre FDES 2026 ;
    - fourrures à 0,40 : Placo seul.
-4. **TRPF des montants doublés à 0,40** : 10 (Placo + calcul), contre SNIP 7 et Chausson 8.
+4. **TRPF des montants doublés à 0,40** : 10 (Placo, retrouvé par le calcul) ; SNIP 7, Chausson 8 et Pladur 7 assemblent les montants plus espacés : écart expliqué (recherche/18 §3).
+12. **Montage au-delà du tableau** (72/48 plus haute que 3,40 m, contre-cloison M48 plus haute que 2,65 m sans appui) : montants en « à vérifier ». Ordre « simples à 40 cm avant doublés à 60 cm » : déduit de la matière, aucun fabricant ne le publie (recherche/18 §1).
 5. **Séparative, 1re peau** : 12 (SNIP seul).
 6. **Vis de doublage Knauf** : aucune valeur trouvée, on applique 15 (règle de Greg).
 7. **Plafond feu Placo** :
@@ -875,7 +876,7 @@ Le détail est dans `recherche/09` à `17`.
 - membrane, enduit, colis d'isolant, seau d'enduit, clous, boîtes.
 
 
-## 16. Décisions de Greg (20 novembre 2026) et ce qui reste à trancher
+## 16. Décisions de Greg (20 novembre 2026) et points tranchés par la recherche
 
 **Tranché :**
 1. **Vis et fixations :** sorties d'office.
@@ -887,9 +888,11 @@ Le détail est dans `recherche/09` à `17`.
 7. **Suspentes à 1,56/m² et 98/48 doublés à 0,60 en 3,75 m :** validés.
 8. **Coffrages :** règle acceptée. Les lignes restent « à vérifier », avec le calcul visible : « 5 m × développé 1 m × 1,10 = 5,5 m² de plaques ».
 
-**Reste à trancher :**
-- **Montage par défaut tiré de la hauteur** (DTU 25.41) : simples à 40 cm avant doublés à 60 cm (moins cher), ou doublés par habitude ?
-- **Cornière de rive :** garder l'estimation (pièce supposée carrée, orange « ajuste à tes pièces »), ou la sortir seulement quand le devis donne le périmètre ?
+**Tranché par la recherche (Greg, 20 novembre 2026 : « c'est à toi de chercher tes réponses, n'invente rien ») :** aucune question technique ne reste pour Greg. Détail et sources : `recherche/18-trancher-montage-corniere.md`.
+- **Montage par défaut tiré de la hauteur.** Cloison 72/48 : jusqu'à 2,50 m, simples à 60 cm ; jusqu'à 2,75 m, simples à 40 cm ; jusqu'à 3,05 m, doublés à 60 cm ; jusqu'à 3,40 m, doublés à 40 cm. Au-delà, ligne « à vérifier » (aucune 72/48 ne tient). Contre-cloison M48 sans appui : 2,00 / 2,25 / 2,40 / 2,65 m, puis « à vérifier » (appuis au mur ou montants de 70). Chaque hauteur a deux sources (NF DTU 25.41 2022, Siniat, Placo, Pladur). Aucun fabricant ne publie d'ordre de préférence. Simples à 40 cm passe avant doublés à 60 cm parce qu'il demande 21 % de montant en moins (SNIP, Chausson) ; c'est **à confirmer par un plaquiste**. Jamais d'office : le montant renforcé (5 à 10 cm de gagnés, délai J+5 chez Placo) ni le M70 (il change l'épaisseur écrite).
+- **Cornière de rive.** Obligatoire sur tout le pourtour (NF DTU 25.41 2022, guide CAPEB / FFB / SNIP §6.2.2.7, Placo 2023). Sans cornière seulement si on ne peut pas la fixer, et seul le devis peut le dire. Le périmètre écrit au devis est lu. Sinon il est estimé, pièce supposée carrée (4 × √surface), dit à l'artisan comme hypothèse, et la ligne est orange. Les ratios fixes publiés (0,47 ml/m²) ne valent que pour 80 à 96 m² : sur 12 m², ils feraient manquer plus de la moitié de la cornière.
+- **Vis de plafond à 0,60 :** 12/m², vis de rive comprises (SNIP). L'écart avec Placo (10) et Pladur (8) vient des vis de rive : c'est expliqué, ce n'est plus une contradiction.
+- **TRPF des montants doublés à 0,40 :** 10/m² (Placo, retrouvé par le calcul). SNIP, Chausson et Pladur (7 à 8) assemblent les deux montants plus espacés.
 
 ## 17. Ce qu'il reste à faire pour ouvrir le métier plaquiste dans Mobiiz
 

@@ -1,6 +1,6 @@
 {
   "id": "plaquiste-isolation",
-  "version": "plaquiste-isolation-2026.11.20-4",
+  "version": "plaquiste-isolation-2026.11.20-5",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -2424,7 +2424,7 @@
             },
             "version": 1,
             "formula": "si(ei > 30, si(couches < 2, 4, si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4)))), si(montant > regle.montant_large, 1, si(couches < 2, si(hauteur <= regle.h_7248_s60, 1, si(hauteur <= regle.h_7248_s40, 2, si(hauteur <= regle.h_7248_d60, 3, 4))), si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4))))))",
-            "note": "Hauteurs limites NF DTU 25.41 (février 2022), montant M48-35 courant : on prend le montage le moins cher qui tient la hauteur (simples 0,40 avant doublés 0,60). Coupe-feu EI 60 en 72/48 : montants doublés à 0,40 (Placo PV RS 15-020, Knauf PV EFR-19-V-002073)."
+            "note": "Hauteurs limites NF DTU 25.41 (février 2022), montant M48-35 courant : on prend le montage qui tient la hauteur avec le moins de matière (simples 0,40 avant doublés 0,60 : 21 % de montant en moins, SNIP et Chausson ; montant renforcé ML 48-50 jamais d'office : 5 à 10 cm de gagnés, référence Placo à délai J+5 ; M70 jamais d'office : il change l'épaisseur écrite). Aucun fabricant ne publie d'ordre de préférence : ordre déduit de la matière (recherche/18 §1). Coupe-feu EI 60 en 72/48 : montants doublés à 0,40 (Placo PV RS 15-020, Knauf PV EFR-19-V-002073)."
           }
         },
         {
@@ -3688,10 +3688,9 @@
           "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 10 TRPF/m² : Placo Intégrale 2021-22 et le calcul de sa règle « montants doublés solidarisés tous les 40 cm » (9,9) (recherche/15 n° 2). Règle changée : avant 7."
+            "note": "Recherche du 2026-11-19 — 1 source : 10 TRPF/m² : Placo Intégrale 2021-22, retrouvé par le calcul de sa règle « montants doublés assemblés tous les 0,40 m » (recherche/15 n° 2 et 18 §3). SNIP 7, Chausson 8 et Pladur 7 assemblent plus espacé (environ tous les mètres) : écart expliqué, pas une contradiction. Règle changée : avant 7."
           },
           "version": 1,
-          "conflict": "SNIP 7, Chausson 8 : ils ne comptent pas toute la solidarisation des montants doublés.",
           "kind": "installation_condition",
           "value": "10",
           "unit": "u/m2",
@@ -3857,6 +3856,7 @@
           "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature) + portes * regle.montants_par_porte",
           "unit": "u",
           "core": true,
+          "when": "si(ei < 1, si(si(montant > regle.montant_large, 0, si(couches < 2, si(hauteur > regle.h_7248_d40, 1, 0), 0)) < 1, 1, 0), 0)",
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
           "precision": "{montage}",
           "short": "montants",
@@ -3866,8 +3866,7 @@
             "status": "draft",
             "note": "Recherche du 2026-11-19 — 2 sources : Un montant par entraxe + 1 ; en doublés, les deux montants de bout ne se doublent pas : (n + (doubles − 1)(n − 2)) × 1,05. Redonne le SNIP (2,10 / 2,89 / 3,68 / 5,25 ml/m²) et Placo Intégrale 2021-22 (recherche/09 n° 35). Hors montants d'huisserie."
           },
-          "version": 1,
-          "when": "ei < 1"
+          "version": 1
         },
         {
           "id": "montants-feu",
@@ -3875,6 +3874,7 @@
           "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature) + portes * regle.montants_par_porte",
           "unit": "u",
           "core": true,
+          "when": "si(ei >= 1, si(si(montant > regle.montant_large, 0, si(couches < 2, si(hauteur > regle.h_7248_d40, 1, 0), 0)) < 1, 1, 0), 0)",
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m} {marque_systeme}",
           "precision": "{montage} ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
           "short": "montants",
@@ -3885,7 +3885,43 @@
             "note": "Recherche du 2026-11-19 — 2 sources : Un montant par entraxe + 1 ; en doublés, les deux montants de bout ne se doublent pas : (n + (doubles − 1)(n − 2)) × 1,05. Redonne le SNIP (2,10 / 2,89 / 3,68 / 5,25 ml/m²) et Placo Intégrale 2021-22 (recherche/09 n° 35). Hors montants d'huisserie."
           },
           "version": 1,
-          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ]
+        },
+        {
+          "id": "montants-hors",
+          "slot": "montant",
+          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature) + portes * regle.montants_par_porte",
+          "unit": "u",
+          "core": true,
+          "when": "si(ei < 1, si(si(montant > regle.montant_large, 0, si(couches < 2, si(hauteur > regle.h_7248_d40, 1, 0), 0)) >= 1, 1, 0), 0)",
+          "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
+          "precision": "{montage} ; à vérifier : cloison de {hauteur|m}, plus haute que le tableau du DTU 25.41 pour une 72/48 (3,40 m) : cloison plus large ou montage à faire valider",
+          "short": "montants",
+          "source": "dtu-2541-2022",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Au-delà de 3,40 m, aucune 72/48 du NF DTU 25.41 (2022) ni des fabricants ne tient : la quantité est calculée en doublés à 0,40, ligne à vérifier (recherche/18 §1)."
+          },
+          "version": 1
+        },
+        {
+          "id": "montants-hors-feu",
+          "slot": "montant",
+          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature) + portes * regle.montants_par_porte",
+          "unit": "u",
+          "core": true,
+          "when": "si(ei >= 1, si(si(montant > regle.montant_large, 0, si(couches < 2, si(hauteur > regle.h_7248_d40, 1, 0), 0)) >= 1, 1, 0), 0)",
+          "designation": "Montants M{montant|mm#} longueur {longueur_montant|m} {marque_systeme}",
+          "precision": "{montage} ; à vérifier : cloison de {hauteur|m}, plus haute que le tableau du DTU 25.41 pour une 72/48 (3,40 m) : cloison plus large ou montage à faire valider ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
+          "short": "montants",
+          "source": "dtu-2541-2022",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Au-delà de 3,40 m, aucune 72/48 du NF DTU 25.41 (2022) ni des fabricants ne tient : la quantité est calculée en doublés à 0,40, ligne à vérifier (recherche/18 §1)."
+          },
+          "version": 1,
           "precisionRequires": [
             "marque_systeme"
           ]
@@ -8548,7 +8584,25 @@
           "version": 1,
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
           "precision": "{montage}",
-          "short": "montants"
+          "short": "montants",
+          "when": "si(montant > regle.montant_large, 0, si(hauteur > regle.h48_d40, 1, 0)) < 1"
+        },
+        {
+          "id": "montants-hors",
+          "slot": "montant",
+          "formula": "arrondi_sup((longueur_mur / entraxe + 1 + (doubles - 1) * (longueur_mur / entraxe - 1)) * regle.chute)",
+          "unit": "u",
+          "core": true,
+          "source": "dtu-2541-2022",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Au-delà de 2,65 m, une contre-cloison M48 sans appui ne tient pas : des appuis au mur tous les 1,50 m de hauteur ou des montants de 70 (Placo, Pladur ; recherche/18 §2). Quantité calculée en doublés à 0,40, ligne à vérifier."
+          },
+          "version": 1,
+          "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
+          "precision": "{montage} ; à vérifier : contre-cloison de {hauteur|m}, plus haute que 2,65 m sans appui : des appuis au mur ou des montants de 70",
+          "short": "montants",
+          "when": "si(montant > regle.montant_large, 0, si(hauteur > regle.h48_d40, 1, 0)) >= 1"
         },
         {
           "id": "rails",
@@ -8706,6 +8760,28 @@
           "kind": "site_data",
           "question": "Surface de plafond ?",
           "fromLineQuantity": true
+        },
+        {
+          "key": "perimetre",
+          "label": "Périmètre du plafond",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Le tour de la pièce (périmètre) ?",
+          "textLabels": [
+            "perimetre",
+            "pourtour",
+            "rive"
+          ],
+          "default": {
+            "source": "mobiiz-geometrie",
+            "verification": {
+              "status": "draft",
+              "note": "Recherche du 2026-11-19 — à confirmer : Périmètre réel quand le devis le donne (cornière obligatoire sur tout le pourtour, NF DTU 25.41 2022 via guide CAPEB / FFB / SNIP §6.2.2.7 et Placo 2023) ; sinon estimé, pièce supposée carrée (recherche/18 §2)."
+            },
+            "version": 1,
+            "formula": "surface * table.perimetre",
+            "note": "périmètre estimé, pièce supposée carrée"
+          }
         },
         {
           "key": "support",
@@ -9681,10 +9757,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 12 vis/m² à 0,60 (SNIP)."
+            "note": "Recherche du 2026-11-19 — 1 source : 12 vis/m² à 0,60, vis de la cornière de rive comprises (SNIP ; vissage de la rive confirmé par Siniat). Placo 2023 (10) et Pladur (8) ne comptent pas les vis de rive : le calcul refait explique l'écart (recherche/18 §3)."
           },
           "version": 1,
-          "conflict": "Placo 2023 : 10 ; Pladur : 8.",
           "kind": "installation_condition",
           "value": "12",
           "unit": "u/m2",
@@ -9868,7 +9943,7 @@
           "source": "mobiiz-geometrie",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Estimation : pièce supposée carrée (périmètre = 4 × √surface). Ni SNIP (0,47 ml/m² pour 8 × 10 m) ni Placo (« selon chantier ») ne donnent mieux : à remplacer par le périmètre réel."
+            "note": "Recherche du 2026-11-19 — à confirmer : Estimation quand le devis ne donne pas le périmètre : pièce supposée carrée (4 × √surface). Placo et Chausson comptent au périmètre réel ; les ratios fixes publiés (SNIP 0,47, Pladur 0,44 ml/m²) ne valent que pour 80 à 96 m² et feraient manquer de la cornière dans un logement (12 m² : 1,15 ml/m²). Une ligne qui couvre plusieurs pièces sous-estime encore : ligne orange (recherche/18 §2)."
           },
           "version": 1,
           "label": "Cornière de rive par m² de plafond (pièce supposée carrée)",
@@ -10129,7 +10204,7 @@
         {
           "id": "corniere",
           "slot": "corniere",
-          "formula": "surface * table.perimetre * regle.chute_corniere",
+          "formula": "perimetre * regle.chute_corniere",
           "unit": "ml",
           "core": true,
           "source": "snip-fc18",
@@ -10145,7 +10220,7 @@
         {
           "id": "corniere-feu",
           "slot": "corniere",
-          "formula": "surface * table.perimetre * regle.chute_corniere",
+          "formula": "perimetre * regle.chute_corniere",
           "unit": "ml",
           "core": true,
           "source": "snip-fc18",
@@ -10236,7 +10311,7 @@
         {
           "id": "fixations-clous",
           "slot": "fixation",
-          "formula": "arrondi_sup(surface * table.perimetre * regle.chute_corniere / regle.pas_fixation_rail + 0)",
+          "formula": "arrondi_sup(perimetre * regle.chute_corniere / regle.pas_fixation_rail + 0)",
           "unit": "u",
           "core": true,
           "source": "siniat-carnet-cloison",
@@ -10256,7 +10331,7 @@
         {
           "id": "fixations-chevilles",
           "slot": "fixation_cheville",
-          "formula": "arrondi_sup(surface * table.perimetre * regle.chute_corniere / regle.pas_fixation_rail + 0)",
+          "formula": "arrondi_sup(perimetre * regle.chute_corniere / regle.pas_fixation_rail + 0)",
           "unit": "u",
           "core": true,
           "source": "siniat-carnet-cloison",

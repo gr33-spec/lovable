@@ -54,3 +54,12 @@
   - Igloo en sacs de 10 kg (avant 12,5) ;
   - entretoises du plafond feu Placo : Stil Flam, 1,3/m² (avant PRF 2,6/m², système retiré).
 - Taux : 91 % des chiffres confirmés (88 % par deux sources, 3 % validés par Greg).
+
+## plaquiste-isolation-2026.11.20-5 — Montage et cornière tranchés par la recherche (20 novembre 2026)
+
+- Greg : « c'est à toi de chercher tes réponses, n'invente rien ». Plus aucune question technique pour lui (`recherche/18-trancher-montage-corniere.md`).
+- Montage par défaut tiré de la hauteur : les seuils de la fiche sont confirmés (72/48 : 2,50 / 2,75 / 3,05 / 3,40 m ; contre-cloison M48 : 2,00 / 2,25 / 2,40 / 2,65 m). Ordre simples 0,40 avant doublés 0,60 : 21 % de montant en moins ; reste à confirmer par un plaquiste.
+- Règle changée : au-delà du tableau, les montants sortent « à vérifier » avec la raison (avant : doublés à 0,40 sans mot).
+- Règle changée : le périmètre d'un plafond écrit au devis est lu (nouvelle donnée `perimetre`) ; sinon il est estimé et dit comme hypothèse (avant : toujours estimé, sans être dit).
+- Vis de plafond 12/m² et TRPF doublés 0,40 à 10/m² : écarts entre sources expliqués (vis de rive ; espacement de l'assemblage), plus des contradictions.
+- Les 18 chantiers types : aucune quantité ne change.
