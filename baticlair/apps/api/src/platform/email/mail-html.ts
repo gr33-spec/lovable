@@ -9,7 +9,7 @@ export function mailEnHtml(texte: string, lien: string | null): string {
     if (b.startsWith("--\n")) return `<p style="margin:24px 0 0;color:#99844C;font-size:12px">${echapper(b.slice(3))}</p>`;
     const lignes = b.split("\n").map((l) => {
       const m = lien ? /^(Répondre|Réponds) en ligne, sans inscription : (\S+)$/.exec(l) : null;
-      if (m) return `<a href="${echapper(m[2]!)}" style="display:inline-block;margin:6px 0 10px;padding:12px 22px;border-radius:999px;background:#FED206;color:#130901;font-weight:700;text-decoration:none">${m[1]} en ligne</a><br><span style="color:#614822;font-size:13px">Sans inscription.</span>`;
+      if (m) return `<a href="${echapper(m[2]!)}" style="display:inline-block;margin:6px 0 10px;padding:12px 22px;border-radius:999px;background:#FED206;color:#130901;font-weight:700;text-decoration:none">${m[1]} en ligne</a><br><span style="color:#4F4B45;font-size:13px">Sans inscription.</span>`;
       // Demande de prix individuelle (Greg, 12 novembre 2026) : répondre à l'e-mail vient d'abord ; la saisie en ligne est
       // une solution secondaire, donc un bouton discret (contour), pas le bouton jaune.
       const s = lien ? /^(Vous pouvez aussi chiffrer|Tu peux aussi chiffrer) en ligne, sans inscription : (\S+)$/.exec(l) : null;

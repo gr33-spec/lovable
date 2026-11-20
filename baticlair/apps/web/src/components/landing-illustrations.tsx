@@ -51,9 +51,9 @@ export function Visuel({ emplacement, className = "", children }: { emplacement:
 }
 
 const ARDOISE = "#2E1B05";
-const ARDOISE_CLAIRE = "#614822";
+const ARDOISE_CLAIRE = "#4F4B45";
 const ZINC = "#99844C";
-const ZINC_FONCE = "#614822";
+const ZINC_FONCE = "#4F4B45";
 const BOIS = "#CA8A1B";
 const BOIS_FONCE = "#96580C";
 const PEAU = "#F4DB5C";
@@ -61,7 +61,7 @@ const CASQUE = "#CA8A1B";
 const VESTE = "#130901";
 const PANTALON = "#130901";
 const TUILE = "#96580C";
-const TUILE_FONCE = "#614822";
+const TUILE_FONCE = "#4F4B45";
 
 /** La scène du haut : une maison, son toit d'ardoises, le couvreur sur l'échelle avec son téléphone, la palette au pied. */
 export function SceneChantier({ className = "" }: { className?: string }) {
@@ -93,7 +93,7 @@ export function SceneChantier({ className = "" }: { className?: string }) {
       <rect x="0" y="452" width="480" height="4" fill="#99844C55" />
       {/* La cheminée */}
       <rect x="318" y="140" width="34" height="78" fill="#96580C" />
-      <rect x="312" y="134" width="46" height="10" rx="2" fill="#614822" />
+      <rect x="312" y="134" width="46" height="10" rx="2" fill="#4F4B45" />
       <g stroke="#96580C" strokeWidth="2">
         <line x1="318" y1="162" x2="352" y2="162" />
         <line x1="318" y1="184" x2="352" y2="184" />
@@ -186,9 +186,9 @@ export function SceneChantier({ className = "" }: { className?: string }) {
       {/* Seau et rouleau d'écran au sol */}
       <g>
         <path d="M296 452 L300 420 L326 420 L330 452 Z" fill="#99844C" />
-        <rect x="298" y="416" width="30" height="5" rx="2" fill="#614822" />
-        <rect x="336" y="430" width="44" height="22" rx="11" fill="#614822" />
-        <circle cx="347" cy="441" r="7" fill="#614822" />
+        <rect x="298" y="416" width="30" height="5" rx="2" fill="#4F4B45" />
+        <rect x="336" y="430" width="44" height="22" rx="11" fill="#4F4B45" />
+        <circle cx="347" cy="441" r="7" fill="#4F4B45" />
       </g>
     </svg>
   );
@@ -339,7 +339,7 @@ export function TourneeGroupee({ className = "" }: { className?: string }) {
       {/* Le camion plateau, chargé de palettes */}
       <g transform="translate(70 76)">
         <rect x="0" y="22" width="112" height="10" rx="2" fill="#F2F1EE" />
-        <rect x="6" y="2" width="30" height="20" rx="2" fill="#614822" />
+        <rect x="6" y="2" width="30" height="20" rx="2" fill="#4F4B45" />
         <rect x="40" y="6" width="30" height="16" rx="2" fill="#96580C" />
         <rect x="74" y="0" width="30" height="22" rx="2" fill="#99844C" />
         <path d="M114 4 L138 4 L150 18 L150 32 L114 32 Z" fill="#FBF8F3" />
