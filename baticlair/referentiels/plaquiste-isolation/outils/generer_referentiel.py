@@ -21,7 +21,7 @@ import os
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SORTIE = os.path.join(ICI, "..", "referentiel.json")
-VERSION = "plaquiste-isolation-2026.11.20-3"
+VERSION = "plaquiste-isolation-2026.11.20-4"
 TRADE = "drywall"
 DATE = "2026-11-19"
 
@@ -920,7 +920,7 @@ def isolation_rouleaux():
 def soufflage():
     acermi = UNE("Certificat ACERMI du produit (une source officielle par produit ; Comblissimo R 10 recoupé par la fiche Isover 2026).")
     deux = OK2("Certificat ACERMI en vigueur ET fiche fabricant récente concordants : Comblissimo (fiche Isover 2026, à 1 % près), Jetrock 2 (fiche Rockwool 01/2026, identique), Thermacell Cristal (fiche Soprema INSFR0303-3/b et brochure 06/2025) (recherche/10 n° 25, recherche/13 F1-F3).")
-    une = UNE("Certificat ACERMI seul : Supafil Loft 045 (fiche Knauf illisible) et Igloo (poids de sac à confirmer : 11,3 kg chez batiproduits, absent du certificat) (recherche/13 F4-F5).")
+    une = OK2("Supafil Loft 045 : certificat ACERMI et produit jumeau Knauf Thermo Loft (ACERMI 13/D/016/850, même tableau) repris par la brochure Samse 2024 ; Igloo en sacs de 10 kg : certificat ACERMI 2026 et fiche Ouattitude 09/2024, à un sac près. Le sac de 11,3 kg n'est dans aucun tableau certifié : compter avec le poids écrit sur le sac (recherche/17 n° 1).")
     sacs_a = {**prov("acermi-soufflage", deux), "label": "Sacs pour 100 m² : Comblissimo, Jetrock 2, Thermacell Cristal", "unit": "u",
               "axes": [{"param": "produit_vrac", "thresholds": ["1", "3", "4"]}, {"param": "r_vise", "thresholds": ["5", "6", "7", "8", "10"]}],
               "values": [["15.6", "18.7", "21.8", "24.9", "31.2"],   # Comblissimo, sac 17,3 kg
@@ -929,13 +929,13 @@ def soufflage():
     sacs_b = {**prov("acermi-soufflage", une), "label": "Sacs pour 100 m² : Supafil Loft 045, Igloo", "unit": "u",
               "axes": [{"param": "produit_vrac", "thresholds": ["1", "5"]}, {"param": "r_vise", "thresholds": ["5", "6", "7", "8", "10"]}],
               "values": [["16.4", "19.7", "23.0", "26.3", "32.9"],   # Knauf Supafil Loft 045, sac 16,6 kg
-                         ["50", "60", "69", "79", "99"]]}            # Igloo (Ouattitude N), sac 12,5 kg
+                         ["62", "74", "87", "99", "124"]]}          # Igloo (Ouattitude N), sac de 10 kg
     acermi = deux
     params = [{"key": "surface", "label": "Surface des combles (au sol)", "unit": "m2", "kind": "site_data", "question": "Surface des combles ?", "fromLineQuantity": True},
               {"key": "produit_vrac", "label": "Isolant à souffler", "unit": "u", "kind": "site_data", "question": "Quel isolant à souffler ?",
                "hint": "Le nombre de sacs dépend du produit (son certificat ACERMI).",
-               "choices": [{"label": "Laine de verre Comblissimo (sac 17,3 kg)", "value": "1"}, {"label": "Laine de verre Supafil (sac 16,6 kg)", "value": "2"}, {"label": "Laine de roche Jetrock (sac 20 kg)", "value": "3"}, {"label": "Ouate Thermacell Cristal (sac 12,5 kg)", "value": "4"}, {"label": "Ouate Igloo (sac 12,5 kg)", "value": "5"}],
-               "display": {"1": "Laine de verre à souffler Comblissimo, sac de 17,3 kg", "2": "Laine de verre à souffler Supafil Loft 045, sac de 16,6 kg", "3": "Laine de roche à souffler Jetrock 2, sac de 20 kg", "4": "Ouate de cellulose Thermacell Cristal, sac de 12,5 kg", "5": "Ouate de cellulose Igloo, sac de 12,5 kg"},
+               "choices": [{"label": "Laine de verre Comblissimo (sac 17,3 kg)", "value": "1"}, {"label": "Laine de verre Supafil (sac 16,6 kg)", "value": "2"}, {"label": "Laine de roche Jetrock (sac 20 kg)", "value": "3"}, {"label": "Ouate Thermacell Cristal (sac 12,5 kg)", "value": "4"}, {"label": "Ouate Igloo (sac 10 kg)", "value": "5"}],
+               "display": {"1": "Laine de verre à souffler Comblissimo, sac de 17,3 kg", "2": "Laine de verre à souffler Supafil Loft 045, sac de 16,6 kg", "3": "Laine de roche à souffler Jetrock 2, sac de 20 kg", "4": "Ouate de cellulose Thermacell Cristal, sac de 12,5 kg", "5": "Ouate de cellulose Igloo, sac de 10 kg"},
                "textValues": [{"value": "1", "keywords": ["comblissimo"]}, {"value": "2", "keywords": ["supafil"]}, {"value": "3", "keywords": ["jetrock", "laine de roche soufflee"]}, {"value": "4", "keywords": ["thermacell"]}, {"value": "5", "keywords": ["igloo", "ouattitude"]}]},
               {"key": "r_vise", "label": "Résistance thermique visée", "unit": "u", "kind": "site_data", "question": "Quel R visé ?",
                "choices": [{"label": "R 5", "value": "5"}, {"label": "R 6", "value": "6"}, {"label": "R 7", "value": "7"}, {"label": "R 8", "value": "8"}, {"label": "R 10", "value": "10"}],
@@ -1085,11 +1085,11 @@ def referentiel():
                               when="si(ei >= 1, si(couches < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], designation="Laine minérale 45 mm {marque_systeme} (selon le PV)", short="laine du système coupe-feu"))
     # Plafond coupe-feu : deux plaques par défaut (REI 60 : Placo PRF 2 Placoflam, Siniat 2 Prégyflam) ; peau visible vissée à 15 cm.
     # Plafond coupe-feu : le nombre de plaques reste lu au devis (une valeur par défaut calculée laisserait la 2e peau « possible » dans les conditions du moteur).
-    PRODUCTS.append(produit("entretoise-prf", "splice", "Entretoise PRF Placo (montage plafond feu Placo)", "Entretoises PRF Placo", piece("entretoise", "entretoises"), ["entretoise prf"]))
+    PRODUCTS.append(produit("entretoise-prf", "splice", "Entretoise Stil Flam Placo (montage plafond feu Placo, remplace le PRF)", "Entretoises Stil Flam Placo", piece("entretoise", "entretoises"), ["entretoise prf"]))
     pl["slots"].append(slot("entretoise_prf", "splice", "Entretoises PRF", "entretoise-prf", "Entretoises PRF tous les 0,60 m (montage feu Placo).", "placo-pv-feu", "plafond", ["entretoise"]))
-    pl["constants"]["entretoises_prf"] = regle("2.6", "u/m2", "placo-pv-feu", UNE("Montage plafond feu Placo PRF : 2,6 entretoises PRF par m² (Placo Intégrale Plafonds 2023 p. 102-104) ; propre au système Placo (recherche/11 §4.3). Conditionnement non relevé : à la pièce."), label="{v} entretoises PRF par m²")
+    pl["constants"]["entretoises_prf"] = regle("1.3", "u/m2", "placo-pv-feu", DOUTE("Le système PRF n'est plus vendu : Placo l'a remplacé par Stil Flam, entretoises tous les 1,20 m, « deux fois moins » qu'avant (Offre Placo 2024, fiche produit du 18/12/2023) ; 1,3/m² = la moitié des 2,6 du PRF, calcul non écrit par Placo (recherche/17 n° 3). Règle changée : avant 2,6."), label="{v} entretoises par m²")
     pl["needs"].append(besoin("entretoises-prf", "entretoise_prf", "surface * regle.entretoises_prf", "u", "placo-pv-feu", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."),
-                              when="si(ei >= 1, si(marque_systeme < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], short="entretoises PRF", precision="montage feu Placo PRF, une entretoise tous les 0,60 m"))
+                              when="si(ei >= 1, si(marque_systeme < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], short="entretoises PRF", precision="montage feu Placo Stil Flam, une entretoise tous les 1,20 m"))
     pl["constants"]["vis_feu"] = regle("23", "u/m2", "placo-pv-feu", UNE("Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."), label="{v} vis par m² (montage feu)")
     pl["needs"] = [dict(n, formula="surface * regle.vis_feu") if n["id"] == "vis-ttpc-35-feu" else n for n in pl["needs"]]
     work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur(), coffrage()]

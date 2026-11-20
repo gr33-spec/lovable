@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-3` (fichier machine `referentiel.json`), deuxième passe du 20 novembre 2026 : **91 % des chiffres confirmés par deux sources** (90 % avec le nouvel ouvrage « coffrage ») |
+| Version | `plaquiste-isolation-2026.11.20-4` (fichier machine `referentiel.json`), après les réponses de Greg et la cinquième vague du 20 novembre 2026 : **91 % des chiffres confirmés** (88 % par deux sources, 3 % validés par Greg), 90 % avec l'ouvrage « coffrage » encore à vérifier |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -827,30 +827,39 @@ Résultat : 2 bloquants, 12 gênants, 9 détails.
 - la membrane à nommer « Vario Xtra » quand le devis le dit ;
 - l'enduit de la 1re peau.
 
-## 15. Liste des « à confirmer » (après la deuxième passe)
+## 15. Liste des « à confirmer » (après la troisième passe)
 
-Ils sont classés par effet sur une commande. Le détail est dans `recherche/09` à `15`.
+Le détail est dans `recherche/09` à `17`.
 
-1. **Coffrages, soffites, caissons** (nouvel ouvrage) : aucune quantité par mètre n'est publiée. La règle proposée (plaques = longueur × développé × 1,10, profilés de rive, bande armée par arête) est à valider par un plaquiste [R12].
-2. **Périmètre d'un plafond** quand le devis ne le donne pas : pièce supposée carrée. Aucune règle ne peut exister, deux pièces de même surface n'ayant pas le même périmètre. L'écart est faible pour une pièce courante (2 %), fort pour un couloir (15 %) [R13 H1, R15 n° 8].
-3. **Vis au m², doublage et contre-cloison** : SNIP 15 (vis de rive comprises), contre Placo 11, Siniat Clipstar et Chausson 12, Pladur 26. Chaque écart est expliqué ; le choix revient à l'habitude d'un plaquiste [R15 n° 4].
-4. **Vis au m² de plafond à 0,60** : SNIP 12, Placo 10 ou 15, Pladur 8 ; à 0,40 : Placo seul (15) ; fourrures à 0,40 : Placo seul (3,0).
-5. **TRPF des montants doublés à 0,40** : 10 (Placo + calcul de sa règle), contre SNIP 7 et Chausson 8.
-6. **Séparatives, vis de la 1re peau** (12, SNIP seul).
-7. **Plénum et longueur de plaque de plafond par défaut** : ce sont des habitudes ou des données du chantier, impossibles à sourcer [R15 n° 6].
-8. **Montage feu Placo** (23 vis/m², 2,6 entretoises/m²) : propres au système Placo, une seule source par nature.
-9. **Soufflage Supafil et Igloo** : certificat ACERMI seul ; poids du sac Igloo (11,3 kg chez batiproduits) à confirmer.
-10. **Adhésif de membrane** : 0,8 ml/m², seule valeur écrite (Isover).
-11. **Fixation en bout de rail** (non comptée) : une seule source, grand public.
-12. **Hors fichier machine** (fiche lisible) :
-    - Knauf France : longueurs des montants 48/35, KF 13 en 2,80 m, charge du Diamant ;
-    - palettes Fermacell (tarif 2010) ;
-    - palette Glasroc H Ocean (40 ou 43) ;
-    - conditionnement des montants Siniat ;
-    - composition de la Siniat D102/48 EI 120 ;
-    - plafonds REI Knauf ; gaine Placo ;
-    - PSE : R du Styrodur ;
-    - hauteurs Knauf 2020 à revalider.
+1. **Coffrages** : règle acceptée par Greg, lignes « à vérifier » avec le calcul visible ; à confirmer par un plaquiste.
+2. **Périmètre d'un plafond** non écrit au devis : pièce supposée carrée. Aucune règle publiable.
+3. **Vis de plafond** :
+   - à 0,60 : SNIP 12, Placo 10 ou 15, Pladur 8 ;
+   - à 0,40 : Placo seul (15) ;
+   - 1re peau d'un plafond en 2 BA13 : 8 (SNIP), le 3 de Placo contredit par sa propre FDES 2026 ;
+   - fourrures à 0,40 : Placo seul.
+4. **TRPF des montants doublés à 0,40** : 10 (Placo + calcul), contre SNIP 7 et Chausson 8.
+5. **Séparative, 1re peau** : 12 (SNIP seul).
+6. **Vis de doublage Knauf** : aucune valeur trouvée, on applique 15 (règle de Greg).
+7. **Plafond feu Placo** :
+   - Stil Flam remplace le PRF : entretoises tous les 1,20 m, 1,3/m² calculés ;
+   - vis à 15 cm (23/m²) : une seule source, peut-être plus valable avec Stil Flam.
+8. **Plénum et longueur de plaque de plafond par défaut** : habitudes, gardées en questions.
+9. **Adhésif de membrane** : 0,8 ml/m² (Isover seul, cohérent avec le calcul des joints).
+10. **Fixation en bout de rail** (non comptée).
+11. **Hors fichier machine** :
+    - Knauf : KF 13 en 3,00 m (une source, le 2,80 m n'existe pas), charge du Diamant, Métal Chrono (entraxes, PV) ;
+    - Siniat D102/48 EI 120 ;
+    - palette Fermacell (tarif 2010) ;
+    - Glasroc H Ocean 40 ou 43 par palette ;
+    - Styrodur 3035 CS : R confirmé à 30, 50, 60 et 100 mm, certificat ACERMI non ouvert.
+
+**Réglés pendant la troisième passe** :
+- FDES Placo sur la base INIES (montants, rails, TRPF, fourrures, appuis, plaques confirmés) ;
+- vis de doublage par marque (Placo 11, Siniat 12) ;
+- soufflage Supafil (produit jumeau certifié) ;
+- Igloo en sacs de 10 kg ;
+- Styrodur.
 
 **Réglés pendant la deuxième passe** :
 - mortier adhésif : 1,8 kg/m² sur mur plan, 2,5 kg/m² sur mur irrégulier ;

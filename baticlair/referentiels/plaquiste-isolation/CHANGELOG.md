@@ -38,3 +38,19 @@
   GR 32 Nu 45 (retiré par Isover) remplacé par URSA PRK 32 45 ; tables de soufflage séparées par niveau de preuve.
 - Nouvel ouvrage `coffrage` (soffite, caisson) : règle proposée, à confirmer ; chantier type PI-18.
 - Chantiers types : `recherche/14-chantiers-avant-apres.md` (ancienne et nouvelle valeur, raison, source).
+
+## plaquiste-isolation-2026.11.20-4 — Réponses de Greg et cinquième vague (20 novembre 2026)
+
+- Décisions de Greg, valeurs « vérifiées » (comme la couverture) :
+  - 2 montants par porte écrite au devis ;
+  - vis de doublage et de contre-cloison selon la marque écrite (Placo 11, Siniat 12), sinon 15 ;
+  - suspentes 1,56/m² et 98/48 en 3,75 m validés ;
+  - mortier adhésif : question gardée ;
+  - coupe-feu : un négoce sans la marque peut proposer un système complet d'une autre marque avec son PV, signalé à l'artisan, jamais de mélange ;
+  - coffrages : règle acceptée, lignes « à vérifier » avec le calcul visible.
+- FDES Placo (base INIES) en 2e source : montants, rails, TRPF, fourrures, appuis, plaques.
+- Règles changées :
+  - 1re peau d'un plafond en 2 BA13 : retour à 8 vis/m² (le 3 de Placo est contredit par sa FDES 2026) ;
+  - Igloo en sacs de 10 kg (avant 12,5) ;
+  - entretoises du plafond feu Placo : Stil Flam, 1,3/m² (avant PRF 2,6/m², système retiré).
+- Taux : 91 % des chiffres confirmés (88 % par deux sources, 3 % validés par Greg).

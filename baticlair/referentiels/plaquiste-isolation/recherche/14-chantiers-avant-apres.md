@@ -70,3 +70,13 @@ Avant = `chantiers-types.md` à la fin de la première nuit (commit bead8925) ; 
 | PI-18 | Cornières de rive | — | 7 longueurs de 3 m; 21 ml | Nouveau chantier : coffrage calculé par la règle proposée (à confirmer) [R12] |
 | PI-18 | Enduit prêt à l'emploi | — | 1 seau de 25 kg; 2,35 kg | Nouveau chantier : coffrage calculé par la règle proposée (à confirmer) [R12] |
 | PI-18 | Vis TTPC 25 | — | 1 boîte de 1000; 75 pièces | Nouveau chantier : coffrage calculé par la règle proposée (à confirmer) [R12] |
+
+## Troisième passe (réponses de Greg et cinquième vague, version -4)
+
+| Chantier | Article | Avant | Après | Raison et source |
+|---|---|---|---|---|
+| PI-01 | Montants M48 de 2,49 m | 33 montants | 39 montants | 2 montants par porte écrite au devis (3 blocs-portes), décision de Greg du 20/11 |
+| PI-07 | Vis TTPC 25 | 600 vis (1 boîte) | 440 vis (1 boîte) | Doublage Optima de marque Placo : 11 vis/m² (Placo + FDES INIES) ; sans marque écrite, 15 (décision de Greg) [R16] |
+| PI-10 | Entretoises de plafond feu | 104 PRF | 52 Stil Flam | Le PRF n'est plus vendu : Stil Flam, entretoises tous les 1,20 m (Offre Placo 2024), 1,3/m², à confirmer [R17] |
+| PI-10 | Vis TTPC 25 (1re peau) | 120 | 320 | 1re peau du plafond 2 BA13 : 8/m² (SNIP) ; le 3/m² de Placo ne tient pas face à la FDES Placo 2026 [R16] |
+| PI-12 | Ouate Igloo | 48 sacs de 12,5 kg | 60 sacs de 10 kg | Sac de 10 kg : certificat ACERMI et fiche Ouattitude concordants ; le 12,5 kg n'avait qu'une source [R17] |

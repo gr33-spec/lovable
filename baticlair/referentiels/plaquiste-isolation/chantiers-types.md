@@ -1,7 +1,7 @@
 # Chantiers types plaquiste-isolation (jeu de test pour l'ouverture du métier)
 
 Calculés par le moteur de Mobiiz (`packages/domain`, `computeWorkItem` puis `purchaseList`) avec `referentiel.json`
-(version `plaquiste-isolation-2026.11.20-3`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
+(version `plaquiste-isolation-2026.11.20-4`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
 Écrit par `outils/calculer_chantiers.mjs` : ne pas modifier à la main, relancer l'outil.
 
 Lecture : « Lu au devis » = données que le modèle de lecture doit trouver dans la ligne ; « Questions » = ce que le moteur
@@ -295,7 +295,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Entretoises PRF : Entretoises PRF Placo
+**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Entretoises PRF : Entretoises Stil Flam Placo
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -312,7 +312,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 45 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 13,2 kg |  |
-| Entretoises PRF Placo | 104 entretoises | 104 pièces | montage feu Placo PRF, une entretoise tous les 0,60 m |
+| Entretoises Stil Flam Placo | 52 entretoises | 52 pièces | montage feu Placo Stil Flam, une entretoise tous les 1,20 m |
 
 ## PI-11 — Combles perdus : soufflage laine de verre R 7
 
@@ -356,7 +356,9 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
-| Ouate de cellulose Igloo, sac de 12,5 kg | 48 sacs | 48 pièces | pour 60 m² à R 8, épaisseur après tassement du certificat |
+| Ouate de cellulose Igloo, sac de 10 kg | 60 sacs | 60 pièces | pour 60 m² à R 8, épaisseur après tassement du certificat |
+
+> Igloo compté en sacs de 10 kg (certificat ACERMI et fiche Ouattitude concordants) ; le sac de 11,3 kg vu chez un distributeur n'est dans aucun tableau certifié.
 
 ## PI-13 — Combles aménagés : rampants isolés, membrane, plafond
 

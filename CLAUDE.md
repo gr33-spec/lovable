@@ -341,4 +341,11 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
   - les vis et les fixations sortent d'office ;
   - bande et enduit sont des cases à cocher ;
   - un ouvrage coupe-feu se commande en système complet d'une seule marque, avec son procès-verbal : une question « Quelle marque ? », toutes les lignes portent la marque, jamais « ou équivalent ».
+- Réponses de Greg (20 novembre 2026, version `-4`, 91 % des chiffres confirmés) :
+  - 2 montants par porte écrite au devis ;
+  - vis de doublage selon la marque écrite, sinon 15/m² ;
+  - suspentes 1,56/m² et 98/48 en 3,75 m validés ;
+  - question « Ton mur est plan ? » gardée pour le mortier adhésif ;
+  - en coupe-feu, un négoce sans la marque peut proposer un système complet d'une autre marque avec son PV, signalé à l'artisan, jamais de mélange ;
+  - coffrages : règle acceptée, lignes « à vérifier » avec le calcul visible.
 

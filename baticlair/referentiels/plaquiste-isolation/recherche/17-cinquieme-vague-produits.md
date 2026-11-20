@@ -22,11 +22,88 @@ Aucune autre modification du dépôt.
 | 5b. **Siniat D102/48 EI 120** : composition | non lue (fiche en erreur 500) | **toujours non lue** (fiche en erreur 500 à nouveau, curl et WebFetch, 20/11/2026) ; connus : EI 120, PV Efectis 09-V-238 + ext. 10/2, 47 dB, M48-35, isolant, plaques de 1,20 m vissées | [N6] Siniat, fiche « Cloison Prégymétal D102/48 EI120 47 dB M48-35 isolant » (pi79225, extrait moteur : « plaques PRÉGY de 120 cm de large vissées sur une ossature métallique », la composition est coupée) | — (2 recherches, 20/11/2026 : aucune copie négoce, batiproduits ou CSTB ne donne la ligne « Composition du système ») | **à confirmer (raison : fiche Siniat en erreur serveur ; composition jamais lue)** | 102 − 48 = 54 mm, soit 27 mm par face : ce n'est ni 2 BA13 (25 mm, la D98/48), ni 1 BA25 (25 mm). Une plaque spéciale d'environ 27 mm, ou deux plaques de 13,5 mm, est possible ; on ne devine pas. Tant que la composition n'est pas lue, le moteur propose pour un EI 120 en 48 mm la Placo 98/48 2 Placoflam BA13 (RS 15-022) ou la Knauf KM 98/48 2 KF 13 (07-A-235), lisibles, et pose « Quelle marque ? » (décision du 20/11). |
 | 6a. **Placo : gaine technique coupe-feu** (constitution) | non trouvée (placo.fr 403) | **constitution relevée (extraits de fiches système Placo, 1 source)** : gaine verticale Placostil ; **EI 30 paroi / EI 60 traversée** : Stil M 48 / R 62 Easy Stil, 2 plaques d'un côté, H max 3,00 m, PV **RS 19-118** ; Placostil M 48 + 1 plaque **Duo'Tech 25** d'un côté, EI 30 paroi (i→o) / EI 60 traversée, H max 3,00 m, PV **RS 15-026** ; Placostil M 90 + laine minérale 85 mm, EI 60, H max 4,05 m, RS 15-026 ; Stil M 100, 2 plaques d'un seul côté, EI 60, section intérieure ≤ 1 250 × 1 000 mm, H max 3,50 m (le titre dit 4,30 m) ; **EI 120** : double ossature M 48 + R 48, 1 Placoplatre BA 25 + 1 Placomarine BA 13 d'un seul côté, H max 2,55 m, RS 15-026 | [Y14] Placo, fiches système « Gaine technique … Verticale Placostil » placo.fr (sp00035388, sp00035384, sp00035391, sp00035403, sp00018912 / 15 / 16, sp00019363 …), **extraits moteur** c. 20/11/2026 (PDF en 403) ; une fiche datée « 2023-2024 » | Principe recoupé par d'autres marques (déjà lu) : Siniat gaine D72/48 EI 30 i→o / o→i, CFT 60 (EFR-15-000546) ; Knauf gaine KM 72/48 EI 30 paroi / EI 60 traversée ; Pladur fiche « Gaine complexe technique » 03/2019 (copie locale) : 2 BA13 sur ossature indépendante, EI 60 traversée, EI 30 i→o | **principe : confirmé (3 marques) ; constitution Placo : 1 source (extraits de fiches fabricant, à relire en PDF)** | La gaine Placo se monte **d'un seul côté** (plaques côté local), sur M 48 ou M 90 / M 100 selon la section et la hauteur, avec Duo'Tech 25 ou 2 plaques : c'est le même principe que Siniat et Knauf. Les extraits contiennent au moins une incohérence (4,30 m dans le titre, 3,50 m dans le texte) : garder la valeur basse. Assez pour poser les questions (« EI 30 ou EI 60 ? », « hauteur ? », « section ? ») ; pas assez pour un quantitatif Placo chiffré au m² sans la fiche lisible. |
 | 6b. **Glasroc H Ocean 13** : plaques par palette (40 ou 43) | 40 (Offre Placo 2024) contre 43 (batiproduits) | **40** (Placo, deux tableaux du même catalogue) ; 43 non retenu | [P24] Offre Placo 2024 p. 44 : « Palette de 40 plaques » (H97622500 / 600 / 3000) ; même document, tableau de stockage : « Plaques Glasroc® H Ocean ép. 13 mm, 1 200, **34 ou 40** » (34 = la 18S, 0,90 m) | — : batiproduits (fiche non datée) : 43 plaques/palette ; la brochure Placo 03/2024 (extrait) ne donne pas la palette ; aucun négoce trouvé (1 recherche, 20/11/2026) | **1 source (fabricant, 2 tableaux) ; 43 = contradiction non expliquée (batiproduits, ancienne édition probable)** | Sans effet sur la commande : la Glasroc H Ocean se vend à la plaque. Ne pas coder de palette. |
+| 7. **Fermacell** : plaques par palette | 48 (2,00 à 2,60 m) / 40 (2,80 et 3,00 m), tarif 2010 seul | **inchangé, toujours à confirmer** ; la seule fiche tarifaire trouvée (non datée, référence 71309 2BA 2 600 × 1 200 × 12,5 : **48 pièces, 149,8 m², 2 206 kg par palette**) est la même que le tarif Ciffréo Bona de 2010 | [F2] tarif Fermacell (copie Ciffréo Bona, « fermacell_gamme_complete.pdf », 2010 d'après `01`) ; extrait moteur 20/11/2026 identique | — : fiches techniques Fermacell hébergées par Chausson (« 20-20 » BD et BA, PDF lus), Samse (fiche 5336, état 03/2013) et materiaux-naturels (n_826, état 03/2013) : « emballées et posées à plat sur palettes », **jamais le nombre** ; Toutfaire : sans palette (1 recherche, 20/11/2026) | **à confirmer (raison : aucune édition postérieure à 2010 ne donne la palette ; Fermacell ne l'écrit pas dans ses fiches techniques)** | 48 plaques de 2,60 × 1,20 = 149,8 m² et 2 206 kg (14,7 kg/m² × 149,8 ≈ 2 200 kg) : le chiffre est cohérent avec le poids de la plaque, ce qui le rend plausible, pas actuel. Rappel `10` : sans effet sur la commande (vente à la plaque) ; ne pas coder de palette Fermacell. |
+| 8. **XPS Styrodur 3035 CS** : R par épaisseur | à confirmer (fiche BASF hors réseau) | **R (m²·K/W) : 30 mm 0,90 ; 40 mm 1,20 ; 50 mm 1,45 ; 60 mm 1,75 ; 80 mm 2,25 ; 100 mm 2,85 ; 120 mm 3,40** (λD 0,033 à 0,035) | [Y15] BASF, « Technische Daten Styrodur® 3035 CS », **Stand Februar 2026** (hébergée par Heinze, PDF lu c. 20/11/2026) : λD(90d) et RD par épaisseur, de 30 à 160 mm | [Y16] distributeur italien (fiche « Documento tecnico Styrodur® 3035 CS », **septembre 2022**, PDF lu) : RD 0,90 / **1,25** / 1,45 / 1,75 / **2,30** / 2,85 / **3,30** ; [Y17] BayWa (négoce allemand), TD Styrodur 3035 CS, avril 2015 : λ 0,034 (50-60) / 0,035 (80-100) / 0,036 (120) | **confirmé (2 sources) pour 30, 50, 60 et 100 mm ; 40, 80, 120 mm : écart ≤ 0,10, valeur 2026 retenue** | L'écart vient de l'édition : la fiche 2026 déclare λ selon l'EAD 040650 (λ à 50 ans) — 40 mm passe de 0,032 à 0,033 (R 1,25 → 1,20), 120 mm de 0,036 à 0,035 (R 3,30 → 3,40). **Réserve France** : ces fiches sont allemande et italienne ; le certificat ACERMI français 03/004/274 n'a pas été ouvert (adresse introuvable). Pour un calcul thermique réglementaire, le R du certificat ACERMI fait foi ; pour une commande, l'épaisseur suffit (le R n'est qu'une aide au choix). Batiproduits liste en France 30 à 120 mm : toutes les épaisseurs ci-dessus existent. |
+| 9a. **Plénum par défaut** « moins de 15 cm » → suspente longue 171 (plafond sous solives) | hypothèse dite, orange, avec la question | **inchangé : garder la question** ; le lien « 171 ⇔ plénum jusqu'à ≈ 150 mm » est, lui, sourcé | [S47] Placo, Intégrale 04/2023 Plafonds (copie locale relue c. 20/11/2026), schéma « Suspente compatible » : Courte 81 ≈ 20 à 60 mm, **Longue 171 ≈ 150 mm**, Longue 240 ≈ 220 mm, Maxi 300 ≈ 280 mm, Maxi 400 ≈ 380 mm, Sécable ≈ 600 mm ; suspente 171 : 52 daN (RE EEM 11 26035649/D) | [W13] Chausson « Guide ABC » 2020-21 fiche 55 : « Le système de suspension dépend du support, de la hauteur du plénum, des charges admissibles » (aucun défaut) ; Siniat : suspente Pivot ou P41 selon le plénum (`11`) | **correspondance suspente ↔ plénum : 1 source (fabricant) ; valeur par défaut : impossible par nature** | Aucun guide ne peut publier un plénum « par défaut » : c'est la hauteur entre le plancher et le plafond fini du chantier. Pourquoi « moins de 15 cm » est une habitude : sous solives en rénovation, on descend le plafond juste de quoi passer l'isolant et les gaines ; la suspente longue 171 couvre ce cas (jusqu'à ≈ 15 cm d'après le schéma Placo) et c'est la référence la plus vendue au comptoir. Garder « Ton plafond descend de combien ? » ; 171 en hypothèse dite. |
+| 9b. **Longueur de plaque de plafond par défaut** : 2,50 m | hypothèse ; le SNIP calcule avec 3 m | **inchangé : garder la question « 2,50 m ou 3 m ? »** | [V1] SNIP fiche 18 (déc. 2024) p. 14 : bandes calculées « pour une longueur de plaque de 3 m » (plafonds) | [P24] Offre Placo 2024 : BA 13 en 2,40 / 2,50 / 2,60 / 3,00 m (piles de 50), aucune « longueur plafond » ; Chausson fiche 55 : bande 1,60 ml/m² sans longueur de plaque | **impossible par nature : habitude d'entreprise** | Pourquoi 2,50 m est une habitude : c'est la longueur standard stockée partout (elle sert aussi aux cloisons de 2,50 m), une plaque de 2,50 × 1,20 (≈ 27 kg en BA 13) se lève à deux au lève-plaque, et elle tombe sur un entraxe de 0,50 / 0,60 en about. 3 m (SNIP) réduit les joints d'about. La longueur ne change pas les m² de plaque (1,05), seulement le nombre de plaques, de bandes et de vis d'about : c'est une question de comptoir, pas une donnée publiable. |
 
 ## Bilan
 
-(en cours)
+18 lignes pour les 9 points (≈ 60 chiffres relevés). Recherches web : 25 environ, plus la relecture des copies locales.
+
+**Passés à « confirmé (2 sources) »**
+- 1a Supafil Loft 045 : le tableau ACERMI (16,4 / 19,7 / 23,0 / 26,3 / 32,9 sacs) est recoupé par Samse sur le **Thermo Loft**, produit jumeau au tableau certifié identique (statut « confirmé via Thermo Loft »).
+- 1b Igloo, sac de 10 kg : ACERMI 2026 (62 / 74 / 87 / 99 / 124) recoupé par la fiche Ouattitude 2024 (63 / 75 / 88 / 100 / 125), à un sac près, l'écart venant de l'édition du certificat.
+- 4a Knauf 48/35 en 2,60 m (catalogue Knauf 2020 + Mr Bricolage).
+- 8 Styrodur 3035 CS : R à 30, 50, 60 et 100 mm (BASF 02/2026 + distributeur 2022).
+- Principes confirmés, chiffres encore à une source : 3a (Stil Flam remplace PRF), 4d (constitution Métal Chrono), 6a (gaine technique Placo, même principe que Siniat, Knauf et Pladur).
+
+**Valeurs à changer dans `referentiel.json` (proposition, à valider par Greg)**
+1. Règle changée : plafond feu Placo, avant « entretoises PRF 2,6 u/m² » → après « entretoises Stil Flam® ≈ 1,3 u/m² » (tous les 1,20 m, « deux fois moins », boîte de 25). Le système PRF n'est plus vendu (Offre Placo 2024, fiche produit Stil Flam du 18/12/2023). Statut : principe sûr (fabricant, 3 documents) ; nombre au m² calculé, en orange.
+2. Knauf KF 13 : retirer 2,80 m (aucun document) ; 3,00 m « à confirmer avec le négoce ».
+3. Igloo : ne jamais compter avec un sac de 11,3 kg ; colonne du poids écrit sur le sac (10 / 10,8 / 11,5 / 12,5).
+4. Styrodur 3035 CS : R par épaisseur de la fiche BASF 2026 (aide au choix seulement).
+5. Knauf montant 48/35 : longueurs demandées 2,60 / 3,00 m (le négoce sert sa référence à 1 cm près).
+
+**À une source (fabricant)**
+- 1b Igloo en sac de 12,5 kg.
+- 3b vis à 15 cm (23 u/m²), rien ne dit que Stil Flam garde ce vissage.
+- 4b KF 13 en 3,00 m.
+- 4c Diamant à 55 kg par point.
+- 6a constitution des gaines Placo (extraits de fiches).
+- 6b Glasroc H Ocean, palette de 40.
+- 9a correspondance suspente 171 et plénum d'environ 150 mm.
+
+**À confirmer (avec la raison)**
+- 1c sac Igloo de 11,3 kg : hors certificat, il faut le lire en négoce.
+- 3a nombre d'entretoises Stil Flam au m² : les fiches système Stil Flam sont en 403 sur placo.fr.
+- 3b vissage Stil Flam : non publié hors placo.fr.
+- 4c vis ou cheville de la charge Diamant : media.knauf.com en 403.
+- 4d entraxes et PV Métal Chrono : fiche Knauf en 403.
+- 5a montants Siniat par paquet : jamais publié.
+- 5b composition de la D102/48 EI 120 : la fiche Siniat renvoie l'erreur 500 à chaque essai.
+- 7 palettes Fermacell : tarif de 2010 seulement.
+- 8 R français : certificat ACERMI 03/004/274 non ouvert.
+- 6b palette de 43 plaques chez batiproduits : contradiction non expliquée.
+
+**Impossibles par nature (dire pourquoi, garder la question)**
+- 2 deuxième fabricant pour l'adhésif. Aucun ne publie de ratio lisible. Semin publie « 2,4 /m² » sans unité : c'est la surface d'un rouleau, inutilisable. On garde 0,8 (Isover), cohérent avec le calcul des joints de lés (≈ 0,71 m/m² plus les rives).
+- 9a plénum par défaut : donnée du chantier.
+- 9b longueur de plaque de plafond : habitude d'entreprise.
+
+**Où j'en suis.** Les 9 points sont traités. Ce qui débloquerait le reste :
+- une copie lisible des fiches système Placo (Stil Flam, gaines), par un négoce ou un PDF envoyé par Greg ;
+- la fiche Siniat D102/48 (réessayer plus tard : erreur serveur) ;
+- la fiche système Knauf Métal Chrono ;
+- un tarif Fermacell récent.
 
 ## Sources
 
-(en cours)
+Consultées le 20/11/2026 sauf mention. [Y1]-[Y17] sont nouvelles ; les autres renvoient aux fichiers `10`, `11`, `13`, `15`.
+
+1. [Y1] ACERMI, certificat 04/D/016/378/27 (Supafil Loft 045, Optiloft), créé le 01/04/2026 — https://acermi.com/en/certified-insulation-products/certificate/04-d-016-378-27/
+2. [Y2] ACERMI, certificat 13/D/016/850-10 (Thermo Loft), créé le 16/05/2025 — https://acermi.com/en/certified-insulation-products/certificate/13-d-016-850-10/
+3. [Y3] Samse, brochure « Travaux isolation 2024 » (PDF, 8 p., 19/08/2024), p. 3 — https://samse.fr/media/wysiwyg/upload/BROCHURE-travaux%20isolation%202024-bd.pdf
+4. [Y4] ACERMI, certificat 12/D/157/784/23 (Igloo France et six autres noms), créé le 04/11/2026 — https://acermi.com/en/certified-insulation-products/certificate/12-d-157-784-23/
+5. [Y5] Igloo France Cellulose, fiche technique Ouattitude V_20240917V1 (09/2024), hébergée par Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1855055.pdf
+6. [Y6] batiweb, « Ouate de cellulose Igloo France » (non daté) — https://www.batiweb.com/produit-btp/ouate-de-cellulose-igloo-france-isolant-biosource-pour-combles-murs-et-planchers-347277
+7. [Y7] Isover, « Documentation membranes, gestion de la vapeur d'eau et étanchéité à l'air » (extrait moteur) — https://www.isover.fr/documents/array/documentation-membranes-gestion-de-la-vapeur-deau-et-ea.pdf
+8. [Y8] Semin, fiches « Ruban adhésif universel » et « Ruban double face acrylique » (04/2021), « Pare vapeur » (07/2021), hébergées par BigMat — https://medias.bigmat.fr/data_medias/medias_finaux/documents/3585501040832-tdttdjOKek.pdf ; …/3585501046247-dTlM40ljGh.pdf ; …/3585501046230-tzxlH4Bwuv.pdf
+9. [Y9] Placo, fiche produit « Entretoise Stil Flam® » (mise à jour 18/12/2023), hébergée par Chausson — https://cdn.chausson.fr/catalog-document/866d87fc-7937-4016-a3ff-5f5c53d939a0/ficheproduit-entretoise-stil-flam.pdf
+10. [Y10] batiweb, « Stil Flam, le système de plafonds coupe-feu Placo » (non daté) — https://www.batiweb.com/produit-btp/stil-flam-le-systeme-de-plafonds-coupe-feu-placo-348999
+11. [Y11] batiweb, publi-rédactionnel « Knauf Métal Chrono, le plafond feu monoparement à montage rapide » (06/12/2021) — https://www.batiweb.com/actualites/publi-redactionnels/knauf-metal-chrono-le-plafond-feu-monoparement-a-montage-rapide-39095
+12. [Y12] CMES Matériaux, fiche article « MT Ultra WAB 48-35 L 3 m » (extrait moteur, PDF 403) — https://www.cmesmat.fr/
+13. [Y13] Gypso (marque Chausson), fiche « Montants en acier galvanisé » (non datée) — https://www.chausson.fr/media/article-document/265644
+14. [Y14] Placo, fiches système « Gaine technique … Verticale Placostil » (sp00035384, sp00035388, sp00035391, sp00035403, sp00018912, sp00018915, sp00018916, sp00019363 ; extraits moteur, PDF en 403) — https://www.placo.fr/documents/fiche-systeme/
+15. [Y15] BASF, « Technische Daten Styrodur® 3035 CS » (Stand Februar 2026), hébergée par Heinze — https://www.heinze.de/m2/93/22345293/etc/75/49895675.pdf
+16. [Y16] « Documento tecnico Styrodur® 3035 CS » (09/2022, distributeur italien) — https://cdn.shopify.com/s/files/1/0057/9741/2935/files/Styrodur-3035CS_2022.pdf
+17. [Y17] BayWa, « TD Styrodur 3035 CS » (Stand April 2015) — https://res.cloudinary.com/baywa-ag-p/raw/upload/A2809390.pdf
+18. [P24] Placo, « Offre Placo 2024 » (PDF du 21/02/2024, copie CAPEB, copie locale `p3/f36121c8`), p. 44 et p. 60 — voir `10`.
+19. [S47] Placo, L'Intégrale Second Œuvre 04/2023, Plafonds (copie locale `pdf/plaf.txt`) — https://dam.pim-cps.saint-gobain.com/MAM/assets/1/C1A269993195482DA567890D5C26E716/doc/CEDB5A77BEAE4BDA8E2753C0A9B3A813/SO03-Intgrale_Placo_Second_Oeuvre_04.2023_-_Plafonds.pdf
+20. [K1] Knauf, catalogue « Plaquiste 2020 — Cloisons » (hébergé par Deltour, copie locale `cf/kn/k3`) — https://deltourmateriaux.com/wp-content/uploads/2020/08/cloisons-catalogue-2020-plaquiste-knauf.pdf
+21. [K2] Knauf, actualité « Nouveau plafond feu 60' Knauf Métal Chrono » (extrait moteur, 403) — https://knauf.com/fr-FR/actualites/knauf/nouveau-plafond-feu-plaque-platre-60-knauf-metal-chrono
+22. [N6] Siniat, fiche D102/48 EI 120 (erreur 500, 20/11/2026) — https://www.siniat.fr/-/print2pdf/system/pi79225/siniat-fiche-technique/fr-fr/cloison-pregymetal-d102-48-ei120-47db-m48-35-isolant.pdf
+23. [SI-a] Siniat, fiche produit « Montant Prégymétal 48-35/6 » (04/09/2026, copie locale `p10/sin/pi173939`) — voir `10`.
+24. Fermacell, fiches techniques plaque fibres-gypse BD et BA (Chausson, « 20-20 »), Samse 5336 (03/2013), materiaux-naturels n_826 (03/2013) : sans palette — https://cdn.chausson.fr/catalog-document/816ff644-ace1-49cf-9ae1-da3674a1c9db/fiche-technique-20-20-plaque-fibres-gypse-fermacell-bd.pdf ; https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_5336.pdf ; [F2] tarif Fermacell 2010 (Ciffréo Bona) — https://www.ciffreobona.fr/userfiles/file/PDF/15/41/165/8857/fermacell_gamme_complete.pdf
+25. [V1] SNIP fiche 18 (déc. 2024) ; [W13] Chausson « Guide ABC » 2020-21 ; Pladur « Gaine complexe technique » 03/2019 (copie locale `cf/txt/p3_e26189af`) — voir `09`, `13`.
+26. Knauf, pages produit (extraits moteur, 403) : « Knauf Feu KF 13 » fr-FR, « Plaque coupe feu FR BA 13 » fr-TN, « Vis spéciale LG35 » fr-MA, « Montant 48/35 » fr-FR / fr-MA / fr-TN / fr-DZ — https://knauf.com/
