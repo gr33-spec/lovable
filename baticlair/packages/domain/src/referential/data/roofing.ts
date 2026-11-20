@@ -180,6 +180,24 @@ const REGION_ARDOISE_PARAM: ParamDef = {
   estimate: "Prise égale à la zone climatique du département, en attendant la liste des régions du DTU 40.11.",
 };
 /**
+ * Situation du chantier (NF DTU 40.11 : protégée / normale / exposée). Exposée : littoral sur environ 5 km, îles,
+ * presqu'îles, falaises, rives d'estuaire près de l'embouchure. Lue dans la carte des régions par commune (fiche
+ * couverture), sinon normale ; un défaut affiché, modifiable, jamais une question (comme la zone).
+ */
+const SITUATION_PARAM: ParamDef = {
+  key: "situation",
+  label: "Situation du chantier",
+  unit: "u",
+  kind: "site_data",
+  question: "Le chantier est-il en situation exposée (bord de mer à moins de 5 km, île, falaise) ?",
+  default: { value: "1", source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "situation normale, à défaut de commune au bord de mer" },
+  choices: [
+    { label: "Normale", value: "1" },
+    { label: "Exposée (bord de mer, île)", value: "2" },
+  ],
+  display: { "1": "normale", "2": "exposée" },
+};
+/**
  * Table officielle Cupa (§34) : ardoises au m² par format (hauteur × largeur, cm) et recouvrement (mm).
  * Elle fait foi ; hors table seulement, la formule Cupa (avec le diamètre du crochet) calcule.
  */
@@ -1154,7 +1172,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.20-59",
+  version: "roofing-2026.11.20-60",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2157,6 +2175,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         ENTRAXE_PARAM,
         PENTE_PARAM,
         REGION_ARDOISE_PARAM,
+        SITUATION_PARAM,
         DIAMETRE_CROCHET_PARAM,
         QUALITE_ARDOISE_PARAM,
         {
@@ -2190,6 +2209,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       constants: {
         ...ECRAN_CONSTANTS,
+        supplement_expose: deFiche("ardoise.supplement_expose"),
+        coef_expose: deFiche("ardoise.coef_expose"),
+        pas_mm: condition("1", "mm", "definition", { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "BatiClair (définition)" }, "Recouvrement arrondi au millimètre supérieur."),
         seuil_rampant: deFiche("ardoise.seuil_projection_1"),
         seuil_rampant_2: deFiche("ardoise.seuil_projection_2"),
         marge_crochet: deFiche("ardoise.marge_choix_crochet"),
@@ -2216,15 +2238,27 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
-          key: "recouvrement",
-          label: "Recouvrement",
+          key: "recouvrement_dtu",
+          label: "Recouvrement DTU (situation normale)",
           unit: "mm",
           // La pente et la zone d'abord (elles disent la ligne), puis le rampant (il choisit la table).
           formula: "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
-          shown: true,
-          source: F,
-          verification: FOUNDER_DOC,
+          source: FICHE,
+          verification: FICHE_VERIFIEE,
           version: 1,
+        },
+        {
+          key: "recouvrement",
+          label: "Recouvrement",
+          unit: "mm",
+          // Situation exposée en région III (NF DTU 40.11 2020, Cupa, Rathscheck ; fiche couverture 2026-11-20) : la plus
+          // forte de R + 10 mm et R × 1,10, au mm supérieur. Régions I et II exposées : rien d'appliqué (non confirmé).
+          // Le recouvrement du DTU d'abord (pente, zone, rampant), puis la situation (elle ajoute la majoration).
+          formula: "recouvrement_dtu + si(situation >= 2, si(zone >= 3, arrondi_sup(max(recouvrement_dtu + regle.supplement_expose, recouvrement_dtu * regle.coef_expose) / regle.pas_mm) * regle.pas_mm - recouvrement_dtu, recouvrement_dtu * 0), recouvrement_dtu * 0)",
+          shown: true,
+          source: FICHE,
+          verification: FICHE_VERIFIEE,
+          version: 2,
         },
       ],
       needs: [

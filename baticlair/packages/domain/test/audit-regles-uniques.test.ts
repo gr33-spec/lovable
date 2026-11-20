@@ -21,6 +21,7 @@ const work = ROOFING_REFERENTIAL.workItems;
 const MEME_VALEUR_AUTRE_REGLE: Record<string, string> = {
   "2 u": "Nombres par pièce sans lien : 2 ardoises (couvert et courant), 2 abouts, 2 fixations par patte, 2 closoirs par plaque, 2 talons par ligne.",
   "1.05 u": "Antivents par ardoise (§4) et marge du zinc linéaire (§7).",
+  "10 mm": "Pas de vente des crochets (de cm en cm) et majoration du recouvrement de l'ardoise en situation exposée (NF DTU 40.11, fiche couverture).",
   "1.1 u": "Écran au-dessus de 30 % de pente (surface + 10 %, fiche couverture) et marge des bandes de plomb (ml × 1,1, §12).",
   "2 m": "Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes.",
   "1 m": "Largeur d'une feuille de zinc et largeur utile d'un bac acier 1000.",

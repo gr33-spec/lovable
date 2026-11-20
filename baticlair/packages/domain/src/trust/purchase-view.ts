@@ -390,8 +390,8 @@ export function supplierTest(designation: string, unit: string | null): string |
  * de « fixation »), un consommable sorti sur le « oui » de l'artisan, une valeur par défaut du tiroir pas encore
  * confirmée (§49.2.5 : « la ligne qui en dépend reste orange tant qu'un défaut non confirmé la porte »).
  */
-/** Défauts affichés, jamais demandés (§49.4.3 : zone climatique, entraxe, taux de perte, pureau). */
-const SHOWN_ONLY = new Set(["param:zone", "param:region_ardoise", "param:entraxe", "param:pureau"]);
+/** Défauts affichés, jamais demandés (§49.4.3 : zone climatique, entraxe, taux de perte, pureau ; situation exposée, lue à la commune). */
+const SHOWN_ONLY = new Set(["param:zone", "param:region_ardoise", "param:entraxe", "param:pureau", "param:situation"]);
 
 function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
   const out: RuleToConfirm[] = [];
