@@ -6994,7 +6994,7 @@
           "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Placo : 11 vis/m² (Intégrale 2021-22, sans vis de rive) (recherche/13 D1, 15 n° 4)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Placo : 11 vis/m² (Intégrale 2021-22, sans vis de rive), cohérent avec la FDES Placo 2023 du doublage Optima sur INIES (4 à 11) (recherche/16 n° 7)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9715,14 +9715,15 @@
           "label": "{v} vis par m²"
         },
         "vis_int": {
-          "source": "placo-integrale-plafonds-2023",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : 1re peau d'un plafond en 2 BA13, entraxe 0,60 : 3 vis/m², Placo 2023 et règle DTU des premiers parements vissés à 60 cm (guide CAPEB 2022, Chausson) qui redonne 3 (recherche/15 n° 5). Règle changée : avant 8 (SNIP, vis de rive comprises)."
+            "note": "Recherche du 2026-11-19 — contradiction : 1re peau d'un plafond en 2 BA13 à 0,60 : 8 vis/m² (SNIP), gardé jusqu'à l'avis d'un plaquiste (recherche/16 n° 6)."
           },
           "version": 1,
+          "conflict": "Placo Intégrale 2023 : 3 ; mais la FDES Placo 2026 (INIES 52811) pèse deux fois la masse de 3 + 12 vis : la valeur 3 ne tient pas.",
           "kind": "installation_condition",
-          "value": "3",
+          "value": "8",
           "unit": "u/m2",
           "label": "{v} vis 1re peau par m²"
         },

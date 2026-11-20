@@ -307,7 +307,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Chevilles métal 6 × 40 | 1 boîte de 100 | 63 pièces |  |
 | Éclisses de fourrure Placo | 1 boîte de 50 | 23,87 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
 | Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
-| Vis TTPC 25 Placo | 1 boîte de 1000 | 120 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
+| Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
 | Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 45 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
