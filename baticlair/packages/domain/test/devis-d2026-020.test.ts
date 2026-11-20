@@ -52,15 +52,18 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
 });
 
 describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le reste suit", () => {
-  it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 8 cm → crochet 9 cm)", () => {
+  // NF DTU 40.11 (fiche couverture) : zone 1, 45° → recouvrement 73 mm → crochet 73 + 3 = 76 mm, soit 8 cm (avant 9).
+  it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 73 mm → crochet 8 cm)", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
-    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 9 cm");
+    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 8 cm");
   });
-  it("« crochet inox de 11 cm » : crochets de 11 cm, recouvrement 10 cm, pureau 11 cm, ardoises recomptées", () => {
+  // Règle du fondateur, confirmée le 2026-11-19 (fiche couverture, ardoise.jeu_de_tete_crochet) : recouvrement = crochet − 5 mm,
+  // pureau = (320 − 105) ÷ 2 = 107,5 mm. Avant : crochet − 1 cm, pureau 11 cm.
+  it("« crochet inox de 11 cm » : crochets de 11 cm, recouvrement 10,5 cm, pureau 10,75 cm, ardoises recomptées", () => {
     const sans = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 posées au crochet inox de 11 cm")], {}, ZONE_1);
     expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 11 cm");
-    expect(v.assumptions.find((a) => a.key === "param:pureau")?.value).toBe("11");
+    expect(v.assumptions.find((a) => a.key === "param:pureau")?.value).toBe("10,75");
     // Plus de recouvrement, plus d'ardoises : la liste reste cohérente avec le crochet commandé.
     expect(Number(slates(v)!.quantity!.replace(/\D/g, ""))).toBeGreaterThan(Number(slates(sans)!.quantity!.replace(/\D/g, "")));
     // « inox » qualifie le crochet, pas l'ardoise.
@@ -72,7 +75,7 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
   });
   it("« Ø 2,7 mm » n'est pas une longueur de crochet", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], {}, ZONE_1);
-    expect(crochets(v)?.label).toMatch(/longueur 9 cm/);
+    expect(crochets(v)?.label).toMatch(/longueur 8 cm/);
   });
 });
 
@@ -102,8 +105,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
 
   it("1. la liste attendue, dans l'ordre du devis (avant réponse) : chaque article écrit, la naissance d'office, rien d'autre", () => {
     expect(liste()).toEqual([
-      ["Ardoises naturelles Espagne 1er choix 32×22", "2 052 pièces"],
-      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 094 pièces"],
+      ["Ardoises naturelles Espagne 1er choix 32×22", "2 122 pièces"],
+      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 122 pièces"],
       ["Gouttière zinc Havraise", "3 longueurs de 4 m"],
       ["Naissances Ø80", "2 pièces"],
       ["Crochets de gouttière Havraise", "20 pièces"],
@@ -121,10 +124,10 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(v.suggestions).toEqual([]);
   });
 
-  it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = ardoises × 1,02", () => {
+  it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = un par ardoise", () => {
     const ardoises = v.toBuy[0]!;
-    expect(ardoises.precision).toBe("48 m² × 40,7 ardoises/m² (crochet 11 cm, pente 30°) + 5 % de marge");
-    expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)");
+    expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°) + 5 % de marge");
+    expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée");
     expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
   });
 

@@ -61,8 +61,8 @@ describe("ce qui part chez le négoce : une commande claire, rien d'autre", () =
     expect(posees.join(" | ")).not.toMatch(/pureau/i);
     const liste = (q.lignes as { libelle: string; texte: string | null }[]).map((l) => [l.libelle, l.texte]);
     expect(liste).toEqual([
-      ["Ardoises naturelles Espagne 1er choix 32×22", "2 052 pièces"],
-      ["Crochets d'ardoise inox Ø 2,7, longueur 11 cm", "2 094 pièces"],
+      ["Ardoises naturelles Espagne 1er choix 32×22", "2 106 pièces"],
+      ["Crochets d'ardoise inox Ø 2,7, longueur 11 cm", "2 106 pièces"],
       ["Gouttière havraise zinc dév. 25", "3 longueurs de 4 m"],
       ["Naissances dév. 25 Ø80", "2 pièces"],
       ["Crochets de gouttière havraise, acier galvanisé ou zinc", "20 pièces"],

@@ -141,7 +141,7 @@ describe("la règle du comptoir (§47.8)", () => {
     );
     expect(complet.questions).toEqual([]);
     expect(complet.toBuy.map((b) => b.label)).toEqual(
-      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 11 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
+      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 10 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
     );
   });
 

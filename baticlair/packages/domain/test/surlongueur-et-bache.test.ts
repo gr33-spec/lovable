@@ -28,7 +28,7 @@ describe("surlongueur de bobine et bâche", () => {
       { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
       { ref: "2", designation: "Descente d'eau pluviale zinc Ø80 hauteur 4 m", quantity: "2", unit: "u" },
     ], {});
-    expect(v.toBuy.find((b) => b.label.startsWith("Liteaux 18"))?.precision).toBe("lattage 200 m², une file tous les 10,25 cm");
+    expect(v.toBuy.find((b) => b.label.startsWith("Liteaux 18"))?.precision).toBe("lattage 200 m², une file tous les 10,55 cm");
     expect(v.toBuy.find((b) => b.label.startsWith("Liteaux 27"))?.precision).toBe("contre-lattage 200 m², une file tous les 60 cm");
     expect(v.toBuy.find((b) => /tube/i.test(b.label))?.precision).toBe("2 descentes × 4 m");
   });

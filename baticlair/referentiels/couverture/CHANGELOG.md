@@ -1,5 +1,102 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.20-59 — Base couverture : la fiche, le DTU, la zone par commune (mission du fondateur, 19-20 novembre 2026)
+
+Travail de la branche `claude/amazing-einstein-jhz8k4`, fusionné sur la branche de test. Chaque constante est lue dans
+`referentiels/couverture/fiche-couverture.json` (constantes et tables prouvées par des chiffres confirmés). Les étapes,
+de la plus récente à la plus ancienne :
+
+### Étape — Zone du chantier calculée par commune
+
+- **§26 / §32.1 Zone climatique** : lue PAR COMMUNE dans la carte des régions (`carte-regions.json`, `zones_communes`,
+  34 734 communes : distance à la côte au 1:10 M et trait de côte Histolitt, altitude IGN de la mairie, NF DTU 40.11 et
+  40.21). La commune écrite après le code postal ; sinon la zone la plus forte des communes du code postal ; sinon
+  l'ancienne table par département (`zone.ts`). Décision du fondateur (19/11/2026).
+- Exemples : Rennes, Vitré, Nantes, Grenoble passaient en zone 3 (département) : Rennes, Vitré, Nantes en zone 1,
+  Grenoble en zone 2. Brest, Lorient, Saint-Malo restent en zone 3 ; Étel et Belz en zone 2 (côte « de Lorient à
+  l'Espagne »). Grenoble, 200 m² de 30×22 : 8 547 ardoises, crochets de 9 cm (avant 8 925, 10 cm).
+- Le crochet inox 2,7 mm reste d'office par département littoral (NF DTU 40.11 : Ø 2,4 interdit dans le 22, le 29 et le 56).
+
+### Étape — Écran sous toiture : surface + 10 % au-dessus de 30 %, + 20 % en dessous
+
+- **§6 / §28.4 Écran** : m² d'écran = surface × 1,10 au-dessus de 30 % de pente (règle du fondateur, confirmée),
+  × 1,20 à 30 % et moins (lés recouverts de 20 cm, abouts et faîtage : NF DTU 40.29 via Edilians, Siplast, Dörken).
+  Lu dans la fiche (`ecran.coef_pente_forte`, `ecran.coef_pente_faible`). Avant : recouvrement des lés seul,
+  × 1,071 / × 1,154 (abouts et faîtage oubliés).
+- L'écran reste commandé en ROULEAUX de 75 m² (ce que sert le comptoir, §40 test du fournisseur), les m² à couvrir
+  dits sur la ligne. La règle du fondateur « en m², point » est signalée, pas appliquée : en m², la quantité bouge de
+  9 % avec la pente et ferait poser une question de plus (règle des 3 %, §41), et une ligne en m² ne passe pas le
+  test du fournisseur.
+- Exemples : 120 m² à 45 % → 132 m², 2 rouleaux (avant 128,57 m², 2 rouleaux) ; à 30 % → 144 m², 2 rouleaux.
+
+### Étape — Tubes de descente en longueurs de 2 m par défaut
+
+- **§7 / §15 Tubes de descente** : longueurs de 2 m par défaut, lues dans la fiche (`evacuation.longueur_tube_descente`).
+  Règle du fondateur, et la recherche confirme que le 2 m existe en zinc (VMZinc, Rheinzink, NedZink ; standard en
+  Bretagne) comme en PVC (Nicoll, First Plast : 4, 3, 2, 1 m). « En longueurs de 4 m » écrit au devis donne du 4 m.
+  Avant : 4 m. Exemple : 2 descentes de 5 m → 6 tubes de 2 m (avant 4 tubes de 4 m).
+- Aide de la question du diamètre : Ø 100 jusqu'à 113 m² de toit (avant 130), Ø 120 jusqu'à 160 m² (NF DTU 40.5 via
+  VMZinc, fiche couverture).
+
+### Étape — Faîtières et arêtiers sans modèle : 3 au ml
+
+- **§5 Faîtière et arêtier courants (40 à 42 cm), modèle non écrit au devis** : 3 au ml, lu dans la fiche
+  (`faitage.faitieres_par_ml_sans_modele`). Recherche : 3 au ml pour une faîtière 1/2 ronde ou angulaire sans emboîtement
+  (Edilians, Terreal, Monier), 2,5 seulement pour une faîtière à emboîtement grand modèle. Sans modèle, 3 : jamais trop
+  court. Avant : 2,9 au ml (« ml ÷ 0,35 »).
+- Exemples : D-2026-015, faîtières refusées → 30 (avant 29) ; arêtier de 12 m → 36 arêtières et 36 crochets (avant 35).
+
+### Étape — Tuile à pureau variable : le rampant en rangs entiers
+
+- **§5 Pureau par défaut d'une tuile à pureau variable** (le devis ne le dit pas) : le rampant est partagé en un nombre
+  ENTIER de rangs au pureau le plus long admis par le fabricant : pureau = max(pureau mini, rampant ÷ arrondi au-dessus
+  (rampant ÷ pureau maxi)). C'est la pose réelle (fiche couverture : Edilians, Koramic, Terreal). La fiche HP 10 de
+  février 2026 donne des pentes minimales par zone et par site, sans lien avec le pureau. Avant : pureau mini en
+  zone 3 ou sous 19,3°, sinon maxi. Le rampant (5,5 m par défaut) devient une hypothèse dite de l'ouvrage.
+- Exemple : HP 10, rampant 5,5 m → 15 rangs, pureau 36,7 cm (avant 31 cm en zone 3). 120 m² : 1 258 tuiles (avant
+  1 488) ; 24 m de rives : 66 tuiles de rive (avant 78).
+
+### Étape — Ardoise : recouvrement du NF DTU 40.11, lu dans la fiche couverture
+
+- **§3 Recouvrement de l'ardoise au crochet** : le tableau du NF DTU 40.11 (2020, annexe B), relu chez Cupa et Rathscheck
+  (132 valeurs identiques), par pente et région, une table par bande de rampant (≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m ;
+  le rampant tient lieu de projection horizontale, ce qui est prudent). Les trois tables sont construites par
+  `construire_fiche.py` à partir des chiffres confirmés de la fiche (`tables` de `fiche-couverture.json`).
+  Avant : tableau du référentiel (25° à 50°), + 10 mm au-delà de 5,5 m de rampant, arrondi aux 5 mm supérieurs.
+- Exemples :
+  - 45°, région III, rampant ≤ 5,50 m : 89 mm (avant 95). Brest, 200 m² de 30×22 : 8 925 ardoises (avant 9 271), ligne de
+    la table Cupa 42,5/m².
+  - 45°, région I : 73 mm (avant 80) ; crochet 8 cm (avant 9).
+  - 45°, région III, rampant 6 m : 94 mm (avant 105).
+  - 30°, région III : 119 mm (avant 120).
+- Pente minimale de la table : 24,23° (45 %, la plus forte des pentes admises dans les trois régions et les trois
+  bandes ; avant : 25°). En dessous, l'ouvrage n'est pas calculé et la raison est dite.
+- Rampant : un choix « Plus de 11 m » est ajouté.
+
+### Étape — Faîtage et arêtier zinc façonnés en longueurs de 2 m (fiche couverture)
+
+- **§3 / §7 Faîtage et arêtier zinc commandés façonnés** : longueurs de 2 m, lues dans la fiche
+  (`zinguerie.longueur_faitage_aretier_faconne`). Règle du fondateur (« zinc façonné en 2 m »), confirmée par
+  VMZinc, Rheinzink et trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) : aucune pièce de 3 m vue.
+  Avant : longueurs de 3 m. Exemple : 9 ml d'arêtier zinc → 5 longueurs de 2 m (avant 4 longueurs de 3 m).
+- La marge × 1,05 du zinc linéaire ne change pas ici (sans source : à trancher par le fondateur).
+
+### Étape — Ardoise : trois constantes lues dans la fiche couverture (mission du fondateur, 2026-11-19)
+
+Première étape de la bascule « le code lit la fiche et rien d'autre » : ces constantes viennent de
+`referentiels/couverture/constantes.json`, chacune prouvée par des chiffres confirmés de `fiche-couverture.json`.
+
+- **Pureau quand le devis donne le crochet** : recouvrement = crochet − 5 mm (jeu de tête), soit pureau =
+  (longueur − crochet) ÷ 2 + 2,5 mm. Règle du fondateur (18/11), confirmée par le manuel CAP, le guide du
+  ministère de la Culture et Cupa. Avant : crochet − 1 cm (+ 5 mm). D-2026-020 (32×22, crochet 11) : pureau
+  10,75 cm (avant 11), 42,09 ardoises/m² (avant 40,7), 2 122 ardoises (avant 2 052).
+- **Crochet par défaut** (devis sans longueur) : recouvrement + 3 mm, arrondi au cm supérieur (Cupa, Frénéhard,
+  NF DTU 40.11 2020). Avant : recouvrement + 1 cm. Brest (30×22, 45°, zone 3, R 95 mm) : crochet 10 cm (avant 11).
+- **Crochets** : un par ardoise commandée, sans perte en plus. Règle du fondateur, confirmée par Cupa,
+  Rathscheck et le DTU 40.11 via guides. Avant : ardoises × 1,02. Brest : 9 271 crochets (avant 9 457).
+- Aucune autre quantité ne change : seules les lignes de crochets et le pureau au crochet écrit bougent dans
+  les comptes rendus (`docs/lot-*`, tableau de Brest).
+
 ## roofing-2026.11.19-58 — Zinc à tasseaux : la largeur de bobine ne se demande jamais (recette en ligne, 2026-11-19)
 
 - **Zinc à tasseaux** : la largeur de la bobine (`largeur_bobine_tasseaux`) est `neverAsk`. Sur le site de test, deux lectures sur trois du devis D-2026-024 posaient « bobine de 650 ou de 500 ? » ; la couverture restait en attente. La valeur courante de Greg (650 mm) est dite et se change dans la liste ; écrite au devis, elle est prise.

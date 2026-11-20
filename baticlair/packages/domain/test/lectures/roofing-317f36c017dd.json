@@ -2,7 +2,7 @@
  "devis": [
   {
    "ref": "1",
-   "designation": "Descente PVC Ø80 en longueurs de 2 m, hauteur 3 m, sans dauphin",
+   "designation": "Descente PVC Ø80 en longueurs de 4 m, hauteur 3 m, sans dauphin",
    "quantity": "1",
    "unit": "u"
   }
@@ -24,7 +24,7 @@
   "lignes": [
    {
     "ref": "1",
-    "designation": "Descente PVC Ø80 en longueurs de 2 m, hauteur 3 m, sans dauphin",
+    "designation": "Descente PVC Ø80 en longueurs de 4 m, hauteur 3 m, sans dauphin",
     "quantite": "1",
     "unite": "u",
     "role": "fourniture",
@@ -38,7 +38,7 @@
       "donnees": {
        "diametre_descente": "80 mm",
        "hauteur_descente": "3 m",
-       "longueur_tube": "2 m",
+       "longueur_tube": "4 m",
        "dauphin": "0"
       },
       "attend": [],

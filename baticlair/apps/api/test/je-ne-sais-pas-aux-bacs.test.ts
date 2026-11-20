@@ -43,7 +43,7 @@ describe("la longueur des bacs laissée sans réponse", () => {
   it("« Je ne sais pas » : les ardoises sont chiffrées avec leur rampant courant ; les bacs restent à préciser", async () => {
     const b = await chantier(null);
     const liste = b.ecran.purchase.toBuy.map((x) => [x.label, x.quantity]);
-    expect(liste).toContainEqual(["Ardoises naturelles Espagne 1er choix 32×22", "5 030 pièces"]);
+    expect(liste).toContainEqual(["Ardoises naturelles Espagne 1er choix 32×22", "4 889 pièces"]);
     const bacs = liste.find(([label]) => /joint debout/i.test(label ?? ""))!;
     expect(bacs[1]).toBeNull();
     // La question reste sur la ligne des bacs : elle se règle dans la liste.
@@ -54,7 +54,7 @@ describe("la longueur des bacs laissée sans réponse", () => {
     const b = await chantier("5");
     expect(b.ecran.purchase.toBuy.map((x) => [x.label, x.quantity])).toEqual([
       ["Bacs joint debout zinc naturel 0,65 mm, longueur 5,15 m", "19 bacs"],
-      ["Ardoises naturelles Espagne 1er choix 32×22", "5 030 pièces"],
+      ["Ardoises naturelles Espagne 1er choix 32×22", "4 889 pièces"],
     ]);
     expect(b.questions.map((x) => x.id)).not.toContain("engine:param:longueur_rampant");
   });

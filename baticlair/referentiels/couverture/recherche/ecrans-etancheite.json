@@ -1,0 +1,3046 @@
+{
+  "famille": "ecrans-etancheite",
+  "generated": "2026-11-19",
+  "perimetre": "Écrans souples de sous-toiture (NF DTU 40.29), contre-lattage, adhésifs ; étanchéité de toiture-terrasse (NF DTU 43.1, 43.3, 43.4, 43.5) : membranes bitume SBS, EIF, isolants, relevés, évacuations, EPDM, PVC.",
+  "entrees": [
+    {
+      "id": "ecran_recouvrement_lés_pente_sup30",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement horizontal entre lés",
+      "valeur": 10,
+      "unite": "cm",
+      "condition": "pente > 30 % (> 16,7°) ; NF DTU 40.29",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Pente ≤ 30 % / > 30 % ; Recouvrement 20 cm / 10 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "20 cm pour des pentes ≤ 30% et de 10 cm pour des pentes > 30%",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "recouvrements horizontaux de 10 cm (pente > 30 % ou version ADH+)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_recouvrement_lés_pente_inf30",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement horizontal entre lés",
+      "valeur": 20,
+      "unite": "cm",
+      "condition": "pente ≤ 30 % (≤ 16,7°) ; NF DTU 40.29",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Pente ≤ 30 % … Recouvrement 20 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "Pente ≤ 30 % > 30 % ; Recouvrement 20 cm 10 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 2",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "10 cm pour les pentes supérieures à 30%, 20 cm sinon",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_recouvrement_bandes_adhesives",
+      "famille": "ecran",
+      "sous_famille": "écran souple à double bande adhésive intégrée",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement horizontal entre lés",
+      "valeur": 10,
+      "unite": "cm",
+      "condition": "toutes pentes, écran à bandes adhésives intégrées (ADH, BBC)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "Recouvrement de 10 cm pour toutes les pentes grâce aux doubles bandes adhésives",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "10 cm (pente > 30 % ou version ADH+)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_recouvrement_abouts",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement en about de lé",
+      "valeur": 10,
+      "unite": "cm",
+      "condition": "jonction au droit d'un support (chevron) ; sinon + bande adhésive",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "au droit d'un support avec un recouvrement de 10 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "au droit d'un support avec un recouvrement de 10 cm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_recouvrement_faitage",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement par retournement au faîtage",
+      "valeur": 20,
+      "unite": "cm",
+      "condition": "pente ≤ 30 % ; 30 cm si pente > 30 % (Edilians) ; bande à cheval de 40 cm mini",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Recouvrement minimum 20 cm (≤ 30 %) 30 cm (> 30 %)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "Fermer les lignes de faîtage et arêtier par l'écran, avec un recouvrement de 20 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Edilians : 20 cm (≤ 30 %) et 30 cm (> 30 %) ; Siplast : 20 cm sans distinction. Les deux concernent l'écran fermé au faîtage (non HPV ventilé : faîtage laissé ouvert).",
+      "raison": "Valeur > 30 % divergente entre deux fabricants ; le texte du DTU 40.29 n'a pas été lu."
+    },
+    {
+      "id": "ecran_seuil_pente",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "seuil de pente qui change le recouvrement",
+      "valeur": 30,
+      "unite": "%",
+      "condition": "30 % = 16,7° ; 10 cm strictement au-dessus, 20 cm à 30 % et en dessous",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Pente ≤ 30 % / > 30 %",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "pentes ≤ 30% … pentes > 30%",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_conso_m2_par_m2",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "Siplast",
+      "modele": "",
+      "attribut": "consommation d'écran par m² de toiture",
+      "valeur": 1.15,
+      "unite": "m²/m²",
+      "condition": "plage 1,10 à 1,20 selon la pente (recouvrements compris)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Samse, n° 1230466)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf",
+          "type": "fabricant",
+          "extrait": "Consommation 1,10 à 1,20 m²/m² en fonction de la pente",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Def'X R1 (diffusée par Samse, n° 1230458)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230458.pdf",
+          "type": "fabricant",
+          "extrait": "1,10 à 1,20 m²/m² en fonction de la pente",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Deux fiches du même fabricant (une seule source). Recoupement géométrique (calcul BatiClair sur les recouvrements DTU confirmés) : lé 1,50 m − 10 cm → 1,50/1,40 = 1,071 ; − 20 cm → 1,50/1,30 = 1,154 ; + retournement au faîtage 20-30 cm par versant, débord à l'égout, abouts 10 cm tous les 50 m : on retrouve 1,10 (forte pente) à 1,20 (faible pente).",
+      "raison": "Pas de seconde source indépendante qui chiffre la consommation au m². Deuxième passe : rien trouvé chez Edilians (Apneo 3, Aero 2), Dörken, Ubbink, Tyvek (brochures), Rockwool ni Chausson ; ces fiches donnent les recouvrements, pas une consommation au m². Le recoupement reste le calcul."
+    },
+    {
+      "id": "ecran_rouleau_150x50",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "",
+      "modele": "",
+      "attribut": "format de rouleau",
+      "valeur": 75,
+      "unite": "m²",
+      "condition": "1,50 × 50 m, format courant de toutes les marques",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340134215-scWdrUoLYe.pdf",
+          "type": "fabricant",
+          "extrait": "Surface 75 m2 ; Dimensions 1,50 x 50 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Onduline, fiche Ondutiss Air HDV Resist R2 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3467670042605-RDlnuzSOve.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 x 50 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 2",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "AERO 2 … 1,5 … 50 … 75",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiche DELTA-NEO VENT (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/267b56a0-d96f-45b1-aff0-0ed81304405f/be-fiche-technique-delta-neo-vent.pdf",
+          "type": "fabricant",
+          "extrait": "Dimension des rouleaux 50 m × 1,50 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "50 m x 1,50 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Samse, fiche iNDi HPV R3 (marque du négoce, n° 1238924)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1238924.pdf",
+          "type": "negoce",
+          "extrait": "Rouleau de 1,50 m x 50 m (75 m²)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_rouleau_150x100",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier",
+      "modele": "Spirtech 110",
+      "attribut": "format de rouleau",
+      "valeur": 150,
+      "unite": "m²",
+      "condition": "1,50 × 100 m (Monier Spirtech 110)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Monier, brochure gamme Spirtech (diffusée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/591003_1921389_591003.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau : 1,50 m x 100 m (150 m2)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_rouleau_150x20_et_30x1",
+      "famille": "ecran",
+      "sous_famille": "écran HPV petit format (GSB)",
+      "marque": "",
+      "modele": "",
+      "attribut": "format de rouleau",
+      "valeur": 30,
+      "unite": "m²",
+      "condition": "1,50 × 20 m (Ondutiss Air R2 Resist 150, 30 m²) ; Soprema 30 × 1 m (30 m²)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Castorama, Ondutiss Air R2 Resist 150 1,50 × 20 m",
+          "url": "https://www.castorama.fr/ecran-de-sous-toiture-ondutiss-air-r2-resist-150-1-50-x-20-m/3467670042575_CAFR.prd",
+          "type": "negoce",
+          "extrait": "1,50 x 20 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bricocash, Sop'Écran+ HPV R2 30 × 1 m (Soprema)",
+          "url": "https://www.bricocash.fr/p/ecran-sous-toiture-et-pare-pluie-sop-ecran-hpv-r2-30x1m/3434551864014",
+          "type": "negoce",
+          "extrait": "Sop'Écran+ HPV R2 30x1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Formats de grande surface de bricolage, chacun vu chez un seul vendeur ; rarement en négoce pro."
+    },
+    {
+      "id": "ecran_palette",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "",
+      "modele": "",
+      "attribut": "rouleaux par palette",
+      "valeur": "12 à 39",
+      "unite": "rouleaux",
+      "condition": "dépend du modèle, à lire sur la fiche du modèle : DELTA-MAXX PLUS 18, DELTA-XX PLUS UNIVERSAL 22, Edilians AERO 24, Spirtech 300 20, DELTA-NEO VENT 25, Divoroll Ecotech 200FR 25, Ondutiss 39, iNDi R2 12 ; sans effet sur la commande d'un chantier (vente au rouleau)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Dörken, fiche DELTA-NEO VENT (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/267b56a0-d96f-45b1-aff0-0ed81304405f/be-fiche-technique-delta-neo-vent.pdf",
+          "type": "fabricant",
+          "extrait": "Nombre de rouleaux par palette 25 r.",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Monier (BMI), fiche Divoroll Ecotech 200FR (diffusée par Samse, n° 1244784)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1244784.pdf",
+          "type": "fabricant",
+          "extrait": "Nombre d'unités par palette 25",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Samse, fiche iNDi HPV R3 (marque du négoce, n° 1238924)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1238924.pdf",
+          "type": "negoce",
+          "extrait": "Palette de 25 rouleaux",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiche technique DELTA-MAXX PLUS (février 2023, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/preview/56688/file/Fiche%20Technique%20DELTA%20MAXX%20PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Palettisation 18 (dimension 1,5 x 50 m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 2 / AERO 2 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Il n'y a pas de nombre « standard » : 25 était le chiffre le plus fréquent de la deuxième passe, mais il varie de 12 à 39 selon la marque et le modèle. La plage est confirmée ; un chiffre se lit par modèle."
+    },
+    {
+      "id": "ecran_hpv_sd",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "",
+      "modele": "",
+      "attribut": "valeur Sd d'un écran HPV",
+      "valeur": 0.18,
+      "unite": "m",
+      "condition": "HPV = Sd ≤ 0,18 m (perméance ≥ 0,5 g/m².h.mmHg) ; classe Sd1 ≤ 0,10 m ; produits courants 0,02 à 0,03 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Monier, brochure gamme Spirtech (diffusée par Union Matériaux)",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/591003_1921389_591003.pdf",
+          "type": "fabricant",
+          "extrait": "une perméance supérieure ou égale à 0,5 g/m2.h.mmHg soit une valeur Sd ≤ 0,18 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "Sd1 : ≤ 0,10 m ; Sd2 : entre 0,10 et 0,18 m ; Sd3 : > à 0,18 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "La pose au contact de l'isolant exige Sd1 (≤ 0,10 m) selon les tableaux Edilians et Ubbink ; un écran Sd2 (0,10 à 0,18) est HPV au sens Monier mais doit rester ventilé en sous-face."
+    },
+    {
+      "id": "ecran_classe_tr",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "entraxe maxi des chevrons selon la classe mécanique",
+      "valeur": 60,
+      "unite": "cm",
+      "condition": "TR1 45 cm, TR2 (« R2 ») 60 cm, TR3 (« R3 ») 90 cm",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "TR1 (45 cm) … TR2 (60 cm) … TR3 (90 cm)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "45 cm … 60 cm … 90 cm … TR3",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Les Matériaux, fiche conseil sous-toiture",
+          "url": "https://www.lesmateriaux.fr/uploads/advice/pdf/07-sous-toiture.pdf",
+          "type": "negoce",
+          "extrait": "R2 = 60 cm entraxe chevrons ; R3 = 90 cm entraxe chevrons",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_lame_air_non_hpv",
+      "famille": "ecran",
+      "sous_famille": "écran non HPV (Sd2, Sd3)",
+      "marque": "",
+      "modele": "",
+      "attribut": "lame d'air ventilée sous l'écran",
+      "valeur": 2,
+      "unite": "cm",
+      "condition": "support discontinu (chevrons) ; sur support continu : 4 cm (rampant < 12 m) ou 6 cm (≥ 12 m)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Cas des écrans non respirants : 2 cm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "4 cm minimum si l'écran est Sd2 ou Sd3 et la longueur de rampant est inférieure ou égale à 12 m",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_hpv_contact_isolant",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "",
+      "modele": "",
+      "attribut": "pose au contact de l'isolant",
+      "valeur": 0,
+      "unite": "cm",
+      "condition": "Sd1, E1, support discontinu ≤ 60 cm (TR2/TR3) ; obligatoire avec laine minérale sous rampant (CPT 3560, 2009)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "les écrans souples de sous-toiture HPV peuvent être posés directement au contact de l'isolant",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "au contact de … 60 cm E1 Sd1 TR2 TR3",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_pose_tendue",
+      "famille": "ecran",
+      "sous_famille": "écran souple de sous-toiture",
+      "marque": "",
+      "modele": "",
+      "attribut": "mode de pose",
+      "valeur": null,
+      "unite": "",
+      "condition": "pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "La pose « en auget » … est désormais interdite, seule la pose tendue est permise",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "L'ancienne disposition qui consistait à poser l'écran non tendu n'est plus admise",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "contre_liteau_section_mini",
+      "famille": "ecran",
+      "sous_famille": "contre-liteau sur écran",
+      "marque": "",
+      "modele": "",
+      "attribut": "section minimale",
+      "valeur": "20 × 36",
+      "unite": "mm",
+      "condition": "20 mm d'épaisseur × 36 mm de largeur minimum, bois traité classe 2",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "La contre-latte est de minimum : 2 cm d'épaisseur, 3,6 cm de largeur",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "liteaux en bois traités classe 2, de dimensions minimales 20 x 36 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "contre-lattage avec des liteaux (épaisseur mini 20 mm)",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "contre_liteau_pose",
+      "famille": "ecran",
+      "sous_famille": "contre-liteau sur écran",
+      "marque": "",
+      "modele": "",
+      "attribut": "nombre de files",
+      "valeur": 1,
+      "unite": "file par chevron",
+      "condition": "une contre-latte sur chaque chevron ou fermette, qui fixe l'écran ; ml = surface ÷ entraxe des chevrons",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "pointes ou agrafes disposées dans les zones destinées à être recouvertes par les contre-lattes qui, elles, assureront la fixation définitive",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "La fixation définitive de l'écran sera assurée par un contre-lattage",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "ecran_larmier_egout",
+      "famille": "ecran",
+      "sous_famille": "bande d'égout / larmier",
+      "marque": "Edilians",
+      "modele": "",
+      "attribut": "dimensions",
+      "valeur": 2,
+      "unite": "m",
+      "condition": "développé 166 mm, longueur 2 m (Edilians) ; bande rigide obligatoire à l'égout (NF DTU 40.29)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier : disponible en développé 166 mm, longueur 2 ml",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Terreal, fiche produit Romane Canal (diffusée par Chausson), accessoires",
+          "url": "https://cdn.chausson.fr/catalog-document/1b1b1770-1c11-4cb7-a817-f1740d06defc/terreal-fiche-produit-romane-canal.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier Zinc 0,6 mm - Longueur 2 m Développé 166 mm … Conforme DTU 40.29",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Même larmier chez Edilians et Terreal : développé 166 mm, 2 m."
+    },
+    {
+      "id": "adhesif_ecran_rouleau",
+      "famille": "ecran",
+      "sous_famille": "adhésif de recouvrement d'écran",
+      "marque": "Dörken",
+      "modele": "DELTA-MULTI-BAND M60",
+      "attribut": "format de rouleau",
+      "valeur": 25,
+      "unite": "m",
+      "condition": "60 mm × 25 m (DELTA-MULTI-BAND M60) ; FLEXX en 60 ou 100 mm × 25 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Dörken, fiche DELTA-MULTI-BAND M60 (diffusée par Deschacht)",
+          "url": "https://webassets.deschacht.eu/fr-be/ts1/21605/5215f052/delta-multiband-m60-25m.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du rouleau 60 mm, longueur du rouleau 25 mètres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bilp (négoce bois), DELTA-MULTI-BAND M 60, 60 mm × 25 m, vendu au rouleau",
+          "url": "https://mob.bilp.fr/2740--delta-multi-band-m-60.html",
+          "type": "negoce",
+          "extrait": "60mm x 25m - CDT : rouleau",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "adhesif_ecran_conso",
+      "famille": "ecran",
+      "sous_famille": "adhésif de recouvrement d'écran",
+      "marque": "",
+      "modele": "",
+      "attribut": "ml d'adhésif par m² de toiture",
+      "valeur": 0.71,
+      "unite": "ml/m²",
+      "condition": "= 1 ÷ 1,40 m de lé utile (pente > 30 %) ; 1 ÷ 1,30 = 0,77 ml/m² (≤ 30 %) ; seulement si l'écran participe à l'étanchéité à l'air et n'a pas de bande intégrée",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Il faut que les zones de recouvrement des lés soient étanches … En rajoutant au niveau du raccord entre les lés, des bandes adhésives",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Ratio géométrique BatiClair (une ligne de recouvrement par lé) ; le besoin d'adhésif dépend du choix d'étanchéité à l'air."
+    },
+    {
+      "id": "pare_vapeur_sd",
+      "famille": "ecran",
+      "sous_famille": "pare-vapeur sous écran",
+      "marque": "",
+      "modele": "",
+      "attribut": "valeur Sd minimale",
+      "valeur": 18,
+      "unite": "m",
+      "condition": "pare-vapeur continu côté chaud avec un écran de sous-toiture",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "CAPEB, « Nouveau NF DTU 40.29 écrans souples de sous-toiture »",
+          "url": "https://www.capeb.fr/actualites/nouveau-nf-dtu-40.29-ecrans-souples-de-sous-toiture",
+          "type": "guide",
+          "extrait": "doivent avoir une valeur de Sd supérieure ou égale à 18 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiches DELTA-REFLEX / REFLEX PLUS (diffusées par Samse, n° 72813)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_72813.pdf",
+          "type": "fabricant",
+          "extrait": "Conforme au CPT 3560 et au DTU 31.2 : valeur Sd ≥ 18 m",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "pare_vapeur_rouleau",
+      "famille": "ecran",
+      "sous_famille": "pare-vapeur (combles, sarking)",
+      "marque": "Dörken",
+      "modele": "DELTA-REFLEX",
+      "attribut": "format de rouleau",
+      "valeur": 75,
+      "unite": "m²",
+      "condition": "1,50 × 50 m = 75 m² (Dörken, Edilians) ; aussi 3,00 × 25 m (Dörken) et 2,80 × 50 m (Edilians)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Dörken, fiches DELTA-REFLEX / REFLEX PLUS (diffusées par Samse, n° 72813)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_72813.pdf",
+          "type": "fabricant",
+          "extrait": "1,50 m x 50 m ( sans mandrin ) ; 3,00 m x 25 m ( avec mandrin )",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique VAPEO STOP (mise en page 05-2024), sur edilians.com",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_vapeo_stop.pdf",
+          "type": "fabricant",
+          "extrait": "VAPEO STOP 078834 1,5 × 50 m, 7 kg, 75 m² ; VAPEO STOP 2,8 : 2,8 × 50 m, 140 m² ; 24 rouleaux par palette",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Deux fabricants indépendants donnent le même rouleau de 75 m² ; le grand format change selon la marque."
+    },
+    {
+      "id": "delta_maxx_plus_sd",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-MAXX PLUS",
+      "attribut": "valeur Sd",
+      "valeur": 0.17,
+      "unite": "m",
+      "condition": "écran perméable à la vapeur à deux bandes autocollantes intégrées ; support discontinu ou continu",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-MAXX PLUS (février 2023, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/preview/56688/file/Fiche%20Technique%20DELTA%20MAXX%20PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Valeur Sd EN ISO 12572 env. 0,17 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,17 ≤ 0,18, donc HPV"
+      ]
+    },
+    {
+      "id": "delta_maxx_plus_rouleau",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-MAXX PLUS",
+      "attribut": "format de rouleau et palette",
+      "valeur": {
+        "1,50 × 50 m": "75 m², 14 kg, 18 rouleaux par palette",
+        "2,96 × 50 m": "148 m², 28 kg, 15 rouleaux par palette"
+      },
+      "unite": "m / u",
+      "condition": "classement R (R2 / R3) non écrit sur la fiche française",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-MAXX PLUS (février 2023, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/preview/56688/file/Fiche%20Technique%20DELTA%20MAXX%20PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Dimension 1,5 x 50 / 2,96 x 50 m ; Palettisation 18 (dimension 1,5 x 50 m) 15 (dimension 2,96 x 50 m)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "1,5 × 50 = 75 m² ; 2,96 × 50 = 148 m²"
+      ]
+    },
+    {
+      "id": "delta_xx_plus_universal",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-XX PLUS UNIVERSAL",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R2 (QB CSTB n° 22-015 : E1-Sd1-TR2)",
+        "Sd_m": 0.08,
+        "entraxe_maxi_cm": 60,
+        "rouleau": "1,50 × 50 m, 11 kg",
+        "rouleaux_par_palette": 22
+      },
+      "unite": "",
+      "condition": "pose au contact de l'isolant possible",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-XX PLUS UNIVERSAL (édition 02, 10/07/2024, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/download/30020/file/DOE-0000_Datenblatt_XX-PLUS-UNIVERSAL_FR_Aufl02_LA03_240710.pdf",
+          "type": "fabricant",
+          "extrait": "Écran de sous-toiture universel HPV R2 … Valeur Sd env. 0,08 m … Palettisation 22 rouleaux/palette",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, page produit DELTA-XX PLUS UNIVERSAL (doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/delta-xx-plus-universal",
+          "type": "fabricant",
+          "extrait": "Certification QB du CSTB n°22-015 (Classement E1-Sd1,TR2)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,08 ≤ 0,18",
+        "R2 ⇔ entraxe ≤ 60 cm : la fiche écrit « entraxe maxi entre chevrons : 60 cm »",
+        "1,5 × 50 = 75 m²"
+      ]
+    },
+    {
+      "id": "delta_foxx_plus",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-FOXX PLUS",
+      "attribut": "Sd et rouleau",
+      "valeur": {
+        "Sd_m": 0.08,
+        "rouleau": "1,50 × 50 m, 20,5 kg"
+      },
+      "unite": "",
+      "condition": "écran HPV renforcé (270 g/m²), bandes adhésives intégrées",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Dörken, fiche technique DELTA-FOXX PLUS (février 2026, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/download/55945/file/Fiche%20Technique%20DELTA%20FOXX-PLUS.pdf",
+          "type": "fabricant",
+          "extrait": "Transmission de la vapeur d'eau - Valeur Sd – env. 0,08 m ; Dimensions du rouleau 1,50 × 50 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,08 ≤ 0,18"
+      ]
+    },
+    {
+      "id": "edilians_aero_1",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Edilians",
+      "modele": "AERO 1 / AERO 1 DBA",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R1",
+        "entraxe_maxi_cm": 45,
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 9 kg",
+        "rouleaux_par_palette": 24
+      },
+      "unite": "",
+      "condition": "DBA = double bande adhésive intégrée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique AERO 1 / AERO 1 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_1.pdf",
+          "type": "fabricant",
+          "extrait": "résistance « standard » R1 … entraxes maximum de 45 cm … Sd 0,02 … 24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "24 rouleaux × 75 m² = 1 800 m² par palette (valeur imprimée : 1800)"
+      ],
+      "reference": "078967, 078969"
+    },
+    {
+      "id": "edilians_aero_2",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Edilians",
+      "modele": "AERO 2 / AERO 2 DBA",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R2",
+        "entraxe_maxi_cm": 60,
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 12 kg",
+        "rouleaux_par_palette": 24
+      },
+      "unite": "",
+      "condition": "DBA = double bande adhésive intégrée ; AERO 2 aussi en 3 × 50 m (150 m², 23 kg)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique AERO 2 / AERO 2 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "résistance « standard » R2 … entraxes maximum de 60 cm … Sd 0,02 … 24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "24 rouleaux × 75 m² = 1 800 m² par palette (valeur imprimée : 1800)"
+      ],
+      "reference": "078826, 078944, 078828"
+    },
+    {
+      "id": "edilians_aero_3",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Edilians",
+      "modele": "AERO 3 / AERO 3 DBA",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "HPV R3",
+        "entraxe_maxi_cm": 90,
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 13 kg",
+        "rouleaux_par_palette": 24
+      },
+      "unite": "",
+      "condition": "DBA = double bande adhésive intégrée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Edilians, fiche technique AERO 3 / AERO 3 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_3_1.pdf",
+          "type": "fabricant",
+          "extrait": "résistance « standard » R3 … entraxes maximum de 90 cm … Sd 0,02 … 24 rouleaux par palette 1800",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "24 rouleaux × 75 m² = 1 800 m² par palette (valeur imprimée : 1800)"
+      ],
+      "reference": "078830, 078974"
+    },
+    {
+      "id": "spirtech_200",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier (BMI)",
+      "modele": "Divoroll Spirtech 200",
+      "attribut": "classe, Sd, rouleau",
+      "valeur": {
+        "classe": "E1-Sd1-TR2, R2",
+        "entraxe_maxi_cm": 60,
+        "Sd_m": 0.03,
+        "rouleau": "1,50 × 50 m = 75 m²"
+      },
+      "unite": "",
+      "condition": "existe en BBC (double bande adhésive intégrée) ; palette non indiquée",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Monier), page produit Divoroll Spirtech 200 (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/divoroll-spirtech-200-3670997695/",
+          "type": "fabricant",
+          "extrait": "Classement E.S.T. E1-Sd1-TR2 ; Classement R / Entraxe Maxi R2 / 60 cm ; Valeur Sd 0,03 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "page fabricant non datée : la règle confirme_fabricant demande une fiche datée"
+    },
+    {
+      "id": "spirtech_300",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier (BMI)",
+      "modele": "Divoroll Spirtech 300",
+      "attribut": "classe, Sd, rouleau, palette",
+      "valeur": {
+        "classe": "E1-Sd1-TR3, R3",
+        "Sd_m": 0.03,
+        "rouleau": "1,50 × 50 m = 75 m², 12 kg",
+        "rouleaux_par_palette": 20
+      },
+      "unite": "",
+      "condition": "écran armé ; existe en BBC (double bande adhésive)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Monier), page produit Divoroll Spirtech 300 (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/divoroll-spirtech-300-409560277/",
+          "type": "fabricant",
+          "extrait": "E1-Sd1-TR3 ; R3 / 60 cm ; Valeur Sd 0,03 m ; 20",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340134215-scWdrUoLYe.pdf",
+          "type": "fabricant",
+          "extrait": "Écran r3 - entraxe 90 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Entraxe maxi : la page BMI écrit « R3 / 60 cm », la fiche diffusée par BigMat « R3 - entraxe 90 cm » (90 cm = définition de R3 / TR3). Probable coquille de la page : à faire confirmer.",
+      "raison": "page fabricant non datée et entraxe contradictoire entre deux documents du même fabricant"
+    },
+    {
+      "id": "ubbink_multivap_300xs",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Ubbink",
+      "modele": "Multivap 300XS",
+      "attribut": "classe, Sd, rouleau",
+      "valeur": {
+        "classe": "HPV R3 (QB25 CSTB n° 13-087 : E1-Sd1-TR3)",
+        "Sd_m": 0.02,
+        "rouleau": "1,50 × 50 m = 75 m², 12,6 kg"
+      },
+      "unite": "",
+      "condition": "tous types de pose (contact isolant, sarking, support continu) ; palette non indiquée",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Ubbink France, fiche produit Écran de sous-toiture Multivap 300XS réf. 204300 (UB-17-09-2026-FR-FR, cdn-blob.ubbink.com)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/5fd7e8df-deb4-424e-9d00-84fe76fb3812/F0014334_0001.pdf",
+          "type": "fabricant",
+          "extrait": "Écran de sous-toiture R3 HPV ; Certifié QB25 par le CSTB (E1 - Sd1 - TR3) ; Valeur SD 0,02 M",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Résistances (420 / 420 N, 385 / 390 N après vieillissement) identiques à l'AERO 3 Edilians : probablement le même produit d'origine, les deux ne comptent pas comme sources indépendantes l'une de l'autre.",
+      "controle": [
+        "HPV ⇔ Sd ≤ 0,18 m (définition reprise par le NF DTU 40.29) : 0,02 ≤ 0,18",
+        "1,5 × 50 = 75 m² (valeur imprimée : 75)"
+      ],
+      "reference": "204300"
+    },
+    {
+      "id": "delta_neo_vent_palette",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Dörken",
+      "modele": "DELTA-NEO VENT",
+      "attribut": "rouleaux par palette",
+      "valeur": 25,
+      "unite": "rouleaux",
+      "condition": "fiche belge",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Dörken, fiche DELTA-NEO VENT (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/267b56a0-d96f-45b1-aff0-0ed81304405f/be-fiche-technique-delta-neo-vent.pdf",
+          "type": "fabricant",
+          "extrait": "Nombre de rouleaux par palette 25 r.",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "fiche lue chez un négoce (Chausson), produit absent de doerken.com/fr"
+    },
+    {
+      "id": "ecotech_200fr_palette",
+      "famille": "ecran",
+      "sous_famille": "écran HPV",
+      "marque": "Monier (BMI)",
+      "modele": "Divoroll Ecotech 200FR",
+      "attribut": "rouleaux par palette",
+      "valeur": 25,
+      "unite": "rouleaux",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Monier (BMI), fiche Divoroll Ecotech 200FR (diffusée par Samse, n° 1244784)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1244784.pdf",
+          "type": "fabricant",
+          "extrait": "Nombre d'unités par palette 25",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "fiche fabricant lue chez un négoce (Samse) seulement"
+    },
+    {
+      "id": "bitume_recouvrement_longitudinal",
+      "famille": "etancheite",
+      "sous_famille": "membrane bitume SBS soudée",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement longitudinal (galon)",
+      "valeur": 6,
+      "unite": "cm",
+      "condition": "bicouche soudé, NF DTU 43.1 / 43.3 / 43.4 ; 10 à 12 cm pour une 1re couche fixée mécaniquement (fixations dans le recouvrement)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du galon de recouvrement ≥ 60 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paracier, bicouche sur bac acier (Samse, n° 1166309)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1166309.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur minimale du recouvrement longitudinal (cm) … 6",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice Adepar JS / JS R4 (Samse, n° 869978)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_869978.pdf",
+          "type": "fabricant",
+          "extrait": "recouvrement longitudinal de 6 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Siplast Paracier (1re couche fixée sur bac acier) : 10 à 12 cm ; Paradiene FM : bande de recouvrement 10 cm."
+    },
+    {
+      "id": "bitume_recouvrement_about",
+      "famille": "etancheite",
+      "sous_famille": "membrane bitume SBS",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement en about de lé",
+      "valeur": 15,
+      "unite": "cm",
+      "condition": "feuille autoadhésive Adepar JS (Siplast) ; about soudé : valeur non trouvée",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Siplast, notice Adepar JS / JS R4 (Samse, n° 869978)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_869978.pdf",
+          "type": "fabricant",
+          "extrait": "recouvrement en about de lé de 15 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Une seule fiche (autoadhésif). Pour la feuille soudée, etancheur.md retient 10 cm par défaut sans source ; à lire dans le DTU 43.1 ou un cahier des prescriptions de pose."
+    },
+    {
+      "id": "soprema_flam25_rouleau",
+      "famille": "etancheite",
+      "sous_famille": "1re couche (sous-couche) SBS",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25",
+      "attribut": "format de rouleau",
+      "valeur": 7,
+      "unite": "m²",
+      "condition": "ELASTOPHENE FLAM 25 : 7 × 1 m, ≈ 25 kg ; FLAM S 25, FLAM 180-25, 70-25, ELASTOPHENE 25 : aussi 7 × 1 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 7mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche WPBFR211/b ELASTOPHENE FLAM 180-25 (Samse, n° 908847)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908847.pdf",
+          "type": "fabricant",
+          "extrait": "7mx1m … Environ 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Castorama, sous-couche d'étanchéité Soprema 7 m²",
+          "url": "https://www.castorama.fr/sous-couche-d-etancheite-soprema-7m-/3434550464741_CAFR.prd",
+          "type": "negoce",
+          "extrait": "Sous-couche d'étanchéité Soprema 7m²",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le site international Soprema et une ancienne fiche (etancheur.md) donnent 10 × 1 m (≈ 32-33 kg) : format ancien ou hors France ; les fiches françaises actuelles sont toutes à 7 × 1 m (rouleaux limités à ≈ 25 kg)."
+    },
+    {
+      "id": "siplast_paradiene_ss_couche_rouleau",
+      "famille": "etancheite",
+      "sous_famille": "1re couche (sous-couche) SBS",
+      "marque": "Siplast",
+      "modele": "Paradiene S VV / S R4",
+      "attribut": "format de rouleau",
+      "valeur": 7.5,
+      "unite": "m²",
+      "condition": "Paradiene BD S, S VV, S R4, JS R4 : 7,5 × 1 m, 25 kg ; 35 S R4 : 5 × 1 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "Paradiene S VV 7,5 m x 1 m 25 kg",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Une ancienne notice (etancheur.md, Ciffréo Bona) donnait 10 × 1 m.",
+      "raison": "Notice Siplast seule ; pas de négoce trouvé qui vende ce format."
+    },
+    {
+      "id": "siplast_paracier_rouleau",
+      "famille": "etancheite",
+      "sous_famille": "1re couche sur bac acier",
+      "marque": "Siplast",
+      "modele": "",
+      "attribut": "format de rouleau",
+      "valeur": 10,
+      "unite": "m²",
+      "condition": "Paradiene FM R4, Parastyrene FM JS, Paracier G VV 100 : 10 × 1 m (32 à 43 kg) ; Paradiene FM : 7,5 × 1 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Siplast, notice gamme Paracier, bicouche sur bac acier (Samse, n° 1166309)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1166309.pdf",
+          "type": "fabricant",
+          "extrait": "Paradiene FM R4 10 x 1 m 32 kg* ; * Les rouleaux doivent être portés par deux personnes",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice Paradiene FM / FM R4 (Samse, n° 1053977)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1053977.pdf",
+          "type": "fabricant",
+          "extrait": "Paradiene FM / FM R4 1 x 7,5 m 25 kg 40",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Paradiene FM R4 : 10 × 1 m (notice Paracier) contre 7,5 × 1 m (notice FM) : deux éditions différentes.",
+      "raison": "Deux notices du même fabricant en désaccord."
+    },
+    {
+      "id": "soprema_flam25ar_rouleau",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25 AR",
+      "attribut": "format de rouleau",
+      "valeur": 6,
+      "unite": "m²",
+      "condition": "ELASTOPHENE FLAM 25 AR : 6 × 1 m, ≈ 25 kg",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 6mx1m ; Environ 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "Paradiene 30.1 GS 6mx1m 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bricomarché, Chape Alu Mammouth SBS 6 × 1 m (source du tiroir)",
+          "url": "https://www.bricomarche.com/p/couche-de-finition-alu-chape-alu-mammouth-sbs-6x1m/3434550871617",
+          "type": "negoce",
+          "extrait": "SBS 6x1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Brico Dépôt, couche d'étanchéité supérieure ardoisée 6 × 1 m",
+          "url": "https://www.bricodepot.fr/p/3434550464697/couche-d-etancheite-superieure-ardoisee-6-x-1-m-noire",
+          "type": "negoce",
+          "extrait": "ardoisée 6 x 1 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 AR n° WPBFR206/1/c (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/83617731-4e5e-4eab-9498-b3f9e364539b/TDS-ELASTOPHENE-FLAM-25-AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 6mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Sopralène Flam 180 AR existe en 6 × 1 et 8 × 1 m ; Paradiene 40.1 GS 6 × 1 m 32 kg (ancienne notice : 8 × 1 m) ; Paradiene 30.1 GS 10 × 1 m sur catalogue ancien."
+    },
+    {
+      "id": "eif_conso_soprema",
+      "famille": "etancheite",
+      "sous_famille": "primaire EIF",
+      "marque": "",
+      "modele": "",
+      "attribut": "consommation",
+      "valeur": 0.25,
+      "unite": "l/m²",
+      "condition": "Elastocol 500 : 0,15 à 0,25 l/m² en une couche ; béton absorbant ≈ 0,25 l/m² (30 l ≈ 120 m²) ; métal ≈ 0,15 l/m² (30 l ≈ 200 m²)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
+          "type": "fabricant",
+          "extrait": "Consommations indicatives en une couche : 0,15 à 0,25 l/m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
+          "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
+          "type": "fabricant",
+          "extrait": "consommation comprise entre 100 g/m² et 350 g/m² selon la porosité du support",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Soprema en litres (0,15-0,25 l/m², masse volumique ≈ 0,95 kg/l, soit 0,14-0,24 kg/m²) ; Siplast en masse, plage plus large (0,10-0,35 kg/m²). Les deux s'accordent sur ≈ 0,25 l/m² sur béton."
+    },
+    {
+      "id": "eif_conditionnement",
+      "famille": "etancheite",
+      "sous_famille": "primaire EIF",
+      "marque": "",
+      "modele": "",
+      "attribut": "conditionnement",
+      "valeur": "5 / 10 / 25 / 30",
+      "unite": "l",
+      "condition": "Soprema Elastocol 500 : bidons de 5 et 30 l ; Siplast Primer : 2, 10 ou 25 l ; Impression Veral : 10 ou 25 l ; Eco-Activ Primer : 1, 10 ou 20 l",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
+          "type": "fabricant",
+          "extrait": "Bidons de 5 et 30 litres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
+          "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
+          "type": "fabricant",
+          "extrait": "Siplast Primer : bidons de 2, 10 ou 25 l",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "pir_efigreen_alu_format",
+      "famille": "etancheite",
+      "sous_famille": "isolant PIR sous étanchéité",
+      "marque": "Soprema",
+      "modele": "Efigreen Alu+",
+      "attribut": "format de panneau",
+      "valeur": 0.36,
+      "unite": "m²",
+      "condition": "EFIGREEN ALU+ : 600 × 600 mm (format standard) ; version XL 1 200 × 1 000 ou 2 500 × 1 200 mm",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Soprema, fiche INSFR005-1/d EFIGREEN ALU+ (Samse, n° 1159160)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1159160.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur x largeur 600 mm x 600 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson, DTA Efigreen Alu+",
+          "url": "https://cdn.chausson.fr/catalog-document/02605c60-6ea5-4f60-a577-09507634543a/dtadocumenttechniquedapplication-776183.pdf",
+          "type": "negoce",
+          "extrait": "600 x 600 mm (d'après la recherche, non téléchargé)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "Le 1 200 × 1 000 existe (Efigreen Alu+ XL, Efigreen Acier) mais n'est pas le format standard de l'Alu+.",
+      "raison": "Le DTA Chausson n'a été vu que dans un extrait de recherche, pas lu."
+    },
+    {
+      "id": "laine_roche_rockacier_format",
+      "famille": "etancheite",
+      "sous_famille": "isolant laine de roche sous étanchéité",
+      "marque": "Rockwool",
+      "modele": "Rockacier B",
+      "attribut": "format de panneau",
+      "valeur": 1.2,
+      "unite": "m²",
+      "condition": "Rockacier B nu / B Soudable : 1 200 × 1 000 mm, 40 à 80 mm (Soudable)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Rockwool, fiche Rockacier B nu (Samse, n° 766222)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_766222.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions (mm) 1200 x 1000",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Batiproduits, Rockacier B Soudable (Rockwool)",
+          "url": "https://www.batiproduits.com/fiche/produits/isolant-en-laine-de-roche-revetue-de-bitume-pour-p68902958.html",
+          "type": "autre",
+          "extrait": "Longueur : 120 cm … Largeur : 100 cm",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "releve_hauteur",
+      "famille": "etancheite",
+      "sous_famille": "relevé d'étanchéité",
+      "marque": "",
+      "modele": "",
+      "attribut": "hauteur minimale au-dessus de la protection",
+      "valeur": 15,
+      "unite": "cm",
+      "condition": "valeur courante ; 10, 15 ou 25 cm selon la nature de la protection (NF DTU 43.1)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "AQC, Mémo chantier relevés d'étanchéité non isolés, terrasses béton (2021, cite le NF DTU 43.1)",
+          "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Releves-Etancheite-Non-Isoles-Terrasses-Beton-AQC.pdf",
+          "type": "guide",
+          "extrait": "H 100 150 250 mm … Selon nature de la protection … Selon NF DTU 43.1",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Supracoating RLV (Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/PDF/5/136/451/10792/supracoating_rlv.pdf",
+          "type": "fabricant",
+          "extrait": "hauteur conforme au DTU 0,15 m (schéma)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "La valeur dépend de la protection (autoprotégée, gravillons, dalles) et de la pente : l'AQC donne 100 / 150 / 250 mm ; 15 cm reste le cas courant."
+    },
+    {
+      "id": "equerre_renfort",
+      "famille": "etancheite",
+      "sous_famille": "équerre de renfort de relevé",
+      "marque": "",
+      "modele": "",
+      "attribut": "largeur de bande",
+      "valeur": 25,
+      "unite": "cm",
+      "condition": "bande de 0,25 m en rouleau de 10 m (Soprema) ; 25 ou 33 cm (Derbigum, 33 cm sur pare-vapeur si isolant > 130 mm)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Castorama, Équerre d'étanchéité Soprema 0,25 × 10 m",
+          "url": "https://www.castorama.fr/equerre-d-etancheite-soprema-0-25-x-10-m/3434550871785_CAFR.prd",
+          "type": "negoce",
+          "extrait": "Équerre d'étanchéité Soprema 0,25 x 10 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Derbigum, fiche DERBISTRIP 25 / 33 cm (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/e0f8851b-e2f6-4f22-92d9-5ed13c262acc/tds-fr-948-derbistrip.pdf",
+          "type": "fabricant",
+          "extrait": "Le DERBISTRIP (25 cm) est utilisé pour réaliser les équerres de renfort des relevés",
+          "consulte": "2026-11-19"
+        }
+      ]
+    },
+    {
+      "id": "gravillons_epaisseur",
+      "famille": "etancheite",
+      "sous_famille": "protection lourde gravillons",
+      "marque": "",
+      "modele": "",
+      "attribut": "épaisseur",
+      "valeur": 4,
+      "unite": "cm",
+      "condition": "terrasse inaccessible",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "Gravillons 4 cm d'épaisseur",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Vu sur un seul schéma fabricant pendant cette mission (etancheur.md cite aussi DTU 43.1 / 43.3 via Soprema)."
+    },
+    {
+      "id": "pare_vapeur_vgard",
+      "famille": "etancheite",
+      "sous_famille": "pare-vapeur toiture-terrasse",
+      "marque": "Holcim Elevate",
+      "modele": "V-Gard",
+      "attribut": "format de rouleau",
+      "valeur": 54,
+      "unite": "m²",
+      "condition": "V-Gard : 50 × 1,08 m (fiche Batiproduits) ; Sd 1 500 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Batiproduits, V-Gard (Holcim Elevate) pare-vapeur toiture-terrasse",
+          "url": "https://www.batiproduits.com/amp/fiche/produits/ecran-pare-vapeur-en-systeme-de-toiture-terrasse-p322700310.html",
+          "type": "autre",
+          "extrait": "Longueur : 50 m - Largeur : 1.08 m - Surface : 50 m² / rouleau",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "1,08 × 50 = 54 m² bruts, la fiche dit 50 m² (utiles ?).",
+      "raison": "Une seule fiche, surface ambiguë."
+    },
+    {
+      "id": "pare_vapeur_bitume_elastovap",
+      "famille": "etancheite",
+      "sous_famille": "pare-vapeur bitume",
+      "marque": "Soprema",
+      "modele": "Elastovap",
+      "attribut": "format de rouleau",
+      "valeur": 7,
+      "unite": "m²",
+      "condition": "Soprema Elastovap : 7 × 1 m, ≈ 25 kg (pare-vapeur courant sur maçonnerie)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Quincaillerie Angles, Elastovap Soprema 1 × 7 m",
+          "url": "https://www.quincaillerie-angles.fr/pdf-product/view/index/id/94779",
+          "type": "negoce",
+          "extrait": "1 x 7 m (d'après la recherche)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Format lu dans un extrait de recherche, fiche non téléchargée."
+    },
+    {
+      "id": "epdm_rouleau",
+      "famille": "etancheite",
+      "sous_famille": "membrane EPDM",
+      "marque": "",
+      "modele": "",
+      "attribut": "format de rouleau",
+      "valeur": 3.05,
+      "unite": "m de large",
+      "condition": "RubberCover 1,1-1,14 mm : 3,05 × 7,62 m (23,2 m²) en France ; 3,05 × 30,5 m (93 m²) chez un négoce anglais ; bâche sur mesure",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Huws Gray (négoce UK), Elevate RubberCover EPDM 1,14 mm, rouleau 30,5 × 3,05 m",
+          "url": "https://www.huwsgray.co.uk/epdm-rubber-roofing/firestone-epdm-045(114mm)-fsrcr3m-per-m2-9303-m2-per-roll-(-305m-x-305m-)-100011308-5008989",
+          "type": "negoce",
+          "extrait": "93.03 m2 Per Roll (30.5 x 3.05m)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Holcim Elevate, brochure RubberCover EPDM (FR)",
+          "url": "https://holcimelevate.com/content/dam/elevateemea/documents/fr/roofing/rubbercover-epdm/product-literature/rc-lit-bro-fr-02779-secured.pdf",
+          "type": "fabricant",
+          "extrait": "rouleaux de 3,05 m x 7,62 m (d'après la recherche)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Formats différents selon le pays ; la colle (BA-2012) varie de 2,35 à 12 m²/l selon les sources : non tranché."
+    },
+    {
+      "id": "evacuations_eep",
+      "famille": "etancheite",
+      "sous_famille": "entrée d'eaux pluviales (EEP)",
+      "marque": "",
+      "modele": "",
+      "attribut": "règle de dimensionnement",
+      "valeur": null,
+      "unite": "",
+      "condition": "NF DTU 60.11 P3 (formule de Bazin) + DTU série 43 ; règle courante « 1 cm² de section par m² » ; trop-plein",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "FFB, dimensionnement des évacuations des eaux pluviales (NF DTU 60.11 P3)",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/equipements-techniques/plomberie-sanitaire/dossier/le-dimensionnement-des-evacuations-des-eaux-pluviales",
+          "type": "guide",
+          "extrait": "La formule de Bazin … conservée pour les gouttières, les naissances et les descentes d'une toiture avec revêtement d'étanchéité",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "docs/referentiels/etancheur.md (référentiel interne, non revérifié)",
+          "url": "docs/referentiels/etancheur.md",
+          "type": "autre",
+          "extrait": "1 cm² de descente par m² de toiture ; 2 EEP mini, ou 1 + trop-plein",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Tableau FFB réservé aux adhérents, DTU non lu ; la règle 1 cm²/m² et l'obligation du trop-plein ne viennent que de forums et du référentiel interne. De toute façon le nombre d'EEP se lit au devis (règle numéro un)."
+    },
+    {
+      "id": "pvc_flagon",
+      "famille": "etancheite",
+      "sous_famille": "membrane PVC",
+      "marque": "Soprema",
+      "modele": "Flagon SV / SR",
+      "attribut": "format de rouleau",
+      "valeur": 42,
+      "unite": "m²",
+      "condition": "Flagon SV 15/10 : 20 × 2,10 m ; recouvrement 5 cm (SV) ou 10 cm (SR fixé)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "docs/referentiels/etancheur.md (référentiel interne, non revérifié)",
+          "url": "docs/referentiels/etancheur.md",
+          "type": "autre",
+          "extrait": "20 × 2,10 m (utile 2,05) … 5 cm long. et transv.",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique BETF WPSIT0056.b FLAGON SV (lotus.soprema.fr, domaine du fabricant)",
+          "url": "https://lotus.soprema.fr/www/reftechsop.nsf/($AllByUNID)/BB8DE0D8C0BB4384C1258382002D9EC6/$File/BETF-WPSIT0056.b-EN%20FLAGON%20SV.pdf",
+          "type": "fabricant",
+          "extrait": "Length of the roll (m) 20 (25) 20 20 20 ; Width of the roll (m) 2,10 (extrait de recherche ; serveur en erreur 503 à la lecture)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Format 2,10 × 20 m = 42 m² (14 rouleaux par palette) vu dans l'extrait de la fiche Soprema et dans une fiche Soprema suisse (42 m² par rouleau), deux documents du même fabricant, non téléchargés (503) : une seule source, et confirme_fabricant impossible sans lire la fiche datée.",
+      "controle": [
+        "calcul : 2,10 × 20 = 42 m² ; fiche non lue directement (serveur Soprema en 503), donc pas de confirme_fabricant"
+      ]
+    },
+    {
+      "id": "bitume_conso_geometrique",
+      "famille": "etancheite",
+      "sous_famille": "bicouche SBS",
+      "marque": "",
+      "modele": "",
+      "attribut": "surface de membrane par m² de terrasse (recouvrements seuls)",
+      "valeur": 1.08,
+      "unite": "m²/m²",
+      "condition": "rouleau 1 m, galon 6 cm, about 10 cm : 7 × 1 → 0,94 × 6,9 = 6,49 m² utiles (×1,079) ; 6 × 1 → 0,94 × 5,9 = 5,55 (×1,081) ; hors chutes et relevés",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du galon de recouvrement ≥ 60 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 6mx1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "Calcul BatiClair sur des valeurs confirmées ; l'about de 10 cm reste à confirmer."
+    },
+    {
+      "id": "soprema_e25_role",
+      "famille": "etancheite",
+      "sous_famille": "1re couche (sous-couche) SBS",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25",
+      "attribut": "rôle, format, épaisseur",
+      "valeur": {
+        "role": "1re couche d'un bicouche (ou 2e couche sous protection rapportée)",
+        "rouleau": "7 × 1 m = 7 m², ≈ 25 kg",
+        "epaisseur_mm": 2.6,
+        "armature": "voile de verre",
+        "faces": "film thermofusible dessus et dessous"
+      },
+      "unite": "",
+      "condition": "soudée au chalumeau ; galon de recouvrement ≥ 60 mm",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 n° WPBFR204/b (PDF du 28/01/2015, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/f738f9cf-715b-4ed7-9c7b-66c332d934e6/TDS-ELASTOPHENE-FLAM-25.pdf",
+          "type": "fabricant",
+          "extrait": "utilisée en complexe bicouche, soit comme première couche, soit comme deuxième couche avec protection rapportée ; 7m x 1m x 2,6 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "7 × 1 = 7 m²"
+      ]
+    },
+    {
+      "id": "soprema_e25ar_role",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Elastophène Flam 25 AR",
+      "attribut": "rôle, format, coloris",
+      "valeur": {
+        "role": "couche de finition autoprotégée d'un bicouche soudable",
+        "rouleau": "6 × 1 m = 6 m², ≈ 25 kg",
+        "epaisseur_mm": 2.6,
+        "coloris_standards": [
+          "Noir",
+          "Gris",
+          "Brun Matisse",
+          "Rouge Gauguin",
+          "Vert Véronèse",
+          "Sienne Cézanne",
+          "Gris Chagall",
+          "Blanc Chagall",
+          "Ocre Van Gogh",
+          "Blanc D-TOX"
+        ]
+      },
+      "unite": "",
+      "condition": "paillettes d'ardoise ; sous-couches associées : Elastophène Flam 70-25 ou 180-25",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 AR n° WPBFR206/1/c (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/83617731-4e5e-4eab-9498-b3f9e364539b/TDS-ELASTOPHENE-FLAM-25-AR.pdf",
+          "type": "fabricant",
+          "extrait": "couche de finition d'un complexe bicouche soudable ; Dimensions du rouleau 6mx1m ; Coloris standards Noir, Gris, Brun Matisse…",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "6 × 1 = 6 m²"
+      ]
+    },
+    {
+      "id": "soprema_s180ar_role",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Sopralène Flam 180 AR",
+      "attribut": "rôle, format, coloris",
+      "valeur": {
+        "role": "couche de finition autoprotégée d'un bicouche",
+        "rouleau": "6 × 1 m = 6 m², ≈ 25 kg",
+        "epaisseur_mm": 3.1,
+        "armature": "polyester non-tissé",
+        "coloris_standards": [
+          "Noir",
+          "Gris",
+          "Brun Matisse",
+          "Rouge Gauguin",
+          "Vert Véronèse",
+          "Sienne Cézanne"
+        ],
+        "coloris_reflechissants": [
+          "Blanc Chagall",
+          "Blanc D-TOX"
+        ]
+      },
+      "unite": "",
+      "condition": "soudée au chalumeau ; sous-couche Elastophène Flam 25 ; « d'autres longueurs sont réalisables à la demande »",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, fiche technique SOPRALENE FLAM 180 AR n° WPBFR230/1/d (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/94559614-aeec-4bc0-80f1-b03f482ade1c/TDS-SOPRALENE-FLAM-180-AR.pdf",
+          "type": "fabricant",
+          "extrait": "couche de finition d'un complexe bicouche ; Dimensions du rouleau* 6mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "ecart": "La fiche comptoir de la deuxième passe disait 1 × 8 m : la fiche française n° WPBFR230/1/d écrit 6 × 1 m (le 8 m est la version export de la fiche anglaise).",
+      "controle": [
+        "6 × 1 = 6 m²"
+      ]
+    },
+    {
+      "id": "soprema_nuancier_paillettes",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Soprema",
+      "modele": "Nuancier paillettes d'ardoise",
+      "attribut": "teintes de paillettes",
+      "valeur": [
+        "Gris",
+        "Noir",
+        "Vert Véronèse",
+        "Rouge Gauguin",
+        "Gris Chagall",
+        "Brun Matisse",
+        "Sienne Cézanne",
+        "Ocre Van Gogh"
+      ],
+      "unite": "liste",
+      "condition": "toutes les feuilles autoprotégées Soprema ; disponibilité par produit : voir la fiche du produit",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme_fabricant",
+      "sources": [
+        {
+          "titre": "Soprema, nuancier « Finitions en paillettes d'ardoise » DC-24/072_FR (novembre 2024, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/6fd74910-6f0a-41b4-9964-575acf97a48e/Nuancier-Paillettes-d-ardoise.pdf",
+          "type": "fabricant",
+          "extrait": "Finitions en paillettes d'ardoise Gris Noir Vert Véronèse Rouge Gauguin Gris Chagall Brun Matisse Sienne Cézanne Ocre Van Gogh",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "controle": [
+        "pas de calcul possible pour une liste de teintes"
+      ]
+    },
+    {
+      "id": "siplast_paradiene_301gs",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS (paillettes d'ardoise)",
+      "marque": "Siplast",
+      "modele": "Paradiene 30.1 GS",
+      "attribut": "rôle, format, coloris",
+      "valeur": {
+        "role": "2e couche (finition autoprotégée) sur Adepar JS ou Paradiene FM",
+        "rouleau": "6 × 1 m",
+        "coloris": [
+          "Anthracite",
+          "Blanc Alpin SRI 82",
+          "Blanc SRI 60",
+          "Brun",
+          "Gris Anthracite",
+          "Gris Clair",
+          "Rouge Bauxite",
+          "Vert Lichen"
+        ]
+      },
+      "unite": "",
+      "condition": "autoprotection minérale ; armature voile de verre",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Siplast), page produit Paradiene 30.1 GS (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/paradiene-30-1-gs-rouge-bauxite-1568175029/",
+          "type": "fabricant",
+          "extrait": "Deuxième couche d'un système d'étanchéité ; largeur 1 m, longueur 6 m ; Rouge Bauxite",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "page fabricant non datée ; fiche technique datée non retrouvée"
+    },
+    {
+      "id": "siplast_parafor_solo_gs",
+      "famille": "etancheite",
+      "sous_famille": "monocouche SBS autoprotégée",
+      "marque": "Siplast",
+      "modele": "Parafor Solo GS",
+      "attribut": "rôle et format",
+      "valeur": {
+        "role": "monocouche soudé en plein (terrasse inaccessible ou technique)",
+        "rouleau": "1 × 7 m × 4 mm"
+      },
+      "unite": "",
+      "condition": "coloris non listés sur la page",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "BMI (Siplast), page produit Parafor Solo GS (bmigroup.com/fr, non datée)",
+          "url": "https://www.bmigroup.com/fr/p/parafor-solo-gs-3039606568/",
+          "type": "fabricant",
+          "extrait": "Revêtement d'étanchéité monocouche, soudé en plein ; 1m x 7m x 4mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "raison": "page fabricant non datée ; teintes et palette non trouvées sur une fiche officielle"
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "seuil_pente_ecran = 16,7° (30 %)",
+      "origine": "roofing.ts:1083",
+      "valeur_actuelle": "16.7 °",
+      "verdict": "confirme",
+      "bonne_valeur": "30 % = 16,7° ; 20 cm à 30 % et en dessous, 10 cm au-dessus",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Pente ≤ 30 % / > 30 %",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "≤ 30% … > 30%",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le « ≤ » du code est le bon sens de la borne."
+    },
+    {
+      "ratio": "recouvrement_faible_pente = 0,20 m",
+      "origine": "roofing.ts:1084",
+      "valeur_actuelle": "0.20 m",
+      "verdict": "confirme",
+      "bonne_valeur": "0,20 m",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Recouvrement 20 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "20 cm (pente ≤ 30 %)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "NF DTU 40.29 via deux fabricants et un négoce."
+    },
+    {
+      "ratio": "recouvrement_forte_pente = 0,10 m",
+      "origine": "roofing.ts:1085",
+      "valeur_actuelle": "0.10 m",
+      "verdict": "confirme",
+      "bonne_valeur": "0,10 m (aussi toutes pentes pour un écran à bandes adhésives intégrées)",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "10 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "10 cm pour toutes les pentes grâce aux doubles bandes adhésives",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Un écran ADH / BBC permet 10 cm même sous 30 %."
+    },
+    {
+      "ratio": "ECRAN_FORMULA = surface × 1,5 / (1,5 − recouvrement) (soit +7,1 % ou +15,4 %)",
+      "origine": "roofing.ts:1087",
+      "valeur_actuelle": "×1,071 (> 16,7°) ; ×1,154 (≤ 16,7°)",
+      "verdict": "corrige",
+      "bonne_valeur": "×1,10 (pente > 30 %) ; ×1,20 (pente ≤ 30 %)",
+      "sources": [
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Samse, n° 1230466)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf",
+          "type": "fabricant",
+          "extrait": "1,10 à 1,20 m²/m² en fonction de la pente",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "retournement … Recouvrement minimum 20 cm / 30 cm ; abouts 10 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "La formule ne compte que le recouvrement entre lés : il manque le retournement au faîtage (20-30 cm par versant), l'about tous les 50 m (10 cm) et le débord à l'égout. Siplast chiffre 1,10 à 1,20 ; une seule source chiffrée, la géométrie la recoupe. Ligne à garder orange « quantité à confirmer » tant que le fondateur n'a pas tranché."
+    },
+    {
+      "ratio": "Écran = surface + 10 %, affiché en m²",
+      "origine": "regles-metier SKILL.md § Écran sous-toiture",
+      "valeur_actuelle": "×1,10",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "×1,10 juste au-dessus de 30 % (cas breton courant : ardoise ≥ 40°) ; insuffisant à 30 % et moins (×1,20)",
+      "sources": [
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Samse, n° 1230466)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf",
+          "type": "fabricant",
+          "extrait": "1,10 à 1,20 m²/m² en fonction de la pente",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Règle du fondateur prioritaire : la recherche la confirme en forte pente et la contredit en faible pente (bac, tuile canal, pente ≤ 16,7°). À trancher."
+    },
+    {
+      "ratio": "Écran affiché en m², pas de conversion en rouleaux",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "m²",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "le comptoir sert des rouleaux entiers (75 m² ; 30 m² en GSB) : « 2 rouleaux de 1,50 × 50 m (110 m² à couvrir) »",
+      "sources": [
+        {
+          "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340134215-scWdrUoLYe.pdf",
+          "type": "fabricant",
+          "extrait": "Surface 75 m2",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "Conditionnement divisible : palette de 20 rouleaux",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "La palette se divise, le rouleau non. Le §6 du référentiel dit « rouleau » ; le skill dit m². Décision à trancher (le §40 autorise le m² pour l'écran)."
+    },
+    {
+      "ratio": "Écran HPV m² rampant × 1,12 / 75, arrondi sup.",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "×1,12",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "×1,10 (> 30 %) / ×1,20 (≤ 30 %)",
+      "sources": [
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Samse, n° 1230466)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf",
+          "type": "fabricant",
+          "extrait": "1,10 à 1,20 m²/m²",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Valeur moyenne plausible, sans source ; la pente doit choisir le coefficient."
+    },
+    {
+      "ratio": "Quantité écran : surface rampant × 1,10 à 1,15",
+      "origine": "referentiel-couverture.md §28.4",
+      "valeur_actuelle": "1,10 à 1,15",
+      "verdict": "corrige",
+      "bonne_valeur": "1,10 à 1,20",
+      "sources": [
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Samse, n° 1230466)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf",
+          "type": "fabricant",
+          "extrait": "1,10 à 1,20 m²/m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Def'X R1 (diffusée par Samse, n° 1230458)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230458.pdf",
+          "type": "fabricant",
+          "extrait": "1,10 à 1,20 m²/m²",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Haut de plage relevé à 1,20 (faible pente)."
+    },
+    {
+      "ratio": "Recouvrement 10 cm si pente ≥ 30 % (17°), 20 cm en dessous (à vérifier DTU 40.29)",
+      "origine": "referentiel-couverture.md §28.4",
+      "valeur_actuelle": "10 cm si ≥ 30 %",
+      "verdict": "corrige",
+      "bonne_valeur": "10 cm si > 30 % ; 20 cm si ≤ 30 % (30 % pile : 20 cm)",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "≤ 30 % : 20 cm ; > 30 % : 10 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "≤ 30% … > 30%",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les valeurs sont bonnes, la borne est à l'envers dans la doc ; le code a la bonne. Retirer « à vérifier »."
+    },
+    {
+      "ratio": "Écran HPV au contact de l'isolant, contre-liteaux ≥ 20 mm",
+      "origine": "referentiel-couverture.md §28.4",
+      "valeur_actuelle": "≥ 20 mm",
+      "verdict": "confirme",
+      "bonne_valeur": "épaisseur ≥ 20 mm, largeur ≥ 36 mm, bois classe 2",
+      "sources": [
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "2 cm d'épaisseur, 3,6 cm de largeur",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "20 x 36 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Ajouter la largeur 36 mm."
+    },
+    {
+      "ratio": "Écran non HPV : lame d'air 2 cm minimum sous l'écran",
+      "origine": "referentiel-couverture.md §28.4",
+      "valeur_actuelle": "2 cm",
+      "verdict": "confirme",
+      "bonne_valeur": "2 cm sur chevrons ; 4 cm (rampant < 12 m) ou 6 cm (≥ 12 m) sur support continu",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "2 cm minimum",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "4 cm … 6 cm minimum si l'écran est Sd2 ou Sd3",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Compléter pour le support continu (volige)."
+    },
+    {
+      "ratio": "Rouleau écran 1,5 × 50 m = 75 m²",
+      "origine": "roofing.ts:1081, 1562-1565, 1702-1707 ; §6 ; §28.4",
+      "valeur_actuelle": "75 m²",
+      "verdict": "confirme",
+      "bonne_valeur": "75 m² (1,50 × 50 m)",
+      "sources": [
+        {
+          "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340134215-scWdrUoLYe.pdf",
+          "type": "fabricant",
+          "extrait": "1,50 x 50 m ; 75 m2",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiche DELTA-NEO VENT (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/267b56a0-d96f-45b1-aff0-0ed81304405f/be-fiche-technique-delta-neo-vent.pdf",
+          "type": "fabricant",
+          "extrait": "50 m × 1,50 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 2",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_2_2.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 50 75",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Format de toutes les marques pro ; 1,50 × 100 m (Monier) et 30 m² (GSB) existent."
+    },
+    {
+      "ratio": "USUAL_CONTRE_LITEAU : contre-liteaux 27×40 sur chevrons",
+      "origine": "roofing.ts:1080 ; §6 ; §28.6",
+      "valeur_actuelle": "27 × 40",
+      "verdict": "confirme",
+      "bonne_valeur": "27 × 40 respecte le minimum 20 × 36 ; 40 × 40 aussi",
+      "sources": [
+        {
+          "titre": "Chausson, notice de pose écrans HPV R2 et R3 Elos (cite le NF DTU 40.29)",
+          "url": "https://cdn.chausson.fr/catalog-document/275307c5-3c1e-4582-8b26-779c1e457d40/elos-20-20notice-20de-20pose-20-c3-a9crans-20sous-20toitures.pdf",
+          "type": "negoce",
+          "extrait": "2 cm d'épaisseur, 3,6 cm de largeur",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "20 x 36 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Section courante au-dessus du minimum ; la section réelle reste celle du devis."
+    },
+    {
+      "ratio": "Contre-liteaux : surface / entraxe_supports (une file par chevron)",
+      "origine": "roofing.ts:1929-1938",
+      "valeur_actuelle": "surface ÷ entraxe",
+      "verdict": "confirme",
+      "bonne_valeur": "surface ÷ entraxe des chevrons",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "contre-lattes qui … assureront la fixation définitive de l'écran",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "contre-lattage",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "La contre-latte suit chaque chevron : la formule est juste."
+    },
+    {
+      "ratio": "Contre-liteaux d'office avec l'écran, entraxe 50 cm par défaut",
+      "origine": "regles-metier SKILL.md § Contre-liteaux",
+      "valeur_actuelle": "50 cm",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "entraxe des chevrons lu au devis ; aucune source ne donne 50 cm (§6 dit 0,60 m par défaut ; R2 = 60 cm maxi, R3 = 90 cm)",
+      "sources": [
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "TR2 (60 cm) … TR3 (90 cm)",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Les Matériaux, fiche conseil sous-toiture",
+          "url": "https://www.lesmateriaux.fr/uploads/advice/pdf/07-sous-toiture.pdf",
+          "type": "negoce",
+          "extrait": "R2 = 60 cm … R3 = 90 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "« D'office » est techniquement juste (pose tendue = contre-lattage obligatoire) mais contredit la règle numéro un (§49) si le devis ne les écrit pas. L'entraxe 50 cm n'est qu'une habitude : à trancher avec le 0,60 du §6."
+    },
+    {
+      "ratio": "Contre-liteaux m² / entraxe (0,45 à 0,60) ≈ 1,7 à 2,2 ml/m², +5 %",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "1,7 à 2,2 ml/m² +5 %",
+      "verdict": "confirme",
+      "bonne_valeur": "1 ÷ 0,60 = 1,67 ; 1 ÷ 0,45 = 2,22 ml/m² ; la perte de 5 % reste sans source",
+      "sources": [
+        {
+          "titre": "Ubbink, fiche écrans de sous-toiture (classement E.S.T.)",
+          "url": "https://cdn-blob.ubbink.com/syncforce/905039a6-d07e-4e6c-a36c-1f231faeee36/F0003273_0001.pdf",
+          "type": "fabricant",
+          "extrait": "TR1 (45 cm) … TR2 (60 cm)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Géométrie juste ; perte à confirmer."
+    },
+    {
+      "ratio": "Adhésif de recouvrement d'écran : rouleau 25 m, ml ≈ m² / 1,4",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "m² ÷ 1,4 ÷ 25",
+      "verdict": "confirme",
+      "bonne_valeur": "m² ÷ 1,40 (> 30 %) ou ÷ 1,30 (≤ 30 %), rouleaux de 25 m ; seulement si écrit au devis",
+      "sources": [
+        {
+          "titre": "Dörken, fiche DELTA-MULTI-BAND M60 (diffusée par Deschacht)",
+          "url": "https://webassets.deschacht.eu/fr-be/ts1/21605/5215f052/delta-multiband-m60-25m.pdf",
+          "type": "fabricant",
+          "extrait": "longueur du rouleau 25 mètres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bilp (négoce bois), DELTA-MULTI-BAND M 60, 60 mm × 25 m, vendu au rouleau",
+          "url": "https://mob.bilp.fr/2740--delta-multi-band-m-60.html",
+          "type": "negoce",
+          "extrait": "60mm x 25m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Rouleau de 25 m confirmé ; ratio géométrique. Le skill dit « accessoires jamais proposés » : cohérent avec la règle numéro un."
+    },
+    {
+      "ratio": "Pare-vapeur sous sarking m² × 1,15 / surface rouleau",
+      "origine": "referentiel-couverture.md §6",
+      "valeur_actuelle": "×1,15",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "non trouvé",
+      "sources": [
+        {
+          "titre": "Dörken, fiches DELTA-REFLEX / REFLEX PLUS (diffusées par Samse, n° 72813)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_72813.pdf",
+          "type": "fabricant",
+          "extrait": "1,50 m x 50 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Aucune source de consommation trouvée pour le pare-vapeur en pente."
+    },
+    {
+      "ratio": "Tiroir étanchéité : EIF bidon de 25 kg",
+      "origine": "etancheite.ts:71-76",
+      "valeur_actuelle": "25 kg",
+      "verdict": "corrige",
+      "bonne_valeur": "bidons en LITRES : 5 ou 30 l (Soprema Elastocol 500), 2, 10 ou 25 l (Siplast Primer)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
+          "type": "fabricant",
+          "extrait": "Bidons de 5 et 30 litres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
+          "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
+          "type": "fabricant",
+          "extrait": "bidons de 2, 10 ou 25 l",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Aucun EIF trouvé vendu en kg ; la contenance dépend de la marque, à demander ou lire au devis."
+    },
+    {
+      "ratio": "Tiroir étanchéité : eif_par_m2 = 0,3 kg/m²",
+      "origine": "etancheite.ts:104 ; §9 (0,25 à 0,30 kg/m²)",
+      "valeur_actuelle": "0,3 kg/m²",
+      "verdict": "corrige",
+      "bonne_valeur": "0,25 l/m² sur béton (0,15 l/m² sur métal)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
+          "type": "fabricant",
+          "extrait": "0,15 à 0,25 l/m² … béton, un bidon de 30 litres permet de couvrir environ 120 m²",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
+          "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
+          "type": "fabricant",
+          "extrait": "100 g/m² et 350 g/m² selon la porosité",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "0,3 kg/m² est dans la plage Siplast mais au-dessus du haut de plage Soprema ; 0,25 l/m² s'accorde avec les deux et avec l'unité de vente (litres)."
+    },
+    {
+      "ratio": "Tiroir étanchéité : sous-couche SBS rouleau 1 × 10 m (10 m²)",
+      "origine": "etancheite.ts:79-84 ; §9",
+      "valeur_actuelle": "10 m²",
+      "verdict": "corrige",
+      "bonne_valeur": "7 m² (Soprema Elastophène Flam 25, 7 × 1 m) ou 7,5 m² (Siplast Paradiene S, 7,5 × 1 m) ; 10 × 1 m seulement sur bac acier (Paradiene FM R4, Paracier)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 7mx1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "7,5 m x 1 m 25 kg",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les fiches françaises actuelles limitent le rouleau à ≈ 25 kg. Le format dépend de la marque : à lire au devis ou demander."
+    },
+    {
+      "ratio": "Tiroir étanchéité : autoprotégée rouleau 1 × 6 m (6 m²)",
+      "origine": "etancheite.ts:85-91",
+      "valeur_actuelle": "6 m²",
+      "verdict": "confirme",
+      "bonne_valeur": "6 m² (Soprema Flam 25 AR, Siplast 30.1 GS) ; 8 × 1 m chez Sopralène Flam 180 AR",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "6mx1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "Paradiene 30.1 GS 6mx1m 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bricomarché, Chape Alu Mammouth SBS 6 × 1 m (source du tiroir)",
+          "url": "https://www.bricomarche.com/p/couche-de-finition-alu-chape-alu-mammouth-sbs-6x1m/3434550871617",
+          "type": "negoce",
+          "extrait": "6x1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Trois sources dont deux fabricants."
+    },
+    {
+      "ratio": "Tiroir étanchéité : recouvrement = 1,12 (recouvrements 6 à 10 cm et relevés)",
+      "origine": "etancheite.ts:106",
+      "valeur_actuelle": "×1,12",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "×1,08 pour les recouvrements seuls (galon 6 cm + about 10 cm), plus chutes ; relevés à compter à part (ml × développé)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "galon ≥ 60 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "6mx1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Mêler relevés et partie courante dans un seul coefficient fausse les petites terrasses très bordées ; about soudé de 10 cm non sourcé."
+    },
+    {
+      "ratio": "Tiroir étanchéité : PIR 1 200 × 1 000 (1,2 m²)",
+      "origine": "etancheite.ts:77, 105",
+      "valeur_actuelle": "1,2 m²",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "format à lire ou demander : Efigreen Alu+ standard 600 × 600 (0,36 m²) ; 1 200 × 1 000 en Efigreen Alu+ XL / Acier, Rockacier",
+      "sources": [
+        {
+          "titre": "Soprema, fiche INSFR005-1/d EFIGREEN ALU+ (Samse, n° 1159160)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1159160.pdf",
+          "type": "fabricant",
+          "extrait": "600 mm x 600 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rockwool, fiche Rockacier B nu (Samse, n° 766222)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_766222.pdf",
+          "type": "fabricant",
+          "extrait": "1200 x 1000",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le défaut 1,2 m² divise par 3,3 le nombre de panneaux si l'artisan prend du 600 × 600."
+    },
+    {
+      "ratio": "Tiroir étanchéité : perte isolant 1,03",
+      "origine": "etancheite.ts:105 ; §9",
+      "valeur_actuelle": "×1,03",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "non trouvé",
+      "sources": [],
+      "explication": "Aucune source."
+    },
+    {
+      "ratio": "Bicouche 2e couche autoprotégée rouleau 1 × 8 m, recouvrement 8 cm",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "8 cm",
+      "verdict": "corrige",
+      "bonne_valeur": "galon 6 cm ; rouleau 6 × 1 m le plus courant (8 × 1 m existe)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du galon de recouvrement ≥ 60 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paracier, bicouche sur bac acier (Samse, n° 1166309)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1166309.pdf",
+          "type": "fabricant",
+          "extrait": "6",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Le galon des autoprotégées est le même que celui des sous-couches."
+    },
+    {
+      "ratio": "Bicouche 1re couche rouleau 1 × 10 m, recouvrement 6 cm",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "10 m, 6 cm",
+      "verdict": "corrige",
+      "bonne_valeur": "recouvrement 6 cm confirmé ; rouleau 7 ou 7,5 m (béton), 10 m (bac acier fixé)",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "7mx1m ; galon ≥ 60 mm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "7,5 m x 1 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Voir la sous-couche du tiroir."
+    },
+    {
+      "ratio": "Primaire d'imprégnation 0,25 à 0,30 kg/m² ; seau 10 ou 25 kg",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "0,25-0,30 kg/m², seau kg",
+      "verdict": "corrige",
+      "bonne_valeur": "≈ 0,25 l/m² béton ; bidons 5/10/25/30 l",
+      "sources": [
+        {
+          "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
+          "type": "fabricant",
+          "extrait": "0,15 à 0,25 l/m² ; Bidons de 5 et 30 litres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
+          "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
+          "type": "fabricant",
+          "extrait": "100 g/m² et 350 g/m² ; bidons de 2, 10 ou 25 l",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Unité de vente en litres."
+    },
+    {
+      "ratio": "Relevé : hauteur mini 15 cm au-dessus de la protection, 10 cm en bac acier",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "15 cm",
+      "verdict": "confirme",
+      "bonne_valeur": "15 cm courant ; 10, 15 ou 25 cm selon la protection",
+      "sources": [
+        {
+          "titre": "AQC, Mémo chantier relevés d'étanchéité non isolés, terrasses béton (2021, cite le NF DTU 43.1)",
+          "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Releves-Etancheite-Non-Isoles-Terrasses-Beton-AQC.pdf",
+          "type": "guide",
+          "extrait": "H 100 150 250 … Selon nature de la protection",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Supracoating RLV (Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/PDF/5/136/451/10792/supracoating_rlv.pdf",
+          "type": "fabricant",
+          "extrait": "0,15 m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "La part « 10 cm en bac acier » n'a pas été vérifiée."
+    },
+    {
+      "ratio": "Relevé : équerre de renfort + 2 couches, bandes de 25 à 33 cm",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "25-33 cm",
+      "verdict": "confirme",
+      "bonne_valeur": "équerre 0,25 m (rouleau 10 m) ; 33 cm quand l'isolant dépasse 130 mm (Derbigum)",
+      "sources": [
+        {
+          "titre": "Castorama, Équerre d'étanchéité Soprema 0,25 × 10 m",
+          "url": "https://www.castorama.fr/equerre-d-etancheite-soprema-0-25-x-10-m/3434550871785_CAFR.prd",
+          "type": "negoce",
+          "extrait": "0,25 x 10 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Derbigum, fiche DERBISTRIP 25 / 33 cm (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/e0f8851b-e2f6-4f22-92d9-5ed13c262acc/tds-fr-948-derbistrip.pdf",
+          "type": "fabricant",
+          "extrait": "DERBISTRIP 25 cm / 33 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    },
+    {
+      "ratio": "EEP : Ø 80 ≤ 70 m², Ø 100 ≤ 130 m², 1 par 100 à 150 m², trop-plein 1 par EEP (obligatoire)",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "Ø80 ≤ 70 m² ; Ø100 ≤ 130 m²",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "non trouvé dans une source lisible ; contredit la règle « 1 cm²/m² » d'etancheur.md (Ø 80 = 50 cm² → 50 m² ; Ø 100 = 78 cm² → 78 m²)",
+      "sources": [
+        {
+          "titre": "FFB, dimensionnement des évacuations des eaux pluviales (NF DTU 60.11 P3)",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/equipements-techniques/plomberie-sanitaire/dossier/le-dimensionnement-des-evacuations-des-eaux-pluviales",
+          "type": "guide",
+          "extrait": "le tableau 5 donne les diamètres selon la surface collectée par EEP, la forme de l'EEP (cylindrique ou tronconique)",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": "Les deux règles internes se contredisent ; la forme (tronconique) change le résultat. Le nombre d'EEP se lit au devis."
+    },
+    {
+      "ratio": "Bouteille de propane 13 kg pour 60 à 80 m² de bicouche",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "60-80 m²",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "non trouvé",
+      "sources": [],
+      "explication": "Aucune source ; consommable, seulement sur le « oui » à la question consommables."
+    },
+    {
+      "ratio": "Protection gravillons 4 cm ≈ 65 kg/m²",
+      "origine": "referentiel-couverture.md §9",
+      "valeur_actuelle": "4 cm",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "4 cm confirmé par une source ; densité 1,6 t/m³ non sourcée",
+      "sources": [
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "Gravillons 4 cm d'épaisseur",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "explication": ""
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Écran de sous-toiture",
+      "ce_que_le_vendeur_demande": [
+        "HPV ou non (pose au contact de l'isolant ?)",
+        "classe R2 ou R3 selon l'entraxe des chevrons (60 / 90 cm)",
+        "marque ou « équivalent »",
+        "avec ou sans bandes adhésives intégrées",
+        "nombre de rouleaux",
+        "modèle courant si l'artisan n'en a pas : Dörken DELTA-XX PLUS UNIVERSAL (R2), Edilians AERO 2 / AERO 3, Monier Spirtech 200 / 300, Ubbink Multivap 300XS (R3)"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "1,50 × 50 m = 75 m² (aussi 1,50 × 100 m Monier ; 2,96 × 50 m Dörken ; 3 × 50 m Edilians AERO 2 ; 30 m² en GSB) ; palette de 12 à 39 rouleaux selon le modèle (DELTA-MAXX PLUS 18, DELTA-XX PLUS 22, AERO 24, Spirtech 300 20)",
+      "sources": [
+        {
+          "titre": "Monier (BMI), fiche Divoroll Spirtech 300 (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3561340134215-scWdrUoLYe.pdf",
+          "type": "fabricant",
+          "extrait": "Écran r3 - entraxe 90 cm",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (diffusée par Ciffréo Bona)",
+          "url": "https://www.ciffreobona.fr/userfiles/file/fiches_technique/siplast/ft_sup_air.pdf",
+          "type": "fabricant",
+          "extrait": "Écran R2, entraxe maxi 60 cm ; Palette de 20 rouleaux",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Dörken, fiche technique DELTA-XX PLUS UNIVERSAL (édition 02, 10/07/2024, doerken.com/fr)",
+          "url": "https://www.doerken.com/fr/fr/content/download/30020/file/DOE-0000_Datenblatt_XX-PLUS-UNIVERSAL_FR_Aufl02_LA03_240710.pdf",
+          "type": "fabricant",
+          "extrait": "Palettisation 22 rouleaux/palette",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Edilians, fiche technique AERO 3 / AERO 3 DBA (août 2024, edilians.com)",
+          "url": "https://edilians.com/media/productattach/f/i/fiche_technique_-_aero_3_1.pdf",
+          "type": "fabricant",
+          "extrait": "24 rouleaux par palette",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "ecran"
+    },
+    {
+      "article": "Contre-liteaux",
+      "ce_que_le_vendeur_demande": [
+        "section (≥ 20 × 36 ; courant 27 × 40)",
+        "traitement classe 2",
+        "longueur des barres",
+        "ml ou nombre de bottes"
+      ],
+      "unite_de_vente": "ml, barre ou botte",
+      "conditionnement": "barres de 4 m courantes (non vérifié ici)",
+      "sources": [
+        {
+          "titre": "Mister Matériaux, fiche Écran HPV R2 « Les Élémentaires » (cite le NF DTU 40.29)",
+          "url": "https://attachments.mistermateriaux.com/FLYER_LES-ELEMENTAIRES_ECRAN_0123_V3.pdf",
+          "type": "negoce",
+          "extrait": "liteaux en bois traités classe 2, de dimensions minimales 20 x 36 mm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "ecran"
+    },
+    {
+      "article": "Adhésif d'écran",
+      "ce_que_le_vendeur_demande": [
+        "largeur (60 ou 100 mm)",
+        "compatible avec la marque d'écran",
+        "nombre de rouleaux"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "25 m ; carton de 10 rouleaux (Dörken)",
+      "sources": [
+        {
+          "titre": "Dörken, fiche DELTA-MULTI-BAND M60 (diffusée par Deschacht)",
+          "url": "https://webassets.deschacht.eu/fr-be/ts1/21605/5215f052/delta-multiband-m60-25m.pdf",
+          "type": "fabricant",
+          "extrait": "longueur du rouleau 25 mètres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Bilp (négoce bois), DELTA-MULTI-BAND M 60, 60 mm × 25 m, vendu au rouleau",
+          "url": "https://mob.bilp.fr/2740--delta-multi-band-m-60.html",
+          "type": "negoce",
+          "extrait": "CDT : rouleau",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "ecran"
+    },
+    {
+      "article": "Bande d'égout / larmier d'écran",
+      "ce_que_le_vendeur_demande": [
+        "développé",
+        "longueur",
+        "matière"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "2 m, développé 166 mm (Edilians)",
+      "sources": [
+        {
+          "titre": "Edilians, guide technique écrans souples de sous-toiture (cite le NF DTU 40.29)",
+          "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf",
+          "type": "fabricant",
+          "extrait": "Larmier : disponible en développé 166 mm, longueur 2 ml",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "ecran"
+    },
+    {
+      "article": "Sous-couche bitume SBS (1re couche)",
+      "ce_que_le_vendeur_demande": [
+        "référence (Elastophène Flam 25, Paradiene S…)",
+        "support (béton, bac acier, bois)",
+        "soudée, autoadhésive ou fixée",
+        "nombre de rouleaux"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "1 × 7 m (Soprema), 1 × 7,5 m (Siplast), 1 × 10 m (bac acier) ; ≈ 25 kg",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR204/b ELASTOPHENE FLAM 25 (diffusée par Samse, n° 908804)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_908804.pdf",
+          "type": "fabricant",
+          "extrait": "7mx1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "7,5 m x 1 m 25 kg",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique ELASTOPHENE FLAM 25 n° WPBFR204/b (PDF du 28/01/2015, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/f738f9cf-715b-4ed7-9c7b-66c332d934e6/TDS-ELASTOPHENE-FLAM-25.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 7mx1m",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "etancheite"
+    },
+    {
+      "article": "Couche autoprotégée (2e couche)",
+      "ce_que_le_vendeur_demande": [
+        "référence",
+        "teinte des paillettes (Soprema : Gris, Noir, Vert Véronèse, Rouge Gauguin, Gris Chagall, Brun Matisse, Sienne Cézanne, Ocre Van Gogh)",
+        "nombre de rouleaux"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "rouleau 6 × 1 m (Soprema Sopralène Flam 180 AR, Elastophène Flam 25 AR ; Siplast Paradiene 30.1 GS) ; 8 m sur demande / export",
+      "sources": [
+        {
+          "titre": "Soprema, fiche WPBFR206/1/c ELASTOPHENE FLAM 25 AR (diffusée par Envain Matériaux)",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_WPBFR206.1.c.FR_ELASTOPHENE%20FLAM%2025%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "6mx1m ; Paillettes d'ardoise",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast, notice gamme Paradiene (Samse, n° 872667)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_872667.pdf",
+          "type": "fabricant",
+          "extrait": "Paradiene 30.1 GS 6mx1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, fiche technique SOPRALENE FLAM 180 AR n° WPBFR230/1/d (PDF du 5/12/2022, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/94559614-aeec-4bc0-80f1-b03f482ade1c/TDS-SOPRALENE-FLAM-180-AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau* 6mx1m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Soprema, nuancier « Finitions en paillettes d'ardoise » DC-24/072_FR (novembre 2024, lien depuis soprema.fr)",
+          "url": "https://my.assets-library.com/asset/6fd74910-6f0a-41b4-9964-575acf97a48e/Nuancier-Paillettes-d-ardoise.pdf",
+          "type": "fabricant",
+          "extrait": "Finitions en paillettes d'ardoise",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "etancheite"
+    },
+    {
+      "article": "Primaire EIF",
+      "ce_que_le_vendeur_demande": [
+        "référence (solvanté ou émulsion)",
+        "contenance du bidon",
+        "support"
+      ],
+      "unite_de_vente": "bidon (litres)",
+      "conditionnement": "5 / 30 l Soprema ; 2 / 10 / 25 l Siplast",
+      "sources": [
+        {
+          "titre": "Soprema, fiche MISFR133/a ELASTOCOL 500 (Samse, n° 963559)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_963559.pdf",
+          "type": "fabricant",
+          "extrait": "Bidons de 5 et 30 litres",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Siplast-Icopal, notice EIF Impression Veral, Siplast Primer, Eco-Activ Primer (hellopro)",
+          "url": "https://www.hellopro.fr//documentation/pdf_prod/5/0/5/162973_65e5301674d2f749c993bb079cf5e71b_5818505.pdf",
+          "type": "fabricant",
+          "extrait": "Siplast Primer : bidons de 2, 10 ou 25 l",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "etancheite"
+    },
+    {
+      "article": "Isolant sous étanchéité",
+      "ce_que_le_vendeur_demande": [
+        "matière (PIR, laine de roche, verre cellulaire)",
+        "épaisseur ou R",
+        "format du panneau (600 × 600, 1 200 × 1 000, 2 500 × 1 200)",
+        "parement (alu, bitume soudable, nu)",
+        "nombre de colis"
+      ],
+      "unite_de_vente": "colis ou panneau",
+      "conditionnement": "PIR Efigreen Alu+ 600 × 600 ; Rockacier 1 200 × 1 000",
+      "sources": [
+        {
+          "titre": "Soprema, fiche INSFR005-1/d EFIGREEN ALU+ (Samse, n° 1159160)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1159160.pdf",
+          "type": "fabricant",
+          "extrait": "600 mm x 600 mm ; regroupés en colis",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Rockwool, fiche Rockacier B nu (Samse, n° 766222)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_766222.pdf",
+          "type": "fabricant",
+          "extrait": "1200 x 1000",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "etancheite"
+    },
+    {
+      "article": "Équerre de renfort",
+      "ce_que_le_vendeur_demande": [
+        "largeur (25 ou 33 cm)",
+        "nombre de rouleaux"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "0,25 × 10 m",
+      "sources": [
+        {
+          "titre": "Castorama, Équerre d'étanchéité Soprema 0,25 × 10 m",
+          "url": "https://www.castorama.fr/equerre-d-etancheite-soprema-0-25-x-10-m/3434550871785_CAFR.prd",
+          "type": "negoce",
+          "extrait": "0,25 x 10 m",
+          "consulte": "2026-11-19"
+        },
+        {
+          "titre": "Derbigum, fiche DERBISTRIP 25 / 33 cm (diffusée par Chausson)",
+          "url": "https://cdn.chausson.fr/catalog-document/e0f8851b-e2f6-4f22-92d9-5ed13c262acc/tds-fr-948-derbistrip.pdf",
+          "type": "fabricant",
+          "extrait": "25 cm / 33 cm",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "etancheite"
+    },
+    {
+      "article": "Entrée d'eaux pluviales (EEP), trop-plein, crapaudine",
+      "ce_que_le_vendeur_demande": [
+        "Ø de la descente",
+        "matière (bitume, plomb, PVC, alu)",
+        "platine à souder ou à coller",
+        "avec ou sans crapaudine"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "FFB, dimensionnement des évacuations des eaux pluviales (NF DTU 60.11 P3)",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/equipements-techniques/plomberie-sanitaire/dossier/le-dimensionnement-des-evacuations-des-eaux-pluviales",
+          "type": "guide",
+          "extrait": "diamètres selon la surface collectée par EEP, la forme de l'EEP",
+          "consulte": "2026-11-19"
+        }
+      ],
+      "famille": "etancheite"
+    }
+  ]
+}

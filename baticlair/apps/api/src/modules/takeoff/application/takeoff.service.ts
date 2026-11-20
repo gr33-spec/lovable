@@ -13,6 +13,8 @@ import {
   type OrderGap,
   assessTakeoffLine,
   climateZone,
+  baseDuMetier,
+  zoneDeLAdresse,
   isCoastal,
   type Referential,
   postalCodeIn,
@@ -1532,8 +1534,16 @@ export class TakeoffService {
     const current = referentialFor(takeoff.trade) ?? ROOFING_REFERENTIAL;
     const ref = (takeoff.referentialVersion && takeoff.referentialVersion !== current.version ? await this.reading.referentials?.load(takeoff.referentialVersion) : null) ?? current;
     const address = (await this.reading.projectAddress?.(tenant, takeoff.projectId)) ?? null;
-    const zone = climateZone(postalCodeIn(address));
-    const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: `Code postal du chantier (${postalCodeIn(address)})`, origin: "document" }] : [];
+    // Zone PAR COMMUNE (décision du fondateur, 2026-11-19 : distance à la côte et altitude, carte des régions de la fiche
+    // couverture) ; à défaut, la table par département. Ardoise et tuile peuvent différer (Méditerranée) : la plus forte.
+    const commune = zoneDeLAdresse(baseDuMetier("couverture")?.carte ?? null, address);
+    const zone = commune ? Math.max(commune.zoneArdoise, commune.zoneTuile) : climateZone(postalCodeIn(address));
+    const preuveZone = commune
+      ? commune.trouvee === "commune"
+        ? `Commune du chantier (${postalCodeIn(address)}, zone DTU calculée à la commune)`
+        : `Code postal du chantier (${postalCodeIn(address)}, zone la plus forte de ses communes)`
+      : `Code postal du chantier (${postalCodeIn(address)})`;
+    const extraFacts: SiteFact[] = zone ? [{ key: "zone", value: String(zone), unit: "u", evidence: preuveZone, origin: "document" }] : [];
     if (isCoastal(postalCodeIn(address))) {
       extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
     }

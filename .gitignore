@@ -12,3 +12,4 @@ coverage/
 baticlair/apps/api/src/generated/
 baticlair/packages/domain/src/referential/fiches/sources.generated.ts
 baticlair/packages/domain/src/groupe/seuils.generated.ts
+baticlair/packages/domain/src/referential/base/sources.generated.ts
