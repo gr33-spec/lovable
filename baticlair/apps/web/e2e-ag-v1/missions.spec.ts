@@ -532,7 +532,7 @@ test("« Voir Mobiiz en images », missions ouvertes : quatre écrans, le quatri
   }
   await expect(dialogue.getByText(/Les coordonnées ne sont partagées qu'après l'accord des deux entreprises\./)).toBeVisible();
   expect(await dialogue.innerText()).not.toMatch(/intérim|recrutement|€|garanti/i);
-  await expect(dialogue.getByRole("link", { name: "Commencer gratuitement" })).toHaveAttribute("href", "/inscription");
+  await expect(dialogue.getByRole("link", { name: "Commencer gratuitement" })).toHaveAttribute("href", "/commencer");
   await dialogue.getByRole("button", { name: "Fermer", exact: true }).click();
   await expect(dialogue).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Voir Mobiiz en images" })).toBeFocused();

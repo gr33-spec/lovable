@@ -45,7 +45,13 @@ function BoutonCopier({ texte, compact = false }: { texte: string; compact?: boo
     setTimeout(() => setCopie(false), 2000);
   }
   return (
-    <Button type="button" variant={compact ? "secondary" : "primary"} onClick={() => void copier()} className={compact ? "min-h-11 px-3 text-[14px]" : "min-h-12"} aria-live="polite">
+    <Button
+      type="button"
+      variant={compact ? "secondary" : "primary"}
+      onClick={() => void copier()}
+      className={compact ? "min-h-11 px-3 text-[14px]" : "min-h-12"}
+      aria-live="polite"
+    >
       {copie ? <Check size={18} aria-hidden="true" /> : <Copy size={18} aria-hidden="true" />}
       {copie ? "Copiée" : "Copier l'adresse"}
     </Button>
@@ -91,7 +97,11 @@ export function EcranAdresseMobiiz({ onContinuer }: { onContinuer: () => void })
       <p className="text-[17px] leading-relaxed">
         {PHRASES_ADRESSE.envoie} {PHRASES_ADRESSE.recoit}
       </p>
-      {!data.email ? <p className="text-[14px] text-muted">Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.</p> : null}
+      {!data.email ? (
+        <p className="text-[14px] text-muted">
+          Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.
+        </p>
+      ) : null}
       <div className="flex flex-col gap-2">
         <BoutonCopier texte={adresseAffichee(data)} />
         <Button type="button" variant="secondary" className="min-h-12" pending={pending} onClick={() => void compris()}>
@@ -176,7 +186,11 @@ export function AdresseMobiizCard() {
           <p className="text-[14px] text-muted">
             {PHRASES_ADRESSE.envoie} {PHRASES_ADRESSE.recoit}
           </p>
-          {!data.email ? <p className="text-[14px] text-muted">Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.</p> : null}
+          {!data.email ? (
+            <p className="text-[14px] text-muted">
+              Le domaine d&apos;e-mail n&apos;est pas encore branché sur cet environnement : rien n&apos;y arrive pour l&apos;instant.
+            </p>
+          ) : null}
           <div className="flex flex-wrap items-center gap-2">
             <BoutonCopier texte={adresseAffichee(data)} compact />
             <Link href="/recus" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-[14px] font-bold">
@@ -205,7 +219,11 @@ export function AdresseMobiizCard() {
               <Field
                 id={ids.adresse}
                 label="Nouvelle adresse (une seule fois)"
-                hint={data.domaine ? `Lettres sans accent, chiffres et tirets, puis @${data.domaine}. L'ancienne reste valable.` : "Lettres sans accent, chiffres et tirets. L'ancienne reste valable."}
+                hint={
+                  data.domaine
+                    ? `Lettres sans accent, chiffres et tirets, puis @${data.domaine}. L'ancienne reste valable.`
+                    : "Lettres sans accent, chiffres et tirets. L'ancienne reste valable."
+                }
                 value={souhaitee}
                 onChange={(e) => {
                   setSouhaitee(e.target.value);
