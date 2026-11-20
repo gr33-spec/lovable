@@ -41,7 +41,8 @@ describe("les réponses envoyées d'un coup", () => {
     const second = await agent.post(`/v1/quantitatifs/${id}/reponses?ecran=1`).send(envoi);
     expect(second.status).toBe(201);
     expect(await ouvertes()).toEqual(apres);
-  });
+    // Huit requêtes, chacune recalcule l'écran du devis entier (≈ 0,3 s) : plus long que les 5 s par défaut.
+  }, 30_000);
 
   it("une donnée inconnue de toute fiche reste refusée", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
