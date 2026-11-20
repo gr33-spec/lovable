@@ -47,18 +47,22 @@ async function ecran(agent: Agent, projetId: string) {
 }
 
 describe("§51.5 : la lecture par le modèle, par l'API (DE00000071)", () => {
-  it("les cinq questions du modèle, et aucune autre ; le bref en un paragraphe", async () => {
+  // RÈGLE CHANGÉE (Greg, 20 novembre 2026) : les questions sont décidées par le code, d'après la fiche du métier. Sept :
+  // celles du modèle, plus la pose des crochets et le Ø des descentes, que le calcul demande. Avant : cinq, celles du modèle.
+  it("les sept questions du calcul, et aucune autre ; le bref en un paragraphe", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Test");
     const { projetId } = await depose(agent);
     const vue = await ecran(agent, projetId);
     const textes = vue.questions.map((q) => q.texte);
-    expect(textes).toHaveLength(5);
-    expect(textes.join("\n")).toMatch(/Développé de la gouttière/);
+    expect(textes).toHaveLength(7);
+    expect(textes.join("\n")).toMatch(/Gouttière de 25/);
+    expect(textes.join("\n")).toMatch(/chevrons/);
     expect(textes.join("\n")).toMatch(/descentes/);
     expect(textes.join("\n")).toMatch(/EPDM ou PVC/);
     expect(textes.join("\n")).toMatch(/ZWC .*Pratikal/);
     expect(textes.join("\n")).toMatch(/10 tôles ou 10 m²/);
-    expect(vue.questions.find((q) => /Développé/.test(q.texte))!.boutons).toEqual(["De 25", "De 33"]);
+    // Le devis ne dit ni 25 ni 33 : les choix de la fiche (avant : deux boutons du modèle).
+    expect(vue.questions.find((q) => /Gouttière de 25/.test(q.texte))!.boutons).toEqual(["De 25", "De 28", "De 33", "De 40"]);
     // Jamais un identifiant interne, jamais une question sur les Velux eux-mêmes.
     for (const t of textes) expect(t).not.toMatch(/[a-f0-9]{8}-|__|param:|fenetre-de-toit/);
     expect(textes.filter((t) => /velux|fenêtre/i.test(t) && !/raccord/i.test(t))).toEqual([]);
@@ -98,7 +102,7 @@ describe("§51.5 : la lecture par le modèle, par l'API (DE00000071)", () => {
     const { agent } = await signUpWithCompany(ctx.app, "greg@example.fr", "Toitures Test");
     const { id, projetId } = await depose(agent);
     const before = await ecran(agent, projetId);
-    const developpe = before.questions.find((q) => /Développé/.test(q.texte))!;
+    const developpe = before.questions.find((q) => /Gouttière de 25/.test(q.texte))!;
     const raccord = before.questions.find((q) => /ZWC/.test(q.texte))!;
     await agent.post(`/v1/quantitatifs/${id}/reponses`).send({ reponses: [{ question: developpe.id, valeur: "25" }, { question: raccord.id, valeur: "ZWC" }] }).expect(201);
     const after = await ecran(agent, projetId);

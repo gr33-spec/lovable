@@ -43,15 +43,13 @@ describe("une question obligatoire née d'une réponse revient à l'écran des q
     lecture.questions = [{ cle: "acces_au_chantier", texte: "Accès au chantier : camion ou fourgon ?", boutons: [{ label: "Camion", valeur: "camion" }, { label: "Fourgon", valeur: "fourgon" }], unite: null, donnee: "accès au chantier", ligne: null }];
     await ctx.prisma.takeoff.update({ where: { id: record.id }, data: { lecture: lecture as unknown as object } });
     const ouvertes = async () => JSON.stringify(((await agent.get(`/v1/quantitatifs/${q.id}?ecran=1`)).body.ecran.view.decisions as { question?: { key: string } }[]).map((d) => d.question?.key));
-    expect(await ouvertes()).not.toContain("param:faconnage");
-
-    const suite = await agent.post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`).send({ reponses: [{ question: "fiche:acces_au_chantier", valeur: "camion" }] });
-    expect(suite.status).toBe(200);
-    expect(suite.body.phase).toBe("questions");
+    // RÈGLE CHANGÉE (Greg, 20 novembre 2026) : les questions sont décidées par le code, d'après la fiche du métier ; le
+    // façonnage des bacs est posé dès l'ouverture, avec la question du modèle. Il ne peut plus « naître » d'une réponse.
     expect(await ouvertes()).toContain("param:faconnage");
+    expect(await ouvertes()).toContain("fiche:acces_au_chantier");
 
-    // Déjà posée, puis sautée : le calcul reste refusé (§49.4).
-    const refuse = await agent.post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`).send({ reponses: [] });
+    // Posée, puis sautée (seule la question du modèle répondue) : le calcul est refusé (§49.4).
+    const refuse = await agent.post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`).send({ reponses: [{ question: "fiche:acces_au_chantier", valeur: "camion" }] });
     expect(refuse.status).toBe(400);
     expect(JSON.stringify(refuse.body)).toContain("faconnage_required");
 

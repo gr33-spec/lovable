@@ -821,7 +821,8 @@ export function ecranDeLecture(input: {
     const deSaLigne = q.ligne ? plan.lines.find((x) => x.status === "planned" && x.ref.split(".")[0] === q.ligne) : undefined;
     const def =
       (deSaLigne?.status === "planned" ? ref.workItems.find((w) => w.id === baseOf(deSaLigne.workItemId))?.params.find((p) => p.key === q.cle) : undefined) ??
-      ref.workItems.filter((w) => ouvragesDuPlan.has(w.id)).flatMap((w) => w.params).find((p) => p.key === q.cle);
+      // Sans ligne : l'ouvrage qui en a besoin (sans valeur courante) avant celui qui a sa valeur (les bacs avant l'ardoise).
+      ref.workItems.filter((w) => ouvragesDuPlan.has(w.id)).flatMap((w) => w.params).filter((p) => p.key === q.cle).sort((x, y) => Number(!!x.default) - Number(!!y.default))[0];
     // Une donnée d'un ouvrage absent du devis, ou une mesure de ligne (la longueur d'une bande) : le calcul la demande
     // lui-même, à la bonne pièce, ou pas du tout.
     if (!def || def.fromLineQuantity) return null;
@@ -833,9 +834,11 @@ export function ecranDeLecture(input: {
     const valable = (v: string) => toutes.has(v) || (/^\d+(?:[.,]\d+)?$/.test(v.trim()) && toutes.size === 0) || /^\d+(?:[.,]\d+)?$/.test(v.trim());
     // Les deux valeurs se lisent au devis (une ligne, l'en-tête, la fiche lue) : jamais deux boutons inventés (« 50 cm / 66 cm »
     // pour un chéneau dont le devis ne dit rien, D-2026-024).
+    // Ou dans ce que la question cite du devis, entre guillemets (« Pente 35° », lu dans l'en-tête).
+    const cites = new Set([...q.texte.matchAll(/«([^»]*)»/g)].flatMap((m) => [...m[1]!.matchAll(/\d+(?:[.,]\d+)?/g)].map((x) => String(Number(x[0].replace(",", "."))))));
     const ecritAuDevis = (b: { label: string; valeur: string }) => {
       const n = /\d+(?:[.,]\d+)?/.exec(`${b.label} ${b.valeur}`)?.[0]?.replace(",", ".");
-      return n !== undefined && nombresDuDevis.has(String(Number(n)));
+      return n !== undefined && (nombresDuDevis.has(String(Number(n))) || cites.has(String(Number(n))));
     };
     if (lues.length === 2 && new Set(lues).size === 2 && lues.every(valable) && q.boutons.every(ecritAuDevis) && !(toutes.size === 2 && lues.every((v) => toutes.has(v)))) return q;
     return { ...q, texte: def.question, boutons: (def.choices ?? []).map((c) => ({ label: c.label, valeur: c.value })), unite: def.unit };
@@ -1027,9 +1030,12 @@ export function ecranDeLecture(input: {
   const aSonNom = (q: Question): Question => {
     const piece = scopedParam(q.key);
     const ouvrage = piece && ref.workItems.find((w) => w.id === baseOf(piece.workItemId));
-    if (!piece || !ouvrage || q.text !== ouvrage.params.find((p) => p.key === piece.name)?.question) return q;
+    const propre = ouvrage?.params.find((p) => p.key === piece!.name);
+    // Une phrase de la fiche pour cette donnée (celle de cet ouvrage, ou celle d'un autre : « Abergements, solins… » pour les
+    // bacs) : la question prend celle de SON ouvrage, ses boutons, et le nom de la pièce.
+    if (!piece || !ouvrage || !propre || !ref.workItems.some((w) => w.params.some((p) => p.key === piece.name && p.question === q.text))) return q;
     const nom = plan.inputs.find((i) => i.workItemId === piece.workItemId)?.label?.split(", ")[0] ?? lotLabel(ouvrage.label);
-    return nom ? { ...q, text: questionDePiece(nom, `param:${piece.name}`, q.text) } : q;
+    return { ...q, text: nom ? questionDePiece(nom, `param:${piece.name}`, propre.question) : propre.question, ...(propre.choices ? { options: propre.choices } : {}) };
   };
   for (const a of live) a.question = aSonNom(a.question);
   const questions = live.filter((a) => !answered(a)).map((a) => a.question);
