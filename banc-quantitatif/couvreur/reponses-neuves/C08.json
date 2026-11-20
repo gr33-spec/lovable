@@ -1,0 +1,26 @@
+[
+ {
+  "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
+  "bouton": "De 50",
+  "valeur": "",
+  "unite": "mm",
+  "ne_sait_pas": false,
+  "dit": "Noue de 50."
+ },
+ {
+  "id": "fiche:modele_ardoise ¦ Quelle ardoise ?",
+  "bouton": "",
+  "valeur": "ardoise naturelle d'Espagne 1er choix 32×22",
+  "unite": "",
+  "ne_sait_pas": false,
+  "dit": "Naturelle d'Espagne 1er choix, 32×22."
+ },
+ {
+  "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+  "bouton": "Non",
+  "valeur": "",
+  "unite": "u",
+  "ne_sait_pas": false,
+  "dit": "Non, je garde le dauphin existant."
+ }
+]

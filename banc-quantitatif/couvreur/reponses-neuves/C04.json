@@ -1,0 +1,18 @@
+[
+ {
+  "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+  "bouton": "Non",
+  "valeur": "",
+  "unite": "u",
+  "ne_sait_pas": false,
+  "dit": "Non, raccordée direct sur le regard."
+ },
+ {
+  "id": "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?",
+  "bouton": "",
+  "valeur": "75",
+  "unite": "m",
+  "ne_sait_pas": false,
+  "dit": "75 mètres de couvre-joints."
+ }
+]
