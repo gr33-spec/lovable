@@ -425,6 +425,8 @@ Chaque marque dit que ses performances ne valent qu'avec ses propres composants 
 | Plafond REI 60 sous plancher | montage PRF : 2 Placoflam BA13, fourrures à 0,60, entretoises PRF (2,6/m²), vis tous les 15 cm (jusqu'à 23/m²) | 2 Prégyflam BA13 ou BA15, fourrures S47 à 0,50 | Métal Chrono : 1 KF BA15 (principe seulement) | ✔✔ plaques ; ✔ montage |
 | Gaines | trappes coupe-feu 30, 60, 120 min (gaine non trouvée) | D72/48 sur montants accolés (EI 30), D84/48 BA18 S (EI 60) | KM 72/48 KS 13 + laine ; trappes Star GT 18 / GT 25 | ✔ |
 
+**Négoce sans la marque (Greg, 20/11)** : il peut proposer un système complet d'une autre marque avec son procès-verbal, signalé clairement à l'artisan ; jamais de mélange de marques.
+
 **Ce que fait `referentiel.json`** (ouvrages `cloison-distributive` et `plafond-fourrures`) :
 - donnée `ei`, lue au devis (« EI 60 », « REI 60 », « CF 1h ») ; par défaut 0, « pas d'exigence feu écrite » ;
 - question `marque_systeme` ; elle n'est posée que si `ei` est écrit ;
@@ -864,26 +866,21 @@ Ils sont classés par effet sur une commande. Le détail est dans `recherche/09`
 - membrane, enduit, colis d'isolant, seau d'enduit, clous, boîtes.
 
 
-## 16. À trancher par Greg ou par un plaquiste avant l'ouverture
+## 16. Décisions de Greg (20 novembre 2026) et ce qui reste à trancher
 
-Tranché par Greg le 20/11 :
-- vis et fixations d'office ;
-- bande et enduit en cases ;
-- coupe-feu d'une seule marque.
+**Tranché :**
+1. **Vis et fixations :** sorties d'office.
+2. **Bande et enduit :** cases à cocher.
+3. **Coupe-feu :** système complet d'une seule marque avec son procès-verbal, une question « Quelle marque ? ». **Un négoce qui n'a pas la marque peut proposer un système complet d'une autre marque avec son procès-verbal, signalé clairement à l'artisan ; jamais de mélange de marques dans un système coupe-feu.** C'est écrit sur chaque ligne du système.
+4. **Mortier adhésif :** la question « Ton mur est plan ? » est gardée (1,8 ou 2,5 kg/m²).
+5. **Montants de porte :** 2 par porte écrite au devis. Lu au devis (« 3 blocs-portes »), jamais demandé ; sans porte écrite, aucun.
+6. **Vis de doublage et de contre-cloison :** celles de la marque si elle est écrite au devis (Placo 11/m², Siniat 12/m²), sinon 15/m² (syndicat), par prudence. Knauf : 15 tant que sa valeur n'est pas sourcée.
+7. **Suspentes à 1,56/m² et 98/48 doublés à 0,60 en 3,75 m :** validés.
+8. **Coffrages :** règle acceptée. Les lignes restent « à vérifier », avec le calcul visible : « 5 m × développé 1 m × 1,10 = 5,5 m² de plaques ».
 
-Reste à trancher :
-1. **Négoce qui ne tient pas la marque du système coupe-feu** (Knauf seul, système Placo). Deux possibilités :
-   - un bouton « Je n'ai pas cette marque » pour ce négoce ;
-   - une réponse « peu importe la marque, un système complet avec son PV », qui laisse le négoce proposer son système complet.
-   Aujourd'hui, la liste dit « à chiffrer en entier dans cette marque, ou pas du tout ».
-2. **Mortier adhésif** : 1,8 kg/m² sur mur plan par défaut, 2,5 sur mur irrégulier. La question « Ton mur est plan, ou irrégulier ? » est-elle utile, ou faut-il prendre 2,5 partout pour ne jamais manquer ?
-3. **Montants d'huisserie** : faut-il ajouter 2 montants (ou plus) par porte écrite au devis ? Ni le SNIP ni Placo ne les comptent dans leurs ratios.
-4. **Montage par défaut tiré de la hauteur** (DTU 25.41) : simples à 40 cm avant doublés à 60 cm (moins cher), ou doublés par habitude.
-5. **Vis du doublage et de la contre-cloison** : 15/m² (SNIP, vis de rive comprises) ou 11 à 12 (Placo, Siniat, Chausson).
-6. **Suspentes** : 1,56/m² (SNIP + Placo 2026, grande pièce) au lieu de 1,8. Une petite pièce en demande environ 1,75 ; la boîte de 100 couvre l'écart. On garde 1,56 ?
-7. **98/48 en montants doublés à 0,60** : 3,75 m (Placo, Siniat, Pladur) au lieu de 3,70 (Rockwool seul).
-8. **Coffrages** : la règle proposée (section 15, point 1).
-9. **Cornière de rive** : garder l'estimation (orange « ajuste à tes pièces ») ou la sortir seulement quand le devis donne le périmètre.
+**Reste à trancher :**
+- **Montage par défaut tiré de la hauteur** (DTU 25.41) : simples à 40 cm avant doublés à 60 cm (moins cher), ou doublés par habitude ?
+- **Cornière de rive :** garder l'estimation (pièce supposée carrée, orange « ajuste à tes pièces »), ou la sortir seulement quand le devis donne le périmètre ?
 
 ## 17. Ce qu'il reste à faire pour ouvrir le métier plaquiste dans Mobiiz
 
