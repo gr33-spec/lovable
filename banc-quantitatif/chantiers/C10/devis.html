@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Devis DV-2026-187 - Toitures Riaud</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6e6e6; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 10pt; color: #1d2430; }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff; padding: 15mm 15mm 22mm 15mm; position: relative; }
+  .entete { display: flex; justify-content: space-between; align-items: flex-start; }
+  .logo { display: flex; align-items: center; gap: 4mm; }
+  .logo .carre { width: 15mm; height: 15mm; background: #1f4e79; color: #fff; font-weight: bold; font-size: 17pt; display: flex; align-items: center; justify-content: center; }
+  .logo .nom { font-size: 17pt; font-weight: bold; color: #1f4e79; line-height: 1.1; }
+  .logo .metier { font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.3px; color: #5a6472; }
+  .coord { margin-top: 3mm; font-size: 9pt; line-height: 1.45; color: #333; }
+  .coord p { margin: 0; }
+  .cartouche { text-align: right; }
+  .cartouche .mot { font-size: 24pt; font-weight: bold; color: #1f4e79; letter-spacing: 2px; }
+  .cartouche table { margin-left: auto; border-collapse: collapse; font-size: 9.5pt; margin-top: 1mm; }
+  .cartouche td { padding: 1px 0 1px 8px; text-align: right; }
+  .cartouche td:first-child { color: #5a6472; }
+  .filet { height: 2px; background: #1f4e79; margin: 6mm 0 6mm 0; }
+  .blocs { display: flex; justify-content: space-between; gap: 10mm; margin-bottom: 6mm; }
+  .bloc { width: 47%; font-size: 9.5pt; line-height: 1.5; }
+  .bloc .e { font-size: 8pt; text-transform: uppercase; letter-spacing: 1px; color: #1f4e79; font-weight: bold; margin-bottom: 1mm; }
+  .bloc.client { background: #f2f5f9; padding: 4mm 5mm; }
+  .bloc p { margin: 0; }
+  .objet { font-size: 10pt; margin: 0 0 4mm 0; }
+  table.lignes { width: 100%; border-collapse: collapse; }
+  table.lignes th { background: #1f4e79; color: #fff; font-size: 8pt; text-transform: uppercase; letter-spacing: .5px; padding: 2.2mm 2mm; text-align: left; }
+  table.lignes th.d, table.lignes td.d { text-align: right; white-space: nowrap; }
+  table.lignes th.c, table.lignes td.c { text-align: center; white-space: nowrap; }
+  table.lignes td { padding: 2.4mm 2mm; vertical-align: top; border-bottom: 1px solid #d3d8df; }
+  table.lignes tr:nth-child(even) td { background: #f8fafc; }
+  table.lignes td.n { width: 9mm; color: #5a6472; }
+  table.lignes .t { font-weight: bold; }
+  table.lignes .s { font-size: 9pt; color: #3a4350; line-height: 1.4; margin-top: .6mm; }
+  .bas { display: flex; justify-content: space-between; gap: 10mm; margin-top: 6mm; }
+  .conditions { width: 56%; font-size: 8.5pt; line-height: 1.5; color: #333; }
+  .conditions p { margin: 0 0 1.5mm 0; }
+  table.totaux { width: 68mm; border-collapse: collapse; font-size: 10pt; }
+  table.totaux td { padding: 2mm 2.5mm; border-bottom: 1px solid #d3d8df; }
+  table.totaux td:last-child { text-align: right; white-space: nowrap; }
+  table.totaux tr.ttc td { background: #1f4e79; color: #fff; font-weight: bold; border: 0; }
+  .signature { display: flex; justify-content: space-between; gap: 10mm; margin-top: 8mm; }
+  .signature div { width: 47%; height: 28mm; border: 1px solid #b9c0ca; padding: 2mm 3mm; font-size: 8.5pt; color: #5a6472; }
+  .pied { position: absolute; left: 15mm; right: 15mm; bottom: 8mm; border-top: 1px solid #b9c0ca; padding-top: 2mm; font-size: 7.5pt; color: #666; text-align: center; line-height: 1.4; }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="entete">
+    <div>
+      <div class="logo">
+        <div class="carre">TR</div>
+        <div>
+          <div class="nom">TOITURES RIAUD</div>
+          <div class="metier">Couverture &middot; Zinguerie &middot; &Eacute;tanch&eacute;it&eacute;</div>
+        </div>
+      </div>
+      <div class="coord">
+        <p>EURL Toitures Riaud</p>
+        <p>8, rue du Champ Martin &ndash; ZA des Landelles</p>
+        <p>35135 Chantepie</p>
+        <p>T&eacute;l. 02 99 55 01 73 &middot; contact@toitures-riaud.example</p>
+      </div>
+    </div>
+    <div class="cartouche">
+      <div class="mot">DEVIS</div>
+      <table>
+        <tr><td>N&deg;</td><td><b>DV-2026-187</b></td></tr>
+        <tr><td>Date</td><td>09/11/2026</td></tr>
+        <tr><td>Validit&eacute;</td><td>2 mois</td></tr>
+        <tr><td>Suivi par</td><td>Yann Riaud</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="filet"></div>
+
+  <div class="blocs">
+    <div class="bloc">
+      <div class="e">Chantier</div>
+      <p>Construction d'un pavillon</p>
+      <p>27, all&eacute;e des Noisetiers</p>
+      <p>35000 Rennes</p>
+    </div>
+    <div class="bloc client">
+      <div class="e">Client</div>
+      <p><b>M. et Mme Lo&iuml;c Hamon</b></p>
+      <p>5, square de Galicie</p>
+      <p>35200 Rennes</p>
+    </div>
+  </div>
+
+  <p class="objet"><b>Objet :</b> couverture en ardoises fibres-ciment, zinguerie et &eacute;vacuation des eaux pluviales d'un pavillon neuf.</p>
+
+  <table class="lignes">
+    <thead>
+      <tr>
+        <th>N&deg;</th>
+        <th>D&eacute;signation</th>
+        <th class="c">Unit&eacute;</th>
+        <th class="d">Quantit&eacute;</th>
+        <th class="d">P.U. HT</th>
+        <th class="d">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="n">1</td>
+        <td><div class="t">Installation de chantier</div><div class="s">Mise en place, location et repli de l'&eacute;chafaudage de pied et des protections de bas de pente.</div></td>
+        <td class="c">U</td><td class="d">1</td><td class="d">980,00 &euro;</td><td class="d">980,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">2</td>
+        <td><div class="t">&Eacute;cran sous-toiture</div><div class="s">Fourniture et pose d'un &eacute;cran sous-toiture HPV.</div></td>
+        <td class="c">M2</td><td class="d">110</td><td class="d">6,80 &euro;</td><td class="d">748,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">3</td>
+        <td><div class="t">Liteaux</div><div class="s">Fourniture et pose de liteaux sapin trait&eacute;.</div></td>
+        <td class="c">M2</td><td class="d">100</td><td class="d">9,50 &euro;</td><td class="d">950,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">4</td>
+        <td><div class="t">Couverture ardoises fibres-ciment</div><div class="s">Fourniture et pose d'ardoises fibres-ciment 40&times;24 noires. Pente 35&deg;.</div></td>
+        <td class="c">M2</td><td class="d">110</td><td class="d">48,00 &euro;</td><td class="d">5&nbsp;280,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">5</td>
+        <td><div class="t">Fa&icirc;tage</div><div class="s">Fourniture et pose de fa&icirc;ti&egrave;res.</div></td>
+        <td class="c">ML</td><td class="d">10</td><td class="d">42,00 &euro;</td><td class="d">420,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">6</td>
+        <td><div class="t">Rives</div><div class="s">Fourniture et pose de bandes de rive en zinc, d&eacute;velopp&eacute; 250. 4 rives de 5,50 m.</div></td>
+        <td class="c">ML</td><td class="d">22</td><td class="d">38,00 &euro;</td><td class="d">836,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">7</td>
+        <td><div class="t">Goutti&egrave;res</div><div class="s">Fourniture et pose de goutti&egrave;res PVC sable. 2 longueurs de 10 m.</div></td>
+        <td class="c">ML</td><td class="d">20</td><td class="d">32,00 &euro;</td><td class="d">640,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">8</td>
+        <td><div class="t">Descentes</div><div class="s">Fourniture et pose de descentes PVC &Oslash;80, hauteur 5 m.</div></td>
+        <td class="c">U</td><td class="d">2</td><td class="d">145,00 &euro;</td><td class="d">290,00 &euro;</td>
+      </tr>
+      <tr>
+        <td class="n">9</td>
+        <td><div class="t">Sortie de toit</div><div class="s">Fourniture et pose d'une sortie de toit &Oslash;100 pour &eacute;vent.</div></td>
+        <td class="c">U</td><td class="d">1</td><td class="d">120,00 &euro;</td><td class="d">120,00 &euro;</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="bas">
+    <div class="conditions">
+      <p><b>Conditions de r&egrave;glement :</b> acompte de 30 % &agrave; la commande, solde &agrave; la r&eacute;ception des travaux, par ch&egrave;que ou virement.</p>
+      <p><b>D&eacute;lai :</b> intervention sous 6 semaines apr&egrave;s accord, dur&eacute;e pr&eacute;vue 2 semaines hors intemp&eacute;ries.</p>
+      <p><b>Assurance :</b> garantie d&eacute;cennale et responsabilit&eacute; civile Mutuelle des Artisans de l'Ouest, contrat n&deg; 35-448-2210, couverture France m&eacute;tropolitaine.</p>
+      <p>TVA au taux de 20 % (construction neuve).</p>
+    </div>
+    <table class="totaux">
+      <tr><td>Total HT</td><td>10&nbsp;264,00 &euro;</td></tr>
+      <tr><td>TVA 20 %</td><td>2&nbsp;052,80 &euro;</td></tr>
+      <tr class="ttc"><td>Total TTC</td><td>12&nbsp;316,80 &euro;</td></tr>
+    </table>
+  </div>
+
+  <div class="signature">
+    <div>L'entreprise<br>Yann Riaud, g&eacute;rant</div>
+    <div>Le client : date, signature et mention &laquo; Bon pour accord &raquo;</div>
+  </div>
+
+  <div class="pied">
+    EURL Toitures Riaud au capital de 8&nbsp;000 &euro; &middot; SIRET 512 345 678 00021 &middot; RCS Rennes &middot; APE 4391B &middot; TVA FR 41 512345678<br>
+    8, rue du Champ Martin, ZA des Landelles, 35135 Chantepie
+  </div>
+</div>
+</body>
+</html>

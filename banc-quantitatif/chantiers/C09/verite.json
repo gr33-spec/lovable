@@ -1,0 +1,148 @@
+{
+  "id": "C09",
+  "commune": "Perros-Guirec",
+  "code_postal": "22700",
+  "nature": "neuf",
+  "description": "Maison neuve à deux pans en bord de mer (à 300 m de la côte), couverture zinc à joint debout sur voligeage. Deux pans de 6,00 m de long par 5,00 m de rampant : 2 × 6,00 × 5,00 = 60 m².",
+  "ouvrages": [
+    {
+      "ouvrage": "voligeage",
+      "libelle": "Voligeage jointif sous le zinc",
+      "surface": 60,
+      "unite_surface": "m2",
+      "materiau": "voliges sapin 18 mm, largeur 105 mm, posées jointives sur chevrons",
+      "fixation": "pointes annelées inox (bord de mer)"
+    },
+    {
+      "ouvrage": "couverture-zinc-joint-debout",
+      "libelle": "Couverture zinc à joint debout",
+      "surface": 60,
+      "unite_surface": "m2",
+      "nombre_de_pans": 2,
+      "largeur_pan": 6.0,
+      "longueur_rampant": 5.0,
+      "pente": 15,
+      "unite_pente": "°",
+      "materiau": "zinc naturel",
+      "aspect_zinc": 1,
+      "epaisseur_zinc": 0.7,
+      "faconnage": 2,
+      "faconnage_libelle": "il commande des bacs profilés à la longueur du rampant (il ne profile pas lui-même)",
+      "bacs": {
+        "longueur": 5.0,
+        "largeur_bobine_mm": 500,
+        "entraxe_joints_mm": 430,
+        "nombre_par_pan": 14,
+        "nombre": 28
+      },
+      "bacs_longs": "sans objet (rampant de 5 m, moins de 10 m)",
+      "zone": 3,
+      "zone_libelle": "bord de mer (à 300 m de la côte)",
+      "pattes": "pattes fixes en tête, pattes coulissantes ensuite, inox, entraxe resserré (bord de mer)",
+      "fixation_pattes": "pointes annelées inox 2,5 × 28, 2 par patte",
+      "support": "voligeage sapin 18 mm jointif",
+      "ecran": "aucun (comble ventilé sous voliges)",
+      "egout": {
+        "piece": "bande d'égout à ourlet, zinc naturel 0,70",
+        "longueur_bande": 12,
+        "detail": "2 égouts de 6,00 m",
+        "developpe": 330,
+        "faconnage": 2
+      },
+      "rives": "relevés de rive pliés dans le dernier bac + bande de rive zinc, 4 rives de 5,00 m (20 m), non prévues au devis"
+    },
+    {
+      "ouvrage": "faitage-zinc",
+      "libelle": "Faîtage en bande zinc",
+      "longueur_faitage": 6,
+      "developpe": 330,
+      "aspect_zinc": 1,
+      "epaisseur_zinc": 0.7,
+      "faconnage": 2,
+      "pattes": "3 pattes par mètre, soit 18"
+    },
+    {
+      "ouvrage": "gouttiere",
+      "libelle": "Gouttière zinc demi-ronde de 33",
+      "materiau": "zinc naturel",
+      "profil": "demi-ronde",
+      "developpe_gouttiere": 33,
+      "longueur_gouttiere": 12,
+      "lignes": [
+        { "facade": "nord", "longueur": 6.0 },
+        { "facade": "sud", "longueur": 6.0 }
+      ],
+      "nb_angles": 0,
+      "nb_descentes": 2,
+      "diametre_descente": 100,
+      "fixation_crochet": 1,
+      "fixation_crochet_libelle": "crochets sur les chevrons, un tous les 40 cm (bord de mer) : 16 par ligne, 32 en tout",
+      "talons": 4,
+      "naissances": 2,
+      "barres": "longueurs de 4 m : 2 par ligne, 4 en tout",
+      "soudure": "étain et décapant (1 jonction par ligne + 2 naissances + 4 talons)"
+    },
+    {
+      "ouvrage": "descente",
+      "libelle": "Descentes d'eaux pluviales zinc",
+      "materiau": "zinc naturel",
+      "nb_descentes": 2,
+      "diametre_descente": 100,
+      "hauteur_descente": 5.0,
+      "longueur_tube": 2,
+      "tubes": 6,
+      "coudes_par_descente": 2,
+      "coudes": 4,
+      "colliers": "un tous les 2 m plus un : 4 par descente, 8 en tout",
+      "dauphin": 0,
+      "dauphin_libelle": "pas de dauphin : raccord direct sur regard PVC en pied"
+    }
+  ],
+  "noues": "aucune",
+  "aretiers": "aucun",
+  "penetrations": "aucune dans ce devis (sortie VMC et conduit de poêle chiffrés plus tard)",
+  "faconnage": "2 = je commande façonné : bacs joint debout profilés par le fournisseur à 5,00 m, bande d'égout et bande de faîtage achetées pliées en longueurs de 2 m. Il ne plie que les petites finitions sur place.",
+  "echafaudage": "échafaudage de pied de l'entreprise, rien à acheter",
+  "ne_sait_pas": [
+    "la marque du zinc (VMZINC ou Rheinzink : selon le stock du négoce)",
+    "la section exacte des voliges livrées (18 × 105 ou 18 × 125)",
+    "si le plombier pose la sortie VMC avant ou après la couverture"
+  ],
+  "ecrit_au_devis": [
+    "chantier : construction neuve, maison individuelle, à Perros-Guirec (22700)",
+    "installation de chantier : échafaudage de pied, forfait",
+    "voligeage jointif en voliges sapin, 60,00 m² (colonne)",
+    "couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 60,00 m² (colonne)",
+    "2 pans",
+    "rampant 5,00 m",
+    "bande d'égout en zinc naturel, 12,00 ml (colonne)",
+    "faîtage en zinc naturel (bande de faîtage), 6,00 ml (colonne)",
+    "gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, 12,00 ml (colonne)",
+    "descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, 2 u (colonne)",
+    "écritures « m² », « ml », « Ø »"
+  ],
+  "tu_au_devis": [
+    "qui façonne les bacs : il commande des bacs profilés (faconnage 2)",
+    "bord de mer (zone 3)",
+    "bande d'égout et faîtage achetés pliés, développé 33 cm (330 mm)",
+    "épaisseur des voliges : 18 mm",
+    "pente 15°",
+    "largeur de chaque pan : 6,00 m ; 14 bacs par pan, 28 en tout, entraxe 430 mm",
+    "crochets de gouttière sur chevrons, tous les 40 cm",
+    "tubes de descente en longueurs de 2 m, 2 coudes par descente, pas de dauphin",
+    "aucun angle de gouttière"
+  ],
+  "oublis": [
+    "pattes fixes et pattes coulissantes du joint debout",
+    "pointes annelées de fixation des pattes",
+    "pointes de voliges",
+    "bandes de rive zinc (4 rives de 5,00 m)",
+    "pattes de la bande de faîtage",
+    "32 crochets de gouttière",
+    "4 talons de gouttière",
+    "2 naissances Ø 100 (le référentiel les ajoute d'office à une gouttière écrite)",
+    "4 coudes de descente",
+    "8 colliers de descente",
+    "étain et décapant pour les soudures de gouttière"
+  ]
+}
