@@ -336,3 +336,9 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Le métier reste fermé : aucun code ne lit ce dossier, et `PLATRERIE_REFERENTIAL` (cloison 72/48 seule) n'a pas bougé.
 - Toutes les valeurs sont `draft` jusqu'à la relecture d'un plaquiste.
 - Avant d'ouvrir : relecture par un plaquiste, décisions de Greg (`FICHE.md` §16), branchement et tests (`FICHE.md` §17).
+- Deuxième passe (20 novembre 2026, version `plaquiste-isolation-2026.11.20-3`) : 91 % des chiffres confirmés par deux sources (90 % avec le nouvel ouvrage coffrage, encore à confirmer) ; 11 ouvrages ; 18 chantiers types.
+- Décisions de Greg (20 novembre 2026) :
+  - les vis et les fixations sortent d'office ;
+  - bande et enduit sont des cases à cocher ;
+  - un ouvrage coupe-feu se commande en système complet d'une seule marque, avec son procès-verbal : une question « Quelle marque ? », toutes les lignes portent la marque, jamais « ou équivalent ».
+

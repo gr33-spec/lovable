@@ -3529,7 +3529,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1re peau vissée à 60 cm en montants doublés : SNIP 13 et règle Chausson « plaques internes à 60 cm » (recherche/15 n° 1)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3541,7 +3541,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18."
+            "note": "Recherche du 2026-11-19 — 2 sources : SNIP 18 et règle Chausson (recherche/15 n° 1)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -5122,10 +5122,10 @@
           "formula": "arrondi_sup((longueur_cloison / regle.e60 + 1) * regle.files_montants * regle.chute)",
           "unit": "u",
           "core": true,
-          "source": "dtu-2541-2022",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48."
+            "note": "Recherche du 2026-11-19 — 2 sources : Deux files de montants simples à 0,60 : SNIP p. 7 et Pladur p. 64 (recherche/09 n° 59, recherche/15 n° 3)."
           },
           "version": 1,
           "designation": "Montants M48 longueur {longueur_montant|m}",
@@ -9760,10 +9760,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 1,8.",
           "when": "si(ei < 1, si(plenum < 2, 1, 0), 0)",
           "short": "suspentes"
         },
@@ -9776,10 +9775,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 1,8.",
           "when": "si(ei >= 1, si(plenum < 2, 1, 0), 0)",
           "short": "suspentes",
           "precisionRequires": [
@@ -9797,10 +9795,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 1,8.",
           "when": "si(ei < 1, si(plenum >= 2, 1, 0), 0)",
           "short": "suspentes"
         },
@@ -9813,10 +9810,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 1,8.",
           "when": "si(ei >= 1, si(plenum >= 2, 1, 0), 0)",
           "short": "suspentes",
           "precisionRequires": [

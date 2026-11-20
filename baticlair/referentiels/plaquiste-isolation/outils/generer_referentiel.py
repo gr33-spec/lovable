@@ -430,8 +430,8 @@ def cloison():
         "vis_1p_d40": regle("47", "u/m2", "snip-fc18", OK2("47 vis/m² en doublés 0,40 : SNIP 47 et Chausson 45, à 4 % près (recherche/13 A2)."), label="{v} vis par m²"),
         "vis_int_s60": regle("10", "u/m2", "snip-fc18", OK2("1re peau vissée à 60 cm : SNIP (10) et guide Chausson 2020-21 (même règle, le calcul redonne 10) (recherche/15 n° 1)."), label="{v} vis 1re peau par m²"),
         "vis_int_s40": regle("14", "u/m2", "snip-fc18", OK2("SNIP 14 et règle Chausson (calcul : 14) (recherche/15 n° 1)."), label="{v} vis 1re peau par m²"),
-        "vis_int_d60": regle("13", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
-        "vis_int_d40": regle("18", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
+        "vis_int_d60": regle("13", "u/m2", "snip-fc18", OK2("1re peau vissée à 60 cm en montants doublés : SNIP 13 et règle Chausson « plaques internes à 60 cm » (recherche/15 n° 1)."), label="{v} vis 1re peau par m²"),
+        "vis_int_d40": regle("18", "u/m2", "snip-fc18", OK2("SNIP 18 et règle Chausson (recherche/15 n° 1)."), label="{v} vis 1re peau par m²"),
         "vis_ext_s60": regle("27", "u/m2", "snip-fc18", OK2("2e peau TTPC 35 : SNIP 27 et Placo sp00011452 (26,25) (recherche/09 n° 11)."), label="{v} vis 2e peau par m²"),
         "vis_ext_s40": regle("34", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 2e peau par m²"),
         "vis_ext_d60": regle("32", "u/m2", "snip-fc18", OK2("SNIP 32 et Placo sp00020105 (31,5) (recherche/09)."), label="{v} vis 2e peau par m²"),
@@ -772,8 +772,8 @@ def plafond():
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(surface * couches * regle.chute / (regle.largeur_plaque * longueur_plaque))", "u", "placo-integrale-plafonds-2023", OK2("1,05 m² de plaque par m² et par peau (Placo, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"),
         besoin("fourrures", "fourrure", "surface * " + E.format(a="regle.fourrures_e60", b="regle.fourrures_e50", c="regle.fourrures_e40"), "ml", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="fourrures", precision="entraxe {entraxe_fourrures|cm}"),
-        besoin("suspentes-longues", "suspente", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum < 2", short="suspentes"),
-        besoin("suspentes-secables", "suspente_secable", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum >= 2", short="suspentes"),
+        besoin("suspentes-longues", "suspente", "nb_suspentes", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), when="plenum < 2", short="suspentes"),
+        besoin("suspentes-secables", "suspente_secable", "nb_suspentes", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), when="plenum >= 2", short="suspentes"),
         besoin("vis-suspentes", "vis_suspente", "nb_suspentes * regle.vis_par_suspente_bois", "u", "placo-integrale-plafonds-2023", OK2("2 TTPC 35 par suspente sous bois."), when="support < 2", short="vis de suspente"),
         besoin("chevilles-suspentes", "cheville_suspente", "nb_suspentes", "u", "placo-integrale-plafonds-2023", OK2("Une cheville métallique par suspente sous béton : Placo Intégrale 2023 et Pladur 2019 (chevilles sous agrément à chaque point) (recherche/09 n° 24)."), when="support >= 2", short="chevilles de suspente"),
         besoin("eclisses", "eclisse", "surface * si(entraxe_fourrures >= regle.e60, regle.fourrures_e60, si(entraxe_fourrures >= regle.e50, regle.fourrures_e50, regle.fourrures_e40)) / regle.longueur_fourrure_plafond", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="éclisses"),
@@ -835,7 +835,7 @@ def separative():
                derive("files_rails", "Files de rails", "u", "si(type_separative < 2, 1, 2)", "dtu-2541-2022", OK2("SAA : un rail large ; SAD : deux rails : SNIP et fiches système Placo (recherche/15 n° 3)."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(longueur_cloison * regle.faces * regle.plaques_par_face * regle.chute / regle.largeur_plaque)", "u", "snip-fc18", OK2("4,2 m² de plaques par m² (2 faces × 2 plaques × 1,05), comme le parement double (Placo, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"),
-        besoin("montants", "montant", "arrondi_sup((longueur_cloison / regle.e60 + 1) * regle.files_montants * regle.chute)", "u", "dtu-2541-2022", d, designation="Montants M48 longueur {longueur_montant|m}", short="montants", precision="deux files ({type_separative})"),
+        besoin("montants", "montant", "arrondi_sup((longueur_cloison / regle.e60 + 1) * regle.files_montants * regle.chute)", "u", "snip-fc18", OK2("Deux files de montants simples à 0,60 : SNIP p. 7 et Pladur p. 64 (recherche/09 n° 59, recherche/15 n° 3)."), designation="Montants M48 longueur {longueur_montant|m}", short="montants", precision="deux files ({type_separative})"),
         besoin("rails", "rail", "longueur_cloison * 2 * files_rails * regle.chute", "ml", "dtu-2541-2022", d, short="rails", precision="SAA : un rail large (R70 ou R90) haut et bas ; SAD : deux rails R48 haut et bas"),
         besoin("vis-ttpc-25", "vis", "surface * regle.vis_int", "u", "snip-fc18", d, short="vis 1re peau"),
         besoin("vis-ttpc-35", "vis_ext", "surface * regle.vis_ext", "u", "snip-fc18", d, short="vis 2e peau"),

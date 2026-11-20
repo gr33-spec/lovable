@@ -23,3 +23,18 @@
 - Locaux humides : montants à 0,40 m sous carreaux de plus de 1 600 cm² en parement simple (AQC, Knauf, guide DTU 2022).
 - Isolants PSE sous chape, XPS, isolants minces (statut AQC), suspentes Intégra 2, seuils CEE 2026 et R « élément par
   élément » : dans `FICHE.md`, pas encore d'ouvrage dans `referentiel.json`.
+
+## plaquiste-isolation-2026.11.20-3 — Deuxième passe « viser 98 % » (Greg, 20 novembre 2026)
+
+- Décisions de Greg écrites : vis et fixations d'office ; bande et enduit en cases ; coupe-feu d'une seule marque
+  (question « Quelle marque ? », lignes marquées « à chiffrer en entier dans cette marque », laine du système d'office,
+  entretoises PRF Placo, REI en plafond).
+- Taux de chiffres confirmés par deux sources : 59 % → 91 % (90 % avec le nouvel ouvrage coffrage). Recherches
+  `recherche/09` à `15`.
+- Règles changées : vis 30/m² confirmé (Placo actuel 29,19) ; montants doublés (les deux montants de bout ne se doublent
+  pas) ; TRPF doublés 6 (0,60) et 10 (0,40) ; fourrure horizontale des appuis en doublage Optima ; suspentes 1,56/m²
+  (avant 1,8) ; éclisses par fourrure de 3 m ; plus de TRPF en plafond (suspentes clipsées) ; 1re peau de plafond 3 / 4
+  vis/m² ; 98/48 doublés 3,75 m ; mortier adhésif 1,8 (mur plan) / 2,5 (mur irrégulier) ; adhésif de membrane 0,8 ml/m² ;
+  GR 32 Nu 45 (retiré par Isover) remplacé par URSA PRK 32 45 ; tables de soufflage séparées par niveau de preuve.
+- Nouvel ouvrage `coffrage` (soffite, caisson) : règle proposée, à confirmer ; chantier type PI-18.
+- Chantiers types : `recherche/14-chantiers-avant-apres.md` (ancienne et nouvelle valeur, raison, source).

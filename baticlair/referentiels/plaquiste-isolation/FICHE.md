@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-2` (fichier machine `referentiel.json`) |
+| Version | `plaquiste-isolation-2026.11.20-3` (fichier machine `referentiel.json`), deuxième passe du 20 novembre 2026 : **91 % des chiffres confirmés par deux sources** (90 % avec le nouvel ouvrage « coffrage ») |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -743,7 +743,7 @@ Les questions sont dans l'ordre du plus gros levier, et posées **seulement si l
 
 ## 14. Chantiers types
 
-**17 chantiers** (au-delà des 15 demandés) dans `chantiers-types.md`, calculés par le moteur de Mobiiz :
+**18 chantiers** (au-delà des 15 demandés ; PI-18 coffrage ajouté le 20/11) dans `chantiers-types.md`, calculés par le moteur de Mobiiz :
 
 - **PI-01** maison neuve, 45 m² de 72/48 ;
 - **PI-02** cloison isolée en 2,60 m ;
@@ -806,45 +806,84 @@ Résultat : 4 bloquants, 13 gênants, 7 détails.
 - **Enduit de la 1re peau en parement double** (≈ 0,15 à 0,2 kg/m², vendeur, non sourcé), **mortier adhésif en rénovation** (2,5 à 3 kg/m²) et **rail haut vissé dans des fourrures** : à trancher par un plaquiste.
 - **Colis d'isolant et sacs de vrac propres à une marque :** la ligne montre aussi le besoin en m² (ou le produit du certificat), pour qu'un négoce d'une autre marque convertisse.
 
-## 15. Liste des « à confirmer »
+### 14 ter. Deuxième relecture du comptoir (`relecture-testeur-negoce-2.md`, PI-03, PI-10, PI-07)
 
-Ils sont classés par effet sur une commande, le plus gros d'abord. Le détail et la raison sont dans les fichiers de recherche.
+Résultat : 2 bloquants, 12 gênants, 9 détails.
 
-1. **Mortier adhésif** : 1,8 kg/m² (Siniat 2026, Placo système 2017) contre 2 à 3 (fiche produit MAP 2025) et 2,5 (Pladur). Sur 30 m², c'est 3 ou 4 sacs.
-2. **Montants au m²** : géométrie + 5 % (Pladur, ≈ 1,75 ml/m²) contre 2,10 (SNIP, Placo, montants d'huisserie et d'about compris). Faut-il ajouter les montants d'huisserie par porte ?
-3. **Vis au m²** en cloison (30 SNIP contre 22 Placo), en doublage (15 contre 11 contre 26) et en plafond (12 contre 10 contre 8).
-4. **Suspentes au m²** : 1,8 (Placo) retenu, contre 1,56 (SNIP).
-5. **Quantitatifs SAA / SAD** : déduits de la constitution, aucun quantitatif fabricant lu.
-6. **Périmètre des plafonds** (cornière de rive) : estimé pour une pièce carrée ; le devis donne rarement le périmètre.
-7. **Fixation de bout de rail** (non chiffrée) ; nombre de tirs par cartouche de gaz.
-8. **Ratio d'adhésif** de membrane (rives) ; dimensions de Stopvap. Le recouvrement de 10 cm et les rouleaux Intello, Majrex et LDS sont levés en 3e passe.
-9. **R du Styrodur, URSA XPS, polyuréthane nu, Actis Triso** (la 3e passe a couvert le PSE sous chape, le XPS Ravatherm et le statut des isolants minces).
-10. **Suspentes Intégra 2** : boîte de 50 et densité de 1,5 à 3 par m² ✔ (1 source) ; pas encore un ouvrage de la fiche.
-11. ~~Entraxe sous carrelage~~ : levé en 3e passe (0,40 m au-delà de carreaux de 1 600 cm², ✔✔ [R07]). Reste à le lire au devis (format des carreaux), la fiche lit seulement « sous faïence » ou « sous carrelage ».
-12. **Plafond vissé directement sous solives** (DTU 2022 : ossatures bois supprimées).
-13. **Knauf France** (montants, rails, KF 13 en 2,80 / 3,00, charge du Diamant), **gamme Siniat Prégymétal**, M 90 / M 100 / R 100 Placo.
-14. **Placo BA 15 et BA 18 standard** en 1,20 m (fiches France absentes) ; Habito Hydro (formats) ; Glasroc H Ocean ; palettes Fermacell (tarif 2010 seul).
-15. **Charge d'une cheville Molly sur BA13 standard** ; renforts de charges lourdes ; mastic acoustique ; mousse coupe-feu.
-16. **Coffrages, soffites, habillages d'IPN** : aucun quantitatif.
-17. **Pertes en rénovation et en rampants** ; pertes du soufflage ; piges (≈ 1 pour 25 m²) ; écart au feu des conduits.
-18. **Seuils R des aides 2026** (CEE) ; R minimaux « élément par élément » en rénovation ; éditions en vigueur des DTU 45.10 et 45.11.
-19. **Conditionnements** : TTPC 45 en boîte de 1000 ; TRPF (500 ou 1000) ; seau d'enduit prêt à l'emploi (17 / 22 / 25 kg) ; suspente longue 240 (50 ou 100) ; carton d'éclisses 2026 ; chevilles de suspente (boîte de 100 ?).
-20. **Règle EC du DTU 25.41** : déduite des fiches, texte non lu.
+**Corrigé :**
+- Chaque ligne coupe-feu dit « système coupe-feu Placo EI 60 : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal) ».
+- Entretoises PRF ajoutées au plafond feu Placo (104 pour PI-10).
+- La laine écrite d'une cloison coupe-feu porte la marque.
+- Le plafond dit REI, plus EI.
+- Vis TTPC 35 des suspentes et vis TTPC 35 ne font plus qu'une ligne.
 
----
+**Reste ouvert :**
+- un négoce qui ne tient pas la marque du système (section 16) ;
+- un bloc « À préciser » pour les pièces du PV que la fiche ne sort pas : jonctions intumescentes, boîtiers électriques, trappes (à faire au branchement) ;
+- la boîte de vis Placo, vendue par 500 ou 1 500 et non 1 000 ;
+- l'appui à nommer « Optima2 100 » ;
+- la membrane à nommer « Vario Xtra » quand le devis le dit ;
+- l'enduit de la 1re peau.
+
+## 15. Liste des « à confirmer » (après la deuxième passe)
+
+Ils sont classés par effet sur une commande. Le détail est dans `recherche/09` à `15`.
+
+1. **Coffrages, soffites, caissons** (nouvel ouvrage) : aucune quantité par mètre n'est publiée. La règle proposée (plaques = longueur × développé × 1,10, profilés de rive, bande armée par arête) est à valider par un plaquiste [R12].
+2. **Périmètre d'un plafond** quand le devis ne le donne pas : pièce supposée carrée. Aucune règle ne peut exister, deux pièces de même surface n'ayant pas le même périmètre. L'écart est faible pour une pièce courante (2 %), fort pour un couloir (15 %) [R13 H1, R15 n° 8].
+3. **Vis au m², doublage et contre-cloison** : SNIP 15 (vis de rive comprises), contre Placo 11, Siniat Clipstar et Chausson 12, Pladur 26. Chaque écart est expliqué ; le choix revient à l'habitude d'un plaquiste [R15 n° 4].
+4. **Vis au m² de plafond à 0,60** : SNIP 12, Placo 10 ou 15, Pladur 8 ; à 0,40 : Placo seul (15) ; fourrures à 0,40 : Placo seul (3,0).
+5. **TRPF des montants doublés à 0,40** : 10 (Placo + calcul de sa règle), contre SNIP 7 et Chausson 8.
+6. **Séparatives, vis de la 1re peau** (12, SNIP seul).
+7. **Plénum et longueur de plaque de plafond par défaut** : ce sont des habitudes ou des données du chantier, impossibles à sourcer [R15 n° 6].
+8. **Montage feu Placo** (23 vis/m², 2,6 entretoises/m²) : propres au système Placo, une seule source par nature.
+9. **Soufflage Supafil et Igloo** : certificat ACERMI seul ; poids du sac Igloo (11,3 kg chez batiproduits) à confirmer.
+10. **Adhésif de membrane** : 0,8 ml/m², seule valeur écrite (Isover).
+11. **Fixation en bout de rail** (non comptée) : une seule source, grand public.
+12. **Hors fichier machine** (fiche lisible) :
+    - Knauf France : longueurs des montants 48/35, KF 13 en 2,80 m, charge du Diamant ;
+    - palettes Fermacell (tarif 2010) ;
+    - palette Glasroc H Ocean (40 ou 43) ;
+    - conditionnement des montants Siniat ;
+    - composition de la Siniat D102/48 EI 120 ;
+    - plafonds REI Knauf ; gaine Placo ;
+    - PSE : R du Styrodur ;
+    - hauteurs Knauf 2020 à revalider.
+
+**Réglés pendant la deuxième passe** :
+- mortier adhésif : 1,8 kg/m² sur mur plan, 2,5 kg/m² sur mur irrégulier ;
+- montants au m² : nouvelle formule des montants doublés ;
+- vis au m² des cloisons ;
+- quantités SAA et SAD ;
+- cornière de rive (méthode périmètre × 1,05) ;
+- pas de fixation des rails ;
+- produits Knauf et Siniat : en partie (section 3) ;
+- cheville Molly : environ 20 kg sur BA13 standard (Fischer, coefficient de sécurité 3), renfort au-delà de 30 kg (Placo) ;
+- suspentes, éclisses, TRPF en plafond, 98/48 en 3,75 m ;
+- soufflage Comblissimo, Jetrock et Thermacell ;
+- membrane, enduit, colis d'isolant, seau d'enduit, clous, boîtes.
+
 
 ## 16. À trancher par Greg ou par un plaquiste avant l'ouverture
 
-1. ~~Vis, TRPF et fixations de rail~~ : **tranché par Greg le 20/11** : sorties d'office.
-2. ~~Bande et enduit~~ : **tranché par Greg le 20/11** : en cases à cocher.
-2 bis. ~~Coupe-feu~~ : **tranché par Greg le 20/11** : système complet d'une seule marque, une question « Quelle marque ? » (section 5.8).
-3. **Mortier adhésif** : 1,8 ou 2,5 kg/m² par défaut.
-4. **Montants d'huisserie** : faut-il ajouter 2 montants (ou plus) par porte écrite au devis ?
-5. **Montage par défaut tiré de la hauteur** (DTU 25.41) : simples à 40 cm avant doublés à 60 cm (moins cher). Le plaquiste peut préférer les doublés ; dans ce cas, en faire une habitude d'entreprise.
-6. **Cornière de rive** : garder l'estimation (orange, « ajuste à tes pièces »), ou la sortir seulement quand le devis donne le périmètre ?
-7. **Les quantités SNIP 2024 contre Placo** (vis, fourrures, suspentes) : la fiche suit le document de la profession le plus récent, sauf pour les suspentes (Placo, plus sûr).
+Tranché par Greg le 20/11 :
+- vis et fixations d'office ;
+- bande et enduit en cases ;
+- coupe-feu d'une seule marque.
 
----
+Reste à trancher :
+1. **Négoce qui ne tient pas la marque du système coupe-feu** (Knauf seul, système Placo). Deux possibilités :
+   - un bouton « Je n'ai pas cette marque » pour ce négoce ;
+   - une réponse « peu importe la marque, un système complet avec son PV », qui laisse le négoce proposer son système complet.
+   Aujourd'hui, la liste dit « à chiffrer en entier dans cette marque, ou pas du tout ».
+2. **Mortier adhésif** : 1,8 kg/m² sur mur plan par défaut, 2,5 sur mur irrégulier. La question « Ton mur est plan, ou irrégulier ? » est-elle utile, ou faut-il prendre 2,5 partout pour ne jamais manquer ?
+3. **Montants d'huisserie** : faut-il ajouter 2 montants (ou plus) par porte écrite au devis ? Ni le SNIP ni Placo ne les comptent dans leurs ratios.
+4. **Montage par défaut tiré de la hauteur** (DTU 25.41) : simples à 40 cm avant doublés à 60 cm (moins cher), ou doublés par habitude.
+5. **Vis du doublage et de la contre-cloison** : 15/m² (SNIP, vis de rive comprises) ou 11 à 12 (Placo, Siniat, Chausson).
+6. **Suspentes** : 1,56/m² (SNIP + Placo 2026, grande pièce) au lieu de 1,8. Une petite pièce en demande environ 1,75 ; la boîte de 100 couvre l'écart. On garde 1,56 ?
+7. **98/48 en montants doublés à 0,60** : 3,75 m (Placo, Siniat, Pladur) au lieu de 3,70 (Rockwool seul).
+8. **Coffrages** : la règle proposée (section 15, point 1).
+9. **Cornière de rive** : garder l'estimation (orange « ajuste à tes pièces ») ou la sortir seulement quand le devis donne le périmètre.
 
 ## 17. Ce qu'il reste à faire pour ouvrir le métier plaquiste dans Mobiiz
 
