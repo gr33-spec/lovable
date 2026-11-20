@@ -7,6 +7,8 @@ vus = {}
 def parcours(o):
     if isinstance(o, dict):
         v = o.get("verification")
+        if v and v.get("status") == "verified" and v.get("verifiedBy", "").startswith("Greg"):
+            vus[(o.get("value") or o.get("formula") or json.dumps(o.get("values")), o.get("unit"), v.get("note", ""))] = "validé Greg"
         if v and v.get("status") == "draft":
             m = re.search(r"— (2 sources|1 source|à confirmer|contradiction) :", v.get("note", ""))
             if m:
@@ -16,6 +18,6 @@ def parcours(o):
         for x in o: parcours(x)
 parcours(r)
 c = Counter(vus.values()); n = sum(c.values())
-for k in ["2 sources", "1 source", "contradiction", "à confirmer"]:
+for k in ["validé Greg", "2 sources", "1 source", "contradiction", "à confirmer"]:
     print(f"{k:14} {c[k]:4}  {round(100 * c[k] / n)} %")
 print(f"{'total':14} {n:4}")

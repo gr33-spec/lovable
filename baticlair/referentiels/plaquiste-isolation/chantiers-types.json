@@ -4,7 +4,7 @@
     "titre": "Maison neuve : cloisons de distribution",
     "devis": [
       {
-        "designation": "Cloison de distribution type Placostil 72/48, BA13 standard, hauteur 2,50 m",
+        "designation": "Cloison de distribution type Placostil 72/48, BA13 standard, hauteur 2,50 m, avec 3 blocs-portes",
         "quantite": 45,
         "unite": "m²",
         "ouvrage": "cloison-distributive",
@@ -12,6 +12,10 @@
           "hauteur": [
             2.5,
             "m"
+          ],
+          "portes": [
+            3,
+            "u"
           ]
         },
         "ecrits": [
@@ -237,6 +241,10 @@
           "epaisseur_isolant": [
             100,
             "mm"
+          ],
+          "marque_ossature": [
+            1,
+            "u"
           ]
         },
         "ecrits": [

@@ -231,6 +231,13 @@
       "note": "recherche/06 (89 lignes, 2 à 5 négoces par article)."
     },
     {
+      "id": "greg-decisions",
+      "kind": "trade_practice",
+      "title": "Réponses de Greg Roy (fondateur), 20 novembre 2026 : montants de porte, vis de doublage, suspentes, 98/48 en 3,75 m, coupe-feu d'une seule marque, coffrages",
+      "documentRef": "FICHE.md §16",
+      "retrievedAt": "2026-11-20"
+    },
+    {
       "id": "rockwool-murs-2024",
       "kind": "standard",
       "title": "NF DTU 25.41 (fév. 2022) : hauteurs des contre-cloisons, tableau repris par Rockwool (guide murs par l'intérieur 07/2024)",
@@ -2631,6 +2638,34 @@
           }
         },
         {
+          "key": "portes",
+          "label": "Portes dans la cloison",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Combien de portes dans cette cloison ?",
+          "textCount": [
+            "porte",
+            "portes",
+            "bloc-porte",
+            "blocs-portes",
+            "bloc porte",
+            "huisserie",
+            "huisseries"
+          ],
+          "default": {
+            "source": "greg-decisions",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+              "note": "Montants d'huisserie : 2 par porte ÉCRITE au devis (Greg, 20 novembre 2026) ; sans porte écrite, aucune."
+            },
+            "version": 1,
+            "value": "0",
+            "note": "aucune porte écrite au devis"
+          }
+        },
+        {
           "key": "ei",
           "label": "Classement coupe-feu",
           "unit": "u",
@@ -3308,6 +3343,20 @@
           "unit": "u",
           "label": "ossature + {v}"
         },
+        "montants_par_porte": {
+          "source": "greg-decisions",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+            "note": "2 montants d'huisserie par porte écrite au devis (Greg, 20 novembre 2026)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "label": "{v} montants par porte"
+        },
         "rails_par_cloison": {
           "source": "snip-fc18",
           "verification": {
@@ -3434,8 +3483,10 @@
         "h_9848_d60": {
           "source": "dtu-2541-2022",
           "verification": {
-            "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : 3,75 m : fiche Placo sp00020105 (98/48 doublés 0,60, 3,75 m), Siniat carnet DTU et Pladur ; seul le guide Rockwool dit 3,70 (recherche/09 n° 30, à valider par Greg). Règle changée : avant 3,70 m."
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+            "note": "Validé par Greg le 20/11/2026. 3,75 m : fiche Placo sp00020105 (98/48 doublés 0,60, 3,75 m), Siniat carnet DTU et Pladur ; seul le guide Rockwool dit 3,70 (recherche/09 n° 30, à valider par Greg). Règle changée : avant 3,70 m."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3787,7 +3838,7 @@
           "unit": "u",
           "core": true,
           "designation": "Plaques {marque_systeme} {type_plaque} BA13 1,20 × {longueur_plaque|m}",
-          "precision": "{couches} sur {longueur_cloison|m} de cloison, hauteur {hauteur|m} ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
+          "precision": "{couches} sur {longueur_cloison|m} de cloison, hauteur {hauteur|m} ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
           "exclusions": "Vides de portes non déduits (le devis vend la surface pleine) ; hors huisseries.",
           "source": "snip-fc18",
           "verification": {
@@ -3803,13 +3854,13 @@
         {
           "id": "montants",
           "slot": "montant",
-          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature)",
+          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature) + portes * regle.montants_par_porte",
           "unit": "u",
           "core": true,
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
           "precision": "{montage}",
           "short": "montants",
-          "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.",
+          "exclusions": "Montants d'huisserie : 2 par porte écrite au devis (Greg, 20/11/2026) ; montants d'angle non compris.",
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
@@ -3821,13 +3872,13 @@
         {
           "id": "montants-feu",
           "slot": "montant",
-          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature)",
+          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature) + portes * regle.montants_par_porte",
           "unit": "u",
           "core": true,
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m} {marque_systeme}",
-          "precision": "{montage} ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
+          "precision": "{montage} ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
           "short": "montants",
-          "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.",
+          "exclusions": "Montants d'huisserie : 2 par porte écrite au devis (Greg, 20/11/2026) ; montants d'angle non compris.",
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
@@ -3861,7 +3912,7 @@
           "formula": "longueur_cloison * regle.rails_par_cloison * regle.chute_ossature",
           "unit": "ml",
           "core": true,
-          "precision": "rails haut et bas ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
+          "precision": "rails haut et bas ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
           "short": "rails",
           "source": "snip-fc18",
           "verification": {
@@ -3908,7 +3959,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TTPC 25 {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "vis-ttpc-35",
@@ -3934,7 +3985,7 @@
           "core": true,
           "when": "si(ei >= 1, si(couches >= 2, 1, 0), 0)",
           "short": "vis TTPC 35",
-          "precision": "2e peau ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
+          "precision": "2e peau ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
@@ -3979,7 +4030,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TRPF 13 {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "fixations-clous",
@@ -4050,7 +4101,7 @@
             "marque_systeme"
           ],
           "designation": "Laine minérale 45 mm {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "bande",
@@ -6310,6 +6361,74 @@
             "2": "Hilti",
             "3": "Paslode"
           }
+        },
+        {
+          "key": "marque_ossature",
+          "label": "Marque de l'ossature",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "L'ossature, c'est quelle marque ?",
+          "choices": [
+            {
+              "label": "Pas dit",
+              "value": "0"
+            },
+            {
+              "label": "Placo",
+              "value": "1"
+            },
+            {
+              "label": "Knauf",
+              "value": "2"
+            },
+            {
+              "label": "Siniat",
+              "value": "3"
+            }
+          ],
+          "display": {
+            "0": "marque non écrite",
+            "1": "Placo",
+            "2": "Knauf",
+            "3": "Siniat"
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "placo",
+                "optima",
+                "placostil",
+                "stil"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "knauf"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "siniat",
+                "clipstar",
+                "pregymetal"
+              ]
+            }
+          ],
+          "default": {
+            "source": "greg-decisions",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+              "note": "Vis de doublage : celles de la marque quand elle est écrite au devis, sinon 15/m² (syndicat), par prudence (Greg, 20 novembre 2026). Jamais demandée."
+            },
+            "version": 1,
+            "value": "0",
+            "note": "marque non écrite : ratio du syndicat"
+          }
         }
       ],
       "slots": [
@@ -6860,15 +6979,40 @@
         "vis_par_m2": {
           "source": "snip-fc18",
           "verification": {
-            "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 15 vis/m² (SNIP fiche 18, vis de rive comprises)."
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+            "note": "15 vis/m² (SNIP, vis de rive comprises) quand la marque n'est pas écrite, par prudence (Greg, 20/11/2026)."
           },
           "version": 1,
-          "conflict": "Placo (ancien) 11 ; Pladur 26 à 2,50 m. À trancher.",
           "kind": "installation_condition",
           "value": "15",
           "unit": "u/m2",
           "label": "{v} vis par m²"
+        },
+        "vis_placo": {
+          "source": "placo-integrale-plafonds-2023",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Placo : 11 vis/m² (Intégrale 2021-22, sans vis de rive) (recherche/13 D1, 15 n° 4)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "11",
+          "unit": "u/m2",
+          "label": "{v} vis par m² (Placo)"
+        },
+        "vis_siniat": {
+          "source": "siniat-carnet-cloison",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Siniat Clipstar : 12 vis/m² ; le guide Chausson dit aussi 12 (recherche/15 n° 4)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "12",
+          "unit": "u/m2",
+          "label": "{v} vis par m² (Siniat)"
         },
         "trpf_par_m2": {
           "source": "snip-fc18",
@@ -7061,7 +7205,7 @@
         {
           "id": "vis-ttpc-25",
           "slot": "vis",
-          "formula": "surface * regle.vis_par_m2",
+          "formula": "surface * si(marque_ossature < 1, regle.vis_par_m2, si(marque_ossature < 2, regle.vis_placo, si(marque_ossature < 3, regle.vis_par_m2, regle.vis_siniat)))",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
@@ -7534,6 +7678,74 @@
             "1": "Spit",
             "2": "Hilti",
             "3": "Paslode"
+          }
+        },
+        {
+          "key": "marque_ossature",
+          "label": "Marque de l'ossature",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "L'ossature, c'est quelle marque ?",
+          "choices": [
+            {
+              "label": "Pas dit",
+              "value": "0"
+            },
+            {
+              "label": "Placo",
+              "value": "1"
+            },
+            {
+              "label": "Knauf",
+              "value": "2"
+            },
+            {
+              "label": "Siniat",
+              "value": "3"
+            }
+          ],
+          "display": {
+            "0": "marque non écrite",
+            "1": "Placo",
+            "2": "Knauf",
+            "3": "Siniat"
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "placo",
+                "optima",
+                "placostil",
+                "stil"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "knauf"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "siniat",
+                "clipstar",
+                "pregymetal"
+              ]
+            }
+          ],
+          "default": {
+            "source": "greg-decisions",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+              "note": "Vis de doublage : celles de la marque quand elle est écrite au devis, sinon 15/m² (syndicat), par prudence (Greg, 20 novembre 2026). Jamais demandée."
+            },
+            "version": 1,
+            "value": "0",
+            "note": "marque non écrite : ratio du syndicat"
           }
         }
       ],
@@ -8107,15 +8319,40 @@
         "vis_s60": {
           "source": "snip-fc18",
           "verification": {
-            "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 15 vis/m² (SNIP fiche 18)."
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+            "note": "15 vis/m² (SNIP) quand la marque n'est pas écrite, par prudence (Greg, 20/11/2026)."
           },
           "version": 1,
-          "conflict": "Placo ancien 11 ; Pladur 26.",
           "kind": "installation_condition",
           "value": "15",
           "unit": "u/m2",
           "label": "{v} vis par m²"
+        },
+        "vis_placo": {
+          "source": "placo-integrale-plafonds-2023",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Placo : 11 vis/m², même règle de vissage que le doublage (recherche/13 D2)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "11",
+          "unit": "u/m2",
+          "label": "{v} vis par m² (Placo)"
+        },
+        "vis_siniat": {
+          "source": "siniat-carnet-cloison",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Siniat : 12 vis/m² (Clipstar ; même règle) (recherche/15 n° 4)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "12",
+          "unit": "u/m2",
+          "label": "{v} vis par m² (Siniat)"
         },
         "vis_s40": {
           "source": "snip-fc18",
@@ -8331,7 +8568,7 @@
         {
           "id": "vis-ttpc-25",
           "slot": "vis",
-          "formula": "surface * si(montage < 2, regle.vis_s60, regle.vis_s40)",
+          "formula": "surface * si(montage < 2, si(marque_ossature < 1, regle.vis_s60, si(marque_ossature < 2, regle.vis_placo, si(marque_ossature < 3, regle.vis_s60, regle.vis_siniat))), regle.vis_s40)",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
@@ -9381,8 +9618,10 @@
         "suspentes_e60": {
           "source": "snip-fc18",
           "verification": {
-            "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : 1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
+            "note": "Validé par Greg le 20/11/2026. 1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9713,7 +9952,7 @@
           "precisionRequires": [
             "marque_systeme"
           ],
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "fourrures",
@@ -9744,7 +9983,7 @@
           },
           "version": 1,
           "short": "fourrures",
-          "precision": "entraxe {entraxe_fourrures|cm} ; système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)",
+          "precision": "entraxe {entraxe_fourrures|cm} ; système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques",
           "when": "ei >= 1",
           "precisionRequires": [
             "marque_systeme"
@@ -9784,7 +10023,7 @@
             "marque_systeme"
           ],
           "designation": "Suspentes longues {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "suspentes-secables",
@@ -9819,7 +10058,7 @@
             "marque_systeme"
           ],
           "designation": "Suspentes sécables {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "vis-suspentes",
@@ -9884,7 +10123,7 @@
             "marque_systeme"
           ],
           "designation": "Éclisses de fourrure {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "corniere",
@@ -9921,7 +10160,7 @@
             "marque_systeme"
           ],
           "designation": "Cornières de rive, longueur 3 m {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "vis-ttpc-25",
@@ -9956,7 +10195,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TTPC 25 {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "vis-ttpc-35",
@@ -9991,7 +10230,7 @@
             "marque_systeme"
           ],
           "designation": "Vis TTPC 35 {marque_systeme}",
-          "precision": "système coupe-feu {marque_systeme} {ei} : à chiffrer en entier dans cette marque, ou pas du tout (pièces non remplaçables, procès-verbal)"
+          "precision": "système coupe-feu {marque_systeme} {ei} : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques"
         },
         {
           "id": "fixations-clous",
@@ -11399,7 +11638,7 @@
           },
           "version": 1,
           "designation": "Plaques BA13 1,20 × 2,50 m",
-          "precision": "coffrage de {longueur_coffrage|m}, développé {developpe|m}"
+          "precision": "à vérifier : {longueur_coffrage|m} × développé {developpe|m} × 1,10 = {surface_plaques|m2} de plaques (règle acceptée par Greg le 20/11, à confirmer par un plaquiste)"
         },
         {
           "id": "rives",
