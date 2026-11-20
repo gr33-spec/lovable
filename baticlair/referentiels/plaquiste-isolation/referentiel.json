@@ -3387,7 +3387,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18, montants doublés 0,60."
+            "note": "Recherche du 2026-11-19 — 2 sources : 35 vis/m² en doublés 0,60 : SNIP fiche 18 et guide Chausson 2020-21 (recherche/13 A1)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3399,7 +3399,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18, montants doublés 0,40."
+            "note": "Recherche du 2026-11-19 — 2 sources : 47 vis/m² en doublés 0,40 : SNIP 47 et Chausson 45, à 4 % près (recherche/13 A2)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3528,15 +3528,14 @@
           "label": "{v} vis TRPF par m²"
         },
         "trpf_d60": {
-          "source": "snip-fc18",
+          "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 5 TRPF/m² (SNIP)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 6 TRPF/m² en doublés 0,60 : Placo (assemblage des montants doublés compris) et guide Chausson ; le SNIP en compte 5 (recherche/13 A4). Règle changée : avant 5."
           },
           "version": 1,
-          "conflict": "Placo compte aussi l'assemblage des montants doublés : 6.",
           "kind": "installation_condition",
-          "value": "5",
+          "value": "6",
           "unit": "u/m2",
           "label": "{v} vis TRPF par m²"
         },
@@ -3904,7 +3903,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo) ; la fixation en bout de chaque rail n'est chiffrée par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (recherche/13 B1). Fixation en bout de barre non comptée (une seule source, grand public)."
           },
           "version": 1
         },
@@ -3920,7 +3919,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Idem fixations au cloueur."
+            "note": "Recherche du 2026-11-19 — 2 sources : Même règle que les clous (recherche/13 B1)."
           },
           "version": 1
         },
@@ -4841,11 +4840,11 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48."
+            "note": "Recherche du 2026-11-19 — 1 source : Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12) ; Pladur compte plus serré (recherche/13 C1)."
           },
           "version": 1,
           "kind": "installation_condition",
-          "value": "10",
+          "value": "12",
           "unit": "u/m2",
           "label": "{v} vis 1re peau par m²"
         },
@@ -4853,11 +4852,11 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48."
+            "note": "Recherche du 2026-11-19 — 1 source : Séparative, 2e peau : SNIP p. 6-7 (30) (recherche/13 C2)."
           },
           "version": 1,
           "kind": "installation_condition",
-          "value": "27",
+          "value": "30",
           "unit": "u/m2",
           "label": "{v} vis 2e peau par m²"
         },
@@ -4865,7 +4864,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48."
+            "note": "Recherche du 2026-11-19 — 1 source : Séparative : SNIP p. 6-7 (4 en simples 0,60) ; Pladur 2 (recherche/13 C3)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -5085,7 +5084,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -5105,7 +5104,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -6982,7 +6981,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -7002,7 +7001,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -7951,7 +7950,7 @@
           "source": "pladur-2019",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Pladur : M48-35 0,40 simples 2,25 m."
+            "note": "Recherche du 2026-11-19 — 2 sources : 2,25 m : Pladur ; Placo dit 2,30, on garde la plus basse (recherche/13 D3)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -7973,7 +7972,7 @@
           "source": "pladur-2019",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Pladur : 2,65 m."
+            "note": "Recherche du 2026-11-19 — 2 sources : 2,65 m : Pladur ; Placo dit 2,75, on garde la plus basse (recherche/13 D4)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -8252,7 +8251,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -8272,7 +8271,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -9279,7 +9278,7 @@
           "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 2,7 (Placo 2023)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 2,7 : Placo 2023 ; le calcul à la pièce (une suspente tous les 1,20 m par file) donne 2,63 pour 4 × 4 m (recherche/13 E2)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9287,29 +9286,29 @@
           "unit": "u/m2",
           "label": "{v} suspentes par m²"
         },
-        "eclisses_e60": {
-          "source": "snip-fc18",
+        "longueur_fourrure_plafond": {
+          "source": "placo-f530",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP (aboutage des fourrures)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Fourrure commandée en 3,00 m (Placo, Chausson) : une éclisse à chaque aboutage."
           },
           "version": 1,
           "kind": "installation_condition",
-          "value": "0.21",
-          "unit": "u/m2",
-          "label": "{v} éclisses par m²"
+          "value": "3",
+          "unit": "m",
+          "label": "fourrures de {v}"
         },
-        "eclisses_e50": {
-          "source": "snip-fc18",
+        "vis_int_e50": {
+          "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1re peau d'un plafond en 2 BA13, entraxe 0,50 : 4 vis/m², Placo 2023 et Pladur 2019 ; le SNIP compte le double (recherche/13 E7)."
           },
           "version": 1,
           "kind": "installation_condition",
-          "value": "0.25",
+          "value": "4",
           "unit": "u/m2",
-          "label": "{v} éclisses par m²"
+          "label": "{v} vis 1re peau par m²"
         },
         "vis_e60": {
           "source": "snip-fc18",
@@ -9328,10 +9327,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 14 (SNIP)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 14 vis/m² à 0,50 : SNIP et guide Chausson 2020-21 (recherche/13 E4)."
           },
           "version": 1,
-          "conflict": "Placo 12.",
           "kind": "installation_condition",
           "value": "14",
           "unit": "u/m2",
@@ -9353,10 +9351,10 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 1re peau : 8 vis/m² (SNIP, 0,60)."
+            "note": "Recherche du 2026-11-19 — contradiction : 1re peau à 0,60 : 8 vis/m² (SNIP), gardé pour la marge."
           },
           "version": 1,
-          "conflict": "Placo : 3 à 5 selon l'entraxe.",
+          "conflict": "Placo 2023 : 3 ; le SNIP compte le double de Placo et Pladur (recherche/13 E7).",
           "kind": "installation_condition",
           "value": "8",
           "unit": "u/m2",
@@ -9587,10 +9585,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 2,0 à 0,60.",
           "short": "fourrures",
           "precision": "entraxe {entraxe_fourrures|cm}",
           "when": "ei < 1"
@@ -9604,10 +9601,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 2,0 à 0,60.",
           "short": "fourrures",
           "precision": "entraxe {entraxe_fourrures|cm} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
           "when": "ei >= 1",
@@ -9723,7 +9719,7 @@
         {
           "id": "eclisses",
           "slot": "eclisse",
-          "formula": "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)",
+          "formula": "surface * si(entraxe_fourrures >= regle.e60, regle.fourrures_e60, si(entraxe_fourrures >= regle.e50, regle.fourrures_e50, regle.fourrures_e40)) / regle.longueur_fourrure_plafond",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
@@ -9738,7 +9734,7 @@
         {
           "id": "eclisses-feu",
           "slot": "eclisse",
-          "formula": "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)",
+          "formula": "surface * si(entraxe_fourrures >= regle.e60, regle.fourrures_e60, si(entraxe_fourrures >= regle.e50, regle.fourrures_e50, regle.fourrures_e40)) / regle.longueur_fourrure_plafond",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
@@ -9795,32 +9791,30 @@
         {
           "id": "vis-ttpc-25",
           "slot": "vis",
-          "formula": "surface * si(couches < 2, si(entraxe_fourrures >= regle.e60, regle.vis_e60, si(entraxe_fourrures >= regle.e50, regle.vis_e50, regle.vis_e40)), regle.vis_int)",
+          "formula": "surface * si(couches < 2, si(entraxe_fourrures >= regle.e60, regle.vis_e60, si(entraxe_fourrures >= regle.e50, regle.vis_e50, regle.vis_e40)), si(entraxe_fourrures >= regle.e60, regle.vis_int, regle.vis_int_e50))",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 10.",
           "short": "vis",
           "when": "ei < 1"
         },
         {
           "id": "vis-ttpc-25-feu",
           "slot": "vis",
-          "formula": "surface * si(couches < 2, si(entraxe_fourrures >= regle.e60, regle.vis_e60, si(entraxe_fourrures >= regle.e50, regle.vis_e50, regle.vis_e40)), regle.vis_int)",
+          "formula": "surface * si(couches < 2, si(entraxe_fourrures >= regle.e60, regle.vis_e60, si(entraxe_fourrures >= regle.e50, regle.vis_e50, regle.vis_e40)), si(entraxe_fourrures >= regle.e60, regle.vis_int, regle.vis_int_e50))",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : SNIP."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
-          "conflict": "Placo 10.",
           "short": "vis",
           "when": "ei >= 1",
           "precisionRequires": [
@@ -9873,7 +9867,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -9893,7 +9887,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -10247,7 +10241,7 @@
           "source": "pladur-2019",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 1,05 m² par m² et par couche : fiches Isover 2019 combles perdus et rampants (seule valeur publiée) ; Placo et Pladur 1,05 en cloison et doublage."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,05 m² par m² et par couche : fiches Isover 2019 (combles aménagés, rampants) et guide Chausson ; en combles perdus, Isover seul, même valeur que Placo, Pladur et Rockwool en paroi (recherche/13 G1-G2)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -10485,24 +10479,22 @@
         }
       },
       "tables": {
-        "sacs": {
+        "sacs_a": {
           "source": "acermi-soufflage",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Certificat ACERMI du produit (une source officielle par produit ; Comblissimo R 10 recoupé par la fiche Isover 2026)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Certificat ACERMI en vigueur ET fiche fabricant récente concordants : Comblissimo (fiche Isover 2026, à 1 % près), Jetrock 2 (fiche Rockwool 01/2026, identique), Thermacell Cristal (fiche Soprema INSFR0303-3/b et brochure 06/2025) (recherche/10 n° 25, recherche/13 F1-F3)."
           },
           "version": 1,
-          "label": "Sacs pour 100 m² (certificat ACERMI)",
+          "label": "Sacs pour 100 m² : Comblissimo, Jetrock 2, Thermacell Cristal",
           "unit": "u",
           "axes": [
             {
               "param": "produit_vrac",
               "thresholds": [
                 "1",
-                "2",
                 "3",
-                "4",
-                "5"
+                "4"
               ]
             },
             {
@@ -10525,13 +10517,6 @@
               "31.2"
             ],
             [
-              "16.4",
-              "19.7",
-              "23.0",
-              "26.3",
-              "32.9"
-            ],
-            [
               "21.1",
               "25.3",
               "29.6",
@@ -10544,6 +10529,44 @@
               "56",
               "64",
               "80"
+            ]
+          ]
+        },
+        "sacs_b": {
+          "source": "acermi-soufflage",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Certificat ACERMI seul : Supafil Loft 045 (fiche Knauf illisible) et Igloo (poids de sac à confirmer : 11,3 kg chez batiproduits, absent du certificat) (recherche/13 F4-F5)."
+          },
+          "version": 1,
+          "label": "Sacs pour 100 m² : Supafil Loft 045, Igloo",
+          "unit": "u",
+          "axes": [
+            {
+              "param": "produit_vrac",
+              "thresholds": [
+                "1",
+                "5"
+              ]
+            },
+            {
+              "param": "r_vise",
+              "thresholds": [
+                "5",
+                "6",
+                "7",
+                "8",
+                "10"
+              ]
+            }
+          ],
+          "values": [
+            [
+              "16.4",
+              "19.7",
+              "23.0",
+              "26.3",
+              "32.9"
             ],
             [
               "50",
@@ -10559,13 +10582,13 @@
         {
           "id": "sacs",
           "slot": "vrac",
-          "formula": "arrondi_sup(surface * table.sacs / regle.cent_m2)",
+          "formula": "arrondi_sup(surface * si(produit_vrac < 2, table.sacs_a, si(produit_vrac < 3, table.sacs_b, si(produit_vrac < 5, table.sacs_a, table.sacs_b))) / regle.cent_m2)",
           "unit": "u",
           "core": true,
           "source": "acermi-soufflage",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Certificat ACERMI du produit (une source officielle par produit ; Comblissimo R 10 recoupé par la fiche Isover 2026)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Certificat ACERMI en vigueur ET fiche fabricant récente concordants : Comblissimo (fiche Isover 2026, à 1 % près), Jetrock 2 (fiche Rockwool 01/2026, identique), Thermacell Cristal (fiche Soprema INSFR0303-3/b et brochure 06/2025) (recherche/10 n° 25, recherche/13 F1-F3)."
           },
           "version": 1,
           "designation": "{produit_vrac}",
@@ -10686,7 +10709,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Joints tous les 1,40 m + rives."
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."
           },
           "version": 1,
           "short": "adhésif"

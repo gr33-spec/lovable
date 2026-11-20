@@ -422,8 +422,8 @@ def cloison():
         # Vis (SNIP fiche 18, déc. 2024 : vis des rails comprises)
         "vis_1p_s60": regle("30", "u/m2", "snip-fc18", OK2("30 vis/m² (vis à 30 cm + vis des rails) : SNIP fiche 18 et fiche solution Placo actuelle sp00011223 (29,19). Le « 22 » venait d'une ancienne fiche Placo (recherche/09 n° 31)."), label="{v} vis par m²"),
         "vis_1p_s40": regle("37", "u/m2", "snip-fc18", OK2("37 vis/m² à 0,40 : SNIP fiche 18 et fiche solution Placo sp00011244 (36,75) (recherche/09 n° 6)."), label="{v} vis par m²"),
-        "vis_1p_d60": regle("35", "u/m2", "snip-fc18", UNE("SNIP fiche 18, montants doublés 0,60."), label="{v} vis par m²"),
-        "vis_1p_d40": regle("47", "u/m2", "snip-fc18", UNE("SNIP fiche 18, montants doublés 0,40."), label="{v} vis par m²"),
+        "vis_1p_d60": regle("35", "u/m2", "snip-fc18", OK2("35 vis/m² en doublés 0,60 : SNIP fiche 18 et guide Chausson 2020-21 (recherche/13 A1)."), label="{v} vis par m²"),
+        "vis_1p_d40": regle("47", "u/m2", "snip-fc18", OK2("47 vis/m² en doublés 0,40 : SNIP 47 et Chausson 45, à 4 % près (recherche/13 A2)."), label="{v} vis par m²"),
         "vis_int_s60": regle("10", "u/m2", "snip-fc18", UNE("SNIP fiche 18, 98/48 : 1re peau vissée à 60 cm, TTPC 25."), label="{v} vis 1re peau par m²"),
         "vis_int_s40": regle("14", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
         "vis_int_d60": regle("13", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
@@ -434,7 +434,7 @@ def cloison():
         "vis_ext_d40": regle("42", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 2e peau par m²"),
         "trpf_s60": regle("2", "u/m2", "snip-fc18", OK2("2 TRPF/m² (montant sur rail, haut et bas) : SNIP fiche 18 et Placo fiche solution 72/48."), label="{v} vis TRPF par m²"),
         "trpf_s40": regle("3", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis TRPF par m²"),
-        "trpf_d60": regle("5", "u/m2", "snip-fc18", CONFLIT("5 TRPF/m² (SNIP).", "Placo compte aussi l'assemblage des montants doublés : 6."), label="{v} vis TRPF par m²"),
+        "trpf_d60": regle("6", "u/m2", "placo-integrale-plafonds-2023", OK2("6 TRPF/m² en doublés 0,60 : Placo (assemblage des montants doublés compris) et guide Chausson ; le SNIP en compte 5 (recherche/13 A4). Règle changée : avant 5."), label="{v} vis TRPF par m²"),
         "trpf_d40": regle("7", "u/m2", "snip-fc18", CONFLIT("7 TRPF/m² (SNIP).", "Placo : 10."), label="{v} vis TRPF par m²"),
         "isolant_par_m2": regle("1.05", "u", "snip-fc18", OK2("1,05 m² d'isolant par m² : SNIP fiche 18 et Placo fiche solution 72/48."), label="isolant + 5 %"),
         **finitions_constantes(2),
@@ -485,9 +485,9 @@ def cloison():
         {"id": "vis-trpf", "slot": "trpf", "formula": f"surface * {trpf}", "unit": "u", "core": True, "short": "vis TRPF", **prov("snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."))},
         {"id": "fixations-clous", "slot": "fixation", "formula": "arrondi_sup(longueur_cloison * regle.rails_par_cloison * regle.chute_ossature / regle.pas_fixation_rail)", "unit": "u", "core": True, "when": "fixation_rail < 2", "short": "fixations de rail",
          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz", "precisionRequires": ["marque_cloueur"],
-         "precision": "une fixation tous les 60 cm", **prov("siniat-carnet-cloison", DOUTE("Pas de 60 cm confirmé (Siniat, Placo) ; la fixation en bout de chaque rail n'est chiffrée par aucune source lue."))},
+         "precision": "une fixation tous les 60 cm", **prov("siniat-carnet-cloison", OK2("Pas de 0,60 m au plus : Siniat, Placo, Pladur (recherche/13 B1). Fixation en bout de barre non comptée (une seule source, grand public)."))},
         {"id": "fixations-chevilles", "slot": "fixation_cheville", "formula": "arrondi_sup(longueur_cloison * regle.rails_par_cloison * regle.chute_ossature / regle.pas_fixation_rail)", "unit": "u", "core": True, "when": "fixation_rail >= 2", "short": "chevilles de rail",
-         "precision": "une cheville tous les 60 cm", **prov("siniat-carnet-cloison", DOUTE("Idem fixations au cloueur."))},
+         "precision": "une cheville tous les 60 cm", **prov("siniat-carnet-cloison", OK2("Même règle que les clous (recherche/13 B1)."))},
         {"id": "isolant", "slot": "isolant", "formula": "surface * regle.isolant_par_m2", "unit": "m2", "core": False, "short": "isolant", **prov("snip-fc18", OK2("1,05 m²/m² : SNIP et Placo."))},
         *besoins_finitions("surface"),
     ]
@@ -538,7 +538,7 @@ GEO = OK2("Géométrie : longueur = surface ÷ hauteur (SNIP et Pladur calculent
 def fixations_rail(base_ml, extra_count="0"):
     """Clous ou chevilles des rails (et des appuis) selon l'habitude de l'artisan."""
     f = f"arrondi_sup({base_ml} / regle.pas_fixation_rail + {extra_count})"
-    etat = DOUTE("Pas de 60 cm confirmé (Siniat, Placo Intégrale 2023) ; la fixation en bout de rail et celle des appuis ne sont chiffrées par aucune source lue.")
+    etat = OK2("Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée.")
     return [
         besoin("fixations-clous", "fixation", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail < 2", short="fixations", precision="une fixation tous les 60 cm", designation="Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz", precisionRequires=["marque_cloueur"]),
         besoin("fixations-chevilles", "fixation_cheville", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail >= 2", short="chevilles", precision="une cheville tous les 60 cm"),
@@ -660,8 +660,8 @@ def contre_cloison():
          "e40": regle("0.40", "m", "dtu-2541-2022", OK2("Entraxe 0,40 (DTU via Siniat, SNIP).")),
          "rails_par_mur": regle("2", "u", "snip-fc18", OK2("Rail haut et bas (SNIP)."), label="{v} rails"),
          "montant_large": regle("60", "mm", "rockwool-murs-2024", OK2("M70 et plus : tableau à part (Rockwool, Pladur).")),
-         "h48_s60": regle("2.00", "m", "rockwool-murs-2024", hh), "h48_s40": regle("2.25", "m", "pladur-2019", UNE("Pladur : M48-35 0,40 simples 2,25 m.")),
-         "h48_d60": regle("2.40", "m", "rockwool-murs-2024", hh), "h48_d40": regle("2.65", "m", "pladur-2019", UNE("Pladur : 2,65 m.")),
+         "h48_s60": regle("2.00", "m", "rockwool-murs-2024", hh), "h48_s40": regle("2.25", "m", "pladur-2019", OK2("2,25 m : Pladur ; Placo dit 2,30, on garde la plus basse (recherche/13 D3).")),
+         "h48_d60": regle("2.40", "m", "rockwool-murs-2024", hh), "h48_d40": regle("2.65", "m", "pladur-2019", OK2("2,65 m : Pladur ; Placo dit 2,75, on garde la plus basse (recherche/13 D4).")),
          "h70_s60": regle("2.50", "m", "rockwool-murs-2024", hh),
          "vis_s60": regle("15", "u/m2", "snip-fc18", CONFLIT("15 vis/m² (SNIP fiche 18).", "Placo ancien 11 ; Pladur 26."), label="{v} vis par m²"),
          "vis_s40": regle("19", "u/m2", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), label="{v} vis par m²"),
@@ -724,13 +724,13 @@ def plafond():
          "fourrures_e40": regle("3.0", "ml/m2", "placo-integrale-plafonds-2023", UNE("3,0 ml/m² à 0,40 : Placo Intégrale 2023."), label="{v} de fourrures par m²"),
          "suspentes_e60": regle("1.56", "u/m2", "snip-fc18", OK2("1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."), label="{v} suspentes par m²"),
          "suspentes_e50": regle("1.84", "u/m2", "snip-fc18", UNE("1,84 (SNIP) ; Pladur 1,75 à 5 % près (recherche/09 n° 48). Règle changée : avant 2,2."), label="{v} suspentes par m²"),
-         "suspentes_e40": regle("2.7", "u/m2", "placo-integrale-plafonds-2023", UNE("2,7 (Placo 2023)."), label="{v} suspentes par m²"),
-         "eclisses_e60": regle("0.21", "u/m2", "snip-fc18", UNE("SNIP (aboutage des fourrures)."), label="{v} éclisses par m²"),
-         "eclisses_e50": regle("0.25", "u/m2", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), label="{v} éclisses par m²"),
+         "suspentes_e40": regle("2.7", "u/m2", "placo-integrale-plafonds-2023", OK2("2,7 : Placo 2023 ; le calcul à la pièce (une suspente tous les 1,20 m par file) donne 2,63 pour 4 × 4 m (recherche/13 E2)."), label="{v} suspentes par m²"),
+         "longueur_fourrure_plafond": regle("3", "m", "placo-f530", OK2("Fourrure commandée en 3,00 m (Placo, Chausson) : une éclisse à chaque aboutage."), label="fourrures de {v}"),
+         "vis_int_e50": regle("4", "u/m2", "placo-integrale-plafonds-2023", OK2("1re peau d'un plafond en 2 BA13, entraxe 0,50 : 4 vis/m², Placo 2023 et Pladur 2019 ; le SNIP compte le double (recherche/13 E7)."), label="{v} vis 1re peau par m²"),
          "vis_e60": regle("12", "u/m2", "snip-fc18", CONFLIT("12 vis/m² à 0,60 (SNIP).", "Placo 2023 : 10 ; Pladur : 8."), label="{v} vis par m²"),
-         "vis_e50": regle("14", "u/m2", "snip-fc18", CONFLIT("14 (SNIP).", "Placo 12."), label="{v} vis par m²"),
+         "vis_e50": regle("14", "u/m2", "snip-fc18", OK2("14 vis/m² à 0,50 : SNIP et guide Chausson 2020-21 (recherche/13 E4)."), label="{v} vis par m²"),
          "vis_e40": regle("15", "u/m2", "placo-integrale-plafonds-2023", UNE("15 (Placo 2023)."), label="{v} vis par m²"),
-         "vis_int": regle("8", "u/m2", "snip-fc18", CONFLIT("1re peau : 8 vis/m² (SNIP, 0,60).", "Placo : 3 à 5 selon l'entraxe."), label="{v} vis 1re peau par m²"),
+         "vis_int": regle("8", "u/m2", "snip-fc18", CONFLIT("1re peau à 0,60 : 8 vis/m² (SNIP), gardé pour la marge.", "Placo 2023 : 3 ; le SNIP compte le double de Placo et Pladur (recherche/13 E7)."), label="{v} vis 1re peau par m²"),
          "vis_ext": regle("12", "u/m2", "snip-fc18", OK2("2e peau : 12 vis TTPC 35/m² (SNIP) ; Placo 10 à 15."), label="{v} vis 2e peau par m²"),
          "vis_par_suspente_bois": regle("2", "u", "placo-integrale-plafonds-2023", OK2("2 vis TTPC 35 par suspente sous bois : Placo Intégrale 2023 et fiche Maxi Stil F 530."), label="{v} vis par suspente"),
          "pas_fixation_rail": c_pas_fixation(),
@@ -767,14 +767,14 @@ def plafond():
     derived = [derive("nb_suspentes", "Nombre de suspentes", "u", "arrondi_sup(surface * " + E.format(a="regle.suspentes_e60", b="regle.suspentes_e50", c="regle.suspentes_e40") + ")", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(surface * couches * regle.chute / (regle.largeur_plaque * longueur_plaque))", "u", "placo-integrale-plafonds-2023", OK2("1,05 m² de plaque par m² et par peau (Placo, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"),
-        besoin("fourrures", "fourrure", "surface * " + E.format(a="regle.fourrures_e60", b="regle.fourrures_e50", c="regle.fourrures_e40"), "ml", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 2,0 à 0,60."), short="fourrures", precision="entraxe {entraxe_fourrures|cm}"),
+        besoin("fourrures", "fourrure", "surface * " + E.format(a="regle.fourrures_e60", b="regle.fourrures_e50", c="regle.fourrures_e40"), "ml", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="fourrures", precision="entraxe {entraxe_fourrures|cm}"),
         besoin("suspentes-longues", "suspente", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum < 2", short="suspentes"),
         besoin("suspentes-secables", "suspente_secable", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum >= 2", short="suspentes"),
         besoin("vis-suspentes", "vis_suspente", "nb_suspentes * regle.vis_par_suspente_bois", "u", "placo-integrale-plafonds-2023", OK2("2 TTPC 35 par suspente sous bois."), when="support < 2", short="vis de suspente"),
         besoin("chevilles-suspentes", "cheville_suspente", "nb_suspentes", "u", "placo-integrale-plafonds-2023", OK2("Une cheville métallique par suspente sous béton : Placo Intégrale 2023 et Pladur 2019 (chevilles sous agrément à chaque point) (recherche/09 n° 24)."), when="support >= 2", short="chevilles de suspente"),
-        besoin("eclisses", "eclisse", "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="éclisses"),
+        besoin("eclisses", "eclisse", "surface * si(entraxe_fourrures >= regle.e60, regle.fourrures_e60, si(entraxe_fourrures >= regle.e50, regle.fourrures_e50, regle.fourrures_e40)) / regle.longueur_fourrure_plafond", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="éclisses"),
         besoin("corniere", "corniere", "surface * table.perimetre * regle.chute_corniere", "ml", "snip-fc18", OK2("Méthode périmètre × 1,05 : SNIP et Pladur (recherche/09 n° 64) ; le périmètre reste estimé (pièce carrée)."), estimate="périmètre estimé d'après la surface : ajuste à tes pièces", short="cornière de rive"),
-        besoin("vis-ttpc-25", "vis", "surface * si(couches < 2, " + E.format(a="regle.vis_e60", b="regle.vis_e50", c="regle.vis_e40") + ", regle.vis_int)", "u", "snip-fc18", CONFLIT("SNIP.", "Placo 10."), short="vis"),
+        besoin("vis-ttpc-25", "vis", "surface * si(couches < 2, " + E.format(a="regle.vis_e60", b="regle.vis_e50", c="regle.vis_e40") + ", si(entraxe_fourrures >= regle.e60, regle.vis_int, regle.vis_int_e50))", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis"),
         besoin("vis-ttpc-35", "vis_ext", "surface * regle.vis_ext", "u", "snip-fc18", OK2("SNIP 12/m², Placo 10-15."), when="couches >= 2", short="vis 2e peau"),
         *fixations_rail("surface * table.perimetre * regle.chute_corniere"),
         besoin("isolant", "isolant", "surface * regle.isolant_par_m2", "m2", "pladur-2019", OK2("1,05 m²/m²."), core=False, short="isolant"),
@@ -813,9 +813,9 @@ def separative():
          "plaques_par_face": regle("2", "u", "dtu-2541-2022", OK2("SAA et SAD : 2 BA13 par face (Placo SAA 120, SAD 160 ; Siniat S180)."), label="{v} plaques par face"),
          "e60": regle("0.60", "m", "dtu-2541-2022", OK2("Entraxe 0,60.")),
          "files_montants": regle("2", "u", "dtu-2541-2022", OK2("Séparative à double ossature : SNIP p. 7 (4,20 ml/m² = 2 × 2,10) et Pladur Mémento 2017 p. 64 (3,50 = 2 × 1,75) (recherche/09 n° 59)."), label="{v} files de montants"),
-         "vis_int": regle("10", "u/m2", "snip-fc18", d, label="{v} vis 1re peau par m²"),
-         "vis_ext": regle("27", "u/m2", "snip-fc18", d, label="{v} vis 2e peau par m²"),
-         "trpf": regle("4", "u/m2", "snip-fc18", d, label="{v} TRPF par m²"),
+         "vis_int": regle("12", "u/m2", "snip-fc18", UNE("Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12) ; Pladur compte plus serré (recherche/13 C1)."), label="{v} vis 1re peau par m²"),
+         "vis_ext": regle("30", "u/m2", "snip-fc18", UNE("Séparative, 2e peau : SNIP p. 6-7 (30) (recherche/13 C2)."), label="{v} vis 2e peau par m²"),
+         "trpf": regle("4", "u/m2", "snip-fc18", UNE("Séparative : SNIP p. 6-7 (4 en simples 0,60) ; Pladur 2 (recherche/13 C3)."), label="{v} TRPF par m²"),
          "pas_fixation_rail": c_pas_fixation(),
          "isolant_par_m2": regle("1.05", "u", "snip-fc18", OK2("1,05 m²/m² par couche."), label="isolant + 5 %"),
          **finitions_constantes(2)}
@@ -874,7 +874,7 @@ def joints():
 # OUVRAGE 8 : ISOLANT EN ROULEAUX OU PANNEAUX (combles, rampants, murs, planchers)
 # ---------------------------------------------------------------------------------------------------------------
 def isolation_rouleaux():
-    c = {"chute": regle("1.05", "u", "pladur-2019", UNE("1,05 m² par m² et par couche : fiches Isover 2019 combles perdus et rampants (seule valeur publiée) ; Placo et Pladur 1,05 en cloison et doublage."), label="+ {v}")}
+    c = {"chute": regle("1.05", "u", "pladur-2019", OK2("1,05 m² par m² et par couche : fiches Isover 2019 (combles aménagés, rampants) et guide Chausson ; en combles perdus, Isover seul, même valeur que Placo, Pladur et Rockwool en paroi (recherche/13 G1-G2)."), label="+ {v}")}
     params = [surface("Surface à isoler", "Surface à isoler ?"),
               {"key": "couches_isolant", "label": "Couches", "unit": "u", "kind": "site_data", "question": "Combien de couches de cet isolant ?",
                "choices": [{"label": "Une", "value": "1"}, {"label": "Deux", "value": "2"}],
@@ -891,13 +891,18 @@ def isolation_rouleaux():
 # ---------------------------------------------------------------------------------------------------------------
 def soufflage():
     acermi = UNE("Certificat ACERMI du produit (une source officielle par produit ; Comblissimo R 10 recoupé par la fiche Isover 2026).")
-    table = {**prov("acermi-soufflage", acermi), "label": "Sacs pour 100 m² (certificat ACERMI)", "unit": "u",
-             "axes": [{"param": "produit_vrac", "thresholds": ["1", "2", "3", "4", "5"]}, {"param": "r_vise", "thresholds": ["5", "6", "7", "8", "10"]}],
-             "values": [["15.6", "18.7", "21.8", "24.9", "31.2"],   # Comblissimo, sac 17,3 kg
-                        ["16.4", "19.7", "23.0", "26.3", "32.9"],   # Knauf Supafil Loft 045, sac 16,6 kg
-                        ["21.1", "25.3", "29.6", "33.8", "42.2"],   # Rockwool Jetrock 2, sac 20 kg
-                        ["40", "48", "56", "64", "80"],             # Thermacell Cristal, sac 12,5 kg
-                        ["50", "60", "69", "79", "99"]]}            # Igloo (Ouattitude N), sac 12,5 kg
+    deux = OK2("Certificat ACERMI en vigueur ET fiche fabricant récente concordants : Comblissimo (fiche Isover 2026, à 1 % près), Jetrock 2 (fiche Rockwool 01/2026, identique), Thermacell Cristal (fiche Soprema INSFR0303-3/b et brochure 06/2025) (recherche/10 n° 25, recherche/13 F1-F3).")
+    une = UNE("Certificat ACERMI seul : Supafil Loft 045 (fiche Knauf illisible) et Igloo (poids de sac à confirmer : 11,3 kg chez batiproduits, absent du certificat) (recherche/13 F4-F5).")
+    sacs_a = {**prov("acermi-soufflage", deux), "label": "Sacs pour 100 m² : Comblissimo, Jetrock 2, Thermacell Cristal", "unit": "u",
+              "axes": [{"param": "produit_vrac", "thresholds": ["1", "3", "4"]}, {"param": "r_vise", "thresholds": ["5", "6", "7", "8", "10"]}],
+              "values": [["15.6", "18.7", "21.8", "24.9", "31.2"],   # Comblissimo, sac 17,3 kg
+                         ["21.1", "25.3", "29.6", "33.8", "42.2"],   # Rockwool Jetrock 2, sac 20 kg
+                         ["40", "48", "56", "64", "80"]]}            # Thermacell Cristal, sac 12,5 kg
+    sacs_b = {**prov("acermi-soufflage", une), "label": "Sacs pour 100 m² : Supafil Loft 045, Igloo", "unit": "u",
+              "axes": [{"param": "produit_vrac", "thresholds": ["1", "5"]}, {"param": "r_vise", "thresholds": ["5", "6", "7", "8", "10"]}],
+              "values": [["16.4", "19.7", "23.0", "26.3", "32.9"],   # Knauf Supafil Loft 045, sac 16,6 kg
+                         ["50", "60", "69", "79", "99"]]}            # Igloo (Ouattitude N), sac 12,5 kg
+    acermi = deux
     params = [{"key": "surface", "label": "Surface des combles (au sol)", "unit": "m2", "kind": "site_data", "question": "Surface des combles ?", "fromLineQuantity": True},
               {"key": "produit_vrac", "label": "Isolant à souffler", "unit": "u", "kind": "site_data", "question": "Quel isolant à souffler ?",
                "hint": "Le nombre de sacs dépend du produit (son certificat ACERMI).",
@@ -908,13 +913,13 @@ def soufflage():
                "choices": [{"label": "R 5", "value": "5"}, {"label": "R 6", "value": "6"}, {"label": "R 7", "value": "7"}, {"label": "R 8", "value": "8"}, {"label": "R 10", "value": "10"}],
                "display": {"5": "R 5", "6": "R 6", "7": "R 7", "8": "R 8", "10": "R 10"},
                "textValues": [{"value": "10", "keywords": ["r10", "r 10", "r=10", "r = 10"]}, {"value": "8", "keywords": ["r8", "r 8", "r=8", "r = 8"]}, {"value": "7", "keywords": ["r7", "r 7", "r=7", "r = 7"]}, {"value": "6", "keywords": ["r6", "r 6", "r=6", "r = 6"]}, {"value": "5", "keywords": ["r5", "r 5", "r=5", "r = 5"]}]}]
-    needs = [besoin("sacs", "vrac", "arrondi_sup(surface * table.sacs / regle.cent_m2)", "u", "acermi-soufflage", acermi,
+    needs = [besoin("sacs", "vrac", "arrondi_sup(surface * si(produit_vrac < 2, table.sacs_a, si(produit_vrac < 3, table.sacs_b, si(produit_vrac < 5, table.sacs_a, table.sacs_b))) / regle.cent_m2)", "u", "acermi-soufflage", acermi,
                     designation="{produit_vrac}", precision="pour {surface|m2} à {r_vise}, épaisseur après tassement du certificat",
                     exclusions="Aucune majoration : le tassement est déjà dans le tableau du certificat. Piges, déflecteurs de conduits et rehausse de trappe : seulement s'ils sont écrits.")]
     slots = [{"key": "combles", "family": "blown_insulation_work", "label": "Combles soufflés", "measureOnly": True},
              slot("vrac", "loose_fill", "Isolant à souffler", "vrac-souffle", "Sacs du produit écrit au devis.", "acermi-soufflage", "combles", ["comblissimo", "supafil", "ouate", "jetrock"])]
     return {"id": "isolation-soufflee", "trade": TRADE, "section": "principal", "label": "Isolation des combles perdus par soufflage",
-            "triggers": ["blown_insulation_work"], "params": params, "slots": slots, "constants": {"cent_m2": regle("100", "m2", "acermi-soufflage", OK2("Le certificat ACERMI donne les sacs pour 100 m² (définition du tableau)."), label="pour {v}")}, "tables": {"sacs": table}, "needs": needs}
+            "triggers": ["blown_insulation_work"], "params": params, "slots": slots, "constants": {"cent_m2": regle("100", "m2", "acermi-soufflage", OK2("Le certificat ACERMI donne les sacs pour 100 m² (définition du tableau)."), label="pour {v}")}, "tables": {"sacs_a": sacs_a, "sacs_b": sacs_b}, "needs": needs}
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -926,7 +931,7 @@ def pare_vapeur():
          "majoration_adhesif": regle("1.3", "u", "isover-vario", UNE("Joints entre lés + rives : 0,93 ml/m², dans la fourchette Isover 0,8 à 1,4 m/m² « suivant les points singuliers » (extrait, recherche/12) ; aucune autre marque ne publie de ratio."), label="adhésif + {v}")}
     params = [surface("Surface de membrane", "Surface à couvrir ?")]
     needs = [besoin("membrane", "membrane", "surface * regle.majoration", "m2", "isover-vario", OK2("Surface × 1,10 : Isover (étiquettes Vario Xtra, Stopvap) et calcul sur le recouvrement de 10 cm de trois fabricants (recherche/12)."), short="membrane"),
-             besoin("adhesif", "adhesif", "surface / regle.largeur_utile * regle.majoration_adhesif", "ml", "isover-vario", UNE("Joints tous les 1,40 m + rives."), short="adhésif", core=True)]
+             besoin("adhesif", "adhesif", "surface / regle.largeur_utile * regle.majoration_adhesif", "ml", "isover-vario", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="adhésif", core=True)]
     slots = [slot("membrane", "vapour_barrier", "Membrane pare-vapeur", "vario-xtra", "Rouleau de 60 m².", "isover-vario", None, ["membrane", "pare-vapeur", "vario"]),
              slot("adhesif", "vb_tape", "Adhésif de membrane", "adhesif-kb1", "Adhésif de la même marque, rouleau de 40 m.", "gedimat-vario", "membrane", ["adhesif", "kb1"])]
     return {"id": "pare-vapeur", "trade": TRADE, "section": "principal", "label": "Membrane pare-vapeur et adhésifs",

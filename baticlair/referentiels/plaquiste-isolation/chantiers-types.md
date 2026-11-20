@@ -130,7 +130,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Fourrures F530 | 6 longueurs de 3 m | 18 ml | entraxe 40 cm |
 | Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 17 pièces |  |
 | Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 34 pièces |  |
-| Éclisses | 1 boîte de 50 | 1,5 pièces |  |
+| Éclisses | 1 boîte de 50 | 6 pièces |  |
 | Cornières de rive | 5 longueurs de 3 m | 12,6 ml |  |
 | Vis TTPC 35 | 1 boîte de 1000 | 72 pièces |  |
 
@@ -274,7 +274,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Fourrures F530 | 15 longueurs de 3 m | 44,75 ml | entraxe 60 cm |
 | Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 39 pièces |  |
 | Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 78 pièces |  |
-| Éclisses | 1 boîte de 50 | 5,25 pièces |  |
+| Éclisses | 1 boîte de 50 | 14,92 pièces |  |
 | Cornières de rive | 8 longueurs de 3 m | 23,36 ml |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 300 pièces |  |
 | Vis TTPC 35 | 1 boîte de 1000 | 300 pièces |  |
@@ -307,7 +307,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Fourrures, longueur 3 m Placo | 24 longueurs de 3 m | 71,6 ml | entraxe 60 cm ; système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Suspentes sécables Placo | 2 boîtes de 50 | 63 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Chevilles métal 6 × 40 | 1 boîte de 100 | 63 pièces |  |
-| Éclisses de fourrure Placo | 1 boîte de 50 | 8,4 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Éclisses de fourrure Placo | 1 boîte de 50 | 23,87 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
@@ -388,7 +388,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Fourrures F530 | 30 longueurs de 3 m | 89,5 ml | entraxe 60 cm |
 | Suspentes sécables (plénum 80 à 580 mm) | 2 boîtes de 50 | 78 pièces |  |
 | Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 156 pièces |  |
-| Éclisses | 1 boîte de 50 | 10,5 pièces |  |
+| Éclisses | 1 boîte de 50 | 29,83 pièces |  |
 | Cornières de rive | 12 longueurs de 3 m | 33,08 ml |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 600 pièces |  |
 | Vis TTPC 35 | 1 boîte de 1000 | 600 pièces |  |
@@ -421,8 +421,8 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Plaques BA13 standard 1,20 × 2,5 m | 31 plaques | 31 pièces |  |
 | Montants M48 longueur 2,49 m | 33 montants | 33 pièces | deux files (SAD) |
 | Rails R48 | 13 longueurs de 3 m | 36,96 ml | SAA : un rail large (R70 ou R90) haut et bas ; SAD : deux rails R48 haut et bas |
-| Vis TTPC 25 | 1 boîte de 1000 | 220 pièces |  |
-| Vis TTPC 35 | 1 boîte de 1000 | 594 pièces |  |
+| Vis TTPC 25 | 1 boîte de 1000 | 264 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 660 pièces |  |
 | Vis TRPF 13 | 1 boîte de 500 | 88 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 62 pièces | une fixation tous les 60 cm |
 | GR 32 Nu 45 | 2 colis de 12,15 m² | 23,1 m² |  |
@@ -467,7 +467,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Fourrures F530 | 9 longueurs de 3 m | 26,85 ml | entraxe 60 cm |
 | Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 24 pièces |  |
 | Chevilles métal 6 × 40 | 1 boîte de 100 | 24 pièces |  |
-| Éclisses | 1 boîte de 50 | 3,15 pièces |  |
+| Éclisses | 1 boîte de 50 | 8,95 pièces |  |
 | Cornières de rive | 7 longueurs de 3 m | 18,11 ml |  |
 | Vis TTPC 35 | 1 boîte de 1000 | 180 pièces |  |
 
@@ -519,7 +519,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Montants M48 longueur 2,99 m | 28 montants | 28 pièces | montants doublés à 60 cm |
 | Rails R48 | 6 longueurs de 3 m | 16,8 ml | rails haut et bas |
 | Vis TTPC 25 | 1 boîte de 1000 | 840 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 120 pièces |  |
+| Vis TRPF 13 | 1 boîte de 500 | 144 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 29 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 67,2 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 15,84 kg |  |
