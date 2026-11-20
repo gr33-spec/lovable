@@ -1,5 +1,17 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.20-61 — Plomb en rouleaux de 10 m et de 5 m ; teintes de l'ardoise fibres-ciment
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| §12 Rouleau de plomb, bande jusqu'à 30 cm | 6 m (à confirmer) | 10 m (`rouleau_plomb`) | Le Plomb Français, D'Huart Industrie (fiches bandes de plomb, 20/11/2026) |
+| §12 Rouleau de plomb, bande de plus de 30 cm | 6 m (à confirmer) | 5 m (`rouleau_plomb_large`, seuil `largeur_bande_plomb_max` 30 cm) | mêmes fabricants |
+| Exemple : 5 ml de solin plomb, 30 cm | 1 rouleau de 6 m | 1 rouleau de 10 m | |
+| Exemple : 12 ml de bande 50 cm | 3 rouleaux de 6 m | 3 rouleaux de 5 m | |
+| Question teinte ardoise fibres-ciment | bleu-noir / noir / brun | anthracite (noir) / brun ; « bleu-noir » écrit au devis reste lu tel quel | Cedral (manuel de pose), Cembrit (documentation technique) |
+
+Recherche : `recherche/abergements-souches.json`, `recherche/fibres-ciment.json`.
+
 ## roofing-2026.11.20-60 — Ardoise en situation exposée : recouvrement majoré en région III
 
 - **§3 Recouvrement, situation exposée** (NF DTU 40.11 2020 §5.1.1.2 : + 10 mm ; Cupa et Rathscheck : + 10 %) : en région

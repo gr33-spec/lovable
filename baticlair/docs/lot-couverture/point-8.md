@@ -24,13 +24,13 @@ Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Plomb laminé 1,5 mm, rouleau largeur 40 cm × 6 m | 2 rouleaux | Valeur par défaut à confirmer |
+| Plomb laminé 1,5 mm, rouleau largeur 40 cm × 5 m | 2 rouleaux | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Plomb laminé 1,5 mm, rouleau largeur 40 cm × 6 m | 2 rouleaux | 8 ml de bande | chiffrable |
+| Plomb laminé 1,5 mm, rouleau largeur 40 cm × 5 m | 2 rouleaux | 8 ml de bande | chiffrable |
 
 ## Bande cuivre de 33
 

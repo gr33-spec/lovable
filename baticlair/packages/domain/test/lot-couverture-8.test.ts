@@ -46,11 +46,11 @@ describeLot({
 const u = (value: string, unit = "u") => ({ value, unit });
 
 describe("plomb et cuivre : rouleaux de plomb, cuivre comme le zinc", () => {
-  it("plomb sans largeur : 30 cm, 1,5 mm, rouleaux de 6 m à confirmer ; la largeur et l'épaisseur lues l'emportent", () => {
+  it("plomb sans largeur : 30 cm, 1,5 mm, rouleaux de 10 m (5 m au-delà de 30 cm, Le Plomb Français, D\'Huart) ; la largeur et l'épaisseur lues l'emportent", () => {
     const sans = readQuote([{ ref: "1", designation: "Solin plomb", quantity: "5", unit: "ml" }]);
-    expect(sans.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Plomb laminé 1,5 mm, rouleau largeur 30 cm × 6 m", "1 rouleau"]]);
+    expect(sans.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Plomb laminé 1,5 mm, rouleau largeur 30 cm × 10 m", "1 rouleau"]]);
     const lu = readQuote([{ ref: "1", designation: "Bande de plomb largeur 50 cm ép. 2 mm", quantity: "12", unit: "ml" }]);
-    expect(lu.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Plomb laminé 2 mm, rouleau largeur 50 cm × 6 m", "3 rouleaux"]]); // 12 × 1,1 / 6 = 2,2
+    expect(lu.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Plomb laminé 2 mm, rouleau largeur 50 cm × 5 m", "3 rouleaux"]]); // 12 × 1,1 / 5 = 2,64 (avant : 6 m, 2,2 → 3)
   });
 
   it("cuivre commandé façonné : longueurs de 2 m ; façonné sur place court : feuilles 2 × 1 m ; long : bobine au mètre à sa largeur", () => {

@@ -952,21 +952,29 @@ const PANS_BAC_PARAM: ParamDef = {
     { value: "2", keywords: ["2 pans", "deux pans", "double pente", "bipente"] },
   ],
 };
+/** Plomb en bandes : 10 m jusqu'à 30 cm de large, 5 m au-delà (Le Plomb Français, D'Huart Industrie ; recherche du 20/11/2026). */
+const PLOMB_VERIFIE: Provenance["verification"] = {
+  status: "verified",
+  verifiedAt: "2026-11-20",
+  verifiedBy: "Recherche base couverture : Le Plomb Français, D'Huart Industrie",
+  note: "Bandes de plomb vendues en 10, 5 et 2 m ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer.",
+};
 /** Teinte de l'ardoise fibres-ciment : le comptoir ne la sert pas sans elle. */
 const TEINTE_FC_PARAM: ParamDef = {
   key: "teinte_fc",
   label: "Teinte de l'ardoise fibres-ciment",
   unit: "u",
   kind: "site_data",
-  question: "Ardoises fibres-ciment : bleu-noir, noir ou brun ?",
+  // Recherche du 20/11/2026 (Cedral, Cembrit) : anthracite / noir et brun ; « bleu-noir » n'existe chez aucun des deux.
+  // Écrit au devis, il reste lu tel quel (valeur 1), jamais proposé en bouton.
+  question: "Ardoises fibres-ciment : anthracite (noir) ou brun ?",
   choices: [
-    { label: "Bleu-noir", value: "1" },
-    { label: "Noir", value: "2" },
+    { label: "Anthracite / noir", value: "2" },
     { label: "Brun", value: "3" },
   ],
   textValues: [
     { value: "1", keywords: ["bleu noir", "bleu-noir", "bleue noire"] },
-    { value: "2", keywords: ["noire", "noires", "teinte noir", "coloris noir"] },
+    { value: "2", keywords: ["noire", "noires", "teinte noir", "coloris noir", "anthracite"] },
     { value: "3", keywords: ["brun", "brune", "brunes"] },
   ],
   display: { "1": "bleu-noir", "2": "noir", "3": "brun" },
@@ -1172,7 +1180,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.20-60",
+  version: "roofing-2026.11.20-61",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2958,17 +2966,36 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [{ key: "plomb", family: "lead_strip", label: "Plomb en rouleau", usual: { text: "Plomb laminé en rouleau (§12).", source: FR_REPLY_DESCENTES, productId: "plomb-rouleau" } }],
       constants: {
         marge_bandes: ZINC_PLAT_CONSTANTS.marge_bandes,
-        rouleau_plomb: rule("6", "m", F, todo("§12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer."), "rouleau de plomb de {v}"),
+        // Recherche du 20/11/2026 : bandes de plomb jusqu'à 30 cm vendues en 10 m (aussi 5 et 2 m), Le Plomb Français et
+        // D'Huart Industrie ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer.
+        rouleau_plomb: rule("10", "m", F, PLOMB_VERIFIE, "rouleau de plomb de {v} (bande jusqu'à 30 cm)"),
+        rouleau_plomb_large: rule("5", "m", F, PLOMB_VERIFIE, "rouleau de plomb de {v} (bande de plus de 30 cm)"),
+        largeur_bande_plomb_max: rule("30", "cm", F, PLOMB_VERIFIE, "bande de plomb en rouleau de 10 m jusqu'à {v} de large"),
       },
       needs: [
         {
           id: "rouleaux-plomb",
           slot: "plomb",
+          when: "largeur_plomb <= regle.largeur_bande_plomb_max",
           formula: "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)",
           unit: "u",
           core: true,
           exclusions: "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
-          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 6 m",
+          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 10 m",
+          precision: "{longueur_plomb|ml} de bande",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "rouleaux-plomb-larges",
+          slot: "plomb",
+          when: "largeur_plomb > regle.largeur_bande_plomb_max",
+          formula: "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb_large)",
+          unit: "u",
+          core: true,
+          exclusions: "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
+          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 5 m",
           precision: "{longueur_plomb|ml} de bande",
           source: F,
           verification: FOUNDER_DOC,
