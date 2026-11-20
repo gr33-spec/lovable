@@ -12,10 +12,17 @@ const BANC = [
   { ref: "2", designation: "Isolant PIR ep 100 mm", quantity: "48", unit: "m²" },
 ];
 const pir = (answers = {}) => readTradeQuote(ETANCHEITE_REFERENTIAL, BANC, answers).toBuy.find((b) => /Isolant PIR/.test(b.label));
+const UN = { "param:format_pir": { value: "1", unit: "u" } };
 
 describe("isolant PIR de toiture-terrasse : le format du panneau", () => {
-  it("par défaut 1 200 × 600 : 69 panneaux pour 48 m²", () => {
-    const l = pir();
+  it("non écrit au devis : la ligne attend la question du format (le comptoir la pose)", () => {
+    const p = readTradeQuote(ETANCHEITE_REFERENTIAL, BANC);
+    const rows = p.screen.groups.flatMap((g) => g.rows);
+    const texte = (r: (typeof rows)[number]) => r.pending?.label ?? p.toBuy.find((b) => b.key === r.itemKey)?.label ?? "";
+    expect(rows.find((r) => /Isolant PIR/.test(texte(r)))?.status).toBe("check");
+  });
+  it("1 200 × 600 répondu : 69 panneaux pour 48 m²", () => {
+    const l = pir(UN);
     expect(l?.label).toBe("Isolant PIR toiture-terrasse 1 200 × 600, ép. 100 mm");
     expect(l?.quantity).toBe("69 panneaux");
   });
