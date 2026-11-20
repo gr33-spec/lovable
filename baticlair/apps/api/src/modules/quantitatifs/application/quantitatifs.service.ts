@@ -1,6 +1,6 @@
 import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
-import { normalizeText } from "@baticlair/domain";
+import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -366,8 +366,13 @@ export class QuantitatifsService {
           // de sa fiche : la réponse est prise, jamais refusée « sans unité » puis reposée sans fin.
           uniteDeLaFiche(reviewed.takeoff.trade, key);
         if (!unit) throw validationFailed("Missing unit", [{ path: `reponses.${i}.unite`, message: r.question }]);
-        if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
-        value = { value: r.valeur.trim().replace(",", "."), unit };
+        // Un bouton dit en mots (« bandeau ») pour une donnée à boutons de la fiche, même quand sa question n'est pas
+        // ouverte (le code ne la pose pas) : la valeur du référentiel (« 2 »), jamais un refus.
+        let lu = r.valeur.trim();
+        const def = donneeDeLaFiche(reviewed.takeoff.trade, key);
+        if (!/^\d+(?:[.,]\d+)?$/.test(lu) && def?.choices?.length) lu = valeurDuReferentiel(def, { label: lu, valeur: lu });
+        if (!/^\d+(?:[.,]\d+)?$/.test(lu)) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        value = { value: lu.replace(",", "."), unit };
       }
       reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, value);
     }
