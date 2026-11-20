@@ -7,10 +7,16 @@ import { departementConnu } from "@/lib/metiers-inscription";
 
 /**
  * LA CARTE DE L'ONBOARDING (Greg, 19 novembre 2026) : la France découpée en régions ; un toucher sur une région la zoome
- * (animation du cadre, coupée sous « réduire les animations ») et la découpe en départements, chargés à ce moment-là
- * (`/cartes/region-<code>.json`, 3 à 24 Ko). Le reste de la France reste derrière, flouté. « Toute la France » revient en
- * arrière. Sous la carte, les mêmes choix en boutons, faciles au pouce (les petits départements d'Île-de-France compris) ;
- * la Corse est sur la carte et dans la liste, l'outre-mer dans la liste.
+ * et la découpe en départements (`/cartes/region-<code>.json`, 3 à 24 Ko). Le reste de la France reste derrière, flouté.
+ * « Toute la France » revient en arrière. Sous la carte, les mêmes choix en boutons, faciles au pouce (les petits
+ * départements d'Île-de-France compris) ; la Corse est sur la carte et dans la liste, l'outre-mer dans la liste.
+ *
+ * LA TRANSITION (retour de Greg, 20 novembre 2026 : « pas tout à fait fluide ») : un seul mouvement, une transformation CSS
+ * du groupe de la carte, menée par le navigateur (avant : le cadre recalculé et toute la carte redessinée par React à chaque
+ * image). Les traits gardent leur épaisseur à l'écran (`vector-effect`). Le flou du reste de la France et l'ombre des
+ * départements ne se posent qu'une fois le zoom fini (avant : un flou recalculé à chaque image, le plus coûteux). Les
+ * départements sont préchargés (au survol ou au toucher d'une région, puis toutes les régions quand la page est au repos) :
+ * ils apparaissent pendant le zoom, plus après. Sous « réduire les animations », le zoom est immédiat.
  */
 type Vue = readonly [number, number, number, number];
 
@@ -24,7 +30,7 @@ interface DepartementCarte {
 
 export type ChoixRegion = { type: "metropole"; region: RegionCarte } | { type: "outre-mer"; code: string; nom: string };
 
-const DUREE_ZOOM = 650;
+const DUREE_ZOOM = 700;
 const cache = new Map<string, Promise<DepartementCarte[]>>();
 function chargerDepartements(code: string): Promise<DepartementCarte[]> {
   let p = cache.get(code);
@@ -51,34 +57,26 @@ function cadreRegion(r: RegionCarte): Vue {
   return [cx - l / 2, cy - h / 2, l, h];
 }
 
-function useCadreAnime(cible: Vue): Vue {
-  const [vue, setVue] = useState<Vue>(cible);
-  const depuis = useRef<Vue>(cible);
-  const courant = useRef<Vue>(cible);
-  useEffect(() => {
-    const reduit = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduit) {
-      courant.current = cible;
-      // Sans animation : le cadre suit la cible au prochain affichage.
-      const id = requestAnimationFrame(() => setVue(cible));
-      return () => cancelAnimationFrame(id);
-    }
-    depuis.current = courant.current;
-    let debut = 0;
-    let id = 0;
-    const image = (t: number) => {
-      if (!debut) debut = t;
-      const p = Math.min(1, (t - debut) / DUREE_ZOOM);
-      const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-      const v = depuis.current.map((a, i) => a + (cible[i]! - a) * e) as unknown as Vue;
-      courant.current = v;
-      setVue(v);
-      if (p < 1) id = requestAnimationFrame(image);
-    };
-    id = requestAnimationFrame(image);
-    return () => cancelAnimationFrame(id);
-  }, [cible]);
-  return vue;
+/** La transformation qui amène le cadre `b` (unités de la carte) dans le cadre de la France entière. */
+function transformation(b: Vue): string {
+  const echelle = VUE_FRANCE[2] / b[2];
+  const tx = -(b[0] - VUE_FRANCE[0]) * echelle;
+  const ty = -(b[1] - VUE_FRANCE[1]) * echelle;
+  return `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${echelle.toFixed(4)})`;
+}
+
+/** Les départements de toutes les régions, quand la page est au repos : le premier zoom n'attend plus le réseau. */
+function precharger() {
+  const lancer = (k: number) => {
+    const r = REGIONS_CARTE[k];
+    if (!r) return;
+    chargerDepartements(r.code)
+      .catch(() => undefined)
+      .finally(() => window.setTimeout(() => lancer(k + 1), 120));
+  };
+  const ric = (window as Window & { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+  if (ric) ric(() => lancer(0), { timeout: 2500 });
+  else window.setTimeout(() => lancer(0), 1200);
 }
 
 export function CarteFrance({
@@ -98,10 +96,20 @@ export function CarteFrance({
   useEffect(() => {
     onZoom?.(!!choix);
   }, [choix, onZoom]);
-  // La cible du zoom, stable tant que la région ne change pas (sinon l'animation repartirait à chaque image).
+  // Le cadre visé (stable tant que la région ne change pas) et sa transformation ; « posé » une fois le zoom fini.
   const cible = useMemo(() => (region ? cadreRegion(region) : VUE_FRANCE), [region]);
-  const vue = useCadreAnime(cible);
+  const [posee, setPosee] = useState<string | null>(null);
+  const pose = !!region && posee === region.code;
   const titre = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    precharger();
+  }, []);
+  // La fin du zoom : à la fin de la transition, ou au plus tard un peu après (onglet caché, animations coupées).
+  useEffect(() => {
+    if (!region) return;
+    const id = window.setTimeout(() => setPosee(region.code), DUREE_ZOOM + 120);
+    return () => window.clearTimeout(id);
+  }, [region]);
 
   // Le département déjà choisi (retour en arrière dans l'onboarding) rouvre sa région, une fois, à l'arrivée sur la carte ;
   // « Toute la France » n'est ensuite jamais annulé.
@@ -140,18 +148,19 @@ export function CarteFrance({
 
   const choisirRegion = useCallback((r: RegionCarte) => {
     setDeps(null);
+    setPosee(null);
     setChoix({ type: "metropole", region: r });
     requestAnimationFrame(() => titre.current?.focus());
   }, []);
   const revenir = () => {
     setChoix(null);
     setDeps(null);
+    setPosee(null);
   };
 
-  // Tailles en unités de la carte, d'après la largeur visible : le texte garde la même taille à l'écran à chaque zoom.
-  const echelle = vue[2] / VUE_FRANCE[2];
-  const police = vue[2] / 30;
-  const trait = vue[2] / 420;
+  // Tailles en unités de la carte, pour le cadre d'arrivée : le texte des départements a sa taille d'écran une fois zoomé.
+  const echelle = cible[2] / VUE_FRANCE[2];
+  const police = cible[2] / 30;
   const depsAffiches = region && deps && deps.every((d) => region.departements.includes(d.code)) ? deps : null;
 
   return (
@@ -175,99 +184,121 @@ export function CarteFrance({
       {choix?.type === "outre-mer" ? null : (
         <div className="mzo-carte-cadre">
           <svg
-            className="mzo-carte-svg"
-            viewBox={vue.join(" ")}
+            className={`mzo-carte-svg${pose ? " posee" : ""}`}
+            viewBox={`0 0 ${VUE_FRANCE[2]} ${VUE_FRANCE[3]}`}
             preserveAspectRatio="xMidYMid meet"
             role="group"
             aria-label={region ? `Carte : départements de la région ${region.nom}` : "Carte des régions de France"}
           >
             <defs>
               <filter id="mzo-flou" x="-5%" y="-5%" width="110%" height="110%">
-                <feGaussianBlur stdDeviation={3 * echelle} />
+                <feGaussianBlur stdDeviation={2.6 * echelle} />
               </filter>
             </defs>
-            <g filter={region ? "url(#mzo-flou)" : undefined} className={region ? "mzo-fond" : undefined}>
-              {REGIONS_CARTE.map((r) => (
-                <path
-                  key={r.code}
-                  d={r.d}
-                  className={`mzo-region${region?.code === r.code ? " courante" : ""}`}
-                  data-region={r.code}
-                  role={region ? undefined : "button"}
-                  tabIndex={region ? -1 : 0}
-                  aria-label={region ? undefined : r.nom}
-                  strokeWidth={trait}
-                  onClick={region ? undefined : () => choisirRegion(r)}
-                  onKeyDown={
-                    region
-                      ? undefined
-                      : (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            choisirRegion(r);
-                          }
-                        }
-                  }
-                />
-              ))}
-            </g>
-            {!region
-              ? REGIONS_CARTE.map((r) => (
-                  <text
-                    key={r.code}
-                    x={r.centre[0]}
-                    y={r.centre[1]}
-                    className="mzo-nom-region"
-                    textAnchor="middle"
-                    aria-hidden="true"
-                    fontSize={VUE_FRANCE[2] / 58}
-                  >
-                    {r.code === "11"
-                      ? "IDF"
-                      : r.nom
-                          .replace("Provence-Alpes-Côte d'Azur", "PACA")
-                          .replace("Bourgogne-Franche-Comté", "Bourgogne-F.-C.")
-                          .replace("Centre-Val de Loire", "Centre-VdL")
-                          .replace("Auvergne-Rhône-Alpes", "Auvergne-R.-A.")}
-                  </text>
-                ))
-              : null}
-            {depsAffiches
-              ? depsAffiches.map((d) => {
-                  const on = d.code === departement;
-                  const petit = d.boite[2] - d.boite[0] < vue[2] / 7;
-                  return (
-                    <g
-                      key={d.code}
-                      className={`mzo-dep${on ? " on" : ""}`}
-                      role="button"
-                      tabIndex={0}
-                      aria-pressed={on}
-                      aria-label={`${d.nom} (${d.code})`}
-                      data-departement={d.code}
-                      onClick={() => onDepartement(d.code, d.nom)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          onDepartement(d.code, d.nom);
-                        }
-                      }}
-                    >
-                      <path d={d.d} strokeWidth={trait * 1.2} />
-                      <text x={d.centre[0]} y={d.centre[1]} textAnchor="middle" aria-hidden="true" fontSize={petit ? police * 0.85 : police}>
-                        {petit ? d.code : d.nom}
-                        {petit ? null : (
-                          <tspan x={d.centre[0]} dy={police * 1.15} fontSize={police * 0.8} className="mzo-code">
-                            {d.code}
-                          </tspan>
-                        )}
-                      </text>
+            <g
+              className="mzo-scene"
+              style={{ transform: transformation(cible) }}
+              onTransitionEnd={(e) => {
+                if (e.target === e.currentTarget && region) setPosee(region.code);
+              }}
+            >
+              <g transform={`translate(${-VUE_FRANCE[0]} ${-VUE_FRANCE[1]})`}>
+                <g filter={pose ? "url(#mzo-flou)" : undefined} className={region ? "mzo-fond" : undefined}>
+                  {REGIONS_CARTE.map((r) => (
+                    <path
+                      key={r.code}
+                      d={r.d}
+                      className={`mzo-region${region?.code === r.code ? " courante" : ""}`}
+                      data-region={r.code}
+                      role={region ? undefined : "button"}
+                      tabIndex={region ? -1 : 0}
+                      aria-label={region ? undefined : r.nom}
+                      onPointerEnter={region ? undefined : () => void chargerDepartements(r.code).catch(() => undefined)}
+                      onPointerDown={region ? undefined : () => void chargerDepartements(r.code).catch(() => undefined)}
+                      onClick={region ? undefined : () => choisirRegion(r)}
+                      onKeyDown={
+                        region
+                          ? undefined
+                          : (e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                choisirRegion(r);
+                              }
+                            }
+                      }
+                    />
+                  ))}
+                </g>
+                <g className={`mzo-noms${region ? " caches" : ""}`} aria-hidden="true">
+                  {REGIONS_CARTE.map((r) => (
+                    <text key={r.code} x={r.centre[0]} y={r.centre[1]} className="mzo-nom-region" textAnchor="middle" fontSize={VUE_FRANCE[2] / 58}>
+                      {r.code === "11"
+                        ? "IDF"
+                        : r.nom
+                            .replace("Provence-Alpes-Côte d'Azur", "PACA")
+                            .replace("Bourgogne-Franche-Comté", "Bourgogne-F.-C.")
+                            .replace("Centre-Val de Loire", "Centre-VdL")
+                            .replace("Auvergne-Rhône-Alpes", "Auvergne-R.-A.")}
+                    </text>
+                  ))}
+                </g>
+                {depsAffiches ? (
+                  <>
+                    {depsAffiches.map((d) => {
+                      const on = d.code === departement;
+                      return (
+                        <g
+                          key={d.code}
+                          className={`mzo-dep${on ? " on" : ""}`}
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={on}
+                          aria-label={`${d.nom} (${d.code})`}
+                          data-departement={d.code}
+                          onClick={() => onDepartement(d.code, d.nom)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onDepartement(d.code, d.nom);
+                            }
+                          }}
+                        >
+                          <path d={d.d} />
+                        </g>
+                      );
+                    })}
+                    {/* Les noms par-dessus tous les contours : un département voisin ne les coupe jamais. */}
+                    <g className="mzo-noms-deps" aria-hidden="true">
+                      {depsAffiches.map((d) => {
+                        // Le nom tient dans son département : réduit au besoin (jusqu'aux trois quarts), sinon le numéro seul.
+                        const largeur = d.boite[2] - d.boite[0];
+                        const ajuste = Math.min(1, (largeur * 0.9) / (d.nom.length * police * 0.56));
+                        const petit = largeur < cible[2] / 7 || ajuste < 0.72;
+                        return (
+                          <text
+                            key={d.code}
+                            x={d.centre[0]}
+                            y={d.centre[1]}
+                            textAnchor="middle"
+                            className={d.code === departement ? "on" : undefined}
+                            fontSize={petit ? police * 0.85 : police * ajuste}
+                          >
+                            {petit ? d.code : d.nom}
+                            {petit ? null : (
+                              <tspan x={d.centre[0]} dy={police * 1.15} fontSize={police * 0.8} className="mzo-code">
+                                {d.code}
+                              </tspan>
+                            )}
+                          </text>
+                        );
+                      })}
                     </g>
-                  );
-                })
-              : null}
+                  </>
+                ) : null}
+              </g>
+            </g>
           </svg>
-          {region && !depsAffiches ? (
+          {region && !depsAffiches && (pose || erreur) ? (
             <p className="mzo-chargement">{erreur ? "La carte ne s'affiche pas : choisis dans la liste dessous." : "Je zoome…"}</p>
           ) : null}
         </div>
@@ -279,7 +310,12 @@ export function CarteFrance({
           <ul className="mzo-pastilles" aria-label="Choisis ta région">
             {REGIONS_CARTE.map((r) => (
               <li key={r.code}>
-                <button type="button" data-pastille-region={r.code} onClick={() => choisirRegion(r)}>
+                <button
+                  type="button"
+                  data-pastille-region={r.code}
+                  onPointerDown={() => void chargerDepartements(r.code).catch(() => undefined)}
+                  onClick={() => choisirRegion(r)}
+                >
                   {r.nom}
                 </button>
               </li>

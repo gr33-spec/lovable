@@ -16,7 +16,7 @@
      reste claire mais porte la même identité (boutons jaunes à texte noir, carte du mois noire au chrono jaune, pastille
      jaune pâle pour l'onglet actif). Une seule couleur de marque ; ok / warn / danger restent des couleurs d'état. */
   /* PALETTE DE GREG (29 octobre 2026, « utilise uniquement cette palette ») : jaunes #FED206 / #F4CB09 / #F4DB5C, noirs et
-     bruns #0D0601 / #130901 / #2E1B05 / #614822, blancs #FBF8F3 / #F6F3EE / #F2F1EE, ambre #CA8A1B, ocre #96580C, taupe
+     bruns #0D0601 / #130901 / #2E1B05 / #4F4B45, blancs #FBF8F3 / #F6F3EE / #F2F1EE, ambre #CA8A1B, ocre #96580C, taupe
      #99844C (traits en taupe transparent). Seules exceptions : le vert « prêt » et le rouge « erreur », des états. */
   --color-ground: #F6F3EE;
   --color-surface: #FBF8F3;
@@ -29,9 +29,9 @@
   --color-tint-sky: #F4DB5C;
   --color-tint-mint: #e6f6ec;
   --color-tint-peach: #F4DB5C;
-  --color-muted: #614822;
+  --color-muted: #4F4B45;
   /* Plus de quatrième gris : `subtle` vaut `muted`. */
-  --color-subtle: #614822;
+  --color-subtle: #4F4B45;
   --color-line: #99844C40;
   --color-accent: #FED206;
   /* Le jaune n'est jamais un texte sur fond clair : « accent-text » (liens, chrono, libellés accent) est l'encre. */
@@ -300,8 +300,8 @@ body:has(.app-clair) {
   .app-nuit :where([class*="bg-surface"], [class*="bg-accent"], [class*="bg-glass"], [class*="bg-ok-bg"], [class*="bg-warn-bg"], [class*="bg-danger-bg"], [class*="bg-tint"], [class*="bg-white"], input, textarea, select, [role="menu"]) {
     --color-ground: #f6f3ee;
     --color-ink: #130901;
-    --color-muted: #614822;
-    --color-subtle: #614822;
+    --color-muted: #4F4B45;
+    --color-subtle: #4F4B45;
     --color-line: #99844c40;
     --color-accent-text: #130901;
     color: var(--color-ink);
