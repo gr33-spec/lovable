@@ -845,9 +845,7 @@
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
    "param:longueur_rampant",
-   "param:developpe@bandes-zinc__4",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe@bandes-zinc__4"
   ],
   "aChiffrer": []
  },
@@ -991,9 +989,7 @@
   ],
   "questions": [
    "param:qualite_ardoise",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -1262,10 +1258,7 @@
    "param:developpe",
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:fixation_crochet",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -1314,9 +1307,7 @@
   ],
   "questions": [
    "param:faconnage",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -1375,9 +1366,7 @@
    "param:developpe",
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -1457,8 +1446,7 @@
    }
   ],
   "questions": [
-   "fiche:fenetre_de_toit_quelle_taille",
-   "param:raccord_couverture"
+   "fiche:fenetre_de_toit_quelle_taille"
   ],
   "aChiffrer": []
  },
@@ -1933,9 +1921,7 @@
   ],
   "questions": [
    "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:fixation_crochet"
   ],
   "aChiffrer": []
  },
@@ -1997,9 +1983,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "param:nb_descentes"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -2014,11 +1998,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "param:diametre_descente",
-   "param:fixation_crochet",
-   "param:nb_descentes"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -2072,11 +2052,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "param:diametre_descente",
-   "param:fixation_crochet",
-   "param:nb_angles"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -2320,7 +2296,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc",
    "fiche:marque_des_ardoises"
@@ -2413,7 +2388,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],
@@ -2555,9 +2529,7 @@
   ],
   "questions": [
    "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:fixation_crochet"
   ],
   "aChiffrer": []
  },
@@ -2614,10 +2586,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "param:diametre_descente",
-   "param:fixation_crochet"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -2664,9 +2633,7 @@
    "param:developpe",
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -2706,9 +2673,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "param:dauphin"
-  ],
+  "questions": [],
   "aChiffrer": []
  },
  {
@@ -2919,7 +2884,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],
@@ -3029,7 +2993,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],
@@ -3178,10 +3141,7 @@
   "questions": [
    "param:faconnage",
    "param:longueur_rampant",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:fixation_crochet",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -3300,9 +3260,7 @@
   "questions": [
    "param:perimetre_cheminee",
    "param:developpe",
-   "param:faconnage@pieces-pliees",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": [
    "Ardoises (Ardoises naturelles Espagne 1er choix 30×22)"
@@ -3386,11 +3344,7 @@
    }
   ],
   "questions": [
-   "param:teinte_gouttiere",
-   "param:diametre_descente",
-   "param:fixation_crochet",
-   "param:nb_angles",
-   "param:nb_descentes"
+   "param:teinte_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -3421,9 +3375,7 @@
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -3685,9 +3637,7 @@
    "param:developpe",
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -3740,9 +3690,7 @@
   ],
   "questions": [
    "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:fixation_crochet"
   ],
   "aChiffrer": []
  },
@@ -3788,10 +3736,7 @@
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:diametre_descente",
-   "param:fixation_crochet",
-   "param:nb_descentes"
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -3897,8 +3842,7 @@
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:dauphin"
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -4057,9 +4001,7 @@
    }
   ],
   "questions": [
-   "param:aretier_matiere",
-   "param:developpe_aretier",
-   "param:nb_aretiers"
+   "param:aretier_matiere"
   ],
   "aChiffrer": []
  },
@@ -4448,9 +4390,7 @@
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
    "param:longueur_rampant",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -4519,10 +4459,7 @@
     "raison": null
    }
   ],
-  "questions": [
-   "param:diametre_descente",
-   "param:nb_descentes"
-  ],
+  "questions": [],
   "aChiffrer": [
    "Liteaux 27x40"
   ]
@@ -4564,9 +4501,7 @@
    "param:developpe",
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -4770,9 +4705,7 @@
    "param:developpe",
    "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:developpe_gouttiere",
-   "param:diametre_descente",
-   "param:nb_descentes"
+   "param:developpe_gouttiere"
   ],
   "aChiffrer": []
  },
@@ -4915,7 +4848,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],
@@ -5038,7 +4970,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],
@@ -5196,7 +5127,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],
@@ -5312,7 +5242,6 @@
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
-   "param:developpe",
    "param:developpe@bande-porte-solin",
    "param:developpe@bandes-zinc"
   ],

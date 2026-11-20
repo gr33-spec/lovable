@@ -37,14 +37,13 @@ async function chantier() {
 }
 
 describe("un bouton du modèle en mots passe, et un refus se dit sur sa carte", () => {
-  it("« En façade (bandeau) » est accepté et ramené à la valeur du référentiel", async () => {
+  // RÈGLE CHANGÉE (Greg, 20 novembre 2026) : les questions sont décidées par le code. La pose des crochets ne se demande que
+  // si le calcul en a besoin (des crochets écrits ou cochés) ; ici le devis n'écrit que la gouttière : la question du modèle
+  // n'est pas posée. Avant : elle était posée, avec ses boutons ramenés aux valeurs du référentiel.
+  it("la question du modèle sur une donnée de la fiche n'est posée que si le calcul en a besoin", async () => {
     const { agent, q } = await chantier();
-    const ecran = (await agent.get(`/v1/quantitatifs/${q.id}?ecran=1`).expect(200)).body as { questions: { id: string; boutons: { label: string; valeur: string }[] }[] };
-    const question = ecran.questions.find((x) => x.id.includes("fixation_crochet"))!;
-    const bandeau = question.boutons.find((b) => /bandeau/i.test(b.label))!;
-    expect(bandeau.valeur).toBe("2");
-    const res = await agent.post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`).send({ reponses: [{ question: question.id, valeur: bandeau.valeur, unite: "u" }] });
-    expect(res.status, JSON.stringify(res.body)).toBe(200);
+    const ecran = (await agent.get(`/v1/quantitatifs/${q.id}?ecran=1`).expect(200)).body as { questions: { id: string; texte: string }[] };
+    expect(ecran.questions.filter((x) => x.id.includes("fixation_crochet") || /bandeau/.test(x.texte))).toEqual([]);
   });
 
   it("même envoyé en mots (« bandeau »), la réponse passe ; une réponse illisible est refusée sur sa carte (reponses.N)", async () => {

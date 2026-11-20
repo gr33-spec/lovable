@@ -25,6 +25,8 @@ export function lectureParLeCode(ref: Referential, lecture: LectureDevis): Lectu
 }
 
 /** Les mots, sans accent ni pluriel (« Chéneaux » = « cheneau », « bacs » = « bac »), pour chercher un mot de la fiche. */
+/** Une donnée qui est une quantité (une longueur, une surface, un nombre) : l'app ne la demande jamais à l'artisan. */
+export const QUANTITE_DEMANDEE = /^(?:longueur|surface|nombre|nb|quantite|metrage|lineaire)(?:_|$)/;
 export function motsDeLaFiche(raw: string): string {
   return normalizeText(raw)
     .replace(/[^a-z0-9.,/ ]/g, " ")
@@ -176,7 +178,8 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   // descente) reste : la question de la lecture est gardée, la ligne l'attend. Le reste (les « à préciser », les précisions
   // libres) varie d'une lecture à l'autre : le code le décide.
   const connues = new Set(ref.workItems.flatMap((w) => w.params.map((p) => p.key)));
-  const attend = [...new Set(l.fournitures.flatMap((f) => f.attend))].filter((k) => !connues.has(k));
+  // Jamais une quantité demandée (« longueur totale du porte-solin ? » pour « 2 unités ») : la ligne ne l'attend pas.
+  const attend = [...new Set(l.fournitures.flatMap((f) => f.attend))].filter((k) => !connues.has(k) && !QUANTITE_DEMANDEE.test(k));
   const telQuel = !compte && !mesure && premiere ? { attend: [...new Set([...premiere.attend, ...attend])], aPreciser: premiere.aPreciser } : { attend };
   return {
     ...l,

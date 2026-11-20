@@ -77,12 +77,10 @@ describe("une question du modèle qui prolonge une donnée du référentiel est 
     expect(rattacherQuestion(ref, plan, { ...rive, ligne: "9:999" }).cle).toBe("faconnage_rive");
     const avec = { ...l, questions: [rive, ...l.questions.filter((q) => !(q.cle === "faconnage" && q.ligne === ligne))] };
     const e0 = ecranDeLecture({ ref, lecture: avec, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC }, preferences: {} });
-    // Une seule réponse pour tout le devis (Greg, 17 novembre 2026) : la question de la rive est celle du groupe, avec ses mots.
+    // RÈGLE CHANGÉE (Greg, 20 novembre 2026) : la question est décidée par le code, jamais par la lecture. La rive de
+    // D-2026-018 « comprend le pliage » : le devis dit le façonnage, rien ne se demande (ni la phrase du modèle, ni celle
+    // du groupe, ni une question par pièce). Avant : la question du modèle devenait celle du groupe.
     expect(e0.questions.some((x) => x.text === rive.texte)).toBe(false);
-    const q = e0.questions.find((x) => x.key === "param:faconnage@pieces-pliees")!;
-    expect(q.text).toMatch(/^Tes pièces pliées/);
-    expect(e0.questions.filter((x) => /^param:faconnage@bandes-zinc__/.test(x.key))).toEqual([]);
-    const e1 = ecranDeLecture({ ref, lecture: avec, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, [q.key]: { value: "1", unit: "u" } }, preferences: {} });
-    expect(e1.questions.filter((x) => x.key === q.key || x.key === "fiche:faconnage_rive")).toEqual([]);
+    expect(e0.questions.filter((x) => /^param:faconnage@(?:pieces-pliees|bandes-zinc__)/.test(x.key) || x.key === "fiche:faconnage_rive")).toEqual([]);
   });
 });

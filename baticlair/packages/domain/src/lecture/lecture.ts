@@ -17,7 +17,7 @@ import { isWithoutSupplyUnit } from "../takeoff/supply.js";
 import { withoutLabour } from "../trust/marchandise.js";
 import { normalizeText } from "../trades/trade-profile.js";
 import { fournituresElectriques, pointElectrique, type ArticleElectrique } from "./electricite.js";
-import { lectureParLeCode } from "./par-le-code.js";
+import { lectureParLeCode, QUANTITE_DEMANDEE } from "./par-le-code.js";
 import { ficheDeCalcul, fournituresDeFiche, questionsDeFiche, type ArticleFiche, type FicheMetier } from "../referential/fiches/index.js";
 
 /**
@@ -827,7 +827,9 @@ export function ecranDeLecture(input: {
     if (q.cle.startsWith("produit_") || questionsDeLaFiche.has(q.cle)) return q;
     // Une donnée que la fiche ne connaît pas (une contradiction du devis, « ZWC ou Pratikal ? » ; la matière d'une ligne
     // qu'aucun ouvrage ne calcule) : le code ne sait pas la poser, la question de la lecture reste.
-    if (!ref.workItems.some((w) => w.params.some((p) => p.key === q.cle))) return q;
+    // Une donnée inconnue de la fiche qui est une quantité, sans boutons (« Porte-solin : longueur totale en mètres ? » sur
+    // « 2 unités », une lecture sur cinq de D-2026-024) : jamais demandée (règle permanente : aucune quantité demandée).
+    if (!ref.workItems.some((w) => w.params.some((p) => p.key === q.cle))) return QUANTITE_DEMANDEE.test(q.cle) && q.boutons.length === 0 ? null : q;
     // La donnée de l'ouvrage de SA ligne d'abord (le façonnage des bacs n'est pas celui des bandes), sinon du premier
     // ouvrage du devis qui la connaît.
     const deSaLigne = q.ligne ? plan.lines.find((x) => x.status === "planned" && x.ref.split(".")[0] === q.ligne) : undefined;
@@ -853,7 +855,13 @@ export function ecranDeLecture(input: {
       return n !== undefined && (nombresDuDevis.has(String(Number(n))) || cites.has(String(Number(n))));
     };
     if (lues.length === 2 && new Set(lues).size === 2 && lues.every(valable) && q.boutons.every(ecritAuDevis) && !(toutes.size === 2 && lues.every((v) => toutes.has(v)))) return q;
-    return { ...q, texte: def.question, boutons: (def.choices ?? []).map((c) => ({ label: c.label, valeur: c.value })), unite: def.unit };
+    // Une donnée qu'attend une fourniture des points (la gamme de l'appareillage) : le calcul générique ne la voit pas ;
+    // elle se pose avec les mots et les boutons de la fiche.
+    if (points.some((p) => p.attend.includes(q.cle))) return { ...q, texte: def.question, boutons: (def.choices ?? []).map((c) => ({ label: c.label, valeur: c.value })), unite: def.unit };
+    // Sinon, la question est celle du calcul : il la pose s'il en a besoin (la donnée manque), jamais parce que le modèle
+    // l'a écrite (Greg, 20 novembre 2026, D-2026-024 rejoué cinq fois : « Ton pan finit comment ? » alors que le devis dit
+    // « les 2 côtés », posée une lecture sur cinq).
+    return null;
   };
   const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q00) => {
     const q1 = deLaFiche(rattacherQuestion(ref, plan, q00, lignes));
@@ -1001,6 +1009,16 @@ export function ecranDeLecture(input: {
     const porteurs = plan.inputs.filter((i) => ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.params.some((p) => p.key === nom));
     return porteurs.length > 0 && porteurs.every((i) => sansUnite.has(i.workItemId));
   };
+  // « Je ne sais pas » (une réponse nulle) à une donnée de la fiche : la question reste ouverte sur sa ligne (§51.6), même
+  // quand le calcul la remplace par une valeur courante (le rampant des ardoises) ; c'est le code qui la garde.
+  for (const [k, v] of Object.entries(answers)) {
+    if (v !== null || !k.startsWith("param:") || scopedParam(k) || fallback.some((q) => q.key === k)) continue;
+    const defs = ref.workItems.filter((w) => ouvragesDuPlan.has(w.id)).flatMap((w) => w.params).filter((p) => `param:${p.key}` === k);
+    // Seulement pour une donnée qu'un ouvrage du devis ne sait pas supposer (la longueur des bacs) ; la zone, qui a sa
+    // valeur courante partout, reprend cette valeur, dite et modifiable.
+    const def = defs.find((p) => !p.default);
+    if (def) fallback.push({ key: k, kind: "param", text: def.question, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
+  }
   for (const q of fallback) {
     if (deCesOuvragesSeulement(q)) continue;
     const donnee = scopedParam(q.key)?.name ?? q.key.replace(/^param:/, "");
@@ -1041,8 +1059,19 @@ export function ecranDeLecture(input: {
   // jamais avec la phrase commune de la donnée.
   const aSonNom = (q: Question): Question => {
     const piece = scopedParam(q.key);
+    // Une donnée commune à plusieurs ouvrages du devis (le rampant des bacs et des ardoises) : les mots de l'ouvrage qui en a
+    // besoin (sans valeur courante), jamais ceux d'un autre (« Longueur des bacs… », pas « Longueur du rampant… »).
+    if (!piece && q.key.startsWith("param:")) {
+      const defs = ref.workItems.filter((w) => ouvragesDuPlan.has(w.id)).flatMap((w) => w.params).filter((p) => `param:${p.key}` === q.key);
+      const besoin = defs.find((p) => !p.default);
+      if (besoin && defs.some((p) => p.question === q.text) && besoin.question !== q.text) return { ...q, text: besoin.question };
+    }
     const ouvrage = piece && ref.workItems.find((w) => w.id === baseOf(piece.workItemId));
     const propre = ouvrage?.params.find((p) => p.key === piece!.name);
+    // Déjà au nom de la pièce, mais au nom long (« Bande de ventilation …, Quartz-Zinc 0,65 mm gris : développé… ») : le nom
+    // tel qu'écrit au devis, sans les données ajoutées.
+    const long = piece ? plan.inputs.find((i) => i.workItemId === piece.workItemId)?.label : undefined;
+    if (long && long.includes(", ") && q.text.startsWith(`${long} : `)) return { ...q, text: `${long.split(", ")[0]!} : ${q.text.slice(long.length + 3)}` };
     // Une phrase de la fiche pour cette donnée (celle de cet ouvrage, ou celle d'un autre : « Abergements, solins… » pour les
     // bacs) : la question prend celle de SON ouvrage, ses boutons, et le nom de la pièce.
     if (!piece || !ouvrage || !propre || !ref.workItems.some((w) => w.params.some((p) => p.key === piece.name && p.question === q.text))) return q;

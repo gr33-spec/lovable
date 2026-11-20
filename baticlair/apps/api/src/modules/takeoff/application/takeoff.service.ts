@@ -64,6 +64,7 @@ import {
   scopedKey,
   type LectureDevis,
   valeurApprise,
+  designationsDuDevis,
   lignesDuTexte,
   phraseGrosDevis,
   poidsAnalyse,
@@ -769,7 +770,9 @@ export class TakeoffService {
       const essaiAuto = result.status === "timeout" || (result.status === "provider_error" && !/^http_4(?!29)/.test(result.errorCode ?? ""));
       throw new DomainError("analysis_failed", "The AI could not read this quote", { reason: result.status, essaiAuto });
     }
-    const lecture = result.output;
+    // Le même devis donne toujours la même liste (Greg, 20 novembre 2026) : la désignation de chaque ligne est reprise du
+    // texte du devis, jamais des mots du modèle (titre seul, « : », « — », « . » selon la lecture).
+    const lecture = designationsDuDevis(result.output, document.numberedText);
     const lignes = lignesDeLecture(lecture);
     if (lignes.length === 0) {
       await this.saveStats(analysisId, stats("failed", "nothing_read"));

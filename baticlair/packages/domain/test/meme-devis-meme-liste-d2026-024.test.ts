@@ -1,16 +1,19 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ecranDeLecture, parseLecture, ROOFING_REFERENTIAL, type EngineAnswer } from "../src/index.js";
+import { designationsDuDevis, ecranDeLecture, parseLecture, ROOFING_REFERENTIAL, type EngineAnswer, type LectureDevis } from "../src/index.js";
 
 /**
  * LE MÊME DEVIS DONNE TOUJOURS LA MÊME LISTE ET LES MÊMES QUESTIONS (Greg, 20 novembre 2026, devis D-2026-024, zinc à
  * tasseaux) : « Les questions sont décidées par le code à partir de la fiche métier (ce que le négoce exige pour chaque
  * ligne), pas par la lecture IA. Toute ligne « à chiffrer » vient obligatoirement avec la question qui la débloque. »
  * Avant (constat du 18 novembre) : trois lectures du même devis donnaient trois listes et trois séries de questions.
- * Les trois lectures RÉELLES du site de test (19 et 20 novembre 2026), le nom du client retiré, rejouées par le moteur
- * seul : à l'ouverture, puis chaque question reçoit la même réponse (premier bouton, sinon 3) jusqu'à n'en plus avoir.
+ * Les huit lectures RÉELLES du site de test (trois des 19 et 20 novembre, puis D-2026-024 rejoué cinq fois en ligne le
+ * 20 novembre sur la version 62), le nom du client retiré, rejouées par le moteur seul : à l'ouverture, puis chaque
+ * question reçoit la même réponse (premier bouton, sinon 3) jusqu'à n'en plus avoir. Comme sur le serveur, la
+ * désignation de chaque ligne est reprise du texte du devis (`designationsDuDevis`), jamais des mots du modèle.
  */
-const LECTURES = (JSON.parse(readFileSync(new URL("./devis-reels/d2026-024-lectures.json", import.meta.url), "utf8")) as unknown[]).map((l) => parseLecture(l));
+const TEXTE = readFileSync(new URL("./devis-reels/d2026-024-texte.txt", import.meta.url), "utf8");
+const LECTURES = (JSON.parse(readFileSync(new URL("./devis-reels/d2026-024-lectures.json", import.meta.url), "utf8")) as unknown[]).map((l) => designationsDuDevis(parseLecture(l) as LectureDevis, TEXTE));
 const ref = ROOFING_REFERENTIAL;
 const ecran = (i: number, answers: Record<string, EngineAnswer> = {}) => ecranDeLecture({ ref, lecture: LECTURES[i]!, answers, preferences: {} });
 
@@ -38,12 +41,11 @@ const finale = (i: number) => {
   };
 };
 
-describe("D-2026-024 : trois lectures réelles, une seule liste", () => {
+describe("D-2026-024 : huit lectures réelles, une seule liste", () => {
   it("à l'ouverture : les mêmes questions, dans le même ordre, et la même liste", () => {
-    expect(LECTURES).toHaveLength(3);
-    const [a, b, c] = [0, 1, 2].map(ouverture);
-    expect(b).toEqual(a);
-    expect(c).toEqual(a);
+    expect(LECTURES).toHaveLength(8);
+    const [a, ...autres] = LECTURES.map((_, i) => ouverture(i));
+    for (const x of autres) expect(x).toEqual(a);
     // Le pliage une fois pour le devis, puis les données du calcul. Les rives (« 2 côtés ») sont écrites au devis : la
     // finition ne se demande pas, et les tasseaux sont chiffrés dès l'ouverture (13 bacs − 1 + 2 rives = 14 rangs × 4 m).
     expect(a!.questions[0]).toMatch(/^param:faconnage@pieces-pliees /);
@@ -52,9 +54,8 @@ describe("D-2026-024 : trois lectures réelles, une seule liste", () => {
   });
 
   it("toutes questions répondues : la même liste finale, rien à chiffrer sans sa question, plus aucune question", () => {
-    const [a, b, c] = [0, 1, 2].map(finale);
-    expect(b).toEqual(a);
-    expect(c).toEqual(a);
+    const [a, ...autres] = LECTURES.map((_, i) => finale(i));
+    for (const x of autres) expect(x).toEqual(a);
     expect(a!.reste).toBe(0);
     // Tasseaux et couvre-joints chiffrés (rangs = bacs − 1 + rives sur tasseau), le chéneau en bobineau.
     expect(a!.liste.join("\n")).toMatch(/tasseau/i);
