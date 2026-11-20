@@ -1,0 +1,488 @@
+{
+  "famille": "pertes",
+  "generated": "2026-11-20",
+  "note": "Marges de casse et de coupe à ajouter aux quantités de couverture. Aucun fabricant (Cupa, Rathscheck, Samaca, Cedral, Edilians, Terreal, Wienerberger, BMI/Monier, VMZinc, Rheinzink, Siplast, Soprema, Dörken) ne publie de pourcentage de perte de chantier dans les documents trouvés. Les seuls chiffres de fabricant sont les FDES collectives de la terre cuite (CTMNC) : 1 % de casse à la pose, hypothèse environnementale qui ne compte pas les coupes. Le DTU ne fixe pas de perte (rien trouvé qui le cite). Les eduscol (sujets CAP/BP) étaient inaccessibles (erreur 503) les 19 et 20 novembre 2026. Les sites de calculateurs grand public (type autre) sont notés pour mémoire et ne comptent pas comme source sérieuse.",
+  "entrees": [
+    {
+      "id": "methode_perte_apres_plus_values",
+      "famille": "pertes",
+      "sous_famille": "méthode",
+      "marque": null,
+      "modele": null,
+      "attribut": "méthode de métré des points singuliers",
+      "valeur": "surface de couverture + plus-values des points singuliers (m² par ml) = surface à considérer ; quantité = surface à considérer × éléments au m² ; puis + % de casse",
+      "unite": null,
+      "condition": "couverture en petits éléments (ardoise au crochet dans le manuel ; le guide Culture fait de même pour l'ardoise clouée ou au crochet)",
+      "regions": ["France"],
+      "statut": "confirme",
+      "sources": [
+        { "titre": "Manuel CAP couvreur, chapitre 21 « Quantitatif d'une couverture en ardoise au crochet » (copie en ligne)", "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf", "type": "guide", "extrait": "PLUS-VALUES pour le calcul du quantitatif (à ajouter à la surface de couverture) … Ces résultats doivent être augmentés d'un pourcentage pour casse, remplissage", "consulte": "2026-11-20" },
+        { "titre": "Ministère de la Culture, Guide de maîtrise d'ouvrage et de maîtrise d'œuvre, Ouvrages de couverture – Ardoises (août 2011), bordereau et mode de métré", "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf", "type": "guide", "extrait": "Chapitre 4 Les ouvrages de coupe et de raccord … Noue à fendis au mètre linéaire … Arêtier à rangs de doublage et bardelis au mètre linéaire", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Les deux sources traitent les rives, noues et arêtiers à part de la surface courante (le manuel en m² ajoutés, le guide Culture en ouvrages au ml). Le manuel ajoute ENSUITE un pourcentage de casse : plus-values et perte s'additionnent, elles ne se remplacent pas.",
+      "raison": null
+    },
+    {
+      "id": "ardoise_plus_values_cap",
+      "famille": "pertes",
+      "sous_famille": "ardoise naturelle",
+      "marque": null,
+      "modele": null,
+      "attribut": "plus-values par ml (m² à ajouter à la surface)",
+      "valeur": { "egout_droit": "pureau × longueur", "egout_biais": "2 pureaux × longueur", "rive_tranchis_droit": 0.16, "rive_tranchis_biais": 0.25, "rive_tranchis_circulaire": 0.33, "aretier_rang_doublage_2_rives": 0.66, "aretier_ardoises_biaises_2_rives": 0.66, "noue_fendis_renvers_1_ou_2_tranchis": 1.5, "noue_renvers_rond_ou_1_tranchis": 1.5, "deversee_1_tranchis": 0.33, "deversee_2_tranchis": 0.5, "tourelle": "circonférence de base × hauteur" },
+      "unite": "m² par ml",
+      "condition": "ardoise au crochet ; exemple du manuel : versant 39 m², égout 5 m, tranchis droit 6 m, tranchis biais 6,32 m → 3,15 m² de plus-values (+8 %) → 42,15 m²",
+      "regions": ["France"],
+      "statut": "une_source",
+      "sources": [
+        { "titre": "Manuel CAP couvreur, chapitre 21, tableau des plus-values (copie en ligne)", "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf", "type": "guide", "extrait": "Tranchis droit 0,16 m² … Par rang de doublage (pour 2 rives) 0,66 m² … À 1 tranchis, à 2 tranchis 1,50 m²", "consulte": "2026-11-20" }
+      ],
+      "ecart": null,
+      "raison": "Une seule source chiffre les plus-values (le manuel CAP, recopié tel quel dans referentiel-couverture.md §25.1, valeurs identiques). Le guide Culture confirme la méthode (ouvrages au ml) mais ne chiffre pas. L'égout (1 rang de doublis) est déjà confirmé ailleurs (ardoise.md §7). Le tableau ne donne rien pour les lucarnes, chiens-assis, fenêtres de toit ni pénétrations."
+    },
+    {
+      "id": "ardoise_naturelle_perte_toit_simple",
+      "famille": "pertes",
+      "sous_famille": "ardoise naturelle",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes",
+      "valeur": 5,
+      "unite": "%",
+      "condition": "toit simple (deux pans, sans ouverture), après plus-values ou à défaut sur la surface",
+      "regions": ["France"],
+      "statut": "une_source",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur, « Calcul des surfaces, des pureaux et des quantités de matériaux »", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Quantité = Surface × Densité × 1.05 … marge de 5% pour la casse et les coupes", "consulte": "2026-11-20" },
+        { "titre": "Agence wallonne du patrimoine, fiche FARCC1-2 « Ardoises naturelles, spécifications produit » (2022)", "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2022/03/farcc1-2-ardoises-naturelles-specifications-produit.pdf", "type": "guide", "extrait": "Le taux de rebut acceptable sera de maximum 5 %, au-delà on peut considérer que la livraison n'est plus conforme", "consulte": "2026-11-20" },
+        { "titre": "Ozymandias Agency, blog « Combien d'ardoises au m² » (agence web pour couvreurs, pour mémoire)", "url": "https://ozymandias.agency/blog/combien-ardoises-m2-tableau-formats-calcul-2026/", "type": "autre", "extrait": "Deux pans simples, sans ouverture : 5 %", "consulte": "2026-11-20" },
+        { "titre": "Reformex, calculateur nombre de tuiles (site de devis, pour mémoire)", "url": "https://www.reformex.fr/calculateurs/nombre-tuiles/", "type": "autre", "extrait": "Pour un toit simple à deux pans sans ouverture, 5 % peuvent suffire", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Le manuel CAP (chapitre 21) demande « un pourcentage pour casse, remplissage » sans le chiffrer. La fiche wallonne ne donne pas une perte mais le rebut toléré à la livraison (ardoises écartées au tri), jusqu'à 5 % : c'est une raison de ne pas descendre sous 5 % en ardoise naturelle. Des calculateurs grand public disent 10 % pour l'ardoise naturelle sans distinguer la forme du toit (macalculatriceenligne), non retenu.",
+      "raison": "Un seul chiffre de formation (Nomad Education reprend le cours CAP). Les autres pages qui disent 5 % sont des sites grand public. Aucun fabricant d'ardoise ne publie de perte."
+    },
+    {
+      "id": "ardoise_naturelle_perte_toit_complique",
+      "famille": "pertes",
+      "sous_famille": "ardoise naturelle",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes, toit compliqué",
+      "valeur": "7 % (lucarnes, fenêtres de toit) ; 10 % et plus (croupes, noues, arêtiers, tourelles)",
+      "unite": "%",
+      "condition": "sans plus-values comptées à part",
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Ozymandias Agency, blog « Combien d'ardoises au m² »", "url": "https://ozymandias.agency/blog/combien-ardoises-m2-tableau-formats-calcul-2026/", "type": "autre", "extrait": "Toiture avec lucarnes ou fenêtres de toit : 7 % ; Croupes, noues, arêtiers, tourelles : 10 % et plus", "consulte": "2026-11-20" },
+        { "titre": "Reformex, calculateur nombre de tuiles", "url": "https://www.reformex.fr/calculateurs/nombre-tuiles/", "type": "autre", "extrait": "pour un toit à croupes avec noues et lucarnes, gardez 10 % au minimum", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Ordre de grandeur cohérent avec le manuel CAP : dans son exemple, rives droite et biaise sur un pan de 39 m² ajoutent déjà 8 % de surface avant la casse.",
+      "raison": "Seulement des sites grand public (agence web, site de devis). Aucun guide professionnel ni fabricant ne chiffre un pourcentage « toit compliqué ». La méthode des plus-values du manuel CAP + 5 % est mieux sourcée."
+    },
+    {
+      "id": "ardoise_crochets_surplus",
+      "famille": "pertes",
+      "sous_famille": "ardoise naturelle",
+      "marque": null,
+      "modele": null,
+      "attribut": "crochets d'ardoise",
+      "valeur": "1 crochet par ardoise ; surplus 0 à 10 % selon la source",
+      "unite": "u",
+      "condition": "pose au crochet",
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Manuel CAP couvreur, chapitre 21 (copie en ligne)", "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf", "type": "guide", "extrait": "Nombre total de crochets = nombre d'ardoises = 1 543 u.", "consulte": "2026-11-20" },
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Généralement 1 crochet par ardoise (prévoir un surplus de 10%)", "consulte": "2026-11-20" },
+        { "titre": "Ozymandias Agency, blog (pour mémoire)", "url": "https://ozymandias.agency/blog/combien-ardoises-m2-tableau-formats-calcul-2026/", "type": "autre", "extrait": "un crochet par ardoise, plus une petite réserve de 3 à 5 % pour les pertes", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Le principe « 1 crochet par ardoise » est confirmé par deux sources. Le surplus diverge : 0 % (manuel CAP, sur les ardoises AVANT la casse), 10 % (Nomad), 3 à 5 % (blog). Le code compte 1 crochet par ardoise COMMANDÉE (après 5 % de perte) : cela fait déjà 5 % de crochets en plus du besoin, puis l'arrondi à la boîte (500, 1 000 ou 5 kg) en ajoute.",
+      "raison": "Surplus au-delà des ardoises commandées non tranché (0 % contre 10 %)."
+    },
+    {
+      "id": "ardoise_fibres_ciment_perte",
+      "famille": "pertes",
+      "sous_famille": "ardoise fibres-ciment",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes",
+      "valeur": 5,
+      "unite": "%",
+      "condition": "toit simple",
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur (règle générale « tuiles et ardoises »)", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Le coefficient 1.05 correspond à une marge de 5% pour la casse et les coupes", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Brochures Cedral et documentation Eternit cherchées : conditionnements et formats seulement, aucun % de perte.",
+      "raison": "Aucune source propre au fibres-ciment. Pas de tri ni de rebut comme en ardoise naturelle, mais les coupes de rive, noue et arêtier sont les mêmes. On garde la règle du fondateur (5 %, « mêmes formules » que l'ardoise)."
+    },
+    {
+      "id": "tuile_terre_cuite_casse_pose_fdes",
+      "famille": "pertes",
+      "sous_famille": "tuiles terre cuite (emboîtement, plates, canal)",
+      "marque": "CTMNC (FDES collectives des fabricants français de tuiles terre cuite)",
+      "modele": "tuile à emboîtement ; tuile canal et tuile plate ; tuile terre cuite (2014)",
+      "attribut": "taux de casse à la mise en œuvre (hypothèse FDES, module A5)",
+      "valeur": 1,
+      "unite": "%",
+      "condition": "casse seule, sans les coupes de rive, noue ou arêtier",
+      "regions": ["France"],
+      "statut": "confirme",
+      "sources": [
+        { "titre": "FDES collective de la tuile à emboîtement de terre cuite, CTMNC, mars 2020 (copie BigMat)", "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891337909-MYvxt0XoiV.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" },
+        { "titre": "FDES collective de la tuile canal et de la tuile plate de terre cuite, CTMNC, mars 2020, mise à jour avril 2022 (copie Chausson)", "url": "https://cdn.chausson.fr/catalog-document/74808192-8ee4-4dce-ade8-45bd10af99fb/fdes.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" },
+        { "titre": "FDES tuile terre cuite, CTMNC, novembre 2014 (copie Chausson)", "url": "https://cdn.chausson.fr/catalog-document/4c0c989b-60a6-4af8-b32d-60d6bd757730/fdesfichesdedclarationsenvir-etsanitaires-1000992.pdf", "type": "fabricant", "extrait": "Taux de chute lors de la mise en œuvre % 1%", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Trois éditions du même producteur (CTMNC) : elles comptent pour UNE source fabricant, mais elles disent la même chose sur six ans et couvrent les trois familles. Les copies sont chez des négoces ; l'original est sur la base INIES (non ouverte).",
+      "raison": "Statut « confirme » seulement pour ce qu'elle dit : 1 % de casse. Ce n'est PAS la perte à commander (les coupes manquent)."
+    },
+    {
+      "id": "tuile_emboitement_perte_toit_simple",
+      "famille": "pertes",
+      "sous_famille": "tuiles à emboîtement (grand moule, petit moule, romanes, béton)",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes",
+      "valeur": "3 à 5",
+      "unite": "%",
+      "condition": "toit simple à deux pans, rives en tuiles de rive comptées à part",
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Quantité = Surface × Densité × 1.05", "consulte": "2026-11-20" },
+        { "titre": "FDES collective tuile à emboîtement, CTMNC, mars 2020 (copie BigMat)", "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891337909-MYvxt0XoiV.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" },
+        { "titre": "Reformex, calculateur nombre de tuiles (pour mémoire)", "url": "https://www.reformex.fr/calculateurs/nombre-tuiles/", "type": "autre", "extrait": "Pour un toit simple à deux pans sans ouverture, 5 % peuvent suffire", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Formation : 5 % casse + coupes. Fabricants : 1 % de casse seule. Le 3 % du code se situe entre les deux et n'a aucune source écrite. Sur un deux-pans à emboîtement, les coupes sont faibles (rives en tuiles de rive, demi-tuiles), ce qui explique qu'on soit plus bas qu'en ardoise.",
+      "raison": "Aucune source sérieuse ne chiffre 3 %. Edilians, Terreal, Wienerberger/Koramic et BMI/Monier ne publient pas de perte de chantier dans les documents trouvés. Pour la tuile béton, rien de propre."
+    },
+    {
+      "id": "tuile_perte_toit_complique",
+      "famille": "pertes",
+      "sous_famille": "toutes tuiles",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes, toit compliqué",
+      "valeur": "7 à 10 % et plus (noues, arêtiers, croupes, lucarnes, fenêtres de toit)",
+      "unite": "%",
+      "condition": null,
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Reformex, calculateur nombre de tuiles", "url": "https://www.reformex.fr/calculateurs/nombre-tuiles/", "type": "autre", "extrait": "pour un toit à croupes avec noues et lucarnes, gardez 10 % au minimum", "consulte": "2026-11-20" }
+      ],
+      "ecart": "D'autres calculateurs grand public disent 10 à 15 %, voire 20 % avec noues et arêtiers : pas de consensus.",
+      "raison": "Aucune source professionnelle ni fabricant. Pas de tableau de plus-values pour la tuile équivalent à celui du CAP ardoise."
+    },
+    {
+      "id": "tuile_plate_perte",
+      "famille": "pertes",
+      "sous_famille": "tuiles plates",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes",
+      "valeur": 5,
+      "unite": "%",
+      "condition": "toit simple",
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur (tuiles et ardoises)", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "marge de 5% pour la casse et les coupes", "consulte": "2026-11-20" },
+        { "titre": "FDES collective tuile canal et tuile plate, CTMNC, 2020-2022 (copie Chausson)", "url": "https://cdn.chausson.fr/catalog-document/74808192-8ee4-4dce-ade8-45bd10af99fb/fdes.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" }
+      ],
+      "ecart": "La tuile plate se pose comme l'ardoise (petit élément, coupes de rive, noue, arêtier) : on attend une perte proche de l'ardoise. Le guide Culture « tuiles plates » existe (même série, non dépouillé) et devrait avoir le même mode de métré.",
+      "raison": "Une seule source de formation (règle générale), la FDES ne compte que la casse."
+    },
+    {
+      "id": "tuile_canal_perte",
+      "famille": "pertes",
+      "sous_famille": "tuiles canal",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte casse et coupes (courant et couvert)",
+      "valeur": "au moins 1 % (casse) ; 5 % courant en formation",
+      "unite": "%",
+      "condition": null,
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "FDES collective tuile canal et tuile plate, CTMNC (copie Chausson)", "url": "https://cdn.chausson.fr/catalog-document/74808192-8ee4-4dce-ade8-45bd10af99fb/fdes.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" },
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Quantité = Surface × Densité × 1.05", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Le code n'applique AUCUNE perte à la tuile canal, alors que la FDES du fabricant suppose déjà 1 % de casse.",
+      "raison": "Valeur de perte à retenir non tranchée ; seul le « zéro perte » est contredit."
+    },
+    {
+      "id": "faitieres_aretiers_rives_pieces",
+      "famille": "pertes",
+      "sous_famille": "faîtières, arêtiers, tuiles de rive",
+      "marque": null,
+      "modele": null,
+      "attribut": "méthode",
+      "valeur": "ml × pièces au ml du modèle, arrondi à la pièce supérieure ; casse 1 % (FDES) ; aucun % de coupe trouvé",
+      "unite": null,
+      "condition": null,
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Longueur du faîtage / longueur utile de la tuile faîtière", "consulte": "2026-11-20" },
+        { "titre": "FDES collective tuile à emboîtement, CTMNC (copie BigMat)", "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891337909-MYvxt0XoiV.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" }
+      ],
+      "ecart": "La règle « + 5 % sur rives, faîtage, closoir, noues » du skill n'a été trouvée dans aucune source. Le manuel CAP divise sans marge ; seul l'arrondi à la pièce ajoute.",
+      "raison": "Aucune source sur la perte des accessoires. La FDES vise la tuile courante (unité fonctionnelle au m²), pas forcément les accessoires."
+    },
+    {
+      "id": "liteaux_perte_aboutage",
+      "famille": "pertes",
+      "sous_famille": "liteaux et contre-liteaux",
+      "marque": null,
+      "modele": null,
+      "attribut": "chute d'aboutage",
+      "valeur": "longueur vendue ÷ longueur utile (multiple de l'entraxe des chevrons) : 0 % si la longueur tombe juste (4,20 m sur chevrons à 60 cm), 10 % pour 4,00 m sur 60 cm",
+      "unite": "%",
+      "condition": "liteaux aboutés sur chevron (DTU 40.11 cité par les guides : appui de 35 mm, divisé par deux aux jonctions)",
+      "regions": ["France"],
+      "statut": "une_source",
+      "sources": [
+        { "titre": "Recherche bois.md / bois.json du 19 novembre 2026 (guide Culture ardoises et DTU 40.11 cités ; longueurs du Nord chez Tanguy, Quéguiner, Bretagne Matériaux)", "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf", "type": "guide", "extrait": "le supplément pour coupes et pertes (compris dans le prix du support)", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Calcul, pas une valeur publiée : la chute dépend de la longueur achetée et de l'entraxe. Le manuel CAP et Nomad calculent les liteaux (rangs × longueur, ou surface × ml/m²) SANS marge ; le manuel ajoute ensuite « un pourcentage pour casse, remplissage » à l'ensemble.",
+      "raison": "Méthode logique, une seule base écrite. Le 5 % n'a pas de source : la recherche bois.json attribuait 1,05 sur les liteaux à Nomad Education ; la page ouverte le 20 novembre applique 1,05 aux tuiles et ardoises seulement."
+    },
+    {
+      "id": "volige_perte",
+      "famille": "pertes",
+      "sous_famille": "voliges",
+      "marque": null,
+      "modele": null,
+      "attribut": "perte coupes et chutes",
+      "valeur": "5 à 10",
+      "unite": "%",
+      "condition": "plus haut sur croupes, lucarnes ; plus la chute d'aboutage (comme les liteaux)",
+      "regions": ["France", "Belgique"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "Ministère de la Culture, guide MOA/MOE Ardoises (2011), support jointif en voliges", "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf", "type": "guide", "extrait": "la fourniture et la pose d'un voligeage jointif … le supplément pour coupes et pertes", "consulte": "2026-11-20" },
+        { "titre": "TrustUp (blog belge de travaux), prix de la volige au m²", "url": "https://blog.trustup.be/fr/?p=15860", "type": "autre", "extrait": "marge de 5 à 10 % pour les coupes et les chutes", "consulte": "2026-11-20" }
+      ],
+      "ecart": "Le guide Culture demande un supplément pour coupes et pertes sans le chiffrer. La volige se vend au m² avec un minimum d'une pièce (bois.json).",
+      "raison": "Un seul chiffre, sur un blog."
+    },
+    {
+      "id": "ecran_consommation_sans_perte_en_plus",
+      "famille": "pertes",
+      "sous_famille": "écran sous toiture",
+      "marque": "Siplast",
+      "modele": "Sup'Air, Def'X R1",
+      "attribut": "consommation (recouvrements compris)",
+      "valeur": "1,10 à 1,20",
+      "unite": "m²/m²",
+      "condition": "selon la pente (recouvrement 10 cm au-dessus de 30 %, 20 cm à 30 % et moins)",
+      "regions": ["France"],
+      "statut": "une_source",
+      "sources": [
+        { "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+ (Samse n° 1230466)", "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf", "type": "fabricant", "extrait": "Consommation 1,10 à 1,20 m²/m² en fonction de la pente", "consulte": "2026-11-19" },
+        { "titre": "Siplast, fiche Def'X R1 (Samse n° 1230458)", "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230458.pdf", "type": "fabricant", "extrait": "1,10 à 1,20 m²/m² en fonction de la pente", "consulte": "2026-11-19" }
+      ],
+      "ecart": "Deux fiches du même fabricant = une source ; recoupée par le calcul sur les recouvrements DTU confirmés (ecrans-etancheite.json). Dörken : aucune consommation en m²/m², seulement des recouvrements. Aucune FDES d'écran trouvée avec un taux de chute.",
+      "raison": "Pas de seconde marque qui publie une consommation."
+    },
+    {
+      "id": "zinc_bandes_longueurs",
+      "famille": "pertes",
+      "sous_famille": "zinc en bandes (faîtage, rive, égout, noue)",
+      "marque": null,
+      "modele": null,
+      "attribut": "méthode",
+      "valeur": "ml + recouvrement à chaque jonction, arrondi à la longueur de 2 m ; avec 5 cm de recouvrement : +2,5 % ; avec 10 cm : +5 %",
+      "unite": null,
+      "condition": "bandes façonnées vendues en 2 m",
+      "regions": ["France"],
+      "statut": "a_confirmer",
+      "sources": [
+        { "titre": "NedZink, catalogue France (longueur standard des profilés, solins, bandes)", "url": "https://www.nedzink.com/wp-content/uploads/2019/07/22207-nz-nedzink-catalogus-fr-web.pdf", "type": "fabricant", "extrait": "longueur standard/2m (profilés, solins, bandes)", "consulte": "2026-11-19" },
+        { "titre": "VMZINC Belgique, Évacuations des eaux pluviales, guide de prescription et de pose", "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/Belgium/Evacuations%20des%20eaux%20pluviales.pdf", "type": "fabricant", "extrait": "éléments de 2 m de longueur maximum", "consulte": "2026-11-19" }
+      ],
+      "ecart": "Les longueurs de 2 m sont confirmées (zinguerie.json). Le 5 % du code revient à 10 cm de recouvrement par bande de 2 m ; cette valeur de recouvrement n'est pas sourcée ici. VMZinc et Rheinzink ne publient pas de perte de chantier (FDES/EPD lues : rien sur les chutes de pose).",
+      "raison": "Recouvrement des bandes à confirmer (DTU 40.41 via un guide)."
+    },
+    {
+      "id": "zinc_gouttiere_longueurs",
+      "famille": "pertes",
+      "sous_famille": "gouttières zinc",
+      "marque": null,
+      "modele": null,
+      "attribut": "méthode",
+      "valeur": "ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus",
+      "unite": null,
+      "condition": null,
+      "regions": ["France"],
+      "statut": "confirme",
+      "sources": [
+        { "titre": "Recherche zinguerie.json du 19 novembre 2026 : longueur gouttière 4 m (VMZINC 2026, RHEINZINK 2026, Edilians 2024) ; recouvrement de jonction 30 mm minimum, soudé (DTU 40.5 cité)", "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/Belgium/Evacuations%20des%20eaux%20pluviales.pdf", "type": "fabricant", "extrait": "longueur 4 m (2 et 3 m existent)", "consulte": "2026-11-19" }
+      ],
+      "ecart": "Avec des longueurs de 4 m, 30 mm par jonction fait 0,75 % : l'arrondi à la longueur l'absorbe.",
+      "raison": "Longueur et recouvrement confirmés dans zinguerie.json (deux fabricants et le DTU cité) ; la méthode en découle par le calcul."
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "wasteRules roof_slate rate 5 (« Casse et coupes de rive, pans rectangulaires simples »)",
+      "origine": "roofing.ts:4046 ; referentiel-couverture.md §2 ; regles-metier SKILL.md",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "5 % sur toit simple (garder) ; une seule source de formation, convergente avec le rebut toléré de 5 % en ardoise naturelle",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "marge de 5% pour la casse et les coupes", "consulte": "2026-11-20" },
+        { "titre": "Agence wallonne du patrimoine, FARCC1-2", "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2022/03/farcc1-2-ardoises-naturelles-specifications-produit.pdf", "type": "guide", "extrait": "Le taux de rebut acceptable sera de maximum 5 %", "consulte": "2026-11-20" }
+      ],
+      "explication": "Rien ne contredit 5 %. Ce n'est pas « confirmé » au sens des consignes : un seul chiffre sérieux, aucun fabricant."
+    },
+    {
+      "ratio": "Pertes ardoise : 5 % toit simple / 10 % toit compliqué (fondateur) ; §2 : 8 à 10 % toiture complexe",
+      "origine": "regles-metier SKILL.md ; referentiel-couverture.md §2 ; ardoise.md §7",
+      "valeur_actuelle": "5 % / 10 % (le code applique toujours 5 %)",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "5 % toit simple ; toit compliqué : plus-values CAP au ml (rive 0,16 à 0,33 m², arêtier 0,66, noue 1,50) PUIS 5 %, ou à défaut 10 % demandé à l'artisan",
+      "sources": [
+        { "titre": "Manuel CAP couvreur, chapitre 21", "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf", "type": "guide", "extrait": "PLUS-VALUES pour le calcul du quantitatif (à ajouter à la surface de couverture)", "consulte": "2026-11-20" },
+        { "titre": "Ozymandias Agency, blog (pour mémoire)", "url": "https://ozymandias.agency/blog/combien-ardoises-m2-tableau-formats-calcul-2026/", "type": "autre", "extrait": "Croupes, noues, arêtiers, tourelles : 10 % et plus", "consulte": "2026-11-20" }
+      ],
+      "explication": "Le 10 % n'a que des sources grand public. La méthode des plus-values est écrite dans un manuel de formation et confirmée dans son principe par le guide Culture."
+    },
+    {
+      "ratio": "Rives, noues, arêtiers : coupes dans la perte du toit (rien en plus)",
+      "origine": "regles-metier SKILL.md ; points-singuliers.json",
+      "valeur_actuelle": "0 en plus",
+      "verdict": "corrige",
+      "bonne_valeur": "ardoise : plus-values en m² par ml (manuel CAP), puis la perte en % s'applique au total",
+      "sources": [
+        { "titre": "Manuel CAP couvreur, chapitre 21", "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf", "type": "guide", "extrait": "Ces résultats doivent être augmentés d'un pourcentage pour casse, remplissage", "consulte": "2026-11-20" },
+        { "titre": "Ministère de la Culture, guide MOA/MOE Ardoises (2011)", "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf", "type": "guide", "extrait": "Les ouvrages de coupe et de raccord … au mètre linéaire", "consulte": "2026-11-20" }
+      ],
+      "explication": "Deux sources indépendantes comptent les points singuliers à part de la surface courante ; le manuel ajoute la casse en plus. Les chiffres des plus-values restent à une source (CAP). Règle du fondateur à signaler : la recherche la contredit pour l'ardoise ; pour la tuile, rien de chiffré."
+    },
+    {
+      "ratio": "Crochets d'ardoise : perte 0 % (un crochet par ardoise commandée)",
+      "origine": "roofing.ts:4048 (ardoise.perte_crochets) ; referentiel-couverture.md §25.1",
+      "valeur_actuelle": "0 % sur les ardoises commandées",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "1 crochet par ardoise (confirmé) ; surplus 0 % (CAP, sur ardoises avant casse) ou 10 % (Nomad) ; le code donne déjà +5 % sur le besoin",
+      "sources": [
+        { "titre": "Manuel CAP couvreur, chapitre 21", "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf", "type": "guide", "extrait": "Nombre total de crochets = nombre d'ardoises", "consulte": "2026-11-20" },
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "prévoir un surplus de 10%", "consulte": "2026-11-20" }
+      ],
+      "explication": "Principe confirmé, surplus contradictoire. Le crochet tombe et se tord à la pose : un surplus est plausible, mais 10 % n'a qu'une source."
+    },
+    {
+      "ratio": "wasteRules roof_slate_fc rate 5",
+      "origine": "roofing.ts:4047 ; referentiel-couverture.md §4",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "5 % (garder)",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "marge de 5% pour la casse et les coupes", "consulte": "2026-11-20" }
+      ],
+      "explication": "Aucune source propre au fibres-ciment (Cedral, Eternit cherchés)."
+    },
+    {
+      "ratio": "wasteRules roof_tile rate 3 (« Tuiles mécaniques »)",
+      "origine": "roofing.ts:4051 ; referentiel-couverture.md §2",
+      "valeur_actuelle": "3 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "entre 1 % (casse seule, FDES CTMNC) et 5 % (casse + coupes, formation CAP) ; demander à l'artisan (règle du fondateur), proposer 5 %",
+      "sources": [
+        { "titre": "FDES collective tuile à emboîtement, CTMNC, 2020", "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891337909-MYvxt0XoiV.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" },
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Quantité = Surface × Densité × 1.05", "consulte": "2026-11-20" }
+      ],
+      "explication": "3 % n'est écrit nulle part. La règle du fondateur (perte de la tuile demandée à l'artisan) n'est pas contredite."
+    },
+    {
+      "ratio": "Tuile canal : aucune perte (pas de wasteRule roof_tile_canal)",
+      "origine": "roofing.ts (wasteRules) ; inventaire-ratios.md canal_x2",
+      "valeur_actuelle": "0 %",
+      "verdict": "corrige",
+      "bonne_valeur": "appliquer une perte comme aux autres tuiles (au moins la casse : 1 % selon la FDES ; 5 % en formation), demandée à l'artisan",
+      "sources": [
+        { "titre": "FDES collective tuile canal et tuile plate, CTMNC", "url": "https://cdn.chausson.fr/catalog-document/74808192-8ee4-4dce-ade8-45bd10af99fb/fdes.pdf", "type": "fabricant", "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre", "consulte": "2026-11-20" },
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "marge de 5% pour la casse et les coupes", "consulte": "2026-11-20" }
+      ],
+      "explication": "Deux sources indépendantes supposent une perte non nulle ; la valeur à retenir reste à fixer."
+    },
+    {
+      "ratio": "wasteRules batten rate 5 (« Chutes de liteaux et contre-liteaux »)",
+      "origine": "roofing.ts:4052 ; referentiel-couverture.md §2 ; bois.json liteau_perte",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "calculer la chute d'aboutage (longueur vendue ÷ multiple de l'entraxe) ; 5 % comme défaut tant que la longueur et l'entraxe ne sont pas connus",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur (page ouverte)", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Nombre = Rampant / Pureau (arrondi à l'entier supérieur)", "consulte": "2026-11-20" }
+      ],
+      "explication": "Correction de la recherche bois.json : Nomad n'applique pas 1,05 aux liteaux. Le 5 % liteaux n'a donc aucune source écrite. Avec 4,00 m sur chevrons à 60 cm, la chute fait déjà 10 %."
+    },
+    {
+      "ratio": "wasteRules sheathing rate 5 (« Support voligeage : m² rampant × 1,05 »)",
+      "origine": "roofing.ts:4055 ; referentiel-couverture.md §7",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "5 % toit simple, plus sur croupes et lucarnes ; demander à l'artisan (règle du fondateur)",
+      "sources": [
+        { "titre": "Ministère de la Culture, guide MOA/MOE Ardoises (2011)", "url": "https://www.culture.gouv.fr/content/download/50134/file/GuideMoaMoe_Couverture_Ardoises_20110801.pdf", "type": "guide", "extrait": "le supplément pour coupes et pertes", "consulte": "2026-11-20" },
+        { "titre": "TrustUp, blog belge", "url": "https://blog.trustup.be/fr/?p=15860", "type": "autre", "extrait": "marge de 5 à 10 % pour les coupes et les chutes", "consulte": "2026-11-20" }
+      ],
+      "explication": "Un supplément existe (guide Culture) mais n'est chiffré que par un blog."
+    },
+    {
+      "ratio": "wasteRules zinc_ridge / hip_strip rate 5 (bande zinc, ml × 1,05)",
+      "origine": "roofing.ts:4053-4054 ; referentiel-couverture.md §2, §3",
+      "valeur_actuelle": "5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "ml + recouvrements, arrondi aux longueurs de 2 m ; le 5 % équivaut à 10 cm de recouvrement par bande de 2 m",
+      "sources": [
+        { "titre": "NedZink, catalogue France", "url": "https://www.nedzink.com/wp-content/uploads/2019/07/22207-nz-nedzink-catalogus-fr-web.pdf", "type": "fabricant", "extrait": "longueur standard/2m (profilés, solins, bandes)", "consulte": "2026-11-19" }
+      ],
+      "explication": "Aucun fabricant ne donne de % ; le recouvrement des bandes reste à sourcer. La noue (valley) n'a aucune perte dans le code."
+    },
+    {
+      "ratio": "Écran : coefficient 1,10 (> 30 %) / 1,20 (≤ 30 %) qui inclut recouvrements, abouts, faîtage ; aucune perte en plus",
+      "origine": "roofing.ts:1127-1134 (fiche ecran.coef_pente_forte / faible)",
+      "valeur_actuelle": "× 1,10 / × 1,20, pas de wasteRule underlay",
+      "verdict": "confirme",
+      "bonne_valeur": "garder ; ne pas ajouter de % de perte par-dessus",
+      "sources": [
+        { "titre": "Siplast, fiche Sup'Air / Sup'Air ADH+", "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1230466.pdf", "type": "fabricant", "extrait": "Consommation 1,10 à 1,20 m²/m² en fonction de la pente", "consulte": "2026-11-19" },
+        { "titre": "Calcul sur les recouvrements DTU 40.29 confirmés (ecrans-etancheite.json : 10 cm > 30 %, 20 cm ≤ 30 %)", "url": "https://edilians.com/media/wysiwyg/Services-pros/guide-de-pose/ecran-sous-toiture/guide-de-pose-ecran-de-sous-toiture.pdf", "type": "fabricant", "extrait": "recouvrements entre lés (guide de pose Edilians)", "consulte": "2026-11-19" }
+      ],
+      "explication": "Une consommation fabricant (Siplast) + le calcul sur les recouvrements d'une autre marque (Edilians) retrouvent la même plage. La perte de 10 à 15 % du §2 ferait double compte."
+    },
+    {
+      "ratio": "« + 5 % » sur closoir, rives, noues (fondateur)",
+      "origine": "regles-metier SKILL.md",
+      "valeur_actuelle": "ml + 5 %",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "pièces au ml arrondies (tuiles de rive, faîtières) ; rouleau de closoir de 5 m arrondi ; bandes zinc arrondies aux 2 m avec recouvrement",
+      "sources": [
+        { "titre": "Nomad Education, révisions CAP couvreur", "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/calcul-des-surfaces-des-pureaux-et-des-quantites-cyf4ba41", "type": "guide", "extrait": "Longueur du faîtage / longueur utile de la tuile faîtière", "consulte": "2026-11-20" }
+      ],
+      "explication": "Aucune source ne chiffre + 5 % sur les accessoires au ml ; aucune ne le contredit non plus. Règle du fondateur à garder tant qu'elle n'est pas tranchée."
+    }
+  ],
+  "decision": [
+    { "materiau": "ardoise naturelle", "toit_simple": "5 %", "toit_complique": "plus-values CAP au ml (rive 0,16/0,25/0,33 ; arêtier 0,66 ; noue 1,50 ; déversée 0,33/0,50) puis 5 % ; sinon 10 % demandé", "statut": "5 % une_source ; méthode confirmée ; chiffres des plus-values une_source ; 10 % a_confirmer" },
+    { "materiau": "crochets d'ardoise", "toit_simple": "1 par ardoise commandée (= +5 % sur le besoin)", "toit_complique": "idem", "statut": "principe confirmé ; surplus a_confirmer (0 ou 10 %)" },
+    { "materiau": "ardoise fibres-ciment", "toit_simple": "5 %", "toit_complique": "comme l'ardoise naturelle", "statut": "a_confirmer" },
+    { "materiau": "tuiles à emboîtement GM, PM, romanes, béton", "toit_simple": "demander ; proposer 5 % (fourchette 1 à 5 %)", "toit_complique": "demander ; 7 à 10 % (grand public seulement)", "statut": "a_confirmer ; casse seule 1 % confirmée (FDES)" },
+    { "materiau": "tuiles plates", "toit_simple": "demander ; proposer 5 %", "toit_complique": "comme l'ardoise (pas de table de plus-values trouvée)", "statut": "a_confirmer" },
+    { "materiau": "tuiles canal", "toit_simple": "demander ; jamais 0 % ; proposer 5 %", "toit_complique": "demander", "statut": "0 % corrigé ; valeur a_confirmer" },
+    { "materiau": "faîtières, arêtiers, tuiles de rive", "toit_simple": "ml × pièces/ml, arrondi à la pièce", "toit_complique": "idem", "statut": "a_confirmer (aucune source sur + 5 %)" },
+    { "materiau": "liteaux, contre-liteaux", "toit_simple": "chute d'aboutage calculée ; défaut 5 %", "toit_complique": "idem + coupes biaises (demander)", "statut": "une_source (calcul) ; 5 % sans source" },
+    { "materiau": "voliges", "toit_simple": "5 %", "toit_complique": "demander (5 à 10 %)", "statut": "a_confirmer" },
+    { "materiau": "zinc en bandes", "toit_simple": "ml + recouvrements, arrondi aux 2 m", "toit_complique": "idem par ouvrage", "statut": "a_confirmer (recouvrement)" },
+    { "materiau": "gouttières zinc", "toit_simple": "ml + 30 mm par jonction, arrondi aux 4 m", "toit_complique": "idem", "statut": "confirme" },
+    { "materiau": "écran sous toiture", "toit_simple": "× 1,10 (> 30 %) / × 1,20 (≤ 30 %), rien en plus", "toit_complique": "idem ; points singuliers demandés", "statut": "confirme (Siplast + calcul Edilians)" },
+    { "materiau": "lucarnes, chiens-assis, fenêtres de toit, pénétrations", "toit_simple": "-", "toit_complique": "demander à l'artisan (règle du fondateur) ; aucune plus-value chiffrée trouvée", "statut": "a_confirmer" }
+  ],
+  "commande_comptoir": []
+}
