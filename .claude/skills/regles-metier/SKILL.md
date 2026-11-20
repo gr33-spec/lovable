@@ -20,7 +20,7 @@ accord explicite. Les conflits :
 1. TRANCHÉ le 19 novembre 2026 : les Suggestions du fondateur l'emportent sur
    le §49.1 point 5. Un article non dit peut être proposé dans l'étape
    « Suggestions » (cases décochées + « Continuer »), jamais ajouté d'office.
-   Branché le 20 novembre 2026 (roofing-2026.11.20-62) : sans limite de nombre ;
+   Branché le 20 novembre 2026 (roofing-2026.11.20-63) : sans limite de nombre ;
    rives, bardelis, dauphins (la case vaut le « oui »), jonctions, clous
    fibres-ciment, six kits Velux (BDX, BBX, BFX, volet, store, habillage), en
    plus des naissances, talons, angles, crochets et consommables. Restent sans
