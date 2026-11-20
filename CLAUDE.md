@@ -355,4 +355,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Sixième vague (20 novembre 2026, version `-6`, `recherche/19` et `20`) :
   - plafond coupe-feu Placo Stil Flam : 1,7 entretoise/m² (avant 1,3) et 13 vis/m² (avant 23, à confirmer) ;
   - sans deuxième source, toujours « à confirmer » : vis Knauf, séparative 1re peau, plafond à 0,40, adhésif de membrane.
+- Septième vague (20 novembre 2026, version `-7`, `recherche/21` et `22`) :
+  - séparatives SAA / SAD corrigées : montants doublés (avant simples), rails SAA sur le pourtour, ruban résilient et mastic d'office, vis TRPF 10 / 14 ;
+  - coupe-feu : compléments par marque dans `FICHE.md` §5.8 bis (98/48 EI 120 à 3,00 m, EI 90 → système EI 120 de la marque).
 

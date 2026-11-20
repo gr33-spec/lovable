@@ -1,7 +1,7 @@
 # Chantiers types plaquiste-isolation (jeu de test pour l'ouverture du métier)
 
 Calculés par le moteur de Mobiiz (`packages/domain`, `computeWorkItem` puis `purchaseList`) avec `referentiel.json`
-(version `plaquiste-isolation-2026.11.20-6`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
+(version `plaquiste-isolation-2026.11.20-7`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
 Écrit par `outils/calculer_chantiers.mjs` : ne pas modifier à la main, relancer l'outil.
 
 Lecture : « Lu au devis » = données que le modèle de lecture doit trouver dans la ligne ; « Questions » = ce que le moteur
@@ -412,18 +412,20 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 8,8 m ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation : Clous + gaz béton ; Isolant : Laine 45 mm (PRK 32) ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 8,8 m ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Ruban résilient : Ruban résilient ; Mastic acrylique : Mastic acrylique ; Clous de fixation : Clous + gaz béton ; Isolant : Laine 45 mm (PRK 32) ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
 | Plaques BA13 standard 1,20 × 2,5 m | 31 plaques | 31 pièces |  |
-| Montants M48 longueur 2,49 m | 33 montants | 33 pièces | deux files (SAD) |
-| Rails R48 | 13 longueurs de 3 m | 36,96 ml | SAA : un rail large (R70 ou R90) haut et bas ; SAD : deux rails R48 haut et bas |
-| Vis TTPC 25 | 1 boîte de 1000 | 264 pièces |  |
-| Vis TTPC 35 | 1 boîte de 1000 | 660 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 88 pièces |  |
+| Montants M48 longueur 2,49 m | 62 montants | 62 pièces | deux files de montants doublés (SAD), entraxe 0,6 m |
+| Rails R48 | 13 longueurs de 3 m | 36,96 ml | SAA : rail R70 (montants de 48) sur tout le pourtour ; SAD : rails R48 haut et bas |
+| Vis TTPC 25 | 1 boîte de 1000 | 330 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 770 pièces |  |
+| Vis TRPF 13 | 1 boîte de 500 | 220 pièces |  |
+| Ruban résilient | 2 rouleaux de 15 m | 18,48 ml | sous les rails bas |
+| Mastic acrylique | 8 cartouches | 7,04 pièces | joint en pied des deux faces |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 62 pièces | une fixation tous les 60 cm |
 | Laine 45 mm (PRK 32) | 3 colis de 10,53 m² | 23,1 m² |  |
 | Bande à joint | 1 rouleau de 150 m | 61,6 ml | joints jointoyés avec bande |

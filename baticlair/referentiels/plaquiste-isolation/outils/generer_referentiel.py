@@ -21,7 +21,7 @@ import os
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SORTIE = os.path.join(ICI, "..", "referentiel.json")
-VERSION = "plaquiste-isolation-2026.11.20-6"
+VERSION = "plaquiste-isolation-2026.11.20-7"
 TRADE = "drywall"
 DATE = "2026-11-19"
 
@@ -92,6 +92,8 @@ def un(value, unit):
 SOURCES = [
     {"id": "definition", "kind": "definition", "title": "Définitions (1 pièce = 1 pièce)", "retrievedAt": DATE},
     {"id": "mobiiz-geometrie", "kind": "baticlair_rule", "title": "Géométrie Mobiiz : longueur d'ouvrage = surface ÷ hauteur ; une plaque couvre 1,20 m × la hauteur ; arrondi à l'unité de vente", "retrievedAt": DATE, "note": "Règle de calcul, à faire valider par un plaquiste (fiche plaquiste-isolation, section Règles de calcul)."},
+    {"id": "siniat-dta-separatives", "kind": "manufacturer", "title": "CSTB / Siniat, DTA n° 9/11-922_V5 « Cloisons séparatives Prégymétal S et S Twin » (valide du 02/09/2026)", "url": "https://media.siniat.fr/pi42095/original/991616172/siniat---dta---cloisons-separatives-pregymetal-s---cstb-9_11_922_v3", "retrievedAt": "2026-11-20", "note": "recherche/21 [S1]."},
+    {"id": "placo-fdes-separatives", "kind": "manufacturer", "title": "Placo, FDES des séparatives SAA 120, SAA 140, SAD 180, SAD 220 (base INIES, 2024)", "url": "https://www.base-inies.fr/api/Produit/38669", "retrievedAt": "2026-11-20", "note": "recherche/21 [P3] à [P7] : quantités par m² (montants, rails, vis, bande résiliente, mastic)."},
     {"id": "snip-fc18", "kind": "manufacturer", "title": "SNIP, fiche conseil n° 18 « Ouvrages en plaques de plâtre : quantitatifs estimés de produits » (déc. 2024, PDF du 13/02/2025)", "publisher": "SNIP (syndicat des fabricants : Placo, Knauf, Siniat…)", "url": "https://www.lesindustriesduplatre.org/wp-content/uploads/2025/03/SNIP-FICHE-CONSEIL-18-VERSIONS-2025_V6-13fevrier.pdf", "retrievedAt": DATE, "note": "Hypothèses du document : 5 % de chutes comprises, vis des rails comptées, cloison 4 m × 2,50-2,70 m, plafond 8 × 10 m. recherche/02, section D."},
     {"id": "dtu-2541-2022", "kind": "standard", "title": "NF DTU 25.41 (février 2022) : hauteurs limites des cloisons et contre-cloisons, tableaux repris par Rockwool (guide cloisons 12/2023, guide murs 07/2024) et la CAPEB", "documentRef": "NF DTU 25.41 P1-1, février 2022 (texte AFNOR non recopié)", "url": "https://www.rockwool.com/siteassets/rw-f/telechargements/guides-de-pose-et-mise-en-oeuvre/cloisons/rockwool_mise_en_oeuvre_isolation_des_cloisons.pdf", "retrievedAt": DATE, "note": "recherche/03, sections 1.0, 1.1, 4.2."},
     {"id": "capeb-dtu-2541", "kind": "standard", "title": "CAPEB, guide « NF DTU 25.41 — Les principales nouveautés 2022 »", "url": "https://www.capeb.fr/www/capeb/media//morbihan/document/2022_Guide%20DTU%2025-41_DEF_HD_WEB.pdf", "retrievedAt": DATE},
@@ -183,6 +185,8 @@ FAMILIES += [
     fam("vb_tape", "Adhésif de membrane", "ml", ["adhesif", "kb1", "multitape"], consumable=True),
     fam("boxing", "Coffrage, soffite, caisson", "ml", ["coffrage", "soffite", "caisson", "habillage de poutre", "encoffrement", "ipn"]),
     fam("corner_tape", "Bande armée d'angle", "ml", ["bande armee", "bande d'angle"], consumable=True),
+    fam("resilient_strip", "Bande résiliente sous rail", "ml", ["ruban resilient", "bande resiliente", "resilient"], consumable=True),
+    fam("acoustic_sealant", "Mastic acrylique acoustique", "u", ["mastic acrylique", "mastic acoustique", "mastic"], consumable=True),
     fam("hanger_anchor", "Fixation des suspentes au support", "u", ["cheville metal", "clou cheville"], consumable=True),
 ]
 
@@ -294,6 +298,9 @@ PRODUCTS = [p for p in PRODUCTS if p["id"] != "laine-cloison-45"] + [
     isolant("ibr-200", "Isover IBR Revêtu Kraft 200 mm, R 5,00, rouleau 4,5 × 1,20 m (5,40 m²) ou équivalent", "IBR 200", 5.40, "isover-ibr", OK2("5,40 m² : Isover, Castorama, Leroy Merlin (recherche/10 n° 55)."), ["ibr 200"]),
     isolant("ibr-300", "Isover IBR Revêtu Kraft 300 mm, R 7,50, rouleau 2,6 × 1,20 m (3,12 m²) ou équivalent", "IBR 300", 3.12, "isover-ibr", OK2("3,12 m² : SFIC et Tessella ; fiche Isover 2017."), ["ibr 300"]),
     isolant("ibr-400", "Isover IBR Revêtu Kraft 400 mm, R 10, rouleau 2,0 × 1,20 m (2,40 m²) ou équivalent", "IBR 400", 2.40, "isover-ibr", OK2("2,40 m² : fiche Isover (extrait) et Brico Dépôt."), ["ibr 400"]),
+    produit("ruban-resilient", "resilient_strip", "Ruban résilient 45 sous rail (Placo Ruban Résilient 45 ou équivalent), rouleau de 15 m", "Ruban résilient",
+            [unite("rouleau", "rouleau de 15 m", "rouleaux de 15 m", "15", "m", "placo-fdes-separatives", OK2("Rouleau de 15 m : fiche Placo Ruban Résilient 45 (copie BigMat, 18/12/2023) et extrait de la fiche Placo du 31/03/2026 (recherche/21 N1, N2)."))], ["ruban resilient", "bande resiliente"]),
+    produit("mastic-acrylique", "acoustic_sealant", "Mastic acrylique, cartouche de 310 ml", "Mastic acrylique", piece("cartouche", "cartouches"), ["mastic acrylique"]),
     produit("bande-armee", "corner_tape", "Bande armée d'angle 50 mm (deux lames acier), rouleau de 30 m", "Bande armée",
             [unite("rouleau", "rouleau de 30 m", "rouleaux de 30 m", "30", "m", "placo-integrale-2023-bande", OK2("Rouleau de 30 m : Siniat (catalogue Finition) et Placo Bande Armée 50 (fiche, BigMat) (recherche/05 A.1)."))], ["bande armee", "bande d'angle"]),
     produit("vrac-souffle", "loose_fill", "Isolant en vrac à souffler (produit et poids du sac selon le certificat)", "Isolant à souffler", piece("sac", "sacs"), ["laine a souffler", "laine soufflee", "ouate"]),
@@ -840,17 +847,24 @@ def plafond():
 # OUVRAGE 6 : CLOISON SÉPARATIVE (SAA, SAD) — constitution connue, quantités à confirmer
 # ---------------------------------------------------------------------------------------------------------------
 def separative():
-    d = DOUTE("Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48.")
     c = {**longueurs(),
          "largeur_plaque": regle("1.20", "m", "placo-ba13", OK2("Plaques de 1,20 m.")),
          "chute": regle("1.05", "u", "snip-fc18", OK2("5 % : SNIP et Pladur."), label="+ {v}"),
          "faces": regle("2", "u", "mobiiz-geometrie", OK2("Deux faces."), label="{v} faces"),
          "plaques_par_face": regle("2", "u", "dtu-2541-2022", OK2("SAA et SAD : 2 BA13 par face (Placo SAA 120, SAD 160 ; Siniat S180)."), label="{v} plaques par face"),
          "e60": regle("0.60", "m", "dtu-2541-2022", OK2("Entraxe 0,60.")),
-         "files_montants": regle("2", "u", "dtu-2541-2022", OK2("Séparative à double ossature : SNIP p. 7 (4,20 ml/m² = 2 × 2,10) et Pladur Mémento 2017 p. 64 (3,50 = 2 × 1,75) (recherche/09 n° 59)."), label="{v} files de montants"),
-         "vis_int": regle("12", "u/m2", "snip-fc18", UNE("Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12). La règle « plaques internes vissées à 60 cm » a deux sources (SNIP, guide Chausson) et le calcul la redonne exactement (12, 16) ; le chiffre lui-même, SNIP seul (recherche/13 C1, 19 §2)."), label="{v} vis 1re peau par m²"),
-         "vis_ext": regle("30", "u/m2", "snip-fc18", OK2("Séparative, 2e peau : SNIP 30 ; chaque file est une 72/48 déjà confirmée (SNIP + Placo 29,19) (recherche/15 n° 3)."), label="{v} vis 2e peau par m²"),
-         "trpf": regle("4", "u/m2", "snip-fc18", OK2("Séparative : 4 TRPF/m² = deux files de 72/48 à 2 (SNIP + Placo) (recherche/15 n° 3)."), label="{v} TRPF par m²"),
+         "files_montants": regle("2", "u", "dtu-2541-2022", OK2("Deux files de montants (SAA alternée ou SAD) : SNIP p. 7, Pladur 2017 p. 64, DTA Siniat 2026 (recherche/09 n° 59, 21 §1)."), label="{v} files de montants"),
+         "e40": regle("0.40", "m", "dtu-2541-2022", OK2("Entraxe 0,40.")),
+         "h_d60": regle("2.75", "m", "siniat-dta-separatives", OK2("Séparative M48 en 2 + 2 BA13 : montants DOUBLÉS à 0,60 jusqu'à 2,75 m ; montants simples à 0,60 jamais admis : DTA Siniat 9/11-922_V5 (2026) et fiches système Placo 2025 ; Knauf 2020 et Pladur 2017 disent pareil (recherche/21 §1)."), label="doublés à 0,60 jusqu'à {v}"),
+         "h_d40": regle("3.00", "m", "siniat-dta-separatives", OK2("Doublés à 0,40 jusqu'à 3,00 m : DTA Siniat 2026 et FDES Placo SAA 120 « max 3,00 m » (recherche/21 §1 ; documents anciens : 3,05)."), label="doublés à 0,40 jusqu'à {v}"),
+         "ruban_par_rail": regle("1.05", "u", "placo-fdes-separatives", OK2("Ruban résilient sous les rails BAS seulement : DTA Siniat 2026, FDES Placo 2024, Knauf 2020 (recherche/21 §5, n° 6) ; + 5 %."), label="ruban sous rails bas + 5 %"),
+         "mastic_par_m2": regle("0.32", "u/m2", "placo-fdes-separatives", UNE("Joint mastic acrylique en pied des deux faces : règle chez Siniat, Placo et Knauf ; quantité 100 cm³/m² (≈ 1 cartouche de 310 ml pour 3 m²) : Placo seul (FDES SAD 160 et quantitatif B01) (recherche/21 n° 7)."), label="{v} cartouche par m²"),
+         "vis_int_d60": regle("15", "u/m2", "snip-fc18", CONFLIT("1re peau, montants doublés 0,60 : SNIP 15 (recherche/21 n° 10). Règle changée : avant 12 (montants simples, jamais admis en séparative).", "Placo compte moins (FDES SAA 120 : 32 vis au total par m²) : écart de méthode sur le vissage des montants doublés ; valeur haute gardée."), label="{v} vis 1re peau par m²"),
+         "vis_int_d40": regle("21", "u/m2", "snip-fc18", CONFLIT("1re peau, doublés 0,40 : SNIP 21 (recherche/21 n° 10).", "Placo compte moins : écart de méthode."), label="{v} vis 1re peau par m²"),
+         "vis_ext_d60": regle("35", "u/m2", "snip-fc18", CONFLIT("2e peau, doublés 0,60 : SNIP 35 (recherche/21 n° 10). Règle changée : avant 30.", "Placo compte moins (32 au total) : écart de méthode ; valeur haute gardée."), label="{v} vis 2e peau par m²"),
+         "vis_ext_d40": regle("47", "u/m2", "snip-fc18", CONFLIT("2e peau, doublés 0,40 : SNIP 47 (recherche/21 n° 10).", "Placo compte moins : écart de méthode."), label="{v} vis 2e peau par m²"),
+         "trpf_d60": regle("10", "u/m2", "snip-fc18", OK2("Doublés 0,60 : 10 TRPF/m² (SNIP ; Placo B01 10, FDES SAA 120 9,96) (recherche/21 n° 11). Règle changée : avant 4."), label="{v} TRPF par m²"),
+         "trpf_d40": regle("14", "u/m2", "snip-fc18", OK2("Doublés 0,40 : 14 TRPF/m² (SNIP ; FDES Placo SAD 180 15,09) (recherche/21 n° 11)."), label="{v} TRPF par m²"),
          "pas_fixation_rail": c_pas_fixation(),
          "isolant_par_m2": regle("1.05", "u", "snip-fc18", OK2("1,05 m²/m² par couche."), label="isolant + 5 %"),
          **finitions_constantes(2)}
@@ -863,15 +877,19 @@ def separative():
     derived = [derive("longueur_cloison", "Longueur de cloison", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_plaque", "Longueur des plaques", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Plus petite longueur ≥ hauteur − 1 cm."), True),
                derive("longueur_montant", "Longueur des montants", "m", LONGUEUR_MONTANT, "placo-m48", OK2("Montant = hauteur − 1 cm."), True),
+               derive("entraxe", "Entraxe des montants doublés", "m", "si(hauteur <= regle.h_d60, regle.e60, regle.e40)", "siniat-dta-separatives", OK2("Doublés à 0,60 jusqu'à 2,75 m, à 0,40 au-delà (DTA Siniat 2026, Placo 2025).")),
                derive("files_rails", "Files de rails", "u", "si(type_separative < 2, 1, 2)", "dtu-2541-2022", OK2("SAA : un rail large ; SAD : deux rails : SNIP et fiches système Placo (recherche/15 n° 3)."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(longueur_cloison * regle.faces * regle.plaques_par_face * regle.chute / regle.largeur_plaque)", "u", "snip-fc18", OK2("4,2 m² de plaques par m² (2 faces × 2 plaques × 1,05), comme le parement double (Placo, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"),
-        besoin("montants", "montant", "arrondi_sup((longueur_cloison / regle.e60 + 1) * regle.files_montants * regle.chute)", "u", "snip-fc18", OK2("Deux files de montants simples à 0,60 : SNIP p. 7 et Pladur p. 64 (recherche/09 n° 59, recherche/15 n° 3)."), designation="Montants M48 longueur {longueur_montant|m}", short="montants", precision="deux files ({type_separative})"),
-        besoin("rails", "rail", "longueur_cloison * 2 * files_rails * regle.chute", "ml", "dtu-2541-2022", d, short="rails", precision="SAA : un rail large (R70 ou R90) haut et bas ; SAD : deux rails R48 haut et bas"),
-        besoin("vis-ttpc-25", "vis", "surface * regle.vis_int", "u", "snip-fc18", d, short="vis 1re peau"),
-        besoin("vis-ttpc-35", "vis_ext", "surface * regle.vis_ext", "u", "snip-fc18", d, short="vis 2e peau"),
-        besoin("vis-trpf", "trpf", "surface * regle.trpf", "u", "snip-fc18", d, short="vis TRPF"),
-        *fixations_rail("longueur_cloison * 2 * files_rails * regle.chute"),
+        besoin("montants", "montant", "arrondi_sup((longueur_cloison / entraxe + 1 + (longueur_cloison / entraxe - 1)) * regle.files_montants * regle.chute)", "u", "siniat-dta-separatives", OK2("Deux files de montants DOUBLÉS (les deux montants de bout ne se doublent pas), 0,60 jusqu'à 2,75 m, 0,40 jusqu'à 3,00 m : DTA Siniat 2026 et Placo 2025 ; redonne Placo (7 ml/m² à 2,60 m) (recherche/21 n° 1). Règle changée : avant deux files de montants simples à 0,60 (jamais admis en 2 + 2 BA13)."), designation="Montants M48 longueur {longueur_montant|m}", short="montants", precision="deux files de montants doublés ({type_separative}), entraxe {entraxe|m}", when="si(hauteur > regle.h_d40, 1, 0) < 1"),
+        besoin("montants-hors", "montant", "arrondi_sup((longueur_cloison / entraxe + 1 + (longueur_cloison / entraxe - 1)) * regle.files_montants * regle.chute)", "u", "siniat-dta-separatives", DOUTE("Au-delà de 3,00 m, aucune séparative M48 en 2 + 2 BA13 du DTA Siniat ni de Placo : M70 ou M90 selon la fiche du système (recherche/21 n° 1). Quantité en doublés à 0,40, ligne à vérifier."), designation="Montants M48 longueur {longueur_montant|m}", short="montants", precision="à vérifier : séparative de {hauteur|m}, plus haute que 3,00 m en M48 : montants de 70 ou 90 selon la fiche du système", when="si(hauteur > regle.h_d40, 1, 0) >= 1"),
+        besoin("rails", "rail", "si(type_separative < 2, 2 * longueur_cloison + 2 * hauteur, 4 * longueur_cloison) * regle.chute", "ml", "snip-fc18", OK2("SAA : un rail large (R70 pour M48, R90 pour M70) sur tout le pourtour, départs verticaux compris, (2L + 2H) × 1,05 (SNIP 1,37 ml/m², Placo FDES) ; SAD : deux rails haut et bas, 4L × 1,05 (recherche/21 n° 4-5). Règle changée : avant 2L en SAA."), short="rails", precision="SAA : rail R70 (montants de 48) sur tout le pourtour ; SAD : rails R48 haut et bas"),
+        besoin("vis-ttpc-25", "vis", "surface * si(entraxe >= regle.e60, regle.vis_int_d60, regle.vis_int_d40)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis 1re peau"),
+        besoin("vis-ttpc-35", "vis_ext", "surface * si(entraxe >= regle.e60, regle.vis_ext_d60, regle.vis_ext_d40)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis 2e peau"),
+        besoin("vis-trpf", "trpf", "surface * si(entraxe >= regle.e60, regle.trpf_d60, regle.trpf_d40)", "u", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="vis TRPF"),
+        besoin("ruban-resilient", "ruban", "longueur_cloison * files_rails * regle.ruban_par_rail", "ml", "placo-fdes-separatives", OK2("Exigé par le système sous les rails bas : DTA Siniat 2026, FDES Placo 2024, Knauf 2020 (recherche/21 n° 6)."), short="ruban résilient", precision="sous les rails bas"),
+        besoin("mastic", "mastic", "surface * regle.mastic_par_m2", "u", "placo-fdes-separatives", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="mastic", precision="joint en pied des deux faces"),
+        *fixations_rail("si(type_separative < 2, 2 * longueur_cloison + 2 * hauteur, 4 * longueur_cloison) * regle.chute"),
         besoin("isolant", "isolant", "surface * regle.isolant_par_m2", "m2", "snip-fc18", OK2("1,05 m²/m² par couche ; une 2e couche se lit au devis."), core=False, short="isolant"),
         *besoins_finitions("surface"),
     ]
@@ -883,6 +901,8 @@ def separative():
         slot("vis", "screw_board", "Vis TTPC 25", "vis-ttpc-25", "TTPC 25.", "gypso-vis", "separative", ["ttpc 25"]),
         slot("vis_ext", "screw_board", "Vis TTPC 35", "vis-ttpc-35", "TTPC 35.", "gypso-vis", "separative", ["ttpc 35"]),
         slot("trpf", "screw_metal", "Vis TRPF", "vis-trpf-13", "TRPF 13.", "snip-fc18", "separative", ["trpf"]),
+        slot("ruban", "resilient_strip", "Ruban résilient", "ruban-resilient", "Ruban résilient 45, rouleau de 15 m.", "placo-fdes-separatives", "separative", ["ruban resilient", "bande resiliente"]),
+        slot("mastic", "acoustic_sealant", "Mastic acrylique", "mastic-acrylique", "Mastic acrylique, cartouche de 310 ml.", "placo-fdes-separatives", "separative", ["mastic"]),
         *slots_fixation("separative"),
         slot("isolant", "insulation", "Isolant", "ursa-prk32-45", "Isolant écrit au devis.", "acermi-gr32", None, ["laine", "isolant"], ask="Quel isolant : marque ou équivalent, épaisseur ?"),
         *slots_finitions(),

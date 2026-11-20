@@ -77,3 +77,11 @@
 
 - Fiche lisible §5.8 bis : 98/48 EI 120 Placo à 3,00 m avec laine (avant 3,10 m) ; 98/48 BA 25 EI 120 à 3,80 m ; EI 60 en 100/70 ; EI 90 absent chez Placo et Siniat → système EI 120 de la marque ; isolant = celui du PV ; vissage, bande et enduit identiques au standard ; boîtiers, gaines, trappes, plafond autoportant REI 120, protection de poteaux.
 - Rien ne change dans `referentiel.json` (les nouveaux systèmes sont décrits, à brancher comme ouvrages).
+
+## plaquiste-isolation-2026.11.20-7 — Séparatives SAA / SAD corrigées (20 novembre 2026, `recherche/21`)
+
+- Règle changée : montants doublés (0,60 jusqu'à 2,75 m, 0,40 jusqu'à 3,00 m), avant deux files simples à 0,60 ; au-delà de 3,00 m, ligne « à vérifier ».
+- Règle changée : rails SAA sur tout le pourtour (2L + 2H), avant 2L.
+- Règle changée : TRPF 10 (doublés 0,60) et 14 (0,40), avant 4 ; vis des plaques 15 / 35 et 21 / 47, avant 12 / 30.
+- Nouveau d'office : ruban résilient sous les rails bas (rouleaux de 15 m) et mastic acrylique en pied (1 cartouche pour 3 m², quantité d'une seule source).
+- Chantier PI-14 : montants 33 → 62 ; TRPF 88 → 220 ; vis 264 → 330 et 660 → 770 ; + 2 rouleaux de ruban, + 8 cartouches de mastic.

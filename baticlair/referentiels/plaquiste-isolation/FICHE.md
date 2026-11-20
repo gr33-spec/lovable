@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-6` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
+| Version | `plaquiste-isolation-2026.11.20-7` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -317,6 +317,28 @@ Exigence entre logements neufs : DnT,A ≥ 53 dB (50 dB vers une cuisine ou une 
   - SAA : un rail large, R70 ou R90, haut et bas ;
   - SAD : deux rails R48 haut et bas ;
   - vis du parement double.
+
+#### 5.2 bis Séparatives : quantités corrigées (septième vague, `recherche/21-separatives-saa-sad.md`, version `-7`)
+
+Sources : DTA Siniat 9/11-922_V5 (valide du 02/09/2026, lu en entier), FDES Placo SAA 120, SAA 140, SAD 180, SAD 220, SAD 160 Duo'Tech (INIES 2024-2025), SNIP fiche 18, Knauf 2020, Pladur 2017.
+
+| Point | Règle | État |
+|---|---|---|
+| Montants M48 en 2 + 2 BA13 | **toujours doublés** : 0,60 jusqu'à 2,75 m, 0,40 jusqu'à 3,00 m ; simples à 0,60 jamais admis ; au-delà de 3,00 m : M70 / M90 selon la fiche du système, ligne « à vérifier ». **Règle changée** : avant, deux files de montants simples à 0,60 | ✔✔ |
+| Rails SAA | rail large (R70 pour M48, R90 pour M70) sur **tout le pourtour**, départs verticaux compris : (2L + 2H) × 1,05. **Règle changée** : avant 2L | ✔✔ |
+| Rails SAD | deux rails haut et bas, 4L × 1,05 (inchangé) | ✔✔ |
+| Ruban résilient | **d'office**, sous les rails **bas** seulement ; Placo Ruban Résilient 45, rouleau de 15 m (réf. H94960015) | ✔✔ (3 fabricants) |
+| Mastic acrylique | joint en pied des deux faces (règle chez 3 marques) ; 100 cm³/m², ≈ 1 cartouche de 310 ml pour 3 m² (Placo seul) | règle ✔✔, quantité ✔ |
+| Vis TRPF | doublés 0,60 : **10/m²** ; doublés 0,40 : **14/m²**. **Règle changée** : avant 4 | ✔✔ |
+| Vis des plaques | doublés 0,60 : 15 (1re peau) / 35 (2e peau) ; doublés 0,40 : 21 / 47 (SNIP). Placo compte moins (32 au total) : écart de méthode sur le vissage des montants doublés, valeur haute gardée | contradiction expliquée |
+| Plaques | 4,20 / 5,25 / 6,30 m² par m² en 2 + 2 / 2 + 3 / 3 + 3 ; « 2 + 3 » (SAD 180, KMA 23) et « 3 + 3 » (SAD 220, S195) se lisent au devis, vis TTPC 45 pour la 3e peau (une source) | ✔✔ (TTPC 45 : ✔) |
+| Isolant | 1,05 m² par couche ; une couche en SAA, une ou deux en SAD selon le devis | ✔✔ |
+| Entretoises en SAD | **aucune** : « aucune liaison entre les ossatures » | ✔✔ |
+| Bande et enduit | 2,80 ml et 0,66 kg par m² (inchangé) | ✔✔ |
+| Type SAA / SAD | lu dans le nom du système : SAA, SAD ; Knauf KMA 22-120/48 sur rail 70 = alternée, KMA 22-160/48 sur 2 rails = double ; Siniat S « rail commun » = alternée ; Pladur SA / SD | ✔✔ |
+| Acoustique | le système se lit au devis, jamais choisi d'après les 53 dB (exigence en œuvre) ; RA de 56 dB (SAA 120) à 67 dB (SAD 220) | ✔✔ |
+
+Reste à brancher (décrit, pas encore dans le moteur) : 2 + 3 et 3 + 3, montants M70 / M90 lus au système (SAA 140 = M70 simples sur R90 ; SAD 220 = M70 doublés). Incertain : Knauf en vigueur (catalogue 2020 seul), Fermacell (guide 2012), hauteurs Placo hors M48, largeur du ruban sous R70 / R90.
 
 ### 5.3 Doublages
 
