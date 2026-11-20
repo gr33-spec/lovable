@@ -17,7 +17,7 @@ const lecture = (v: Variante): LectureDevis =>
     contexte: null,
     notes: [],
     lots: [],
-    bref: ["Couverture zinc, 32 m², bacs de 4 m."],
+    bref: ["Couverture zinc, 32 m²."],
     fiche: { donnees: (v.fiche ?? []).map(([cle, valeur, origine]) => ({ cle, libelle: cle.replace(/_/g, " "), valeur, origine, regle: null, preuve: valeur ? "ligne 1 : « bacs de 4 m »" : "" })) },
     lignes: [
       {
@@ -25,7 +25,7 @@ const lecture = (v: Variante): LectureDevis =>
         role: "fourniture_et_pose",
         unite: "m²",
         quantite: "32",
-        designation: "Fourniture et pose couverture zinc joint debout, bacs de 4 m",
+        designation: v.fiche?.some(([, valeur]) => valeur) || v.donnees ? "Fourniture et pose couverture zinc joint debout, bacs de 4 m" : "Fourniture et pose couverture zinc joint debout",
         fournitures: [{ nom: "Couverture zinc joint debout anthracite", unite: "m²", quantite: "32", attend: [], donnees: { surface: "32", ...(v.donnees ?? {}) }, ouvrage: "couverture-zinc-joint-debout", aPreciser: [], precision: null, emplacement: "couverture" }],
       },
     ],

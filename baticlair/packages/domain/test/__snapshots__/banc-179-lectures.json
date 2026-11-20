@@ -728,7 +728,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -817,11 +818,12 @@
   ],
   "questions": [
    "param:surface",
-   "param:nb_descentes",
-   "param:diametre_descente",
-   "param:faconnage@pieces-pliees",
    "param:faconnage@couverture-zinc-joint-debout",
-   "param:developpe@bandes-zinc__4"
+   "param:faconnage@pieces-pliees",
+   "param:longueur_rampant",
+   "param:developpe@bandes-zinc__4",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -837,7 +839,10 @@
     "raison": "Façonnage à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:faconnage",
+   "param:longueur_rampant"
+  ],
   "aChiffrer": []
  },
  {
@@ -880,15 +885,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Liteaux 27×40",
@@ -920,8 +925,9 @@
    }
   ],
   "questions": [
+   "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees",
-   "param:perimetre_cheminee"
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -948,8 +954,8 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 028 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde",
@@ -960,6 +966,7 @@
    }
   ],
   "questions": [
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:diametre_descente",
    "param:nb_descentes"
@@ -1099,10 +1106,10 @@
    }
   ],
   "questions": [
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:fixation_crochet",
    "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe@bandes-zinc__3"
   ],
   "aChiffrer": []
  },
@@ -1136,18 +1143,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -1158,18 +1167,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "1 880 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 9 cm",
     "quantite": "1 918 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -1185,8 +1196,8 @@
    }
   ],
   "questions": [
-   "param:faconnage@pieces-pliees",
-   "param:developpe"
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -1224,13 +1235,13 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:fixation_crochet",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:fixation_crochet",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -1280,8 +1291,8 @@
   "questions": [
    "param:faconnage",
    "param:developpe_gouttiere",
-   "param:nb_descentes",
-   "param:diametre_descente"
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -1298,8 +1309,8 @@
    }
   ],
   "questions": [
-   "param:faconnage@pieces-pliees",
-   "param:perimetre_cheminee"
+   "param:perimetre_cheminee",
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -1337,12 +1348,12 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -1354,15 +1365,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "3 379 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "3 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Embase plomb de sortie de toit",
@@ -1386,7 +1397,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -1402,7 +1415,8 @@
    }
   ],
   "questions": [
-   "param:pente"
+   "param:pente",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -1419,8 +1433,8 @@
    }
   ],
   "questions": [
-   "param:raccord_couverture",
-   "fiche:fenetre_de_toit_quelle_taille"
+   "fiche:fenetre_de_toit_quelle_taille",
+   "param:raccord_couverture"
   ],
   "aChiffrer": []
  },
@@ -1495,15 +1509,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "3 379 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "3 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Embase plomb de sortie de toit",
@@ -1527,7 +1541,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -1584,8 +1600,8 @@
    }
   ],
   "questions": [
-   "param:faconnage@pieces-pliees",
-   "param:developpe"
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -1612,18 +1628,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "1 880 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 9 cm",
     "quantite": "1 918 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -1681,8 +1699,8 @@
   ],
   "questions": [
    "param:recouvrement_canal",
-   "product:tuile",
-   "fiche:traitement_des_liteaux"
+   "fiche:traitement_des_liteaux",
+   "product:tuile"
   ],
   "aChiffrer": []
  },
@@ -1694,15 +1712,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Liteaux 18×40",
@@ -1734,8 +1752,9 @@
    }
   ],
   "questions": [
+   "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees",
-   "param:perimetre_cheminee"
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -1808,10 +1827,10 @@
    }
   ],
   "questions": [
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:fixation_crochet",
    "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe@bandes-zinc__3"
   ],
   "aChiffrer": []
  },
@@ -1836,8 +1855,8 @@
   ],
   "questions": [
    "param:recouvrement_canal",
-   "product:tuile",
-   "fiche:date_de_livraison"
+   "fiche:date_de_livraison",
+   "product:tuile"
   ],
   "aChiffrer": []
  },
@@ -1904,18 +1923,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "8 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "8 616 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -1970,8 +1991,8 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
    "param:diametre_descente",
+   "param:fixation_crochet",
    "param:nb_descentes"
   ],
   "aChiffrer": []
@@ -1999,18 +2020,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2026,9 +2049,9 @@
    }
   ],
   "questions": [
+   "param:diametre_descente",
    "param:fixation_crochet",
-   "param:nb_angles",
-   "param:diametre_descente"
+   "param:nb_angles"
   ],
   "aChiffrer": []
  },
@@ -2064,18 +2087,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2087,10 +2112,11 @@
     "quantite": "2 028 pièces",
     "unite": "pièces",
     "etat": "check",
-    "raison": "Épaisseur à préciser"
+    "raison": "Épaisseur, qualité à préciser"
    }
   ],
   "questions": [
+   "param:qualite_ardoise",
    "fiche:epaisseur_des_crochets"
   ],
   "aChiffrer": []
@@ -2125,8 +2151,8 @@
    }
   ],
   "questions": [
-   "param:faconnage@pieces-pliees",
-   "param:developpe"
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -2138,15 +2164,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Liteaux 18×40",
@@ -2178,8 +2204,9 @@
    }
   ],
   "questions": [
+   "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees",
-   "param:perimetre_cheminee"
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -2192,14 +2219,14 @@
     "quantite": "2 052 pièces",
     "unite": "pièces",
     "etat": "check",
-    "raison": "Marque à préciser"
+    "raison": "Marque, qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
     "etat": "check",
-    "raison": "Marque à préciser"
+    "raison": "Marque, qualité à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2266,9 +2293,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees",
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc",
    "fiche:marque_des_ardoises"
   ],
   "aChiffrer": []
@@ -2281,15 +2311,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2356,9 +2386,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -2433,18 +2466,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2510,18 +2545,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "2 782 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 838 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2532,11 +2569,13 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2552,8 +2591,8 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
-   "param:diametre_descente"
+   "param:diametre_descente",
+   "param:fixation_crochet"
   ],
   "aChiffrer": []
  },
@@ -2598,12 +2637,12 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -2615,18 +2654,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2669,18 +2710,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2727,15 +2770,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "3 379 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "3 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Sortie de toit Poujoulat",
@@ -2761,7 +2804,8 @@
   ],
   "questions": [
    "param:diametre_sortie",
-   "param:usage_sortie"
+   "param:usage_sortie",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -2773,15 +2817,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2848,9 +2892,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -2867,7 +2914,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -2879,15 +2927,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2954,9 +3002,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -2968,15 +3019,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "3 379 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "3 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Embase plomb de sortie de toit",
@@ -3000,7 +3051,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -3100,9 +3153,10 @@
   ],
   "questions": [
    "param:faconnage",
+   "param:longueur_rampant",
    "param:developpe_gouttiere",
-   "param:fixation_crochet",
    "param:diametre_descente",
+   "param:fixation_crochet",
    "param:nb_descentes"
   ],
   "aChiffrer": []
@@ -3221,10 +3275,10 @@
   ],
   "questions": [
    "param:perimetre_cheminee",
-   "param:nb_descentes",
    "param:developpe",
+   "param:faconnage@pieces-pliees",
    "param:diametre_descente",
-   "param:faconnage@pieces-pliees"
+   "param:nb_descentes"
   ],
   "aChiffrer": [
    "Ardoises (Ardoises naturelles Espagne 1er choix 30×22)"
@@ -3279,18 +3333,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "8 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "8 616 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -3307,9 +3363,9 @@
   ],
   "questions": [
    "param:teinte_gouttiere",
+   "param:diametre_descente",
    "param:fixation_crochet",
    "param:nb_angles",
-   "param:diametre_descente",
    "param:nb_descentes"
   ],
   "aChiffrer": []
@@ -3360,8 +3416,8 @@
    }
   ],
   "questions": [
-   "param:faconnage@pieces-pliees",
-   "param:developpe"
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": []
  },
@@ -3498,8 +3554,8 @@
   ],
   "questions": [
    "param:diametre_sortie",
-   "param:fixation_crochet",
    "param:usage_sortie",
+   "param:fixation_crochet",
    "product:tuile"
   ],
   "aChiffrer": []
@@ -3556,7 +3612,8 @@
    }
   ],
   "questions": [
-   "param:surface"
+   "param:surface",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -3601,12 +3658,12 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -3708,8 +3765,8 @@
   ],
   "questions": [
    "param:qualite_ardoise",
-   "param:fixation_crochet",
    "param:diametre_descente",
+   "param:fixation_crochet",
    "param:nb_descentes"
   ],
   "aChiffrer": []
@@ -3727,7 +3784,8 @@
    }
   ],
   "questions": [
-   "param:pente"
+   "param:pente",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -3796,15 +3854,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Tubes de descente zinc Ø80, longueur 4 m",
@@ -3815,6 +3873,7 @@
    }
   ],
   "questions": [
+   "param:qualite_ardoise",
    "param:dauphin"
   ],
   "aChiffrer": []
@@ -3945,18 +4004,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 408 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 597 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -3998,7 +4059,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -4052,7 +4114,7 @@
     "raison": "Façonnage à préciser"
    },
    {
-    "designation": "Gouttière zinc gris demi-ronde dév. 25",
+    "designation": "Gouttière dév. 25",
     "quantite": "4 longueurs de 4 m",
     "unite": "longueurs de 4 m",
     "etat": "ok",
@@ -4066,7 +4128,7 @@
     "raison": "Pose à préciser"
    },
    {
-    "designation": "Naissances zinc gris demi-ronde",
+    "designation": "Naissances",
     "quantite": null,
     "unite": null,
     "etat": "check",
@@ -4095,11 +4157,11 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
    "param:nb_descentes",
+   "param:faconnage@couverture-zinc-joint-debout",
+   "param:fixation_crochet",
    "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe@bandes-zinc__3"
   ],
   "aChiffrer": []
  },
@@ -4111,18 +4173,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -4194,10 +4258,10 @@
    }
   ],
   "questions": [
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:fixation_crochet",
    "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe@bandes-zinc__3"
   ],
   "aChiffrer": []
  },
@@ -4273,15 +4337,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Tuiles HP10",
@@ -4292,7 +4356,8 @@
    }
   ],
   "questions": [
-   "product:tuile"
+   "product:tuile",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -4355,12 +4420,13 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:longueur_rampant",
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -4471,12 +4537,12 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -4508,7 +4574,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -4567,15 +4634,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "3 379 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "3 447 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Sortie de toit Poujoulat",
@@ -4601,7 +4668,8 @@
   ],
   "questions": [
    "param:diametre_sortie",
-   "param:usage_sortie"
+   "param:usage_sortie",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -4675,12 +4743,12 @@
    }
   ],
   "questions": [
-   "param:developpe_gouttiere",
-   "param:nb_descentes",
    "param:developpe",
-   "param:diametre_descente",
+   "param:faconnage@couverture-zinc-joint-debout",
    "param:faconnage@pieces-pliees",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe_gouttiere",
+   "param:diametre_descente",
+   "param:nb_descentes"
   ],
   "aChiffrer": []
  },
@@ -4714,7 +4782,8 @@
    }
   ],
   "questions": [
-   "param:pente"
+   "param:pente",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": []
  },
@@ -4819,10 +4888,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -4865,15 +4936,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -4940,9 +5011,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -4990,7 +5064,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -5019,15 +5094,15 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -5094,9 +5169,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -5108,18 +5186,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
     "quantite": "2 052 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "2 094 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -5205,10 +5285,12 @@
    }
   ],
   "questions": [
+   "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
    "param:developpe",
-   "param:faconnage@pieces-pliees"
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
   ],
   "aChiffrer": []
  },
@@ -5329,11 +5411,11 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
    "param:nb_descentes",
+   "param:faconnage@couverture-zinc-joint-debout",
+   "param:fixation_crochet",
    "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe@bandes-zinc__3"
   ],
   "aChiffrer": []
  },
@@ -5345,18 +5427,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "9 271 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
     "quantite": "9 457 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -5382,18 +5466,20 @@
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
     "quantite": "10 003 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 12 cm",
     "quantite": "10 204 pièces",
     "unite": "pièces",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Qualité à préciser"
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:qualite_ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -5409,7 +5495,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -5447,8 +5534,8 @@
    }
   ],
   "questions": [
-   "param:qualite_ardoise",
-   "param:faconnage@pieces-pliees"
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise"
   ],
   "aChiffrer": [
    "Arêtiers (Arêtier zinc dév. 33)"
@@ -5513,7 +5600,8 @@
    }
   ],
   "questions": [
-   "param:faconnage"
+   "param:faconnage",
+   "param:longueur_rampant"
   ],
   "aChiffrer": []
  },
@@ -5586,11 +5674,11 @@
    }
   ],
   "questions": [
-   "param:fixation_crochet",
    "param:nb_descentes",
+   "param:faconnage@couverture-zinc-joint-debout",
+   "param:fixation_crochet",
    "param:diametre_descente",
-   "param:developpe@bandes-zinc__3",
-   "param:faconnage@couverture-zinc-joint-debout"
+   "param:developpe@bandes-zinc__3"
   ],
   "aChiffrer": []
  },

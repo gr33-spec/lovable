@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.19-58",
+  "version": "roofing-2026.11.20-59",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -143,6 +143,33 @@
       "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/pureau-ardoises-au-m2/",
       "retrievedAt": "2026-10-03",
       "note": "Mise à jour septembre 2026 (référentiel du fondateur, §34) : ardoises/m² = 1 / [pureau × (largeur + Ø crochet)], Ø 1 mm, inox 2,7 mm en zone littorale."
+    },
+    {
+      "id": "rheinzink-tasseau-pose-pliage",
+      "kind": "manufacturer",
+      "title": "RHEINZINK, « Tasseau, pose et pliage : schémas détaillés et cotés à usage professionnel »",
+      "publisher": "RHEINZINK",
+      "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Documents-Techniques/guides-de-pose-tasseau-pose-pliage-v09201-fr-fr.pdf",
+      "retrievedAt": "2026-11-20",
+      "note": "§1.6.4 : entraxe 620 mm (feuille 650, tasseau 50), 470 mm (500, 50). §1.6.5 : relevé du bac 45 mm contre un tasseau de 50, 90 mm contre un mur. §1.12.4 : couvre-joints de partie courante en éléments de 1 m au plus ; 1,50 m de tasseau au m² (650 / 50). §1.15 « Habillage de rive » : « rive droite avec tasseau de rive […] On pose ensuite un couvre-joint pour recouvrir le bac et l'habillage de la rive »."
+    },
+    {
+      "id": "vmzinc-delta-guide",
+      "kind": "manufacturer",
+      "title": "VMZINC, « Toiture Delta VMZINC, guide de prescription et de pose », traitement des finitions",
+      "publisher": "VMZINC",
+      "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Solutions%20couverture/Delta%20VMZINC/Guide%20Delta%20VMZINC%20FR.pdf",
+      "retrievedAt": "2026-11-20",
+      "note": "« Rives latérales, rive à tasseau : placer et fixer un tasseau bois […], réaliser une rive de couverture identique à celle d'une couverture à tasseaux » ; repères : 1 couvre-joint, 2 tasseau de rive, 3 patte à tasseau, 4 bande de rive."
+    },
+    {
+      "id": "nedzink-cahier-technique",
+      "kind": "manufacturer",
+      "title": "NedZink, « Conseils de zinc, cahier technique » (techguide FR, novembre 2013)",
+      "publisher": "NedZink",
+      "url": "https://www.nedzink.com/wp-content/uploads/2019/07/13426-fr-v1-techn-advboek-volledig.pdf",
+      "retrievedAt": "2026-11-20",
+      "note": "« Rive : pour la finition latérale, le zinc du premier et du dernier bac est relevé contre un rebord en bois, par exemple un tasseau […] Le tasseau est recouvert d'un profil au choix. » Chapitre 6 : « bacs relevés de chaque côté et séparés par des tasseaux […] recouverts de couvre-joints »."
     },
     {
       "id": "vmzinc-joint-debout",
@@ -434,6 +461,18 @@
       "keyAttributes": [],
       "keywords": [
         "bobineau"
+      ]
+    },
+    {
+      "code": "box_gutter",
+      "label": "Chéneau encaissé",
+      "needUnit": "m",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "cheneau encaisse",
+        "cheneau zinc",
+        "cheneau en zinc"
       ]
     },
     {
@@ -8749,7 +8788,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -9385,7 +9425,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -10049,7 +10090,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -10841,7 +10883,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -11352,7 +11395,8 @@
           "unit": "m",
           "kind": "site_data",
           "question": "Longueur de bande porte-solin ?",
-          "fromLineQuantity": true
+          "fromLineQuantity": true,
+          "ownOnly": true
         },
         {
           "key": "developpe",
@@ -11621,7 +11665,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -12921,7 +12966,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -13479,7 +13525,11 @@
               "keywords": [
                 "ventilation",
                 "extraction",
-                "aeration"
+                "aeration",
+                "vmc",
+                "event",
+                "chute event",
+                "ventilation primaire"
               ]
             }
           ],
@@ -13830,7 +13880,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -13902,6 +13953,53 @@
             {
               "label": "Bobine de 500 mm",
               "value": "500"
+            }
+          ]
+        },
+        {
+          "key": "nb_rives_tasseau",
+          "label": "Rives sur tasseau",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Ton pan finit comment, de chaque côté ?",
+          "hint": "Une rive a son tasseau de rive et son couvre-joint ; contre un mur, le bac se relève sans tasseau.",
+          "textLabels": [
+            "rives",
+            "rive"
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "2 cotes",
+                "deux cotes",
+                "2 rives",
+                "deux rives",
+                "chaque cote"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "1 cote",
+                "un cote",
+                "une rive",
+                "1 rive"
+              ]
+            }
+          ],
+          "choices": [
+            {
+              "label": "Une rive de chaque côté",
+              "value": "2"
+            },
+            {
+              "label": "Une rive et un mur",
+              "value": "1"
+            },
+            {
+              "label": "Un mur de chaque côté",
+              "value": "0"
             }
           ]
         }
@@ -14084,12 +14182,15 @@
           "key": "nb_rangs",
           "label": "Rangs de tasseaux",
           "unit": "u",
-          "formula": "nb_bacs + 1",
-          "source": "definition",
+          "formula": "nb_bacs - 1 + nb_rives_tasseau",
+          "source": "rheinzink-tasseau-pose-pliage",
           "verification": {
-            "status": "draft"
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "BatiClair (trois guides de pose recoupés : RHEINZINK, VMZINC, NedZink)",
+            "note": "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau."
           },
-          "version": 1
+          "version": 2
         }
       ],
       "needs": [
@@ -14119,13 +14220,16 @@
           "formula": "nb_rangs * longueur_rampant",
           "unit": "m",
           "core": true,
-          "exclusions": "Un rang de tasseaux de chaque côté de chaque bac, sur la longueur du rampant. Pointes ou vis de 80 mm à part.",
+          "exclusions": "Un rang entre deux bacs et un tasseau de rive par rive, sur la longueur du rampant ; aucun contre un mur. Pointes ou vis de 80 mm à part.",
           "precision": "{nb_rangs} rangs × {longueur_rampant|m}",
-          "source": "definition",
+          "source": "rheinzink-tasseau-pose-pliage",
           "verification": {
-            "status": "draft"
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "BatiClair (trois guides de pose recoupés : RHEINZINK, VMZINC, NedZink)",
+            "note": "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau."
           },
-          "version": 1
+          "version": 2
         },
         {
           "id": "couvre-joints-tasseaux",
@@ -14133,17 +14237,20 @@
           "formula": "nb_rangs * longueur_rampant",
           "unit": "m",
           "core": true,
-          "exclusions": "Un couvre-joint par rang de tasseaux ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
+          "exclusions": "Un couvre-joint par rang de tasseaux, tasseaux de rive compris (RHEINZINK §1.15) ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
           "precision": "{nb_rangs} rangs × {longueur_rampant|m}",
           "designation": "Couvre-joints {aspect_zinc} {epaisseur_zinc} mm pour tasseaux de 50 mm",
           "precisionRequires": [
             "aspect_zinc"
           ],
-          "source": "definition",
+          "source": "rheinzink-tasseau-pose-pliage",
           "verification": {
-            "status": "draft"
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "BatiClair (trois guides de pose recoupés : RHEINZINK, VMZINC, NedZink)",
+            "note": "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau."
           },
-          "version": 1
+          "version": 2
         }
       ]
     },
@@ -14339,7 +14446,8 @@
               "keywords": [
                 "anthra",
                 "anthra zinc",
-                "anthra-zinc"
+                "anthra-zinc",
+                "anthracite"
               ]
             },
             {
@@ -15817,6 +15925,495 @@
           "precision": "{largeur_pan|ml} de faîtage",
           "precisionRequires": [
             "teinte_bac"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "cheneau-encaisse",
+      "trade": "roofing",
+      "section": "evacuation",
+      "label": "Chéneau encaissé zinc",
+      "triggers": [
+        "box_gutter"
+      ],
+      "params": [
+        {
+          "key": "longueur_cheneau",
+          "label": "Longueur de chéneau",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du chéneau ?",
+          "fromLineQuantity": true,
+          "textLabels": [
+            "cheneau"
+          ]
+        },
+        {
+          "key": "developpe_cheneau",
+          "label": "Développé du chéneau",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Ton chéneau fait quel développé ?",
+          "hint": "La largeur de zinc avant façonnage : elle choisit la largeur du bobineau (500, 650 ou 1 000 mm).",
+          "textLabels": [
+            "developpe du cheneau",
+            "developpe"
+          ],
+          "choices": [
+            {
+              "label": "Jusqu'à 50 cm",
+              "value": "500"
+            },
+            {
+              "label": "Jusqu'à 65 cm",
+              "value": "650"
+            },
+            {
+              "label": "Jusqu'à 1 m",
+              "value": "1000"
+            }
+          ]
+        },
+        {
+          "key": "epaisseur_zinc",
+          "label": "Épaisseur du zinc",
+          "unit": "mm",
+          "kind": "artisan_preference",
+          "question": "Épaisseur du zinc ?",
+          "textLabels": [
+            "epaisseur",
+            "ep"
+          ],
+          "default": {
+            "value": "0.65",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "0,65 mm standard (§7)"
+          },
+          "choices": [
+            {
+              "label": "0,65 mm",
+              "value": "0.65"
+            },
+            {
+              "label": "0,70 mm",
+              "value": "0.7"
+            },
+            {
+              "label": "0,80 mm",
+              "value": "0.8"
+            }
+          ],
+          "display": {
+            "0.65": "0,65",
+            "0.7": "0,70",
+            "0.8": "0,80"
+          }
+        },
+        {
+          "key": "aspect_zinc",
+          "label": "Aspect du zinc",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zinc prépatiné : Quartz-Zinc (gris) ou Anthra-Zinc (noir) ?",
+          "hint": "Le devis dit « prépatiné » sans la teinte : le comptoir sert l'un ou l'autre.",
+          "default": {
+            "value": "1",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "zinc naturel : le devis ne dit pas prépatiné",
+            "unlessText": [
+              "prepatine",
+              "pre patine",
+              "pre-patine"
+            ]
+          },
+          "choices": [
+            {
+              "label": "Zinc naturel",
+              "value": "1"
+            },
+            {
+              "label": "Quartz-Zinc (prépatiné gris)",
+              "value": "2"
+            },
+            {
+              "label": "Anthra-Zinc (prépatiné noir)",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "quartz",
+                "quartz zinc",
+                "quartz-zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "anthra",
+                "anthra zinc",
+                "anthra-zinc",
+                "anthracite"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "pigmento"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "zinc naturel"
+              ]
+            }
+          ],
+          "display": {
+            "1": "zinc naturel",
+            "2": "Quartz-Zinc",
+            "3": "Anthra-Zinc",
+            "4": "Pigmento"
+          },
+          "named": true,
+          "onlyFromPrincipal": true
+        }
+      ],
+      "slots": [
+        {
+          "key": "cheneau",
+          "family": "box_gutter",
+          "label": "Chéneau encaissé",
+          "measureOnly": true
+        },
+        {
+          "key": "bobineau",
+          "family": "zinc_narrow_coil",
+          "label": "Bobineau zinc",
+          "keywords": [
+            "bobineau"
+          ],
+          "usual": {
+            "text": "Bobineau de zinc, façonné et soudé sur place (référentiel du fondateur : chéneaux en bobineau).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bobineau-zinc"
+          },
+          "formOf": "cheneau"
+        }
+      ],
+      "constants": {
+        "poids_plat_065": {
+          "kind": "installation_condition",
+          "value": "4.7",
+          "unit": "kg/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."
+        },
+        "poids_plat_070": {
+          "kind": "installation_condition",
+          "value": "5.04",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "poids_plat_080": {
+          "kind": "installation_condition",
+          "value": "5.76",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "seuil_070": {
+          "kind": "installation_condition",
+          "value": "0.7",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "seuil_080": {
+          "kind": "installation_condition",
+          "value": "0.8",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "marge_bandes": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
+        },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
+        "marge_zinc_lineaire": {
+          "kind": "installation_condition",
+          "value": "1.05",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« ml noue × 1,05 », « ml égout × 1,05 », « ml faîtage × 1,05 » (§7)."
+        }
+      },
+      "derived": [
+        {
+          "key": "ml_zinc",
+          "label": "Longueur de zinc façonné",
+          "unit": "m",
+          "formula": "longueur_cheneau * regle.marge_zinc_lineaire",
+          "shown": true,
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "key": "largeur_bobineau",
+          "label": "Largeur du bobineau",
+          "unit": "mm",
+          "formula": "si(developpe_cheneau <= regle.bobineau_500, regle.bobineau_500, si(developpe_cheneau <= regle.bobineau_650, regle.bobineau_650, regle.bobineau_1000))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "key": "longueur_bobineau",
+          "label": "Longueur du bobineau",
+          "unit": "m",
+          "formula": "si(ml_zinc <= regle.bobineau_17, regle.bobineau_17, si(ml_zinc <= regle.bobineau_21, regle.bobineau_21, si(ml_zinc <= regle.bobineau_31, regle.bobineau_31, si(largeur_bobineau <= regle.bobineau_500, regle.bobineau_40, regle.bobineau_31))))",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "bobineau-cheneau",
+          "slot": "bobineau",
+          "formula": "arrondi_sup(ml_zinc / longueur_bobineau)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Longueur du chéneau × 1,05, en bobineau de la largeur du développé ; joints de dilatation (tous les 12 m) et naissances à part.",
+          "precision": "pour {longueur_cheneau|m} de chéneau, marge 5 % comprise",
+          "designation": "Bobineau {aspect_zinc} {epaisseur_zinc} mm, {largeur_bobineau|mm} × {longueur_bobineau|m}",
+          "precisionRequires": [
+            "aspect_zinc",
+            "developpe_cheneau"
           ],
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {

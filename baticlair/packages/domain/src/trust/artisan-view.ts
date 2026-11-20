@@ -647,7 +647,7 @@ export function computeWithAnswers(
     for (const n of needs) {
       const piece = ins.find((i) => i.workItemId === n.workItemId)?.label;
       if (!piece || !n.question || !PER_PIECE.has(n.question.key) || piecewise.includes(n.question.key)) continue;
-      n.question = { ...n.question, text: `${piece} : tu façonnes toi-même ou tu commandes façonné ?` };
+      n.question = { ...n.question, text: questionDePiece(piece, n.question.key, n.question.text) };
     }
     for (const key of piecewise) {
       for (const n of needs) {
@@ -655,7 +655,7 @@ export function computeWithAnswers(
         // Chaque lot dit son nom (deux lots peuvent partager la même phrase : bandes et abergement) ; une pièce écrite au
         // devis (instance par ligne) dit le sien, tel qu'écrit (« Bande de ventilation en Z en zinc quartz »).
         const lot = ins.find((i) => i.workItemId === n.workItemId)?.label ?? lotLabel(ref.workItems.find((w) => w.id === baseOf(n.workItemId))?.label ?? "");
-        n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId), text: lot ? `${lot} : tu façonnes toi-même ou tu commandes façonné ?` : n.question.text };
+        n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId), text: lot ? questionDePiece(lot, key, n.question.text) : n.question.text };
       }
     }
     // Une pièce écrite au devis (« bandes-zinc__12 ») a SES questions : à son nom, avec sa clé (sa réponse ne vaut que
@@ -775,7 +775,12 @@ export function computeWithAnswers(
 }
 
 /** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */
-const PER_PIECE = new Set(["param:faconnage"]);
+// Le développé aussi (Greg, 20 novembre 2026, D-2026-024) : la rive et le faîtage ont chacun le leur, jamais une question
+// « Développé de la bande zinc ? » pour les deux.
+const PER_PIECE = new Set(["param:faconnage", "param:developpe"]);
+/** La question d'une pièce, à son nom : « Rive : tu façonnes toi-même… ? », « Faîtage : développé de la bande zinc ? ». */
+export const questionDePiece = (piece: string, key: string, text: string) =>
+  key === "param:faconnage" ? `${piece} : tu façonnes toi-même ou tu commandes façonné ?` : `${piece} : ${text.charAt(0).toLowerCase()}${text.slice(1)}`;
 /** Le nom d'un lot de zinguerie, tel que l'artisan le dit (« Noue zinc », « Bandes zinc (solin, rive, égout…) »). */
 export function lotLabel(label: string): string {
   // §48.6 : une question nomme UNE pièce ; la parenthèse de l'ouvrage (« (zinc + porte-solin) », « (solin, rive…) ») n'en dit pas d'autre.

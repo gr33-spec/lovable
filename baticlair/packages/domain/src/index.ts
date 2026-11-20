@@ -47,6 +47,7 @@ export * from "./trust/completion.js";
 export * from "./trust/short-reason.js";
 export * from "./projects/site-name.js";
 export * from "./lecture/lecture.js";
+export * from "./lecture/par-le-code.js";
 export * from "./lecture/controles.js";
 export * from "./lecture/lots.js";
 export * from "./lecture/par-lots.js";

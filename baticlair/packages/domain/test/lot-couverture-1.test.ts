@@ -33,7 +33,8 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Arêtier zinc dév. 33", quantity: "10", unit: "ml" },
       { ref: "3", designation: "Noue encaissée zinc", quantity: "4", unit: "ml" },
     ],
-    questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"],
+    // Dans l'ordre du calcul (Greg, 20 novembre 2026 : les questions sont décidées par le code).
+    questions: ["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
     couleurs: { vert: 0, orange: 3, gris: 1 },
   },
 ];

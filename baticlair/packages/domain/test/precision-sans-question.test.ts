@@ -24,8 +24,9 @@ const lecture: LectureDevis = {
 describe("la précision dit l'info au négoce, jamais la question posée à l'artisan", () => {
   it("« Ta descente Ø100 … : Zinc » devient « Matière de la descente : Zinc »", () => {
     const v = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers: { "fiche:matiere_descente": "Zinc" } }).purchase;
-    const tuyau = v.toBuy.find((b) => /^Tuyau de descente/.test(b.label))!;
-    expect(tuyau.precision).toBe("Descente en façade, hauteur 3 m ; Matière de la descente : Zinc");
+    // Greg, 20 novembre 2026 : la ligne est rattachée par le code (« Tubes de descente ») ; la réponse va dans sa précision.
+    const tuyau = v.toBuy.find((b) => /descente/i.test(b.label))!;
+    expect(tuyau.precision).toContain("Matière de la descente : Zinc");
     expect(tuyau.precision).not.toMatch(/\btu\b|\bta\b|\?/i);
   });
 

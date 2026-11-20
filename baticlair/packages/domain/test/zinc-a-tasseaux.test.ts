@@ -36,10 +36,15 @@ const ecran = (l: LectureDevis, answers: Record<string, EngineAnswer> = {}) => e
 const liste = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.map((b) => [b.label, b.quantity, b.precision ?? null]);
 
 describe("couverture zinc à tasseaux : de la bobine au mètre, d'après l'entraxe des tasseaux", () => {
-  it("le devis de Greg : 32 m², bacs de 4 m → 8 m de pan ÷ 0,62 = 13 bacs × (4 m + 15 cm) = 54 ml de bobine de 650, sans aucune question", () => {
-    const e = ecran(lecture());
+  it("le devis de Greg : 32 m², bacs de 4 m → 8 m de pan ÷ 0,62 = 13 bacs × (4 m + 15 cm) = 54 ml de bobine de 650 ; une seule question, la finition des rives (tasseaux et couvre-joints sont écrits)", () => {
+    // Greg, 20 novembre 2026 : « si ça dépend de la finition de rive, pose la question une seule fois, avec des boutons ».
+    const ouvert = ecran(lecture());
+    expect(ouvert.questions.map((q) => [q.text, (q.options ?? []).map((o) => o.label)])).toEqual([
+      ["Ton pan finit comment, de chaque côté ?", ["Une rive de chaque côté", "Une rive et un mur", "Un mur de chaque côté"]],
+    ]);
+    const e = ecran(lecture(), { "param:nb_rives_tasseau": { value: "2", unit: "u" } });
     expect(e.purchase.questions).toEqual([]);
-    expect(liste(e)).toEqual([["Bobine Anthra-Zinc 0,65 mm, largeur 650 mm", "54 ml", "13 bacs × 4,15 m"]]);
+    expect(liste(e).find((l) => /^Bobine/.test(String(l[0])))).toEqual(["Bobine Anthra-Zinc 0,65 mm, largeur 650 mm", "54 ml", "13 bacs × 4,15 m"]);
     // Ce qui est supposé se dit (et se change) : la bobine de 650 de Greg, l'entraxe de 620, l'épaisseur courante.
     const hypotheses = Object.fromEntries(e.purchase.assumptions.map((a) => [a.key, a.value]));
     expect(hypotheses).toMatchObject({ "param:largeur_bobine_tasseaux": "650", "derived:entraxe_tasseaux": "620", "derived:largeur_pan": "8" });
@@ -64,14 +69,27 @@ describe("couverture zinc à tasseaux : de la bobine au mètre, d'après l'entra
     }
   });
 
-  it("règle numéro un : tasseaux et couvre-joints seulement si le devis les écrit ; leur nombre de rangs n'est pas encore validé, ils restent « à chiffrer », jamais avec une quantité inventée", () => {
-    expect(ecran(lecture()).purchase.toQuote).toEqual([]);
-    const e = ecran(lecture(["tasseau", "couvre_joint"]));
-    expect(liste(e).map((l) => l[0])).toEqual(["Bobine Anthra-Zinc 0,65 mm, largeur 650 mm"]);
-    expect(e.purchase.toQuote.map((t) => [t.label.replace(/ \(.*$/, ""), t.reason])).toEqual([
-      ["Tasseaux bois trapézoïdaux de 50 mm", "Règle de calcul en attente de vérification."],
-      ["Couvre-joints zinc de tasseaux", "Règle de calcul en attente de vérification."],
+  it("tasseaux et couvre-joints (écrits au devis) : un rang entre deux bacs, plus le tasseau de chaque rive, aucun contre un mur (RHEINZINK §1.15 et §1.6.5, VMZINC Delta, NedZink)", () => {
+    // Greg, 20 novembre 2026 : « ne compte pas sur moi, vérifie-le toi-même […] Croise au moins deux sources ».
+    const rangs = (rives: string) => {
+      const e = ecran(lecture(["tasseau", "couvre_joint"]), { "param:nb_rives_tasseau": { value: rives, unit: "u" } });
+      expect(e.purchase.toQuote).toEqual([]);
+      return liste(e).filter((l) => !/^Bobine/.test(String(l[0]))).map((l) => [l[0], l[1]]);
+    };
+    expect(rangs("2")).toEqual([
+      ["Tasseaux bois trapézoïdaux de 50 mm", "56 ml"],
+      ["Couvre-joints Anthra-Zinc 0,65 mm pour tasseaux de 50 mm", "56 ml"],
     ]);
+    expect(rangs("1").map((l) => l[1])).toEqual(["52 ml", "52 ml"]);
+    expect(rangs("0").map((l) => l[1])).toEqual(["48 ml", "48 ml"]);
+  });
+
+  it("la finition des rives écrite au devis (« bandes de rive pour les 2 côtés ») ne se demande pas", () => {
+    const l = lecture();
+    const avecRive = { ...l, lignes: [...l.lignes, { ref: "3", role: "fourniture_et_pose", unite: "m", quantite: "8", designation: "Fourniture et pose habillages de rive : bandes de rive en zinc anthracite pour les 2 côtés (2 x 4 m)", fournitures: [] }] } as unknown as LectureDevis;
+    const e = ecran(avecRive);
+    expect(e.questions.map((q) => q.key)).not.toContain("param:nb_rives_tasseau");
+    expect(liste(e).filter((x) => /Tasseaux/.test(String(x[0])))).toEqual([["Tasseaux bois trapézoïdaux de 50 mm", "56 ml", "14 rangs × 4 m"]]);
   });
 
   it("le modèle reçoit l'ouvrage et les mots du devis qui disent ses données", () => {
@@ -97,10 +115,10 @@ describe("un article écrit ne disparaît jamais : une ligne de fourniture dont 
 
   it("« fourniture et pose » sans article : « à chiffrer », avec ses mots et sa mesure ; la pose et l'échafaudage restent sans fourniture", () => {
     const e = ecran(sansOuvrage);
-    expect(e.purchase.toQuote.map((t) => [t.label, t.measure, t.reason])).toEqual([
-      ["Fourniture et pose couverture en lauzes de pays", "32 m²", LIGNE_NON_CHIFFREE],
-      ["Fourniture et pose bandes porte-solin cheminées", "2 unités", LIGNE_NON_CHIFFREE],
-    ]);
+    // Les lauzes : aucun ouvrage de la fiche ; les porte-solin : rattachés par le code à leur ouvrage (Greg, 20 novembre 2026),
+    // le nombre écrit se commande tel quel.
+    expect(e.purchase.toQuote.map((t) => [t.label, t.measure, t.reason])).toEqual([["Fourniture et pose couverture en lauzes de pays", "32 m²", LIGNE_NON_CHIFFREE]]);
+    expect(e.purchase.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Bandes porte-solin cheminées", "2 pièces"]]);
     expect(e.sansFourniture.map((l) => l.label)).toEqual(["Dépose ancienne couverture", "Installation et location échafaudage"]);
   });
 });

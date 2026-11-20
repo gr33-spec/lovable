@@ -1,0 +1,1726 @@
+[
+ {
+  "bref": [
+   "Rénovation : dépose de l'ancienne couverture sur 32 m², évacuation des gravats.",
+   "Couverture neuve en zinc prépatiné anthracite à tasseaux bois, 32 m², bacs de 4 m, avec couvre-joints.",
+   "Chéneau encaissé zinc anthracite, 8 m, contre mur mitoyen, façonné et soudé sur place.",
+   "Bandes de rive zinc anthracite, 8 m (2 × 4 m).",
+   "Faîtage en bande ventilée zinc anthracite, 8 m.",
+   "2 bandes porte-solin avec bavette et joint mastic pour entourage de cheminées.",
+   "1 descente d'eaux pluviales Ø80 zinc anthracite, avec bagues et colliers, raccordée au chéneau.",
+   "Sortie de toit zinc anthracite Ø125 avec chapeau pour VMC.",
+   "Sortie de toit zinc anthracite Ø100 avec chapeau pour chute/évent.",
+   "Échafaudage de sécurité, 3 m environ, installé et loué."
+  ],
+  "lots": [],
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "ouvrage",
+     "regle": null,
+     "preuve": "ligne 1 : « couverture zinc à tasseaux »",
+     "valeur": "couverture zinc à tasseaux avec dépose de l'ancienne couverture",
+     "libelle": "Ouvrage",
+     "origine": "devis"
+    },
+    {
+     "cle": "surface",
+     "regle": null,
+     "preuve": "ligne 1 : « 32 m² »",
+     "valeur": "32 m²",
+     "libelle": "Surface",
+     "origine": "devis"
+    },
+    {
+     "cle": "materiau",
+     "regle": null,
+     "preuve": "ligne 1 : « zinc prépatiné anthracite sur tasseaux bois et couvre-joints »",
+     "valeur": "zinc prépatiné anthracite",
+     "libelle": "Matériau",
+     "origine": "devis"
+    },
+    {
+     "cle": "longueur_des_bacs_(rampant)",
+     "regle": null,
+     "preuve": "ligne 1 : « bacs de 4 m »",
+     "valeur": "4 m",
+     "libelle": "Longueur des bacs (rampant)",
+     "origine": "devis"
+    },
+    {
+     "cle": "largeur_de_la_bobine",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Largeur de la bobine",
+     "origine": "manquante"
+    },
+    {
+     "cle": "epaisseur_du_zinc",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Épaisseur du zinc",
+     "origine": "manquante"
+    },
+    {
+     "cle": "cheneau",
+     "regle": null,
+     "preuve": "ligne 3 : « chéneau encaissé en zinc anthracite contre mur mitoyen »",
+     "valeur": "8 m, zinc anthracite, encaissé contre mur mitoyen",
+     "libelle": "Chéneau",
+     "origine": "devis"
+    },
+    {
+     "cle": "faconnage",
+     "regle": "« Fourniture, façonnage, soudures et pose » du chéneau : l'artisan façonne et soude lui-même",
+     "preuve": "ligne 3",
+     "valeur": "façonné sur place par l'artisan",
+     "libelle": "Façonnage",
+     "origine": "deduite"
+    },
+    {
+     "cle": "rives",
+     "regle": null,
+     "preuve": "ligne 5 : « pour les 2 côtés (2 x 4 m) »",
+     "valeur": "8 m (2 × 4 m), bandes zinc anthracite",
+     "libelle": "Rives",
+     "origine": "devis"
+    },
+    {
+     "cle": "faitage",
+     "regle": null,
+     "preuve": "ligne 6 : « bande de faîtage ventilée en zinc anthracite »",
+     "valeur": "8 m, bande ventilée zinc anthracite",
+     "libelle": "Faîtage",
+     "origine": "devis"
+    },
+    {
+     "cle": "bandes_porte_solin",
+     "regle": null,
+     "preuve": "ligne 7",
+     "valeur": "2 unités, avec bavette et joint mastic, entourage de cheminées",
+     "libelle": "Bandes porte-solin",
+     "origine": "devis"
+    },
+    {
+     "cle": "descente_d_eaux_pluviales",
+     "regle": null,
+     "preuve": "ligne 8",
+     "valeur": "1 u, Ø80, zinc anthracite, bagues et colliers, raccordée au chéneau",
+     "libelle": "Descente d'eaux pluviales",
+     "origine": "devis"
+    },
+    {
+     "cle": "hauteur_de_la_descente",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Hauteur de la descente",
+     "origine": "manquante"
+    },
+    {
+     "cle": "sortie_de_toit_1",
+     "regle": null,
+     "preuve": "ligne 9",
+     "valeur": "1 u, Ø125, zinc anthracite, chapeau, VMC",
+     "libelle": "Sortie de toit 1",
+     "origine": "devis"
+    },
+    {
+     "cle": "sortie_de_toit_2",
+     "regle": null,
+     "preuve": "ligne 10",
+     "valeur": "1 u, Ø100, zinc anthracite, chapeau, chute/évent",
+     "libelle": "Sortie de toit 2",
+     "origine": "devis"
+    },
+    {
+     "cle": "depose",
+     "regle": null,
+     "preuve": "ligne 11",
+     "valeur": "ancienne couverture 32 m²",
+     "libelle": "Dépose",
+     "origine": "devis"
+    },
+    {
+     "cle": "echafaudage",
+     "regle": null,
+     "preuve": "ligne 12",
+     "valeur": "1 u, hauteur environ 3 m",
+     "libelle": "Échafaudage",
+     "origine": "devis"
+    }
+   ]
+  },
+  "notes": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "role": "fourniture_et_pose",
+    "unite": "m²",
+    "quantite": "32",
+    "designation": "Fourniture et pose couverture zinc à tasseaux : couverture en zinc prépatiné anthracite sur tasseaux bois et couvre-joints, bacs de 4 m",
+    "fournitures": [
+     {
+      "nom": "Zinc prépatiné anthracite en bobine, bacs de 4 m",
+      "unite": null,
+      "attend": [
+       "largeur_bobine_tasseaux",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "bobine"
+     },
+     {
+      "nom": "Tasseaux bois",
+      "unite": null,
+      "attend": [
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "tasseau"
+     },
+     {
+      "nom": "Couvre-joints zinc prépatiné anthracite",
+      "unite": null,
+      "attend": [
+       "largeur_bobine_tasseaux",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "couvre_joint"
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose chéneau zinc anthracite : chéneau encaissé en zinc anthracite contre mur mitoyen, façonnage et soudures",
+    "fournitures": [
+     {
+      "nom": "Chéneau encaissé zinc anthracite, contre mur mitoyen",
+      "unite": "ml",
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": "8",
+      "aPreciser": [
+       "développé",
+       "épaisseur"
+      ],
+      "precision": "Chéneau encaissé contre mur mitoyen, façonné et soudé sur place",
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose habillages de rive : bandes de rive en zinc anthracite pour les 2 côtés (2 x 4 m)",
+    "fournitures": [
+     {
+      "nom": "Bandes de rive zinc anthracite",
+      "unite": "ml",
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": "8",
+      "aPreciser": [
+       "développé",
+       "épaisseur"
+      ],
+      "precision": "2 côtés (2 x 4 m)",
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose faîtage zinc anthracite : bande de faîtage ventilée en zinc anthracite sur toute la longueur",
+    "fournitures": [
+     {
+      "nom": "Bande de faîtage ventilée zinc anthracite",
+      "unite": "ml",
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": "8",
+      "aPreciser": [
+       "développé",
+       "épaisseur"
+      ],
+      "precision": "Bande ventilée",
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "role": "fourniture_et_pose",
+    "unite": "unités",
+    "quantite": "2",
+    "designation": "Fourniture et pose bandes porte-solin cheminées : bandes porte-solin avec bavette et joint mastic d'étanchéité pour entourage de cheminées",
+    "fournitures": [
+     {
+      "nom": "Bandes porte-solin avec bavette",
+      "unite": "u",
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": "2",
+      "aPreciser": [
+       "développé",
+       "longueur"
+      ],
+      "precision": "Entourage de cheminées",
+      "emplacement": null
+     },
+     {
+      "nom": "Joint mastic d'étanchéité",
+      "unite": null,
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose descente d'eaux pluviales Ø80 : descente zinc anthracite avec bagues, colliers et raccordement au chéneau",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente zinc anthracite Ø80",
+      "unite": null,
+      "attend": [
+       "hauteur_descente"
+      ],
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "ouvrage": "descente",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Raccordement au chéneau",
+      "emplacement": "tube"
+     },
+     {
+      "nom": "Colliers de descente Ø80",
+      "unite": null,
+      "attend": [
+       "hauteur_descente"
+      ],
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "ouvrage": "descente",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "collier"
+     },
+     {
+      "nom": "Bagues de descente Ø80",
+      "unite": null,
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose sortie de toiture Ø125 : sortie de toit zinc anthracite Ø125 avec chapeau pour VMC",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit zinc anthracite Ø125 pour VMC",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "125"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Intégration étanche, pour VMC",
+      "emplacement": "platine"
+     },
+     {
+      "nom": "Chapeau de sortie de toit Ø125",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "125"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Pour VMC",
+      "emplacement": "chapeau"
+     }
+    ]
+   },
+   {
+    "ref": "8",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose sortie de toiture Ø100 : sortie de toit zinc anthracite Ø100 avec chapeau pour chute/évent",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit zinc anthracite Ø100 pour chute/évent",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "100"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Intégration étanche, pour chute/évent",
+      "emplacement": "platine"
+     },
+     {
+      "nom": "Chapeau de sortie de toit Ø100",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "100"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Pour chute/évent",
+      "emplacement": "chapeau"
+     }
+    ]
+   },
+   {
+    "ref": "9",
+    "role": "pose",
+    "unite": "m²",
+    "quantite": "32",
+    "designation": "Dépose ancienne couverture : dépose de l'ancienne couverture et mise en décharge / évacuation des gravats",
+    "fournitures": []
+   },
+   {
+    "ref": "10",
+    "role": "hors_quantitatif",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Installation et location échafaudage : transport, montage, location et repli d'échafaudage de sécurité sur une hauteur de 3 m environ",
+    "fournitures": []
+   }
+  ],
+  "metier": "roofing",
+  "contexte": {
+   "date": "18/11/2026",
+   "ville": "Plouha",
+   "code postal": "22580",
+   "numéro du devis": "D-2026-024",
+   "neuf ou rénovation": "rénovation (dépose de l'ancienne couverture)"
+  },
+  "questions": [
+   {
+    "cle": "largeur_bobine_tasseaux",
+    "ligne": "1",
+    "texte": "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+    "unite": "mm",
+    "donnee": "largeur de la bobine",
+    "boutons": [
+     {
+      "label": "Bobine de 650 mm",
+      "valeur": "650"
+     },
+     {
+      "label": "Bobine de 500 mm",
+      "valeur": "500"
+     }
+    ]
+   },
+   {
+    "cle": "epaisseur_zinc",
+    "ligne": null,
+    "texte": "Épaisseur du zinc ?",
+    "unite": "mm",
+    "donnee": "épaisseur du zinc",
+    "boutons": [
+     {
+      "label": "0,65 mm",
+      "valeur": "0.65"
+     },
+     {
+      "label": "0,70 mm",
+      "valeur": "0.7"
+     },
+     {
+      "label": "0,80 mm",
+      "valeur": "0.8"
+     }
+    ]
+   },
+   {
+    "cle": "hauteur_descente",
+    "ligne": "6",
+    "texte": "Hauteur de la descente d'eaux pluviales, en mètres (ex. 3,50) ?",
+    "unite": "m",
+    "donnee": "hauteur de la descente",
+    "boutons": []
+   }
+  ]
+ },
+ {
+  "bref": [
+   "Dépose de l'ancienne couverture sur 32 m² avec évacuation des gravats.",
+   "Couverture zinc prépatiné anthracite sur tasseaux bois et couvre-joints, 32 m², bacs de 4 m.",
+   "Chéneau encaissé zinc anthracite 8 m, contre mur mitoyen, avec soudures.",
+   "Bandes de rive zinc anthracite 8 m (2 × 4 m).",
+   "Bande de faîtage ventilée zinc anthracite 8 m.",
+   "2 bandes porte-solin avec bavette et joint mastic pour les cheminées.",
+   "1 descente d'eaux pluviales Ø80 zinc anthracite avec bagues et colliers, raccordée au chéneau.",
+   "1 sortie de toit zinc anthracite Ø125 avec chapeau pour VMC, 1 sortie Ø100 avec chapeau pour chute/évent.",
+   "Échafaudage de sécurité environ 3 m, installation et location."
+  ],
+  "lots": [],
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "ouvrage",
+     "regle": null,
+     "preuve": "ligne 1:011 : « Fourniture et pose couverture zinc à tasseaux »",
+     "valeur": "couverture zinc à tasseaux",
+     "libelle": "Ouvrage",
+     "origine": "devis"
+    },
+    {
+     "cle": "surface",
+     "regle": null,
+     "preuve": "ligne 1:011 : « 32 m² »",
+     "valeur": "32 m²",
+     "libelle": "Surface",
+     "origine": "devis"
+    },
+    {
+     "cle": "aspect_du_zinc",
+     "regle": null,
+     "preuve": "ligne 1:012-013 : « zinc prépatiné anthracite »",
+     "valeur": "prépatiné anthracite (Anthra-Zinc)",
+     "libelle": "Aspect du zinc",
+     "origine": "devis"
+    },
+    {
+     "cle": "longueur_des_bacs",
+     "regle": null,
+     "preuve": "ligne 1:013 : « bacs de 4 m »",
+     "valeur": "4 m",
+     "libelle": "Longueur des bacs",
+     "origine": "devis"
+    },
+    {
+     "cle": "epaisseur_du_zinc",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Épaisseur du zinc",
+     "origine": "manquante"
+    },
+    {
+     "cle": "largeur_de_bobine",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Largeur de bobine",
+     "origine": "manquante"
+    },
+    {
+     "cle": "rampant",
+     "regle": "longueur des bacs = rampant (bacs de 4 m)",
+     "preuve": "",
+     "valeur": "4 m",
+     "libelle": "Rampant",
+     "origine": "deduite"
+    },
+    {
+     "cle": "cheneau",
+     "regle": null,
+     "preuve": "ligne 1:014-016",
+     "valeur": "8 m en zinc anthracite, encaissé contre mur mitoyen",
+     "libelle": "Chéneau",
+     "origine": "devis"
+    },
+    {
+     "cle": "developpe_du_cheneau",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Développé du chéneau",
+     "origine": "manquante"
+    },
+    {
+     "cle": "rives",
+     "regle": null,
+     "preuve": "ligne 1:017-019",
+     "valeur": "8 m (2 × 4 m)",
+     "libelle": "Rives",
+     "origine": "devis"
+    },
+    {
+     "cle": "faitage",
+     "regle": null,
+     "preuve": "ligne 1:020-022",
+     "valeur": "8 m, bande ventilée zinc anthracite",
+     "libelle": "Faîtage",
+     "origine": "devis"
+    },
+    {
+     "cle": "porte_solin_cheminees",
+     "regle": null,
+     "preuve": "ligne 1:023-025",
+     "valeur": "2 unités, avec bavette et mastic",
+     "libelle": "Porte-solin cheminées",
+     "origine": "devis"
+    },
+    {
+     "cle": "longueur_de_bande_porte_solin",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Longueur de bande porte-solin",
+     "origine": "manquante"
+    },
+    {
+     "cle": "nombre_de_descentes",
+     "regle": null,
+     "preuve": "ligne 1:026 : « 1 unité »",
+     "valeur": "1",
+     "libelle": "Nombre de descentes",
+     "origine": "devis"
+    },
+    {
+     "cle": "diametre_de_descente",
+     "regle": null,
+     "preuve": "ligne 1:026",
+     "valeur": "Ø80",
+     "libelle": "Diamètre de descente",
+     "origine": "devis"
+    },
+    {
+     "cle": "hauteur_de_descente",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Hauteur de descente",
+     "origine": "manquante"
+    },
+    {
+     "cle": "sorties_de_toit",
+     "regle": null,
+     "preuve": "ligne 1:030-035",
+     "valeur": "1 × Ø125 (VMC) et 1 × Ø100 (chute/évent), zinc anthracite avec chapeau",
+     "libelle": "Sorties de toit",
+     "origine": "devis"
+    },
+    {
+     "cle": "depose_ancienne_couverture",
+     "regle": null,
+     "preuve": "ligne 1:036",
+     "valeur": "32 m²",
+     "libelle": "Dépose ancienne couverture",
+     "origine": "devis"
+    },
+    {
+     "cle": "echafaudage",
+     "regle": null,
+     "preuve": "ligne 2:002-004",
+     "valeur": "1 unité, hauteur 3 m environ",
+     "libelle": "Échafaudage",
+     "origine": "devis"
+    },
+    {
+     "cle": "faconnage",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Façonnage",
+     "origine": "manquante"
+    }
+   ]
+  },
+  "notes": [
+   "Le devis dit « 2 unités » pour les porte-solin des cheminées : la longueur de bande n'est pas écrite.",
+   "La dépose et l'échafaudage ne demandent aucune fourniture."
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "role": "fourniture_et_pose",
+    "unite": "m²",
+    "quantite": "32",
+    "designation": "Fourniture et pose couverture zinc à tasseaux : couverture en zinc prépatiné anthracite sur tasseaux bois et couvre-joints, bacs de 4 m",
+    "fournitures": [
+     {
+      "nom": "Zinc prépatiné anthracite (Anthra-Zinc) en bobine pour couverture à tasseaux, bacs de 4 m",
+      "unite": null,
+      "attend": [
+       "epaisseur_zinc",
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "bobine"
+     },
+     {
+      "nom": "Tasseaux bois",
+      "unite": null,
+      "attend": [
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "tasseau"
+     },
+     {
+      "nom": "Couvre-joints zinc prépatiné anthracite",
+      "unite": null,
+      "attend": [
+       "epaisseur_zinc",
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "couvre_joint"
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose chéneau zinc anthracite : chéneau encaissé en zinc anthracite contre mur mitoyen, façonnage et soudures",
+    "fournitures": [
+     {
+      "nom": "Chéneau zinc anthracite encaissé",
+      "unite": "ml",
+      "attend": [
+       "developpe_cheneau",
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3",
+       "longueur_bande": "8"
+      },
+      "ouvrage": "bandes-zinc",
+      "quantite": "8",
+      "aPreciser": [],
+      "precision": "encaissé contre mur mitoyen, soudures",
+      "emplacement": "bande"
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose habillages de rive : bandes de rive en zinc anthracite pour les 2 côtés (2 x 4 m)",
+    "fournitures": [
+     {
+      "nom": "Bandes de rive zinc anthracite",
+      "unite": "ml",
+      "attend": [
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3",
+       "longueur_bande": "8"
+      },
+      "ouvrage": "bandes-zinc",
+      "quantite": "8",
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "bande"
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose faîtage zinc anthracite : bande de faîtage ventilée en zinc anthracite sur toute la longueur",
+    "fournitures": [
+     {
+      "nom": "Bande de faîtage ventilée zinc anthracite",
+      "unite": null,
+      "attend": [
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3",
+       "longueur_faitage": "8"
+      },
+      "ouvrage": "faitage-zinc",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "bande ventilée",
+      "emplacement": "bande"
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "role": "fourniture_et_pose",
+    "unite": "unités",
+    "quantite": "2",
+    "designation": "Fourniture et pose bandes porte-solin cheminées : bandes porte-solin avec bavette et joint mastic d'étanchéité pour entourage de cheminées",
+    "fournitures": [
+     {
+      "nom": "Bandes porte-solin zinc avec bavette",
+      "unite": null,
+      "attend": [
+       "longueur_bande",
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3"
+      },
+      "ouvrage": "bande-porte-solin",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "avec bavette",
+      "emplacement": "porte_solin"
+     },
+     {
+      "nom": "Mastic d'étanchéité",
+      "unite": null,
+      "attend": [
+       "longueur_bande"
+      ],
+      "donnees": {},
+      "ouvrage": "bande-porte-solin",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "mastic"
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose descente d'eaux pluviales Ø80 : descente zinc anthracite avec bagues, colliers et raccordement au chéneau",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente zinc anthracite Ø80",
+      "unite": null,
+      "attend": [
+       "hauteur_descente"
+      ],
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "ouvrage": "descente",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "raccordement au chéneau",
+      "emplacement": "tube"
+     },
+     {
+      "nom": "Colliers de descente Ø80",
+      "unite": null,
+      "attend": [
+       "hauteur_descente"
+      ],
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "ouvrage": "descente",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "collier"
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose sortie de toiture Ø125 : sortie de toit zinc anthracite Ø125 avec chapeau pour VMC",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit zinc anthracite Ø125 pour VMC",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "125"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "platine"
+     },
+     {
+      "nom": "Chapeau de sortie de toit Ø125 pour VMC",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "125"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "chapeau"
+     }
+    ]
+   },
+   {
+    "ref": "8",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose sortie de toiture Ø100 : sortie de toit zinc anthracite Ø100 avec chapeau pour chute/évent",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit zinc anthracite Ø100 pour chute/évent",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "100"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "platine"
+     },
+     {
+      "nom": "Chapeau de sortie de toit Ø100 pour chute/évent",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "100"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "chapeau"
+     }
+    ]
+   },
+   {
+    "ref": "9",
+    "role": "pose",
+    "unite": "m²",
+    "quantite": "32",
+    "designation": "Dépose ancienne couverture : dépose et mise en décharge / évacuation des gravats",
+    "fournitures": []
+   },
+   {
+    "ref": "10",
+    "role": "hors_quantitatif",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Installation et location échafaudage : transport, montage, location et repli d'échafaudage de sécurité sur une hauteur de 3 m environ",
+    "fournitures": []
+   }
+  ],
+  "metier": "roofing",
+  "contexte": {
+   "date": "18/11/2026",
+   "ville": "Plouha",
+   "code postal": "22580",
+   "numéro du devis": "D-2026-024",
+   "neuf ou rénovation": "rénovation (dépose de l'ancienne couverture)"
+  },
+  "questions": [
+   {
+    "cle": "faconnage",
+    "ligne": null,
+    "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+    "unite": null,
+    "donnee": "façonnage",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ]
+   },
+   {
+    "cle": "epaisseur_zinc",
+    "ligne": null,
+    "texte": "Épaisseur du zinc ?",
+    "unite": "mm",
+    "donnee": "épaisseur du zinc",
+    "boutons": [
+     {
+      "label": "0,65 mm",
+      "valeur": "0.65"
+     },
+     {
+      "label": "0,70 mm",
+      "valeur": "0.7"
+     },
+     {
+      "label": "0,80 mm",
+      "valeur": "0.8"
+     }
+    ]
+   },
+   {
+    "cle": "largeur_bobine_tasseaux",
+    "ligne": "1",
+    "texte": "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+    "unite": "mm",
+    "donnee": "largeur de bobine",
+    "boutons": [
+     {
+      "label": "Bobine de 650 mm",
+      "valeur": "650"
+     },
+     {
+      "label": "Bobine de 500 mm",
+      "valeur": "500"
+     }
+    ]
+   },
+   {
+    "cle": "developpe_cheneau",
+    "ligne": "2",
+    "texte": "Chéneau : quel développé de bande ?",
+    "unite": "mm",
+    "donnee": "développé du chéneau",
+    "boutons": [
+     {
+      "label": "330 mm",
+      "valeur": "330"
+     },
+     {
+      "label": "400 mm",
+      "valeur": "400"
+     },
+     {
+      "label": "500 mm",
+      "valeur": "500"
+     }
+    ]
+   },
+   {
+    "cle": "longueur_bande",
+    "ligne": "5",
+    "texte": "Porte-solin : quelle longueur de bande en tout pour les 2 cheminées, en mètres ?",
+    "unite": "m",
+    "donnee": "longueur de bande porte-solin",
+    "boutons": []
+   },
+   {
+    "cle": "hauteur_descente",
+    "ligne": "6",
+    "texte": "Hauteur de la descente d'eaux pluviales, en mètres ? (ex. 3,00)",
+    "unite": "m",
+    "donnee": "hauteur de descente",
+    "boutons": []
+   }
+  ]
+ },
+ {
+  "bref": [
+   "Dépose de l'ancienne couverture sur 32 m², avec évacuation des gravats.",
+   "Couverture zinc prépatiné anthracite sur 32 m², à tasseaux bois et couvre-joints, bacs de 4 m.",
+   "Chéneau encaissé en zinc anthracite 8 m, contre mur mitoyen.",
+   "Bandes de rive en zinc anthracite 8 m (2 x 4 m).",
+   "Bande de faîtage ventilée en zinc anthracite 8 m.",
+   "2 bandes porte-solin de cheminées, avec bavette et joint mastic.",
+   "Descente d'eaux pluviales Ø80 zinc anthracite, avec bagues et colliers, raccordée au chéneau.",
+   "Sortie de toit zinc anthracite Ø125 avec chapeau pour VMC.",
+   "Sortie de toit zinc anthracite Ø100 avec chapeau pour chute/évent.",
+   "Échafaudage de sécurité, hauteur 3 m environ."
+  ],
+  "lots": [],
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "ouvrage",
+     "regle": null,
+     "preuve": "ligne 1:011 : « couverture zinc à tasseaux »",
+     "valeur": "couverture zinc à tasseaux avec dépose de l'ancienne couverture",
+     "libelle": "Ouvrage",
+     "origine": "devis"
+    },
+    {
+     "cle": "surface",
+     "regle": null,
+     "preuve": "ligne 1:011 : « 32 m² »",
+     "valeur": "32 m²",
+     "libelle": "Surface",
+     "origine": "devis"
+    },
+    {
+     "cle": "aspect_du_zinc",
+     "regle": null,
+     "preuve": "ligne 1:012-013 : « zinc prépatiné anthracite »",
+     "valeur": "prépatiné anthracite",
+     "libelle": "Aspect du zinc",
+     "origine": "devis"
+    },
+    {
+     "cle": "longueur_des_bacs_(rampant)",
+     "regle": null,
+     "preuve": "ligne 1:013 : « bacs de 4 m »",
+     "valeur": "4 m",
+     "libelle": "Longueur des bacs (rampant)",
+     "origine": "devis"
+    },
+    {
+     "cle": "longueur_du_faitage",
+     "regle": null,
+     "preuve": "ligne 1:020 : « 8 m »",
+     "valeur": "8 m",
+     "libelle": "Longueur du faîtage",
+     "origine": "devis"
+    },
+    {
+     "cle": "longueur_de_rives",
+     "regle": null,
+     "preuve": "ligne 1:019 : « pour les 2 côtés (2 x 4 m) »",
+     "valeur": "8 m (2 côtés de 4 m)",
+     "libelle": "Longueur de rives",
+     "origine": "devis"
+    },
+    {
+     "cle": "cheneau",
+     "regle": null,
+     "preuve": "ligne 1:014-016",
+     "valeur": "8 m, zinc anthracite, encaissé contre mur mitoyen",
+     "libelle": "Chéneau",
+     "origine": "devis"
+    },
+    {
+     "cle": "nombre_de_cheminees",
+     "regle": null,
+     "preuve": "ligne 1:023 : « 2 unités »",
+     "valeur": "2",
+     "libelle": "Nombre de cheminées",
+     "origine": "devis"
+    },
+    {
+     "cle": "nombre_de_descentes",
+     "regle": null,
+     "preuve": "ligne 1:026 : « 1 unité »",
+     "valeur": "1",
+     "libelle": "Nombre de descentes",
+     "origine": "devis"
+    },
+    {
+     "cle": "diametre_de_descente",
+     "regle": null,
+     "preuve": "ligne 1:026",
+     "valeur": "Ø80",
+     "libelle": "Diamètre de descente",
+     "origine": "devis"
+    },
+    {
+     "cle": "sorties_de_toit",
+     "regle": null,
+     "preuve": "lignes 1:030-035",
+     "valeur": "2 : Ø125 VMC et Ø100 chute/évent",
+     "libelle": "Sorties de toit",
+     "origine": "devis"
+    },
+    {
+     "cle": "epaisseur_du_zinc",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Épaisseur du zinc",
+     "origine": "manquante"
+    },
+    {
+     "cle": "largeur_de_la_bobine",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Largeur de la bobine",
+     "origine": "manquante"
+    },
+    {
+     "cle": "faconnage",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Façonnage",
+     "origine": "manquante"
+    },
+    {
+     "cle": "developpe_du_cheneau",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Développé du chéneau",
+     "origine": "manquante"
+    },
+    {
+     "cle": "perimetre_des_cheminees",
+     "regle": null,
+     "preuve": "",
+     "valeur": null,
+     "libelle": "Périmètre des cheminées",
+     "origine": "manquante"
+    }
+   ]
+  },
+  "notes": [
+   "Le devis ne dit ni l'épaisseur du zinc ni la largeur de bobine : ces deux points sont demandés.",
+   "Hauteur de la descente non écrite : à préciser pour les tubes et colliers.",
+   "Échafaudage et dépose : rien à acheter."
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "role": "fourniture_et_pose",
+    "unite": "m²",
+    "quantite": "32",
+    "designation": "Fourniture et pose couverture zinc à tasseaux — couverture en zinc prépatiné anthracite sur tasseaux bois et couvre-joints, bacs de 4 m",
+    "fournitures": [
+     {
+      "nom": "Zinc prépatiné anthracite en bobine pour couverture à tasseaux",
+      "unite": null,
+      "attend": [
+       "epaisseur_zinc",
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "bobine"
+     },
+     {
+      "nom": "Tasseaux bois",
+      "unite": null,
+      "attend": [
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "tasseau"
+     },
+     {
+      "nom": "Couvre-joints zinc prépatiné anthracite",
+      "unite": null,
+      "attend": [
+       "epaisseur_zinc",
+       "largeur_bobine_tasseaux"
+      ],
+      "donnees": {
+       "surface": "32",
+       "aspect_zinc": "3",
+       "longueur_rampant": "4"
+      },
+      "ouvrage": "couverture-zinc-tasseaux",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "couvre_joint"
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose chéneau zinc anthracite — chéneau encaissé en zinc anthracite contre mur mitoyen, façonnage et soudures",
+    "fournitures": [
+     {
+      "nom": "Chéneau zinc anthracite encaissé",
+      "unite": "ml",
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": "8",
+      "aPreciser": [
+       "épaisseur du zinc",
+       "développé du chéneau"
+      ],
+      "precision": "Chéneau encaissé contre mur mitoyen, façonné et soudé sur place",
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose habillages de rive — bandes de rive en zinc anthracite, 2 côtés (2 x 4 m)",
+    "fournitures": [
+     {
+      "nom": "Bandes de rive zinc anthracite",
+      "unite": "ml",
+      "attend": [
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3",
+       "longueur_bande": "8"
+      },
+      "ouvrage": "bandes-zinc",
+      "quantite": "8",
+      "aPreciser": [
+       "développé de la bande"
+      ],
+      "precision": null,
+      "emplacement": "bande"
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "role": "fourniture_et_pose",
+    "unite": "m",
+    "quantite": "8",
+    "designation": "Fourniture et pose faîtage zinc anthracite — bande de faîtage ventilée en zinc anthracite sur toute la longueur",
+    "fournitures": [
+     {
+      "nom": "Bande de faîtage ventilée zinc anthracite",
+      "unite": null,
+      "attend": [
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3",
+       "longueur_faitage": "8"
+      },
+      "ouvrage": "faitage-zinc",
+      "quantite": null,
+      "aPreciser": [
+       "développé de la bande"
+      ],
+      "precision": "Bande de faîtage ventilée",
+      "emplacement": "bande"
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "role": "fourniture_et_pose",
+    "unite": "unités",
+    "quantite": "2",
+    "designation": "Fourniture et pose bandes porte-solin cheminées — bandes porte-solin avec bavette et joint mastic d'étanchéité pour entourage de cheminées",
+    "fournitures": [
+     {
+      "nom": "Bandes porte-solin avec bavette pour cheminées",
+      "unite": null,
+      "attend": [
+       "perimetre_cheminee",
+       "faconnage",
+       "epaisseur_zinc"
+      ],
+      "donnees": {
+       "aspect_zinc": "3",
+       "nb_cheminees": "2"
+      },
+      "ouvrage": "abergement-cheminee",
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Avec bavette",
+      "emplacement": "porte_solin"
+     },
+     {
+      "nom": "Joint mastic d'étanchéité",
+      "unite": null,
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": null,
+      "aPreciser": [],
+      "precision": "Pour l'entourage des cheminées",
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose descente d'eaux pluviales Ø80 — descente zinc anthracite avec bagues, colliers et raccordement au chéneau",
+    "fournitures": [
+     {
+      "nom": "Descente d'eaux pluviales zinc anthracite Ø80",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "ouvrage": "descente",
+      "quantite": null,
+      "aPreciser": [
+       "hauteur de la descente"
+      ],
+      "precision": "Raccordée au chéneau",
+      "emplacement": "tube"
+     },
+     {
+      "nom": "Colliers de descente Ø80",
+      "unite": null,
+      "attend": [],
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "ouvrage": "descente",
+      "quantite": null,
+      "aPreciser": [
+       "hauteur de la descente"
+      ],
+      "precision": null,
+      "emplacement": "collier"
+     },
+     {
+      "nom": "Bagues pour descente Ø80",
+      "unite": null,
+      "attend": [],
+      "donnees": {},
+      "ouvrage": null,
+      "quantite": null,
+      "aPreciser": [
+       "quantité de bagues"
+      ],
+      "precision": null,
+      "emplacement": null
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose sortie de toiture Ø125 — sortie de toit zinc anthracite Ø125 avec chapeau pour VMC",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit zinc anthracite Ø125",
+      "unite": "u",
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "125"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": "1",
+      "aPreciser": [],
+      "precision": "Pour VMC",
+      "emplacement": "platine"
+     },
+     {
+      "nom": "Chapeau Ø125 pour VMC",
+      "unite": "u",
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "125"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": "1",
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "chapeau"
+     }
+    ]
+   },
+   {
+    "ref": "8",
+    "role": "fourniture_et_pose",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Fourniture et pose sortie de toiture Ø100 — sortie de toit zinc anthracite Ø100 avec chapeau pour chute/évent",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit zinc anthracite Ø100",
+      "unite": "u",
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "100"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": "1",
+      "aPreciser": [],
+      "precision": "Pour chute/évent",
+      "emplacement": "platine"
+     },
+     {
+      "nom": "Chapeau Ø100 pour chute/évent",
+      "unite": "u",
+      "attend": [],
+      "donnees": {
+       "nb_sorties": "1",
+       "usage_sortie": "2",
+       "support_sortie": "2",
+       "diametre_sortie": "100"
+      },
+      "ouvrage": "sortie-de-toit",
+      "quantite": "1",
+      "aPreciser": [],
+      "precision": null,
+      "emplacement": "chapeau"
+     }
+    ]
+   },
+   {
+    "ref": "9",
+    "role": "pose",
+    "unite": "m²",
+    "quantite": "32",
+    "designation": "Dépose ancienne couverture — dépose et évacuation des gravats",
+    "fournitures": []
+   },
+   {
+    "ref": "10",
+    "role": "hors_quantitatif",
+    "unite": "unité",
+    "quantite": "1",
+    "designation": "Installation et location échafaudage — transport, montage, location et repli d'échafaudage de sécurité, hauteur 3 m environ",
+    "fournitures": []
+   }
+  ],
+  "metier": "roofing",
+  "contexte": {
+   "date": "18/11/2026",
+   "ville": "Plouha",
+   "code postal": "22580",
+   "numéro du devis": "D-2026-024",
+   "neuf ou rénovation": "rénovation"
+  },
+  "questions": [
+   {
+    "cle": "epaisseur_zinc",
+    "ligne": null,
+    "texte": "Quelle épaisseur de zinc ?",
+    "unite": "mm",
+    "donnee": "épaisseur du zinc",
+    "boutons": [
+     {
+      "label": "0,65 mm",
+      "valeur": "0.65"
+     },
+     {
+      "label": "0,70 mm",
+      "valeur": "0.7"
+     },
+     {
+      "label": "0,80 mm",
+      "valeur": "0.8"
+     }
+    ]
+   },
+   {
+    "cle": "largeur_bobine_tasseaux",
+    "ligne": "1",
+    "texte": "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+    "unite": "mm",
+    "donnee": "largeur de bobine",
+    "boutons": [
+     {
+      "label": "Bobine de 650 mm",
+      "valeur": "650"
+     },
+     {
+      "label": "Bobine de 500 mm",
+      "valeur": "500"
+     }
+    ]
+   },
+   {
+    "cle": "faconnage",
+    "ligne": null,
+    "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+    "unite": null,
+    "donnee": "façonnage",
+    "boutons": [
+     {
+      "label": "Je façonne",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ]
+   },
+   {
+    "cle": "cheneau_developpe",
+    "ligne": "2",
+    "texte": "Quel développé pour le chéneau ?",
+    "unite": "mm",
+    "donnee": "développé du chéneau",
+    "boutons": [
+     {
+      "label": "50 cm",
+      "valeur": "500"
+     },
+     {
+      "label": "66 cm",
+      "valeur": "660"
+     }
+    ]
+   },
+   {
+    "cle": "perimetre_cheminee",
+    "ligne": "6",
+    "texte": "Périmètre d'une cheminée (les 4 côtés) ?",
+    "unite": "m",
+    "donnee": "périmètre de cheminée",
+    "boutons": [
+     {
+      "label": "2 m",
+      "valeur": "2"
+     },
+     {
+      "label": "3 m",
+      "valeur": "3"
+     },
+     {
+      "label": "4 m",
+      "valeur": "4"
+     },
+     {
+      "label": "5 m",
+      "valeur": "5"
+     }
+    ]
+   }
+  ]
+ }
+]

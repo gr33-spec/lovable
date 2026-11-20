@@ -8,7 +8,7 @@ import { baseOf, INSTANCE_SEP, type Referential, type Slot, type WorkItemType } 
 import { readDimension, type LinePlan, type QuotePlan } from "../referential/plan.js";
 import { parseRefUnit, sameDim } from "../referential/units.js";
 import type { LineValidation, TakeoffIssue, TakeoffValidation } from "../takeoff/validation.js";
-import { artisanView, computeWithAnswers, groupeDe, piecewiseParams, slotsGivenByQuote, scopedKey, scopedParam, type ArtisanView, type Decision, type EngineAnswer } from "../trust/artisan-view.js";
+import { artisanView, computeWithAnswers, groupeDe, lotLabel, piecewiseParams, questionDePiece, slotsGivenByQuote, scopedKey, scopedParam, type ArtisanView, type Decision, type EngineAnswer } from "../trust/artisan-view.js";
 import { applyPurchaseOverrides, applyRuleConfirmations, purchaseView, type PurchaseItem, type PurchaseView, type ScreenRow } from "../trust/purchase-view.js";
 import { applyOrangeFlags } from "../trust/orange.js";
 import { forbiddenFlags } from "../trust/forbidden.js";
@@ -17,6 +17,7 @@ import { isWithoutSupplyUnit } from "../takeoff/supply.js";
 import { withoutLabour } from "../trust/marchandise.js";
 import { normalizeText } from "../trades/trade-profile.js";
 import { fournituresElectriques, pointElectrique, type ArticleElectrique } from "./electricite.js";
+import { lectureParLeCode } from "./par-le-code.js";
 import { ficheDeCalcul, fournituresDeFiche, questionsDeFiche, type ArticleFiche, type FicheMetier } from "../referential/fiches/index.js";
 
 /**
@@ -726,7 +727,10 @@ export function ecranDeLecture(input: {
   /** La fiche métier qui calcule (§52, format commun) ; absent : celle du métier du référentiel. Les tests la donnent. */
   fiche?: FicheMetier;
 }): EcranDeLecture {
-  const { ref, lecture } = input;
+  // Greg, 20 novembre 2026 : le même devis donne toujours la même liste et les mêmes questions ; l'ouvrage, les articles et
+  // les données d'une ligne sont décidés par le code d'après la fiche du métier, les questions par le calcul.
+  const { ref } = input;
+  const lecture = lectureParLeCode(ref, input.lecture);
   const answers = input.answers ?? {};
   const lignes = lignesDeLecture(lecture, input.ids).map((l) => {
     const edited = input.lines?.get(l.id);
@@ -798,8 +802,49 @@ export function ecranDeLecture(input: {
   // non plus : c'est une quantité (« Combien de rangs de tasseaux ? », recette en ligne du 19 novembre 2026, D-2026-024).
   const interdites = new Set(ref.workItems.flatMap((w) => [...w.params.filter((p) => p.neverAsk).map((p) => p.key), ...(w.derived ?? []).map((d) => d.key)]));
   // Les consommables se cochent à l'étape « Suggestions » : la question oui / non du modèle n'est plus posée.
-  const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q0) => {
-    const q = rattacherQuestion(ref, plan, q0, lignes);
+  // Greg, 20 novembre 2026 : « Les questions sont décidées par le code à partir de la fiche métier, pas par la lecture IA. »
+  // Une question du modèle ne reste que si elle porte sur une donnée de la fiche d'un ouvrage du devis (ou sur un produit,
+  // ou une question de la fiche de calcul) ; elle prend alors les mots et les boutons de la fiche. Les autres (une donnée
+  // que le modèle invente, « fiche:… ») sont écartées : le calcul pose ce qui lui manque.
+  // Les ouvrages du devis : ceux du calcul, et ceux que nomment les fournitures (les points électriques, calculés à part).
+  const ouvragesDuPlan = new Set([...plan.inputs.map((i) => baseOf(i.workItemId)), ...lecture.lignes.flatMap((l) => l.fournitures.map((f) => f.ouvrage ?? "")).filter(Boolean).map(baseOf)]);
+  const texteDuDevis = [...lecture.lignes.map((l) => `${l.designation} ${l.quantite ?? ""}`), ...lecture.fiche.donnees.map((d) => `${d.valeur ?? ""} ${d.preuve ?? ""}`), ...lecture.bref].join(" ");
+  const nombresDuDevis = new Set([...texteDuDevis.matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => String(Number(m[0].replace(",", ".")))));
+  const questionsDeLaFiche = new Set((fiche?.questions ?? []).map((q) => q.cle));
+  const deLaFiche = (q: LectureQuestion): LectureQuestion | null => {
+    if (q.cle.startsWith("produit_") || questionsDeLaFiche.has(q.cle)) return q;
+    // Une donnée que la fiche ne connaît pas (une contradiction du devis, « ZWC ou Pratikal ? » ; la matière d'une ligne
+    // qu'aucun ouvrage ne calcule) : le code ne sait pas la poser, la question de la lecture reste.
+    if (!ref.workItems.some((w) => w.params.some((p) => p.key === q.cle))) return q;
+    // La donnée de l'ouvrage de SA ligne d'abord (le façonnage des bacs n'est pas celui des bandes), sinon du premier
+    // ouvrage du devis qui la connaît.
+    const deSaLigne = q.ligne ? plan.lines.find((x) => x.status === "planned" && x.ref.split(".")[0] === q.ligne) : undefined;
+    const def =
+      (deSaLigne?.status === "planned" ? ref.workItems.find((w) => w.id === baseOf(deSaLigne.workItemId))?.params.find((p) => p.key === q.cle) : undefined) ??
+      ref.workItems.filter((w) => ouvragesDuPlan.has(w.id)).flatMap((w) => w.params).find((p) => p.key === q.cle);
+    // Une donnée d'un ouvrage absent du devis, ou une mesure de ligne (la longueur d'une bande) : le calcul la demande
+    // lui-même, à la bonne pièce, ou pas du tout.
+    if (!def || def.fromLineQuantity) return null;
+    // Un doute que le devis soulève (« Pente : 40° au devis, ou 30° en en-tête ? », « de 25 ou de 33 ? ») : deux boutons,
+    // deux valeurs que le devis écrit, pas tous les choix de la fiche. Greg, 18 novembre 2026 : « S'il y a un doute, ça
+    // vaut le coup de poser une question. » Elle garde ses mots et ses boutons.
+    const toutes = new Set((def.choices ?? []).map((c) => c.value));
+    const lues = q.boutons.map((b) => valeurDuReferentiel(def, b));
+    const valable = (v: string) => toutes.has(v) || (/^\d+(?:[.,]\d+)?$/.test(v.trim()) && toutes.size === 0) || /^\d+(?:[.,]\d+)?$/.test(v.trim());
+    // Les deux valeurs se lisent au devis (une ligne, l'en-tête, la fiche lue) : jamais deux boutons inventés (« 50 cm / 66 cm »
+    // pour un chéneau dont le devis ne dit rien, D-2026-024).
+    const ecritAuDevis = (b: { label: string; valeur: string }) => {
+      const n = /\d+(?:[.,]\d+)?/.exec(`${b.label} ${b.valeur}`)?.[0]?.replace(",", ".");
+      return n !== undefined && nombresDuDevis.has(String(Number(n)));
+    };
+    if (lues.length === 2 && new Set(lues).size === 2 && lues.every(valable) && q.boutons.every(ecritAuDevis) && !(toutes.size === 2 && lues.every((v) => toutes.has(v)))) return q;
+    return { ...q, texte: def.question, boutons: (def.choices ?? []).map((c) => ({ label: c.label, valeur: c.value })), unite: def.unit };
+  };
+  const asked: Asked[] = lecture.questions.filter((q) => !interdites.has(q.cle) && !(q.cle === CONSUMABLES_KEY && !fiche)).flatMap((q00) => {
+    const q1 = deLaFiche(rattacherQuestion(ref, plan, q00, lignes));
+    if (!q1) return [];
+    const q0 = q1;
+    const q = q1;
     // Posée sous un mot du modèle (« largeur de bobine »), c'est la même donnée interdite : écartée aussi.
     if (interdites.has(q.cle)) return [];
     const question = questionDeLecture(ref, plan, q, lignes);
@@ -888,8 +933,20 @@ export function ecranDeLecture(input: {
       const work = ref.workItems.find((w) => w.id === baseOf(n.workItemId));
       const def = work?.params.find((p) => p.key === key);
       // Seule une donnée qui change l'article (le développé, le Ø) se demande ; une donnée sans effet (le recouvrement d'une tuile à blocage), non.
-      if (!def || !work?.needs.some((r) => (r.precisionRequires ?? []).includes(key)) || fallback.some((q) => q.key === `param:${key}` || scopedParam(q.key)?.name === key)) continue;
-      fallback.push({ key: `param:${key}`, kind: "param", text: def.question, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
+      if (!def || !work?.needs.some((r) => (r.precisionRequires ?? []).includes(key))) continue;
+      // Le développé d'une pièce ne se demande qu'une fois son pliage dit : des feuilles n'en ont pas besoin (Greg, 10
+      // octobre : « on veut juste un nombre de feuilles »).
+      const input = plan.inputs.find((i) => i.workItemId === n.workItemId);
+      const g = groupeDe(ref, n.workItemId, "faconnage");
+      const plie = (k: string) => answers[k] !== undefined && answers[k] !== null;
+      if (key !== "faconnage" && work.params.some((p) => p.key === "faconnage") && !input?.params.faconnage && !plie(scopedKey("faconnage", n.workItemId)) && !(g && plie(scopedKey("faconnage", g.id))) && !plie("param:faconnage")) continue;
+      // Une donnée de pièce (le développé) que plusieurs ouvrages attendent se demande pièce par pièce, à son nom.
+      const parPiece = piecewiseParams(ref, plan).includes(`param:${key}`);
+      const k = parPiece ? scopedKey(key, n.workItemId) : `param:${key}`;
+      if (fallback.some((q) => q.key === k || (!parPiece && scopedParam(q.key)?.name === key))) continue;
+      const piece = plan.inputs.find((i) => i.workItemId === n.workItemId)?.label ?? work.label.replace(/\s*\(.*\)$/, "");
+      const text = parPiece ? `${piece} : ${def.question.charAt(0).toLowerCase()}${def.question.slice(1)}` : def.question;
+      fallback.push({ key: k, kind: "param", text, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
     }
   }
   // Point 16 : un article coché à l'étape « Suggestions » vaut un article écrit ; ce que son calcul demande (le nombre de
@@ -912,9 +969,27 @@ export function ecranDeLecture(input: {
     if (answers[key] !== null || !def || fallback.some((q) => q.key === key)) continue;
     fallback.push({ key, kind: "param", text: def.question, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
   }
+  // Un ouvrage dont les lignes n'ont pas d'unité (« tôles bac acier, 10 », D-2022-071) ne lance aucune question de l'ouvrage
+  // (« Surface du toit ? ») : c'est l'unité qui se demande, sur la ligne (§49.2, §51.6).
+  const sansUnite = new Set(
+    plan.inputs
+      .map((i) => i.workItemId)
+      .filter((wid) => {
+        const ls = plan.lines.filter((p) => p.status === "planned" && p.workItemId === wid).map((p) => lignes.find((l) => l.id === p.ref));
+        return ls.length > 0 && ls.every((l) => l && !l.unit?.trim() && !l.ligne.unite?.trim());
+      }),
+  );
+  const deCesOuvragesSeulement = (q: Question) => {
+    const sp = scopedParam(q.key);
+    if (sp) return sansUnite.has(sp.workItemId);
+    const nom = q.key.replace(/^param:/, "");
+    const porteurs = plan.inputs.filter((i) => ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.params.some((p) => p.key === nom));
+    return porteurs.length > 0 && porteurs.every((i) => sansUnite.has(i.workItemId));
+  };
   for (const q of fallback) {
+    if (deCesOuvragesSeulement(q)) continue;
     const donnee = scopedParam(q.key)?.name ?? q.key.replace(/^param:/, "");
-    if ((!hasAnswers && !pourCochees.has(donnee)) || asked.some((a) => a.key === q.key) || !q.key.startsWith("param:")) continue;
+    if (asked.some((a) => a.key === q.key) || !q.key.startsWith("param:")) continue;
     const m = /^param:([a-z0-9_]+)(?:@([a-z0-9_-]+))?$/.exec(q.key) ?? /^product:([a-z0-9_]+)$/.exec(q.key);
     const cle = m ? (q.key.startsWith("product:") ? `produit_${m[1]!}` : m[1]!) : q.key.replace(/[^a-z0-9_]/g, "_");
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === cle);
@@ -940,6 +1015,23 @@ export function ecranDeLecture(input: {
   // Une question qu'attend une fourniture des points (la teinte, la gamme) reste : le calcul générique ne la voit pas.
   const attendPoints = new Set(points.flatMap((p) => p.attend));
   const live = asked.filter((a) => !hasAnswers || a.key.startsWith("fiche:") || a.key.startsWith("product:") || a.key.startsWith(UNITE_KEY) || attendPoints.has(a.q.cle) || (consoEnAttente && a.key === CONSUMABLES_QUESTION.key) || needed(a) || answers[a.key] === null);
+  // Toujours le même ordre (Greg, 20 novembre 2026) : celui du calcul, jamais celui où le modèle a écrit ses questions.
+  const rang = (a: Asked) => {
+    const i = fallback.findIndex((q) => q.key === a.key || scopedParam(q.key)?.name === a.q.cle || q.key === `param:${a.q.cle}`);
+    return i < 0 ? fallback.length : i;
+  };
+  live.sort((x, y) => rang(x) - rang(y) || (x.key < y.key ? -1 : x.key > y.key ? 1 : 0));
+  // La question de la fiche posée pour UNE pièce (« param:developpe@bandes-zinc__3 », « param:faconnage@couverture-zinc-
+  // joint-debout ») se dit à son nom, comme le calcul la pose (« Bande de ventilation en Z : développé de la bande zinc ? »),
+  // jamais avec la phrase commune de la donnée.
+  const aSonNom = (q: Question): Question => {
+    const piece = scopedParam(q.key);
+    const ouvrage = piece && ref.workItems.find((w) => w.id === baseOf(piece.workItemId));
+    if (!piece || !ouvrage || q.text !== ouvrage.params.find((p) => p.key === piece.name)?.question) return q;
+    const nom = plan.inputs.find((i) => i.workItemId === piece.workItemId)?.label?.split(", ")[0] ?? lotLabel(ouvrage.label);
+    return nom ? { ...q, text: questionDePiece(nom, `param:${piece.name}`, q.text) } : q;
+  };
+  for (const a of live) a.question = aSonNom(a.question);
   const questions = live.filter((a) => !answered(a)).map((a) => a.question);
   const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });

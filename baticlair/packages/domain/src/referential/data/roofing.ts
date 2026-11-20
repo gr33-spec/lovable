@@ -403,6 +403,57 @@ const RAMPANT_BACS_PARAM: ParamDef = {
 const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
 const FOUNDER_REPLY_TASSEAUX = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur)" } as const;
 /**
+ * Greg, 20 novembre 2026 : « Pour les tasseaux : ne compte pas sur moi, vérifie-le toi-même […] Croise au moins deux
+ * sources. » Recoupé dans trois guides de pose : RHEINZINK §1.15, VMZINC (Delta, « rive à tasseau »), NedZink (« Rive »).
+ */
+const GUIDES_TASSEAUX = {
+  status: "verified",
+  verifiedAt: "2026-11-20",
+  verifiedBy: "BatiClair (trois guides de pose recoupés : RHEINZINK, VMZINC, NedZink)",
+  note: "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau.",
+} as const;
+/**
+ * Zinc à tasseaux : ce qui finit le pan de chaque côté. Une rive a son tasseau de rive (RHEINZINK §1.15, VMZINC Delta,
+ * NedZink) ; contre un mur, le bac se relève sans tasseau (RHEINZINK §1.6.5). D'où les rangs : un entre deux bacs, plus
+ * un par rive. Écrit au devis (« bandes de rive pour les 2 côtés »), il est pris ; sinon, une question à boutons.
+ */
+/**
+ * Le développé d'un chéneau encaissé : sa largeur de zinc avant façonnage, qui choisit la largeur du bobineau. Référentiel
+ * du fondateur : « Chéneau encaissé | ml × 1,05, dév. selon section (50 à 80 cm) » : aucune valeur courante, il se demande.
+ */
+const DEVELOPPE_CHENEAU_PARAM: ParamDef = {
+  key: "developpe_cheneau",
+  label: "Développé du chéneau",
+  unit: "mm",
+  kind: "site_data",
+  question: "Ton chéneau fait quel développé ?",
+  hint: "La largeur de zinc avant façonnage : elle choisit la largeur du bobineau (500, 650 ou 1 000 mm).",
+  textLabels: ["developpe du cheneau", "developpe"],
+  choices: [
+    { label: "Jusqu'à 50 cm", value: "500" },
+    { label: "Jusqu'à 65 cm", value: "650" },
+    { label: "Jusqu'à 1 m", value: "1000" },
+  ],
+};
+const RIVES_TASSEAUX_PARAM: ParamDef = {
+  key: "nb_rives_tasseau",
+  label: "Rives sur tasseau",
+  unit: "u",
+  kind: "site_data",
+  question: "Ton pan finit comment, de chaque côté ?",
+  hint: "Une rive a son tasseau de rive et son couvre-joint ; contre un mur, le bac se relève sans tasseau.",
+  textLabels: ["rives", "rive"],
+  textValues: [
+    { value: "2", keywords: ["2 cotes", "deux cotes", "2 rives", "deux rives", "chaque cote"] },
+    { value: "1", keywords: ["1 cote", "un cote", "une rive", "1 rive"] },
+  ],
+  choices: [
+    { label: "Une rive de chaque côté", value: "2" },
+    { label: "Une rive et un mur", value: "1" },
+    { label: "Un mur de chaque côté", value: "0" },
+  ],
+};
+/**
  * Zinc à tasseaux : la largeur de la bobine. Greg, 18 novembre 2026 : « En général : bobine de 65 cm de largeur […] Parfois
  * les bacs sont faits dans des bobines de 50 cm de large ». La valeur courante est dite (hypothèse modifiable), jamais
  * demandée ; écrite au devis, elle est prise.
@@ -501,7 +552,8 @@ const ASPECT_ZINC_PARAM: ParamDef = {
   ],
   textValues: [
     { value: "2", keywords: ["quartz", "quartz zinc", "quartz-zinc"] },
-    { value: "3", keywords: ["anthra", "anthra zinc", "anthra-zinc"] },
+    // « zinc anthracite » (D-2026-024) : le prépatiné noir, l'Anthra-Zinc.
+    { value: "3", keywords: ["anthra", "anthra zinc", "anthra-zinc", "anthracite"] },
     { value: "4", keywords: ["pigmento"] },
     { value: "1", keywords: ["zinc naturel"] },
   ],
@@ -1157,7 +1209,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.19-58",
+  version: "roofing-2026.11.20-59",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1283,6 +1335,33 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Mise à jour septembre 2026 (référentiel du fondateur, §34) : ardoises/m² = 1 / [pureau × (largeur + Ø crochet)], Ø 1 mm, inox 2,7 mm en zone littorale.",
     },
     {
+      id: "rheinzink-tasseau-pose-pliage",
+      kind: "manufacturer",
+      title: "RHEINZINK, « Tasseau, pose et pliage : schémas détaillés et cotés à usage professionnel »",
+      publisher: "RHEINZINK",
+      url: "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Documents-Techniques/guides-de-pose-tasseau-pose-pliage-v09201-fr-fr.pdf",
+      retrievedAt: "2026-11-20",
+      note: "§1.6.4 : entraxe 620 mm (feuille 650, tasseau 50), 470 mm (500, 50). §1.6.5 : relevé du bac 45 mm contre un tasseau de 50, 90 mm contre un mur. §1.12.4 : couvre-joints de partie courante en éléments de 1 m au plus ; 1,50 m de tasseau au m² (650 / 50). §1.15 « Habillage de rive » : « rive droite avec tasseau de rive […] On pose ensuite un couvre-joint pour recouvrir le bac et l'habillage de la rive ».",
+    },
+    {
+      id: "vmzinc-delta-guide",
+      kind: "manufacturer",
+      title: "VMZINC, « Toiture Delta VMZINC, guide de prescription et de pose », traitement des finitions",
+      publisher: "VMZINC",
+      url: "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Solutions%20couverture/Delta%20VMZINC/Guide%20Delta%20VMZINC%20FR.pdf",
+      retrievedAt: "2026-11-20",
+      note: "« Rives latérales, rive à tasseau : placer et fixer un tasseau bois […], réaliser une rive de couverture identique à celle d'une couverture à tasseaux » ; repères : 1 couvre-joint, 2 tasseau de rive, 3 patte à tasseau, 4 bande de rive.",
+    },
+    {
+      id: "nedzink-cahier-technique",
+      kind: "manufacturer",
+      title: "NedZink, « Conseils de zinc, cahier technique » (techguide FR, novembre 2013)",
+      publisher: "NedZink",
+      url: "https://www.nedzink.com/wp-content/uploads/2019/07/13426-fr-v1-techn-advboek-volledig.pdf",
+      retrievedAt: "2026-11-20",
+      note: "« Rive : pour la finition latérale, le zinc du premier et du dernier bac est relevé contre un rebord en bois, par exemple un tasseau […] Le tasseau est recouvert d'un profil au choix. » Chapitre 6 : « bacs relevés de chaque côté et séparés par des tasseaux […] recouverts de couvre-joints ».",
+    },
+    {
       id: "vmzinc-joint-debout",
       kind: "manufacturer",
       title: "VMZINC / Umicore, « Joint debout, couverture froide ventilée, dossier technique » (DTU 40.41)",
@@ -1347,6 +1426,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
     { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
+    // Référentiel du fondateur : « "chéneau" = encaissé, pas une gouttière ». En zinc seulement : un chéneau en membrane
+    // (EPDM, PVC, DE00000071) n'est pas cet ouvrage.
+    { code: "box_gutter", label: "Chéneau encaissé", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["cheneau encaisse", "cheneau zinc", "cheneau en zinc"] },
     // Le mortier du solin (« bande porte-solin zinc et mortier ciment », D-2026-020) : jamais supprimé ; mortier d'étanchéité en sacs de 25 kg (§49.7).
     { code: "solin_mortar", label: "Mortier de solin", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["mortier"] },
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
@@ -2855,7 +2937,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Bande porte-solin zinc",
       triggers: ["solin_support"],
       params: [
-        { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande porte-solin ?", fromLineQuantity: true },
+        { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande porte-solin ?", fromLineQuantity: true, ownOnly: true },
         DEVELOPPE_PARAM,
         FACONNAGE_BANDES_PARAM,
         EPAISSEUR_ZINC_PARAM,
@@ -3181,7 +3263,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Un conduit de fumée demande une collerette d'étanchéité (solin).",
           textValues: [
             { value: "1", keywords: ["fumee", "conduit de fumee", "poele", "insert", "chaudiere"] },
-            { value: "2", keywords: ["ventilation", "extraction", "aeration"] },
+            // « pour VMC », « pour chute/évent » (D-2026-024) : une ventilation (VMC, ventilation primaire des eaux usées).
+            { value: "2", keywords: ["ventilation", "extraction", "aeration", "vmc", "event", "chute event", "ventilation primaire"] },
           ],
           choices: [
             { label: "Conduit de fumée", value: "1" },
@@ -3289,7 +3372,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       section: "principal",
       label: "Couverture zinc à tasseaux",
       triggers: ["batten_seam"],
-      params: [SURFACE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, LARGEUR_BOBINE_TASSEAUX_PARAM],
+      params: [SURFACE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, LARGEUR_BOBINE_TASSEAUX_PARAM, RIVES_TASSEAUX_PARAM],
       slots: [
         { key: "couverture", family: "batten_seam", label: "Couverture zinc à tasseaux", measureOnly: true },
         { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.", source: FR_REPLY_TASSEAUX, productId: "bobine-zinc-standard" }, formOf: "couverture" },
@@ -3308,9 +3391,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
         { key: "nb_bacs", label: "Nombre de bacs", unit: "u", formula: "arrondi_sup(largeur_pan / entraxe_tasseaux)", source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
         { key: "longueur_bac", label: "Longueur de bobine par bac", unit: "m", formula: "longueur_rampant + regle.surlongueur_bac", source: FR_REPLY, verification: FOUNDER_REPLY, version: 1 },
-        // Un rang de tasseaux de chaque côté de chaque bac : un de plus que de bacs. À CONFIRMER par le fondateur (finition des
-        // rives) : tant que ce n'est pas fait, tasseaux et couvre-joints restent « à chiffrer », sans quantité.
-        { key: "nb_rangs", label: "Rangs de tasseaux", unit: "u", formula: "nb_bacs + 1", source: "definition", verification: DRAFT, version: 1 },
+        // Un rang entre deux bacs (nb_bacs − 1), plus le tasseau de chaque rive ; contre un mur, aucun (le bac se relève).
+        // Recoupé le 20 novembre 2026 : RHEINZINK §1.15 et §1.6.5, VMZINC Delta « rive à tasseau », NedZink « Rive ».
+        { key: "nb_rangs", label: "Rangs de tasseaux", unit: "u", formula: "nb_bacs - 1 + nb_rives_tasseau", source: "rheinzink-tasseau-pose-pliage", verification: GUIDES_TASSEAUX, version: 2 },
       ],
       needs: [
         {
@@ -3335,11 +3418,11 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "nb_rangs * longueur_rampant",
           unit: "m",
           core: true,
-          exclusions: "Un rang de tasseaux de chaque côté de chaque bac, sur la longueur du rampant. Pointes ou vis de 80 mm à part.",
+          exclusions: "Un rang entre deux bacs et un tasseau de rive par rive, sur la longueur du rampant ; aucun contre un mur. Pointes ou vis de 80 mm à part.",
           precision: "{nb_rangs} rangs × {longueur_rampant|m}",
-          source: "definition",
-          verification: DRAFT,
-          version: 1,
+          source: "rheinzink-tasseau-pose-pliage",
+          verification: GUIDES_TASSEAUX,
+          version: 2,
         },
         {
           id: "couvre-joints-tasseaux",
@@ -3347,13 +3430,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           formula: "nb_rangs * longueur_rampant",
           unit: "m",
           core: true,
-          exclusions: "Un couvre-joint par rang de tasseaux ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
+          exclusions: "Un couvre-joint par rang de tasseaux, tasseaux de rive compris (RHEINZINK §1.15) ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
           precision: "{nb_rangs} rangs × {longueur_rampant|m}",
           designation: "Couvre-joints {aspect_zinc} {epaisseur_zinc} mm pour tasseaux de 50 mm",
           precisionRequires: ["aspect_zinc"],
-          source: "definition",
-          verification: DRAFT,
-          version: 1,
+          source: "rheinzink-tasseau-pose-pliage",
+          verification: GUIDES_TASSEAUX,
+          version: 2,
         },
       ],
     },
@@ -3685,6 +3768,50 @@ export const ROOFING_REFERENTIAL: Referential = {
           designation: "Faîtières bac acier {teinte_bac}, longueur 2 m",
           precision: "{largeur_pan|ml} de faîtage",
           precisionRequires: ["teinte_bac"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // Référentiel du fondateur : « Chéneau encaissé | ml × 1,05, dév. selon section (50 à 80 cm) » ; « Bobineau (grandes
+      // longueurs) uniquement pour les ouvrages continus : joint debout, terrasse à tasseaux, chéneaux. Automatique, pas de
+      // question » ; « "chéneau" = encaissé, pas une gouttière ». D-2026-024 (8 ml) sortait « à chiffrer » (20 novembre 2026).
+      id: "cheneau-encaisse",
+      trade: "roofing",
+      section: "evacuation",
+      label: "Chéneau encaissé zinc",
+      triggers: ["box_gutter"],
+      params: [
+        { key: "longueur_cheneau", label: "Longueur de chéneau", unit: "m", kind: "site_data", question: "Longueur du chéneau ?", fromLineQuantity: true, textLabels: ["cheneau"] },
+        DEVELOPPE_CHENEAU_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
+      ],
+      slots: [
+        { key: "cheneau", family: "box_gutter", label: "Chéneau encaissé", measureOnly: true },
+        { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", keywords: ["bobineau"], usual: { text: "Bobineau de zinc, façonné et soudé sur place (référentiel du fondateur : chéneaux en bobineau).", source: F, productId: "bobineau-zinc" }, formOf: "cheneau" },
+      ],
+      constants: {
+        ...ZINC_PLAT_CONSTANTS,
+        marge_zinc_lineaire: MARGE_ZINC_LINEAIRE,
+      },
+      derived: [
+        { key: "ml_zinc", label: "Longueur de zinc façonné", unit: "m", formula: "longueur_cheneau * regle.marge_zinc_lineaire", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        ...bobineauDerived("developpe_cheneau"),
+      ],
+      needs: [
+        {
+          id: "bobineau-cheneau",
+          slot: "bobineau",
+          formula: "arrondi_sup(ml_zinc / longueur_bobineau)",
+          unit: "u",
+          core: true,
+          exclusions: "Longueur du chéneau × 1,05, en bobineau de la largeur du développé ; joints de dilatation (tous les 12 m) et naissances à part.",
+          precision: "pour {longueur_cheneau|m} de chéneau, marge 5 % comprise",
+          designation: "Bobineau {aspect_zinc} {epaisseur_zinc} mm, {largeur_bobineau|mm} × {longueur_bobineau|m}",
+          precisionRequires: ["aspect_zinc", "developpe_cheneau"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,

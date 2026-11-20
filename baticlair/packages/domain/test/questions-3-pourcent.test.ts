@@ -18,7 +18,11 @@ describe("tri des questions par levier", () => {
     const v = readQuoteComplet(ZINC);
     // Le façonnage (une unité) d'abord, puis ce qui change l'ARTICLE au comptoir (développé, pose des crochets,
     // diamètre des descentes, §47.8), enfin le nombre de descentes (quelques naissances). Plus d'« égout et faîtage ? ».
-    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:developpe_gouttiere", "param:fixation_crochet", "param:diametre_descente", "param:nb_descentes"]);
+    // Greg, 20 novembre 2026 : les questions sont celles du calcul, dès l'ouverture et dans son ordre (le levier le plus
+    // gros d'abord) ; la fiche complète compte aussi les angles, et le rampant du joint debout n'est plus supposé.
+    const cles = v.questions.map((q) => q.question?.key ?? q.key);
+    expect(cles[0]).toBe("param:faconnage");
+    expect([...cles].sort()).toEqual(["param:developpe_gouttiere", "param:diametre_descente", "param:faconnage", "param:fixation_crochet", "param:longueur_rampant", "param:nb_angles", "param:nb_descentes"]);
     expect(QUESTION_THRESHOLD).toBe(0.03);
   });
 });

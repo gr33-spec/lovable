@@ -37,16 +37,17 @@ const ecran = (answers: Record<string, EngineAnswer> = {}) => ecranDeLecture({ r
 
 describe("une question du modèle qui prolonge une donnée du référentiel est cette donnée", () => {
   it("« faconnage_joint_debout » est le façonnage de la couverture zinc à joint debout, avec les valeurs du référentiel", () => {
-    const q = ecran().questions.find((x) => x.text === duModele.texte)!;
-    expect(q.key).toMatch(/^param:faconnage(@couverture-zinc-joint-debout)?$/);
-    expect(q.options).toEqual([
-      { label: "Je façonne (bobines)", value: "1", dit: expect.arrayContaining(["je plie"]) },
-      { label: "Je commande façonné (bacs)", value: "2", dit: expect.arrayContaining(["tout fait"]) },
-    ]);
+    // Greg, 20 novembre 2026 : les questions sont décidées par le code à partir de la fiche du métier, jamais par la
+    // lecture. La question du modèle est celle de la fiche : une seule, avec les mots et les boutons de la fiche.
+    const q = ecran().questions.find((x) => /^param:faconnage(@couverture-zinc-joint-debout)?$/.test(x.key))!;
+    expect(ecran().questions.filter((x) => x.text === duModele.texte)).toEqual([]);
+    expect(q.options?.map((o) => o.value)).toEqual(["1", "2"]);
+    expect(q.options?.[0]?.dit).toEqual(expect.arrayContaining(["je plie"]));
+    expect(q.options?.[1]?.dit).toEqual(expect.arrayContaining(["tout fait"]));
   });
 
   it("une fois répondue, le façonnage du joint debout ne se repose plus", () => {
-    const q = ecran().questions.find((x) => x.text === duModele.texte)!;
+    const q = ecran().questions.find((x) => /^param:faconnage(@couverture-zinc-joint-debout)?$/.test(x.key))!;
     const apres = ecran({ [q.key]: { value: "2", unit: "u" } });
     expect(apres.questions.filter((x) => /^param:faconnage(@couverture-zinc-joint-debout)?$/.test(x.key))).toEqual([]);
     expect(apres.questions.some((x) => x.key.startsWith("fiche:faconnage"))).toBe(false);

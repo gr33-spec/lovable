@@ -29,6 +29,10 @@ const COMPTOIR: Record<string, string> = {
   support_sortie: "« embase plomb ou platine zinc ? »",
   longueur_gouttiere: "les mètres de gouttière",
   developpe_gouttiere: "« gouttière de 25 ou de 33 ? »",
+  // Greg, 20 novembre 2026 (D-2026-024).
+  nb_rives_tasseau: "« ton pan finit comment : une rive de chaque côté, une rive et un mur ? » (tasseau de rive ou relevé)",
+  longueur_cheneau: "les mètres de chéneau, quand le devis ne les donne pas",
+  developpe_cheneau: "« ton chéneau fait quel développé ? » : la largeur du bobineau",
   fixation_crochet: "« crochets à queue ou bandeau ? »",
   nb_descentes: "le nombre de naissances et de descentes",
   diametre_descente: "« descente de 80 ou de 100 ? »",
@@ -92,6 +96,8 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:faconnage@couverture-zinc-joint-debout",
       "param:faconnage@pieces-pliees",
       "param:fixation_crochet",
+      // La fiche complète compte les angles de la gouttière ; le calcul les demande dès l'ouverture (Greg, 20 novembre 2026).
+      "param:nb_angles",
       "param:nb_descentes",
     ]);
     // Quartz lu au devis : pas de question d'aspect.
@@ -128,14 +134,15 @@ describe("la règle du comptoir (§47.8)", () => {
 
   it("chantier de Brest : la qualité d'ardoise, la pose des crochets, le Ø et le nombre de descentes ; le développé est lu au devis", () => {
     const v = readQuoteComplet(BREST, {}, [], {});
-    expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_descentes", "param:qualite_ardoise"]);
+    expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_angles", "param:nb_descentes", "param:qualite_ardoise"]);
     // Un devis qui dit tout ne pose aucune question.
     const complet = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantity: "200", unit: "m²" },
         { ref: "2", designation: "Gouttière demi-ronde zinc développé 33, crochets bandeau, 2 descentes Ø80", quantity: "24", unit: "ml" },
       ],
-      {},
+      // La fiche complète compte aussi les angles (aucun ici), que le devis ne dit pas.
+      { "param:nb_angles": u("0") },
       [],
       {},
     );

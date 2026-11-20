@@ -61,6 +61,8 @@ const SECTION_OUVRAGE: Record<string, string> = {
   "couverture-zinc-joint-debout": "§7, §36",
   // Le zinc à tasseaux n'a pas encore sa section dans le référentiel du fondateur : ses réponses du 18 novembre 2026.
   "couverture-zinc-tasseaux": "§7",
+  // Le chéneau encaissé en zinc (Greg, 20 novembre 2026, D-2026-024) : bobineau au mètre, comme la zinguerie du §7 et du §36.
+  "cheneau-encaisse": "§7, §36",
   "couverture-bac-acier": "§8",
   gouttiere: "§7, §25",
   "gouttiere-pvc-alu": "§15",

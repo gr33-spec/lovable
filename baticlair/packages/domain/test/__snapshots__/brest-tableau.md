@@ -1,9 +1,9 @@
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
