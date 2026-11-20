@@ -27,7 +27,7 @@ const chiffre = z.object({
   regions: z.array(z.string()).optional(),
   ecart: z.unknown().optional(),
   raison: z.unknown().optional(),
-  controle: z.array(z.string()).optional(),
+  controle: z.unknown().optional(),
   portee: z.string().optional(),
   preuves: z.array(z.object({ source: str, extrait: z.string() })).optional(),
 }).loose();

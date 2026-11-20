@@ -18239,6 +18239,18 @@
       "note": "Tuiles mécaniques."
     },
     {
+      "family": "roof_tile_canal",
+      "rate": "3",
+      "source": "fiche-couverture",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-11-19",
+        "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+      },
+      "version": 1,
+      "note": "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)."
+    },
+    {
       "family": "batten",
       "rate": "5",
       "source": "fondateur-referentiel-2026-10-03",

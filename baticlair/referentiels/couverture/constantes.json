@@ -139,6 +139,19 @@
     "ecran_seuil_pente"
    ],
    "avant": "surface × 1,5 ÷ (1,5 − 0,20) = × 1,154"
+  },
+  {
+   "cle": "tuile.perte_canal",
+   "famille": "tuile_canal",
+   "libelle": "Tuile canal (couverts et courants) : 3 % de casse et de coupe, comme les autres tuiles",
+   "valeur": "3",
+   "unite": "%",
+   "regle": "tuiles canal commandées = besoin × 1,03",
+   "decision": "Recherche du 20/11/2026 : la casse à la pose d'une tuile terre cuite n'est jamais nulle (1 % dans les fiches environnementales collectives CTMNC 2014, 2020, 2022), les coupes s'y ajoutent ; la formation CAP compte 5 %. On applique à la canal la marge des tuiles du référentiel du fondateur (3 %), modifiable par l'entreprise. Avant : aucune marge (0 %).",
+   "preuves": [
+    "tuile_terre_cuite_casse_pose_fdes"
+   ],
+   "avant": "0 % (aucune règle de perte pour la tuile canal)"
   }
  ]
 }

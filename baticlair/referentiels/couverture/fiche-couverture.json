@@ -7,7 +7,7 @@
  "regle_confirmation": "confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.",
  "regles_fondateur": "../../../.claude/skills/regles-metier/SKILL.md",
  "carte_regions": "carte-regions.json",
- "taux_confirme": 94.4,
+ "taux_confirme": 93.4,
  "comptes": {
   "ardoise:a_confirmer": 3,
   "ardoise:confirme": 762,
@@ -16,6 +16,9 @@
   "bois_couverture:a_confirmer": 4,
   "bois_couverture:confirme": 34,
   "bois_couverture:une_source": 5,
+  "comptoir_exposee:a_confirmer": 7,
+  "comptoir_exposee:confirme": 6,
+  "comptoir_exposee:une_source": 9,
   "ecran:confirme": 18,
   "ecran:confirme_fabricant": 8,
   "ecran:une_source": 9,
@@ -23,6 +26,9 @@
   "etancheite:confirme": 8,
   "etancheite:confirme_fabricant": 4,
   "etancheite:une_source": 9,
+  "pertes:a_confirmer": 10,
+  "pertes:confirme": 3,
+  "pertes:une_source": 4,
   "points_singuliers:a_confirmer": 4,
   "points_singuliers:confirme": 35,
   "points_singuliers:une_source": 13,
@@ -192,6 +198,20 @@
     "ecran_seuil_pente"
    ],
    "avant": "surface × 1,5 ÷ (1,5 − 0,20) = × 1,154",
+   "statut": "confirme"
+  },
+  {
+   "cle": "tuile.perte_canal",
+   "famille": "tuile_canal",
+   "libelle": "Tuile canal (couverts et courants) : 3 % de casse et de coupe, comme les autres tuiles",
+   "valeur": "3",
+   "unite": "%",
+   "regle": "tuiles canal commandées = besoin × 1,03",
+   "decision": "Recherche du 20/11/2026 : la casse à la pose d'une tuile terre cuite n'est jamais nulle (1 % dans les fiches environnementales collectives CTMNC 2014, 2020, 2022), les coupes s'y ajoutent ; la formation CAP compte 5 %. On applique à la canal la marge des tuiles du référentiel du fondateur (3 %), modifiable par l'entreprise. Avant : aucune marge (0 %).",
+   "preuves": [
+    "tuile_terre_cuite_casse_pose_fdes"
+   ],
+   "avant": "0 % (aucune règle de perte pour la tuile canal)",
    "statut": "confirme"
   }
  ],
@@ -94704,6 +94724,1713 @@
     ],
     "raison": "L'aboutage sur appui est sourcé (guide Culture, DTU 40.11 : appui mini 35 mm, divisé par deux aux jonctions). La formule d'arrondi est une proposition BatiClair à valider."
    }
+  },
+  {
+   "code": "pertes",
+   "libelle": "Pertes de casse et de coupe",
+   "sous_familles": [
+    {
+     "nom": "méthode",
+     "regles": [
+      {
+       "id": "methode_perte_apres_plus_values",
+       "attribut": "methode_de_metre_des_points_singuliers",
+       "valeur": "surface de couverture + plus-values des points singuliers (m² par ml) = surface à considérer ; quantité = surface à considérer × éléments au m² ; puis + % de casse",
+       "unite": null,
+       "statut": "confirme",
+       "sources": [
+        "S12",
+        "S224"
+       ],
+       "libelle_source": "méthode de métré des points singuliers",
+       "condition": "couverture en petits éléments (ardoise au crochet dans le manuel ; le guide Culture fait de même pour l'ardoise clouée ou au crochet)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Les deux sources traitent les rives, noues et arêtiers à part de la surface courante (le manuel en m² ajoutés, le guide Culture en ouvrages au ml). Le manuel ajoute ENSUITE un pourcentage de casse : plus-values et perte s'additionnent, elles ne se remplacent pas.",
+       "preuves": [
+        {
+         "source": "S12",
+         "extrait": "PLUS-VALUES pour le calcul du quantitatif (à ajouter à la surface de couverture) … Ces résultats doivent être augmentés d'un pourcentage pour casse, remplissage"
+        },
+        {
+         "source": "S224",
+         "extrait": "Chapitre 4 Les ouvrages de coupe et de raccord … Noue à fendis au mètre linéaire … Arêtier à rangs de doublage et bardelis au mètre linéaire"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "ardoise naturelle",
+     "regles": [
+      {
+       "id": "ardoise_plus_values_cap",
+       "attribut": "plus_values_par_ml_m2_a_ajouter_a_la_surface",
+       "valeur": {
+        "egout_droit": "pureau × longueur",
+        "egout_biais": "2 pureaux × longueur",
+        "rive_tranchis_droit": 0.16,
+        "rive_tranchis_biais": 0.25,
+        "rive_tranchis_circulaire": 0.33,
+        "aretier_rang_doublage_2_rives": 0.66,
+        "aretier_ardoises_biaises_2_rives": 0.66,
+        "noue_fendis_renvers_1_ou_2_tranchis": 1.5,
+        "noue_renvers_rond_ou_1_tranchis": 1.5,
+        "deversee_1_tranchis": 0.33,
+        "deversee_2_tranchis": 0.5,
+        "tourelle": "circonférence de base × hauteur"
+       },
+       "unite": "m² par ml",
+       "statut": "une_source",
+       "sources": [
+        "S12"
+       ],
+       "libelle_source": "plus-values par ml (m² à ajouter à la surface)",
+       "condition": "ardoise au crochet ; exemple du manuel : versant 39 m², égout 5 m, tranchis droit 6 m, tranchis biais 6,32 m → 3,15 m² de plus-values (+8 %) → 42,15 m²",
+       "regions": [
+        "France"
+       ],
+       "raison": "Une seule source chiffre les plus-values (le manuel CAP, recopié tel quel dans referentiel-couverture.md §25.1, valeurs identiques). Le guide Culture confirme la méthode (ouvrages au ml) mais ne chiffre pas. L'égout (1 rang de doublis) est déjà confirmé ailleurs (ardoise.md §7). Le tableau ne donne rien pour les lucarnes, chiens-assis, fenêtres de toit ni pénétrations.",
+       "preuves": [
+        {
+         "source": "S12",
+         "extrait": "Tranchis droit 0,16 m² … Par rang de doublage (pour 2 rives) 0,66 m² … À 1 tranchis, à 2 tranchis 1,50 m²"
+        }
+       ]
+      },
+      {
+       "id": "ardoise_naturelle_perte_toit_simple",
+       "attribut": "perte_casse_et_coupes",
+       "valeur": 5,
+       "unite": "%",
+       "statut": "une_source",
+       "sources": [
+        "S24",
+        "S415",
+        "S416",
+        "S417"
+       ],
+       "libelle_source": "perte casse et coupes",
+       "condition": "toit simple (deux pans, sans ouverture), après plus-values ou à défaut sur la surface",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Le manuel CAP (chapitre 21) demande « un pourcentage pour casse, remplissage » sans le chiffrer. La fiche wallonne ne donne pas une perte mais le rebut toléré à la livraison (ardoises écartées au tri), jusqu'à 5 % : c'est une raison de ne pas descendre sous 5 % en ardoise naturelle. Des calculateurs grand public disent 10 % pour l'ardoise naturelle sans distinguer la forme du toit (macalculatriceenligne), non retenu.",
+       "raison": "Un seul chiffre de formation (Nomad Education reprend le cours CAP). Les autres pages qui disent 5 % sont des sites grand public. Aucun fabricant d'ardoise ne publie de perte.",
+       "preuves": [
+        {
+         "source": "S24",
+         "extrait": "Quantité = Surface × Densité × 1.05 … marge de 5% pour la casse et les coupes"
+        },
+        {
+         "source": "S415",
+         "extrait": "Le taux de rebut acceptable sera de maximum 5 %, au-delà on peut considérer que la livraison n'est plus conforme"
+        },
+        {
+         "source": "S416",
+         "extrait": "Deux pans simples, sans ouverture : 5 %"
+        },
+        {
+         "source": "S417",
+         "extrait": "Pour un toit simple à deux pans sans ouverture, 5 % peuvent suffire"
+        }
+       ]
+      },
+      {
+       "id": "ardoise_naturelle_perte_toit_complique",
+       "attribut": "perte_casse_et_coupes_toit_complique",
+       "valeur": "7 % (lucarnes, fenêtres de toit) ; 10 % et plus (croupes, noues, arêtiers, tourelles)",
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S416",
+        "S417"
+       ],
+       "libelle_source": "perte casse et coupes, toit compliqué",
+       "condition": "sans plus-values comptées à part",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Ordre de grandeur cohérent avec le manuel CAP : dans son exemple, rives droite et biaise sur un pan de 39 m² ajoutent déjà 8 % de surface avant la casse.",
+       "raison": "Seulement des sites grand public (agence web, site de devis). Aucun guide professionnel ni fabricant ne chiffre un pourcentage « toit compliqué ». La méthode des plus-values du manuel CAP + 5 % est mieux sourcée.",
+       "preuves": [
+        {
+         "source": "S416",
+         "extrait": "Toiture avec lucarnes ou fenêtres de toit : 7 % ; Croupes, noues, arêtiers, tourelles : 10 % et plus"
+        },
+        {
+         "source": "S417",
+         "extrait": "pour un toit à croupes avec noues et lucarnes, gardez 10 % au minimum"
+        }
+       ]
+      },
+      {
+       "id": "ardoise_crochets_surplus",
+       "attribut": "crochets_d_ardoise",
+       "valeur": "1 crochet par ardoise ; surplus 0 à 10 % selon la source",
+       "unite": "u",
+       "statut": "a_confirmer",
+       "sources": [
+        "S12",
+        "S24",
+        "S416"
+       ],
+       "libelle_source": "crochets d'ardoise",
+       "condition": "pose au crochet",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Le principe « 1 crochet par ardoise » est confirmé par deux sources. Le surplus diverge : 0 % (manuel CAP, sur les ardoises AVANT la casse), 10 % (Nomad), 3 à 5 % (blog). Le code compte 1 crochet par ardoise COMMANDÉE (après 5 % de perte) : cela fait déjà 5 % de crochets en plus du besoin, puis l'arrondi à la boîte (500, 1 000 ou 5 kg) en ajoute.",
+       "raison": "Surplus au-delà des ardoises commandées non tranché (0 % contre 10 %).",
+       "preuves": [
+        {
+         "source": "S12",
+         "extrait": "Nombre total de crochets = nombre d'ardoises = 1 543 u."
+        },
+        {
+         "source": "S24",
+         "extrait": "Généralement 1 crochet par ardoise (prévoir un surplus de 10%)"
+        },
+        {
+         "source": "S416",
+         "extrait": "un crochet par ardoise, plus une petite réserve de 3 à 5 % pour les pertes"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "ardoise fibres-ciment",
+     "regles": [
+      {
+       "id": "ardoise_fibres_ciment_perte",
+       "attribut": "perte_casse_et_coupes",
+       "valeur": 5,
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S24"
+       ],
+       "libelle_source": "perte casse et coupes",
+       "condition": "toit simple",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Brochures Cedral et documentation Eternit cherchées : conditionnements et formats seulement, aucun % de perte.",
+       "raison": "Aucune source propre au fibres-ciment. Pas de tri ni de rebut comme en ardoise naturelle, mais les coupes de rive, noue et arêtier sont les mêmes. On garde la règle du fondateur (5 %, « mêmes formules » que l'ardoise).",
+       "preuves": [
+        {
+         "source": "S24",
+         "extrait": "Le coefficient 1.05 correspond à une marge de 5% pour la casse et les coupes"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "tuiles terre cuite (emboîtement, plates, canal)",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "CTMNC (FDES collectives des fabricants français de tuiles terre cuite)",
+       "groupe": "CTMNC (FDES collectives des fabricants français de tuiles terre cuite)",
+       "modeles": [
+        {
+         "nom": "tuile à emboîtement ; tuile canal et tuile plate ; tuile terre cuite (2014)",
+         "attributs": [
+          {
+           "id": "tuile_terre_cuite_casse_pose_fdes",
+           "attribut": "taux_de_casse_a_la_mise_en_oeuvre_hypothese_fdes_module_a5",
+           "valeur": 1,
+           "unite": "%",
+           "statut": "confirme",
+           "sources": [
+            "S418",
+            "S419",
+            "S420"
+           ],
+           "libelle_source": "taux de casse à la mise en œuvre (hypothèse FDES, module A5)",
+           "condition": "casse seule, sans les coupes de rive, noue ou arêtier",
+           "regions": [
+            "France"
+           ],
+           "ecart": "Trois éditions du même producteur (CTMNC) : elles comptent pour UNE source fabricant, mais elles disent la même chose sur six ans et couvrent les trois familles. Les copies sont chez des négoces ; l'original est sur la base INIES (non ouverte).",
+           "raison": "Statut « confirme » seulement pour ce qu'elle dit : 1 % de casse. Ce n'est PAS la perte à commander (les coupes manquent).",
+           "preuves": [
+            {
+             "source": "S418",
+             "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre"
+            },
+            {
+             "source": "S419",
+             "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre"
+            },
+            {
+             "source": "S420",
+             "extrait": "Taux de chute lors de la mise en œuvre % 1%"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "tuiles à emboîtement (grand moule, petit moule, romanes, béton)",
+     "regles": [
+      {
+       "id": "tuile_emboitement_perte_toit_simple",
+       "attribut": "perte_casse_et_coupes",
+       "valeur": "3 à 5",
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S24",
+        "S418",
+        "S417"
+       ],
+       "libelle_source": "perte casse et coupes",
+       "condition": "toit simple à deux pans, rives en tuiles de rive comptées à part",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Formation : 5 % casse + coupes. Fabricants : 1 % de casse seule. Le 3 % du code se situe entre les deux et n'a aucune source écrite. Sur un deux-pans à emboîtement, les coupes sont faibles (rives en tuiles de rive, demi-tuiles), ce qui explique qu'on soit plus bas qu'en ardoise.",
+       "raison": "Aucune source sérieuse ne chiffre 3 %. Edilians, Terreal, Wienerberger/Koramic et BMI/Monier ne publient pas de perte de chantier dans les documents trouvés. Pour la tuile béton, rien de propre.",
+       "preuves": [
+        {
+         "source": "S24",
+         "extrait": "Quantité = Surface × Densité × 1.05"
+        },
+        {
+         "source": "S418",
+         "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre"
+        },
+        {
+         "source": "S417",
+         "extrait": "Pour un toit simple à deux pans sans ouverture, 5 % peuvent suffire"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "toutes tuiles",
+     "regles": [
+      {
+       "id": "tuile_perte_toit_complique",
+       "attribut": "perte_casse_et_coupes_toit_complique",
+       "valeur": "7 à 10 % et plus (noues, arêtiers, croupes, lucarnes, fenêtres de toit)",
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S417"
+       ],
+       "libelle_source": "perte casse et coupes, toit compliqué",
+       "regions": [
+        "France"
+       ],
+       "ecart": "D'autres calculateurs grand public disent 10 à 15 %, voire 20 % avec noues et arêtiers : pas de consensus.",
+       "raison": "Aucune source professionnelle ni fabricant. Pas de tableau de plus-values pour la tuile équivalent à celui du CAP ardoise.",
+       "preuves": [
+        {
+         "source": "S417",
+         "extrait": "pour un toit à croupes avec noues et lucarnes, gardez 10 % au minimum"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "tuiles plates",
+     "regles": [
+      {
+       "id": "tuile_plate_perte",
+       "attribut": "perte_casse_et_coupes",
+       "valeur": 5,
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S24",
+        "S419"
+       ],
+       "libelle_source": "perte casse et coupes",
+       "condition": "toit simple",
+       "regions": [
+        "France"
+       ],
+       "ecart": "La tuile plate se pose comme l'ardoise (petit élément, coupes de rive, noue, arêtier) : on attend une perte proche de l'ardoise. Le guide Culture « tuiles plates » existe (même série, non dépouillé) et devrait avoir le même mode de métré.",
+       "raison": "Une seule source de formation (règle générale), la FDES ne compte que la casse.",
+       "preuves": [
+        {
+         "source": "S24",
+         "extrait": "marge de 5% pour la casse et les coupes"
+        },
+        {
+         "source": "S419",
+         "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "tuiles canal",
+     "regles": [
+      {
+       "id": "tuile_canal_perte",
+       "attribut": "perte_casse_et_coupes_courant_et_couvert",
+       "valeur": "au moins 1 % (casse) ; 5 % courant en formation",
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S419",
+        "S24"
+       ],
+       "libelle_source": "perte casse et coupes (courant et couvert)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Le code n'applique AUCUNE perte à la tuile canal, alors que la FDES du fabricant suppose déjà 1 % de casse.",
+       "raison": "Valeur de perte à retenir non tranchée ; seul le « zéro perte » est contredit.",
+       "preuves": [
+        {
+         "source": "S419",
+         "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre"
+        },
+        {
+         "source": "S24",
+         "extrait": "Quantité = Surface × Densité × 1.05"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "faîtières, arêtiers, tuiles de rive",
+     "regles": [
+      {
+       "id": "faitieres_aretiers_rives_pieces",
+       "attribut": "methode",
+       "valeur": "ml × pièces au ml du modèle, arrondi à la pièce supérieure ; casse 1 % (FDES) ; aucun % de coupe trouvé",
+       "unite": null,
+       "statut": "a_confirmer",
+       "sources": [
+        "S24",
+        "S418"
+       ],
+       "libelle_source": "méthode",
+       "regions": [
+        "France"
+       ],
+       "ecart": "La règle « + 5 % sur rives, faîtage, closoir, noues » du skill n'a été trouvée dans aucune source. Le manuel CAP divise sans marge ; seul l'arrondi à la pièce ajoute.",
+       "raison": "Aucune source sur la perte des accessoires. La FDES vise la tuile courante (unité fonctionnelle au m²), pas forcément les accessoires.",
+       "preuves": [
+        {
+         "source": "S24",
+         "extrait": "Longueur du faîtage / longueur utile de la tuile faîtière"
+        },
+        {
+         "source": "S418",
+         "extrait": "hypothèse de 1 % de tuiles qui sont cassées lors de la mise en œuvre"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "liteaux et contre-liteaux",
+     "regles": [
+      {
+       "id": "liteaux_perte_aboutage",
+       "attribut": "chute_d_aboutage",
+       "valeur": "longueur vendue ÷ longueur utile (multiple de l'entraxe des chevrons) : 0 % si la longueur tombe juste (4,20 m sur chevrons à 60 cm), 10 % pour 4,00 m sur 60 cm",
+       "unite": "%",
+       "statut": "une_source",
+       "sources": [
+        "S224"
+       ],
+       "libelle_source": "chute d'aboutage",
+       "condition": "liteaux aboutés sur chevron (DTU 40.11 cité par les guides : appui de 35 mm, divisé par deux aux jonctions)",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Calcul, pas une valeur publiée : la chute dépend de la longueur achetée et de l'entraxe. Le manuel CAP et Nomad calculent les liteaux (rangs × longueur, ou surface × ml/m²) SANS marge ; le manuel ajoute ensuite « un pourcentage pour casse, remplissage » à l'ensemble.",
+       "raison": "Méthode logique, une seule base écrite. Le 5 % n'a pas de source : la recherche bois.json attribuait 1,05 sur les liteaux à Nomad Education ; la page ouverte le 20 novembre applique 1,05 aux tuiles et ardoises seulement.",
+       "preuves": [
+        {
+         "source": "S224",
+         "extrait": "le supplément pour coupes et pertes (compris dans le prix du support)"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "voliges",
+     "regles": [
+      {
+       "id": "volige_perte__pertes",
+       "attribut": "perte_coupes_et_chutes",
+       "valeur": "5 à 10",
+       "unite": "%",
+       "statut": "a_confirmer",
+       "sources": [
+        "S224",
+        "S421"
+       ],
+       "libelle_source": "perte coupes et chutes",
+       "condition": "plus haut sur croupes, lucarnes ; plus la chute d'aboutage (comme les liteaux)",
+       "regions": [
+        "France",
+        "Belgique"
+       ],
+       "ecart": "Le guide Culture demande un supplément pour coupes et pertes sans le chiffrer. La volige se vend au m² avec un minimum d'une pièce (bois.json).",
+       "raison": "Un seul chiffre, sur un blog.",
+       "preuves": [
+        {
+         "source": "S224",
+         "extrait": "la fourniture et la pose d'un voligeage jointif … le supplément pour coupes et pertes"
+        },
+        {
+         "source": "S421",
+         "extrait": "marge de 5 à 10 % pour les coupes et les chutes"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "écran sous toiture",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Siplast",
+       "groupe": "Siplast",
+       "modeles": [
+        {
+         "nom": "Sup'Air, Def'X R1",
+         "attributs": [
+          {
+           "id": "ecran_consommation_sans_perte_en_plus",
+           "attribut": "consommation_recouvrements_compris",
+           "valeur": "1,10 à 1,20",
+           "unite": "m²/m²",
+           "statut": "une_source",
+           "sources": [
+            "S322",
+            "S323"
+           ],
+           "libelle_source": "consommation (recouvrements compris)",
+           "condition": "selon la pente (recouvrement 10 cm au-dessus de 30 %, 20 cm à 30 % et moins)",
+           "regions": [
+            "France"
+           ],
+           "ecart": "Deux fiches du même fabricant = une source ; recoupée par le calcul sur les recouvrements DTU confirmés (ecrans-etancheite.json). Dörken : aucune consommation en m²/m², seulement des recouvrements. Aucune FDES d'écran trouvée avec un taux de chute.",
+           "raison": "Pas de seconde marque qui publie une consommation.",
+           "preuves": [
+            {
+             "source": "S322",
+             "extrait": "Consommation 1,10 à 1,20 m²/m² en fonction de la pente"
+            },
+            {
+             "source": "S323",
+             "extrait": "1,10 à 1,20 m²/m² en fonction de la pente"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "zinc en bandes (faîtage, rive, égout, noue)",
+     "regles": [
+      {
+       "id": "zinc_bandes_longueurs",
+       "attribut": "methode",
+       "valeur": "ml + recouvrement à chaque jonction, arrondi à la longueur de 2 m ; avec 5 cm de recouvrement : +2,5 % ; avec 10 cm : +5 %",
+       "unite": null,
+       "statut": "a_confirmer",
+       "sources": [
+        "S238",
+        "S302"
+       ],
+       "libelle_source": "méthode",
+       "condition": "bandes façonnées vendues en 2 m",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Les longueurs de 2 m sont confirmées (zinguerie.json). Le 5 % du code revient à 10 cm de recouvrement par bande de 2 m ; cette valeur de recouvrement n'est pas sourcée ici. VMZinc et Rheinzink ne publient pas de perte de chantier (FDES/EPD lues : rien sur les chutes de pose).",
+       "raison": "Recouvrement des bandes à confirmer (DTU 40.41 via un guide).",
+       "preuves": [
+        {
+         "source": "S238",
+         "extrait": "longueur standard/2m (profilés, solins, bandes)"
+        },
+        {
+         "source": "S302",
+         "extrait": "éléments de 2 m de longueur maximum"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "gouttières zinc",
+     "regles": [
+      {
+       "id": "zinc_gouttiere_longueurs",
+       "attribut": "methode",
+       "valeur": "ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus",
+       "unite": null,
+       "statut": "confirme",
+       "sources": [
+        "S302"
+       ],
+       "libelle_source": "méthode",
+       "regions": [
+        "France"
+       ],
+       "ecart": "Avec des longueurs de 4 m, 30 mm par jonction fait 0,75 % : l'arrondi à la longueur l'absorbe.",
+       "raison": "Longueur et recouvrement confirmés dans zinguerie.json (deux fabricants et le DTU cité) ; la méthode en découle par le calcul.",
+       "preuves": [
+        {
+         "source": "S302",
+         "extrait": "longueur 4 m (2 et 3 m existent)"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "wasteRules roof_slate rate 5 (« Casse et coupes de rive, pans rectangulaires simples »)",
+     "origine": "roofing.ts:4046 ; referentiel-couverture.md §2 ; regles-metier SKILL.md",
+     "valeur_actuelle": "5 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "5 % sur toit simple (garder) ; une seule source de formation, convergente avec le rebut toléré de 5 % en ardoise naturelle",
+     "sources": [
+      "S24",
+      "S415"
+     ],
+     "explication": "Rien ne contredit 5 %. Ce n'est pas « confirmé » au sens des consignes : un seul chiffre sérieux, aucun fabricant."
+    },
+    {
+     "ratio": "Pertes ardoise : 5 % toit simple / 10 % toit compliqué (fondateur) ; §2 : 8 à 10 % toiture complexe",
+     "origine": "regles-metier SKILL.md ; referentiel-couverture.md §2 ; ardoise.md §7",
+     "valeur_actuelle": "5 % / 10 % (le code applique toujours 5 %)",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "5 % toit simple ; toit compliqué : plus-values CAP au ml (rive 0,16 à 0,33 m², arêtier 0,66, noue 1,50) PUIS 5 %, ou à défaut 10 % demandé à l'artisan",
+     "sources": [
+      "S12",
+      "S416"
+     ],
+     "explication": "Le 10 % n'a que des sources grand public. La méthode des plus-values est écrite dans un manuel de formation et confirmée dans son principe par le guide Culture."
+    },
+    {
+     "ratio": "Rives, noues, arêtiers : coupes dans la perte du toit (rien en plus)",
+     "origine": "regles-metier SKILL.md ; points-singuliers.json",
+     "valeur_actuelle": "0 en plus",
+     "verdict": "corrige",
+     "bonne_valeur": "ardoise : plus-values en m² par ml (manuel CAP), puis la perte en % s'applique au total",
+     "sources": [
+      "S12",
+      "S224"
+     ],
+     "explication": "Deux sources indépendantes comptent les points singuliers à part de la surface courante ; le manuel ajoute la casse en plus. Les chiffres des plus-values restent à une source (CAP). Règle du fondateur à signaler : la recherche la contredit pour l'ardoise ; pour la tuile, rien de chiffré."
+    },
+    {
+     "ratio": "Crochets d'ardoise : perte 0 % (un crochet par ardoise commandée)",
+     "origine": "roofing.ts:4048 (ardoise.perte_crochets) ; referentiel-couverture.md §25.1",
+     "valeur_actuelle": "0 % sur les ardoises commandées",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "1 crochet par ardoise (confirmé) ; surplus 0 % (CAP, sur ardoises avant casse) ou 10 % (Nomad) ; le code donne déjà +5 % sur le besoin",
+     "sources": [
+      "S12",
+      "S24"
+     ],
+     "explication": "Principe confirmé, surplus contradictoire. Le crochet tombe et se tord à la pose : un surplus est plausible, mais 10 % n'a qu'une source."
+    },
+    {
+     "ratio": "wasteRules roof_slate_fc rate 5",
+     "origine": "roofing.ts:4047 ; referentiel-couverture.md §4",
+     "valeur_actuelle": "5 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "5 % (garder)",
+     "sources": [
+      "S24"
+     ],
+     "explication": "Aucune source propre au fibres-ciment (Cedral, Eternit cherchés)."
+    },
+    {
+     "ratio": "wasteRules roof_tile rate 3 (« Tuiles mécaniques »)",
+     "origine": "roofing.ts:4051 ; referentiel-couverture.md §2",
+     "valeur_actuelle": "3 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "entre 1 % (casse seule, FDES CTMNC) et 5 % (casse + coupes, formation CAP) ; demander à l'artisan (règle du fondateur), proposer 5 %",
+     "sources": [
+      "S418",
+      "S24"
+     ],
+     "explication": "3 % n'est écrit nulle part. La règle du fondateur (perte de la tuile demandée à l'artisan) n'est pas contredite."
+    },
+    {
+     "ratio": "Tuile canal : aucune perte (pas de wasteRule roof_tile_canal)",
+     "origine": "roofing.ts (wasteRules) ; inventaire-ratios.md canal_x2",
+     "valeur_actuelle": "0 %",
+     "verdict": "corrige",
+     "bonne_valeur": "appliquer une perte comme aux autres tuiles (au moins la casse : 1 % selon la FDES ; 5 % en formation), demandée à l'artisan",
+     "sources": [
+      "S419",
+      "S24"
+     ],
+     "explication": "Deux sources indépendantes supposent une perte non nulle ; la valeur à retenir reste à fixer."
+    },
+    {
+     "ratio": "wasteRules batten rate 5 (« Chutes de liteaux et contre-liteaux »)",
+     "origine": "roofing.ts:4052 ; referentiel-couverture.md §2 ; bois.json liteau_perte",
+     "valeur_actuelle": "5 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "calculer la chute d'aboutage (longueur vendue ÷ multiple de l'entraxe) ; 5 % comme défaut tant que la longueur et l'entraxe ne sont pas connus",
+     "sources": [
+      "S24"
+     ],
+     "explication": "Correction de la recherche bois.json : Nomad n'applique pas 1,05 aux liteaux. Le 5 % liteaux n'a donc aucune source écrite. Avec 4,00 m sur chevrons à 60 cm, la chute fait déjà 10 %."
+    },
+    {
+     "ratio": "wasteRules sheathing rate 5 (« Support voligeage : m² rampant × 1,05 »)",
+     "origine": "roofing.ts:4055 ; referentiel-couverture.md §7",
+     "valeur_actuelle": "5 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "5 % toit simple, plus sur croupes et lucarnes ; demander à l'artisan (règle du fondateur)",
+     "sources": [
+      "S224",
+      "S421"
+     ],
+     "explication": "Un supplément existe (guide Culture) mais n'est chiffré que par un blog."
+    },
+    {
+     "ratio": "wasteRules zinc_ridge / hip_strip rate 5 (bande zinc, ml × 1,05)",
+     "origine": "roofing.ts:4053-4054 ; referentiel-couverture.md §2, §3",
+     "valeur_actuelle": "5 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "ml + recouvrements, arrondi aux longueurs de 2 m ; le 5 % équivaut à 10 cm de recouvrement par bande de 2 m",
+     "sources": [
+      "S238"
+     ],
+     "explication": "Aucun fabricant ne donne de % ; le recouvrement des bandes reste à sourcer. La noue (valley) n'a aucune perte dans le code."
+    },
+    {
+     "ratio": "Écran : coefficient 1,10 (> 30 %) / 1,20 (≤ 30 %) qui inclut recouvrements, abouts, faîtage ; aucune perte en plus",
+     "origine": "roofing.ts:1127-1134 (fiche ecran.coef_pente_forte / faible)",
+     "valeur_actuelle": "× 1,10 / × 1,20, pas de wasteRule underlay",
+     "verdict": "confirme",
+     "bonne_valeur": "garder ; ne pas ajouter de % de perte par-dessus",
+     "sources": [
+      "S322",
+      "S231"
+     ],
+     "explication": "Une consommation fabricant (Siplast) + le calcul sur les recouvrements d'une autre marque (Edilians) retrouvent la même plage. La perte de 10 à 15 % du §2 ferait double compte."
+    },
+    {
+     "ratio": "« + 5 % » sur closoir, rives, noues (fondateur)",
+     "origine": "regles-metier SKILL.md",
+     "valeur_actuelle": "ml + 5 %",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "pièces au ml arrondies (tuiles de rive, faîtières) ; rouleau de closoir de 5 m arrondi ; bandes zinc arrondies aux 2 m avec recouvrement",
+     "sources": [
+      "S24"
+     ],
+     "explication": "Aucune source ne chiffre + 5 % sur les accessoires au ml ; aucune ne le contredit non plus. Règle du fondateur à garder tant qu'elle n'est pas tranchée."
+    }
+   ],
+   "comptoir": []
+  },
+  {
+   "code": "comptoir_exposee",
+   "libelle": "Points du comptoir et situation exposée",
+   "sous_familles": [
+    {
+     "nom": "faîtage ardoise",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Edilians",
+       "groupe": "Edilians",
+       "modeles": [
+        {
+         "nom": "Faîtière Armor 33 (réf. 729)",
+         "attributs": [
+          {
+           "id": "faitiere_armor_729_pieces_par_ml",
+           "attribut": "pieces_par_ml",
+           "valeur": 3,
+           "unite": "u/ml",
+           "statut": "confirme",
+           "sources": [
+            "S422",
+            "S423",
+            "S202",
+            "S201"
+           ],
+           "condition": "longueur utile 0,33 m (nom « 33 », négoces « 0,33 » / « 0,33 m ») ; 1 000 ÷ 330 = 3,03 → 3 au ml ; ajouter 1 pièce par about (arrondi au supérieur)",
+           "regions": [
+            "Bretagne",
+            "Pays de la Loire"
+           ],
+           "ecart": "Edilians ne publie ni longueur utile ni nombre au ml sur sa page ; le nombre vient de deux négoces indépendants (Point.P/Bretagne Matériaux : « 3 / ml » ; Tanguy : « 0,33 m ») et du nom « 33 » du fabricant. Leadermat et Quéguiner (même fiche) écrivent « 0,33 ». Pas de confirme_fabricant : aucune fiche Edilians datée ne l'écrit.",
+           "controle": {
+            "formule": "pieces_par_ml = 1000 / longueur_utile_mm",
+            "longueur_utile_mm": 330,
+            "calcul": 3.03,
+            "publie": 3,
+            "ok": true
+           },
+           "preuves": [
+            {
+             "source": "S422",
+             "extrait": "Faîtière Armor 33 à emboîtement terre vieilli masse 3 / ml teinte C1044 EDILIANS (titre ; page 403 au robot, lue par le moteur de recherche)"
+            },
+            {
+             "source": "S423",
+             "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044"
+            },
+            {
+             "source": "S202",
+             "extrait": "Faîtière Armor - 0,33 - Vieillie Masse … 370 mm … 1 palette 184 unités"
+            },
+            {
+             "source": "S201",
+             "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1"
+            }
+           ]
+          },
+          {
+           "id": "faitiere_armor_729_recouvrement",
+           "attribut": "recouvrement_entre_faitieres",
+           "valeur": 40,
+           "unite": "mm",
+           "statut": "une_source",
+           "sources": [
+            "S201",
+            "S423"
+           ],
+           "condition": "calcul : longueur hors tout 370 mm − longueur utile 330 mm (emboîtement)",
+           "regions": [
+            "Bretagne"
+           ],
+           "raison": "Déduit par le calcul (370 hors tout chez Edilians, 0,33 m utile chez les négoces) ; aucune source n'écrit le recouvrement.",
+           "preuves": [
+            {
+             "source": "S201",
+             "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1"
+            },
+            {
+             "source": "S423",
+             "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044"
+            }
+           ]
+          },
+          {
+           "id": "faitiere_armor_729_coloris",
+           "attribut": "coloris",
+           "valeur": [
+            "Rouge (C1029, code RO)",
+            "Vieilli Masse (C1044, code VM)",
+            "Émaillé Brun (E03)"
+           ],
+           "unite": "liste",
+           "statut": "confirme",
+           "sources": [
+            "S201",
+            "S204",
+            "S423",
+            "S424"
+           ],
+           "condition": "Rouge et Vieilli Masse en stock courant en Bretagne (Tanguy, Leadermat) ; Émaillé Brun sur commande, environ 3 fois plus cher (Quéguiner 23,33 € TTC contre 6,91 €)",
+           "regions": [
+            "Bretagne"
+           ],
+           "ecart": "Passe 3b : Émaillé Brun à une seule source ; Quéguiner le vend (réf. 115600) : deuxième source.",
+           "preuves": [
+            {
+             "source": "S201",
+             "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1"
+            },
+            {
+             "source": "S204",
+             "extrait": "Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287"
+            },
+            {
+             "source": "S423",
+             "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044"
+            },
+            {
+             "source": "S424",
+             "extrait": "Couleur Emaille Brun · Longueur 370 mm · Poids 3.1 kg · Conditionnement 1 palette 176 unités"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Faîtière Armor 33 Émaillé Brun",
+         "attributs": [
+          {
+           "id": "faitiere_armor_729_palette_emaille",
+           "attribut": "conditionnement",
+           "valeur": 176,
+           "unite": "u/palette",
+           "statut": "une_source",
+           "sources": [
+            "S424"
+           ],
+           "condition": "Rouge et Vieilli Masse : 184 par palette (PC184, déjà confirmé)",
+           "regions": [
+            "Bretagne"
+           ],
+           "raison": "Seule la fiche Quéguiner donne 176 pour l'émaillé.",
+           "preuves": [
+            {
+             "source": "S424",
+             "extrait": "Couleur Emaille Brun · Longueur 370 mm · Poids 3.1 kg · Conditionnement 1 palette 176 unités"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Faîtière ardoise de 40 Ouverture 17 (réf. 720)",
+         "attributs": [
+          {
+           "id": "faitiere_ardoise_40_720_pieces_par_ml",
+           "attribut": "pieces_par_ml",
+           "valeur": 2.5,
+           "unite": "u/ml",
+           "statut": "une_source",
+           "sources": [
+            "S205",
+            "S425",
+            "S423"
+           ],
+           "condition": "longueur utile 0,40 m (hors tout 445 mm) ; 1 000 ÷ 400 = 2,5",
+           "regions": [
+            "Bretagne"
+           ],
+           "raison": "Point.P écrit « Faîtière ardoisee bretagne … 2,5 / ml » sans numéro de référence ; Tanguy parle de faîtières à emboîtement « (0,40 m) » ; le rattachement à la réf. 720 est une lecture.",
+           "preuves": [
+            {
+             "source": "S205",
+             "extrait": "Référence 720 … Longueur hors tout 445 mm … Poids en Kg 4.2"
+            },
+            {
+             "source": "S425",
+             "extrait": "Faîtière ardoisee bretagne à emboîtement … 2,5 / ml (titre, lu par le moteur de recherche)"
+            },
+            {
+             "source": "S423",
+             "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "ardoise naturelle",
+     "regles": [
+      {
+       "id": "ardoise_crochets_pointe_sur_liteaux",
+       "attribut": "part_crochets_pointe",
+       "valeur": 0.2,
+       "unite": "fraction",
+       "statut": "une_source",
+       "sources": [
+        "S12",
+        "S10",
+        "S18",
+        "S429"
+       ],
+       "condition": "pose à l'agrafe sur liteaux : pointes là où l'agrafe ne passe pas (au droit de chaque chevron ou contre-liteau) et sur les parties voligées (égout : doublis et 1er rang) ; rives : ardoises à 2 clous, pas de crochet ; sur voligeage jointif : 100 % de pointes",
+       "regions": [
+        "France",
+        "Bretagne"
+       ],
+       "raison": "Le chiffre 1/5 n'est écrit que dans le manuel CAP ; le Ministère, le cours BTS et le tutoriel Leroy Merlin confirment seulement le principe (pointes au passage des chevrons et sur volige). Frénéhard, Cupa et Rathscheck ne donnent aucune proportion.",
+       "controle": {
+        "geometrie": "part ≈ (largeur d'appui + 2 cm) ÷ entraxe des chevrons",
+        "contre_liteau_4cm_entraxe_60": 0.1,
+        "chevron_8cm_sans_contre_liteau": 0.17,
+        "egout_volige": "≈ 2 rangs sur 30 à 40 rangs d'un rampant de 4 à 5 m : 5 à 7 %",
+        "total": "10 à 23 % selon support : 1/5 est dans la plage"
+       },
+       "preuves": [
+        {
+         "source": "S12",
+         "extrait": "4/5 agrafes, 1/5 pointes (lu en passe 1, ardoise.json)"
+        },
+        {
+         "source": "S10",
+         "extrait": "Des crochets à pointes sont prévus pour le passage des chevrons. On parle de crochets agrafes et de crochets pointes."
+        },
+        {
+         "source": "S18",
+         "extrait": "Crochets à pointe pour fixation au droit des chevrons ou fermettes et sur volige."
+        },
+        {
+         "source": "S429",
+         "extrait": "Poursuivez la pose avec les ardoises et crochets agrafes sur les liteaux ou crochets pointes lorsque ces derniers ne passent pas."
+        }
+       ]
+      }
+     ],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "tous formats",
+         "attributs": [
+          {
+           "id": "ardoise_palette_regle_poids",
+           "attribut": "ardoises_par_palette_estimation",
+           "valeur": "≈ 1 350 kg ÷ poids unitaire (poids = L × l × e × 2,8 g/cm³)",
+           "unite": "u/palette",
+           "statut": "a_confirmer",
+           "sources": [
+            "S27",
+            "S41",
+            "S426",
+            "S427"
+           ],
+           "condition": "palette de 1 300 à 1 400 kg dans la plupart des cas (de 0,9 à 1,45 t) ; estimation pour l'affichage, à faire confirmer par le négoce",
+           "regions": [
+            "France"
+           ],
+           "raison": "Aucun fabricant (Cupa, Samaca, Rathscheck) ne publie le nombre par palette ; la masse de palette déduite des négoces va de 1,0 à 1,45 t. Règle utile pour un ordre de grandeur, pas pour une commande.",
+           "controle": {
+            "poids_unitaire_kg_3_5mm": {
+             "27x18": 0.476,
+             "30x20": 0.588,
+             "32x22": 0.69,
+             "33x23": 0.744,
+             "35x22": 0.755,
+             "35x25": 0.858,
+             "40x22": 0.862,
+             "40x25": 0.98,
+             "45x30_5mm": 1.89,
+             "46x30_5mm": 1.932,
+             "50x25_5mm": 1.75
+            },
+            "estimation_1350kg": {
+             "27x18": 2840,
+             "30x20": 2300,
+             "32x22": 1960,
+             "33x23": 1810,
+             "35x22": 1790,
+             "35x25": 1570,
+             "40x22": 1570,
+             "40x25": 1380,
+             "45x30_5mm": 710,
+             "46x30_5mm": 700,
+             "50x25_5mm": 770
+            },
+            "verif_negoces": {
+             "27x18 : 2800 × 0,476": 1333,
+             "32x22 : 2000 × 0,690": 1380,
+             "40x22 : 1500 × 0,862": 1293,
+             "46x30 (5 mm) : 700 × 1,932": 1352,
+             "32x22 Catteau 2,7 mm : 2300 × 0,532": 1224,
+             "32x22 Catteau 3,5-4 mm : 1900 × 0,739": 1404,
+             "40x25 Samaca 4 mm : 950 × 1,12": 1064
+            }
+           },
+           "preuves": [
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            },
+            {
+             "source": "S41",
+             "extrait": "Ardoise fine > + – 2.7 mm > 2.300 pièces/palettes … Ardoise épaisse > 7 à 10 mm > 800 pièces/palettes (32 x 22)"
+            },
+            {
+             "source": "S426",
+             "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)"
+            },
+            {
+             "source": "S427",
+             "extrait": "Épaisseur 4 mm … Pièce par m² 25 … Pièce par Palette 950"
+            }
+           ]
+          },
+          {
+           "id": "ardoise_situation_exposee_zone3",
+           "attribut": "majoration_recouvrement",
+           "valeur": "R + 10 mm (retenir max(R + 10 mm, R × 1,10))",
+           "unite": "mm",
+           "statut": "confirme",
+           "sources": [
+            "S7",
+            "S8",
+            "S25",
+            "S3"
+           ],
+           "condition": "zone III, situation exposée (≈ 5 km du littoral, falaises, îles, estuaires) ; pose au crochet et aux clous, pureau entier et développé",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "ecart": "DTU 2020 : + 10 mm. Cupa et Rathscheck (texte de 1993) : conseil de + 10 %. Avec le tableau Cupa (Ph ≤ 5,5 m), les deux écarts restent sous 3 mm de 60 % à 170 % ; même crochet sauf aux bords d'arrondi.",
+           "preuves": [
+            {
+             "source": "S7",
+             "extrait": "valeur : +10 mm en zone III situation exposée ; tableaux 6 et 7 fonction de la zone et de la situation (valeur et référence seulement)"
+            },
+            {
+             "source": "S8",
+             "extrait": "Le recouvrement doit être majoré de 10 mm en zone III situation exposée"
+            },
+            {
+             "source": "S25",
+             "extrait": "versant en site exposé (il est conseillé de majorer le recouvrement de 10 %)"
+            },
+            {
+             "source": "S3",
+             "extrait": "minimas valables en site normal ou protégé dans chaque région … site exposé (il est conseillé de majorer le recouvrement de 10%)"
+            }
+           ]
+          },
+          {
+           "id": "ardoise_situation_exposee_zones1_2",
+           "attribut": "majoration_recouvrement",
+           "valeur": "R × 1,10 arrondi au mm supérieur (≈ + 7 à + 10 mm)",
+           "unite": "mm",
+           "statut": "a_confirmer",
+           "sources": [
+            "S25",
+            "S3",
+            "S432",
+            "S7",
+            "S1"
+           ],
+           "condition": "zones I et II, situation exposée ; la côte sud de Lorient à l'Espagne (Morbihan sud-est, Loire-Atlantique) est en zone 2 exposée",
+           "regions": [
+            "Bretagne",
+            "Pays de la Loire",
+            "France"
+           ],
+           "raison": "Les tableaux 6 et 7 du DTU 2020 ont leurs propres valeurs par zone ET situation (zones I et II exposées incluses) mais ne sont pas lisibles (image, texte AFNOR). Cupa et Rathscheck (1993) disent : tableau valable en site normal ou protégé, + 10 % conseillé en site exposé quelle que soit la région. Les trois lectures (×1,10 ; +10 mm ; zone suivante) diffèrent de 0 à 5 mm.",
+           "controle": {
+            "pente_%": {
+             "60": "z1 92→102 / +10mm 102 / zone2 103 ; z2 103→114 / 113 / zone3 113",
+             "80": "z1 80→88 / 90 / 89 ; z2 89→98 / 99 / 97",
+             "100": "z1 73→81 / 83 / 80 ; z2 80→88 / 90 / 89",
+             "120": "z1 69→76 / 79 / 77 ; z2 77→85 / 87 / 83",
+             "140": "z1 65→72 / 75 / 73 ; z2 73→81 / 83 / 80"
+            },
+            "lecture": "R normal → ×1,10 / +10 mm / R de la zone suivante en site normal (Ph ≤ 5,5 m, tableau Cupa)"
+           },
+           "preuves": [
+            {
+             "source": "S25",
+             "extrait": "versant en site exposé (il est conseillé de majorer le recouvrement de 10 %)"
+            },
+            {
+             "source": "S3",
+             "extrait": "minimas valables en site normal ou protégé dans chaque région … site exposé (il est conseillé de majorer le recouvrement de 10%)"
+            },
+            {
+             "source": "S432",
+             "extrait": "En site exposé, le tableau ne s'applique plus … les fabricants conseillent de majorer le recouvrement de 10 %"
+            },
+            {
+             "source": "S7",
+             "extrait": "valeur : +10 mm en zone III situation exposée ; tableaux 6 et 7 fonction de la zone et de la situation (valeur et référence seulement)"
+            },
+            {
+             "source": "S1",
+             "extrait": "Region;proyeccion;Pendiente %;…;solape (sans colonne de situation)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "27x18",
+         "attributs": [
+          {
+           "id": "ardoise_palette_27x18",
+           "attribut": "ardoises_par_palette",
+           "valeur": 2800,
+           "unite": "u/palette",
+           "statut": "une_source",
+           "sources": [
+            "S426"
+           ],
+           "condition": "épaisseur non lue (A1-T1-S1) ; 2800 × 0,476 kg = 1 333 kg (3,5 mm)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+           "preuves": [
+            {
+             "source": "S426",
+             "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "40x22",
+         "attributs": [
+          {
+           "id": "ardoise_palette_40x22",
+           "attribut": "ardoises_par_palette",
+           "valeur": 1500,
+           "unite": "u/palette",
+           "statut": "une_source",
+           "sources": [
+            "S426"
+           ],
+           "condition": "1500 × 0,862 = 1 293 kg à 3,5 mm",
+           "regions": [
+            "France"
+           ],
+           "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+           "preuves": [
+            {
+             "source": "S426",
+             "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "35x25",
+         "attributs": [
+          {
+           "id": "ardoise_palette_35x25",
+           "attribut": "ardoises_par_palette",
+           "valeur": 800,
+           "unite": "u/palette",
+           "statut": "une_source",
+           "sources": [
+            "S426"
+           ],
+           "condition": "800 pièces = 690 kg à 3,5 mm, 980 kg à 5 mm : ardoise probablement épaisse (5 à 7 mm)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+           "preuves": [
+            {
+             "source": "S426",
+             "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "40x25",
+         "attributs": [
+          {
+           "id": "ardoise_palette_40x25",
+           "attribut": "ardoises_par_palette",
+           "valeur": 950,
+           "unite": "u/palette",
+           "statut": "une_source",
+           "sources": [
+            "S427"
+           ],
+           "condition": "Samaca 55 Primera 4 mm ; Leroy Merlin donne 900 (épaisseur non lue) : écart de 5 %, épaisseur différente probable",
+           "regions": [
+            "France"
+           ],
+           "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+           "preuves": [
+            {
+             "source": "S427",
+             "extrait": "Épaisseur 4 mm … Pièce par m² 25 … Pièce par Palette 950"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "46x30",
+         "attributs": [
+          {
+           "id": "ardoise_palette_46x30",
+           "attribut": "ardoises_par_palette",
+           "valeur": 700,
+           "unite": "u/palette",
+           "statut": "une_source",
+           "sources": [
+            "S426"
+           ],
+           "condition": "700 × 1,932 (5 mm) = 1 352 kg ; le 45×30 n'est publié nulle part : même ordre de grandeur (≈ 710)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+           "preuves": [
+            {
+             "source": "S426",
+             "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "30x20",
+         "attributs": [
+          {
+           "id": "ardoise_palette_30x20",
+           "attribut": "ardoises_par_palette",
+           "valeur": null,
+           "unite": "u/palette",
+           "statut": "a_confirmer",
+           "sources": [
+            "S27"
+           ],
+           "condition": "non publié ; estimation par le poids : ≈ 2300 (1 350 kg ÷ 0.588 kg)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+           "preuves": [
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "33x23",
+         "attributs": [
+          {
+           "id": "ardoise_palette_33x23",
+           "attribut": "ardoises_par_palette",
+           "valeur": null,
+           "unite": "u/palette",
+           "statut": "a_confirmer",
+           "sources": [
+            "S27"
+           ],
+           "condition": "non publié ; estimation par le poids : ≈ 1810 (1 350 kg ÷ 0.744 kg)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+           "preuves": [
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "35x22",
+         "attributs": [
+          {
+           "id": "ardoise_palette_35x22",
+           "attribut": "ardoises_par_palette",
+           "valeur": null,
+           "unite": "u/palette",
+           "statut": "a_confirmer",
+           "sources": [
+            "S27"
+           ],
+           "condition": "non publié ; estimation par le poids : ≈ 1790 (1 350 kg ÷ 0.755 kg)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+           "preuves": [
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "45x30",
+         "attributs": [
+          {
+           "id": "ardoise_palette_45x30",
+           "attribut": "ardoises_par_palette",
+           "valeur": null,
+           "unite": "u/palette",
+           "statut": "a_confirmer",
+           "sources": [
+            "S27"
+           ],
+           "condition": "non publié ; estimation par le poids : ≈ 710 (1 350 kg ÷ 1.89 kg)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+           "preuves": [
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "50x25",
+         "attributs": [
+          {
+           "id": "ardoise_palette_50x25",
+           "attribut": "ardoises_par_palette",
+           "valeur": null,
+           "unite": "u/palette",
+           "statut": "a_confirmer",
+           "sources": [
+            "S27"
+           ],
+           "condition": "non publié ; estimation par le poids : ≈ 770 (1 350 kg ÷ 1.75 kg)",
+           "regions": [
+            "France"
+           ],
+           "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+           "preuves": [
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Cupa",
+       "groupe": "Cupa",
+       "modeles": [
+        {
+         "nom": "Cupa 10 Excellence 40×22",
+         "attributs": [
+          {
+           "id": "ardoise_vente_au_mille",
+           "attribut": "unite_de_vente",
+           "valeur": "au mille (MIL)",
+           "unite": "",
+           "statut": "confirme",
+           "sources": [
+            "S428",
+            "S27"
+           ],
+           "condition": "Sobemat vend au mille et donne le poids du mille : 862 kg = 1 000 × 0,862 kg (poids Cupa 3,5 mm). Le « 690 kg » du 32×22 noté en passe 3b est aussi le poids du mille, pas de la palette",
+           "regions": [
+            "France"
+           ],
+           "controle": {
+            "formule": "poids_mille = 1000 × poids_unitaire",
+            "calcul_kg": 862,
+            "publie_kg": 862,
+            "ok": true
+           },
+           "preuves": [
+            {
+             "source": "S428",
+             "extrait": "MIL … poids : 862 kg (mise à jour 16/11/2026)"
+            },
+            {
+             "source": "S27",
+             "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "gouttière",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "pendante, nantaise, havraise",
+         "attributs": [
+          {
+           "id": "gouttiere_crochets_ecartement_littoral_neige",
+           "attribut": "ecartement_crochets",
+           "valeur": 0.5,
+           "unite": "m",
+           "statut": "confirme",
+           "sources": [
+            "S241",
+            "S236",
+            "S250",
+            "S251",
+            "S430",
+            "S265",
+            "S431"
+           ],
+           "condition": "0,50 m au plus partout (DTU 40.5 art. 5.2.1.1 et 5.2.1.2), « fonction des charges climatiques » sans valeur ; 0,40 m seulement pour la gouttière à l'anglaise (art. 5.2.1.3) et pour le crochet discret VMZINC (2,5/m, propre au produit)",
+           "regions": [
+            "France",
+            "Bretagne"
+           ],
+           "ecart": "Aucune source sérieuse ne réduit l'écartement en bord de mer. Pour la neige : le DTU renvoie aux charges climatiques sans chiffre ; Frénéhard (extrait seulement) demande raidisseur ou tirant neige sur les crochets légers ; deux blogs d'artisans écrivent 40 cm en zone venteuse ou neigeuse (non fiable, attribué au DTU à tort). En bord de mer la contrainte est la matière (inox, cuivre, zinc), pas l'écartement.",
+           "raison": "0,40 m en bord de mer : a_confirmer (prudence d'atelier seulement).",
+           "preuves": [
+            {
+             "source": "S241",
+             "extrait": "écartement qui est fonction des charges climatiques … au plus 0,50 m ; havraises, nantaises : 0,50 m au maximum ; à l'anglaise : crochets à pied 0,40 m au maximum"
+            },
+            {
+             "source": "S236",
+             "extrait": "schémas de pose des crochets (valeurs en image) ; colliers PVC 2 m, fonte 2,70 m, cuivre 2,50 m"
+            },
+            {
+             "source": "S250",
+             "extrait": "2,5 crochets pour 1 m de gouttière posée … 1 crochet discret tous les 40 cm"
+            },
+            {
+             "source": "S251",
+             "extrait": "climat marin : seulement la tenue de la patine ; aucun écartement de crochets publié"
+            },
+            {
+             "source": "S430",
+             "extrait": "En zone exposée (littoral, montagne), réduisez à 40-50 cm."
+            },
+            {
+             "source": "S265",
+             "extrait": "Espacement maximal de 50 cm … réduit à 40 cm en zone venteuse ou neigeuse ; crochets renforcés avec tirant neige"
+            },
+            {
+             "source": "S431",
+             "extrait": "en zone neige, crochets « légers » avec raidisseur ou tirant neige (extrait du moteur de recherche ; PDF non lu : certificat invalide puis 503)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "tuile terre cuite",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "DTU 40.21 / 40.211",
+         "attributs": [
+          {
+           "id": "tuile_situation_exposee",
+           "attribut": "effet_situation_exposee",
+           "valeur": "pente minimale plus forte (colonne « exposé » des tableaux), pas de majoration de recouvrement",
+           "unite": "",
+           "statut": "confirme",
+           "sources": [
+            "S46",
+            "S67"
+           ],
+           "condition": "ex. famille B sans écran, zone 1/2/3 : normal 40/50/60 %, exposé 60/70/80 % ; le recouvrement est fixé par le modèle (emboîtement)",
+           "regions": [
+            "France",
+            "Bretagne"
+           ],
+           "ecart": "La règle ardoise (+10 mm / +10 %) ne s'applique pas aux tuiles à emboîtement : en site exposé on contrôle la pente minimale et la fixation (régions de vent × site normal/exposé), déjà dans tuiles-emboitement.json.",
+           "preuves": [
+            {
+             "source": "S46",
+             "extrait": "colonnes Protégé / Normal / Exposé par zone ; ex. famille B : 35% 35% 50% / 40% 50% 60% / 60% 70% 80%"
+            },
+            {
+             "source": "S67",
+             "extrait": "DTU 40.21 … Protégé 35 … 35 … 50"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "Faîtière Armor : nombre au ml à demander",
+     "origine": "points-singuliers.json faitiere_armor_pieces_par_ml ; TESTEUR-NEGOCE-1",
+     "valeur_actuelle": "a_confirmer (null)",
+     "verdict": "corrige",
+     "bonne_valeur": "3 au ml (longueur utile 0,33 m) ; 2,5 au ml pour la faîtière ardoise de 40",
+     "sources": [
+      "S422",
+      "S423",
+      "S201"
+     ],
+     "explication": "Deux négoces indépendants + nom du modèle + calcul 1000/330."
+    },
+    {
+     "ratio": "Palette 32×22 « 2 200 à demander » ; poids 690 kg de la Cupa 10",
+     "origine": "ardoise.json passe 3b",
+     "valeur_actuelle": "690 kg lu comme poids de palette",
+     "verdict": "corrige",
+     "bonne_valeur": "690 kg = poids du mille (Sobemat vend au mille) ; palette ≈ 1,3-1,4 t",
+     "sources": [
+      "S428",
+      "S27"
+     ],
+     "explication": "862 kg/mille en 40×22 = 1000 × 0,862 kg (Cupa)."
+    },
+    {
+     "ratio": "Crochets à pointe 1/5 sur liteaux",
+     "origine": "référentiel §25.1 ; regles-metier SKILL.md",
+     "valeur_actuelle": "1/5",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "1/5 (CAP) compatible avec la géométrie (10 à 23 %) ; 100 % sur voligeage",
+     "sources": [
+      "S12",
+      "S10",
+      "S429"
+     ],
+     "explication": "Un seul chiffre publié."
+    },
+    {
+     "ratio": "Crochets de gouttière à 0,40 m en bord de mer",
+     "origine": "zinguerie.json / référentiel",
+     "valeur_actuelle": "0,40 m",
+     "verdict": "a_confirmer",
+     "bonne_valeur": "0,50 m (DTU) partout ; 0,40 m seulement anglaise ou crochet discret VMZINC",
+     "sources": [
+      "S241",
+      "S250",
+      "S265"
+     ],
+     "explication": "Aucune source sérieuse ne lie 0,40 m au littoral."
+    },
+    {
+     "ratio": "Situation exposée : + 10 mm",
+     "origine": "ardoise.json ardoise_zone_exposee",
+     "valeur_actuelle": "+10 mm zone III",
+     "verdict": "confirme",
+     "bonne_valeur": "zone III : max(R + 10, R × 1,10) ; zones I-II : R × 1,10 (à confirmer)",
+     "sources": [
+      "S7",
+      "S8",
+      "S25",
+      "S3"
+     ],
+     "explication": "Écart +10 mm / +10 % < 3 mm."
+    }
+   ],
+   "comptoir": [
+    {
+     "article": "Faîtière Armor 33 Edilians (réf. 729)",
+     "ce_que_le_vendeur_demande": [
+      "coloris : Rouge C1029, Vieilli Masse C1044, Émaillé Brun (commande)",
+      "nombre de pièces (3 au ml + abouts)",
+      "à sceller ou à sec (vis/clou)"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "palette de 184 (RO, VM) ; 176 (Émaillé Brun, une source)",
+     "sources": [
+      "S201",
+      "S204",
+      "S423",
+      "S424",
+      "S422"
+     ]
+    },
+    {
+     "article": "Ardoise naturelle hors 32×22",
+     "ce_que_le_vendeur_demande": [
+      "format",
+      "carrière / marque et choix",
+      "épaisseur",
+      "nombre (pièces ou milliers)"
+     ],
+     "unite_de_vente": "pièce, au mille ou palette",
+     "conditionnement": "palette selon épaisseur : 27×18 ≈ 2 800 ; 40×22 ≈ 1 500 ; 40×25 900-950 ; 35×25 800 (épaisse) ; 46×30 ≈ 700 ; autres : à demander",
+     "sources": [
+      "S426",
+      "S427",
+      "S428",
+      "S27"
+     ]
+    },
+    {
+     "article": "Crochets d'ardoise à pointe (avec pose à l'agrafe)",
+     "ce_que_le_vendeur_demande": [
+      "longueur, Ø, nuance",
+      "nombre (≈ 1/5 du total sur liteaux ; tout en pointe sur volige)"
+     ],
+     "unite_de_vente": "boîte",
+     "conditionnement": "pointes par 700 (7-14 cm), 500 (15-16 cm)",
+     "sources": [
+      "S12",
+      "S10"
+     ]
+    },
+    {
+     "article": "Crochets de gouttière",
+     "ce_que_le_vendeur_demande": [
+      "profil et développé",
+      "matière (inox ou cuivre en bord de mer)",
+      "tirant neige / raidisseur en zone de neige",
+      "nombre : 1 tous les 0,50 m + 1"
+     ],
+     "unite_de_vente": "pièce ou carton",
+     "conditionnement": "carton de 100 / 50 selon développé",
+     "sources": [
+      "S241",
+      "S250",
+      "S431"
+     ]
+    }
+   ]
   }
  ],
  "sources": [
@@ -97604,6 +99331,132 @@
    "url": "https://www.bretagne-materiaux.fr/p/toiture-charpente/planche-de-rive-sapin-blanc-du-nord-brut-1-conge-rainure-traite-classe-3-vert-20x220mm-longueur-4-80m-ref-165184-A7103091",
    "type": "negoce",
    "consulte": "2026-11-19"
+  },
+  {
+   "id": "S415",
+   "titre": "Agence wallonne du patrimoine, fiche FARCC1-2 « Ardoises naturelles, spécifications produit » (2022)",
+   "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2022/03/farcc1-2-ardoises-naturelles-specifications-produit.pdf",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S416",
+   "titre": "Ozymandias Agency, blog « Combien d'ardoises au m² » (agence web pour couvreurs, pour mémoire)",
+   "url": "https://ozymandias.agency/blog/combien-ardoises-m2-tableau-formats-calcul-2026/",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S417",
+   "titre": "Reformex, calculateur nombre de tuiles (site de devis, pour mémoire)",
+   "url": "https://www.reformex.fr/calculateurs/nombre-tuiles/",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S418",
+   "titre": "FDES collective de la tuile à emboîtement de terre cuite, CTMNC, mars 2020 (copie BigMat)",
+   "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3550891337909-MYvxt0XoiV.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S419",
+   "titre": "FDES collective de la tuile canal et de la tuile plate de terre cuite, CTMNC, mars 2020, mise à jour avril 2022 (copie Chausson)",
+   "url": "https://cdn.chausson.fr/catalog-document/74808192-8ee4-4dce-ade8-45bd10af99fb/fdes.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S420",
+   "titre": "FDES tuile terre cuite, CTMNC, novembre 2014 (copie Chausson)",
+   "url": "https://cdn.chausson.fr/catalog-document/4c0c989b-60a6-4af8-b32d-60d6bd757730/fdesfichesdedclarationsenvir-etsanitaires-1000992.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S421",
+   "titre": "TrustUp (blog belge de travaux), prix de la volige au m²",
+   "url": "https://blog.trustup.be/fr/?p=15860",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S422",
+   "titre": "Point.P (même article chez Bretagne Matériaux, A3434781) : titre de fiche « Faîtière Armor 33 à emboîtement … vieilli masse 3 / ml teinte C1044 EDILIANS »",
+   "url": "https://www.pointp.fr/p/couverture/faitiere-armor-33-a-emboitement-imerys-toiture-terre-vieilli-masse-3-ml-A3434781",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S423",
+   "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+   "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S424",
+   "titre": "Quéguiner Matériaux, « Faîtière Armor - 0,33 - Emaille Brun » (réf. 115600 ; même fiche que Leadermat)",
+   "url": "https://www.queguiner.fr/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033-0",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S425",
+   "titre": "Point.P, titre de fiche « Faîtière ardoisee bretagne à emboîtement terre cuite vieilli masse 2,5 / ml teinte C1044 EDILIANS »",
+   "url": "https://www.pointp.fr/p/couverture/faitiere-ardoisee-a-emboitement-imerys-toiture-terre-cuite-vieilli-A1228889",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S426",
+   "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+   "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S427",
+   "titre": "Apok (négoce belge), « Ardoise naturelle Samaca 55 Primera 4 mm 40x25 cm »",
+   "url": "https://www.apok.be/fr-be/products/ardoise-naturelle-samaca-55-primera-4mm-40x25cm",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S428",
+   "titre": "Sobemat, « ARDOISE CUPA 10 EXCELLENCE 40x22 CE-NF » (réf. ARD100215), vendue au mille",
+   "url": "https://www.sobemat.fr/produit/ardoise-cupa-10-excellence-40x22-ce-nf-QVJEMTAwMjE1",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S429",
+   "titre": "Leroy Merlin, tutoriel PDF « Comment poser des ardoises ? »",
+   "url": "https://media.adeo.com/media/1434615/comment-poser-des-ardoises-5efeda16de57bc000920cd45.pdf",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S430",
+   "titre": "gouttieres-aluminium.fr, blog « Crochet gouttière »",
+   "url": "https://gouttieres-aluminium.fr/blog/crochet-gouttiere-types/",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S431",
+   "titre": "Frénéhard & Michaux, fiche crochets de gouttière (hébergée par Denis Matériaux)",
+   "url": "https://media.denismateriaux.com/media/139488_qsfeq0108_cq.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S432",
+   "titre": "calcul-pente.fr, page ardoise",
+   "url": "https://calcul-pente.fr/ardoise/",
+   "type": "autre",
+   "consulte": "2026-11-20"
   }
  ]
 }

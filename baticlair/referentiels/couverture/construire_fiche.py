@@ -35,6 +35,8 @@ FAMILLES = [
     ("ecran", "Écrans sous toiture", "ecrans-etancheite.json", "ecran"),
     ("etancheite", "Étanchéité de toiture", "ecrans-etancheite.json", "etancheite"),
     ("bois_couverture", "Bois de couverture", "bois.json", None),
+    ("pertes", "Pertes de casse et de coupe", "pertes.json", None),
+    ("comptoir_exposee", "Points du comptoir et situation exposée", "comptoir-exposee.json", None),
 ]
 CONFIRME = ("confirme", "confirme_fabricant")
 
@@ -92,8 +94,19 @@ def nom_attribut(a):
     return re.sub(r"[^a-z0-9]+", "_", a).strip("_")
 
 
+IDS_VUS = set()
+
+
+def id_unique(i, famille):
+    """Deux recherches peuvent nommer pareil deux chiffres différents (« volige_perte ») : le second prend sa famille."""
+    if i in IDS_VUS:
+        i = f"{i}__{famille}"
+    IDS_VUS.add(i)
+    return i
+
+
 def valeur(e, src):
-    v = {"id": e["id"], "attribut": nom_attribut(e["attribut"]), "valeur": e.get("valeur"), "unite": e.get("unite"),
+    v = {"id": id_unique(e["id"], e.get("famille") or "x"), "attribut": nom_attribut(e["attribut"]), "valeur": e.get("valeur"), "unite": e.get("unite"),
          "statut": e["statut"], "sources": [src.id(s) for s in e.get("sources", [])]}
     if v["attribut"] != e["attribut"]:
         v["libelle_source"] = e["attribut"]
