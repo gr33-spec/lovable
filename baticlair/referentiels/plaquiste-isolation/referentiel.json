@@ -5041,7 +5041,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12) ; Pladur compte plus serré (recherche/13 C1)."
+            "note": "Recherche du 2026-11-19 — 1 source : Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12). La règle « plaques internes vissées à 60 cm » a deux sources (SNIP, guide Chausson) et le calcul la redonne exactement (12, 16) ; le chiffre lui-même, SNIP seul (recherche/13 C1, 19 §2)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -5285,7 +5285,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -5305,7 +5305,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -7275,7 +7275,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -7295,7 +7295,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -8358,7 +8358,7 @@
             "status": "verified",
             "verifiedAt": "2026-11-20",
             "verifiedBy": "Greg Roy (fondateur), réponses du 20 novembre 2026",
-            "note": "15 vis/m² (SNIP) quand la marque n'est pas écrite, par prudence (Greg, 20/11/2026)."
+            "note": "15 vis/m² (SNIP) quand la marque n'est pas écrite ou est Knauf, par prudence (Greg, 20/11/2026). Knauf ne publie aucune valeur et visse « selon le DTU 25.41 » (catalogue Knauf 2020, recherche/19 §1)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -8656,7 +8656,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -8676,7 +8676,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -9683,7 +9683,7 @@
           "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 3,0 ml/m² à 0,40 : Placo Intégrale 2023."
+            "note": "Recherche du 2026-11-19 — 1 source : 3,0 ml/m² à 0,40 : Placo Intégrale 2023 (deux documents Placo, un seul éditeur) ; SNIP et Chausson ne publient que 0,50 et 0,60 ; le calcul (1 / 0,40 × 1,05 = 2,63) est cohérent (recherche/19 §3)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -9781,7 +9781,7 @@
           "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 15 (Placo 2023)."
+            "note": "Recherche du 2026-11-19 — 1 source : 15 (Placo 2023, un seul éditeur). Aucune autre source publiée pour 0,40 (recherche/19 §3)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -10317,7 +10317,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -10337,7 +10337,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail >= 2",
@@ -11145,7 +11145,7 @@
           "source": "isover-vario",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : 0,8 ml d'adhésif par m² : seule valeur écrite telle quelle (Isover, fourchette 0,8 à 1,4 « suivant les points singuliers ») ; le guide Chausson donne un minimum de 0,65 (recherche/15 n° 7). Règle changée : avant 0,93."
+            "note": "Recherche du 2026-11-19 — 1 source : 0,8 ml d'adhésif par m² : seule valeur écrite telle quelle (Isover, fourchette 0,8 à 1,4 « suivant les points singuliers ») ; le guide Chausson donne un minimum de 0,65 ; le calcul des recouvrements (lés de 1,50 m, 10 cm) donne 0,71 ; Pro Clima, Siga, Knauf Insulation et Ursa ne publient rien (recherche/15 n° 7, 19 §5). Règle changée : avant 0,93."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -11740,7 +11740,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail < 2",
@@ -11760,7 +11760,7 @@
           "source": "siniat-carnet-cloison",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4)."
           },
           "version": 1,
           "when": "fixation_rail >= 2",

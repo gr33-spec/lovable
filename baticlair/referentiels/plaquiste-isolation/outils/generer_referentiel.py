@@ -557,7 +557,7 @@ GEO = OK2("Géométrie : longueur = surface ÷ hauteur (SNIP et Pladur calculent
 def fixations_rail(base_ml, extra_count="0"):
     """Clous ou chevilles des rails (et des appuis) selon l'habitude de l'artisan."""
     f = f"arrondi_sup({base_ml} / regle.pas_fixation_rail + {extra_count})"
-    etat = OK2("Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée.")
+    etat = OK2("Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). Aucun fabricant ni guide du DTU ne demande une fixation de plus en bout ; « une de plus par ligne de rail » (les deux bouts fixés) n'est écrit que par Castorama : non compté, à confirmer (recherche/19 §4).")
     return [
         besoin("fixations-clous", "fixation", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail < 2", short="fixations", precision="une fixation tous les 60 cm", designation="Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz", precisionRequires=["marque_cloueur"]),
         besoin("fixations-chevilles", "fixation_cheville", f, "u", "siniat-carnet-cloison", etat, when="fixation_rail >= 2", short="chevilles", precision="une cheville tous les 60 cm"),
@@ -688,7 +688,7 @@ def contre_cloison():
          "h48_s60": regle("2.00", "m", "rockwool-murs-2024", hh), "h48_s40": regle("2.25", "m", "pladur-2019", OK2("2,25 m : Pladur ; Placo dit 2,30, on garde la plus basse (recherche/13 D3).")),
          "h48_d60": regle("2.40", "m", "rockwool-murs-2024", hh), "h48_d40": regle("2.65", "m", "pladur-2019", OK2("2,65 m : Pladur ; Placo dit 2,75, on garde la plus basse (recherche/13 D4).")),
          "h70_s60": regle("2.50", "m", "rockwool-murs-2024", hh),
-         "vis_s60": regle("15", "u/m2", "snip-fc18", GREG("15 vis/m² (SNIP) quand la marque n'est pas écrite, par prudence (Greg, 20/11/2026)."), label="{v} vis par m²"),
+         "vis_s60": regle("15", "u/m2", "snip-fc18", GREG("15 vis/m² (SNIP) quand la marque n'est pas écrite ou est Knauf, par prudence (Greg, 20/11/2026). Knauf ne publie aucune valeur et visse « selon le DTU 25.41 » (catalogue Knauf 2020, recherche/19 §1)."), label="{v} vis par m²"),
          "vis_placo": regle("11", "u/m2", "placo-integrale-plafonds-2023", UNE("Placo : 11 vis/m², même règle de vissage que le doublage (recherche/13 D2)."), label="{v} vis par m² (Placo)"),
          "vis_siniat": regle("12", "u/m2", "siniat-carnet-cloison", UNE("Siniat : 12 vis/m² (Clipstar ; même règle) (recherche/15 n° 4)."), label="{v} vis par m² (Siniat)"),
          "vis_s40": regle("19", "u/m2", "snip-fc18", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), label="{v} vis par m²"),
@@ -753,7 +753,7 @@ def plafond():
          "e50": regle("0.50", "m", "placo-integrale-plafonds-2023", OK2("0,50 si 6 à 10 kg/m² : Placo 2023 et Siniat.")),
          "fourrures_e60": regle("1.79", "ml/m2", "snip-fc18", OK2("1,79 ml/m² à 0,60 : SNIP fiche 18 et fiche solution Placo sp00012110 (1,79) ; le « 2 » de l'Intégrale 2023 est un arrondi (recherche/09 n° 46)."), label="{v} de fourrures par m²"),
          "fourrures_e50": regle("2.10", "ml/m2", "snip-fc18", OK2("2,10 ml/m² à 0,50 : SNIP et Pladur ; Placo 2,2."), label="{v} de fourrures par m²"),
-         "fourrures_e40": regle("3.0", "ml/m2", "placo-integrale-plafonds-2023", UNE("3,0 ml/m² à 0,40 : Placo Intégrale 2023."), label="{v} de fourrures par m²"),
+         "fourrures_e40": regle("3.0", "ml/m2", "placo-integrale-plafonds-2023", UNE("3,0 ml/m² à 0,40 : Placo Intégrale 2023 (deux documents Placo, un seul éditeur) ; SNIP et Chausson ne publient que 0,50 et 0,60 ; le calcul (1 / 0,40 × 1,05 = 2,63) est cohérent (recherche/19 §3)."), label="{v} de fourrures par m²"),
          "suspentes_e60": regle("1.56", "u/m2", "snip-fc18", GREG("Validé par Greg le 20/11/2026. "+"1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."), label="{v} suspentes par m²"),
          "suspentes_e50": regle("1.84", "u/m2", "snip-fc18", OK2("SNIP 1,84 et Pladur 1,75 sortent de la même formule à la pièce (une suspente tous les 1,20 m par file), seule la pièce de référence change (recherche/15 n° 5)."), label="{v} suspentes par m²"),
          "suspentes_e40": regle("2.7", "u/m2", "placo-integrale-plafonds-2023", OK2("2,7 : Placo 2023 ; le calcul à la pièce (une suspente tous les 1,20 m par file) donne 2,63 pour 4 × 4 m (recherche/13 E2)."), label="{v} suspentes par m²"),
@@ -761,7 +761,7 @@ def plafond():
          "vis_int_e50": regle("4", "u/m2", "placo-integrale-plafonds-2023", OK2("1re peau d'un plafond en 2 BA13, entraxe 0,50 : 4 vis/m², Placo 2023 et Pladur 2019 ; le SNIP compte le double (recherche/13 E7)."), label="{v} vis 1re peau par m²"),
          "vis_e60": regle("12", "u/m2", "snip-fc18", UNE("12 vis/m² à 0,60, vis de la cornière de rive comprises (SNIP ; vissage de la rive confirmé par Siniat). Placo 2023 (10) et Pladur (8) ne comptent pas les vis de rive : le calcul refait explique l'écart (recherche/18 §3)."), label="{v} vis par m²"),
          "vis_e50": regle("14", "u/m2", "snip-fc18", OK2("14 vis/m² à 0,50 : SNIP et guide Chausson 2020-21 (recherche/13 E4)."), label="{v} vis par m²"),
-         "vis_e40": regle("15", "u/m2", "placo-integrale-plafonds-2023", UNE("15 (Placo 2023)."), label="{v} vis par m²"),
+         "vis_e40": regle("15", "u/m2", "placo-integrale-plafonds-2023", UNE("15 (Placo 2023, un seul éditeur). Aucune autre source publiée pour 0,40 (recherche/19 §3)."), label="{v} vis par m²"),
          "vis_int": regle("8", "u/m2", "snip-fc18", CONFLIT("1re peau d'un plafond en 2 BA13 à 0,60 : 8 vis/m² (SNIP), gardé jusqu'à l'avis d'un plaquiste (recherche/16 n° 6).", "Placo Intégrale 2023 : 3 ; mais la FDES Placo 2026 (INIES 52811) pèse deux fois la masse de 3 + 12 vis : la valeur 3 ne tient pas."), label="{v} vis 1re peau par m²"),
          "vis_ext": regle("12", "u/m2", "snip-fc18", OK2("2e peau : 12 vis TTPC 35/m² (SNIP) ; Placo 10 à 15."), label="{v} vis 2e peau par m²"),
          "vis_par_suspente_bois": regle("2", "u", "placo-integrale-plafonds-2023", OK2("2 vis TTPC 35 par suspente sous bois : Placo Intégrale 2023 et fiche Maxi Stil F 530."), label="{v} vis par suspente"),
@@ -848,7 +848,7 @@ def separative():
          "plaques_par_face": regle("2", "u", "dtu-2541-2022", OK2("SAA et SAD : 2 BA13 par face (Placo SAA 120, SAD 160 ; Siniat S180)."), label="{v} plaques par face"),
          "e60": regle("0.60", "m", "dtu-2541-2022", OK2("Entraxe 0,60.")),
          "files_montants": regle("2", "u", "dtu-2541-2022", OK2("Séparative à double ossature : SNIP p. 7 (4,20 ml/m² = 2 × 2,10) et Pladur Mémento 2017 p. 64 (3,50 = 2 × 1,75) (recherche/09 n° 59)."), label="{v} files de montants"),
-         "vis_int": regle("12", "u/m2", "snip-fc18", UNE("Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12) ; Pladur compte plus serré (recherche/13 C1)."), label="{v} vis 1re peau par m²"),
+         "vis_int": regle("12", "u/m2", "snip-fc18", UNE("Séparative, 1re peau, montants simples 0,60 : SNIP p. 6-7 (12). La règle « plaques internes vissées à 60 cm » a deux sources (SNIP, guide Chausson) et le calcul la redonne exactement (12, 16) ; le chiffre lui-même, SNIP seul (recherche/13 C1, 19 §2)."), label="{v} vis 1re peau par m²"),
          "vis_ext": regle("30", "u/m2", "snip-fc18", OK2("Séparative, 2e peau : SNIP 30 ; chaque file est une 72/48 déjà confirmée (SNIP + Placo 29,19) (recherche/15 n° 3)."), label="{v} vis 2e peau par m²"),
          "trpf": regle("4", "u/m2", "snip-fc18", OK2("Séparative : 4 TRPF/m² = deux files de 72/48 à 2 (SNIP + Placo) (recherche/15 n° 3)."), label="{v} TRPF par m²"),
          "pas_fixation_rail": c_pas_fixation(),
@@ -963,7 +963,7 @@ def soufflage():
 def pare_vapeur():
     c = {"majoration": regle("1.10", "u", "isover-vario", OK2("1,10 m² de membrane par m² : rendement Isover et calcul (lé 1,50 m, recouvrement 10 cm → +7 %, plus relevés), confirmé en 3e passe (recherche/07)."), label="membrane + {v}"),
          "largeur_utile": regle("1.40", "m", "isover-vario", OK2("Recouvrement de 10 cm au moins entre lés : Knauf, Rockwool (11/2024), Soprema, Isover (recherche/07)."), label="un joint tous les {v}"),
-         "adhesif_par_m2": regle("0.8", "ml/m2", "isover-vario", UNE("0,8 ml d'adhésif par m² : seule valeur écrite telle quelle (Isover, fourchette 0,8 à 1,4 « suivant les points singuliers ») ; le guide Chausson donne un minimum de 0,65 (recherche/15 n° 7). Règle changée : avant 0,93."), label="{v} d'adhésif par m²")}
+         "adhesif_par_m2": regle("0.8", "ml/m2", "isover-vario", UNE("0,8 ml d'adhésif par m² : seule valeur écrite telle quelle (Isover, fourchette 0,8 à 1,4 « suivant les points singuliers ») ; le guide Chausson donne un minimum de 0,65 ; le calcul des recouvrements (lés de 1,50 m, 10 cm) donne 0,71 ; Pro Clima, Siga, Knauf Insulation et Ursa ne publient rien (recherche/15 n° 7, 19 §5). Règle changée : avant 0,93."), label="{v} d'adhésif par m²")}
     params = [surface("Surface de membrane", "Surface à couvrir ?")]
     needs = [besoin("membrane", "membrane", "surface * regle.majoration", "m2", "isover-vario", OK2("Surface × 1,10 : Isover (étiquettes Vario Xtra, Stopvap) et calcul sur le recouvrement de 10 cm de trois fabricants (recherche/12)."), short="membrane"),
              besoin("adhesif", "adhesif", "surface * regle.adhesif_par_m2", "ml", "isover-vario", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."), short="adhésif", core=True)]
