@@ -1621,8 +1621,8 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   // Points 14 et 15 : une seule étape, les mots de Greg, des cases tirées de la fiche ; les crochets, écrits, ne sont pas proposés.
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
-  // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; sans limite de nombre (skill du fondateur, 18/11/2026) : six cases.
-  await expect(cases).toHaveCount(6);
+  // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; sans limite de nombre (skill du fondateur, 18/11/2026) : sept cases (dauphins compris).
+  await expect(cases).toHaveCount(7);
   await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Vis inox 4 × 40" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).not.toBeChecked();

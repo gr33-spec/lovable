@@ -38,6 +38,8 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
       { key: "gouttiere/naissance", label: "Naissances de gouttière" },
       { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)" },
       { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)" },
+      // Skill du fondateur : « Dauphin, cuvette, jonctions : en Suggestion » (le devis n'en dit rien).
+      { key: "descente/dauphin", label: "Dauphins (pied de descente)" },
       // Greg, 18 novembre 2026 : les consommables en cases (plus jamais d'office, plus de question oui / non).
       { key: "bandes-zinc/mastic+bande-porte-solin/mastic", label: "Cartouches de silicone zinc" },
       { key: "bandes-zinc/vis", label: "Vis inox 4 × 40" },
@@ -54,7 +56,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { id, projetId } = await chantier(agent);
     expect((await repondre(agent, id, "gouttiere/etain")).status).toBe(400);
     expect((await repondre(agent, id, "couverture-ardoise/liteau")).status).toBe(400);
-    expect((await ecran(agent, projetId)).suggestions).toHaveLength(6);
+    expect((await ecran(agent, projetId)).suggestions).toHaveLength(7);
   });
 
   it("naissances cochées : elles entrent dans la liste, l'étape est close ; talons et angles n'existent pas", async () => {
