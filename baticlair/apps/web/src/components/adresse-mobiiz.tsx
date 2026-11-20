@@ -2,7 +2,7 @@
 
 import { Check, Copy, Inbox, Mail } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { Button, Card, ErrorNotice, Field, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur, type EtatAdresseMobiiz } from "@/lib/api";
 import { NOM_APP } from "@/lib/nom";
@@ -102,6 +102,30 @@ export function EcranAdresseMobiiz({ onContinuer }: { onContinuer: () => void })
         </Link>
       </div>
     </section>
+  );
+}
+
+/**
+ * AU PREMIER ENVOI AUX NÉGOCES (Greg, 19 novembre 2026 ; RÈGLE CHANGÉE : avant, juste après l'inscription) : le même
+ * contenu, dans la feuille d'envoi, une seule fois (`vueLe`). Chargé seulement à ce moment-là : l'adresse se fabrique
+ * alors avec le vrai nom de l'entreprise (confirmé par le SIRET). Rien tant que ce n'est pas chargé ; déjà vue : `onDejaVue`.
+ */
+export function ContenuAdresseMobiiz({ onDejaVue }: { onDejaVue: () => void }) {
+  const { data, error, reload } = useAdresseMobiiz();
+  const vue = !!data?.vueLe;
+  useEffect(() => {
+    if (vue) onDejaVue();
+  }, [vue, onDejaVue]);
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data || vue) return <Skeleton lines={3} label="Préparation de ton adresse…" />;
+  return (
+    <div className="flex flex-col gap-4" aria-label="Ton adresse Mobiiz">
+      <AdresseEnGros adresse={adresseAffichee(data)} />
+      <p className="text-[17px] leading-relaxed">
+        {PHRASES_ADRESSE.envoie} {PHRASES_ADRESSE.recoit}
+      </p>
+      <BoutonCopier texte={adresseAffichee(data)} />
+    </div>
   );
 }
 
