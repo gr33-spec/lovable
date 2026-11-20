@@ -49,3 +49,80 @@ indépendante doit donc venir d'un négoce ou d'un autre organisme ; quand seul 
 | B11. **Knauf Diamant** : charge par point | 55 kg (1 source, sans vis ni cheville) | **inchangé : « jusqu'à 55 kg par point de fixation (se reporter aux données techniques) »** ; vis et cheville **toujours non précisées** | Knauf, documentation « Knauf Diamant 13 Cleaneo C », **novembre 2019** (copie Chausson https://cdn.chausson.fr/catalog-document/693fe0b8-aac2-494d-8d78-9ea3744556c3/documentation-knauf-diamant.pdf, PDF lu le 20/11/2026) | batiweb, publi-rédactionnel Knauf 18/02/2020 (01) | **1 source (fabricant, 2 documents) ; à confirmer (vis / cheville, entraxe et document en vigueur non trouvés)** | Valeur commerciale, conditions renvoyées à une « donnée technique » introuvable. À ne pas coder. Pour comparaison : Knauf « vis spéciale LG35 » 24 kg sur 2 × 12,5 Diamant (knauf.com fr-MA, extrait). |
 | B12. **Cheville métallique à expansion (Molly) sur BA13 standard** | aucune valeur fabricant (à confirmer) | **20 daN (≈ 20 kg) de charge de service par cheville isolée** dans une plaque de 12,5 mm (Fischer HM 4 à 8 mm, coefficient de sécurité 3) ; 15 daN en 9,5 mm ; 30 daN en 2 × 12,5 mm (HM 5 × 65, 6 × 65) | [FI-a] Fischer, fiche « HM, charges de service Fels » (LT 01 HM, copie Anjou Connectique https://www.anjou-connectique.com/media/wysiwyg/Fischer/LT_01_HM_F__SFR__AIP__V2_1.pdf, PDF lu le 20/11/2026) ; Fischer, fiche HM S 18/04/2011 (Trenois) : HM 5 × 52 pour plaque 7-21 mm, HM 6 × 52 10-21 mm, boîtes de 50 | [N10o] brico.be, Fischer HM 6 × 52 : « capacité indicative 25 kg » (extrait moteur) ; côté plaque : Placo, fiche système (extrait, 07) « au-delà de **30 kg** : renfort incorporé à l'ossature » ; Habito 60 kg par point avec cheville métallique Ø 6 ([P24] p. 66, rappel) | **confirmé (2 sources) pour l'ordre de grandeur** (20-25 kg par Molly sur BA13 simple ; renfort au-delà de 30 kg) ; **la valeur exacte reste propre à chaque cheville** | Fischer est le seul fabricant de cheville lu avec un tableau daté (Rawlplug SN : distances et boîtes de 100, pas de charge ; Spit, Würth : non lus). Aucun fabricant de plaque ne chiffre une Molly sur BA13 standard. Règle du référentiel inchangée : **aucune charge codée** ; un objet lourd cité au devis appelle un renfort (ligne à préciser), pas une cheville. |
 | B13. **Fermacell** : plaques par palette | tarif 2010 seul (à confirmer) | **inchangé : 12,5 × 1 200 : 48 (2,00 à 2,60 m), 40 (2,80 et 3,00 m)** | [F2] tarif Fermacell 2010 (Ciffréo Bona, 01) ; le même tarif ressort encore en tête de recherche le 20/11/2026 | — : fiches BigMat (Fermacell 2,50 × 1,20 BD, PDF lu) et Gobert (01/2015, PDF lu) ne donnent pas la palette | **à confirmer (une seule source, de 2010 ; aucune édition récente trouvée en 2 recherches)** | Sans effet sur la commande (vente à la plaque). Ne pas coder de palette Fermacell. |
+
+## Bilan
+
+**Volume** : 30 lignes (17 pour les numéros de la liste, 13 pour les « à confirmer » de produits). Environ 31 recherches web, le reste en lecture directe de PDF hébergés par des négoces (Samse, Chausson, BigMat, Union Matériaux, Castorama) et par la CAPEB (Offre Placo 2024), plus les fiches Siniat print2pdf (de nouveau accessibles le 20/11/2026).
+
+### Numéros de la liste (`08-liste-deuxieme-passe.md`)
+
+| N° | Ancien statut | Nouveau statut | Valeur |
+|---|---|---|---|
+| 1 | 1 source | **confirmé (2 sources)** | 2,35 m inchangé (botte de 20 : Placo seul, sans effet) |
+| 2 | 1 source | **confirmé (2 sources)** | 50 inchangé |
+| 3 | 1 source | **confirmé (2 sources)** | 500 + 1 gaz inchangé ; 20 mm sur béton confirmé ; **rail sur bois : pas de clou de cloueur, à confirmer** |
+| 4 | 1 source | **confirmé (2 sources)** | 3,36 m² inchangé |
+| 5 | 1 source | **confirmé (2 sources)** | 3,12 m² inchangé |
+| 25 | 1 source | **en partie** : Jetrock 2 et Thermacell Cristal confirmés (5 R chacun) ; Comblissimo confirmé à R 7 et R 10 ; Supafil et Igloo restent 1 source officielle | tableaux inchangés |
+| 27 | contradiction | **confirmé (2 sources), écart expliqué** (marques négoce en 1 000) | 500 inchangé |
+| 28 | contradiction | **confirmé (2 sources), contradiction levée** | 25 kg inchangé |
+| 29 | contradiction | **R : levée (1,40)** ; colisage : 1 source (fiche Isover 2014) | 12,15 m² inchangé |
+| 55 | à confirmer | **confirmé (2 sources)** | 5,40 m² inchangé |
+| 56 | à confirmer | **confirmé (2 sources)** | 100 inchangé |
+
+**Aucune valeur de `referentiel.json` n'est à changer.** Sur ces 11 numéros, 9 passent à « confirmé (2 sources) » ; restent partiels : 25 (Supafil, Igloo, Comblissimo R 5/6/8) et 29 (colisage).
+
+### Autres « à confirmer » de produits
+
+- **Levés (confirmés ou contradiction expliquée)** : M 90 (3,99) et M 100 (2,59 / 3,99) ; R 100 ; existence et format du Placoplatre BA 15 ; Placoplatre BA 18 toujours au catalogue, poids 14,6 kg/m² (contradiction levée) ; Siniat M48-35 (liste complète 2026, 2,50 et 3,00 confirmés) ; ordre de grandeur Molly sur BA13 (20-25 kg, renfort au-delà de 30 kg).
+- **Passés de « à confirmer » à « 1 source fabricant (2 documents) »** : Habito Hydro 13 (4 longueurs, palette 36) ; Glasroc H Ocean 13 et 18S (longueurs) ; BA 15 et BA 18 (longueurs, piles) ; autres longueurs M 90 / M 100 ; Knauf KF 13 en 3,00 m.
+- **Restent à confirmer** : longueurs Knauf 48/35 France (pages contradictoires) ; KF 13 en 2,80 m ; Knauf Diamant 55 kg (vis / cheville non dites) ; palette Glasroc H Ocean (40 contre 43) ; palettes Fermacell (tarif 2010) ; conditionnement des montants Siniat (non publié) ; Supafil et Igloo (fiche fabricant récente avec tableau) ; poids du sac Igloo (11,3 ou 12,5 kg) ; colisage GR 32 Nu 45 ; clou de cloueur pour rail sur plancher bois.
+
+### À reporter (sans modifier ici)
+
+- `referentiel.json` : notes de vérification des n° 1 à 5, 27, 28, 55, 56 → « 2 sources » avec les URL ci-dessous ; n° 25 : statut par produit (Jetrock 2 et Thermacell Cristal confirmés).
+- `clous-gaz-beton` : quand le support est un plancher bois, ne pas proposer « clous + gaz béton » (aucune référence de cloueur pour un rail sur bois).
+- `enduit-pate` : si le devis cite « Placomix PRO », le seau fait 22 kg (17 kg en Allégé).
+- `eclisse-f530` : signaler au comptoir l'« Éclisse 50 Stil F 530 » (500 mm, botte de 10), autre pièce.
+- 01-plaques.md : BA 15, BA 18, Habito Hydro, Glasroc H Ocean (formats de l'Offre Placo 2024) ; 02-ossatures-fixations.md : M 90, M 100, Siniat M48-35, Knauf 48/35.
+
+## Sources
+
+Consultées les 19 et 20 novembre 2026. Les pages des fabricants placo.fr, knauf.com et isover.fr répondent 403 en direct : leurs PDF ont été lus dans des copies hébergées par des négoces, sinon dans les extraits du moteur de recherche (« extrait »).
+
+1. [P24] Placo, « Offre Placo 2024 », catalogue tarif (PDF du 21/02/2024 hébergé par la CAPEB ; copie locale de la 3e passe `p3_f36121c8`), lu en entier le 20/11/2026 : profilés p. 82-83, plaques p. 44, 60-68, finitions, vis.
+2. Placo, fiches Rail Stil F 530 et Éclisse Stil F 530, MAJ 18/12/2023 — https://www.materiaux-naturels.fr/doc/product/n_1967.pdf ; https://www.materiaux-naturels.fr/doc/product/n_1968.pdf (lues en 1re passe).
+3. [N10a] Bricomarché, Rail Placo Stil F 530 2,35 m — https://www.bricomarche.com/p/rail-placor-stilr-f-530-2.35m/3496250125285 (extrait).
+4. [N10b] BigMat, fiche Placo Rail Hydrostil+ F 530 — https://medias.bigmat.fr/data_medias/medias_finaux/documents/3496250308879-6FKs27a5NL.pdf (extrait).
+5. [N10c] Gypso, fiche Éclisses (FT 20190522), via Chausson — https://www.chausson.fr/media/article-document/255926 (PDF lu).
+6. [S43] Spit, fiche Pulsa 40P+ — https://res.cloudinary.com/afdb/raw/upload/s---T1ANmIa--/v1/documents/3153992_cloueur_a_gaz_spit_p.pdf (lue en 1re passe).
+7. [N10d] Domomat, Clous C6 20 + gaz, boîte de 500 (Spit 57540) — https://www.domomat.com/16674-clous-c6-20-gaz-p800-500-pour-materiaux-tendres-et-creux-boite-de-500-spit-57540.html ; cloueur Pulsa 40P spécial plaquiste — https://www.domomat.com/58983-cloueur-a-gaz-pulsa-40p-special-plaquiste-500-clous-c6-20-inclus-spit-019323.html (extraits).
+8. Paslode P800, fiche technique (Trenois) — https://media.trenois.com/static/cloueur-a-gaz-paslode-p800_spi801_fiche-technique.pdf (extrait).
+9. [I-2026] Isover, fiche « Isoconfort 35 Revêtu Kraft », MAJ 24/03/26, copie Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1554173.pdf (PDF lu).
+10. Isover, fiche « Isoconfort 35 » (voile), générée le 18/08/2014, copie Chausson — https://chausson.fr/media/article-document/211133 (PDF lu ; explique l'ancienne longueur 2,10 m).
+11. [N10e] Brico Dépôt, laine de verre 220 mm R 6,25 2,8 × 1,2 — https://www.bricodepot.fr/p/3596265179478/laine-de-verre-220mm-comble-amenage-35-r-6-25-2-8m-x-1-20m-rouleau-kraft (extrait).
+12. [N10f] Castorama, Isover 240 mm 2,6 × 1,2 R 6,85 — https://www.castorama.fr/laine-de-verre-combles-amenages-isover-ep-240-mm-rouleau-kraft-2-6-x-1-2-m-r-6-85-m-k-w/3596265242042_CAFR.prd ; Bricomarché même EAN — https://www.bricomarche.com/p/rouleau-laine-verre-combles-2.6x1.2m-240mm/3596265242042 (extraits).
+13. [R-2026] Rockwool, fiche produit Jetrock 2, 01/2026 — https://www.rockwool.com/syssiteassets/rw-f/telechargements/fiches-produits/rockwool_fp_jetrock_2_202301.pdf (PDF lu).
+14. [SO-a] Soprema, fiche technique Thermacell Cristal n° INSFR0303-3/b, copie Castorama — https://media.castorama.fr/is/content/Castorama/3434551887778_FPD_FR_CFpdf (PDF lu).
+15. [SO-b] Soprema, brochure gamme Ouate de cellulose Cristal (2025), copie Union Matériaux — https://api-pro.union-materiaux.fr/api/product-notice/344760_2855600_ouate.pdf (PDF lu).
+16. Isover, fiche Comblissimo MAJ 24/04/26, copie Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_423944.pdf (PDF relu).
+17. [N10g] Brico Dépôt, laine de verre à souffler Isover 17,3 kg — https://www.bricodepot.fr/p/3596265242578/laine-de-verre-a-souffler-pour-combles-perdus-17-3-kg (page lue + extrait).
+18. [U] URSA, fiche Puls'R 47, copie Samse — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1491813.pdf (PDF lu).
+19. Certificats ACERMI 07/D/018/474/28, 04/D/016/378/27, 17/D/015/1195/5, 22/D/141/1569/5, 12/D/157/784/23, 02/018/098/27 — https://www.acermi.com (lus en 1re passe, 04 [S41]-[S49], [S63]).
+20. [N10h] Bricomarché, Placomix 25 kg — https://www.bricomarche.com/p/enduit-a-joint-a-sechage-pate-placomix-25kg/3496250007819 ; Toupret 25 kg (Castorama 3178310014011) ; Planodis 25 kg (Castorama 3334160420031) ; Siniat Prégy S 7 / 25 kg (batiproduits, batiweb 338803) (extraits).
+21. [S6] Isover, fiche « GR 32 nu », DoP 0001-11, générée le 18/08/2014, copie Chausson — https://www.chausson.fr/media/article-document/211141 (PDF lu) ; GR 32 Revêtu Kraft — https://chausson.fr/media/article-document/203040 (PDF lu).
+22. [I-IBR] Isover, fiche IBR Revêtu Kraft, copie Chausson — https://www.chausson.fr/media/article-document/203039 (extrait).
+23. [N10i] Castorama, Isover IBR 200 mm 1,2 × 4,5 m R 5 — https://www.castorama.fr/laine-de-verre-combles-perdus-et-plafonds-isover-ep-200-mm-rouleau-kraft-1-2-x-4-5-m-r-5-m-k-w/3596265242370_CAFR.prd ; Leroy Merlin réf. 82115939 (extraits).
+24. [N10j] Bricozor, Rawl Z-KSP × 100 — https://www.bricozor.com/cheville-metallique-suspente/cheville-type-ksp-acier-phosphate-noir-rawl.html ; Domomat, Spit Grip L M6 × 25 boîte de 100 — https://www.domomat.com/59141-boite-de-100-chevilles-a-expansion-grip-l-spit-m6x25mm-spit-058581.html (extraits).
+25. [N10k] Domomat, ING Fixations piton Rapido M6 béton, boîte de 100 — https://www.domomat.com/62246-boite-de-100-pitons-de-suspension-rapido-pour-beton-direct-ing-fixations-m6-ing-fixations-a188090.html (extrait).
+26. [N10l] Gypso, vis TRPF 9,5, boîte de 500 (2021), via Chausson — https://www.chausson.fr/media/article-document/253843 ; Samse, TRPF 3,5 × 9,5 boîte de 1 000 (07/2025) — https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1853904.pdf (extraits).
+27. Placo, brochure Glasroc H Ocean 03/2024 (F4514) — https://www.placo.fr/documents/brochures/2024-03-brochure-glasroc-h-ocean-f4514-1.pdf ; batiproduits Glasroc H Ocean — https://www.batiproduits.com/fiche/produits/plaque-de-platre-pour-milieux-tres-humides-p68905018.html (extraits).
+28. [SI-a] Siniat, fiches produit print2pdf du 01 au 10/09/2026 : Montant Prégymétal 48-35/6 (pi173939), Rail 48-30/5,4 (pi173916), Fourrure S47/6 (pi173900), Montant 90-35/6 (pi173911), Montant 100-50/6 (pi173906) — https://www.siniat.fr/-/print2pdf/product/pi173939/siniat-fiche-produit/fr-fr.pdf (et adresses voisines), PDF lus le 20/11/2026.
+29. [N10m] Mr Bricolage, Montant 48 NF 2,50 m Siniat — https://www.mr-bricolage.fr/montant-48-nf-acier-lg-250m-siniat.html (extrait).
+30. [N10n] Knauf, pages fr-FR Montant 48/35 et 48/35 Z275 — https://knauf.com/fr-FR/p/produit/montant-48-35-22807_4091 ; https://knauf.com/fr-FR/p/produit/montant-48-35-z275-22820_4091 ; Mr Bricolage Knauf 2,50 m / 2,60 m — https://www.mr-bricolage.fr/montant-m48-35-longueur-250-m.html, https://www.mr-bricolage.fr/montant-m48-35-longueur-260-m.html (extraits).
+31. Knauf, page fr-FR Knauf Feu KF 13 — https://knauf.com/fr-FR/p/produit/knauf-feu-kf-13-18608_4091 (extrait).
+32. Knauf, documentation Knauf Diamant, novembre 2019, copie Chausson — https://cdn.chausson.fr/catalog-document/693fe0b8-aac2-494d-8d78-9ea3744556c3/documentation-knauf-diamant.pdf (PDF lu).
+33. [FI-a] Fischer, LT 01 HM, charges de service — https://www.anjou-connectique.com/media/wysiwyg/Fischer/LT_01_HM_F__SFR__AIP__V2_1.pdf (PDF lu) ; Fischer, fiche HM S 18/04/2011 (Trenois) — https://media.trenois.com/static/cheville-metallique-hm-avec-vis_fis070_fiche-technique.pdf (PDF lu).
+34. [N10o] brico.be, Fischer HM 6 × 52 « 25 kg indicatif » — https://www.brico.be/fr/quincaillerie/fixations-techniques/chevilles-ancrage/chevilles-pour-platre/cheville-pour-murs-creux-fischer-hm-metal-diam-6x52-mm-4-pieces/5673927 (extrait).
+35. Rawlplug, fiche SN cheville cloison creuse (boîtes de 100, pas de charge) — https://res.cloudinary.com/afdb/raw/upload/s---EttA4cd--/v1/documents/346711_cheville_cloison_creu.pdf ; Fischer GKM (8 daN en 12,5 mm) — https://res.cloudinary.com/afdb/raw/upload/s--1lPhNX8n--/v1/documents/144287_fixation_metallique_f.pdf (PDF lus).
+36. Fermacell, fiches BigMat (plaque BD 2,50 × 1,20) — https://medias.bigmat.fr/data_medias/medias_finaux/documents/4007548002103-5NbNph4BNv.pdf ; Gobert (01/2015) (PDF lus, sans palette) ; [F2] tarif Fermacell 2010 (01).

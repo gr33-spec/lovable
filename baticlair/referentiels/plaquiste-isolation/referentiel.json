@@ -1015,7 +1015,7 @@
             "source": "placo-rail-f530",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 1 source : 2,35 m, botte de 20 : fiche Placo Rail F 530 (18/12/2023) ; l'ancienne piste interne disait 3 m (faux)."
+              "note": "Recherche du 2026-11-19 — 2 sources : 2,35 m : fiche Placo Rail F 530 (18/12/2023) et Bricomarché (même code-barres) ; botte de 20 : Placo seul, sans effet sur une commande à la longueur (recherche/10 n° 1)."
             },
             "version": 1,
             "kind": "packaging",
@@ -1147,7 +1147,7 @@
             "source": "placo-eclisse",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 1 source : Boîte de 50 : fiche Placo Éclisse F 530 (18/12/2023)."
+              "note": "Recherche du 2026-11-19 — 2 sources : Boîte de 50 : fiche Placo Éclisse F 530 et éclisse universelle Gypso. Attention : l'« Éclisse 50 Stil F 530 » est une autre pièce (500 mm, botte de 10) (recherche/10 n° 2)."
             },
             "version": 1,
             "kind": "packaging",
@@ -1283,10 +1283,9 @@
             "source": "gypso-vis",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — contradiction : Boîte de 500 (Placo, GSB) retenue."
+              "note": "Recherche du 2026-11-19 — 2 sources : Boîte de 500 : Placo et Gypso ; la boîte de 1000 n'existe qu'en marque négoce (Samse, Klimas) (recherche/10 n° 27)."
             },
             "version": 1,
-            "conflict": "Klimas vend la TEX 3,5 × 9,5 en boîte de 1000 : le conditionnement dépend de la marque (recherche/02 C.3).",
             "kind": "packaging",
             "value": "500",
             "unit": "u"
@@ -1318,7 +1317,7 @@
             "source": "spit-pulsa",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 1 source : Spit C6 : boîte de 500 clous + 1 cartouche, ou 1500 + 3 ; Hilti non vérifié (recherche/02 C.4). Longueur 20 mm pour un rail sur béton : usage, à confirmer."
+              "note": "Recherche du 2026-11-19 — 2 sources : Boîte de 500 clous + 1 cartouche : Spit et Paslode (même gamme) ; clou de 20 mm pour rail sur béton confirmé ; Hilti : 1 200 clous, gaz à part. Rail sur plancher bois : aucun clou de cloueur à gaz publié (recherche/10 n° 3)."
             },
             "version": 1,
             "kind": "packaging",
@@ -1456,10 +1455,9 @@
             "source": "placo-integrale-2023-bande",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — contradiction : Seau de 25 kg retenu (Placomix classique 25 kg, Siniat Prégy S 25 kg)."
+              "note": "Recherche du 2026-11-19 — 2 sources : Seau de 25 kg : Placo (format en stock), Siniat, Toupret, Planodis. Les 22 et 17 kg sont d'autres produits (Placomix PRO et PRO Allégé) (recherche/10 n° 28)."
             },
             "version": 1,
-            "conflict": "Placomix Pro est en seau de 22 kg, le Pro Allégé en 17 kg, Siniat Prégy S aussi en 7 kg : le seau dépend de la marque (recherche/05 B.2).",
             "kind": "packaging",
             "value": "25",
             "unit": "kg"
@@ -1529,10 +1527,9 @@
             "source": "isover-gr32-nu",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — contradiction : 12,15 m² par paquet (fiche Isover) ; R 1,40 (ACERMI 2025)."
+              "note": "Recherche du 2026-11-19 — 1 source : 12,15 m² par paquet : une seule fiche Isover (2014), produit sur fabrication ; R 1,40 tranché par le certificat ACERMI en vigueur (recherche/10 n° 29)."
             },
             "version": 1,
-            "conflict": "La fiche Isover ancienne imprime R 1,45 ; le certificat ACERMI en vigueur dit 1,40. Colisage : 1 source.",
             "kind": "packaging",
             "value": "12.15",
             "unit": "m2"
@@ -1730,7 +1727,7 @@
             "source": "isover-isoconfort35",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 1 source : 3,36 m² : fiche Isover 24/03/2026 (longueur 2,80 m) ; l'ancienne fiche disait 2,10 m. R 6,25 : 2 sources."
+              "note": "Recherche du 2026-11-19 — 2 sources : 3,36 m² : fiche Isover 24/03/2026, Brico Dépôt, Castorama ; l'ancien 2,10 m était l'Isoconfort 35 « voile » de 2014 (recherche/10 n° 4)."
             },
             "version": 1,
             "kind": "packaging",
@@ -1763,7 +1760,7 @@
             "source": "isover-isoconfort35",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 1 source : 3,12 m² : fiche Isover 24/03/2026."
+              "note": "Recherche du 2026-11-19 — 2 sources : 3,12 m² : fiche Isover 2026, Brico Dépôt, Castorama (recherche/10 n° 5)."
             },
             "version": 1,
             "kind": "packaging",
@@ -1827,7 +1824,7 @@
             "source": "isover-ibr",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — à confirmer : 5,40 m² : Tessella seul ; à confirmer sur la fiche Isover 2026."
+              "note": "Recherche du 2026-11-19 — 2 sources : 5,40 m² : Isover, Castorama, Leroy Merlin (recherche/10 n° 55)."
             },
             "version": 1,
             "kind": "packaging",
@@ -2028,7 +2025,7 @@
             "source": "placo-integrale-plafonds-2023",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — à confirmer : Boîte de 100 : conditionnement non relevé ; le principe (cheville métallique Ø 6 sous dalle béton) est Placo Intégrale 2023 et Knauf (clou-cheville 6 × 40)."
+              "note": "Recherche du 2026-11-19 — 2 sources : Boîte de 100 : Rawl, Spit, ING Fixations (recherche/10 n° 56)."
             },
             "version": 1,
             "kind": "packaging",
