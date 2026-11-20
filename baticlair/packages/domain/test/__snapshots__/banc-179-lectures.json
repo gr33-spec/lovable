@@ -268,6 +268,30 @@
   "aChiffrer": []
  },
  {
+  "fichier": "etancheite-1582e95e630e.json",
+  "metier": "waterproofing",
+  "lignes": [
+   {
+    "designation": "Membrane SBS autoprotégée, rouleau 6 m²",
+    "quantite": "9 rouleaux de 6 m²",
+    "unite": "rouleaux de 6 m²",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Isolant PIR ep 100 mm, épaisseur d'isolant",
+    "quantite": "48 m²",
+    "unite": "m²",
+    "etat": "check",
+    "raison": "Format à préciser"
+   }
+  ],
+  "questions": [
+   "param:format_pir"
+  ],
+  "aChiffrer": []
+ },
+ {
   "fichier": "etancheite-95cd0154cb40.json",
   "metier": "waterproofing",
   "lignes": [

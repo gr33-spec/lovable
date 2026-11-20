@@ -19058,7 +19058,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -19340,7 +19340,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -19753,7 +19753,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -20000,7 +20000,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 288,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -20252,7 +20252,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 350,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -20630,7 +20630,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 350,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -20877,7 +20877,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 350,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -21124,7 +21124,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -21460,7 +21460,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Est"
    ],
@@ -21828,7 +21828,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Est"
@@ -22079,7 +22079,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -22334,7 +22334,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 256,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -22579,7 +22579,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 384,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -22798,7 +22798,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 378,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -23019,7 +23019,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 480,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -23212,7 +23212,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 432,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -23526,7 +23526,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 576,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -23747,7 +23747,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 576,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord"
    ],
@@ -24214,7 +24214,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -24460,7 +24460,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -24734,7 +24734,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -25015,7 +25015,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -25240,7 +25240,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -25488,7 +25488,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -25769,7 +25769,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -26224,7 +26224,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Grand Ouest",
     "Loire-Atlantique (à vérifier)"
@@ -26538,7 +26538,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest",
     "Sud-Ouest"
@@ -26852,7 +26852,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest",
     "Sud-Ouest"
@@ -27161,7 +27161,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Ouest"
    ],
@@ -27436,7 +27436,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Atlantique"
    ],
@@ -27684,7 +27684,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 90,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud-Ouest"
    ],
@@ -27990,7 +27990,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 90,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud"
    ],
@@ -28247,7 +28247,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud",
     "rénovation"
@@ -28561,7 +28561,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne",
     "Rhône"
@@ -28846,7 +28846,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -29188,7 +29188,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne",
     "montagne"
@@ -29558,7 +29558,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne"
    ],
@@ -29833,7 +29833,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne"
    ],
@@ -30108,7 +30108,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -30412,7 +30412,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Bourgogne",
     "Nord-Est"
@@ -30693,7 +30693,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 240,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -30965,7 +30965,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Franche-Comté"
    ],
@@ -31185,7 +31185,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 288,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -31609,7 +31609,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 450,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Normandie",
     "Île-de-France"
@@ -31915,7 +31915,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 540,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Nord",
     "Normandie"
@@ -32470,7 +32470,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 300,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -33177,7 +33177,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 210,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],
@@ -33901,7 +33901,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 180,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "Sud",
     "Ouest"
@@ -34437,7 +34437,7 @@
    "attribut": "tuiles_par_palette",
    "valeur": 510,
    "unite": "u",
-   "condition": "palette standard Edilians (quantité par palette lue sur la fiche du modèle)",
+   "condition": "palette standard du fabricant (quantité par palette lue sur la fiche du modèle)",
    "regions": [
     "France"
    ],

@@ -1004,7 +1004,7 @@ function CasesSuggestions({ options, pending, error, onContinuer }: { options: r
  * ÉTAPE « SUGGESTIONS » (Greg, 17 novembre 2026, points 14 à 17) : après la lecture et avant les questions de précision,
  * une seule étape dans la discussion. Des cases larges, faciles à toucher, un seul bouton « Continuer ». Ce qui est coché
  * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
- * serveur), cinq au plus ; aucune proposition : pas d'étape.
+ * serveur), sans limite de nombre (skill du fondateur) ; aucune proposition : pas d'étape.
  */
 export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
   const router = useRouter();

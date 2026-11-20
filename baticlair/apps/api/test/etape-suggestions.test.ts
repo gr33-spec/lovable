@@ -30,7 +30,7 @@ const ecran = async (agent: Agent, projetId: string) => (await agent.get(`/v1/pr
 const repondre = (agent: Agent, id: string, valeur: string) => agent.post(`/v1/quantitatifs/${id}/reponses`).send({ reponses: [{ question: "suggestions:choisies", valeur }] });
 
 describe("l'étape « Suggestions » : proposée par la fiche, répondue une fois", () => {
-  it("après la lecture : naissances, talons, angles et consommables sont proposés (pas les crochets, écrits) ; cinq au plus ; rien n'est dans la liste", async () => {
+  it("après la lecture : naissances, talons, angles et consommables sont proposés (pas les crochets, écrits) ; sans limite de nombre (skill du fondateur) ; rien n'est dans la liste", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
     const { projetId } = await chantier(agent);
     const e = await ecran(agent, projetId);
@@ -41,6 +41,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
       // Greg, 18 novembre 2026 : les consommables en cases (plus jamais d'office, plus de question oui / non).
       { key: "bandes-zinc/mastic+bande-porte-solin/mastic", label: "Cartouches de silicone zinc" },
       { key: "bandes-zinc/vis", label: "Vis inox 4 × 40" },
+      { key: "faitage-zinc/patte", label: "Pattes de fixation" },
     ]);
     expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // Plus de question oui / non sur les consommables.
@@ -53,7 +54,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { id, projetId } = await chantier(agent);
     expect((await repondre(agent, id, "gouttiere/etain")).status).toBe(400);
     expect((await repondre(agent, id, "couverture-ardoise/liteau")).status).toBe(400);
-    expect((await ecran(agent, projetId)).suggestions).toHaveLength(5);
+    expect((await ecran(agent, projetId)).suggestions).toHaveLength(6);
   });
 
   it("naissances cochées : elles entrent dans la liste, l'étape est close ; talons et angles n'existent pas", async () => {

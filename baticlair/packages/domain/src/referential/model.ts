@@ -381,7 +381,11 @@ export interface Slot {
    * l'ouvrage est écrit et que celui-ci ne l'est pas, il est PROPOSÉ une fois, dans une carte à cases, avec ces mots ;
    * coché, il vaut un article écrit (ses questions se posent alors) ; non coché, il n'existe pas. Jamais ajouté d'office.
    */
-  suggested?: { label: string };
+  /**
+   * Étape « Suggestions » : la case proposée. `vaut` : les données qu'une case cochée tranche (le « oui » d'un dauphin) ;
+   * elles ne se demandent plus (skill du fondateur, 18/11/2026 : cochée, la case vaut l'article écrit).
+   */
+  suggested?: { label: string; vaut?: Record<string, string> };
   /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.

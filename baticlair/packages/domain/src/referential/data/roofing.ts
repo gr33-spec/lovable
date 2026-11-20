@@ -464,6 +464,9 @@ const RAMPANT_BACS_PARAM: ParamDef = {
 };
 /** Réponses du fondateur du 2026-11-18 (couverture zinc à tasseaux). */
 const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
+/** Le skill « regles-metier » du fondateur (interview du 18/11/2026). */
+const SKILL_FONDATEUR = "fondateur-skill-regles-metier-2026-11-18";
+const FOUNDER_SKILL = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur), interview du skill regles-metier" } as const;
 const FOUNDER_REPLY_TASSEAUX = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur)" } as const;
 /**
  * Greg, 20 novembre 2026 : « Pour les tasseaux : ne compte pas sur moi, vérifie-le toi-même […] Croise au moins deux
@@ -1283,7 +1286,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.20-62",
+  version: "roofing-2026.11.20-63",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1381,6 +1384,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       documentRef: "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       retrievedAt: "2026-10-04",
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
+    },
+    {
+      id: SKILL_FONDATEUR,
+      kind: "trade_practice",
+      title: "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
+      documentRef: ".claude/skills/regles-metier/SKILL.md (§ Velux, § Oublis probables)",
+      retrievedAt: "2026-11-18",
+      note: "« En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur. » Un par fenêtre, à sa taille ; la collerette d'écran (BFX) ajoutée d'après le tarif Velux France 2024 (vendue à part du raccord), recherche du 20/11/2026.",
     },
     {
       id: "fondateur-reponses-2026-11-18",
@@ -1745,6 +1756,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
     },
     // §11 : « Raccord d'étanchéité : 1 par fenêtre ; type tuile (ondulée, pureau > 45 mm), ardoise ou matériau plat ».
+    { code: "roof_window_insulation", label: "Kit d'isolation de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_vapour", label: "Pare-vapeur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_collar", label: "Collerette d'écran de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_shutter", label: "Volet roulant de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_blind", label: "Store de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_lining", label: "Habillage intérieur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_flashing", label: "Raccord d'étanchéité de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["raccord d'etancheite", "raccord etancheite"] },
   ],
   products: [
@@ -2037,6 +2054,12 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 2 m", "Arêtier zinc (bande)", {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: longueurFiche("zinguerie.longueur_faitage_aretier_faconne"), primary: true }],
     }),
+    generic("kit-isolation-fenetre", "roof_window_insulation", "Kit d'isolation de fenêtre de toit, à la taille de la fenêtre", "Kits d'isolation (type BDX)"),
+    generic("pare-vapeur-fenetre", "roof_window_vapour", "Pare-vapeur de fenêtre de toit, à la taille de la fenêtre", "Pare-vapeur de fenêtre (type BBX)"),
+    generic("collerette-ecran-fenetre", "roof_window_collar", "Collerette d'écran de fenêtre de toit, à la taille de la fenêtre", "Collerettes d'écran (type BFX)"),
+    generic("volet-fenetre-toit", "roof_window_shutter", "Volet roulant de fenêtre de toit, à la taille de la fenêtre", "Volets roulants de fenêtre de toit"),
+    generic("store-fenetre-toit", "roof_window_blind", "Store de fenêtre de toit, à la taille de la fenêtre", "Stores de fenêtre de toit"),
+    generic("habillage-fenetre-toit", "roof_window_lining", "Habillage intérieur de fenêtre de toit, à la taille de la fenêtre", "Habillages intérieurs de fenêtre de toit"),
     generic("raccord-fenetre-toit", "roof_window_flashing", "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre", "Raccords d'étanchéité"),
     generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
     // §25.2 : « Noue préformée : développé 500 mm, L 2 m ou 3 m ; recouvrement 150 mm → longueur utile 1,85 m pour 2 m ».
@@ -2152,7 +2175,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"], usual: USUAL_LITEAU_TUILE },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
-        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" } },
+        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
       ],
       constants: {
         ...ECRAN_CONSTANTS,
@@ -2248,7 +2271,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "tuile", family: "roof_tile_canal", label: "Tuiles canal" },
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte", "liteaunage"], usual: USUAL_LITEAU_TUILE },
-        { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" } },
+        { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" }, suggested: { label: "Bardelis (tuiles de rive)" } },
       ],
       constants: {
         couvert_et_courant: condition("2", "u", "edilians-canal", FOUNDER_DOC, "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."),
@@ -2517,7 +2540,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       params: [SURFACE_PARAM, TEINTE_FC_PARAM, ENTRAXE_PARAM, PENTE_PARAM],
       slots: [
         { key: "ardoise", family: "roof_slate_fc", label: "Ardoises fibres-ciment", ask: "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?" },
-        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" } },
+        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" }, suggested: { label: "Clous d'ardoise fibres-ciment" } },
         { key: "antivent", family: "slate_wind_hook", label: "Crochets d'antivent", keywords: ["antivent", "crochet"], usual: { text: "Un crochet d'antivent par ardoise (§4).", source: F, productId: "antivent-ardoise-fc" } },
         {
           key: "liteau",
@@ -2897,7 +2920,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "fenetre", family: "roof_window", label: "Fenêtres de toit", measureOnly: true, orderedAsWritten: true },
-        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
+        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },        { key: "isolation", family: "roof_window_insulation", label: "Kits d'isolation (type BDX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "kit-isolation-fenetre" }, suggested: { label: "Kits d'isolation de fenêtre de toit (type BDX)" } },
+        { key: "pare_vapeur", family: "roof_window_vapour", label: "Pare-vapeur de fenêtre (type BBX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "pare-vapeur-fenetre" }, suggested: { label: "Pare-vapeur de fenêtre de toit (type BBX)" } },
+        { key: "collerette", family: "roof_window_collar", label: "Collerettes d'écran (type BFX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "collerette-ecran-fenetre" }, suggested: { label: "Collerettes d'écran de fenêtre de toit (type BFX)" } },
+        { key: "volet", family: "roof_window_shutter", label: "Volets roulants de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "volet-fenetre-toit" }, suggested: { label: "Volets roulants de fenêtre de toit" } },
+        { key: "store", family: "roof_window_blind", label: "Stores de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "store-fenetre-toit" }, suggested: { label: "Stores de fenêtre de toit" } },
+        { key: "habillage", family: "roof_window_lining", label: "Habillages intérieurs de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "habillage-fenetre-toit" }, suggested: { label: "Habillages intérieurs de fenêtre de toit" } },
       ],
       constants: {},
       needs: [
@@ -2912,6 +2940,78 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["raccord_couverture"],
           source: F,
           verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "kit-isolation-fenetre",
+          slot: "isolation",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Kits d'isolation (type BDX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "pare-vapeur-fenetre",
+          slot: "pare_vapeur",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Pare-vapeur de fenêtre (type BBX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "collerette-ecran-fenetre",
+          slot: "collerette",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Collerettes d'écran (type BFX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "volet-fenetre-toit",
+          slot: "volet",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Volets roulants de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "store-fenetre-toit",
+          slot: "store",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Stores de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "habillage-fenetre-toit",
+          slot: "habillage",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Habillages intérieurs de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
           version: 1,
         },
       ],
@@ -4157,7 +4257,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "profil", family: "gutter_plastic", label: "Gouttière", usual: { text: "Longueurs de 4 m (§15).", source: F, productId: "gouttiere-pvc-alu-4m" } },
         { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer), plus un en bout (§15).", source: F, productId: "crochet-gouttiere-standard" } },
-        { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" } },
+        { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" }, suggested: { label: "Jonctions de gouttière" } },
         { key: "talon", family: "gutter_end", label: "Talons", usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" }, suggested: { label: "Talons de gouttière" } },
         { key: "angle", family: "gutter_angle", label: "Angles", usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" }, suggested: { label: "Angles de gouttière" } },
         { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true, suggested: { label: "Naissances de gouttière" } },
@@ -4332,7 +4432,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "coude", family: "downpipe_elbow", label: "Coudes", charsFrom: "tube", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
         // §49.6 : « fixation … des tuyaux de descente » sur la ligne de pose cite les colliers sans les chiffrer.
         { key: "collier", family: "downpipe_clamp", label: "Colliers", citedBy: ["fixation", "fixations"], usual: { text: "Un collier tous les 2 m, plus un.", source: FR_REPLY_DESCENTES, productId: "collier-descente-standard" } },
-        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" } },
+        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" }, suggested: { label: "Dauphins (pied de descente)", vaut: { dauphin: "1" } } },
       ],
       constants: {
         espacement_collier: condition("2", "m", FR_REPLY_DESCENTES, FOUNDER_REPLY_DESCENTES, "« colliers tous les 2 m » (réponse du fondateur, 2026-10-05)."),

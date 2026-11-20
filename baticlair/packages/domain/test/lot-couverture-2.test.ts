@@ -77,6 +77,13 @@ describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté"
     expect(answered.toBuy.map((b) => [b.label, b.precision ?? ""])).toEqual([
       ["Fenêtre de toit", "78 × 118"],
       ["Raccords d'étanchéité pour ardoises, à la taille de la fenêtre de toit", ""],
+      // Proposés en Suggestion (skill du fondateur, 18/11/2026), calculés ici parce que le mode validation sort tout : un par fenêtre.
+      ["Kits d'isolation (type BDX), à la taille de la fenêtre de toit", ""],
+      ["Pare-vapeur de fenêtre (type BBX), à la taille de la fenêtre de toit", ""],
+      ["Collerettes d'écran (type BFX), à la taille de la fenêtre de toit", ""],
+      ["Volets roulants de fenêtre de toit, à la taille de la fenêtre de toit", ""],
+      ["Stores de fenêtre de toit, à la taille de la fenêtre de toit", ""],
+      ["Habillages intérieurs de fenêtre de toit, à la taille de la fenêtre de toit", ""],
     ]);
   });
 });

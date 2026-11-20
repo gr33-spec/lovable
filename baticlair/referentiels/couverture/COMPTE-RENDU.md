@@ -1,8 +1,8 @@
-# Base couverture Mobiiz : compte rendu sur une page (19 novembre 2026)
+# Base couverture Mobiiz : compte rendu sur une page (19-20 novembre 2026)
 
 Fiche : `fiche-couverture.json` (vue lisible `fiche-couverture.md`), carte des régions `carte-regions.json`,
-recherche et sources dans `recherche/`. **11 familles, 392 modèles et formats, 2 697 chiffres, 414 sources,
-94,4 % confirmés** (deux sources indépendantes, ou fiche officielle du fabricant + contrôle par le calcul).
+recherche et sources dans `recherche/`. **22 familles, 597 modèles et formats, 2 954 chiffres, 582 sources,
+90 % confirmés** (deux sources indépendantes, ou fiche officielle du fabricant + contrôle par le calcul).
 
 ## Ardoise naturelle en Bretagne, pose au crochet, pente 45° (100 %), projection ≤ 5,50 m
 
@@ -85,12 +85,32 @@ Deux séries de longueurs : bois de France au pas de 0,50 m, bois du Nord au pas
 qui ferait poser une question de plus, et une ligne en m² ne passe pas le test du fournisseur (§40). L'écran reste en
 rouleaux, les m² à couvrir sont dits sur la ligne.
 
+## Ajouté le 20 novembre (base, code, Suggestions)
+
+| Quoi | Avant | Après | Source |
+|---|---|---|---|
+| Ardoise en situation exposée, zone 3 | aucune majoration | recouvrement max(+ 10 mm, × 1,10), commune lue sur la carte | NF DTU 40.11 §5.1.1.2, Cupa, Rathscheck |
+| Brest, 200 m² de 30×22 | 8 925 ardoises, crochets 10 | 9 383, crochets 11 | idem |
+| Tuile canal, casse et coupe | 0 % | 3 % | FDES CTMNC, CAP |
+| Rouleau de plomb | 6 m (à confirmer) | 10 m jusqu'à 30 cm, 5 m au-delà | Le Plomb Français, D'Huart |
+| Ardoise fibres-ciment, teintes | bleu-noir / noir / brun | anthracite (noir) / brun | Cedral, Cembrit |
+| Isolant PIR de terrasse | 1 200 × 1 000 seul (48 m² : 42) | 1 200 × 600 courant (69), format demandé | Unilin, IKO, Recticel, Knauf |
+| Suggestions | 5 cases au plus | sans limite (ton skill) ; + rives, bardelis, dauphins, jonctions, clous fibres-ciment, 6 kits Velux | skill regles-metier |
+
+Familles nouvelles : fenêtres de toit et raccords, sécurité en toiture, fibres-ciment, sarking, abergements, sous-faces,
+étanchéité de terrasse, accessoires de tuiles (chatières par modèle, closoir par galbe, mortier), ardoises (carrières,
+palettes par épaisseur, faîtière Armor), modèles de zinguerie et d'écrans HPV.
+
+**Tes règles signalées, pas appliquées** :
+- « Chatières : on demande le nombre » et « visserie : description puis nombre » contredisent « jamais une quantité
+  demandée » (CLAUDE.md). Pas branchées : à trancher. La recherche donne le nombre de chatières par modèle (4 à 12 pour
+  100 m²), on pourrait le calculer au lieu de le demander.
+- Épaisseur de plomb par défaut 1,5 mm : le fabricant conseille 2 mm pour une cheminée.
+- Fixation des tuiles : le ratio dépend du vent et de la pente (point ouvert de ton skill), pas branché.
+
 ## Reste à faire
 
-1. **L'étape Suggestions** (tranchée : tes Suggestions l'emportent sur le §49.1) : cases décochées + « Continuer »,
-   avec la liste de ton skill (clous, pointes, rives, chatières, accessoires de zinc, fonds, naissances, Velux…).
-   Demande l'écran, l'API et des tests de bout en bout.
-2. **Situation exposée** : la carte la connaît (358 communes bretonnes probables) ; le + 10 mm du DTU 2020 sur
-   l'ardoise reste à brancher, comme hypothèse dite et modifiable.
-3. **À faire relire par un ardoisier ou un comptoir** : faîtière Armor au ml, palettes d'ardoise hors 32×22, part de
+1. **Suggestions encore sans article au tiroir** : pointes de liteaux, clous d'ardoise naturelle (1 au faîtage, 2 à
+   l'égout et en rive : demande les longueurs d'égout et de rive), cuvettes, solins et abergements non écrits.
+2. **À faire relire par un ardoisier ou un comptoir** : faîtière Armor au ml, palettes d'ardoise hors 32×22, part de
    crochets à pointe sur liteaux, crochets de gouttière à 0,40 m en bord de mer.

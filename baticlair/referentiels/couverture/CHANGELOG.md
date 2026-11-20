@@ -1,5 +1,21 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.20-63 — Suggestions : sans limite de nombre
+
+- **§49.1 point 5, Règle changée** : l'étape « Suggestions » propose tous les oublis probables de la fiche et tous les
+  consommables liés aux lignes écrites, sans limite de nombre (skill du fondateur, 18/11/2026 : « toutes les cases
+  décochées au départ, sans limite de nombre »). Avant : cinq au plus (`SUGGESTIONS_MAX`), au-delà les derniers n'étaient
+  pas proposés. D-2026-020 : les pattes de fixation (faîtage zinc) sont maintenant proposées (6 cases au lieu de 5).
+- **§11 Fenêtres de toit, Suggestions** (skill du fondateur, 18/11/2026 : « En Suggestion : kit d'isolation (BDX),
+  pare-vapeur (BBX), volet roulant, store, habillage intérieur ») : six cases proposées quand une fenêtre de toit est
+  écrite, la collerette d'écran (BFX) en plus (vendue à part du raccord, tarif Velux France 2024, recherche du
+  20/11/2026). Cochées : un par fenêtre, à sa taille (« Kits d'isolation (type BDX), fenêtre 78 × 98 »). Avant : rien.
+- **Rives, dauphins, jonctions, Suggestions** (skill du fondateur : « rive absente du devis : d'abord en Suggestion » ;
+  « Dauphin, cuvette (boîte à eau), jonctions : en Suggestion ») : tuiles de rive (emboîtement), bardelis (canal),
+  dauphins (descentes), jonctions (gouttière PVC ou alu) proposés en cases quand le devis ne les écrit pas. Une case
+  cochée tranche ce qu'elle dit (`suggested.vaut`) : « Dauphins » coché vaut « oui », la question « Un dauphin en pied
+  de chaque descente ? » ne se pose plus. Avant : jamais proposés. Cuvette : pas encore d'article au tiroir.
+
 ## roofing-2026.11.20-62 — Tasseaux sourcés, chéneau encaissé, questions décidées par le code (Greg, 2026-11-20, devis D-2026-024)
 
 - **Zinc à tasseaux, tasseaux et couvre-joints** : la quantité est chiffrée. Rangs = bacs − 1 + rives sur tasseau ; chaque rang fait la longueur du rampant. Sources recoupées : RHEINZINK « Tasseau, pose et pliage » (§1.6.4, §1.6.5, §1.15), VMZINC « Toiture Delta » (rive à tasseau : couvre-joint, tasseau de rive, patte, bande de rive), NedZink « Conseils de zinc » (rive : le premier et le dernier bac relevés contre un tasseau). Une rive a son tasseau, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm) sans tasseau. Le texte du NF DTU 40.41 est payant et protégé : il n'est ni lu ni recopié. Avant : « à chiffrer », sans quantité, en attendant Greg (« bacs + 1 »).

@@ -47,7 +47,7 @@ describe("banc des 179 lectures enregistrées, tous métiers", () => {
     const fichiers = readdirSync(DIR)
       .filter((f) => f.endsWith(".json"))
       .sort();
-    expect(fichiers).toHaveLength(179);
+    expect(fichiers).toHaveLength(180); // 179 + isolant PIR au format (20/11/2026)
     const resultats = fichiers.map(rejouer);
     const metiers = new Set(resultats.map((r) => r.metier));
     expect(metiers.size).toBeGreaterThanOrEqual(16);
