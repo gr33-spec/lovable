@@ -89,7 +89,10 @@ for (const size of WIDTHS) {
 
     await page.goto("/connexion");
     await shoot(page, size.name, "01-connexion");
-    await page.getByRole("link", { name: "Créer un compte" }).click();
+    // « Créer un compte » mène au nouvel onboarding (`/commencer`, Greg, 19 novembre 2026) ; l'inscription complète reste
+    // servie pour les parcours de test : on y va directement.
+    await expect(page.getByRole("link", { name: "Créer un compte" })).toHaveAttribute("href", "/commencer");
+    await page.goto("/inscription");
     await shoot(page, size.name, "02-inscription");
     await page.getByLabel("Prénom et nom").fill("Jean Martin");
     await page.getByLabel("Nom de ton entreprise").fill("Toitures Martin");

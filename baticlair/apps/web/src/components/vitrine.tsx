@@ -47,7 +47,9 @@ export function PiedVitrine({ sansEditeur = false }: { sansEditeur?: boolean }) 
           ))}
           <Link href="/tarifs">Tarifs</Link>
           <Link href="/negoce/connexion">Accès négoce</Link>
-          <Link href="/couvreurs?demo">Revoir la démo</Link>
+          {/* Un vrai rechargement : la démo ne s'ouvre qu'au chargement de la page (`?demo`), un <Link> ne la relance pas. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- voir ci-dessus */}
+          <a href="/couvreurs?demo">Revoir la démo</a>
         </nav>
       </div>
       {sansEditeur ? null : (
