@@ -445,6 +445,27 @@ Chaque marque dit que ses performances ne valent qu'avec ses propres composants 
 - les hauteurs Knauf (catalogue 2020, antérieur au DTU 2022) ;
 - la gaine Placo ; les plafonds rampants des trois marques.
 
+#### 5.8 bis Compléments coupe-feu (septième vague, `recherche/22-coupe-feu-systemes.md`)
+
+Seul Placo publie des FDES de systèmes coupe-feu (base INIES) ; Siniat et Knauf n'y ont que des plaques. Les quantités au m² d'un système feu viennent donc de Placo ; les autres marques se chiffrent avec les ratios du même montage standard.
+
+| Point | Règle | Source | État |
+|---|---|---|---|
+| 98/48 EI 120 Placo (2 Placoflam BA13 par face) | **3,00 m avec laine** (avant 3,10 m, valeur de la fiche système sans isolant) | FDES INIES 38678 (25/07/2024), PV RS 15-022 + ext. 21/1 | ✔✔ (écart expliqué par l'isolant) |
+| 98/48 EI 120 Placo au-delà de 3,00 m | 1 Placoplatre **BA 25** standard par face, M48, **3,80 m**, PV RS 11-044, isolant de la fiche (Isonat Flex 40) ; par m² : BA 25 2,1 m², M48 2,63 ml, R48 0,55 ml, 18 vis, bande 3,44 ml, enduit 0,92 kg | FDES INIES 48876 (19/02/2026) et 47773 (02/12/2025) | ✔ (un éditeur, deux fiches) |
+| EI 60 en montants simples | Placo 100/70, 1 Placoflam BA 15 par face, M70 à 0,60, 3,40 m ; Siniat D100/70 Flam. La 72/48 Placoflam doublée à 0,40 reste le défaut quand le devis écrit « 72/48 » | fiche système Placo (extrait de moteur), brochure Isonat ERP, fiche Siniat | ✔ / à confirmer |
+| EI 90 | Aucun système Placo ni Siniat ; Knauf seul (catalogue 2020). Quand le devis dit EI 90 et que la marque n'en a pas : **le système EI 120 de la marque**, dit à l'artisan (une classe supérieure couvre la classe demandée) | Offre Placo 2024, fiches Siniat, catalogue Knauf 2020 | ✔✔ (absence constatée chez deux marques) |
+| Isolant d'un système feu | **l'isolant de la fiche du système choisi** (laine minérale 45 en 72/48 ; fibre de bois Isonat Flex 40 pour le 98/48 BA 25) ; jamais un isolant hors PV | FDES 48876, PV Placo et Siniat | ✔✔ |
+| Vissage, bande, enduit d'une cloison feu | Identiques au standard : aucune ligne « vis feu » ni « enduit feu » | FDES Placo 38678, fiches Siniat | ✔✔ |
+| Boîtiers électriques | Décalés d'une face à l'autre, ou protégés selon le PV : ligne « à préciser », jamais un capot sorti d'office | fiches système Placo, PV Pladur | ✔✔ |
+| Gaine technique (logement collectif) | Paroi coupe-feu ½ h : une BA 13 de chaque côté suffit ; trappe ¼ h sous 0,25 m², ½ h au-delà ; Placo Easy Stil EI 30, 3,00 m, PV sur demande : ligne « système de gaine selon PV, à chiffrer » | FFB 2016, Knauf, Siniat ; Easy Stil : une source | ✔✔ / ✔ |
+| Plafond autoportant REI 120 | 2 BA 25 standard sur montants (Placo PV RS 21-008 ; Siniat M125-50 accolés à 0,50, portée 3,70 m, EFR-17-000920). REI 30 / 60 autoportants Placo : estimation sans PV, à dire comme telle | Placo, Siniat | ✔✔ |
+| Protection de poteaux et poutres acier | Système dédié de la marque (Siniat R 120 ; Knauf CC) : ligne « à préciser », pas d'ouvrage dans le moteur | fiches Siniat, catalogue Knauf | ✔ |
+| Mastic intumescent de périphérie | Aucune fiche lue ne l'exige : rien d'office | FDES et fiches Placo, Siniat | ✔✔ |
+| Trappe coupe-feu en « tout Siniat » | Siniat France n'en vend pas : trappe d'un autre fabricant avec son propre PV, ligne « à préciser » | catalogue Siniat | ✔ |
+
+Reste incertain : Knauf entier (catalogue 2020, site illisible), fiche Siniat D102/48 (erreur serveur), vis des plafonds feu Siniat et Knauf, Fermacell et Pladur (aucun document français en vigueur lisible). Règle d'ouverture : le moteur ne chiffre aujourd'hui que la 72/48 et la 98/48 feu ; le 98/48 BA 25, le 100/70 et le plafond autoportant sont décrits ici et seront à ajouter comme ouvrages au branchement.
+
 ### 5.7 Locaux humides
 
 | Règle | Valeur | État | Sources |

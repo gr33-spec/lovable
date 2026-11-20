@@ -72,3 +72,8 @@
 - Chantier PI-10 : entretoises 52 → 68 ; vis TTPC 35 920 → 520 (toujours 1 boîte de 1000).
 - Fiche lisible : Glasroc H Ocean 40 plaques par palette, R du Styrodur 3035 CS (aucun certificat ACERMI en cours), Siniat D102/48 EI 120 (2 + 1 BA18), formats KF 13 et Fermacell, plafonds feu Siniat.
 - Sans deuxième source indépendante, gardés « à confirmer » : vis Knauf (15), séparative 1re peau (12), plafond à 0,40 (15 vis, 3,0 ml), adhésif de membrane (0,8), fixation en bout de rail (non comptée).
+
+## Septième vague, coupe-feu (20 novembre 2026, `recherche/22`)
+
+- Fiche lisible §5.8 bis : 98/48 EI 120 Placo à 3,00 m avec laine (avant 3,10 m) ; 98/48 BA 25 EI 120 à 3,80 m ; EI 60 en 100/70 ; EI 90 absent chez Placo et Siniat → système EI 120 de la marque ; isolant = celui du PV ; vissage, bande et enduit identiques au standard ; boîtiers, gaines, trappes, plafond autoportant REI 120, protection de poteaux.
+- Rien ne change dans `referentiel.json` (les nouveaux systèmes sont décrits, à brancher comme ouvrages).
