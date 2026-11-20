@@ -30,7 +30,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 | agrafe_selon_liteau | agrafe 14 (liteau 14-16,5), 18 (liteau 18), 20 (liteau 20) ; autres 18 à 40 mm sur demande mm | Frénéhard Anjou Color ; négoce : A16 pour liteau 15-18 | confirme |
 | conditionnement | 500 u/boîte | crochet à agrafe Ø 2,7, longueurs 7 à 14 cm (400 pour 15-16 cm) | confirme |
 | conditionnement | 700 u/boîte | crochet à pointe Ø 2,7, longueurs 7 à 14 cm (500 pour 15-16 cm) | confirme |
-| crochets_par_boite_5kg | None u | inox Ø 2,7 : 7 cm 670 agrafes / 830 pointes … 11 cm 540 / 640 … 16 cm 430 / 500 | une_source |
+| crochets_par_boite_5kg | inox Ø 2,7 : 7 cm 670 agrafes / 830 pointes … 11 cm 540 / 640 … 16 cm 430 / 500 u | crochets inox Ø 2,7 en boîte de 5 kg, par longueur | une_source |
 | clous_ardoise | 27×15 (Ø 2,4, L 27) ; 30×16 (Ø 2,7, L 30) ; 35×17 (Ø 3,0, L 35) ; tête ≥ 7,5 mm mm | clous à tête large, acier galvanisé, cuivre ou inox (NF DTU 40.11 P1-2 tableau 3) | confirme |
 | clous_par_ardoise | 2 u | pose au clou (ardoise naturelle) ; ardoises de rive, doublis, premier rang et dernier rang : 2 clous | confirme |
 | unite_de_vente | au kg (boîtes de 1 kg et 5 kg) kg | galva 2,7×30 en 5 kg ; cuivre 2,7×27 et 2,7×30 en 1 kg | confirme |
@@ -559,7 +559,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes_vendus | [160, 250, 330, 400] mm | appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 » | confirme |
+| developpes_vendus | [160, 250, 333, 400] mm | appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 » ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce) | confirme |
 | section_d_ecoulement | {'160': 20, '250': 57, '330': 113, '400': 174} cm2 |  | confirme |
 | surface_en_plan_desservie_par_sortie_pente_5_mm_m | {'250': 35, '330': 95, '400': 180} m2 | surface en projection horizontale, par sens d'écoulement vers une naissance ; une naissance au milieu reçoit les deux côtés | confirme |
 
@@ -589,7 +589,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes_et_section | {'250': 43, '330': 100} cm2 | régions de neige (montagne, Est) ; rare en Bretagne | confirme |
+| developpes_et_section | {'250': 43, '333': 100} cm2 | régions de neige (montagne, Est) ; rare en Bretagne ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce) | confirme |
 
 
 ### gouttière zinc (demi-ronde, lyonnaise, nantaise)
@@ -603,7 +603,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes | [330, 400] mm | « de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul | confirme |
+| developpes | [333, 400] mm | « de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce) | confirme |
 
 - **VMZINC Gouttière nantaise (ou laval) de 33** (confirme_fabricant 1) : 
 - **VMZINC Gouttière nantaise (ou laval) de 40 et de 50** (confirme_fabricant 1) : 
@@ -923,7 +923,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 | seuil_de_pente_qui_change_le_recouvrement | 30 % | 30 % = 16,7° ; 10 cm strictement au-dessus, 20 cm à 30 % et en dessous | confirme |
 | consommation_d_ecran_par_m2_de_toiture | 1.15 m²/m² | plage 1,10 à 1,20 selon la pente (recouvrements compris) | une_source |
 | entraxe_maxi_des_chevrons_selon_la_classe_mecanique | 60 cm | TR1 45 cm, TR2 (« R2 ») 60 cm, TR3 (« R3 ») 90 cm | confirme |
-| mode_de_pose | None  | pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite | confirme |
+| mode_de_pose | pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite  | selon la classe de l'écran (HPV R1 / R2 / R3) | confirme |
 
 
 ### écran souple à double bande adhésive intégrée
@@ -1318,7 +1318,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| methode | ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus  |  | confirme |
+| methode | ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus  |  | une_source |
 
 
 ## Points du comptoir et situation exposée

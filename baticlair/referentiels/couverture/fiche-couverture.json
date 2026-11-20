@@ -35,8 +35,8 @@
   "fibres_ciment:confirme": 30,
   "fibres_ciment:une_source": 6,
   "pertes:a_confirmer": 10,
-  "pertes:confirme": 3,
-  "pertes:une_source": 4,
+  "pertes:confirme": 2,
+  "pertes:une_source": 5,
   "points_singuliers:a_confirmer": 4,
   "points_singuliers:confirme": 35,
   "points_singuliers:une_source": 13,
@@ -1320,13 +1320,13 @@
       {
        "id": "ardoise_crochet_boite_5kg",
        "attribut": "crochets_par_boite_5kg",
-       "valeur": null,
+       "valeur": "inox Ø 2,7 : 7 cm 670 agrafes / 830 pointes … 11 cm 540 / 640 … 16 cm 430 / 500",
        "unite": "u",
        "statut": "une_source",
        "sources": [
         "S12"
        ],
-       "condition": "inox Ø 2,7 : 7 cm 670 agrafes / 830 pointes … 11 cm 540 / 640 … 16 cm 430 / 500",
+       "condition": "crochets inox Ø 2,7 en boîte de 5 kg, par longueur",
        "regions": [
         "France"
        ],
@@ -84685,7 +84685,7 @@
        "valeur": [
         160,
         250,
-        330,
+        333,
         400
        ],
        "unite": "mm",
@@ -84696,7 +84696,7 @@
         "S237"
        ],
        "libelle_source": "développés vendus",
-       "condition": "appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 »",
+       "condition": "appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 » ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce)",
        "regions": [
         "Bretagne",
         "France"
@@ -85384,7 +85384,7 @@
        "attribut": "developpes_et_section",
        "valeur": {
         "250": 43,
-        "330": 100
+        "333": 100
        },
        "unite": "cm2",
        "statut": "confirme",
@@ -85393,7 +85393,7 @@
         "S242"
        ],
        "libelle_source": "développés et section",
-       "condition": "régions de neige (montagne, Est) ; rare en Bretagne",
+       "condition": "régions de neige (montagne, Est) ; rare en Bretagne ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce)",
        "regions": [
         "France"
        ],
@@ -85461,7 +85461,7 @@
        "id": "gouttiere_nantaise_developpes",
        "attribut": "developpes",
        "valeur": [
-        330,
+        333,
         400
        ],
        "unite": "mm",
@@ -85475,7 +85475,7 @@
         "S255"
        ],
        "libelle_source": "développés",
-       "condition": "« de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul",
+       "condition": "« de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce)",
        "regions": [
         "Bretagne",
         "Pays de la Loire",
@@ -90042,7 +90042,7 @@
       {
        "id": "ecran_pose_tendue",
        "attribut": "mode_de_pose",
-       "valeur": null,
+       "valeur": "pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite",
        "unite": "",
        "statut": "confirme",
        "sources": [
@@ -90050,7 +90050,7 @@
         "S320"
        ],
        "libelle_source": "mode de pose",
-       "condition": "pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite",
+       "condition": "selon la classe de l'écran (HPV R1 / R2 / R3)",
        "regions": [
         "France"
        ],
@@ -95797,7 +95797,7 @@
        "attribut": "methode",
        "valeur": "ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus",
        "unite": null,
-       "statut": "confirme",
+       "statut": "une_source",
        "sources": [
         "S302"
        ],
@@ -95806,7 +95806,7 @@
         "France"
        ],
        "ecart": "Avec des longueurs de 4 m, 30 mm par jonction fait 0,75 % : l'arrondi à la longueur l'absorbe.",
-       "raison": "Longueur et recouvrement confirmés dans zinguerie.json (deux fabricants et le DTU cité) ; la méthode en découle par le calcul.",
+       "raison": "Une seule source citée : repassé de « confirme » à « une_source » (relecture du 20/11/2026).",
        "preuves": [
         {
          "source": "S302",
