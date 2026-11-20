@@ -228,7 +228,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Site public : garanties sur 3 colonnes au plus sur téléphone ; la zone telle qu'écrite (plus de « et alentours » ajouté dans la barre de confiance) ; une assurance est « Assurance déclarée » ; pas de redite entre bandeau et barre ; liens de 44 px ; une adresse en majuscules redirige ; « Retour à Mon site » sort du lien aussitôt lu ; logo et image de partage gardés 5 minutes en cache (avant : un jour).
 - Éditeur sur téléphone : l'aperçu garde au moins 38 % de la hauteur quand un réglage est ouvert, sans sa barre « Appeler » ; onglets plus lisibles, « Voir mon site » à 44 px, aides en 14 px. En sombre, la couleur choisie se lit.
 - Réponses de Greg (19 novembre 2026). Règle changée : l'éditeur « Mon site » prend la disposition de l'ordinateur dès la tablette (768 px), sur toute la largeur de l'écran ; avant, la tablette gardait celle du téléphone. Règle changée : l'adresse du site d'une entreprise supprimée n'est jamais redonnée (table `adresse_page_reservee`, remplie par un déclencheur avant la suppression d'une entreprise, migration `20261119210000_adresse_page_reservee`) ; avant, une autre entreprise pouvait la reprendre. Demandes : titre de liste au mois abrégé (« Liste du 19 nov. »).
-- Règle changée (feu vert de Greg, 20 novembre 2026) : le gris des textes de l'app passe de #614822 (brun) à #4F4B45 (gris neutre, même contraste AA), dans `globals.css`, les écrans d'erreur et de chargement. La page d'accueil publique (`landing.css`), les e-mails et les dessins gardent l'ancien gris : à décider par Greg.
+- Règle changée (feu vert de Greg, 20 novembre 2026) : le gris des textes de l'app passe de #614822 (brun) à #4F4B45 (gris neutre, même contraste AA), dans `globals.css`, les écrans d'erreur et de chargement. Puis (Greg, 20 novembre 2026) la page d'accueil publique (`landing.css`), les e-mails (`mail-html.ts`) et les dessins : plus aucun #614822 dans le code.
 
 ## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg
 
@@ -348,6 +348,11 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - « Voici ton adresse Mobiiz » (RÈGLE CHANGÉE : avant, juste après l'inscription) : au premier envoi aux négoces, une seule fois, dans la feuille d'envoi, après la validation de l'entreprise. L'inscription complète `/inscription` le montre encore à l'inscription.
 - Aucun nom d'entreprise tant que le SIRET n'est pas validé (parcours « essai ») : le nom est vide en base, l'en-tête n'affiche rien ; l'annuaire donne le nom à la confirmation ; l'adresse Mobiiz attend ce nom (créée au premier besoin). E-mails d'identité : « Bonjour, » quand il n'y a pas de nom.
 - Message pour un autre métier : gardé.
+
+## Décisions du 20 novembre 2026 : carte et retours haptiques
+
+- Carte de l'onboarding : zoom en un seul mouvement mené par le navigateur, flou posé une fois le zoom fini, départements préchargés. Règle changée : sur la carte, les NUMÉROS seuls (avant : noms et numéros mêlés) ; les noms dans la barre « Continuer ». Règle changée (même jour) : sous la carte d'une région, plus la liste des départements, seulement le département choisi et « Continuer » ; seuls les départements trop petits pour le pouce (75, 92, 93, 94, et 90, 68, 66) gardent un bouton à leur numéro ; la barre ne montre que le département de la région affichée. Les régions restent en boutons sous la France entière (leurs noms ne tiennent pas sur un téléphone), l'outre-mer aussi. Pas de zoom de la page au double toucher sur l'onboarding.
+- Retours haptiques dans toute l'application (`lib/haptique.ts`, `RetoursHaptiques` dans la mise en page racine) : un léger au choix (région, département, métier, case, onglet), un appui sur un bouton d'action ; jamais sur un simple lien. Android : vibration du navigateur ; iPhone (iOS 18 et plus) : le clic de l'interrupteur natif. Coupables dans Profil › Apparence (« Vibrations au toucher », allumées par défaut, gardées sur l'appareil).
 
 ## À faire avant l'ouverture d'un nouveau métier
 

@@ -41,7 +41,7 @@ export default function Commencer() {
   const [departement, setDepartement] = useState<{ code: string; nom: string } | null>(null);
   const [metier, setMetier] = useState<string>(METIERS_INSCRIPTION[0]!.id);
   const [email, setEmail] = useState("");
-  const [zoom, setZoom] = useState(false);
+  const [visibles, setVisibles] = useState<readonly string[] | null>(null);
 
   // Déjà connecté : l'app directement.
   useEffect(() => {
@@ -87,14 +87,14 @@ export default function Commencer() {
             On commence par chez toi.
           </h1>
           <CarteFrance
-            onZoom={setZoom}
+            onZoom={setVisibles}
             departement={departement?.code ?? null}
             onDepartement={(code, nom) => {
               setDepartement({ code, nom });
               retenirDepartement(code);
             }}
           />
-          {departement && zoom ? (
+          {departement && visibles?.includes(departement.code) ? (
             <div className="mzo-barre">
               <p className="flex items-center gap-2 text-[16px] font-bold">
                 <span className="mzo-coche" aria-hidden="true">

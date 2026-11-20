@@ -3,7 +3,6 @@
 import { ArrowLeft, Check } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { OUTRE_MER, REGIONS_CARTE, VUE_FRANCE, type RegionCarte } from "@/lib/carte/france-regions";
-import { departementConnu } from "@/lib/metiers-inscription";
 
 /**
  * LA CARTE DE L'ONBOARDING (Greg, 19 novembre 2026) : la France découpée en régions ; un toucher sur une région la zoome
@@ -86,15 +85,16 @@ export function CarteFrance({
 }: {
   departement: string | null;
   onDepartement: (code: string, nom: string) => void;
-  /** Une région (ou l'outre-mer) est ouverte : la barre « Continuer » ne cache pas la France entière. */
-  onZoom?: (ouvert: boolean) => void;
+  /** Les départements de la région ouverte (ou de l'outre-mer choisi), null sur la France entière : la barre « Continuer »
+   *  ne se montre que pour un département de la région affichée, et ne cache jamais la France entière. */
+  onZoom?: (departementsVisibles: readonly string[] | null) => void;
 }) {
   const [choix, setChoix] = useState<ChoixRegion | null>(null);
   const [deps, setDeps] = useState<DepartementCarte[] | null>(null);
   const [erreur, setErreur] = useState(false);
   const region = choix?.type === "metropole" ? choix.region : null;
   useEffect(() => {
-    onZoom?.(!!choix);
+    onZoom?.(choix ? (choix.type === "metropole" ? choix.region.departements : [choix.code]) : null);
   }, [choix, onZoom]);
   // Le cadre visé (stable tant que la région ne change pas) et sa transformation ; « posé » une fois le zoom fini.
   const cible = useMemo(() => (region ? cadreRegion(region) : VUE_FRANCE), [region]);
@@ -162,18 +162,20 @@ export function CarteFrance({
   const echelle = cible[2] / VUE_FRANCE[2];
   const police = cible[2] / 30;
   const depsAffiches = region && deps && deps.every((d) => region.departements.includes(d.code)) ? deps : null;
+  // Trop petit pour le pouce une fois zoomé : moins d'environ 14 % de la largeur de la carte (≈ 45 px sur un iPhone).
+  const petits = depsAffiches ? depsAffiches.filter((d) => Math.min(d.boite[2] - d.boite[0], d.boite[3] - d.boite[1]) / cible[2] < 0.14) : [];
 
   return (
     <div className="mzo-carte">
       <div className="flex min-h-11 items-center justify-between gap-3">
-        <h2 ref={titre} tabIndex={-1} className="text-[20px] font-extrabold outline-none">
+        <h2 ref={titre} tabIndex={-1} className="min-w-0 text-[20px] leading-tight font-extrabold outline-none">
           {choix ? (choix.type === "metropole" ? choix.region.nom : choix.nom) : "Tu travailles où ?"}
         </h2>
         {choix ? (
           <button
             type="button"
             onClick={revenir}
-            className="pressable inline-flex min-h-11 items-center gap-1.5 rounded-full border border-line px-4 text-[14px] font-semibold"
+            className="pressable inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border border-line px-4 text-[14px] font-semibold whitespace-nowrap"
           >
             <ArrowLeft size={16} aria-hidden="true" /> Toute la France
           </button>
@@ -267,28 +269,25 @@ export function CarteFrance({
                         </g>
                       );
                     })}
-                    {/* Les noms par-dessus tous les contours : un département voisin ne les coupe jamais. */}
+                    {/* Les numéros par-dessus tous les contours : un département voisin ne les coupe jamais. */}
                     <g className="mzo-noms-deps" aria-hidden="true">
                       {depsAffiches.map((d) => {
-                        // Le nom tient dans son département : réduit au besoin (jusqu'aux trois quarts), sinon le numéro seul.
-                        const largeur = d.boite[2] - d.boite[0];
-                        const ajuste = Math.min(1, (largeur * 0.9) / (d.nom.length * police * 0.56));
-                        const petit = largeur < cible[2] / 7 || ajuste < 0.72;
+                        // Les NUMÉROS seuls sur la carte (retour de Greg, 20 novembre 2026 : noms et numéros mêlés, « pas
+                        // clair ») : gros et lisibles ; les noms sont dans les boutons dessous et dans la barre « Continuer ».
+                        // Un petit département (Paris, la petite couronne) garde un numéro plus petit qui tient dedans.
+                        const largeur = Math.min(d.boite[2] - d.boite[0], d.boite[3] - d.boite[1]);
+                        const taille = Math.min(police * 1.25, largeur * 0.55);
                         return (
                           <text
                             key={d.code}
                             x={d.centre[0]}
                             y={d.centre[1]}
                             textAnchor="middle"
+                            dominantBaseline="central"
                             className={d.code === departement ? "on" : undefined}
-                            fontSize={petit ? police * 0.85 : police * ajuste}
+                            fontSize={taille}
                           >
-                            {petit ? d.code : d.nom}
-                            {petit ? null : (
-                              <tspan x={d.centre[0]} dy={police * 1.15} fontSize={police * 0.8} className="mzo-code">
-                                {d.code}
-                              </tspan>
-                            )}
+                            {d.code}
                           </text>
                         );
                       })}
@@ -304,7 +303,7 @@ export function CarteFrance({
         </div>
       )}
 
-      {/* Les mêmes choix en boutons : au pouce, au clavier, et pour les petits départements. */}
+      {/* Les régions en boutons (leurs noms ne tiennent pas sur la carte d'un téléphone) ; l'outre-mer, qui n'est pas sur la carte. */}
       {!choix ? (
         <>
           <ul className="mzo-pastilles" aria-label="Choisis ta région">
@@ -332,21 +331,32 @@ export function CarteFrance({
             ))}
           </ul>
         </>
-      ) : (
+      ) : choix.type === "outre-mer" ? (
         <ul className="mzo-pastilles" aria-label="Choisis ton département">
-          {(choix.type === "metropole"
-            ? choix.region.departements.map((c) => ({ code: c, nom: departementConnu(c)?.nom ?? null }))
-            : [{ code: choix.code, nom: choix.nom }]
-          ).map((d) => (
-            <li key={d.code}>
-              <button type="button" aria-pressed={d.code === departement} data-pastille={d.code} onClick={() => onDepartement(d.code, d.nom ?? d.code)}>
-                {d.code === departement ? <Check size={15} strokeWidth={3} aria-hidden="true" /> : null}
-                {d.nom ?? d.code} <span>{d.code}</span>
-              </button>
-            </li>
-          ))}
+          <li>
+            <button type="button" aria-pressed={choix.code === departement} data-pastille={choix.code} onClick={() => onDepartement(choix.code, choix.nom)}>
+              {choix.code === departement ? <Check size={15} strokeWidth={3} aria-hidden="true" /> : null}
+              {choix.nom} <span>{choix.code}</span>
+            </button>
+          </li>
         </ul>
-      )}
+      ) : petits.length ? (
+        // RÈGLE CHANGÉE (Greg, 20 novembre 2026 : « vu qu'on a la carte, pas besoin de remettre tous les noms en dessous ») :
+        // la carte seule, puis le département choisi et « Continuer ». Seuls les départements trop petits pour le pouce
+        // (Paris et la petite couronne) gardent leur numéro en bouton.
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[13px] font-semibold text-muted">Trop petits sur la carte :</span>
+          <ul className="mzo-pastilles" aria-label="Petits départements">
+            {petits.map((d) => (
+              <li key={d.code}>
+                <button type="button" aria-pressed={d.code === departement} aria-label={`${d.nom} (${d.code})`} data-pastille={d.code} onClick={() => onDepartement(d.code, d.nom)}>
+                  {d.code}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

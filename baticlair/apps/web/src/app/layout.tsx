@@ -1,3 +1,4 @@
+import { RetoursHaptiques } from "@/components/retours-haptiques";
 import { ChampVisible } from "@/components/champ-visible";
 import { headers } from "next/headers";
 import "./globals.css";
@@ -82,6 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: SCRIPT_THEME }} />
       </head>
       <body className="min-h-dvh antialiased">
+        <RetoursHaptiques />
         {children}
         <EnregistrementServiceWorker />
         <ChampVisible />

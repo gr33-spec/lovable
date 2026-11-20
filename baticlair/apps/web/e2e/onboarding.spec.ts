@@ -26,16 +26,17 @@ test.beforeEach(async ({ request }) => {
   expect((await request.post("/v1/internal/test/mode-regroupement", { headers: { authorization: "Bearer e2e-secret-de-la-tache" }, data: { mode: "automatique" } })).status()).toBe(200);
 });
 
-/** La carte : région puis département, au toucher (tracés) ou par les boutons. */
-async function choisirDepartement(page: Page, region: string, departement: string, { parLaCarte = true } = {}) {
-  if (parLaCarte) await page.locator(`path[data-region="${region}"]`).click();
-  else await page.locator(`button[data-pastille-region="${region}"]`).click();
-  await page.locator(`button[data-pastille="${departement}"]`).waitFor();
-  if (parLaCarte) {
-    await page.locator(`g[data-departement="${departement}"]`).click();
-    await expect(page.locator(`g[data-departement="${departement}"]`)).toHaveAttribute("aria-pressed", "true");
-  } else await page.locator(`button[data-pastille="${departement}"]`).click();
-  await expect(page.locator(`button[data-pastille="${departement}"]`)).toHaveAttribute("aria-pressed", "true");
+/**
+ * La carte : région puis département, au toucher. RÈGLE CHANGÉE (Greg, 20 novembre 2026) : sous la carte, plus la liste
+ * des départements ; seuls les trop petits (Paris, la petite couronne) ont un bouton (`parLaCarte: false`).
+ */
+async function choisirDepartement(page: Page, region: string, departement: string, { parLaCarte = true, regionParBouton = false } = {}) {
+  if (regionParBouton) await page.locator(`button[data-pastille-region="${region}"]`).click();
+  else await page.locator(`path[data-region="${region}"]`).click();
+  await page.locator(`g[data-departement="${departement}"]`).waitFor();
+  if (parLaCarte) await page.locator(`g[data-departement="${departement}"]`).click();
+  else await page.locator(`button[data-pastille="${departement}"]`).click();
+  await expect(page.locator(`g[data-departement="${departement}"]`)).toHaveAttribute("aria-pressed", "true");
 }
 
 /** Tout le parcours jusqu'à l'écran « Vérifie ton e-mail » ; rend l'e-mail et le corps envoyé pour l'entreprise. */
@@ -70,12 +71,21 @@ test("la carte : 13 régions et l'outre-mer ; une région se zoome en départeme
   await page.locator('path[data-region="53"]').click();
   await expect(page.getByRole("heading", { name: "Bretagne" })).toBeVisible();
   await expect(page.locator("g[data-departement]")).toHaveCount(4);
+  // Sous la carte, plus de liste des départements (Greg, 20 novembre 2026).
+  await expect(page.locator("button[data-pastille]")).toHaveCount(0);
   await page.getByRole("button", { name: "Toute la France" }).click();
   await expect(page.getByRole("heading", { name: "Tu travailles où ?" })).toBeVisible();
   await expect(page.locator("g[data-departement]")).toHaveCount(0);
   // Les petits départements d'Île-de-France : au pouce, par les boutons.
-  await choisirDepartement(page, "11", "75", { parLaCarte: false });
+  await choisirDepartement(page, "11", "75", { parLaCarte: false, regionParBouton: true });
   await expect(page.getByText("Paris (75)")).toBeVisible();
+  // Seuls les petits départements ont leur bouton ; jamais toute la liste sous la carte.
+  await expect(page.locator("button[data-pastille]")).toHaveText(["75", "92", "93", "94"]);
+  // Une autre région ouverte : la barre ne montre plus Paris (elle ne dit que le département de la région affichée).
+  await page.getByRole("button", { name: "Toute la France" }).click();
+  await page.locator('path[data-region="53"]').click();
+  await page.locator('g[data-departement="22"]').waitFor();
+  await expect(page.getByText("Paris (75)")).toHaveCount(0);
   // La Corse, sur la carte ; l'outre-mer, dans la liste.
   await page.getByRole("button", { name: "Toute la France" }).click();
   await choisirDepartement(page, "94", "2A");
@@ -258,4 +268,27 @@ test("aucun nom d'entreprise avant le SIRET ; « Voici ton adresse Mobiiz » au 
   if (!(await feuille.isVisible())) await ouvrir.click();
   await expect(feuille).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Voici ton adresse Mobiiz :" })).toHaveCount(0);
+});
+
+test("retours haptiques : un léger au choix d'une région ou d'un département, un appui sur « Continuer » ; rien quand ils sont coupés", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { __vibrations: number[] }).__vibrations = [];
+    Object.defineProperty(navigator, "vibrate", { configurable: true, value: (ms: number) => ((window as unknown as { __vibrations: number[] }).__vibrations.push(ms), true) });
+  });
+  await page.goto("/commencer");
+  const vibrations = () => page.evaluate(() => (window as unknown as { __vibrations: number[] }).__vibrations);
+  await page.locator('path[data-region="53"]').click();
+  await page.locator('g[data-departement="22"]').click();
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await expect.poll(vibrations).toEqual([8, 8, 14]);
+  // Les numéros seuls sur la carte, les noms dans les boutons dessous.
+  await page.getByRole("button", { name: "Retour" }).click();
+  await expect(page.locator(".mzo-noms-deps text")).toHaveText(["22", "29", "35", "56"]);
+  await expect(page.getByText("Côtes-d'Armor (22)")).toBeVisible();
+  // Coupées (Profil › Apparence) : plus rien.
+  await page.evaluate(() => localStorage.setItem("mobiiz-vibrations", "non"));
+  await page.locator('g[data-departement="29"]').click();
+  await page.waitForTimeout(200);
+  // Le dernier retour est celui de « Retour » (un appui) ; rien après la coupure.
+  expect(await vibrations()).toEqual([8, 8, 14, 14]);
 });
