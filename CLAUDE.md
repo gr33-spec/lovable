@@ -352,4 +352,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
   - Montage par défaut tiré de la hauteur (DTU 25.41). Au-delà du tableau, les montants sortent « à vérifier ».
   - Le périmètre d'un plafond écrit au devis est lu. Sinon il est estimé et dit comme hypothèse.
   - Détail : `recherche/18-trancher-montage-corniere.md`.
+- Sixième vague (20 novembre 2026, version `-6`, `recherche/19` et `20`) :
+  - plafond coupe-feu Placo Stil Flam : 1,7 entretoise/m² (avant 1,3) et 13 vis/m² (avant 23, à confirmer) ;
+  - sans deuxième source, toujours « à confirmer » : vis Knauf, séparative 1re peau, plafond à 0,40, adhésif de membrane.
 

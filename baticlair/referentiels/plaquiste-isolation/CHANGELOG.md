@@ -63,3 +63,12 @@
 - Règle changée : le périmètre d'un plafond écrit au devis est lu (nouvelle donnée `perimetre`) ; sinon il est estimé et dit comme hypothèse (avant : toujours estimé, sans être dit).
 - Vis de plafond 12/m² et TRPF doublés 0,40 à 10/m² : écarts entre sources expliqués (vis de rive ; espacement de l'assemblage), plus des contradictions.
 - Les 18 chantiers types : aucune quantité ne change.
+
+## plaquiste-isolation-2026.11.20-6 — Sixième vague : vis, plafond feu, produits (20 novembre 2026)
+
+- Recherches `recherche/19` (vis et fixations) et `recherche/20` (plafond feu et produits).
+- Règle changée : entretoises Stil Flam du plafond feu Placo, 1,3 → 1,7 par m² (quatre FDES Placo ; le 1,3 oubliait rives et coupes).
+- Règle changée : vis de la peau visible d'un plafond feu, 23 → 13 par m² (avec Stil Flam, Placo visse comme un plafond standard ; 23 ne valait que pour le PRF) ; reste « à confirmer ».
+- Chantier PI-10 : entretoises 52 → 68 ; vis TTPC 35 920 → 520 (toujours 1 boîte de 1000).
+- Fiche lisible : Glasroc H Ocean 40 plaques par palette, R du Styrodur 3035 CS (aucun certificat ACERMI en cours), Siniat D102/48 EI 120 (2 + 1 BA18), formats KF 13 et Fermacell, plafonds feu Siniat.
+- Sans deuxième source indépendante, gardés « à confirmer » : vis Knauf (15), séparative 1re peau (12), plafond à 0,40 (15 vis, 3,0 ml), adhésif de membrane (0,8), fixation en bout de rail (non comptée).

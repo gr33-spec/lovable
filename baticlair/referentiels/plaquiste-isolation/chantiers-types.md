@@ -1,7 +1,7 @@
 # Chantiers types plaquiste-isolation (jeu de test pour l'ouverture du métier)
 
 Calculés par le moteur de Mobiiz (`packages/domain`, `computeWorkItem` puis `purchaseList`) avec `referentiel.json`
-(version `plaquiste-isolation-2026.11.20-5`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
+(version `plaquiste-isolation-2026.11.20-6`), règles « à confirmer » acceptées (mode validateur). **Tout est à relire par un plaquiste.**
 Écrit par `outils/calculer_chantiers.mjs` : ne pas modifier à la main, relancer l'outil.
 
 Lecture : « Lu au devis » = données que le modèle de lecture doit trouver dans la ligne ; « Questions » = ce que le moteur
@@ -308,11 +308,11 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Éclisses de fourrure Placo | 1 boîte de 50 | 23,87 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
 | Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
 | Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
-| Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
+| Vis TTPC 35 Placo | 1 boîte de 1000 | 520 pièces | système coupe-feu Placo REI 60 : en entier dans cette marque ; à défaut, un système complet d'une autre marque avec son procès-verbal, signalé à l'artisan ; jamais de mélange de marques |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 45 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 13,2 kg |  |
-| Entretoises Stil Flam Placo | 52 entretoises | 52 pièces | montage feu Placo Stil Flam, une entretoise tous les 1,20 m |
+| Entretoises Stil Flam Placo | 68 entretoises | 68 pièces | montage feu Placo Stil Flam |
 
 ## PI-11 — Combles perdus : soufflage laine de verre R 7
 

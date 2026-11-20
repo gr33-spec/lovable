@@ -21,7 +21,7 @@ import os
 
 ICI = os.path.dirname(os.path.abspath(__file__))
 SORTIE = os.path.join(ICI, "..", "referentiel.json")
-VERSION = "plaquiste-isolation-2026.11.20-5"
+VERSION = "plaquiste-isolation-2026.11.20-6"
 TRADE = "drywall"
 DATE = "2026-11-19"
 
@@ -1094,10 +1094,10 @@ def referentiel():
     # Plafond coupe-feu : le nombre de plaques reste lu au devis (une valeur par défaut calculée laisserait la 2e peau « possible » dans les conditions du moteur).
     PRODUCTS.append(produit("entretoise-prf", "splice", "Entretoise Stil Flam Placo (montage plafond feu Placo, remplace le PRF)", "Entretoises Stil Flam Placo", piece("entretoise", "entretoises"), ["entretoise prf"]))
     pl["slots"].append(slot("entretoise_prf", "splice", "Entretoises PRF", "entretoise-prf", "Entretoises PRF tous les 0,60 m (montage feu Placo).", "placo-pv-feu", "plafond", ["entretoise"]))
-    pl["constants"]["entretoises_prf"] = regle("1.3", "u/m2", "placo-pv-feu", DOUTE("Le système PRF n'est plus vendu : Placo l'a remplacé par Stil Flam, entretoises tous les 1,20 m, « deux fois moins » qu'avant (Offre Placo 2024, fiche produit du 18/12/2023) ; 1,3/m² = la moitié des 2,6 du PRF, calcul non écrit par Placo (recherche/17 n° 3). Règle changée : avant 2,6."), label="{v} entretoises par m²")
+    pl["constants"]["entretoises_prf"] = regle("1.7", "u/m2", "placo-pv-feu", UNE("1,7 entretoise Stil Flam par m² (rives et coupes comprises) : quatre FDES Placo des plafonds Stil Flam (base INIES 2024 : 1,46 ; 2025-2026 : 1,68), recoupées par le poids de l'entretoise (0,25 kg) ; un seul éditeur (recherche/20 §1). Règle changée : avant 1,3 (calcul qui oubliait rives et coupes), et 2,6 avec l'ancien PRF."), label="{v} entretoises par m²")
     pl["needs"].append(besoin("entretoises-prf", "entretoise_prf", "surface * regle.entretoises_prf", "u", "placo-pv-feu", OK2("Formule : le ratio au m² × la surface ; l'état du chiffre est celui de son ratio (constante)."),
-                              when="si(ei >= 1, si(marque_systeme < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], short="entretoises PRF", precision="montage feu Placo Stil Flam, une entretoise tous les 1,20 m"))
-    pl["constants"]["vis_feu"] = regle("23", "u/m2", "placo-pv-feu", UNE("Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."), label="{v} vis par m² (montage feu)")
+                              when="si(ei >= 1, si(marque_systeme < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], short="entretoises PRF", precision="montage feu Placo Stil Flam"))
+    pl["constants"]["vis_feu"] = regle("13", "u/m2", "placo-pv-feu", DOUTE("Stil Flam : les FDES Placo (base INIES 2024-2026) comptent le même vissage qu'un plafond standard, 12,56 vis/m² pour la peau visible. Le 23/m² (vissage tous les 15 cm) ne valait que pour le PRF, plus vendu. À confirmer : une FDES n'est pas une notice de pose, fiche système et PV non lisibles ; Siniat et Knauf : vissage non publié (recherche/20 §2-4). Règle changée : avant 23."), label="{v} vis par m² (montage feu)")
     pl["needs"] = [dict(n, formula="surface * regle.vis_feu") if n["id"] == "vis-ttpc-35-feu" else n for n in pl["needs"]]
     work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur(), coffrage()]
     return {

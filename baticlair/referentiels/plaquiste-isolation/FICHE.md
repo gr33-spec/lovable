@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | État | **Recherche, NON BRANCHÉE.** Le métier reste fermé dans l'application ; aucun code ne lit ce dossier. |
-| Version | `plaquiste-isolation-2026.11.20-5` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
+| Version | `plaquiste-isolation-2026.11.20-6` (fichier machine `referentiel.json`), après les réponses de Greg, la cinquième vague et la recherche « montage et cornière » du 20 novembre 2026 : **90 % des chiffres confirmés** (87 % par deux sources, 3 % validés par Greg ; les nouvelles lignes « à vérifier » comptent dans le reste) |
 | Rédaction | Mission de nuit du 19-20 novembre 2026 (Claude), sept chercheurs et deux contre-vérifications. |
 | À faire avant ouverture | Relecture par un plaquiste (section 16), branchement (section 17). |
 
@@ -138,7 +138,7 @@ Règle : la plaque H1 est exigée en EB+ privatifs et collectifs ✔✔ [R03-S3 
 | Placo Placoflam BA 13 | 2,40 / 2,50 / 2,60 / 3,00 | 10,2 kg/m² | 50 | ✔✔ | [R01 §3] |
 | Placo Placoflam BA 15 | 2,40 / 2,50 / 2,60 / 3,00 | 12,6 kg/m² | — | ✔ | [R01b] |
 | Siniat Prégyflam Std BA13 | 2,50 / 2,60 / 2,80 / 3,00 | 11,5 kg/m² | 50 | ✔✔ | [R01 §3], [R01b] |
-| Knauf Feu KF 13 | 2,50 (✔✔) ; 2,60 (✔) ; 2,80 / 3,00 ? | — | 50 ? | ✔✔ / ? | [R01b] |
+| Knauf Feu KF 13 | 2,50 (✔✔, réf. 50608) ; 3,00 (✔, une source) ; 2,60 seulement en Belgique et 2,80 seulement en Tunisie : ne pas proposer (recherche/20 §5) | — | 50 ? | ✔✔ / ? | [R01b] |
 | Plaque feu et H1 à la fois | Placo Habito Hydro (type DFRIH1), Knauf Hydro Diamant 13 (D, F, I, H1) ; pas de « Placoflam hydro » | — | — | ✔✔ | [R01b] |
 
 ### 3.4 Phoniques (parement bleu)
@@ -173,7 +173,7 @@ Vis Habito : Habito 25 en boîte de 250, Habito 41 en boîte de 800 ✔ [R02b].
 | Fermacell Powerpanel H2O (ciment) | 12,5 mm ; 1,20 m de large en France ; 1,00 / 2,00 / 2,60 / 3,01 m | 12,5 kg/m² | ✔✔ (≠ 1,25 m levée : format allemand) | [R01b] |
 | Knauf Aquapanel Indoor (EB+c, EC) | 1,20 × 2,60 et 1,20 × 3,00 en France | 15 ? | ✔✔ formats | [R01b] |
 | Placo Aquaroc 13 | 2,50 / 2,60 / 3,00 × 1,20 | 13,5 kg/m² | ✔✔ largeur | [R01 §6] |
-| Placo Glasroc H Ocean (EB+c, EC) | formats ? | — | ? (aucune fiche produit lisible) | [R01b] |
+| Placo Glasroc H Ocean 13 (EB+c, EC) | 1,20 × 2,60 ; 40 plaques par palette (Offre Placo 2024 et FDES de mai 2026 : 125 m² ; le 43 est écarté) | — | ✔✔ (recherche/20 §9) | [R01b] |
 
 ### 3.7 Cintrables, 4 bords amincis, techniques
 
@@ -421,8 +421,8 @@ Chaque marque dit que ses performances ne valent qu'avec ses propres composants 
 | EI 60, 72/48 | 1 **Placoflam** BA13 par face, M48 **doublés à 0,40**, laine minérale 45, 3,45 m (RS 15-020) | **n'existe pas** : passer en D106/70 (BA18) ou D100/70 Flam (Prégyflam BA15) | 1 **KF 13** par face, M48 doublés à 0,40, laine de verre 45 mm 12 kg/m³ obligatoire, feuillard aux joints horizontaux, 3,40 m (EFR-19-V-002073) | ✔✔ (Placo, Knauf) |
 | EI 60, 98/48 | 2 BA13 standard par face, M48 simples à 0,60, 3 m (sp00018909) | 2 Prégyplac BA13 par face, M48-50 (06-V-052) | 2 KS 13 par face (07-A-234) | ✔✔ |
 | EI 90 | non trouvé | non trouvé | 98/48 KS 13 + KF 13 par face | ✔ |
-| EI 120, 98/48 | 2 Placoflam par face, M48-50 à 0,60, sans isolant, 3,10 m (RS 15-022) | D102/48 EI 120 (composition à lire), ou séparatives S195 / S205 en 3 + 3 BA13 | 2 KF 13 par face, jusqu'à 4,35 m | ✔✔ (Placo, Knauf) ; ? Siniat |
-| Plafond REI 60 sous plancher | montage PRF : 2 Placoflam BA13, fourrures à 0,60, entretoises PRF (2,6/m²), vis tous les 15 cm (jusqu'à 23/m²) | 2 Prégyflam BA13 ou BA15, fourrures S47 à 0,50 | Métal Chrono : 1 KF BA15 (principe seulement) | ✔✔ plaques ; ✔ montage |
+| EI 120, 98/48 | 2 Placoflam par face, M48-50 à 0,60, sans isolant, 3,10 m (RS 15-022) | D102/48 EI 120 : 2 + 1 Prégyplac BA18 sur M48-35 (48 + 3 × 18 = 102 mm ; extrait de la fiche Siniat, isolant à confirmer), ou séparatives S195 / S205 en 3 + 3 BA13 | 2 KF 13 par face, jusqu'à 4,35 m | ✔✔ (Placo, Knauf) ; ? Siniat |
+| Plafond REI 60 sous plancher | montage Stil Flam (remplace le PRF) : 2 Placoflam BA13, fourrures à 0,60, entretoises Stil Flam 1,7/m², vissage comme un plafond standard (13 vis/m² en peau visible, à confirmer) (FDES Placo INIES 2024-2026, recherche/20 §1-2) | 2 Prégyflam BA13 ou BA15, fourrures S47 à 0,50, suspentes à 1,10 m (✔✔) ; REI 30 sous bois : 2 BA13 standard, fourrures à 0,50, suspentes à 1,15 m (PV EFR-16-002661, ✔) ; vissage non publié | Métal Chrono : 1 KF BA15 (principe seulement) | ✔✔ plaques ; ✔ montage |
 | Gaines | trappes coupe-feu 30, 60, 120 min (gaine non trouvée) | D72/48 sur montants accolés (EI 30), D84/48 BA18 S (EI 60) | KM 72/48 KS 13 + laine ; trappes Star GT 18 / GT 25 | ✔ |
 
 **Négoce sans la marque (Greg, 20/11)** : il peut proposer un système complet d'une autre marque avec son procès-verbal, signalé clairement à l'artisan ; jamais de mélange de marques.
@@ -434,7 +434,7 @@ Chaque marque dit que ses performances ne valent qu'avec ses propres composants 
 - plaque par défaut selon le classement : standard en 72/48 EI 30 et en 98/48 EI 60 ; feu en 72/48 EI 60 et en 98/48 EI 120 ;
 - 72/48 EI 60 : montants doublés à 0,40 par défaut ;
 - 72/48 coupe-feu : **laine minérale 45 mm de la marque obligatoire** (sortie d'office, « obligatoire si ») ;
-- plafond coupe-feu : deux plaques par défaut à partir de REI 60, peau visible vissée à 15 cm (23 vis/m², Placo PRF ✔).
+- plafond coupe-feu : deux plaques par défaut à partir de REI 60, peau visible vissée comme un plafond standard avec Stil Flam (13 vis/m², FDES Placo, à confirmer) ; les 23 vis/m² ne valaient que pour l'ancien PRF.
 
 **Pas encore généré, à préciser au comptoir** (jamais inventé) [R11 §4.4] :
 - le mastic ou la bande intumescente en pied et en tête de cloison ;
@@ -514,7 +514,7 @@ Fiche environnementale Placo 2026 du BA13, pour 1 m² posé : 12 vis, 1,23 m de 
 | Knauf Ultracoustic P 45 | — | 45 → 1,20 | 12,96 m² (16 panneaux) | ✔✔ R ; ✔ colis | [R04 A5] |
 | Laine de bois Steico Flex 036, Gutex Thermoflex, Pavaflex ; coton Métisse RT ; Biofib'Trio | 0,036 à 0,039 | tableaux ACERMI 2025-2026 | — | ✔ (ACERMI) | [R04 A6] |
 | PSE sous chape Knauf Therm Chape Th38 | — | 20 mm → R 0,50 … 200 mm → R 5,25 | 2,50 × 1,20 m ; 1,05 m² par m² traité | ✔✔ | [R07] |
-| XPS Styrodur 3035 CS (diffusé par Placo) ; Ravatherm XPS 300 ST | 0,029 (Ravatherm) | 30 à 120 mm ; R du Styrodur ? (fiche BASF injoignable) | 1,25 × 0,60 à feuillure, 7 à 14 panneaux par colis | ✔ / ? | [R07] |
+| XPS Styrodur 3035 CS (diffusé par Placo) ; Ravatherm XPS 300 ST | 0,029 (Ravatherm) | 30 à 120 mm ; R du Styrodur 3035 CS : 0,90 / 1,45 / 1,75 / 2,85 à 30 / 50 / 60 / 100 mm (✔✔, déclaré par BASF) ; aucun certificat ACERMI en cours dans la liste officielle au 20/11/2026 : ne jamais écrire « certifié ACERMI » | 1,25 × 0,60 à feuillure, 7 à 14 panneaux par colis | ✔ / ? | [R07] |
 | Efigreen (polyuréthane) | — | — | toiture-terrasse en 0,60 × 0,60 : hors métier plaquiste | ✔✔ | [R07] |
 | Isolants minces | — | « en observation » à la commission prévention produits de l'AQC (C2P) ; R mesuré selon NF EN ISO 22097. Afficher le R de l'isolant seul, jamais « avec lame d'air ». Hybris 31 n'est pas un mince (λ 0,031, 1,20 × 2,70 / 2,80) | — | ✔✔ | [R07] |
 | URSA XPS, polyuréthane nu, Actis Triso | — | — | — | ? (quota de recherche) | [R07] |
@@ -843,17 +843,24 @@ Le détail est dans `recherche/09` à `17`.
 5. **Séparative, 1re peau** : 12 (SNIP seul).
 6. **Vis de doublage Knauf** : aucune valeur trouvée, on applique 15 (règle de Greg).
 7. **Plafond feu Placo** :
-   - Stil Flam remplace le PRF : entretoises tous les 1,20 m, 1,3/m² calculés ;
-   - vis à 15 cm (23/m²) : une seule source, peut-être plus valable avec Stil Flam.
+   - Stil Flam : 1,7 entretoise/m² (quatre FDES Placo, un seul éditeur) ;
+   - vis de la peau visible : 13/m², même vissage qu'un plafond standard d'après les FDES ; à confirmer sur la fiche système (placo.fr refuse la lecture) ;
+   - Siniat et Knauf : vissage feu non publié ; le plafond Knauf Métal Chrono n'est pas chiffré ligne à ligne.
 8. **Plénum et longueur de plaque de plafond par défaut** : habitudes, gardées en questions.
 9. **Adhésif de membrane** : 0,8 ml/m² (Isover seul, cohérent avec le calcul des joints).
 10. **Fixation en bout de rail** (non comptée).
 11. **Hors fichier machine** :
-    - Knauf : KF 13 en 3,00 m (une source, le 2,80 m n'existe pas), charge du Diamant, Métal Chrono (entraxes, PV) ;
-    - Siniat D102/48 EI 120 ;
-    - palette Fermacell (tarif 2010) ;
-    - Glasroc H Ocean 40 ou 43 par palette ;
-    - Styrodur 3035 CS : R confirmé à 30, 50, 60 et 100 mm, certificat ACERMI non ouvert.
+    - Knauf : KF 13 en 3,00 m (une source) ; Diamant jusqu'à 55 kg par point (une source, fixation non publiée) ; Métal Chrono (entraxe des entretoises, vissage, PV) ;
+    - Siniat D102/48 EI 120 : composition lue (2 + 1 BA18), isolant à confirmer ;
+    - palette Fermacell : 48 plaques (tarif 2010 seul) ;
+    - Styrodur 3035 CS : aucun certificat ACERMI en cours trouvé.
+
+**Réglés pendant la sixième vague (recherche/19 et 20)** :
+- Glasroc H Ocean : 40 plaques par palette ;
+- R du Styrodur 3035 CS ;
+- plafond REI 60 Siniat (suspentes à 1,10 m) ;
+- formats KF 13 et Fermacell 12,5 ;
+- fixation en bout de rail : aucune de plus (aucun fabricant ne la demande).
 
 **Réglés pendant la troisième passe** :
 - FDES Placo sur la base INIES (montants, rails, TRPF, fourrures, appuis, plaques confirmés) ;
