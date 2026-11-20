@@ -1159,7 +1159,7 @@
    "marque": "Monier (BMI)",
    "modele": "Divoroll Ecotech 200FR",
    "attribut": "rouleaux par palette",
-   "valeur": 25,
+   "valeur": 20,
    "unite": "rouleaux",
    "condition": "",
    "regions": [
@@ -1175,7 +1175,7 @@
      "consulte": "2026-11-19"
     }
    ],
-   "raison": "fiche fabricant lue chez un négoce (Samse) seulement"
+   "raison": "Corrigé le 20/11/2026 (zinguerie-modeles.json) : la fiche Monier et le certificat CSTB QB 19-001 donnent 20 ; le 25 venait d'une fiche recopiée par un négoce."
   },
   {
    "id": "bitume_recouvrement_longitudinal",

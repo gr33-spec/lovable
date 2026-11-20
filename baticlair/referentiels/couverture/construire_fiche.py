@@ -42,6 +42,7 @@ FAMILLES = [
     ("fenetre_toit", "Fenêtres de toit et raccords", "fenetres-toit.json", None),
     ("securite", "Sécurité en toiture", "securite-toiture.json", None),
     ("fibres_ciment", "Plaques fibres-ciment", "fibres-ciment.json", None),
+    ("zinguerie_modeles", "Zinguerie et écrans : modèles et références du marché", "zinguerie-modeles.json", None),
     ("sous_face", "Sous-faces et habillages de débord", "sous-faces-etancheite.json", "sous_face"),
     # Même famille, second fichier : ajouté à l'étanchéité déjà lue (toiture-terrasse : SBS, EPDM, PIR, relevés).
     ("etancheite", "Étanchéité de toiture", "sous-faces-etancheite.json", "etancheite"),

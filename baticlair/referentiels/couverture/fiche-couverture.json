@@ -7,7 +7,7 @@
  "regle_confirmation": "confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.",
  "regles_fondateur": "../../../.claude/skills/regles-metier/SKILL.md",
  "carte_regions": "carte-regions.json",
- "taux_confirme": 91.3,
+ "taux_confirme": 91.0,
  "comptes": {
   "abergement:a_confirmer": 1,
   "abergement:confirme": 11,
@@ -65,7 +65,11 @@
   "zinguerie:a_confirmer": 4,
   "zinguerie:confirme": 55,
   "zinguerie:confirme_fabricant": 37,
-  "zinguerie:une_source": 13
+  "zinguerie:une_source": 13,
+  "zinguerie_modeles:a_confirmer": 2,
+  "zinguerie_modeles:confirme": 4,
+  "zinguerie_modeles:confirme_fabricant": 13,
+  "zinguerie_modeles:une_source": 9
  },
  "constantes": [
   {
@@ -88458,7 +88462,7 @@
        "regions": [
         "France"
        ],
-       "raison": "un seul fabricant (RHEINZINK) : 54 feuilles en 0,65 par palette de 500 kg, 87 feuilles en 0,80 par palette de 1 t ; 107 en 0,65 par tonne n'est qu'un calcul (1000 / 9,36)",
+       "raison": "un seul fabricant (RHEINZINK) : 54 feuilles en 0,65 par palette de 500 kg, 87 feuilles en 0,80 par palette de 1 t ; 107 en 0,65 est aussi un article RHEINZINK (11005985, relevé du 20/11/2026) ; VMZINC conditionne 150 feuilles en 0,65",
        "controle": [
         "poids : 54 feuilles × 9,36 kg (0,65 mm) = 505 kg pour une palette annoncée de 500 kg ; 87 × 11,52 kg (0,80 mm) = 1 002 kg pour 1 t : cohérent",
         "confirme_fabricant refusé : fiches RHEINZINK lues chez Samse et Richardson, pas sur le domaine du fabricant"
@@ -90353,7 +90357,7 @@
           {
            "id": "ecotech_200fr_palette",
            "attribut": "rouleaux_par_palette",
-           "valeur": 25,
+           "valeur": 20,
            "unite": "rouleaux",
            "statut": "une_source",
            "sources": [
@@ -90363,7 +90367,7 @@
            "regions": [
             "France"
            ],
-           "raison": "fiche fabricant lue chez un négoce (Samse) seulement",
+           "raison": "Corrigé le 20/11/2026 (zinguerie-modeles.json) : la fiche Monier et le certificat CSTB QB 19-001 donnent 20 ; le 25 venait d'une fiche recopiée par un négoce.",
            "preuves": [
             {
              "source": "S331",
@@ -92271,8 +92275,8 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S521",
-            "S522"
+            "S536",
+            "S537"
            ],
            "libelle_source": "format de rouleau",
            "condition": "1re couche d'un bicouche (ou 2e sous protection rapportée)",
@@ -92283,11 +92287,11 @@
            "ecart": "Deux documents Soprema (une source). La fiche comptoir citait 8 m : c'est la longueur export (voir ecrans-etancheite.json).",
            "preuves": [
             {
-             "source": "S521",
+             "source": "S536",
              "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg"
             },
             {
-             "source": "S522",
+             "source": "S537",
              "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
             }
            ]
@@ -92308,8 +92312,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S523",
-        "S521"
+        "S538",
+        "S536"
        ],
        "libelle_source": "rouleau de 1 × 10 m : existe-t-il ?",
        "condition": "1 × 10 m : Siplast Paracier (bac acier, fixé mécaniquement), Soprema Belgique Soprarock SBS P3 TF (36 kg) ; en France la sous-couche soudée courante fait 6 à 7,5 m",
@@ -92320,11 +92324,11 @@
        "ecart": "Siplast Paracier : voir ecrans-etancheite.json (une source).",
        "preuves": [
         {
-         "source": "S523",
+         "source": "S538",
          "extrait": "Dimensions du rouleau (m) 10 x 1 ; Poids du rouleau (kg) 36"
         },
         {
-         "source": "S521",
+         "source": "S536",
          "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg"
         }
        ]
@@ -92342,7 +92346,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S524"
+        "S539"
        ],
        "libelle_source": "rouleau de 1 × 8 m en France",
        "regions": [
@@ -92352,7 +92356,7 @@
        "raison": "Aucun rouleau de 8 m trouvé au catalogue français (Soprema : 6 × 1 m, autres longueurs à la demande).",
        "preuves": [
         {
-         "source": "S524",
+         "source": "S539",
          "extrait": "Dimensions du rouleau 6mx1m ; d'autres longueurs sont réalisables à la demande"
         }
        ]
@@ -92370,8 +92374,8 @@
        "unite": "cm",
        "statut": "confirme",
        "sources": [
-        "S522",
-        "S525"
+        "S537",
+        "S540"
        ],
        "libelle_source": "recouvrement en about (transversal)",
        "condition": "Soprema (guide) 10 cm mini en bord et en bout de lé ; IKO 15 cm transversal (8 cm longitudinal)",
@@ -92382,11 +92386,11 @@
        "ecart": "La fiche produit Soprema donne un galon longitudinal ≥ 60 mm (confirmé dans ecrans-etancheite.json) ; le guide grand public met 10 cm partout. L'about n'était pas trouvé à la première passe.",
        "preuves": [
         {
-         "source": "S522",
+         "source": "S537",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         },
         {
-         "source": "S525",
+         "source": "S540",
          "extrait": "recouvrement de 8 cm longitudinalement et 15 cm transversalement"
         }
        ]
@@ -92404,8 +92408,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S525",
-        "S522"
+        "S540",
+        "S537"
        ],
        "libelle_source": "décalage des joints de la 2e couche",
        "condition": "joints décalés dans les deux sens (quinconce)",
@@ -92415,11 +92419,11 @@
        ],
        "preuves": [
         {
-         "source": "S525",
+         "source": "S540",
          "extrait": "Le recouvrement de la couche de finition ressort de préférence d'une demi-largeur de bande par rapport au recouvrement dans la sous-couche"
         },
         {
-         "source": "S522",
+         "source": "S537",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         }
        ]
@@ -92431,7 +92435,7 @@
        "unite": "× surface",
        "statut": "une_source",
        "sources": [
-        "S522"
+        "S537"
        ],
        "libelle_source": "majoration pertes et recouvrements",
        "condition": "rouleaux, hors relevés comptés à part",
@@ -92442,7 +92446,7 @@
        "ecart": "Recouvrements seuls : × 1,08 (ecrans-etancheite.json) ; le tiroir utilise × 1,12.",
        "preuves": [
         {
-         "source": "S522",
+         "source": "S537",
          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés"
         }
        ],
@@ -92479,7 +92483,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S526"
+            "S541"
            ],
            "libelle_source": "formats de nappe",
            "condition": "toitures résidentielles ≤ 150 m² ; nappe d'un seul tenant choisie pour couvrir la terrasse + relevés",
@@ -92490,7 +92494,7 @@
            "controle": "3,05 × 7,62 = 23,24 ; 6,10 × 30,50 = 186,05 (catalogue : 186,05)",
            "preuves": [
             {
-             "source": "S526",
+             "source": "S541",
              "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62"
             }
            ]
@@ -92511,8 +92515,8 @@
        "unite": "l/m²",
        "statut": "confirme",
        "sources": [
-        "S526",
-        "S527"
+        "S541",
+        "S542"
        ],
        "libelle_source": "consommation de colle de contact (solvant)",
        "condition": "Firestone BA 2012 : 2,35 à 2,75 m²/l (bidons 5 l = 10-12,5 m², 10 l = 20-25 m²) ; BA-2016 projetée : canister 22 l = 50-60 m² ; Elevate BA-2012 : ≈ 3 m²/l",
@@ -92524,11 +92528,11 @@
        "controle": "1 ÷ 2,75 = 0,36 l/m² ; 1 ÷ 2,35 = 0,43 l/m² ; 1 ÷ 3 = 0,33 l/m²",
        "preuves": [
         {
-         "source": "S526",
+         "source": "S541",
          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62"
         },
         {
-         "source": "S527",
+         "source": "S542",
          "extrait": "approx. 3m² per litre (application method dependent)"
         }
        ]
@@ -92549,7 +92553,7 @@
            "unite": "l/m²",
            "statut": "une_source",
            "sources": [
-            "S528"
+            "S543"
            ],
            "condition": "seau de 8 l ou pot de 2 l",
            "regions": [
@@ -92558,7 +92562,7 @@
            ],
            "preuves": [
             {
-             "source": "S528",
+             "source": "S543",
              "extrait": "Consommation L/m² 0,25 ; Disponible en seau de 8 litres ou en pot de 2 litres"
             }
            ]
@@ -92579,10 +92583,10 @@
        "unite": "mm",
        "statut": "confirme",
        "sources": [
-        "S529",
-        "S530",
-        "S531",
-        "S532"
+        "S544",
+        "S545",
+        "S546",
+        "S547"
        ],
        "libelle_source": "format de panneau courant",
        "condition": "Utherm Roof L, IKO enertherm ALU, Recticel PowerDeck F ; existent aussi 1200 × 1000 (Knauf Thane OpTTI), 1200 × 2400 (IKO XL), 600 × 600 (Efigreen Alu+)",
@@ -92592,19 +92596,19 @@
        ],
        "preuves": [
         {
-         "source": "S529",
+         "source": "S544",
          "extrait": "1200 mm de longueur pour 600 mm de largeur, épaisseur entre 30 mm et 160 mm"
         },
         {
-         "source": "S530",
+         "source": "S545",
          "extrait": "formats de 1200 x 600 mm et 1200 x 2400 mm, épaisseurs de 30 à 200 mm"
         },
         {
-         "source": "S531",
+         "source": "S546",
          "extrait": "Recticel PowerDeck F Flat Roof Board 1.2m x 600 x 80mm"
         },
         {
-         "source": "S532",
+         "source": "S547",
          "extrait": "panneaux Knauf Thane OpTTI de format 1200 x 1000 mm"
         }
        ]
@@ -92623,7 +92627,7 @@
        "statut": "a_confirmer",
        "sources": [
         "S373",
-        "S533"
+        "S548"
        ],
        "libelle_source": "règle de dimensionnement et trop-plein",
        "condition": "NF DTU 60.11 P3 (2013) tableau 5 : diamètre selon la surface collectée par EEP, majoré selon les NF DTU 43 ; trop-plein obligatoire avec une seule EEP (NF DTU 43.1 §8.6.1, cité par un forum)",
@@ -92638,7 +92642,7 @@
          "extrait": "NF DTU 60.11 P3 tableau 5 : diamètres des EEP et descentes selon la surface collectée par EEP et la majoration liée aux NF DTU série 43"
         },
         {
-         "source": "S533",
+         "source": "S548",
          "extrait": "1 évacuation = 1 trop-plein obligatoire, 2 évacuations ou plus = 1 trop-plein si le GO dit qu'il faut en mettre"
         }
        ]
@@ -92819,10 +92823,10 @@
      "verdict": "corrige",
      "bonne_valeur": "1re couche soudée 6 m (Sopralène Flam 180), 7 m (Elastophène Flam 25), 7,5 m (Siplast) ; 1 × 10 m seulement en 1re couche fixée mécaniquement ou en Belgique ; autoprotégée 6 m ; galon ≥ 6 cm, about 10 à 15 cm",
      "sources": [
-      "S521",
-      "S524",
-      "S523",
-      "S525"
+      "S536",
+      "S539",
+      "S538",
+      "S540"
      ],
      "explication": "Confirme et complète ecrans-etancheite.json (deuxième fichier, mêmes conclusions) ; aucun 1 × 8 m au catalogue français."
     },
@@ -92833,9 +92837,9 @@
      "verdict": "corrige",
      "bonne_valeur": "colle de contact 0,35 à 0,45 l/m² (en litres, bidons 5 / 10 l) ; colle acrylique 0,25 l/m² ; joints : bandes QuickSeam + QuickPrime (≈ 15 ml de joint par litre)",
      "sources": [
-      "S526",
-      "S527",
-      "S528"
+      "S541",
+      "S542",
+      "S543"
      ],
      "explication": "L'ordre de grandeur est juste mais l'unité de vente est le litre ; Firestone vend des nappes d'un seul tenant (pas de joint jusqu'à 9,15 × 30,50 m) et demande + 150 mm sur les relevés."
     },
@@ -92846,10 +92850,10 @@
      "verdict": "corrige",
      "bonne_valeur": "format courant 1200 × 600 = 0,72 m² ; 1200 × 1000 existe (Knauf OpTTI, laine de roche Rockacier)",
      "sources": [
-      "S529",
-      "S530",
-      "S531",
-      "S532"
+      "S544",
+      "S545",
+      "S546",
+      "S547"
      ],
      "explication": "Le format est à demander : avec 1,2 m² au lieu de 0,72, on commande 40 % de panneaux en moins."
     }
@@ -92961,7 +92965,7 @@
      "unite_de_vente": "nappe + bidons de colle",
      "conditionnement": "nappes 3,05 à 9,15 m × 7,62 ou 30,50 m ; colle 5 / 10 / 22 l",
      "sources": [
-      "S526"
+      "S541"
      ],
      "famille": "etancheite"
     }
@@ -102150,6 +102154,1349 @@
    "perimetre": "Plaques ondulées fibres-ciment (profil 177 × 51, 5 et 6 ondes, NF DTU 40.37) et compléments pour les ardoises fibres-ciment. Les nombres d'ardoises au m², recouvrements, crochets et palettes des ardoises fibres-ciment sont déjà dans ardoise.json (sous-famille « ardoise fibres-ciment ») : non recopiés ici."
   },
   {
+   "code": "zinguerie_modeles",
+   "libelle": "Zinguerie et écrans : modèles et références du marché",
+   "sous_familles": [
+    {
+     "nom": "zinc prépatiné",
+     "regles": [
+      {
+       "id": "zm_prepatine_epaisseurs_vendues",
+       "attribut": "epaisseurs_vendues_en_prepatine_feuilles",
+       "valeur": {
+        "VMZINC Quartz / Anthra": [
+         0.65,
+         0.7,
+         0.8
+        ],
+        "VMZINC Pigmento": [
+         0.7
+        ],
+        "RHEINZINK prePATINA clair / ardoise": [
+         0.65,
+         0.7,
+         0.8,
+         1.0
+        ]
+       },
+       "unite": "mm",
+       "statut": "confirme",
+       "sources": [
+        "S250",
+        "S251"
+       ],
+       "libelle_source": "épaisseurs vendues en prépatiné (feuilles)",
+       "condition": "0,65 mm existe en prépatiné gris chez les deux fabricants ; un zinc « coloré » (Pigmento) est en 0,70 seulement",
+       "regions": [
+        "Bretagne",
+        "France"
+       ],
+       "preuves": [
+        {
+         "source": "S250",
+         "extrait": "QUARTZ-ZINC® 0,65 / 0,70 / 0,80 ; PIGMENTO® … 0,70"
+        },
+        {
+         "source": "S251",
+         "extrait": "prePATINA … Feuilles 0.65 / 0.70 / 0.80 / 1.00"
+        }
+       ]
+      }
+     ],
+     "marques": [
+      {
+       "nom": "VMZINC",
+       "groupe": "VMZINC",
+       "modeles": [
+        {
+         "nom": "QUARTZ-ZINC, ANTHRA-ZINC, PIGMENTO",
+         "attributs": [
+          {
+           "id": "zm_vmz_teintes_prepatinees",
+           "attribut": "teintes_vendues",
+           "valeur": {
+            "QUARTZ-ZINC": "prépatiné gris velours",
+            "ANTHRA-ZINC": "prépatiné gris anthracite",
+            "PIGMENTO": [
+             "vert lichen",
+             "rouge terre",
+             "bleu cendre",
+             "brun écorce"
+            ]
+           },
+           "unite": "liste",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250"
+           ],
+           "libelle_source": "teintes vendues",
+           "condition": "le catalogue compte 26 aspects en tout (naturel, AZENGAR engravé, Collection Noire 5 teintes, Howlite 6 teintes, bilaqués, laqués Or) ; seuls Quartz, Anthra et Pigmento sont des « prépatinés »",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "reference": "feuilles 220010922 (Quartz 0,65), 220020415 (Anthra 0,65), 220010581 / 220010582 / 220019674 / 220020890 (Pigmento vert / rouge / bleu / brun 0,70)",
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "PIGMENTO® … 4 nuances … Vert lichen Rouge terre Bleu cendre Brun écorce ; ANTHRA-ZINC® … aspect gris anthracite"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Feuilles 2000 × 1000 (et 650 / 800) prépatinées",
+         "attributs": [
+          {
+           "id": "zm_vmz_feuilles_prepatinees",
+           "attribut": "epaisseurs_vendues_et_conditionnement_cond",
+           "valeur": {
+            "QUARTZ-ZINC 1000 × 2000": {
+             "0,65": 100,
+             "0,70": 50,
+             "0,80": 130
+            },
+            "QUARTZ-ZINC 650 × 2000": {
+             "0,65": 80
+            },
+            "ANTHRA-ZINC 1000 × 2000": {
+             "0,60": 50,
+             "0,65": 150,
+             "0,70": 100,
+             "0,80": 50
+            },
+            "ANTHRA-ZINC 650 × 2000": {
+             "0,65": 80
+            },
+            "ANTHRA-ZINC 800 × 2000": {
+             "0,65": 60
+            },
+            "PIGMENTO (4 teintes) 1000 × 2000": {
+             "0,70": 50
+            }
+           },
+           "unite": "mm / feuilles par conditionnement",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250"
+           ],
+           "libelle_source": "épaisseurs vendues et conditionnement (Cond.)",
+           "condition": "Pigmento n'existe qu'en 0,70 mm ; Quartz et Anthra en 0,65 / 0,70 / 0,80 (Anthra aussi 0,60) ; film pelable sur tous les prépatinés",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "reference": "220000331, 220010922, 220022623, 220010923, 220007384, 220010845, 220020414, 220020415, 220020418, 220020419, 220010581, 220010582, 220019674, 220020890",
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "220010922 QUARTZ-ZINC® 0,65 1000 2000 100 ; 220010581 PIGMENTO® vert 0,70 1000 2000 50"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Bobineaux prépatinés",
+         "attributs": [
+          {
+           "id": "zm_vmz_bobineaux_prepatines",
+           "attribut": "epaisseur_x_largeur_x_longueur",
+           "valeur": {
+            "QUARTZ-ZINC / ANTHRA-ZINC": [
+             "0,65 / 0,70 / 0,80 × 500 × 31 m",
+             "0,65 / 0,70 × 650 × 31 m ; 0,80 × 650 × 21 m",
+             "0,65 / 0,70 × 1000 × 21 m ; 0,80 × 1000 × 17 m",
+             "0,70 × 400 × 50,4 m"
+            ],
+            "PIGMENTO (4 teintes)": [
+             "0,70 × 400 × 50,4 m",
+             "0,70 × 500 × 40 m",
+             "0,70 × 650 × 31 m",
+             "0,70 × 1000 × 20 m"
+            ]
+           },
+           "unite": "mm / m",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250"
+           ],
+           "libelle_source": "épaisseur × largeur × longueur",
+           "condition": "1 bobineau par unité, palette de 8 (500 / 650) ou 6 (1000, Pigmento)",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "220010593 PIGMENTO® vert 0,70 500 40 100 1/6 ; 211068000 QUARTZ-ZINC® 0,65 500 31 73 1/8"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "RHEINZINK",
+       "groupe": "RHEINZINK",
+       "modeles": [
+        {
+         "nom": "prePATINA clair (blaugrau) et prePATINA ardoise (schiefergrau)",
+         "attributs": [
+          {
+           "id": "zm_rz_prepatina_teintes",
+           "attribut": "nom_francais_aspect_et_ral_approximatif",
+           "valeur": {
+            "prePATINA clair (= « blaugrau »)": "gris-bleuté, RAL ≈ 7045",
+            "prePATINA ardoise (= « schiefergrau »)": "gris ardoise plus foncé, RAL ≈ 7043",
+            "autres aspects (non prépatinés)": "CLASSIC naturel ; GRANUM EXTRA granite et basalte (revêtus, RAL ≈ 7021 pour basalte) ; PRISMO (6 couleurs)"
+           },
+           "unite": "texte",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S251"
+           ],
+           "libelle_source": "nom français, aspect et RAL approximatif",
+           "condition": "en France RHEINZINK ne dit pas « blaugrau / schiefergrau » mais « clair / ardoise » : le vendeur doit entendre ces deux mots",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "preuves": [
+            {
+             "source": "S251",
+             "extrait": "le zinc prePATINA clair dispose d’une apparence gris-bleuté, le zinc prePATINA ardoise présente une teinte plus foncée gris-ardoise ; RAL approximatif 7045 / 7043"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Feuilles prePATINA clair / ardoise",
+         "attributs": [
+          {
+           "id": "zm_rz_prepatina_feuilles",
+           "attribut": "epaisseur_x_format_et_feuilles_par_palette",
+           "valeur": {
+            "0,65 × 650 × 2000": 166,
+            "0,65 × 1000 × 2000": 107,
+            "0,70 × 650 × 2000": 154,
+            "0,70 × 1000 × 2000": 100,
+            "0,80 × 650 × 2000": 135,
+            "0,80 × 1000 × 2000": 87,
+            "1,00 × 1000 × 2000": 70
+           },
+           "unite": "feuilles par palette (Condit. 2)",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S251"
+           ],
+           "libelle_source": "épaisseur × format et feuilles par palette",
+           "condition": "mêmes formats et poids pour clair et ardoise (0,65 × 1000 × 2000 = 9,36 kg) ; ST = sur stock (10 jours) pour 0,65 et 0,70 × 1000 en clair, 0,65 × 1000 en ardoise, le reste fabriqué sur demande",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "107 × 9,36 kg = 1 002 kg ; 87 × 11,52 = 1 002 kg ; 70 × 14,4 = 1 008 kg : palette d'une tonne, cohérent"
+           ],
+           "reference": "clair : 11005963, 11005990, 11005966, 11006145, 11005969, 11006163, 11006012 ; ardoise : 11005964, 11005991, 11005967, 11006148, 11005970, 11006166, 11006014",
+           "preuves": [
+            {
+             "source": "S251",
+             "extrait": "prePATINA ardoise Feuilles 0.65 1000 2000 9.36 1 Pce 107 Pce 11005991 ST"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Bobineaux prePATINA clair / ardoise",
+         "attributs": [
+          {
+           "id": "zm_rz_prepatina_bobineaux",
+           "attribut": "epaisseur_x_largeur_x_longueur",
+           "valeur": {
+            "0,65": [
+             "500 × 31 m (73 kg)",
+             "650 × 31 m",
+             "800 × 21 m",
+             "1000 × 21 m"
+            ],
+            "0,70": [
+             "500 × 31 m",
+             "650 × 31 m",
+             "1000 × 21 m"
+            ],
+            "0,80": [
+             "500 × 31 m",
+             "650 × 21 m",
+             "1000 × 17 m"
+            ]
+           },
+           "unite": "mm / m",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S251"
+           ],
+           "libelle_source": "épaisseur × largeur × longueur",
+           "condition": "vendu à la pièce, 6 par palette",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "preuves": [
+            {
+             "source": "S251",
+             "extrait": "prePATINA ardoise Bobineaux 0.65 500 31 73 1 Pce 6 Pce 11006513 ST"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "feuille de zinc",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "Feuille naturel 2000 × 1000",
+         "attributs": [
+          {
+           "id": "zm_feuille_naturel_conditionnement",
+           "attribut": "feuilles_par_conditionnement_palette",
+           "valeur": {
+            "VMZINC naturel": {
+             "0,50": 140,
+             "0,60": 170,
+             "0,65": 150,
+             "0,70": 150,
+             "0,80": 130,
+             "1,00": 30
+            },
+            "RHEINZINK CLASSIC naturel": {
+             "0,50": 140,
+             "0,60": 115,
+             "0,65": "107 ou 54 (deux articles)",
+             "0,70": 100,
+             "0,80": "87 ou 44",
+             "1,00": 70
+            }
+           },
+           "unite": "feuilles",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250",
+            "S251"
+           ],
+           "libelle_source": "feuilles par conditionnement (palette)",
+           "condition": "la palette dépend du fabricant : 150 feuilles de 0,65 chez VMZINC (≈ 1,4 t), 107 (≈ 1 t) ou 54 (≈ 500 kg) chez RHEINZINK",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "ecart": "« 54 ou 107 » de la base vaut pour RHEINZINK seul ; VMZINC conditionne 150 feuilles en 0,65. Le 107 n'est pas un calcul : c'est un article RHEINZINK (11005985).",
+           "controle": [
+            "RHEINZINK : 107 × 9,36 = 1 002 kg, 54 × 9,36 = 505 kg ; VMZINC : 150 × 9,36 = 1 404 kg (palette plus lourde, pas d'erreur de lecture : 0,70 aussi à 150)"
+           ],
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "200597000 Naturel 0,65 1000 2000 150"
+            },
+            {
+             "source": "S251",
+             "extrait": "CLASSIC naturel 0.65 1000 2000 9.36 1 Pce 107 Pce 11005985 ; 0.65 1000 2000 9.36 1 Pce 54 Pce 11006071"
+            }
+           ],
+           "portee": "VMZINC / RHEINZINK"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "crochet de gouttière",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "VMZINC",
+       "groupe": "VMZINC",
+       "modeles": [
+        {
+         "nom": "Gouttières demi-rondes 25 / 33 (sans pince)",
+         "attributs": [
+          {
+           "id": "zm_vmz_pas_de_crochet_standard",
+           "attribut": "crochets_fournis_par_vmzinc",
+           "valeur": "aucun crochet standard ; seulement le crochet discret PLUVIAZINC pour gouttière à pince (25 : 100, 33 : 50 par carton)",
+           "unite": "texte",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250"
+           ],
+           "libelle_source": "crochets fournis par VMZINC",
+           "condition": "VMZINC renvoie aux « crochets et hampes du commerce » (Frénéhard & Michaux, Edilians, RHEINZINK…) : un crochet ne se demande pas « en VMZINC »",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "Pour la pose des gouttières sur planche d’égout ou sur chevrons, utiliser des crochets et hampes du commerce."
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "RHEINZINK",
+       "groupe": "RHEINZINK",
+       "modeles": [
+        {
+         "nom": "Crochets de gouttière (gamme complète)",
+         "attributs": [
+          {
+           "id": "zm_rz_crochets_gamme",
+           "attribut": "types_au_catalogue",
+           "valeur": [
+            "Alsace",
+            "carrés",
+            "emboutis",
+            "havrais",
+            "Montpellier",
+            "moulurés (avec ou sans raidisseur)",
+            "nantais",
+            "nantais sécurité",
+            "Negrafix",
+            "romans",
+            "Rouen",
+            "Toulouse"
+           ],
+           "unite": "liste",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S251"
+           ],
+           "libelle_source": "types au catalogue",
+           "condition": "conditionnements déjà dans zinguerie.json (rz_crochets_pendants, rz_crochets_rampants) ; aucun écartement au catalogue",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "preuves": [
+            {
+             "source": "S251",
+             "extrait": "Crochets Alsace ; Crochets carrés ; Crochets emboutis ; Crochets havrais ; Crochets Montpellier ; Crochets nantais ; Crochets nantais sécurité ; Crochets Negrafix® ; Crochets romans"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "crochet de gouttière rampante",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "Crochets nantais / havrais",
+         "attributs": [
+          {
+           "id": "zm_crochet_nantais_ecartement",
+           "attribut": "ecartement_maximal",
+           "valeur": 0.5,
+           "unite": "m",
+           "statut": "une_source",
+           "sources": [
+            "S241",
+            "S513"
+           ],
+           "libelle_source": "écartement maximal",
+           "condition": "deuxième passe : toujours aucun fabricant (VMZINC 2026, RHEINZINK 2026, Frénéhard « Nantais SECUR+ ») ne publie d'écartement propre au crochet nantais ; la valeur reste celle du DTU 40.5 lue chez Progineer ; Techniques de l'Ingénieur donne 40 à 50 cm selon l'entraxe des chevrons (toutes gouttières)",
+           "regions": [
+            "Bretagne",
+            "Pays de la Loire"
+           ],
+           "raison": "la seconde source ne vise pas la nantaise en particulier ; la fiche Frénéhard Nantais SECUR+ (distriartisan.fr) renvoie une page HTML au lieu du PDF",
+           "preuves": [
+            {
+             "source": "S241",
+             "extrait": "crochets de même nature métallique, espacés de 0,50 m au maximum"
+            },
+            {
+             "source": "S513",
+             "extrait": "L'écartement des crochets est de 40 à 50 cm si tel est celui des chevrons"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "cuvette",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "VMZINC",
+       "groupe": "VMZINC",
+       "modeles": [
+        {
+         "nom": "Cuvettes (branchement, carrées, ½ rondes de face et d'angle, « Nice »)",
+         "attributs": [
+          {
+           "id": "zm_vmz_cuvettes",
+           "attribut": "et_conditionnement",
+           "valeur": {
+            "branchement naturel": {
+             "Ø 80": 20,
+             "Ø 100": 15,
+             "Ø 120": 5
+            },
+            "branchement Quartz / Anthra": {
+             "Ø 80": 5,
+             "Ø 100": 5
+            },
+            "carrée naturel Ø 80 / 100": "4 par carton, 48 par palette",
+            "carrée Quartz / Anthra / Azengar Ø 80 / 100": "1 / 24",
+            "½ ronde de face naturel": {
+             "Ø 80": 5,
+             "Ø 100": 5,
+             "Ø 120": 1
+            },
+            "½ ronde d'angle naturel Ø 80 / 100": 1,
+            "« Nice » naturel Ø 80 / 100": 5
+           },
+           "unite": "mm / u",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250"
+           ],
+           "libelle_source": "Ø et conditionnement",
+           "condition": "cuvettes à la norme NF P 36-403 ; cuvette de branchement 200 × 254 mm (Ø 80), 274 × 220 (Ø 100)",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "reference": "220010747, 220010772, 205969000, 220010769, 220010773, 220010771, 220024977, 220020697, 220020698, 205976000, 220019388, 220019390, 205979000, 220019391, 206013000, 206014000",
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "Cuvettes de branchement 220010747 Naturel 80 20 ; 220010772 Naturel 100 15 ; 205969000 Naturel 120 5"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "RHEINZINK",
+       "groupe": "RHEINZINK",
+       "modeles": [
+        {
+         "nom": "Cuvettes de branchement, ½ rondes mini, moulurées d'angle",
+         "attributs": [
+          {
+           "id": "zm_rz_cuvettes",
+           "attribut": "dimensions_capacite_et_conditionnement",
+           "valeur": {
+            "branchement Ø 80": "200 × 90 × H 265, 10 (200 par palette)",
+            "branchement Ø 100": "230 × 105 × H 315, 10 (200)",
+            "branchement Ø 120": "250 × 125 × H 345, à l'unité",
+            "½ ronde mini Ø 80 / 100": "150 × 150 × H 215, 2,2 l, à l'unité",
+            "moulurée d'angle Ø 80 / 100 / 120": "2,3 / 3,4 / 3,9 l, à l'unité"
+           },
+           "unite": "mm / l / u",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S251"
+           ],
+           "libelle_source": "Ø, dimensions, capacité et conditionnement",
+           "condition": "CLASSIC naturel",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "reference": "11008130, 11008136, 11008143, 11022814, 11022856, 11008164, 11008167, 11008170",
+           "preuves": [
+            {
+             "source": "S251",
+             "extrait": "Cuvettes de branchement 80 200 90 265 10 Pce 200 Pce 11008130"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "Cuvette de branchement zinc",
+         "attributs": [
+          {
+           "id": "zm_cuvette_branchement_diametres",
+           "attribut": "vendus",
+           "valeur": [
+            80,
+            100,
+            120
+           ],
+           "unite": "mm",
+           "statut": "confirme",
+           "sources": [
+            "S250",
+            "S251"
+           ],
+           "libelle_source": "Ø vendus",
+           "condition": "Ø 80 et Ø 100 en carton (VMZINC 20 / 15, RHEINZINK 10), Ø 120 à l'unité ou par 5",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "Cuvettes de branchement … 80 20 ; 100 15 ; 120 5"
+            },
+            {
+             "source": "S251",
+             "extrait": "Cuvettes de branchement 80 … 100 … 120"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "manchon de descente",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "VMZINC",
+       "groupe": "VMZINC",
+       "modeles": [
+        {
+         "nom": "Manchon pour tuyau cylindrique",
+         "attributs": [
+          {
+           "id": "zm_vmz_manchons_tuyau",
+           "attribut": "et_conditionnement",
+           "valeur": {
+            "Ø 80": 5,
+            "Ø 100": 5,
+            "finitions": [
+             "Naturel",
+             "QUARTZ-ZINC",
+             "ANTHRA-ZINC",
+             "PIGMENTO vert / bleu / rouge"
+            ]
+           },
+           "unite": "u/carton",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S250"
+           ],
+           "libelle_source": "Ø et conditionnement",
+           "condition": "manchon de jonction de tuyau, pas un joint de dilatation de gouttière (celui-ci : type 26, tous les 15 m en pendante, 12 m en nantaise, déjà dans zinguerie.json)",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "controle": [
+            "pas de formule de contrôle pour une teinte, une longueur, un format ou un conditionnement : valeur lue telle quelle sur la fiche officielle datée"
+           ],
+           "reference": "220021756, 220021760, 220021757, 220021761, 220021758, 220021762, 220021843 à 220021848",
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "Manchons pour tuyaux cylindriques 220021756 Naturel pour tuyau de 80 5"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "coude de descente",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Toutes marques",
+       "groupe": "—",
+       "modeles": [
+        {
+         "nom": "Coudes zinc",
+         "attributs": [
+          {
+           "id": "zm_coudes_zinc_67",
+           "attribut": "coude_a_67_en_zinc",
+           "valeur": "aucun",
+           "unite": "texte",
+           "statut": "confirme",
+           "sources": [
+            "S250",
+            "S251"
+           ],
+           "libelle_source": "coude à 67° en zinc",
+           "condition": "angles zinc au catalogue : VMZINC 36°, 40°, 70°, 72°, 90° ; RHEINZINK 60°, 72°, 76°, 90° ; Edilians 72°, 85°. Le 67°30 est un angle PVC : « 67° » demandé en zinc = 72°",
+           "regions": [
+            "Bretagne",
+            "France"
+           ],
+           "preuves": [
+            {
+             "source": "S250",
+             "extrait": "Coudes cintrés à 40° … à 72° … Coude à angle vif 70°"
+            },
+            {
+             "source": "S251",
+             "extrait": "tulipé grand rayon 60° / 72° ; 76° ; 90°"
+            }
+           ],
+           "portee": "VMZINC / RHEINZINK / Edilians"
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "équerre (angle) de gouttière",
+     "regles": [
+      {
+       "id": "zm_equerre_135_zinc_recherche2",
+       "attribut": "equerre_zinc_demi_ronde_a_135_vendue_toute_faite",
+       "valeur": "non trouvée",
+       "unite": "",
+       "statut": "a_confirmer",
+       "sources": [
+        "S514",
+        "S251"
+       ],
+       "libelle_source": "équerre zinc demi-ronde à 135° vendue toute faite",
+       "condition": "deuxième recherche (VMZINC 2026, RHEINZINK 2026 : équerres embouties et soudées ext. / int. sans autre angle ; recherche web) : seuls existent un angle 135° PVC Nicoll LG25 et un angle acier (Suède)",
+       "regions": [
+        "France"
+       ],
+       "raison": "en zinc l'angle à 135° se façonne (deux coupes soudées) ou se commande en pliage sur mesure : à faire dire par l'artisan",
+       "preuves": [
+        {
+         "source": "S514",
+         "extrait": "Angle a coller a 135° 25 gris Nicoll"
+        },
+        {
+         "source": "S251",
+         "extrait": "Équerres embouties 250 14 extérieure sans 5 Pce ; intérieure"
+        }
+       ]
+      }
+     ],
+     "marques": []
+    },
+    {
+     "nom": "écran HPV",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Dörken",
+       "groupe": "Dörken",
+       "modeles": [
+        {
+         "nom": "DELTA-VENT S / DELTA-VENT S PLUS",
+         "attributs": [
+          {
+           "id": "zm_delta_vent_s",
+           "attribut": "rouleau_sd_grammage_bande_adhesive_palette",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², ≈ 11 kg",
+            "Sd_m": 0.02,
+            "grammage_g_m2": 150,
+            "bande_adhesive": "PLUS : deux bords autocollants intégrés ; S : sans",
+            "classe": "HPV R2 (60 cm), QB CSTB n° 14-131",
+            "rouleaux_par_palette": 25
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S515",
+            "S516",
+            "S517"
+           ],
+           "libelle_source": "rouleau, Sd, grammage, bande adhésive, palette",
+           "regions": [
+            "France"
+           ],
+           "ecart": "brochure 2019 : Sd ≈ 0,05 m et 12 kg ; fiches actuelles : 0,02 m et 11 kg (nouvelle formule). Dörken seul, fiches lues hors doerken.com/fr : une_source",
+           "raison": "deux fiches du même fabricant (une seule source), copies chez des négoces",
+           "preuves": [
+            {
+             "source": "S515",
+             "extrait": "Dimensions des rouleaux 50 m × 1,50 m (25 rouleaux/palette) ; Valeur Sd env. 0,02 m"
+            },
+            {
+             "source": "S516",
+             "extrait": "Packaging unit 25 rolls/pallet ; Sd-value approx. 0.02 m"
+            },
+            {
+             "source": "S517",
+             "extrait": "Valeur Sd env. 0,05 m ; Poids du rouleau env. 12 kg ; Dimension du rouleau 50 m × 1,50 m"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "DELTA-XX PLUS LIGHT",
+         "attributs": [
+          {
+           "id": "zm_delta_xx_plus_light",
+           "attribut": "rouleau_sd_grammage_bande_adhesive_palette",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², ≈ 9,75 kg",
+            "Sd_m": 0.08,
+            "grammage_g_m2": 130,
+            "bande_adhesive": "deux bords autocollants intégrés",
+            "certification": "QB 38 CSTB n° 23-01-004",
+            "rouleaux_par_palette": 24
+           },
+           "unite": "",
+           "statut": "confirme_fabricant",
+           "sources": [
+            "S519"
+           ],
+           "libelle_source": "rouleau, Sd, grammage, bande adhésive, palette",
+           "condition": "fiche française sur doerken.com/fr (fichier « Aufl02 … 250520 »)",
+           "regions": [
+            "France"
+           ],
+           "controle": [
+            "130 g/m² × 75 m² = 9,75 kg = poids publié ; Sd 0,08 ≤ 0,10 (Sd1) ≤ 0,18 (HPV)"
+           ],
+           "preuves": [
+            {
+             "source": "S519",
+             "extrait": "Dimension 50 m × 1,50 m ; Poids du rouleau env. 9,75 kg ; Palettisation 24 rouleaux/palette"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "DuPont Tyvek",
+       "groupe": "DuPont Tyvek",
+       "modeles": [
+        {
+         "nom": "Tyvek Toiture 60 / Toiture 60 Tape",
+         "attributs": [
+          {
+           "id": "zm_tyvek_toiture_60",
+           "attribut": "rouleau_sd_grammage_bande_adhesive",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², 11,5 kg",
+            "Sd_m": 0.02,
+            "grammage_g_m2": 145,
+            "classe": "E1-Sd1-TR2, entraxe 60 cm",
+            "bande_adhesive": "version « Tape » avec bande adhésive intégrée",
+            "reference_palette": "avec adhésif 093453 ; sans 093455 (2507B)"
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S520"
+           ],
+           "libelle_source": "rouleau, Sd, grammage, bande adhésive",
+           "condition": "nom français ; « Tyvek Supro » est le nom britannique (voir zm_tyvek_supro)",
+           "regions": [
+            "France"
+           ],
+           "raison": "une seule brochure (DuPont diffusé par Edilians), pas de fiche sur un domaine DuPont France ; palette non publiée",
+           "controle": [
+            "145 g/m² × 75 m² = 10,9 kg, publié 11,5 kg (mandrin et adhésif) : cohérent"
+           ],
+           "preuves": [
+            {
+             "source": "S520",
+             "extrait": "Dimensions 1,50 m x 50 m / 11,5 kg ; Masse par unité de surface 145 g/m2 ; Sd 0,02 m"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Tyvek Toiture 90",
+         "attributs": [
+          {
+           "id": "zm_tyvek_toiture_90",
+           "attribut": "rouleau_sd_grammage",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², 13 kg",
+            "Sd_m": 0.025,
+            "grammage_g_m2": 165,
+            "classe": "E1-Sd1-TR3, entraxe 90 cm",
+            "bande_adhesive": "avec ou sans bande intégrée",
+            "reference_palette": "093459 (2523B)"
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S520",
+            "S521"
+           ],
+           "libelle_source": "rouleau, Sd, grammage",
+           "regions": [
+            "France"
+           ],
+           "raison": "deux éditions DuPont concordantes (2012 et 2023) : un seul fabricant",
+           "preuves": [
+            {
+             "source": "S520",
+             "extrait": "Dimensions 1,50 m x 50 m / 13 kg ; Masse 165 g/m2 ; Sd 0,025 m"
+            },
+            {
+             "source": "S521",
+             "extrait": "Masse par unité de surface … 165 ; Transmission de la vapeur d'eau … 0,025"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "Tyvek Supro",
+         "attributs": [
+          {
+           "id": "zm_tyvek_supro",
+           "attribut": "disponibilite_en_france",
+           "valeur": "non vendu sous ce nom en France",
+           "unite": "",
+           "statut": "a_confirmer",
+           "sources": [
+            "S522"
+           ],
+           "libelle_source": "disponibilité en France",
+           "condition": "brochure DuPont « Supro » en anglais, sans aucun chiffre ; en France la gamme toiture s'appelle Toiture 60 (R2) et Toiture 90 (R3)",
+           "regions": [
+            "France"
+           ],
+           "raison": "aucune fiche française ni chiffre Supro ; ne pas confondre avec Toiture 60 sans preuve",
+           "preuves": [
+            {
+             "source": "S522",
+             "extrait": "Tyvek Supro roofing membrane is a flexible, non-woven sheet"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Monier",
+       "groupe": "BMI",
+       "modeles": [
+        {
+         "nom": "Divoroll Ecotech 200FR",
+         "attributs": [
+          {
+           "id": "zm_divoroll_ecotech_200fr",
+           "attribut": "rouleau_sd_grammage_bande_adhesive_palette",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², 10,5 kg (CSTB : 11,09 kg)",
+            "autres_longueurs_CSTB": "55 m (82,5 m²) et 23,24 m (35 m²)",
+            "Sd_m": 0.02,
+            "grammage_g_m2": 140,
+            "bande_adhesive": "aucune (0)",
+            "classe": "E1-Sd1-TR2, R2 60 cm, QB n° 19-001",
+            "rouleaux_par_palette": 20,
+            "code_article": "AV422"
+           },
+           "unite": "",
+           "statut": "confirme",
+           "sources": [
+            "S523",
+            "S524",
+            "S331"
+           ],
+           "libelle_source": "rouleau, Sd, grammage, bande adhésive, palette",
+           "condition": "fabriqué à Loriol (Drôme) dans l'usine ICOPAL (BMI Group, maison de Siplast)",
+           "regions": [
+            "France"
+           ],
+           "ecart": "20 rouleaux par palette (fiche Monier ET certificat CSTB, organisme indépendant) contre 25 sur la fiche reprise par Samse (déjà dans ecrans-etancheite.json, ecotech_200fr_palette) : la fiche Samse est plus récente en présentation mais contredite par le CSTB ; retenir 20, 25 à faire vérifier par le négoce",
+           "controle": [
+            "140 g/m² × 75 m² = 10,5 kg = poids publié"
+           ],
+           "preuves": [
+            {
+             "source": "S523",
+             "extrait": "Dimensions 1,50 x 50 m ; Grammage 140 g/m2 ; Poids du rouleau 10,5 kg ; Rouleaux/palette 20 rouleaux"
+            },
+            {
+             "source": "S524",
+             "extrait": "Nombre rouleaux / palette U 20 20 20"
+            },
+            {
+             "source": "S331",
+             "extrait": "Nombre d'unités par palette 25"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Siplast (BMI)",
+       "groupe": "Siplast (BMI)",
+       "modeles": [
+        {
+         "nom": "—",
+         "attributs": [
+          {
+           "id": "zm_siplast_ecran",
+           "attribut": "ecran_de_sous_toiture_sous_la_marque_siplast",
+           "valeur": "aucun trouvé",
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S524"
+           ],
+           "libelle_source": "écran de sous-toiture sous la marque Siplast",
+           "condition": "Siplast (ICOPAL SAS, Loriol) fabrique les écrans Divoroll vendus sous la marque Monier ; un « écran Siplast » demandé au comptoir = Divoroll (Ecotech, Spirtech)",
+           "regions": [
+            "France"
+           ],
+           "raison": "absence constatée par recherche, pas une déclaration de Siplast",
+           "preuves": [
+            {
+             "source": "S524",
+             "extrait": "Usine ICOPAL SAS – BMI Group Les Blaches FR-26270 LORIOL"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Terreal",
+       "groupe": "Wienerberger",
+       "modeles": [
+        {
+         "nom": "ESTERRE 150 HPV",
+         "attributs": [
+          {
+           "id": "zm_terreal_esterre_150",
+           "attribut": "rouleau_grammage_classe",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², 11 kg",
+            "grammage_g_m2": 150,
+            "classe": "R2, E1-S1-T2, QB n° 24-011, entraxe 45 ou 60 cm",
+            "Sd_m": "non chiffré (classe Sd1 : ≤ 0,10 m)",
+            "bande_adhesive": "version BA à double bande adhésive (ESTERRE R2 BA HPV, page terreal.com)"
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S525"
+           ],
+           "libelle_source": "rouleau, grammage, classe",
+           "condition": "brochure « Nouveauté 2025 », édition janvier 2025, réf. FA960/2025/01 ; Terreal est passé chez Wienerberger (terreal.com redirige vers wienerberger.fr)",
+           "regions": [
+            "France"
+           ],
+           "raison": "fiche lue chez un négoce ; palette non publiée",
+           "controle": [
+            "150 g/m² × 75 m² = 11,25 kg ≈ 11 kg publié"
+           ],
+           "preuves": [
+            {
+             "source": "S525",
+             "extrait": "1,5 m 150 g/m² ; 50 m 11 kg ; Certification QB n° : 24-011"
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "nom": "ESTERRE 160 HPV",
+         "attributs": [
+          {
+           "id": "zm_terreal_esterre_160",
+           "attribut": "rouleau_grammage_classe",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², 12 kg",
+            "grammage_g_m2": 160,
+            "classe": "R3, entraxe 45, 60 ou 90 cm",
+            "Sd_m": "non chiffré"
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S526"
+           ],
+           "libelle_source": "rouleau, grammage, classe",
+           "condition": "édition janvier 2025, réf. FA1049/2025/01",
+           "regions": [
+            "France"
+           ],
+           "raison": "fiche lue chez un négoce ; palette non publiée",
+           "controle": [
+            "160 × 75 = 12 kg = poids publié"
+           ],
+           "preuves": [
+            {
+             "source": "S526",
+             "extrait": "1,5 m 160 g/m² ; 50 m 12 kg ; 45, 60 ou 90 cm"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "nom": "Atout Pro (marque Samse)",
+       "groupe": "Atout Pro (marque Samse)",
+       "modeles": [
+        {
+         "nom": "Écran de sous-toiture HPV R3",
+         "attributs": [
+          {
+           "id": "zm_atoutpro_hpv_r3",
+           "attribut": "rouleau_sd_grammage_palette",
+           "valeur": {
+            "rouleau": "1,50 × 50 m = 75 m², 12 kg",
+            "Sd_m": 0.02,
+            "grammage_g_m2": 160,
+            "classe": "E1-Sd1-T3, QB n° 25-005, 90 cm",
+            "rouleaux_par_palette": 24,
+            "m2_par_palette": 1800
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S527"
+           ],
+           "libelle_source": "rouleau, Sd, grammage, palette",
+           "condition": "fiche juin 2025 ; marque de négoce (Groupe Samse), hors Bretagne",
+           "regions": [
+            "France"
+           ],
+           "controle": [
+            "24 × 75 = 1 800 m² = valeur publiée ; 160 × 75 = 12 kg"
+           ],
+           "preuves": [
+            {
+             "source": "S527",
+             "extrait": "Rouleau de 1,50 m x 50 m (75 m²) – 12 kg ; Palette de 24 rouleaux, soit 1 800 m²"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "nom": "écran HPV / pare-pluie",
+     "regles": [],
+     "marques": [
+      {
+       "nom": "Dörken",
+       "groupe": "Dörken",
+       "modeles": [
+        {
+         "nom": "DELTA-VENT N / DELTA-VENT N PLUS",
+         "attributs": [
+          {
+           "id": "zm_delta_vent_n",
+           "attribut": "rouleau_sd_grammage_bande_adhesive",
+           "valeur": {
+            "rouleau": "1,50 × 50 m ≈ 10 kg (aussi 2,80 × 50 m)",
+            "Sd_m": 0.02,
+            "grammage_g_m2": 130,
+            "bande_adhesive": "PLUS : bords autocollants intégrés",
+            "usage": "présenté comme pare-pluie HPV (bardage)"
+           },
+           "unite": "",
+           "statut": "une_source",
+           "sources": [
+            "S518"
+           ],
+           "libelle_source": "rouleau, Sd, grammage, bande adhésive",
+           "condition": "fiche datée 2016-04 ; absent de doerken.com/fr (404 à la passe précédente) : probablement remplacé par DELTA-VENT S / NEOVENT",
+           "regions": [
+            "France"
+           ],
+           "raison": "fiche de 2016 lue chez un négoce ; palette non publiée (un « 32 rouleaux » vu seulement dans un résumé de moteur de recherche, non retenu)",
+           "preuves": [
+            {
+             "source": "S518",
+             "extrait": "Masse surfacique env. 130 g/m² ; Valeur Sd env. 0,02 m ; Poids du rouleau env. 10 kg (1,5 m x 50 m)"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "verdicts": [
+    {
+     "ratio": "Écran HPV : 25 rouleaux par palette",
+     "origine": "ecrans-etancheite.json (ecran_palette : « 12 à 39 », ecotech_200fr_palette = 25, delta_neo_vent_palette = 25) ; TESTEUR-NEGOCE-1 (« 25 rouleaux par palette, confirmé »)",
+     "valeur_actuelle": "25 (cité), plage 12 à 39",
+     "verdict": "corrige",
+     "bonne_valeur": "pas de nombre commun : 20 (Ecotech 200FR, Spirtech 300), 22 (DELTA-XX PLUS UNIVERSAL), 24 (DELTA-XX PLUS LIGHT, Edilians AERO, Atout Pro R3), 25 (DELTA-VENT S, DELTA-NEO VENT), 18 (DELTA-MAXX PLUS) ; le 25 de l'Ecotech 200FR est contredit par Monier et le CSTB (20)",
+     "sources": [
+      "S523",
+      "S524",
+      "S519",
+      "S515"
+     ],
+     "explication": "vente au rouleau au comptoir : la palette ne change pas la commande d'un chantier ; ne jamais écrire « 25 » sans le modèle"
+    },
+    {
+     "ratio": "Feuille 2 000 × 1 000 en 0,65 ; palettes 54 ou 107",
+     "origine": "zinguerie.json (feuille_zinc_palette, une_source ; raison « 107 n'est qu'un calcul »)",
+     "valeur_actuelle": "54 / 107 (une source)",
+     "verdict": "corrige",
+     "bonne_valeur": "RHEINZINK : 107 (article 11005985) ou 54 (11006071) ; VMZINC : 150 feuilles par conditionnement",
+     "sources": [
+      "S251",
+      "S250"
+     ],
+     "explication": "le nombre par palette dépend du fabricant ; 107 est un vrai article RHEINZINK, pas un calcul"
+    },
+    {
+     "ratio": "Coudes : 72° (zinc), 67° (PVC)",
+     "origine": "zinguerie.json verdict_ratios",
+     "valeur_actuelle": "72° zinc / 67° PVC",
+     "verdict": "confirme",
+     "bonne_valeur": "inchangé ; aucun coude zinc à 67° (VMZINC 36/40/70/72/90, RHEINZINK 60/72/76/90)",
+     "sources": [
+      "S250",
+      "S251"
+     ],
+     "explication": "un « 67° » demandé en zinc se sert en 72°"
+    }
+   ],
+   "comptoir": [
+    {
+     "article": "Zinc prépatiné (feuille, bobineau, gouttière)",
+     "ce_que_le_vendeur_demande": [
+      "marque (VMZINC ou RHEINZINK : les noms de teinte ne se traduisent pas)",
+      "teinte : Quartz-Zinc / Anthra-Zinc / Pigmento vert-rouge-bleu-brun (VMZINC) ou prePATINA clair / ardoise (RHEINZINK)",
+      "épaisseur (Pigmento : 0,70 seulement)",
+      "format"
+     ],
+     "unite_de_vente": "feuille 2 × 1 m, bobineau, longueur de gouttière",
+     "conditionnement": "feuilles en palette (VMZINC Quartz 0,65 : 100 ; RHEINZINK prePATINA 0,65 : 107)",
+     "sources": [
+      "S250",
+      "S251"
+     ]
+    },
+    {
+     "article": "Écran de sous-toiture HPV",
+     "ce_que_le_vendeur_demande": [
+      "marque et modèle (DELTA-VENT S, XX PLUS LIGHT, Ecotech 200FR, Esterre 150, Tyvek Toiture 60…)",
+      "classe R2 (60 cm) ou R3 (90 cm)",
+      "avec ou sans bande adhésive (PLUS, Tape, BA)",
+      "nombre de rouleaux de 75 m²"
+     ],
+     "unite_de_vente": "rouleau 1,50 × 50 m = 75 m²",
+     "conditionnement": "palette de 18 à 25 selon le modèle",
+     "sources": [
+      "S519",
+      "S523"
+     ]
+    },
+    {
+     "article": "Cuvette de descente zinc",
+     "ce_que_le_vendeur_demande": [
+      "type (branchement, carrée, ½ ronde de face, d'angle)",
+      "Ø 80 / 100 / 120",
+      "finition"
+     ],
+     "unite_de_vente": "pièce",
+     "conditionnement": "VMZINC branchement Ø 80 par 20, Ø 100 par 15 ; RHEINZINK par 10",
+     "sources": [
+      "S250",
+      "S251"
+     ]
+    }
+   ],
+   "perimetre": "modèles nommés : zinc prépatiné VMZINC / RHEINZINK, accessoires zinc non couverts par zinguerie.json (cuvettes, manchons, crochets du commerce, palettes de feuilles), écrans HPV du marché (Dörken, Tyvek, Monier/BMI, Siplast, Terreal) ; complète zinguerie.json et ecrans-etancheite.json sans les répéter"
+  },
+  {
    "code": "sous_face",
    "libelle": "Sous-faces et habillages de débord",
    "sous_familles": [
@@ -102163,9 +103510,9 @@
        "unite": "mm",
        "statut": "confirme",
        "sources": [
-        "S513",
-        "S514",
-        "S515"
+        "S528",
+        "S529",
+        "S530"
        ],
        "libelle_source": "largeurs de lame",
        "condition": "lame 10 mm d'épaisseur ; 250 mm (frisette, planche) le plus courant ; Deceuninck de 100 à 250",
@@ -102175,15 +103522,15 @@
        ],
        "preuves": [
         {
-         "source": "S513",
+         "source": "S528",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S514",
+         "source": "S529",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S515",
+         "source": "S530",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ]
@@ -102195,10 +103542,10 @@
        "unite": "m",
        "statut": "confirme",
        "sources": [
-        "S513",
-        "S514",
-        "S516",
-        "S515"
+        "S528",
+        "S529",
+        "S531",
+        "S530"
        ],
        "libelle_source": "longueurs vendues",
        "condition": "pro : 4 m (M.E.P, Atout Pro), 6 m (Atout Pro, Deceuninck) ; grande surface de bricolage : 3 m",
@@ -102209,19 +103556,19 @@
        "ecart": "Atout Pro vend au paquet de 10 lames.",
        "preuves": [
         {
-         "source": "S513",
+         "source": "S528",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S514",
+         "source": "S529",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S516",
+         "source": "S531",
          "extrait": "LONGUEUR 4M / 6M ; CONDITIONNEMENT PAQUET DE 10"
         },
         {
-         "source": "S515",
+         "source": "S530",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ]
@@ -102233,7 +103580,7 @@
        "unite": "",
        "statut": "une_source",
        "sources": [
-        "S513"
+        "S528"
        ],
        "libelle_source": "fixation des lames",
        "condition": "entraxe des tasseaux ≤ 60 cm ; à réduire selon coloris et exposition (notice de pose)",
@@ -102243,7 +103590,7 @@
        ],
        "preuves": [
         {
-         "source": "S513",
+         "source": "S528",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         }
        ],
@@ -102256,7 +103603,7 @@
        "unite": "mm",
        "statut": "une_source",
        "sources": [
-        "S517"
+        "S532"
        ],
        "libelle_source": "lame d'air derrière les lames",
        "condition": "minimum, entre montants bois ; ventilation selon le DTU de couverture",
@@ -102266,7 +103613,7 @@
        ],
        "preuves": [
         {
-         "source": "S517",
+         "source": "S532",
          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
         }
        ],
@@ -102302,7 +103649,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S513"
+            "S528"
            ],
            "libelle_source": "format et coloris",
            "condition": "longueurs spéciales sur tarif ; SER254 sous avis technique",
@@ -102312,7 +103659,7 @@
            ],
            "preuves": [
             {
-             "source": "S513",
+             "source": "S528",
              "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
             }
            ]
@@ -102346,8 +103693,8 @@
        "unite": "",
        "statut": "une_source",
        "sources": [
-        "S513",
-        "S515"
+        "S528",
+        "S530"
        ],
        "libelle_source": "accessoires de sous-face",
        "condition": "longueurs des profils non publiées dans le catalogue ; 3 m en grande surface (Tecnoprofils)",
@@ -102357,11 +103704,11 @@
        ],
        "preuves": [
         {
-         "source": "S513",
+         "source": "S528",
          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm"
         },
         {
-         "source": "S515",
+         "source": "S530",
          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m"
         }
        ],
@@ -102387,8 +103734,8 @@
        "unite": "",
        "statut": "confirme",
        "sources": [
-        "S514",
-        "S518"
+        "S529",
+        "S533"
        ],
        "libelle_source": "largeurs et longueurs",
        "condition": "Deceuninck 150-400 × 9 mm en 6 m (et 5-6 m selon gamme) ; Plastivan 150 à 404 × 18 mm en 5 m",
@@ -102398,11 +103745,11 @@
        ],
        "preuves": [
         {
-         "source": "S514",
+         "source": "S529",
          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m"
         },
         {
-         "source": "S518",
+         "source": "S533",
          "extrait": "largeurs 150, 175, 200, 225, 250 et 404 mm ; épaisseur 18 mm ; longueur 5 000 mm"
         }
        ]
@@ -102427,7 +103774,7 @@
            "unite": "",
            "statut": "une_source",
            "sources": [
-            "S517"
+            "S532"
            ],
            "condition": "entraxe des points le long de la planche : non trouvé",
            "regions": [
@@ -102436,7 +103783,7 @@
            ],
            "preuves": [
             {
-             "source": "S517",
+             "source": "S532",
              "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
             }
            ]
@@ -102457,8 +103804,8 @@
        "unite": "m",
        "statut": "une_source",
        "sources": [
-        "S519",
-        "S520"
+        "S534",
+        "S535"
        ],
        "libelle_source": "longueur standard des lames",
        "condition": "DAL'ALU SF77 / SF129 (largeur utile 280-290 mm, ≈ 2 kg/m²) ; GutterFrance 310 mm utiles, 0,7 mm",
@@ -102469,11 +103816,11 @@
        "ecart": "La fiche GutterFrance n'a pas pu être ouverte (403) : seule DAL'ALU est lue en entier.",
        "preuves": [
         {
-         "source": "S519",
+         "source": "S534",
          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2"
         },
         {
-         "source": "S520",
+         "source": "S535",
          "extrait": "3000 mm de long, 310 mm de largeur utile, 0,7 mm d'épaisseur, version perforée"
         }
        ]
@@ -102497,7 +103844,7 @@
            "unite": "cm²/m²",
            "statut": "une_source",
            "sources": [
-            "S519"
+            "S534"
            ],
            "libelle_source": "surface ventilée",
            "condition": "version perforée",
@@ -102507,7 +103854,7 @@
            ],
            "preuves": [
             {
-             "source": "S519",
+             "source": "S534",
              "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2"
             }
            ]
@@ -102528,7 +103875,7 @@
        "unite": "",
        "statut": "a_confirmer",
        "sources": [
-        "S517"
+        "S532"
        ],
        "libelle_source": "format standard",
        "condition": "sapin, pin, douglas ; classe d'emploi 3 (ou 2 sous abri)",
@@ -102539,7 +103886,7 @@
        "raison": "Aucun format de lambris bois de sous-face publié par un fabricant ou un négoce breton n'a été trouvé (longueurs de 2 à 5 m selon l'essence) : demander à l'artisan la lame et la longueur.",
        "preuves": [
         {
-         "source": "S517",
+         "source": "S532",
          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus"
         }
        ]
@@ -102556,9 +103903,9 @@
      "verdict": "a_confirmer",
      "bonne_valeur": "compter en lames de 4 m (PVC 250 mm : 1 m² par lame) ; perte : aucune source ; grilles : selon la section de ventilation du DTU (alu perforé 168-174 cm²/m²)",
      "sources": [
-      "S513",
-      "S514",
-      "S519"
+      "S528",
+      "S529",
+      "S534"
      ],
      "explication": "Les fabricants donnent les formats, pas de taux de perte ni de nombre de grilles au ml."
     },
@@ -102569,9 +103916,9 @@
      "verdict": "corrige",
      "bonne_valeur": "PVC cellulaire en 5 ou 6 m (pas de 2 m chez les fabricants pros) ; fixation par points de 2 pointes inox, 3 points en largeur ≥ 280 mm ; nombre au ml : non trouvé",
      "sources": [
-      "S514",
-      "S518",
-      "S517"
+      "S529",
+      "S533",
+      "S532"
      ],
      "explication": "Longueurs corrigées ; les 4 vis/ml restent sans source."
     }
@@ -102589,8 +103936,8 @@
      "unite_de_vente": "lame ou paquet de 10",
      "conditionnement": "4 m (6 m existe)",
      "sources": [
-      "S513",
-      "S516"
+      "S528",
+      "S531"
      ],
      "famille": "sous_face"
     },
@@ -102605,8 +103952,8 @@
      "unite_de_vente": "pièce",
      "conditionnement": "3 m en grande surface ; longueur pro sur tarif",
      "sources": [
-      "S513",
-      "S515"
+      "S528",
+      "S530"
      ],
      "famille": "sous_face"
     },
@@ -102623,8 +103970,8 @@
      "unite_de_vente": "pièce",
      "conditionnement": "5 ou 6 m",
      "sources": [
-      "S514",
-      "S518"
+      "S529",
+      "S533"
      ],
      "famille": "sous_face"
     },
@@ -102639,7 +103986,7 @@
      "unite_de_vente": "lame ou m²",
      "conditionnement": "3 m",
      "sources": [
-      "S519"
+      "S534"
      ],
      "famille": "sous_face"
     }
@@ -106235,146 +107582,251 @@
   },
   {
    "id": "S513",
+   "titre": "Techniques de l'Ingénieur, « Gouttières » (C1075, archive, résumé public)",
+   "url": "https://www.techniques-ingenieur.fr/base-documentaire/archives-th12/archives-le-second-oeuvre-et-l-equipement-du-batiment-tiacc/archive-1/evacuation-des-eaux-pluviales-c1075/gouttieres-c1075niv10003.html",
+   "type": "guide",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S514",
+   "titre": "Distriartisan, angle à coller à 135° LG25 gris Nicoll (PVC)",
+   "url": "https://www.distriartisan.fr/angle-a-coller-a-135-25-gris.html",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S515",
+   "titre": "Dörken, fiche technique DELTA-VENT S / S PLUS (copie diffusée par ABC Maçonnerie)",
+   "url": "https://abc-maconnerie.com/client/document/fiche-technique-delta-vent-s_2210.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S516",
+   "titre": "Dörken, technical datasheet DELTA-VENT S (copie epdm24.nl)",
+   "url": "https://www.epdm24.nl/wp-content/uploads/2022/10/technical-datasheet-delta-vent-s.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S517",
+   "titre": "Dörken, brochure « écrans de sous-toiture DELTA » (doerken.com/ch/fr, fichier de février 2019)",
+   "url": "https://www.doerken.com/ch/fr/content/preview/20962/file/Brochure%20%C3%A9crans%20de%20sous-toiture%20DELTA.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S518",
+   "titre": "Dörken, fiche DELTA-VENT N (2016-04, diffusée par BigMat)",
+   "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/BBFUFCWSvnxI3J2tGuzF.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S519",
+   "titre": "Dörken France, fiche technique DELTA-XX PLUS LIGHT (doerken.com/fr, édition 02, 20/05/2025)",
+   "url": "https://www.doerken.com/fr/fr/content/preview/30021/file/DOE-0000_Datenblatt_XX-PLUS-LIGHT_FR_Aufl02_LA02_250520.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S520",
+   "titre": "DuPont / Edilians, brochure « Gamme DuPont Tyvek et AirGuard » (avril 2023, edilians.com)",
+   "url": "https://edilians.com/media/wysiwyg/uploads/brochure-gamme-dupont-tyvek-airguard.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S521",
+   "titre": "DuPont, fiche technique Tyvek Toiture 90 (2012, copie Econology)",
+   "url": "https://www.econology.fr/media/attachment/file/t/d/tds_tyvek_toiture90_1.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S522",
+   "titre": "DuPont, brochure Tyvek Supro (anglais, copie Shopify)",
+   "url": "https://cdn.shopify.com/s/files/1/0250/6198/2261/files/dupont-tyvek-brochure.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S523",
+   "titre": "Monier (BMI), fiche technique Ecotech 200 FR (diffusée par BigMat)",
+   "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/ECOTECH-200_3561340230412_FT.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S524",
+   "titre": "CSTB, certificat QB25 Ecotech 200 FR, décision n° 19-001 du 30/01/2019 (copie BigMat)",
+   "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/certificat-QB-ecotech-200FR-3561340230412.pdf",
+   "type": "autre",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S525",
+   "titre": "Terreal / Wienerberger, fiche ESTERRE 150 HPV, édition janvier 2025 (diffusée par Samse, n° 1333143)",
+   "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1333143.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S526",
+   "titre": "Terreal / Wienerberger, fiche ESTERRE 160 HPV, édition janvier 2025 (diffusée par Samse, n° 1333158)",
+   "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1333158.pdf",
+   "type": "fabricant",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S527",
+   "titre": "Groupe Samse / Atout Pro, fiche Écran de sous-toiture HPV R3 (juin 2025, n° 1853449)",
+   "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1853449.pdf",
+   "type": "negoce",
+   "consulte": "2026-11-20"
+  },
+  {
+   "id": "S528",
    "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
    "url": "https://www.chausson.fr/media/article-document/209262",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S514",
+   "id": "S529",
    "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S515",
+   "id": "S530",
    "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
    "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S516",
+   "id": "S531",
    "titre": "Atout Pro (marque du groupe Samse), lambris PVC d'habillage de sous-faces (11 juillet 2025)",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1868643.pdf",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S517",
+   "id": "S532",
    "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
    "url": "https://chausson.fr/media/article-document/273852",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S518",
+   "id": "S533",
    "titre": "Batiproduits, planche de rive PVC cellulaire Plastivan réf. 515200-5.00",
    "url": "https://www.batiproduits.com/fiche/produits/planche-de-rive-cellulaire-ref-515200-5-00-en-p496078144.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S519",
+   "id": "S534",
    "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
    "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S520",
+   "id": "S535",
    "titre": "GutterFrance, fiche sous-face aluminium (distriartisan.fr), lue dans l'aperçu du moteur de recherche (403 en accès direct)",
    "url": "https://distriartisan.fr///media/wysiwyg/documents/FK_Gouttieres/fiche_technique_sous_face.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S521",
+   "id": "S536",
    "titre": "Soprema, fiche Sopralène Flam 180 WPBFR229/b, diffusée par BigMat",
    "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3434550072618-zP63bE2VlR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S522",
+   "id": "S537",
    "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
    "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S523",
+   "id": "S538",
    "titre": "Soprema Belgique, fiche Soprarock SBS P3 TF, diffusée par Gobert",
    "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOPREMA%20FT%20SOPRAROCK%20SBS%20P3%20TF.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S524",
+   "id": "S539",
    "titre": "Soprema, fiche Sopralène Flam 180 AR WPBFR230/1/d, diffusée par Envain Matériaux",
    "url": "https://www.envain-materiaux.fr/ressources/images/articles//ficheTechnique/FT_WPBFR230.1.d.FR_SOPRALENE%20FLAM%20180%20AR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S525",
+   "id": "S540",
    "titre": "IKO Summa, recouvrements (lu dans l'aperçu du moteur de recherche)",
    "url": "https://eu.iko.com/wp-content/uploads/2023/10/IKOSumma_FR.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S526",
+   "id": "S541",
    "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
    "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S527",
+   "id": "S542",
    "titre": "Permaroof Store (négoce UK), Elevate Bonding Adhesive BA-2012 10 L (lu dans l'aperçu du moteur de recherche)",
    "url": "https://www.permaroofstore.co.uk/adhesives/bonding-adhesive-10l-ba-2012.html",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S528",
+   "id": "S543",
    "titre": "Chausson, fiche colle pour membrane EPDM Flexirub sur bois / béton",
    "url": "https://www.chausson.fr/media/article-document/256531",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S529",
+   "id": "S544",
    "titre": "Batiproduits, Utherm Roof L (Unilin)",
    "url": "https://www.batiproduits.com/fiche/produits/plaque-isolante-pir-pour-toitures-terrasses-uthe-p480752395.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S530",
+   "id": "S545",
    "titre": "Batiproduits, IKO enertherm ALU XL",
    "url": "https://www.batiproduits.com/fiche/produits/panneau-isolant-en-mousse-rigide-pour-toiture-terr-p381379720.html",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S531",
+   "id": "S546",
    "titre": "Jewson (négoce UK), Recticel PowerDeck F 1200 x 600",
    "url": "https://jewson.co.uk/p/recticel-powerdeck-f-flat-roof-board-1200-x-600-x-80mm-IRPDF080",
    "type": "negoce",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S532",
+   "id": "S547",
    "titre": "Knauf, Knauf Thane OpTTI (knauf.com)",
    "url": "https://knauf.com/fr-FR/p/produit/knauf-thane-optti-29945_4091",
    "type": "fabricant",
    "consulte": "2026-11-20"
   },
   {
-   "id": "S533",
+   "id": "S548",
    "titre": "Forum Construire (forum de professionnels et particuliers) : trop-plein et 1 cm² par m²",
    "url": "https://www.forumconstruire.com/construire/topic-241784.php",
    "type": "autre",

@@ -2149,7 +2149,7 @@
      "consulte": "2026-11-19"
     }
    ],
-   "raison": "un seul fabricant (RHEINZINK) : 54 feuilles en 0,65 par palette de 500 kg, 87 feuilles en 0,80 par palette de 1 t ; 107 en 0,65 par tonne n'est qu'un calcul (1000 / 9,36)",
+   "raison": "un seul fabricant (RHEINZINK) : 54 feuilles en 0,65 par palette de 500 kg, 87 feuilles en 0,80 par palette de 1 t ; 107 en 0,65 est aussi un article RHEINZINK (11005985, relevé du 20/11/2026) ; VMZINC conditionne 150 feuilles en 0,65",
    "controle": [
     "poids : 54 feuilles × 9,36 kg (0,65 mm) = 505 kg pour une palette annoncée de 500 kg ; 87 × 11,52 kg (0,80 mm) = 1 002 kg pour 1 t : cohérent",
     "confirme_fabricant refusé : fiches RHEINZINK lues chez Samse et Richardson, pas sur le domaine du fabricant"

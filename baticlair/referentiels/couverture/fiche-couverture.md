@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **91.0 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -945,7 +945,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 - **Monier Spirtech 110** (une_source 1) : format_de_rouleau 150 m²
 - **Monier Divoroll Spirtech 200** (une_source 1) : 
 - **Monier Divoroll Spirtech 300** (une_source 1) : 
-- **Monier Divoroll Ecotech 200FR** (une_source 1) : rouleaux_par_palette 25 rouleaux
+- **Monier Divoroll Ecotech 200FR** (une_source 1) : rouleaux_par_palette 20 rouleaux
 - **Dörken DELTA-MAXX PLUS** (confirme_fabricant 2) : valeur_sd 0.17 m
 - **Dörken DELTA-XX PLUS UNIVERSAL** (confirme_fabricant 1) : 
 - **Dörken DELTA-FOXX PLUS** (confirme_fabricant 1) : 
@@ -1645,6 +1645,72 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 | teintes | Cedral : anthracite (Kergoat), anthracite ou brun (Orléane), brun flammé (Pommay), gris / brun / rouge (Tecta) ; Cembrit : noir, brun  | le comptoir demande la gamme et la teinte | confirme |
 | liteaux_ml_par_m2 | 40×24 : 6,67 ; 60×30 : 4,00 ; 33×23 : 8,70 ; 45×30 : 5,71 ml/m² | recouvrement 100 mm : pureau = (longueur − 100) ÷ 2 ; liteaux = 1 ÷ pureau (une file par pureau) | confirme |
 
+
+## Zinguerie et écrans : modèles et références du marché
+
+### zinc prépatiné
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| epaisseurs_vendues_en_prepatine_feuilles | {'VMZINC Quartz / Anthra': [0.65, 0.7, 0.8], 'VMZINC Pigmento': [0.7], 'RHEINZINK prePATINA clair / ardoise': [0.65, 0.7, 0.8, 1.0]} mm | 0,65 mm existe en prépatiné gris chez les deux fabricants ; un zinc « coloré » (Pigmento) est en 0,70 seulement | confirme |
+
+- **VMZINC QUARTZ-ZINC, ANTHRA-ZINC, PIGMENTO** (confirme_fabricant 1) : 
+- **VMZINC Feuilles 2000 × 1000 (et 650 / 800) prépatinées** (confirme_fabricant 1) : 
+- **VMZINC Bobineaux prépatinés** (confirme_fabricant 1) : 
+- **RHEINZINK prePATINA clair (blaugrau) et prePATINA ardoise (schiefergrau)** (confirme_fabricant 1) : 
+- **RHEINZINK Feuilles prePATINA clair / ardoise** (confirme_fabricant 1) : 
+- **RHEINZINK Bobineaux prePATINA clair / ardoise** (confirme_fabricant 1) : 
+
+### feuille de zinc
+
+- **Toutes marques Feuille naturel 2000 × 1000** (confirme_fabricant 1) : 
+
+### crochet de gouttière
+
+- **VMZINC Gouttières demi-rondes 25 / 33 (sans pince)** (confirme_fabricant 1) : crochets_fournis_par_vmzinc aucun crochet standard ; seulement le crochet discret PLUVIAZINC pour gouttière à pince (25 : 100, 33 : 50 par carton) texte
+- **RHEINZINK Crochets de gouttière (gamme complète)** (confirme_fabricant 1) : 
+
+### crochet de gouttière rampante
+
+- **Toutes marques Crochets nantais / havrais** (une_source 1) : ecartement_maximal 0.5 m
+
+### cuvette
+
+- **VMZINC Cuvettes (branchement, carrées, ½ rondes de face et d'angle, « Nice »)** (confirme_fabricant 1) : 
+- **RHEINZINK Cuvettes de branchement, ½ rondes mini, moulurées d'angle** (confirme_fabricant 1) : 
+- **Toutes marques Cuvette de branchement zinc** (confirme 1) : 
+
+### manchon de descente
+
+- **VMZINC Manchon pour tuyau cylindrique** (confirme_fabricant 1) : 
+
+### coude de descente
+
+- **Toutes marques Coudes zinc** (confirme 1) : coude_a_67_en_zinc aucun texte
+
+### équerre (angle) de gouttière
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| equerre_zinc_demi_ronde_a_135_vendue_toute_faite | non trouvée  | deuxième recherche (VMZINC 2026, RHEINZINK 2026 : équerres embouties et soudées ext. / int. sans autre angle ; recherche web) : seuls existent un angle 135° PVC Nicoll LG25 et un angle acier (Suède) | a_confirmer |
+
+
+### écran HPV
+
+- **Dörken DELTA-VENT S / DELTA-VENT S PLUS** (une_source 1) : 
+- **Dörken DELTA-XX PLUS LIGHT** (confirme_fabricant 1) : 
+- **DuPont Tyvek Tyvek Toiture 60 / Toiture 60 Tape** (une_source 1) : 
+- **DuPont Tyvek Tyvek Toiture 90** (une_source 1) : 
+- **DuPont Tyvek Tyvek Supro** (a_confirmer 1) : disponibilite_en_france non vendu sous ce nom en France
+- **Monier Divoroll Ecotech 200FR** (confirme 1) : 
+- **Siplast (BMI) —** (une_source 1) : ecran_de_sous_toiture_sous_la_marque_siplast aucun trouvé
+- **Terreal ESTERRE 150 HPV** (une_source 1) : 
+- **Terreal ESTERRE 160 HPV** (une_source 1) : 
+- **Atout Pro (marque Samse) Écran de sous-toiture HPV R3** (une_source 1) : 
+
+### écran HPV / pare-pluie
+
+- **Dörken DELTA-VENT N / DELTA-VENT N PLUS** (une_source 1) : 
 
 ## Sous-faces et habillages de débord
 
