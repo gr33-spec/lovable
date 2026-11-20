@@ -647,5 +647,44 @@
       "enduit"
     ],
     "note": "À 3,00 m, une 72/48 en M48 demande des montants doublés à 60 cm (DTU 25.41 : 3,05 m) : dit par défaut, modifiable."
+  },
+  {
+    "id": "PI-18",
+    "titre": "Caisson autour d'une poutre (coffrage en U), 5 m",
+    "devis": [
+      {
+        "designation": "Coffrage en plaques de plâtre BA13 autour de poutre, caisson 3 faces, développé 1 m",
+        "quantite": 5,
+        "unite": "ml",
+        "ouvrage": "coffrage",
+        "lu": {
+          "longueur_coffrage": [
+            5,
+            "m"
+          ],
+          "type_coffrage": [
+            2,
+            "u"
+          ],
+          "developpe": [
+            1,
+            "m"
+          ]
+        },
+        "ecrits": [
+          "coffrage"
+        ]
+      }
+    ],
+    "reponses": {
+      "fixation_rail": 1,
+      "marque_cloueur": 1,
+      "enduit_forme": 2
+    },
+    "coches": [
+      "bande",
+      "enduit"
+    ],
+    "note": "Règle des coffrages proposée (recherche/12), aucune source fabricant par mètre : toutes les lignes restent orange « à confirmer » jusqu'à la relecture d'un plaquiste."
   }
 ]

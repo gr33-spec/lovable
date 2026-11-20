@@ -173,6 +173,8 @@ FAMILIES += [
     fam("loose_fill", "Isolant en vrac à souffler", "u", ["comblissimo", "supafil", "jetrock", "ouate", "thermacell", "igloo"]),
     fam("vapour_barrier", "Membrane pare-vapeur", "m2", ["pare-vapeur", "pare vapeur", "membrane", "vario", "frein vapeur"]),
     fam("vb_tape", "Adhésif de membrane", "ml", ["adhesif", "kb1", "multitape"], consumable=True),
+    fam("boxing", "Coffrage, soffite, caisson", "ml", ["coffrage", "soffite", "caisson", "habillage de poutre", "encoffrement", "ipn"]),
+    fam("corner_tape", "Bande armée d'angle", "ml", ["bande armee", "bande d'angle"], consumable=True),
     fam("hanger_anchor", "Fixation des suspentes au support", "u", ["cheville metal", "clou cheville"], consumable=True),
 ]
 
@@ -284,6 +286,8 @@ PRODUCTS = [p for p in PRODUCTS if p["id"] != "laine-cloison-45"] + [
     isolant("ibr-200", "Isover IBR Revêtu Kraft 200 mm, R 5,00, rouleau 4,5 × 1,20 m (5,40 m²) ou équivalent", "IBR 200", 5.40, "isover-ibr", OK2("5,40 m² : Isover, Castorama, Leroy Merlin (recherche/10 n° 55)."), ["ibr 200"]),
     isolant("ibr-300", "Isover IBR Revêtu Kraft 300 mm, R 7,50, rouleau 2,6 × 1,20 m (3,12 m²) ou équivalent", "IBR 300", 3.12, "isover-ibr", OK2("3,12 m² : SFIC et Tessella ; fiche Isover 2017."), ["ibr 300"]),
     isolant("ibr-400", "Isover IBR Revêtu Kraft 400 mm, R 10, rouleau 2,0 × 1,20 m (2,40 m²) ou équivalent", "IBR 400", 2.40, "isover-ibr", OK2("2,40 m² : fiche Isover (extrait) et Brico Dépôt."), ["ibr 400"]),
+    produit("bande-armee", "corner_tape", "Bande armée d'angle 50 mm (deux lames acier), rouleau de 30 m", "Bande armée",
+            [unite("rouleau", "rouleau de 30 m", "rouleaux de 30 m", "30", "m", "placo-integrale-2023-bande", OK2("Rouleau de 30 m : Siniat (catalogue Finition) et Placo Bande Armée 50 (fiche, BigMat) (recherche/05 A.1)."))], ["bande armee", "bande d'angle"]),
     produit("vrac-souffle", "loose_fill", "Isolant en vrac à souffler (produit et poids du sac selon le certificat)", "Isolant à souffler", piece("sac", "sacs"), ["laine a souffler", "laine soufflee", "ouate"]),
     produit("vario-xtra", "vapour_barrier", "Membrane pare-vapeur hygro-régulante (Vario Xtra ou équivalent), rouleau 1,50 × 40 m (60 m²)", "Membrane pare-vapeur",
             [unite("rouleau", "rouleau de 60 m²", "rouleaux de 60 m²", "60", "m2", "isover-vario", OK2("1,50 × 40 m = 60 m² : notice Isover et Gedimat."))], ["vario", "vario xtra", "pare-vapeur", "membrane"]),
@@ -996,6 +1000,49 @@ def coupe_feu(work, articles, noms):
     work["needs"] = out
     return work
 
+# ---------------------------------------------------------------------------------------------------------------
+# OUVRAGE 11 : COFFRAGE, SOFFITE, CAISSON (règle proposée, recherche/12 : à valider par un plaquiste)
+# ---------------------------------------------------------------------------------------------------------------
+def coffrage():
+    regle_prop = DOUTE("Aucun fabricant ni guide de métré ne publie de quantités par mètre de coffrage : règle proposée qui applique, face par face, les ratios au m² confirmés et la géométrie des arêtes (recherche/12, à valider par un plaquiste).")
+    c = {"largeur_plaque": regle("1.20", "m", "placo-ba13", OK2("Plaques de 1,20 m.")),
+         "longueur_plaque": regle("2.5", "m", "placo-ba13", OK2("Plaque de 2,50 m (Placo, Siniat)."), label="plaques de {v}"),
+         "chute_coffrage": regle("1.10", "u", "mobiiz-geometrie", regle_prop, label="plaques + {v} (petites faces)"),
+         "rives_par_ml": regle("2", "u", "mobiiz-geometrie", regle_prop, label="{v} rives par mètre de coffrage"),
+         "pas_fixation_rail": c_pas_fixation(),
+         "vis_par_m2": regle("15", "u/m2", "snip-fc18", OK2("15 vis/m² : ratio plafond / contre-cloison du SNIP, appliqué à la surface de plaques (recherche/12)."), label="{v} vis par m²"),
+         "chute": regle("1.05", "u", "snip-fc18", OK2("5 % (SNIP, Pladur)."), label="+ {v}"),
+         **finitions_constantes(1)}
+    params = [{"key": "longueur_coffrage", "label": "Longueur du coffrage", "unit": "m", "kind": "site_data", "question": "Longueur du coffrage ?", "fromLineQuantity": True},
+              {"key": "type_coffrage", "label": "Forme du coffrage", "unit": "u", "kind": "site_data", "question": "Ton coffrage, c'est un soffite en L (2 faces) ou un caisson en U (3 faces) ?",
+               "choices": [{"label": "Soffite en L (2 faces)", "value": "1", "dit": ["soffite", "en l", "2 faces"]}, {"label": "Caisson en U (3 faces)", "value": "2", "dit": ["caisson", "en u", "3 faces", "ipn", "poutre"]}],
+               "display": {"1": "soffite en L", "2": "caisson en U"},
+               "textValues": [{"value": "2", "keywords": ["caisson", "ipn", "poutre", "3 faces"]}, {"value": "1", "keywords": ["soffite", "2 faces", "angle"]}]},
+              {"key": "developpe", "label": "Développé (somme des faces)", "unit": "m", "kind": "site_data", "question": "Développé du coffrage (la somme de ses faces) ?",
+               "textLabels": ["developpe", "dev."], "textRange": {"min": "0.1", "max": "3"},
+               "choices": [{"label": "40 cm", "value": "0.4"}, {"label": "60 cm", "value": "0.6"}, {"label": "80 cm", "value": "0.8"}, {"label": "1 m", "value": "1"}]},
+              ENDUIT, FIXATION_RAIL, CLOUEUR]
+    derived = [derive("surface_plaques", "Surface de plaques", "m2", "longueur_coffrage * developpe", "mobiiz-geometrie", OK2("Longueur × développé (géométrie)."), True),
+               derive("aretes", "Arêtes saillantes", "u", "type_coffrage", "mobiiz-geometrie", OK2("Soffite en L : 1 arête saillante ; caisson en U : 2 (géométrie)."))]
+    needs = [
+        besoin("plaques", "plaque", "arrondi_sup(surface_plaques * regle.chute_coffrage / (regle.largeur_plaque * regle.longueur_plaque))", "u", "mobiiz-geometrie", regle_prop, designation="Plaques BA13 1,20 × 2,50 m", precision="coffrage de {longueur_coffrage|m}, développé {developpe|m}"),
+        besoin("rives", "rive", "longueur_coffrage * (regle.rives_par_ml + aretes) * regle.chute", "ml", "mobiiz-geometrie", regle_prop, precision="rives au mur et au plafond, profilé à chaque arête basse", short="profilés de rive"),
+        *fixations_rail("longueur_coffrage * regle.rives_par_ml"),
+        besoin("vis-ttpc-25", "vis", "surface_plaques * regle.vis_par_m2", "u", "snip-fc18", OK2("Ratio au m² (SNIP)."), short="vis"),
+        besoin("bande-armee", "bande_armee", "longueur_coffrage * aretes * regle.chute", "ml", "placo-integrale-2023-bande", OK2("Bande armée obligatoire sur chaque angle saillant : NF DTU 25.41 § 6.1.4.2.3 (cité par Knauf) et Siniat ; longueur = géométrie (recherche/05, 12)."), short="bande armée", precision="une par arête saillante"),
+        *besoins_finitions("surface_plaques"),
+    ]
+    slots = [{"key": "coffrage", "family": "boxing", "label": "Coffrage", "measureOnly": True},
+             slot("plaque", "plasterboard", "Plaques", "plaque-ba13", "BA13 1,20 × 2,50 m.", "placo-ba13", "coffrage", ["plaque", "ba13"]),
+             slot("rive", "perimeter_angle", "Profilés de rive", "corniere-cr2", "Cornière ou rail de 3 m.", "placo-cr2", "coffrage", ["corniere", "rail"]),
+             *slots_fixation("coffrage"),
+             slot("vis", "screw_board", "Vis TTPC 25", "vis-ttpc-25", "TTPC 25.", "gypso-vis", "coffrage", ["ttpc"]),
+             slot("bande_armee", "corner_tape", "Bande armée d'angle", "bande-armee", "Bande armée, rouleau de 30 m.", "placo-integrale-2023-bande", "coffrage", ["bande armee", "cornière d'angle"]),
+             *slots_finitions()]
+    return {"id": "coffrage", "trade": TRADE, "section": "singulier", "label": "Coffrage, soffite, caisson, habillage de poutre",
+            "triggers": ["boxing"], "params": params, "slots": slots, "constants": c, "derived": derived, "needs": needs}
+
+
 
 def referentiel():
     cl = coupe_feu(cloison(), ["plaques", "montants", "rails", "vis-ttpc-25", "vis-ttpc-35", "vis-trpf"],
@@ -1015,7 +1062,7 @@ def referentiel():
     # Plafond coupe-feu : le nombre de plaques reste lu au devis (une valeur par défaut calculée laisserait la 2e peau « possible » dans les conditions du moteur).
     pl["constants"]["vis_feu"] = regle("23", "u/m2", "placo-pv-feu", UNE("Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."), label="{v} vis par m² (montage feu)")
     pl["needs"] = [dict(n, formula="surface * regle.vis_feu") if n["id"] == "vis-ttpc-35-feu" else n for n in pl["needs"]]
-    work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur()]
+    work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur(), coffrage()]
     return {
         "id": "plaquiste-isolation",
         "version": VERSION,

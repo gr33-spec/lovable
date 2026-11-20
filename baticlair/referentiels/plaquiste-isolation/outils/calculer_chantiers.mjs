@@ -15,7 +15,7 @@ const unitOf = (work, key) => work.params.find((p) => p.key === key)?.unit ?? "u
 
 function calcul(ligne, reponses, coches) {
   const work = ref.workItems.find((w) => w.id === ligne.ouvrage);
-  const params = { surface: { value: String(ligne.quantite), unit: "m2" } };
+  const params = ligne.ouvrage === "coffrage" ? {} : { surface: { value: String(ligne.quantite), unit: "m2" } };
   for (const [k, v] of Object.entries(ligne.lu)) params[k] = val(v);
   const avec = { ...params };
   for (const [k, v] of Object.entries(reponses)) if (work.params.some((p) => p.key === k) && !avec[k]) avec[k] = Array.isArray(v) ? val(v) : { value: String(v), unit: unitOf(work, k) };

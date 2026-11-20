@@ -522,3 +522,33 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 > À 3,00 m, une 72/48 en M48 demande des montants doublés à 60 cm (DTU 25.41 : 3,05 m) : dit par défaut, modifiable.
 
+## PI-18 — Caisson autour d'une poutre (coffrage en U), 5 m
+
+### Devis
+
+| Désignation | Quantité | Unité | Ouvrage de la fiche |
+|---|---|---|---|
+| Coffrage en plaques de plâtre BA13 autour de poutre, caisson 3 faces, développé 1 m | 5 | ml | coffrage |
+
+**Questions attendues** : `param:fixation_rail` (« Tes rails au sol et au plafond, tu les fixes comment ? ») ; `param:enduit_forme` (« Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ? »)
+
+**Réponses du test** : fixation_rail = 1 ; marque_cloueur = 1 ; enduit_forme = 2
+
+**Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
+
+**Hypothèses dites** : Plaques : Plaques BA13 ; Surface de plaques : 5 m² ; Profilés de rive : Cornières de rive ; Clous de fixation : Clous + gaz béton ; Vis TTPC 25 : Vis TTPC 25 ; Bande armée d'angle : Bande armée ; Bande à joint : Bande à joint ; Enduit à joint prêt à l'emploi : Enduit prêt à l'emploi
+
+### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
+
+| Article | Commande | Besoin calculé | Précision |
+|---|---|---|---|
+| Plaques BA13 1,20 × 2,50 m | 2 plaques | 2 pièces | coffrage de 5 m, développé 1 m |
+| Cornières de rive | 7 longueurs de 3 m | 21 ml | rives au mur et au plafond, profilé à chaque arête basse |
+| Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 17 pièces | une fixation tous les 60 cm |
+| Vis TTPC 25 | 1 boîte de 1000 | 75 pièces |  |
+| Bande armée | 1 rouleau de 30 m | 10,5 ml | une par arête saillante |
+| Bande à joint | 1 rouleau de 150 m | 7 ml | joints jointoyés avec bande |
+| Enduit prêt à l'emploi | 1 seau de 25 kg | 2,35 kg |  |
+
+> Règle des coffrages proposée (recherche/12), aucune source fabricant par mètre : toutes les lignes restent orange « à confirmer » jusqu'à la relecture d'un plaquiste.
+

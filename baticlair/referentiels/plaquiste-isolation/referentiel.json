@@ -717,6 +717,33 @@
       "consumable": true
     },
     {
+      "code": "boxing",
+      "label": "Coffrage, soffite, caisson",
+      "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "coffrage",
+        "soffite",
+        "caisson",
+        "habillage de poutre",
+        "encoffrement",
+        "ipn"
+      ]
+    },
+    {
+      "code": "corner_tape",
+      "label": "Bande armée d'angle",
+      "needUnit": "ml",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "bande armee",
+        "bande d'angle"
+      ],
+      "consumable": true
+    },
+    {
       "code": "hanger_anchor",
       "label": "Fixation des suspentes au support",
       "needUnit": "u",
@@ -1894,6 +1921,39 @@
             "kind": "packaging",
             "value": "2.4",
             "unit": "m2"
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bande-armee",
+      "family": "corner_tape",
+      "label": "Bande armée d'angle 50 mm (deux lames acier), rouleau de 30 m",
+      "shortLabel": "Bande armée",
+      "aliases": [
+        "bande armee",
+        "bande d'angle"
+      ],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "rouleau",
+          "label": {
+            "one": "rouleau de 30 m",
+            "many": "rouleaux de 30 m"
+          },
+          "contains": {
+            "source": "placo-integrale-2023-bande",
+            "verification": {
+              "status": "draft",
+              "note": "Recherche du 2026-11-19 — 2 sources : Rouleau de 30 m : Siniat (catalogue Finition) et Placo Bande Armée 50 (fiche, BigMat) (recherche/05 A.1)."
+            },
+            "version": 1,
+            "kind": "packaging",
+            "value": "30",
+            "unit": "m"
           },
           "primary": true
         }
@@ -10713,6 +10773,664 @@
           },
           "version": 1,
           "short": "adhésif"
+        }
+      ]
+    },
+    {
+      "id": "coffrage",
+      "trade": "drywall",
+      "section": "singulier",
+      "label": "Coffrage, soffite, caisson, habillage de poutre",
+      "triggers": [
+        "boxing"
+      ],
+      "params": [
+        {
+          "key": "longueur_coffrage",
+          "label": "Longueur du coffrage",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du coffrage ?",
+          "fromLineQuantity": true
+        },
+        {
+          "key": "type_coffrage",
+          "label": "Forme du coffrage",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Ton coffrage, c'est un soffite en L (2 faces) ou un caisson en U (3 faces) ?",
+          "choices": [
+            {
+              "label": "Soffite en L (2 faces)",
+              "value": "1",
+              "dit": [
+                "soffite",
+                "en l",
+                "2 faces"
+              ]
+            },
+            {
+              "label": "Caisson en U (3 faces)",
+              "value": "2",
+              "dit": [
+                "caisson",
+                "en u",
+                "3 faces",
+                "ipn",
+                "poutre"
+              ]
+            }
+          ],
+          "display": {
+            "1": "soffite en L",
+            "2": "caisson en U"
+          },
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "caisson",
+                "ipn",
+                "poutre",
+                "3 faces"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "soffite",
+                "2 faces",
+                "angle"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "developpe",
+          "label": "Développé (somme des faces)",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Développé du coffrage (la somme de ses faces) ?",
+          "textLabels": [
+            "developpe",
+            "dev."
+          ],
+          "textRange": {
+            "min": "0.1",
+            "max": "3"
+          },
+          "choices": [
+            {
+              "label": "40 cm",
+              "value": "0.4"
+            },
+            {
+              "label": "60 cm",
+              "value": "0.6"
+            },
+            {
+              "label": "80 cm",
+              "value": "0.8"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ]
+        },
+        {
+          "key": "enduit_forme",
+          "label": "Enduit à joint",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ?",
+          "choices": [
+            {
+              "label": "En poudre",
+              "value": "1",
+              "dit": [
+                "poudre",
+                "sac",
+                "en sac"
+              ]
+            },
+            {
+              "label": "Prêt à l'emploi",
+              "value": "2",
+              "dit": [
+                "pret a l'emploi",
+                "pate",
+                "seau",
+                "tout pret"
+              ]
+            }
+          ],
+          "display": {
+            "1": "en poudre",
+            "2": "prêt à l'emploi"
+          },
+          "textValues": [
+            {
+              "value": "2",
+              "keywords": [
+                "pret a l'emploi",
+                "placomix",
+                "pate"
+              ]
+            },
+            {
+              "value": "1",
+              "keywords": [
+                "poudre",
+                "placojoint",
+                "pr4"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "fixation_rail",
+          "label": "Fixation des rails",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Tes rails au sol et au plafond, tu les fixes comment ?",
+          "choices": [
+            {
+              "label": "Cloueur à gaz",
+              "value": "1",
+              "dit": [
+                "cloueur",
+                "gaz",
+                "pistolet"
+              ]
+            },
+            {
+              "label": "Chevilles à frapper",
+              "value": "2",
+              "dit": [
+                "cheville",
+                "chevilles",
+                "frapper"
+              ]
+            }
+          ],
+          "display": {
+            "1": "cloueur à gaz",
+            "2": "chevilles à frapper"
+          }
+        },
+        {
+          "key": "marque_cloueur",
+          "label": "Marque du cloueur",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Ton cloueur à gaz, c'est quelle marque ?",
+          "hint": "Les clous et les cartouches de gaz vont avec leur cloueur.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Spit",
+              "value": "1",
+              "dit": [
+                "spit",
+                "pulsa"
+              ]
+            },
+            {
+              "label": "Hilti",
+              "value": "2",
+              "dit": [
+                "hilti",
+                "gx"
+              ]
+            },
+            {
+              "label": "Paslode",
+              "value": "3",
+              "dit": [
+                "paslode"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Spit",
+            "2": "Hilti",
+            "3": "Paslode"
+          }
+        }
+      ],
+      "slots": [
+        {
+          "key": "coffrage",
+          "family": "boxing",
+          "label": "Coffrage",
+          "measureOnly": true
+        },
+        {
+          "key": "plaque",
+          "family": "plasterboard",
+          "label": "Plaques",
+          "formOf": "coffrage",
+          "keywords": [
+            "plaque",
+            "ba13"
+          ],
+          "usual": {
+            "text": "BA13 1,20 × 2,50 m.",
+            "source": "placo-ba13",
+            "productId": "plaque-ba13"
+          }
+        },
+        {
+          "key": "rive",
+          "family": "perimeter_angle",
+          "label": "Profilés de rive",
+          "formOf": "coffrage",
+          "keywords": [
+            "corniere",
+            "rail"
+          ],
+          "usual": {
+            "text": "Cornière ou rail de 3 m.",
+            "source": "placo-cr2",
+            "productId": "corniere-cr2"
+          }
+        },
+        {
+          "key": "fixation",
+          "family": "anchor",
+          "label": "Clous de fixation",
+          "formOf": "coffrage",
+          "keywords": [
+            "clou",
+            "cloueur"
+          ],
+          "usual": {
+            "text": "Clous pour cloueur à gaz, béton.",
+            "source": "spit-pulsa",
+            "productId": "clous-gaz-beton"
+          }
+        },
+        {
+          "key": "fixation_cheville",
+          "family": "anchor",
+          "label": "Chevilles de fixation",
+          "formOf": "coffrage",
+          "keywords": [
+            "cheville"
+          ],
+          "usual": {
+            "text": "Chevilles à frapper 6 × 40.",
+            "source": "brico-depot-chevilles",
+            "productId": "cheville-frapper"
+          }
+        },
+        {
+          "key": "vis",
+          "family": "screw_board",
+          "label": "Vis TTPC 25",
+          "formOf": "coffrage",
+          "keywords": [
+            "ttpc"
+          ],
+          "usual": {
+            "text": "TTPC 25.",
+            "source": "gypso-vis",
+            "productId": "vis-ttpc-25"
+          }
+        },
+        {
+          "key": "bande_armee",
+          "family": "corner_tape",
+          "label": "Bande armée d'angle",
+          "formOf": "coffrage",
+          "keywords": [
+            "bande armee",
+            "cornière d'angle"
+          ],
+          "usual": {
+            "text": "Bande armée, rouleau de 30 m.",
+            "source": "placo-integrale-2023-bande",
+            "productId": "bande-armee"
+          }
+        },
+        {
+          "key": "bande",
+          "family": "joint_tape",
+          "label": "Bande à joint",
+          "keywords": [
+            "bande"
+          ],
+          "suggested": {
+            "label": "Bande à joint (si tu fais les joints)"
+          },
+          "usual": {
+            "text": "Bande papier, rouleau de 150 m.",
+            "source": "placo-integrale-2023-bande",
+            "productId": "bande-papier"
+          }
+        },
+        {
+          "key": "enduit",
+          "family": "joint_compound",
+          "label": "Enduit à joint",
+          "keywords": [
+            "enduit"
+          ],
+          "suggested": {
+            "label": "Enduit à joint (si tu fais les joints)"
+          },
+          "usual": {
+            "text": "Enduit poudre, sac de 25 kg.",
+            "source": "placo-pr4",
+            "productId": "enduit-poudre"
+          }
+        },
+        {
+          "key": "enduit_pate",
+          "family": "joint_compound",
+          "label": "Enduit à joint prêt à l'emploi",
+          "keywords": [
+            "pret a l'emploi",
+            "placomix"
+          ],
+          "formOf": "enduit",
+          "usual": {
+            "text": "Enduit prêt à l'emploi, seau de 25 kg.",
+            "source": "placo-integrale-2023-bande",
+            "productId": "enduit-pate"
+          }
+        }
+      ],
+      "constants": {
+        "largeur_plaque": {
+          "source": "placo-ba13",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Plaques de 1,20 m."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "1.20",
+          "unit": "m"
+        },
+        "longueur_plaque": {
+          "source": "placo-ba13",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Plaque de 2,50 m (Placo, Siniat)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "2.5",
+          "unit": "m",
+          "label": "plaques de {v}"
+        },
+        "chute_coffrage": {
+          "source": "mobiiz-geometrie",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Aucun fabricant ni guide de métré ne publie de quantités par mètre de coffrage : règle proposée qui applique, face par face, les ratios au m² confirmés et la géométrie des arêtes (recherche/12, à valider par un plaquiste)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "1.10",
+          "unit": "u",
+          "label": "plaques + {v} (petites faces)"
+        },
+        "rives_par_ml": {
+          "source": "mobiiz-geometrie",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Aucun fabricant ni guide de métré ne publie de quantités par mètre de coffrage : règle proposée qui applique, face par face, les ratios au m² confirmés et la géométrie des arêtes (recherche/12, à valider par un plaquiste)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "label": "{v} rives par mètre de coffrage"
+        },
+        "pas_fixation_rail": {
+          "source": "siniat-carnet-cloison",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Rails fixés tous les 60 cm au plus : Siniat carnet cloison et Placo Intégrale 2023 (nouveauté DTU 25.41)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "0.60",
+          "unit": "m",
+          "label": "une fixation tous les {v}"
+        },
+        "vis_par_m2": {
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 15 vis/m² : ratio plafond / contre-cloison du SNIP, appliqué à la surface de plaques (recherche/12)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "15",
+          "unit": "u/m2",
+          "label": "{v} vis par m²"
+        },
+        "chute": {
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 5 % (SNIP, Pladur)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "1.05",
+          "unit": "u",
+          "label": "+ {v}"
+        },
+        "bande_par_m2": {
+          "source": "placo-integrale-2023-bande",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,40 ml par m² de parement (Placo Intégrale 04/2023 et brochure doublage 2017 ; fiche solution 72/48 : 2,80 pour deux faces) × 1 face(s). Siniat dit 1,1 (joints entre plaques seulement) : Placo retenu, plus prudent."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "1.4",
+          "unit": "ml/m2",
+          "label": "{v} de bande par m²"
+        },
+        "enduit_poudre_par_m2": {
+          "source": "placo-pr4",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,33 kg/m² de parement : fiche Placo PR4 (02/04/2026) et Intégrale 2023 ; Siniat 0,30-0,35 × 1 face(s)."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "0.33",
+          "unit": "kg/m2",
+          "label": "{v} d'enduit poudre par m²"
+        },
+        "enduit_pate_par_m2": {
+          "source": "placo-integrale-2023-bande",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 0,47 kg/m² de parement : Intégrale Placo 2023, Siniat Prégy S 0,45, Semin CE 78 0,50 (recherche/12) × 1 face(s). Le 0,525 de la seule fiche Placomix Pro est un minimum de produit, d'autres documents Placo du même produit disent 0,49."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "0.47",
+          "unit": "kg/m2",
+          "label": "{v} d'enduit prêt à l'emploi par m²"
+        }
+      },
+      "derived": [
+        {
+          "key": "surface_plaques",
+          "label": "Surface de plaques",
+          "unit": "m2",
+          "formula": "longueur_coffrage * developpe",
+          "shown": true,
+          "source": "mobiiz-geometrie",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Longueur × développé (géométrie)."
+          },
+          "version": 1
+        },
+        {
+          "key": "aretes",
+          "label": "Arêtes saillantes",
+          "unit": "u",
+          "formula": "type_coffrage",
+          "shown": false,
+          "source": "mobiiz-geometrie",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Soffite en L : 1 arête saillante ; caisson en U : 2 (géométrie)."
+          },
+          "version": 1
+        }
+      ],
+      "needs": [
+        {
+          "id": "plaques",
+          "slot": "plaque",
+          "formula": "arrondi_sup(surface_plaques * regle.chute_coffrage / (regle.largeur_plaque * regle.longueur_plaque))",
+          "unit": "u",
+          "core": true,
+          "source": "mobiiz-geometrie",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Aucun fabricant ni guide de métré ne publie de quantités par mètre de coffrage : règle proposée qui applique, face par face, les ratios au m² confirmés et la géométrie des arêtes (recherche/12, à valider par un plaquiste)."
+          },
+          "version": 1,
+          "designation": "Plaques BA13 1,20 × 2,50 m",
+          "precision": "coffrage de {longueur_coffrage|m}, développé {developpe|m}"
+        },
+        {
+          "id": "rives",
+          "slot": "rive",
+          "formula": "longueur_coffrage * (regle.rives_par_ml + aretes) * regle.chute",
+          "unit": "ml",
+          "core": true,
+          "source": "mobiiz-geometrie",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — à confirmer : Aucun fabricant ni guide de métré ne publie de quantités par mètre de coffrage : règle proposée qui applique, face par face, les ratios au m² confirmés et la géométrie des arêtes (recherche/12, à valider par un plaquiste)."
+          },
+          "version": 1,
+          "precision": "rives au mur et au plafond, profilé à chaque arête basse",
+          "short": "profilés de rive"
+        },
+        {
+          "id": "fixations-clous",
+          "slot": "fixation",
+          "formula": "arrondi_sup(longueur_coffrage * regle.rives_par_ml / regle.pas_fixation_rail + 0)",
+          "unit": "u",
+          "core": true,
+          "source": "siniat-carnet-cloison",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+          },
+          "version": 1,
+          "when": "fixation_rail < 2",
+          "short": "fixations",
+          "precision": "une fixation tous les 60 cm",
+          "designation": "Clous {marque_cloueur} pour cloueur à gaz, béton 20 mm, avec cartouches de gaz",
+          "precisionRequires": [
+            "marque_cloueur"
+          ]
+        },
+        {
+          "id": "fixations-chevilles",
+          "slot": "fixation_cheville",
+          "formula": "arrondi_sup(longueur_coffrage * regle.rives_par_ml / regle.pas_fixation_rail + 0)",
+          "unit": "u",
+          "core": true,
+          "source": "siniat-carnet-cloison",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Pas de 0,60 m au plus : Siniat, Placo, Pladur (« 50 à 60 cm ») (recherche/13 B1). La fixation en bout de barre (à 10 cm de chaque extrémité, Castorama seul) n'est pas comptée."
+          },
+          "version": 1,
+          "when": "fixation_rail >= 2",
+          "short": "chevilles",
+          "precision": "une cheville tous les 60 cm"
+        },
+        {
+          "id": "vis-ttpc-25",
+          "slot": "vis",
+          "formula": "surface_plaques * regle.vis_par_m2",
+          "unit": "u",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Ratio au m² (SNIP)."
+          },
+          "version": 1,
+          "short": "vis"
+        },
+        {
+          "id": "bande-armee",
+          "slot": "bande_armee",
+          "formula": "longueur_coffrage * aretes * regle.chute",
+          "unit": "ml",
+          "core": true,
+          "source": "placo-integrale-2023-bande",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Bande armée obligatoire sur chaque angle saillant : NF DTU 25.41 § 6.1.4.2.3 (cité par Knauf) et Siniat ; longueur = géométrie (recherche/05, 12)."
+          },
+          "version": 1,
+          "short": "bande armée",
+          "precision": "une par arête saillante"
+        },
+        {
+          "id": "bande",
+          "slot": "bande",
+          "formula": "surface_plaques * regle.bande_par_m2",
+          "unit": "ml",
+          "core": false,
+          "short": "bande",
+          "precision": "joints jointoyés avec bande",
+          "source": "placo-integrale-2023-bande",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : m² × ratio Placo."
+          },
+          "version": 1
+        },
+        {
+          "id": "enduit-poudre",
+          "slot": "enduit",
+          "formula": "surface_plaques * regle.enduit_poudre_par_m2",
+          "unit": "kg",
+          "core": false,
+          "when": "enduit_forme < 2",
+          "short": "enduit poudre",
+          "source": "placo-pr4",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : m² × ratio Placo."
+          },
+          "version": 1
+        },
+        {
+          "id": "enduit-pate",
+          "slot": "enduit_pate",
+          "formula": "surface_plaques * regle.enduit_pate_par_m2",
+          "unit": "kg",
+          "core": false,
+          "when": "enduit_forme >= 2",
+          "short": "enduit prêt à l'emploi",
+          "source": "placo-integrale-2023-bande",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Formule : m² × ratio Placo."
+          },
+          "version": 1
         }
       ]
     }
