@@ -39,13 +39,30 @@
   aspect-ratio: 1 / 0.95;
   touch-action: manipulation;
 }
+/*
+ * Le zoom : une seule transformation du groupe, menée par le navigateur (retour de Greg, 20 novembre 2026). Courbe qui
+ * démarre vite et se pose en douceur ; les traits gardent leur épaisseur à l'écran pendant tout le mouvement.
+ */
+.mzo .mzo-scene {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.mzo .mzo-region,
+.mzo .mzo-dep path {
+  vector-effect: non-scaling-stroke;
+}
 .mzo .mzo-region {
   fill: var(--mzo-region);
   stroke: var(--mzo-trait);
+  stroke-width: 1.1px;
   stroke-linejoin: round;
   cursor: pointer;
   outline: none;
-  transition: fill 0.2s ease;
+  transition:
+    fill 0.2s ease,
+    opacity 0.45s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .mzo .mzo-region:hover,
@@ -55,11 +72,12 @@
 .mzo .mzo-region:focus-visible {
   stroke: var(--color-accent, #fed206);
 }
-/* Le zoom fait : le reste de la France passe derrière, flouté et estompé. */
+/* Pendant le zoom, le reste de la France s'estompe ; le flou se pose une fois le zoom fini (jamais recalculé en route). */
 .mzo .mzo-fond .mzo-region {
   fill: var(--mzo-fond);
   opacity: 0.45;
   cursor: default;
+  pointer-events: none;
 }
 .mzo .mzo-fond .mzo-region.courante {
   opacity: 0.2;
@@ -70,17 +88,27 @@
   pointer-events: none;
   opacity: 0.9;
 }
+.mzo .mzo-noms {
+  transition: opacity 0.2s ease;
+}
+.mzo .mzo-noms.caches {
+  opacity: 0;
+}
+/* Les départements apparaissent pendant le zoom, en fondu ; leur ombre se pose une fois le zoom fini. */
 .mzo .mzo-dep {
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  animation: mzo-apparait 0.35s ease both;
+  animation: mzo-apparait 0.45s ease 0.12s both;
 }
 .mzo .mzo-dep path {
   fill: var(--mzo-region);
   stroke: var(--mzo-trait);
+  stroke-width: 1.3px;
   stroke-linejoin: round;
   transition: fill 0.2s ease;
+}
+.mzo .posee .mzo-dep path {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
 }
 .mzo .mzo-dep:hover path {
@@ -93,15 +121,18 @@
   fill: #fed206;
   stroke: #15120e;
 }
-.mzo .mzo-dep text {
+.mzo .mzo-noms-deps {
+  pointer-events: none;
+  animation: mzo-apparait 0.45s ease 0.12s both;
+}
+.mzo .mzo-noms-deps text {
   fill: var(--mzo-texte-carte);
   font-weight: 800;
-  pointer-events: none;
 }
-.mzo .mzo-dep.on text {
+.mzo .mzo-noms-deps text.on {
   fill: #15120e;
 }
-.mzo .mzo-dep .mzo-code {
+.mzo .mzo-noms-deps .mzo-code {
   opacity: 0.7;
 }
 @keyframes mzo-apparait {
@@ -200,7 +231,12 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mzo .mzo-dep {
+  .mzo .mzo-scene,
+  .mzo .mzo-noms {
+    transition: none;
+  }
+  .mzo .mzo-dep,
+  .mzo .mzo-noms-deps {
     animation: none;
   }
   .mzo .mzo-region,
