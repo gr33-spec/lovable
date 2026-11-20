@@ -1,63 +1,19 @@
 {
  "doutes": [
   {
-   "id": "fenetres de toit de fenetres de toit velux ggl mk04 78 98 avec raccords d etancheite pour ardoise ¦ fenetres de toit",
-   "reference": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
-   "lue": "Fenêtres de toit"
-  },
-  {
-   "id": "4 noues de 1.80 m ¦ noues de lucarnes",
+   "id": "4 noues de 1.80 m ¦ noues en zinc",
    "reference": "4 noues de 1,80 m.",
-   "lue": "Noues de lucarnes"
-  },
-  {
-   "id": "fenetres de toit de fenetres de toit velux ggl mk04 78 98 avec raccords d etancheite pour ardoise ¦ raccords d etancheite pour ardoises fenetre 78 98",
-   "reference": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
-   "lue": "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98"
-  },
-  {
-   "id": "faitieres ¦ faitieres terre cuite",
-   "reference": "Faîtières",
-   "lue": "Faîtières terre cuite"
-  },
-  {
-   "id": "4 noues de 1.80 m ¦ noues zinc",
-   "reference": "4 noues de 1,80 m.",
-   "lue": "Noues zinc"
+   "lue": "Noues en zinc"
   }
  ],
  "questions": [
   {
-   "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
-   "question": "Noue de 50 ou de 66 ?"
+   "id": "param:raccord_couverture ¦ Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+   "question": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?"
   },
   {
-   "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
-   "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
-  },
-  {
-   "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
-   "question": "Quelle longueur de crochet ?"
-  },
-  {
-   "id": "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?",
-   "question": "Périmètre d'une cheminée (les 4 côtés) ?"
-  },
-  {
-   "id": "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?",
-   "question": "Sortie de toit : quel diamètre ?"
-  },
-  {
-   "id": "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?",
-   "question": "Sortie de toit : conduit de fumée ou ventilation ?"
-  },
-  {
-   "id": "param:longueur_noue ¦ Longueur de noue ?",
-   "question": "Longueur de noue ?"
-  },
-  {
-   "id": "param:nb_cheminees ¦ Combien de cheminées ?",
-   "question": "Combien de cheminées ?"
+   "id": "param:qualite_ardoise@couverture-ardoises-crochet__4 ¦ Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
   }
  ]
 }

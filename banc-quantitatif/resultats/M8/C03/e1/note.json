@@ -3,11 +3,11 @@
  "c": "C03",
  "e": 1,
  "nRef": 4,
- "justes": 0,
- "quantite": 0,
- "manquantes": 1,
- "inventees": 0,
- "doutes": 3,
+ "justes": 1,
+ "quantite": 1,
+ "manquantes": 2,
+ "inventees": 1,
+ "doutes": 0,
  "questions": 0,
  "questionsRef": 1,
  "questionsHorsRef": 0,
@@ -15,25 +15,17 @@
  "questionsNonJugees": 0,
  "questionsOubliees": 1,
  "detail": {
-  "quantite": [],
+  "quantite": [
+   "Descente zinc Ø100 : 9 pièces attendu, 3 pièces lu"
+  ],
   "manquantes": [
-   "Gouttière demi-ronde zinc naturel dév. 33 (7 longueurs de 4 m)"
+   "Gouttière demi-ronde zinc naturel dév. 33 (7 longueurs de 4 m)",
+   "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
   ],
-  "inventees": [],
-  "doutes": [
-   {
-    "ref": "Angles de gouttière demi-ronde zinc naturel dév. 33",
-    "lue": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles"
-   },
-   {
-    "ref": "Descente zinc Ø100",
-    "lue": "F et P DEP zn Ø100"
-   },
-   {
-    "ref": "Dauphins fonte Ø100",
-    "lue": "F et P dauphins fonte en pied de DEP"
-   }
+  "inventees": [
+   "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles (28 ml)"
   ],
+  "doutes": [],
   "horsRef": []
  }
 }

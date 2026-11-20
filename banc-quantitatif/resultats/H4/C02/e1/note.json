@@ -1,0 +1,36 @@
+{
+ "m": "H4",
+ "c": "C02",
+ "e": 1,
+ "nRef": 7,
+ "justes": 4,
+ "quantite": 1,
+ "manquantes": 2,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 0,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+  ],
+  "manquantes": [
+   "Faîtières terre cuite rouge (24 pièces)",
+   "Closoir ventilé (2 rouleaux de 5 m)"
+  ],
+  "inventees": [
+   "8,00 m. (2 rouleaux de 5 m)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:longueur_faitage",
+    "text": "Longueur du faîtage ?"
+   }
+  ]
+ }
+}

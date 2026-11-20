@@ -225,5 +225,44 @@
    "ne_sait_pas": false,
    "dit": "Une seule cheminée."
   }
+ },
+ "param:raccord_couverture ¦ Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?": {
+  "question": {
+   "id": "param:raccord_couverture ¦ Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+   "question": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+   "boutons": [
+    "Pour tuiles (mécaniques, canal)",
+    "Pour ardoises",
+    "Pour tuiles plates"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Pour ardoises",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Pour ardoises."
+  }
+ },
+ "param:qualite_ardoise@couverture-ardoises-crochet__4 ¦ Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": {
+  "question": {
+   "id": "param:qualite_ardoise@couverture-ardoises-crochet__4 ¦ Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Espagne 1er choix",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Espagne 1er choix."
+  }
  }
 }

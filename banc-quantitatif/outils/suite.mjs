@@ -101,3 +101,17 @@ if (cmd === "noter") {
   const parM = {}; for (const n of lignes) { if (n.absent) { (parM[n.m] ??= { absents: 0 }).absents = (parM[n.m].absents ?? 0) + 1; continue; } const a = (parM[n.m] ??= {}); for (const k of ["nRef", "justes", "quantite", "manquantes", "inventees", "doutes", "questions", "questionsRef", "questionsHorsRef", "questionsInutiles", "questionsNonJugees", "questionsOubliees"]) a[k] = (a[k] ?? 0) + n[k]; a.n = (a.n ?? 0) + 1; }
   console.table(parM);
 }
+
+// Stabilité : le même devis lu plusieurs fois donne-t-il la même liste et les mêmes questions ?
+if (cmd === "stabilite") {
+  const par = {};
+  for (const [m, c, e] of tous) { const f = lire(`${dossier(m, c, e)}/final.json`); if (!f) continue; const sig = (x) => JSON.stringify([x.liste.map((l) => [norm(l.label), l.quantite, l.unite]), x.aChiffrer.map((l) => norm(l.label))]); ((par[m] ??= {})[c] ??= []).push({ e, liste: sig(f.final), questions: JSON.stringify(f.posees.map((q) => q.key)), ouverture: sig(f.ouverture) }); }
+  const out = {};
+  for (const [m, cs] of Object.entries(par)) {
+    let memesListes = 0, memesQuestions = 0, tout = 0, n = 0, lectures = 0; const instables = [];
+    for (const [c, es] of Object.entries(cs)) { n++; lectures += es.length; const L = new Set(es.map((x) => x.liste)).size === 1, Q = new Set(es.map((x) => x.questions)).size === 1; if (L) memesListes++; if (Q) memesQuestions++; if (L && Q) tout++; else instables.push(`${c} (${new Set(es.map((x) => x.liste)).size} listes, ${new Set(es.map((x) => x.questions)).size} séries de questions sur ${es.length})`); }
+    out[m] = { chantiers: n, lectures, memeListe: memesListes, memesQuestions, stables: tout, instables };
+  }
+  ecrire("resultats/stabilite.json", out);
+  for (const [m, o] of Object.entries(out)) console.log(m.padEnd(5), `${o.stables}/${o.chantiers} chantiers stables (${o.lectures} lectures) ; même liste ${o.memeListe}, mêmes questions ${o.memesQuestions} ; instables : ${o.instables.join(", ") || "aucun"}`);
+}

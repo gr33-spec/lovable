@@ -11,8 +11,8 @@
  "questions": 5,
  "questionsRef": 3,
  "questionsHorsRef": 3,
- "questionsInutiles": 0,
- "questionsNonJugees": 3,
+ "questionsInutiles": 2,
+ "questionsNonJugees": 0,
  "questionsOubliees": 1,
  "detail": {
   "quantite": [],

@@ -3,16 +3,16 @@
  "c": "C10",
  "e": 1,
  "nRef": 9,
- "justes": 5,
+ "justes": 6,
  "quantite": 2,
  "manquantes": 1,
  "inventees": 1,
- "doutes": 1,
+ "doutes": 0,
  "questions": 4,
  "questionsRef": 3,
  "questionsHorsRef": 2,
- "questionsInutiles": 0,
- "questionsNonJugees": 2,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
  "questionsOubliees": 1,
  "detail": {
   "quantite": [
@@ -25,12 +25,7 @@
   "inventees": [
    "Gouttières PVC sable (5 longueurs de 4 m)"
   ],
-  "doutes": [
-   {
-    "ref": "Tubes de descente Ø80, longueur 2 m",
-    "lue": "Descentes PVC Ø80"
-   }
-  ],
+  "doutes": [],
   "horsRef": [
    {
     "key": "param:surface",

@@ -3,11 +3,11 @@
  "c": "C08",
  "e": 1,
  "nRef": 4,
- "justes": 2,
- "quantite": 0,
+ "justes": 3,
+ "quantite": 1,
  "manquantes": 0,
  "inventees": 0,
- "doutes": 2,
+ "doutes": 0,
  "questions": 2,
  "questionsRef": 2,
  "questionsHorsRef": 0,
@@ -15,19 +15,12 @@
  "questionsNonJugees": 0,
  "questionsOubliees": 0,
  "detail": {
-  "quantite": [],
+  "quantite": [
+   "Mortier pour solin : 1 sac de 25 kg attendu, 3 ml lu"
+  ],
   "manquantes": [],
   "inventees": [],
-  "doutes": [
-   {
-    "ref": "Mortier pour solin",
-    "lue": "Mortier"
-   },
-   {
-    "ref": "Descente Ø80 d'eau pluviale, diamètre descentes mm",
-    "lue": "DEP Ø80"
-   }
-  ],
+  "doutes": [],
   "horsRef": []
  }
 }

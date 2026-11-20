@@ -5,9 +5,9 @@
  "nRef": 4,
  "justes": 1,
  "quantite": 0,
- "manquantes": 2,
- "inventees": 2,
- "doutes": 1,
+ "manquantes": 3,
+ "inventees": 3,
+ "doutes": 0,
  "questions": 1,
  "questionsRef": 1,
  "questionsHorsRef": 0,
@@ -18,18 +18,15 @@
   "quantite": [],
   "manquantes": [
    "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)",
-   "Descente zinc Ø100 (9 pièces)"
+   "Descente zinc Ø100 (9 pièces)",
+   "Gouttière demi-ronde zinc naturel dév. 33 (7 longueurs de 4 m)"
   ],
   "inventees": [
    "gout. 1/2 rde zn nat. (7 longueurs de 4 m)",
-   "DEP zn (9 pièces)"
+   "DEP zn (9 pièces)",
+   "Naissances dév. 33 Ø100 (3 pièces)"
   ],
-  "doutes": [
-   {
-    "ref": "Gouttière demi-ronde zinc naturel dév. 33",
-    "lue": "Naissances dév. 33 Ø100"
-   }
-  ],
+  "doutes": [],
   "horsRef": []
  }
 }

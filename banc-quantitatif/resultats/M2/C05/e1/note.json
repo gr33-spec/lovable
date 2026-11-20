@@ -3,16 +3,16 @@
  "c": "C05",
  "e": 1,
  "nRef": 9,
- "justes": 4,
+ "justes": 6,
  "quantite": 3,
  "manquantes": 0,
  "inventees": 1,
- "doutes": 2,
+ "doutes": 0,
  "questions": 6,
  "questionsRef": 4,
  "questionsHorsRef": 5,
- "questionsInutiles": 0,
- "questionsNonJugees": 5,
+ "questionsInutiles": 4,
+ "questionsNonJugees": 0,
  "questionsOubliees": 3,
  "detail": {
   "quantite": [
@@ -24,16 +24,7 @@
   "inventees": [
    "Ardoise naturelle 30×20 (à chiffrer )"
   ],
-  "doutes": [
-   {
-    "ref": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
-    "lue": "Fenêtres de toit"
-   },
-   {
-    "ref": "4 noues de 1,80 m.",
-    "lue": "Noues de lucarnes"
-   }
-  ],
+  "doutes": [],
   "horsRef": [
    {
     "key": "param:perimetre_cheminee",

@@ -3,11 +3,11 @@
  "c": "C01",
  "e": 1,
  "nRef": 8,
- "justes": 4,
- "quantite": 1,
+ "justes": 5,
+ "quantite": 2,
  "manquantes": 1,
  "inventees": 1,
- "doutes": 2,
+ "doutes": 0,
  "questions": 2,
  "questionsRef": 2,
  "questionsHorsRef": 0,
@@ -16,7 +16,8 @@
  "questionsOubliees": 0,
  "detail": {
   "quantite": [
-   "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 893 ml lu"
+   "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 893 ml lu",
+   "Crochets d'ardoise (Ardoises) : à chiffrer  attendu, 3992 pièces lu"
   ],
   "manquantes": [
    "Ardoises (Ardoises) (à chiffrer )"
@@ -24,16 +25,7 @@
   "inventees": [
    "Ardoises naturelles Espagne 1er choix 32×22 (3992 pièces)"
   ],
-  "doutes": [
-   {
-    "ref": "Dauphin fonte Ø80 en pied de descente",
-    "lue": "Dauphins fonte Ø80"
-   },
-   {
-    "ref": "Crochets d'ardoise (Ardoises)",
-    "lue": "Crochets d'ardoise inox standard, longueur 10 cm"
-   }
-  ],
+  "doutes": [],
   "horsRef": []
  }
 }

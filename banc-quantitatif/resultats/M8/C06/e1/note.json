@@ -3,11 +3,11 @@
  "c": "C06",
  "e": 1,
  "nRef": 4,
- "justes": 1,
+ "justes": 2,
  "quantite": 1,
  "manquantes": 1,
  "inventees": 1,
- "doutes": 1,
+ "doutes": 0,
  "questions": 0,
  "questionsRef": 1,
  "questionsHorsRef": 0,
@@ -24,12 +24,7 @@
   "inventees": [
    "Les rives 2 x 6ml soit 12ml (12 ml)"
   ],
-  "doutes": [
-   {
-    "ref": "Liteaux 27×40 (Liteaux)",
-    "lue": "Liteaux neufs sur toute la toiture 85m2"
-   }
-  ],
+  "doutes": [],
   "horsRef": []
  }
 }

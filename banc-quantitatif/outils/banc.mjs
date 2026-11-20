@@ -68,6 +68,10 @@ function etapes(m, c, e) {
       if (fait(a)) for (const g of ["toiture", "evacuation", "raccords"]) { const refs = (lire(a).lignes ?? []).filter((l) => l.partie === g).map((l) => l.ref); if (refs.length) job(`b-${g}`, S(`m3-${g}`), "sonnet", "medium", devis, `Les repères des lignes à rendre (numérotées dans l'ordre du devis, en-tête et totaux exclus) : ${refs.join(", ")}. Leur texte, pour te repérer : ${JSON.stringify((lire(a).lignes).filter((l) => refs.includes(l.ref)).map((l) => `${l.ref} = ${String(l.designation).slice(0, 60)}`))}.`); }
       break;
     case "M4": job("a", S("m4"), "opus", "high", devis); break;
+    // Lectures seules déjà faites par un autre modèle, notées à part sans appel en plus : S4 = Sonnet (1re lecture de la méthode 6), H4 = Haiku (méthode 5 avant contrôle).
+    case "S4": copie(`${dossier("M6", c, e)}/a.json`); break;
+    case "S4b": copie(`${dossier("M6", c, e)}/b.json`); break;
+    case "H4": copie(`${dossier("M5", c, e)}/a.json`); break;
     case "M5": job("a", S("m4"), "haiku", "medium", devis);
       if (fait(a) && texteDe(c, e) && fait(`${dossier("M8", c, e)}/a.json`)) { const al = alertesM5(lire(a), c, e); ecrire(`${R}/alertes.json`, al); if (al.length) { ecrire(`${R}/premiere-lecture.json`, { lignes: lire(a).lignes }); job("b", S("relecture"), "sonnet", "medium", devis, `La première lecture à relire : \`${R}/premiere-lecture.json\`. Le contrôle par le code y a relevé ces points, à vérifier d'abord (certains peuvent être de fausses alertes) :\n${al.map((x) => `- ${x}`).join("\n")}`); } }
       break;
@@ -192,7 +196,7 @@ function assembler(m, c, e) {
   let L;
   switch (m) {
     case "M0": L = a; break;
-    case "M4": L = lecture(a.lignes ?? []); break;
+    case "M4": case "S4": case "S4b": case "H4": L = lecture(a.lignes ?? []); break;
     case "M1": if (!b) return null; L = { ...a, lignes: corriger(a.lignes ?? [], b) }; journal.push(`relecture : ${b.lignes_corrigees?.length ?? 0} corrigée(s), ${b.lignes_ajoutees?.length ?? 0} ajoutée(s), ${b.lignes_retirees?.length ?? 0} retirée(s)`); break;
     case "M5": L = lecture(b ? corriger(a.lignes ?? [], b) : a.lignes ?? []); journal.push(`alertes du code : ${(lire(`${R}/alertes.json`) ?? []).length}`); break;
     case "M9": if (!b) return null; L = lecture(corriger(lectureDuCode(a).lignes, b)); journal.push(`relecture : ${b.lignes_corrigees?.length ?? 0} corrigée(s), ${b.lignes_ajoutees?.length ?? 0} ajoutée(s), ${b.lignes_retirees?.length ?? 0} retirée(s)`); break;

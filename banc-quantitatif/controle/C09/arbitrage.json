@@ -1,0 +1,23 @@
+[
+  {
+    "article": "Bacs joint debout zinc naturel 0,70 mm",
+    "bonne_valeur": "28 bacs de 5,00 m",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Le devis écrit « 2 pans, rampant 5,00 m » et la vérité dit « bacs profilés par le fournisseur à 5,00 m » (14 par pan, entraxe 430 de la bobine de 500, fiche « bobine de zinc joint debout »). DÉFAUT DE LA FICHE À SIGNALER : la fiche n'a aucune règle de longueur ni de nombre de bacs pour un joint debout commandé façonné, et le moteur comble ce vide par une surlongueur de 15 cm (5,15 m) qui n'est écrite nulle part dans la fiche."
+  },
+  {
+    "article": "Bande d'égout zinc naturel 0,70 mm, développé 330 mm",
+    "bonne_valeur": "7 bandes de 2 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche « zinc en bandes » : « ml + recouvrement à chaque jonction, arrondi à la longueur de 2 m ; avec 5 cm : +2,5 % ; avec 10 cm : +5 % », soit 12,00 ml (ligne 4 du devis) × 1,025 = 12,3 → 14 m → 7 bandes (même résultat à 10 cm) ; la référence (12 / 2 = 6) n'ajoute aucun recouvrement. La fiche reste à fiabiliser sur ce point (méthode « a_confirmer », recouvrement 5 ou 10 cm non tranché), sans effet ici."
+  },
+  {
+    "article": "Gouttière zinc demi-ronde développé 330 mm",
+    "bonne_valeur": "4 longueurs de 4 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche « gouttières zinc » (confirmé) : « ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m » ; le devis dit « 2 longueurs de 6,00 m », donc par ligne 6,03 m → 2 longueurs × 2 = 4, comme la vérité (« longueurs de 4 m : 2 par ligne, 4 en tout »). La référence (12 / 4 = 3) oublie les jonctions et le découpage par ligne : 3 barres ne couvrent pas deux lignes de 6,03 m."
+  }
+]

@@ -1,0 +1,228 @@
+{
+ "posees": [
+  {
+   "key": "param:teinte_gouttiere@gouttiere-pvc-alu__4",
+   "text": "Gouttière : gouttière : grise, blanche, sable, brune ou anthracite ?",
+   "options": [
+    "Grise",
+    "Blanche",
+    "Sable",
+    "Brune",
+    "Anthracite"
+   ],
+   "reponse": "Grise"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face",
+    "quantite": "26",
+    "unite": "pièces",
+    "affiche": "26 pièces",
+    "etat": "ready",
+    "precision": "150 m² de toiture, largeur utile 1,00 m",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "a-preciser:2"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Vis autoperc. rondelle EPDM autoperceuses bac acier avec",
+    "quantite": "12",
+    "unite": "boîtes de 100",
+    "affiche": "12 boîtes de 100",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoirs mousse profilés au bac acier",
+    "quantite": "52",
+    "unite": "pièces",
+    "affiche": "52 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "38",
+    "unite": "pièces",
+    "affiche": "38 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière PVC de 25",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "param:teinte_gouttiere@gouttiere-pvc-alu__4"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, nacelle et sécu.",
+   "Nettoyage fin de chantier, évac. des chutes"
+  ],
+  "questions": [
+   "param:teinte_gouttiere@gouttiere-pvc-alu__4"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face",
+    "quantite": "26",
+    "unite": "pièces",
+    "affiche": "26 pièces",
+    "etat": "ready",
+    "precision": "150 m² de toiture, largeur utile 1,00 m",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "a-preciser:2"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Vis autoperc. rondelle EPDM autoperceuses bac acier avec",
+    "quantite": "12",
+    "unite": "boîtes de 100",
+    "affiche": "12 boîtes de 100",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoirs mousse profilés au bac acier",
+    "quantite": "52",
+    "unite": "pièces",
+    "affiche": "52 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "38",
+    "unite": "pièces",
+    "affiche": "38 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière PVC grise de 25",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, nacelle et sécu.",
+   "Nettoyage fin de chantier, évac. des chutes"
+  ],
+  "questions": []
+ }
+}

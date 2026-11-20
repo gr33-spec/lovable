@@ -4,10 +4,10 @@
  "e": 1,
  "nRef": 6,
  "justes": 3,
- "quantite": 0,
+ "quantite": 1,
  "manquantes": 2,
  "inventees": 0,
- "doutes": 1,
+ "doutes": 0,
  "questions": 1,
  "questionsRef": 1,
  "questionsHorsRef": 0,
@@ -15,18 +15,15 @@
  "questionsNonJugees": 0,
  "questionsOubliees": 0,
  "detail": {
-  "quantite": [],
+  "quantite": [
+   "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m : 26 pièces attendu, 150 m² lu"
+  ],
   "manquantes": [
    "Vis autoperceuses rondelle EPDM bac acier avec (12 boîtes de 100)",
    "Closoirs mousse profilés au bac acier (52 pièces)"
   ],
   "inventees": [],
-  "doutes": [
-   {
-    "ref": "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m",
-    "lue": "F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)"
-   }
-  ],
+  "doutes": [],
   "horsRef": []
  }
 }
