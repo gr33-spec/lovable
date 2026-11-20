@@ -414,7 +414,9 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
       .catch((e: unknown) => {
         throw new Error(`${String(e)}\nliens du menu au dernier essai : ${JSON.stringify(dernier)}`);
       });
-    const ratios = await nav.getByRole("link").evaluateAll((liens) => {
+    // Sous charge, le menu peut se redessiner entre l'attente et la mesure (relevé à 0 lien juste après 3 visibles) :
+    // la mesure se reprend jusqu'à lire plus de 2 liens.
+    const mesurer = () => nav.getByRole("link").evaluateAll((liens) => {
       // N'importe quelle couleur CSS (rgb, oklab, color-mix) ramenée en [r, g, b, a] par un pixel de canevas.
       const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
       const rgb = (c: string) => {
@@ -453,7 +455,10 @@ test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche 
           return { nom: (l.textContent ?? "").trim(), ratio: (l1! + 0.05) / (l2! + 0.05) };
         });
     });
-    expect(ratios.length).toBeGreaterThan(2);
+    let ratios: Awaited<ReturnType<typeof mesurer>> = [];
+    await expect
+      .poll(async () => (ratios = await mesurer()).length, { message: "liens mesurés", timeout: 20_000 })
+      .toBeGreaterThan(2);
     for (const r of ratios) expect(r.ratio, `${theme} · ${r.nom}`).toBeGreaterThanOrEqual(4.5);
   }
 });
@@ -1836,7 +1841,12 @@ test("§51.6 (2026-10-12) : chaque ligne orange ouverte montre sa question en pr
     expect(await regler.getByRole("button").count(), `carte orange ${i + 1}`).toBeGreaterThan(0);
     // La question passe avant le reste de la fiche (le nom, la quantité).
     const nom = card.getByRole("button", { name: /^Modifier le nom/ });
-    if (await nom.count()) expect((await regler.boundingBox())!.y).toBeLessThan((await nom.boundingBox())!.y);
+    // La fiche s'ouvre en glissant : sous charge, on attend qu'elle soit posée avant de comparer.
+    if (await nom.count()) {
+      await expect
+        .poll(async () => (await regler.boundingBox())!.y - (await nom.boundingBox())!.y, { message: `question avant le nom, carte orange ${i + 1}`, timeout: 10_000 })
+        .toBeLessThan(0);
+    }
     await closeOpenLine(page);
   }
 });

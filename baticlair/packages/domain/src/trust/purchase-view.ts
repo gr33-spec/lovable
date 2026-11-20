@@ -411,7 +411,7 @@ function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
     ...new Map(
       group
         .flatMap((n) => n.assumptions)
-        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key))
+        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key) && !a.shownOnly)
         .map((a) => [a.key, a]),
     ).values(),
   ];

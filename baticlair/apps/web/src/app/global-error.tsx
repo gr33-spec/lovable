@@ -16,7 +16,7 @@ export default function GlobalError({ error, retry }: { error: Error & { digest?
         <main style={{ maxWidth: 420, margin: "0 auto", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", gap: 16, padding: "0 20px" }}>
           <title>{NOM_APP}</title>
           <h1 style={{ fontSize: 26, margin: 0 }}>Oups, {NOM_APP} a eu un souci</h1>
-          <p style={{ fontSize: 15, margin: 0, color: "#614822" }}>Rien n&apos;est perdu : tes chantiers sont enregistrés. On est prévenus.</p>
+          <p style={{ fontSize: 15, margin: 0, color: "#4F4B45" }}>Rien n&apos;est perdu : tes chantiers sont enregistrés. On est prévenus.</p>
           <button type="button" onClick={() => retry()} style={{ minHeight: 52, borderRadius: 16, border: 0, background: "#130901", color: "#FBF8F3", fontSize: 16, fontWeight: 800 }}>
             Réessayer
           </button>

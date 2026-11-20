@@ -465,7 +465,11 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await partirEtReprendre(page, "Terminer ton achat groupé");
     await expect(page.getByRole("region", { name: "Qu'est-ce que tu commandes ?" })).toBeVisible();
     await expect(page.getByText(/Ardoise naturelle 32×22 · Espagne 1er choix/).first()).toBeVisible();
-    await page.getByRole("button", { name: "Continuer" }).click();
+    // Sous charge, un clic peut tomber pendant que l'écran repris se pose : on attend l'étape 2, clic repris au besoin.
+    await expect(async () => {
+      await page.getByRole("button", { name: "Continuer" }).click({ timeout: 5_000 });
+      await expect(page.getByRole("region", { name: "Où et pour quand ?" })).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 30_000 });
     // Étape 2.
     await page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
     await partirEtReprendre(page, "Terminer ton achat groupé");

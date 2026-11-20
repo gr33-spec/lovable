@@ -228,7 +228,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Site public : garanties sur 3 colonnes au plus sur téléphone ; la zone telle qu'écrite (plus de « et alentours » ajouté dans la barre de confiance) ; une assurance est « Assurance déclarée » ; pas de redite entre bandeau et barre ; liens de 44 px ; une adresse en majuscules redirige ; « Retour à Mon site » sort du lien aussitôt lu ; logo et image de partage gardés 5 minutes en cache (avant : un jour).
 - Éditeur sur téléphone : l'aperçu garde au moins 38 % de la hauteur quand un réglage est ouvert, sans sa barre « Appeler » ; onglets plus lisibles, « Voir mon site » à 44 px, aides en 14 px. En sombre, la couleur choisie se lit.
 - Réponses de Greg (19 novembre 2026). Règle changée : l'éditeur « Mon site » prend la disposition de l'ordinateur dès la tablette (768 px), sur toute la largeur de l'écran ; avant, la tablette gardait celle du téléphone. Règle changée : l'adresse du site d'une entreprise supprimée n'est jamais redonnée (table `adresse_page_reservee`, remplie par un déclencheur avant la suppression d'une entreprise, migration `20261119210000_adresse_page_reservee`) ; avant, une autre entreprise pouvait la reprendre. Demandes : titre de liste au mois abrégé (« Liste du 19 nov. »).
-- Gris des textes : proposé #4F4B45 (gris neutre, même contraste que #614822, brun) ; captures avant/après envoyées à Greg ; rien n'est poussé avant son feu vert.
+- Règle changée (feu vert de Greg, 20 novembre 2026) : le gris des textes de l'app passe de #614822 (brun) à #4F4B45 (gris neutre, même contraste AA), dans `globals.css`, les écrans d'erreur et de chargement. La page d'accueil publique (`landing.css`), les e-mails et les dessins gardent l'ancien gris : à décider par Greg.
 
 ## Décisions du 17 novembre 2026 (soir) : « droit au but », après le test du chantier ardoise de Greg
 
@@ -272,6 +272,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - « Je ne sais pas » à la longueur des bacs : l'ouvrage qui a une valeur courante pour le rampant (les ardoises, dont il ne règle que le recouvrement) la reprend et reste chiffré ; les bacs restent à préciser dans la liste. Test `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts`.
 - Une qualité qui se nomme (« Ardoise d'Angers ») est acceptée même quand sa question n'est plus ouverte au moment où les réponses arrivent d'un coup (avant : refusée « pas un nombre », puis reposée).
 - La discussion des questions n'est jamais fermée en route : les cases « Suggestions » s'affichent dans son fil.
+- Recette en ligne du 19 novembre 2026 (D-2026-024) : la largeur de bobine ne se demande plus (défaut affiché 650, jamais « à confirmer », modifiable) ; une ligne « Fourniture et pose » que le modèle détaille en articles sans quantité d'un même ouvrage (bobine, tasseaux, couvre-joints) donne sa surface au premier : la couverture est chiffrée ; un nombre que le code calcule (rangs de tasseaux, nombre de bacs) n'est jamais demandé. Test `zinc-a-tasseaux.test.ts`.
 - Constat du 18 novembre : trois lectures du même devis donnent trois listes différentes. À faire : D-2026-024 au jeu de test, puis stabiliser (prompt, clés de la fiche).
 
 ## Décisions du 15 novembre 2026 (soir) : dossier UX et réponses de Greg
