@@ -1002,7 +1002,9 @@ export function ecranDeLecture(input: {
   for (const [k, v] of Object.entries(answers)) {
     if (v !== null || !k.startsWith("param:") || scopedParam(k) || fallback.some((q) => q.key === k)) continue;
     const defs = ref.workItems.filter((w) => ouvragesDuPlan.has(w.id)).flatMap((w) => w.params).filter((p) => `param:${p.key}` === k);
-    const def = defs.find((p) => !p.default) ?? defs[0];
+    // Seulement pour une donnée qu'un ouvrage du devis ne sait pas supposer (la longueur des bacs) ; la zone, qui a sa
+    // valeur courante partout, reprend cette valeur, dite et modifiable.
+    const def = defs.find((p) => !p.default);
     if (def) fallback.push({ key: k, kind: "param", text: def.question, unit: def.unit, ...(def.choices ? { options: def.choices } : {}), ...(def.named ? { named: true } : {}) });
   }
   for (const q of fallback) {
