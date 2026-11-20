@@ -79,6 +79,10 @@
           "type_plaque": [
             3,
             "u"
+          ],
+          "ei": [
+            60,
+            "u"
           ]
         },
         "ecrits": [
@@ -90,7 +94,8 @@
     "reponses": {
       "fixation_rail": 1,
       "enduit_forme": 1,
-      "marque_cloueur": 1
+      "marque_cloueur": 1,
+      "marque_systeme": 1
     },
     "coches": [
       "bande",
@@ -340,7 +345,7 @@
     "titre": "Plafond coupe-feu sous dalle béton, 2 BA13, plénum 30 cm",
     "devis": [
       {
-        "designation": "Plafond suspendu coupe-feu 2 BA13 feu (Placoflam) sous dalle béton, plénum 30 cm",
+        "designation": "Plafond suspendu coupe-feu REI 60, 2 BA13 feu (Placoflam) sous dalle béton, plénum 30 cm",
         "quantite": 40,
         "unite": "m²",
         "ouvrage": "plafond-fourrures",
@@ -360,6 +365,10 @@
           "type_plaque": [
             3,
             "u"
+          ],
+          "ei": [
+            60,
+            "u"
           ]
         },
         "ecrits": [
@@ -370,7 +379,8 @@
     "reponses": {
       "fixation_rail": 1,
       "enduit_forme": 1,
-      "marque_cloueur": 1
+      "marque_cloueur": 1,
+      "marque_systeme": 1
     },
     "coches": [
       "bande",

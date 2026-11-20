@@ -22,7 +22,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 18 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 60 cm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 18 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 60 cm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -51,7 +51,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 12,31 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,6 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 40 cm ; Longueur des montants : 2,59 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Chevilles de fixation des rails : Chevilles 6 × 40 ; Isolant de cloison : GR 32 Nu 45 ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 12,31 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,6 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 40 cm ; Longueur des montants : 2,59 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Chevilles de fixation des rails : Chevilles 6 × 40 ; Isolant de cloison : GR 32 Nu 45 ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -75,9 +75,9 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 |---|---|---|---|
 | Cloison 98/48 EI60, 2 BA13 feu par face, laine 45 mm, hauteur 3,00 m | 60 | m² | cloison-distributive |
 
-**Questions attendues** : `param:fixation_rail` (« Tes rails au sol et au plafond, tu les fixes comment ? ») ; `param:enduit_forme` (« Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ? »)
+**Questions attendues** : `param:marque_systeme` (« Ton système coupe-feu, c'est quelle marque ? ») ; `param:fixation_rail` (« Tes rails au sol et au plafond, tu les fixes comment ? ») ; `param:enduit_forme` (« Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ? »)
 
-**Réponses du test** : fixation_rail = 1 ; enduit_forme = 1 ; marque_cloueur = 1
+**Réponses du test** : fixation_rail = 1 ; enduit_forme = 1 ; marque_cloueur = 1 ; marque_systeme = 1
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
@@ -87,12 +87,12 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
-| Plaques BA13 feu 1,20 × 3 m | 70 plaques | 70 pièces | 2 plaques par face sur 20 m de cloison, hauteur 3 m |
-| Montants M48 longueur 2,99 m | 37 montants | 37 pièces | montants simples à 60 cm |
-| Rails R48 | 14 longueurs de 3 m | 42 ml | rails haut et bas |
-| Vis TTPC 25 | 1 boîte de 1000 | 600 pièces |  |
-| Vis TTPC 35 | 2 boîtes de 1000 | 1620 pièces | 2e peau |
-| Vis TRPF 13 | 1 boîte de 500 | 120 pièces |  |
+| Plaques Placo feu BA13 1,20 × 3 m | 70 plaques | 70 pièces | 2 plaques par face sur 20 m de cloison, hauteur 3 m ; système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Montants M48 longueur 2,99 m Placo | 37 montants | 37 pièces | montants simples à 60 cm ; système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Rails R48, longueur 3 m Placo | 14 longueurs de 3 m | 42 ml | rails haut et bas ; système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Vis TTPC 25 Placo | 1 boîte de 1000 | 600 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Vis TTPC 35 Placo | 2 boîtes de 1000 | 1620 pièces | 2e peau ; système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Vis TRPF 13 Placo | 1 boîte de 500 | 120 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 71 pièces | une fixation tous les 60 cm |
 | GR 32 Nu 45 | 6 colis de 12,15 m² | 63 m² |  |
 | Bande à joint | 2 rouleaux de 150 m | 168 ml | joints jointoyés avec bande |
@@ -113,7 +113,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 4,8 m ; Plaques par face : 1 plaque par face ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Clous de fixation : Clous + gaz béton
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 4,8 m ; Plaques par face : 1 plaque par face ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -123,7 +123,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Montants M48 longueur 2,49 m | 14 montants | 14 pièces | montants simples à 40 cm |
 | Rails R48 | 4 longueurs de 3 m | 10,08 ml | rails haut et bas |
 | Vis TTPC 25 | 1 boîte de 1000 | 534 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 60 pièces |  |
+| Vis TRPF 13 | 1 boîte de 500 | 36 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 38 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 42 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 9,9 kg |  |
@@ -132,6 +132,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 34 pièces |  |
 | Éclisses | 1 boîte de 50 | 1,5 pièces |  |
 | Cornières de rive | 5 longueurs de 3 m | 12,6 ml |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 72 pièces |  |
 
 > Plaque hydro en plafond : entraxe des fourrures 0,40 m (Placo 2023). Sous faïence, montants à 40 cm (lu au devis ; la valeur imposée par le DTU 25.41 § 6.3.2.1 selon le format des carreaux est à confirmer).
 
@@ -149,7 +150,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Complexes de doublage : Complexes de doublage ; Longueur de mur : 12 m ; Longueur des complexes : 2,5 m ; Mortier adhésif : Mortier adhésif MAP ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Complexes de doublage : Complexes de doublage ; Longueur de mur : 12 m ; Longueur des complexes : 2,5 m ; Mortier adhésif : Mortier adhésif MAP ; Mur à doubler : mur plan ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -174,7 +175,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Complexes de doublage : Complexes de doublage ; Longueur de mur : 17,31 m ; Longueur des complexes : 2,6 m ; Mortier adhésif : Mortier adhésif MAP ; Bande à joint : Bande à joint ; Enduit à joint prêt à l'emploi : Enduit prêt à l'emploi
+**Hypothèses dites** : Complexes de doublage : Complexes de doublage ; Longueur de mur : 17,31 m ; Longueur des complexes : 2,6 m ; Mortier adhésif : Mortier adhésif MAP ; Mur à doubler : mur plan ; Bande à joint : Bande à joint ; Enduit à joint prêt à l'emploi : Enduit prêt à l'emploi
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -207,7 +208,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
 | Plaques BA13 standard 1,20 × 2,5 m | 14 plaques | 14 pièces | pour 16 m de mur |
-| Fourrures F530 | 30 longueurs de 3 m | 90 ml | fourrures verticales tous les 60 cm |
+| Fourrures F530 | 36 longueurs de 3 m | 106,8 ml | fourrures verticales tous les 60 cm |
 | Rails F530 | 15 longueurs de 2,35 m | 33,6 ml | haut et bas |
 | Appuis intermédiaires pour isolant de 100 mm | 1 boîte de 50 | 30 pièces |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 600 pièces |  |
@@ -240,7 +241,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
 | Plaques BA13 standard 1,20 × 2,5 m | 8 plaques | 8 pièces | pour 8,33 m de mur |
-| Montants M48 longueur 2,49 m | 32 montants | 32 pièces | montants doublés à 60 cm |
+| Montants M48 longueur 2,49 m | 30 montants | 30 pièces | montants doublés à 60 cm |
 | Rails R48 | 6 longueurs de 3 m | 17,5 ml | haut et bas |
 | Vis TTPC 25 | 1 boîte de 1000 | 380 pièces |  |
 | Vis TRPF 13 | 1 boîte de 500 | 100 pièces |  |
@@ -263,7 +264,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Couches : 1
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Couches : 1
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -271,12 +272,12 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 |---|---|---|---|
 | Plaques BA13 standard 1,20 × 2,5 m | 9 plaques | 9 pièces |  |
 | Fourrures F530 | 15 longueurs de 3 m | 44,75 ml | entraxe 60 cm |
-| Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 45 pièces |  |
-| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 90 pièces |  |
+| Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 39 pièces |  |
+| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 78 pièces |  |
 | Éclisses | 1 boîte de 50 | 5,25 pièces |  |
 | Cornières de rive | 8 longueurs de 3 m | 23,36 ml |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 300 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 100 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 300 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 39 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 35 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 8,25 kg |  |
@@ -288,29 +289,28 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 | Désignation | Quantité | Unité | Ouvrage de la fiche |
 |---|---|---|---|
-| Plafond suspendu coupe-feu 2 BA13 feu (Placoflam) sous dalle béton, plénum 30 cm | 40 | m² | plafond-fourrures |
+| Plafond suspendu coupe-feu REI 60, 2 BA13 feu (Placoflam) sous dalle béton, plénum 30 cm | 40 | m² | plafond-fourrures |
 
-**Questions attendues** : `param:fixation_rail` (« Tes rails au sol et au plafond, tu les fixes comment ? ») ; `param:enduit_forme` (« Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ? »)
+**Questions attendues** : `param:marque_systeme` (« Ton système coupe-feu, c'est quelle marque ? ») ; `param:fixation_rail` (« Tes rails au sol et au plafond, tu les fixes comment ? ») ; `param:enduit_forme` (« Ton enduit à joint : en poudre (sac) ou prêt à l'emploi (seau) ? »)
 
-**Réponses du test** : fixation_rail = 1 ; enduit_forme = 1 ; marque_cloueur = 1
+**Réponses du test** : fixation_rail = 1 ; enduit_forme = 1 ; marque_cloueur = 1 ; marque_systeme = 1
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
-| Plaques BA13 feu 1,20 × 2,5 m | 28 plaques | 28 pièces |  |
-| Fourrures F530 | 24 longueurs de 3 m | 71,6 ml | entraxe 60 cm |
-| Suspentes sécables (plénum 80 à 580 mm) | 2 boîtes de 50 | 72 pièces |  |
-| Chevilles métal 6 × 40 | 1 boîte de 100 | 72 pièces |  |
-| Éclisses | 1 boîte de 50 | 8,4 pièces |  |
-| Cornières de rive | 9 longueurs de 3 m | 26,46 ml |  |
-| Vis TTPC 25 | 1 boîte de 1000 | 320 pièces |  |
-| Vis TTPC 35 | 1 boîte de 1000 | 480 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 160 pièces |  |
+| Plaques Placo feu BA13 1,20 × 2,5 m | 28 plaques | 28 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Fourrures, longueur 3 m Placo | 24 longueurs de 3 m | 71,6 ml | entraxe 60 cm ; système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Suspentes sécables Placo | 2 boîtes de 50 | 63 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Chevilles métal 6 × 40 | 1 boîte de 100 | 63 pièces |  |
+| Éclisses de fourrure Placo | 1 boîte de 50 | 8,4 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Cornières de rive, longueur 3 m Placo | 9 longueurs de 3 m | 26,46 ml | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Vis TTPC 25 Placo | 1 boîte de 1000 | 320 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
+| Vis TTPC 35 Placo | 1 boîte de 1000 | 920 pièces | système coupe-feu EI 60, marque unique selon son procès-verbal |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 45 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 56 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 13,2 kg |  |
@@ -375,7 +375,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Couches : 1 ; Membrane pare-vapeur : Membrane pare-vapeur ; Adhésif de membrane : Adhésif membrane ; Plaques : Plaques BA13 ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Couches : 1 ; Membrane pare-vapeur : Membrane pare-vapeur ; Adhésif de membrane : Adhésif membrane ; Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Type de plaque : standard ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes sécables : Suspentes sécables (plénum 80 à 580 mm) ; Vis de suspente (TTPC 35) : Vis TTPC 35 (suspentes) ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 25 : Vis TTPC 25 ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -386,12 +386,12 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Adhésif membrane | 2 rouleaux de 40 m | 46,43 ml |  |
 | Plaques BA13 standard 1,20 × 2,5 m | 18 plaques | 18 pièces |  |
 | Fourrures F530 | 30 longueurs de 3 m | 89,5 ml | entraxe 60 cm |
-| Suspentes sécables (plénum 80 à 580 mm) | 2 boîtes de 50 | 90 pièces |  |
-| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 180 pièces |  |
+| Suspentes sécables (plénum 80 à 580 mm) | 2 boîtes de 50 | 78 pièces |  |
+| Vis TTPC 35 (suspentes) | 1 boîte de 1000 | 156 pièces |  |
 | Éclisses | 1 boîte de 50 | 10,5 pièces |  |
 | Cornières de rive | 12 longueurs de 3 m | 33,08 ml |  |
 | Vis TTPC 25 | 1 boîte de 1000 | 600 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 200 pièces |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 600 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 56 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 70 ml | joints jointoyés avec bande |
 | Enduit poudre | 1 sac de 25 kg | 16,5 kg |  |
@@ -448,7 +448,7 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 7,2 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 60 cm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Complexes de doublage : Complexes de doublage ; Longueur de mur : 10,4 m ; Longueur des complexes : 2,5 m ; Mortier adhésif : Mortier adhésif MAP ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Clous de fixation : Clous + gaz béton
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 7,2 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 2,5 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants simples à 60 cm ; Longueur des montants : 2,49 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre ; Complexes de doublage : Complexes de doublage ; Longueur de mur : 10,4 m ; Longueur des complexes : 2,5 m ; Mortier adhésif : Mortier adhésif MAP ; Mur à doubler : mur plan ; Plaques : 1 ; Longueur des plaques de plafond : 2,5 m ; Fourrures : Fourrures F530 ; Entraxe des fourrures : 60 cm ; Suspentes longues : Suspentes longues 171 (plénum 20 à 150 mm) ; Hauteur de suspension : suspentes longues ; Chevilles de suspente : Chevilles métal 6 × 40 ; Éclisses : Éclisses ; Cornière de rive : Cornières de rive ; Vis TTPC 35 (2e peau) : Vis TTPC 35 ; Clous de fixation : Clous + gaz béton
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
@@ -458,17 +458,18 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 | Montants M48 longueur 2,49 m | 14 montants | 14 pièces | montants simples à 60 cm |
 | Rails R48 | 6 longueurs de 3 m | 15,12 ml | rails haut et bas |
 | Vis TTPC 25 | 1 boîte de 1000 | 720 pièces |  |
-| Vis TRPF 13 | 1 boîte de 500 | 96 pièces |  |
+| Vis TRPF 13 | 1 boîte de 500 | 36 pièces |  |
 | Clous Spit pour cloueur à gaz, béton 20 mm, avec cartouches de gaz | 1 boîte de 500 avec gaz | 57 pièces | une fixation tous les 60 cm |
 | Bande à joint | 1 rouleau de 150 m | 107,8 ml | joints jointoyés avec bande |
 | Enduit poudre | 2 sacs de 25 kg | 25,41 kg |  |
 | Complexes de doublage 10+80 1,20 × 2,5 m | 10 panneaux | 10 pièces | pour 10,4 m de mur, hauteur 2,5 m |
 | Mortier adhésif MAP | 2 sacs de 25 kg | 46,8 kg |  |
 | Fourrures F530 | 9 longueurs de 3 m | 26,85 ml | entraxe 60 cm |
-| Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 27 pièces |  |
-| Chevilles métal 6 × 40 | 1 boîte de 100 | 27 pièces |  |
+| Suspentes longues 171 (plénum 20 à 150 mm) | 1 boîte de 100 | 24 pièces |  |
+| Chevilles métal 6 × 40 | 1 boîte de 100 | 24 pièces |  |
 | Éclisses | 1 boîte de 50 | 3,15 pièces |  |
 | Cornières de rive | 7 longueurs de 3 m | 18,11 ml |  |
+| Vis TTPC 35 | 1 boîte de 1000 | 180 pièces |  |
 
 > « Bandes et enduit sur l'ensemble » : déjà compris dans chaque ouvrage, jamais recompté (piège n° 4 de l'ancien référentiel). La ligne « ens » n'est pas une fourniture.
 
@@ -508,14 +509,14 @@ d'office) ; « Hypothèses » = valeurs par défaut dites à l'artisan, modifiab
 
 **Suggestions proposées** : Bande à joint (si tu fais les joints) ; Enduit à joint (si tu fais les joints) — cochées dans le test : bande, enduit
 
-**Hypothèses dites** : Plaques : Plaques BA13 ; Longueur de cloison : 8 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 3 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants doublés à 60 cm ; Longueur des montants : 2,99 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
+**Hypothèses dites** : Plaques : Plaques BA13 ; Classement coupe-feu : sans exigence feu ; Longueur de cloison : 8 m ; Plaques par face : 1 plaque par face ; Type de plaque : standard ; Longueur des plaques : 3 m ; Montants : Montants M48 ; Largeur du montant : 48 mm ; Montage des montants : montants doublés à 60 cm ; Longueur des montants : 2,99 m ; Rails : Rails R48 ; Vis TTPC 25 : Vis TTPC 25 ; Vis TRPF : Vis TRPF 13 ; Clous de fixation des rails : Clous + gaz béton ; Bande à joint : Bande à joint ; Enduit à joint : Enduit poudre
 
 ### Liste attendue (une ligne par article, besoins additionnés sur tout le chantier puis arrondis, §49.5)
 
 | Article | Commande | Besoin calculé | Précision |
 |---|---|---|---|
 | Plaques BA13 standard 1,20 × 3 m | 14 plaques | 14 pièces | 1 plaque par face sur 8 m de cloison, hauteur 3 m |
-| Montants M48 longueur 2,99 m | 31 montants | 31 pièces | montants doublés à 60 cm |
+| Montants M48 longueur 2,99 m | 28 montants | 28 pièces | montants doublés à 60 cm |
 | Rails R48 | 6 longueurs de 3 m | 16,8 ml | rails haut et bas |
 | Vis TTPC 25 | 1 boîte de 1000 | 840 pièces |  |
 | Vis TRPF 13 | 1 boîte de 500 | 120 pièces |  |

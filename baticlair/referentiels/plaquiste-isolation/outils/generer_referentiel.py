@@ -331,6 +331,8 @@ CLOUEUR = {
     "display": {"1": "Spit", "2": "Hilti", "3": "Paslode"},
 }
 
+TYPE_PLAQUE_FEU_DEFAUT = {**prov("placo-pv-feu", OK2("Plaque par défaut selon le classement : EI 30 en 72/48 et EI 60 en 98/48 en plaques STANDARD chez les trois marques ; 72/48 EI 60 et 98/48 EI 120 en plaques feu (Placoflam, KF) chez Placo et Knauf (recherche/11 §4.2).")), "formula": "si(ei > 30, si(couches < 2, 3, si(ei > 60, 3, 1)), 1)", "note": "plaque standard, ou plaque feu quand le système coupe-feu l'exige, par défaut"}
+
 TYPE_PLAQUE = {
     "key": "type_plaque", "label": "Type de plaque", "unit": "u", "kind": "site_data",
     "question": "Quelles plaques : standard, hydro, feu, phonique ou haute dureté ?",
@@ -415,20 +417,20 @@ def cloison():
         "h_7248_s60": regle("2.50", "m", "dtu-2541-2022", hauteurs_ok), "h_7248_s40": regle("2.75", "m", "dtu-2541-2022", hauteurs_ok),
         "h_7248_d60": regle("3.05", "m", "dtu-2541-2022", hauteurs_ok), "h_7248_d40": regle("3.40", "m", "dtu-2541-2022", hauteurs_ok),
         "h_9848_s60": regle("3.00", "m", "dtu-2541-2022", hauteurs_ok), "h_9848_s40": regle("3.40", "m", "dtu-2541-2022", hauteurs_ok),
-        "h_9848_d60": regle("3.70", "m", "dtu-2541-2022", CONFLIT("3,70 m retenu (valeur la plus basse).", "Rockwool (DTU 2022) 3,70 ; Siniat carnet et Pladur 3,75.")),
+        "h_9848_d60": regle("3.75", "m", "dtu-2541-2022", OK2("3,75 m : fiche Placo sp00020105 (98/48 doublés 0,60, 3,75 m), Siniat carnet DTU et Pladur ; seul le guide Rockwool dit 3,70 (recherche/09 n° 30, à valider par Greg). Règle changée : avant 3,70 m.")),
         "h_m70_s60": regle("3.90", "m", "dtu-2541-2022", OK2("120/70 (2 BA13, M70-40) : 3,90 m en simples 0,60 (Rockwool DTU 2022, Siniat 3,85, Pladur 3,85).")),
         # Vis (SNIP fiche 18, déc. 2024 : vis des rails comprises)
-        "vis_1p_s60": regle("30", "u/m2", "snip-fc18", CONFLIT("30 vis/m² (SNIP fiche 18, déc. 2024 : vis à 30 cm sur montants + 5 vis/ml sur les rails).", "Placo (fiche solution 72/48) dit 22 sans les vis de rail ; Pladur 41 ; Gypso 25. SNIP retenu, document de la profession le plus récent."), label="{v} vis par m²"),
-        "vis_1p_s40": regle("37", "u/m2", "snip-fc18", UNE("SNIP fiche 18 : 37 vis/m² à 0,40 (Placo ancien : 30)."), label="{v} vis par m²"),
+        "vis_1p_s60": regle("30", "u/m2", "snip-fc18", OK2("30 vis/m² (vis à 30 cm + vis des rails) : SNIP fiche 18 et fiche solution Placo actuelle sp00011223 (29,19). Le « 22 » venait d'une ancienne fiche Placo (recherche/09 n° 31)."), label="{v} vis par m²"),
+        "vis_1p_s40": regle("37", "u/m2", "snip-fc18", OK2("37 vis/m² à 0,40 : SNIP fiche 18 et fiche solution Placo sp00011244 (36,75) (recherche/09 n° 6)."), label="{v} vis par m²"),
         "vis_1p_d60": regle("35", "u/m2", "snip-fc18", UNE("SNIP fiche 18, montants doublés 0,60."), label="{v} vis par m²"),
         "vis_1p_d40": regle("47", "u/m2", "snip-fc18", UNE("SNIP fiche 18, montants doublés 0,40."), label="{v} vis par m²"),
         "vis_int_s60": regle("10", "u/m2", "snip-fc18", UNE("SNIP fiche 18, 98/48 : 1re peau vissée à 60 cm, TTPC 25."), label="{v} vis 1re peau par m²"),
         "vis_int_s40": regle("14", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
         "vis_int_d60": regle("13", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
         "vis_int_d40": regle("18", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 1re peau par m²"),
-        "vis_ext_s60": regle("27", "u/m2", "snip-fc18", UNE("SNIP fiche 18, 98/48 : 2e peau, TTPC 35 (2 × 12,5 mm + 10 mm)."), label="{v} vis 2e peau par m²"),
+        "vis_ext_s60": regle("27", "u/m2", "snip-fc18", OK2("2e peau TTPC 35 : SNIP 27 et Placo sp00011452 (26,25) (recherche/09 n° 11)."), label="{v} vis 2e peau par m²"),
         "vis_ext_s40": regle("34", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 2e peau par m²"),
-        "vis_ext_d60": regle("32", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 2e peau par m²"),
+        "vis_ext_d60": regle("32", "u/m2", "snip-fc18", OK2("SNIP 32 et Placo sp00020105 (31,5) (recherche/09)."), label="{v} vis 2e peau par m²"),
         "vis_ext_d40": regle("42", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis 2e peau par m²"),
         "trpf_s60": regle("2", "u/m2", "snip-fc18", OK2("2 TRPF/m² (montant sur rail, haut et bas) : SNIP fiche 18 et Placo fiche solution 72/48."), label="{v} vis TRPF par m²"),
         "trpf_s40": regle("3", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis TRPF par m²"),
@@ -456,7 +458,7 @@ def cloison():
          "choices": [{"label": "Simples à 60 cm", "value": "1"}, {"label": "Simples à 40 cm", "value": "2"}, {"label": "Doublés à 60 cm", "value": "3"}, {"label": "Doublés à 40 cm", "value": "4"}],
          "display": {"1": "montants simples à 60 cm", "2": "montants simples à 40 cm", "3": "montants doublés à 60 cm", "4": "montants doublés à 40 cm"},
          "textValues": [{"value": "2", "keywords": ["entraxe 40", "entraxe 0,40", "a 40 cm", "e=40", "sous faience", "sous carrelage"]}, {"value": "3", "keywords": ["montants doubles", "doubles"]}],
-         "default": {**prov("dtu-2541-2022", hauteurs_ok), "formula": "si(montant > regle.montant_large, 1, si(couches < 2, si(hauteur <= regle.h_7248_s60, 1, si(hauteur <= regle.h_7248_s40, 2, si(hauteur <= regle.h_7248_d60, 3, 4))), si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4)))))", "note": montage_note}},
+         "default": {**prov("dtu-2541-2022", hauteurs_ok), "formula": "si(ei > 30, si(couches < 2, 4, si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4)))), si(montant > regle.montant_large, 1, si(couches < 2, si(hauteur <= regle.h_7248_s60, 1, si(hauteur <= regle.h_7248_s40, 2, si(hauteur <= regle.h_7248_d60, 3, 4))), si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4))))))", "note": montage_note + " Coupe-feu EI 60 en 72/48 : montants doublés à 0,40 (Placo PV RS 15-020, Knauf PV EFR-19-V-002073)."}},
         TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR,
     ]
     derived = [
@@ -473,9 +475,9 @@ def cloison():
         {"id": "plaques", "slot": "plaque", "formula": "arrondi_sup(longueur_cloison * regle.faces * couches * regle.chute_plaques / regle.largeur_plaque)", "unit": "u", "core": True,
          "designation": "Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}", "precision": "{couches} sur {longueur_cloison|m} de cloison, hauteur {hauteur|m}",
          "exclusions": "Vides de portes non déduits (le devis vend la surface pleine) ; hors huisseries.", **prov("snip-fc18", OK2("Plaques = 2 faces × plaques par face × 1,05 (SNIP 2,10 m²/m² ; Pladur 2,1 ; Placo 2,10)."))},
-        {"id": "montants", "slot": "montant", "formula": "arrondi_sup((longueur_cloison / entraxe + 1) * doubles * regle.chute_ossature)", "unit": "u", "core": True,
+        {"id": "montants", "slot": "montant", "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature)", "unit": "u", "core": True,
          "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}", "precision": "{montage}", "short": "montants",
-         "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.", **prov("snip-fc18", CONFLIT("Un montant par entraxe + 1, × 1,05 ; soit ≈ 1,75 ml/m² à 0,60 (Pladur).", "SNIP et Placo comptent 2,10 ml/m² : ils incluent montants de départ, d'about et d'huisserie. À trancher par un plaquiste."))},
+         "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.", **prov("snip-fc18", OK2("Un montant par entraxe + 1 ; en doublés, les deux montants de bout ne se doublent pas : (n + (doubles − 1)(n − 2)) × 1,05. Redonne le SNIP (2,10 / 2,89 / 3,68 / 5,25 ml/m²) et Placo Intégrale 2021-22 (recherche/09 n° 35). Hors montants d'huisserie."))},
         {"id": "rails", "slot": "rail", "formula": "longueur_cloison * regle.rails_par_cloison * regle.chute_ossature", "unit": "ml", "core": True, "precision": "rails haut et bas", "short": "rails",
          **prov("snip-fc18", OK2("2 × longueur × 1,05 : SNIP (0,84 ml/m² à 2,50 m) et Pladur (0,84 / 0,75 / 0,70 selon la hauteur)."))},
         {"id": "vis-ttpc-25", "slot": "vis", "formula": f"surface * {vis_ttpc}", "unit": "u", "core": True, "short": "vis TTPC 25", **prov("snip-fc18", UNE("Ratio SNIP par montage."))},
@@ -604,7 +606,7 @@ def doublage_fourrures():
          "h_deux_appuis": regle("4.50", "m", "pladur-2019", OK2("Jusqu'à 4,50 m : appuis à 1,30 et 2,60 m (Pladur) ; DTU 2022 jusqu'à 5,30 m avec plusieurs appuis (CAPEB)."), label="deux lignes d'appuis jusqu'à {v}"),
          "rails_par_mur": regle("2", "u", "snip-fc18", OK2("Lisse ou rail en haut et en bas (SNIP, Pladur)."), label="{v} rails (haut et bas)"),
          "vis_par_m2": regle("15", "u/m2", "snip-fc18", CONFLIT("15 vis/m² (SNIP fiche 18, vis de rive comprises).", "Placo (ancien) 11 ; Pladur 26 à 2,50 m. À trancher."), label="{v} vis par m²"),
-         "trpf_par_m2": regle("2", "u/m2", "snip-fc18", UNE("SNIP fiche 18."), label="{v} vis TRPF par m²"),
+         "trpf_par_m2": regle("2", "u/m2", "snip-fc18", OK2("SNIP 2/m² et Pladur Mémento 2017 (vis MM 2) (recherche/09 n° 15)."), label="{v} vis TRPF par m²"),
          "pas_fixation_rail": c_pas_fixation(),
          "isolant_par_m2": regle("1.05", "u", "pladur-2019", OK2("1,05 m² d'isolant par m² : Pladur et Placo."), label="isolant + 5 %"),
          **finitions_constantes(1)}
@@ -615,14 +617,14 @@ def doublage_fourrures():
               TYPE_PLAQUE, ENDUIT, FIXATION_RAIL, CLOUEUR]
     derived = [derive("longueur_mur", "Longueur de mur", "m", "surface / hauteur", "mobiiz-geometrie", GEO, True),
                derive("longueur_plaque", "Longueur des plaques", "m", LONGUEUR_PLAQUE, "placo-ba13", OK2("Plus petite longueur vendue ≥ hauteur − 1 cm."), True),
-               derive("nb_fourrures", "Nombre de fourrures", "u", "arrondi_sup((longueur_mur / regle.entraxe + 1) * regle.chute)", "pladur-2019", CONFLIT("Une fourrure par 0,60 m + 1, × 1,05 (≈ 1,75 ml/m², Pladur).", "Placo et SNIP comptent 2,0 à 2,5 ml/m² (fourrure horizontale de départ ou de fixation des appuis).")),
+               derive("nb_fourrures", "Nombre de fourrures", "u", "arrondi_sup((longueur_mur / regle.entraxe + 1) * regle.chute)", "snip-fc18", OK2("Une fourrure verticale tous les 0,60 m + 1, × 1,05 : SNIP et Pladur (recherche/09 n° 40).")),
                derive("lignes_appuis", "Lignes d'appuis", "u", "si(hauteur <= regle.h_un_appui, 1, si(hauteur <= regle.h_deux_appuis, 2, 3))", "rockwool-murs-2024", OK2("Rockwool et Pladur."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(longueur_mur * regle.chute / regle.largeur_plaque)", "u", "snip-fc18", OK2("1,05 m² de plaque par m² (SNIP, Pladur)."),
                designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}", precision="pour {longueur_mur|m} de mur"),
-        besoin("fourrures", "fourrure", "nb_fourrures * si(hauteur <= regle.longueur_fourrure, regle.longueur_fourrure, hauteur * regle.chute)", "ml", "pladur-2019", CONFLIT("Une fourrure entière par file (hauteur ≤ 3 m).", "Placo / SNIP : 2,0 à 2,5 ml/m²."), short="fourrures", precision="fourrures verticales tous les 60 cm"),
+        besoin("fourrures", "fourrure", "nb_fourrures * si(hauteur <= regle.longueur_fourrure, regle.longueur_fourrure, hauteur * regle.chute) + longueur_mur * lignes_appuis * regle.chute", "ml", "snip-fc18", OK2("Une fourrure entière par file verticale, plus la fourrure HORIZONTALE chevillée au mur qui porte les appuis (une par ligne d'appuis) : SNIP p. 11 et notice Isover Optima2 (recherche/09 n° 40-41)."), short="fourrures", precision="fourrures verticales tous les 60 cm"),
         besoin("rails", "rail_f530", "longueur_mur * regle.rails_par_mur * regle.chute", "ml", "placo-rail-f530", OK2("2 × longueur × 1,05 (SNIP, Pladur) ; rail F 530 de 2,35 m (Placo)."), short="rails", precision="haut et bas"),
-        besoin("appuis", "appui", "nb_fourrures * lignes_appuis", "u", "rockwool-murs-2024", CONFLIT("Un appui par fourrure et par ligne (≈ 0,8/m² à 2,50 m, SNIP 0,80).", "Placo (ancien) compte 2 appuis/m², Pladur 1."),
+        besoin("appuis", "appui", "nb_fourrures * lignes_appuis", "u", "rockwool-murs-2024", OK2("Un appui par fourrure verticale et par ligne : SNIP 0,80/m² et notice Isover Optima2 ; le « 2 appuis/m² » Placo ancien ne se retrouve nulle part (recherche/09 n° 42)."),
                designation="Appuis intermédiaires pour isolant de {epaisseur_isolant|mm#} mm", short="appuis"),
         besoin("vis-ttpc-25", "vis", "surface * regle.vis_par_m2", "u", "snip-fc18", CONFLIT("SNIP 15/m².", "Placo 11, Pladur 26."), short="vis"),
         besoin("vis-trpf", "trpf", "surface * regle.trpf_par_m2", "u", "snip-fc18", UNE("SNIP."), short="vis TRPF"),
@@ -686,7 +688,7 @@ def contre_cloison():
                derive("doubles", "Montants doublés", "u", "si(montage < 3, 1, 2)", "dtu-2541-2022", OK2("Deux montants dos à dos."))]
     needs = [
         besoin("plaques", "plaque", "arrondi_sup(longueur_mur * regle.chute / regle.largeur_plaque)", "u", "snip-fc18", OK2("1,05 m²/m² (SNIP, Pladur)."), designation="Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}", precision="pour {longueur_mur|m} de mur"),
-        besoin("montants", "montant", "arrondi_sup((longueur_mur / entraxe + 1) * doubles * regle.chute)", "u", "snip-fc18", CONFLIT("Un montant par entraxe + 1, × 1,05.", "SNIP compte 2,10 ml/m² (montants de départ compris)."), designation="Montants M{montant|mm#} longueur {longueur_montant|m}", precision="{montage}", short="montants"),
+        besoin("montants", "montant", "arrondi_sup((longueur_mur / entraxe + 1 + (doubles - 1) * (longueur_mur / entraxe - 1)) * regle.chute)", "u", "snip-fc18", OK2("Même règle que la cloison : SNIP et Placo (recherche/09 n° 45)."), designation="Montants M{montant|mm#} longueur {longueur_montant|m}", precision="{montage}", short="montants"),
         besoin("rails", "rail", "longueur_mur * regle.rails_par_mur * regle.chute", "ml", "snip-fc18", OK2("2 × longueur × 1,05 (SNIP, Pladur)."), short="rails", precision="haut et bas"),
         besoin("vis-ttpc-25", "vis", "surface * si(montage < 2, regle.vis_s60, regle.vis_s40)", "u", "snip-fc18", UNE("SNIP."), short="vis"),
         besoin("vis-trpf", "trpf", "surface * si(montage < 3, regle.trpf_s, regle.trpf_d)", "u", "snip-fc18", UNE("SNIP."), short="vis TRPF"),
@@ -717,11 +719,11 @@ def plafond():
          "chute": regle("1.05", "u", "placo-integrale-plafonds-2023", OK2("1,05 m² de plaque par m² de plafond : Placo Intégrale 2023 et Pladur."), label="+ {v}"),
          "e60": regle("0.60", "m", "placo-integrale-plafonds-2023", OK2("Entraxe 0,60 si isolant < 6 kg/m² : Placo 2023 et Siniat carnet plafond.")),
          "e50": regle("0.50", "m", "placo-integrale-plafonds-2023", OK2("0,50 si 6 à 10 kg/m² : Placo 2023 et Siniat.")),
-         "fourrures_e60": regle("1.79", "ml/m2", "snip-fc18", CONFLIT("1,79 ml/m² à 0,60 : SNIP fiche 18 (2024) et Placo « solution plancher bois ».", "L'Intégrale Placo 2023 compte 2,0 ml/m² ; Pladur 1,75."), label="{v} de fourrures par m²"),
+         "fourrures_e60": regle("1.79", "ml/m2", "snip-fc18", OK2("1,79 ml/m² à 0,60 : SNIP fiche 18 et fiche solution Placo sp00012110 (1,79) ; le « 2 » de l'Intégrale 2023 est un arrondi (recherche/09 n° 46)."), label="{v} de fourrures par m²"),
          "fourrures_e50": regle("2.10", "ml/m2", "snip-fc18", OK2("2,10 ml/m² à 0,50 : SNIP et Pladur ; Placo 2,2."), label="{v} de fourrures par m²"),
          "fourrures_e40": regle("3.0", "ml/m2", "placo-integrale-plafonds-2023", UNE("3,0 ml/m² à 0,40 : Placo Intégrale 2023."), label="{v} de fourrures par m²"),
-         "suspentes_e60": regle("1.8", "u/m2", "placo-integrale-plafonds-2023", CONFLIT("1,8 suspente/m² à 0,60 : Placo Intégrale 2023 ; retenu par défaut car il compte les suspentes de bout de fourrure des petites pièces (recherche/02b).", "SNIP fiche 18 : 1,56 (plafond de 8 × 10 m) ; Pladur 1,46. L'écart dépend de la taille de la pièce."), label="{v} suspentes par m²"),
-         "suspentes_e50": regle("2.2", "u/m2", "placo-integrale-plafonds-2023", CONFLIT("2,2 (Placo 2023).", "SNIP 1,84 ; Pladur 1,75."), label="{v} suspentes par m²"),
+         "suspentes_e60": regle("1.56", "u/m2", "snip-fc18", OK2("1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."), label="{v} suspentes par m²"),
+         "suspentes_e50": regle("1.84", "u/m2", "snip-fc18", UNE("1,84 (SNIP) ; Pladur 1,75 à 5 % près (recherche/09 n° 48). Règle changée : avant 2,2."), label="{v} suspentes par m²"),
          "suspentes_e40": regle("2.7", "u/m2", "placo-integrale-plafonds-2023", UNE("2,7 (Placo 2023)."), label="{v} suspentes par m²"),
          "eclisses_e60": regle("0.21", "u/m2", "snip-fc18", UNE("SNIP (aboutage des fourrures)."), label="{v} éclisses par m²"),
          "eclisses_e50": regle("0.25", "u/m2", "snip-fc18", UNE("SNIP."), label="{v} éclisses par m²"),
@@ -730,11 +732,10 @@ def plafond():
          "vis_e40": regle("15", "u/m2", "placo-integrale-plafonds-2023", UNE("15 (Placo 2023)."), label="{v} vis par m²"),
          "vis_int": regle("8", "u/m2", "snip-fc18", CONFLIT("1re peau : 8 vis/m² (SNIP, 0,60).", "Placo : 3 à 5 selon l'entraxe."), label="{v} vis 1re peau par m²"),
          "vis_ext": regle("12", "u/m2", "snip-fc18", OK2("2e peau : 12 vis TTPC 35/m² (SNIP) ; Placo 10 à 15."), label="{v} vis 2e peau par m²"),
-         "trpf_par_m2": regle("4", "u/m2", "snip-fc18", DOUTE("4 TRPF/m² (SNIP : suspente-fourrure) ; inutile si les suspentes sont clipsées (Stil F 530) : à confirmer."), label="{v} TRPF par m²"),
          "vis_par_suspente_bois": regle("2", "u", "placo-integrale-plafonds-2023", OK2("2 vis TTPC 35 par suspente sous bois : Placo Intégrale 2023 et fiche Maxi Stil F 530."), label="{v} vis par suspente"),
          "pas_fixation_rail": c_pas_fixation(),
          "isolant_par_m2": regle("1.05", "u", "pladur-2019", OK2("1,05 m²/m² (Placo, Pladur)."), label="isolant + 5 %"),
-         "chute_corniere": regle("1.05", "u", "placo-integrale-plafonds-2023", DOUTE("5 % de coupes d'angle sur la cornière : aucune source chiffrée."), label="+ {v}"),
+         "chute_corniere": regle("1.05", "u", "snip-fc18", OK2("Périmètre × 1,05 : retrouvé exactement dans SNIP (0,47 ml/m² pour 8 × 10 m) et Pladur (0,44 pour 8 × 12 m) (recherche/09 n° 62)."), label="+ {v}"),
          **finitions_constantes(1)}
     perimetre = {**prov("mobiiz-geometrie", DOUTE("Estimation : pièce supposée carrée (périmètre = 4 × √surface). Ni SNIP (0,47 ml/m² pour 8 × 10 m) ni Placo (« selon chantier ») ne donnent mieux : à remplacer par le périmètre réel.")),
                  "label": "Cornière de rive par m² de plafond (pièce supposée carrée)", "unit": "ml/m2",
@@ -770,12 +771,11 @@ def plafond():
         besoin("suspentes-longues", "suspente", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum < 2", short="suspentes"),
         besoin("suspentes-secables", "suspente_secable", "nb_suspentes", "u", "snip-fc18", CONFLIT("Ratio SNIP.", "Placo 1,8."), when="plenum >= 2", short="suspentes"),
         besoin("vis-suspentes", "vis_suspente", "nb_suspentes * regle.vis_par_suspente_bois", "u", "placo-integrale-plafonds-2023", OK2("2 TTPC 35 par suspente sous bois."), when="support < 2", short="vis de suspente"),
-        besoin("chevilles-suspentes", "cheville_suspente", "nb_suspentes", "u", "placo-integrale-plafonds-2023", UNE("Une cheville métallique Ø 6 par suspente sous béton (Placo 2023 ; Knauf clou-cheville 6 × 40)."), when="support >= 2", short="chevilles de suspente"),
+        besoin("chevilles-suspentes", "cheville_suspente", "nb_suspentes", "u", "placo-integrale-plafonds-2023", OK2("Une cheville métallique par suspente sous béton : Placo Intégrale 2023 et Pladur 2019 (chevilles sous agrément à chaque point) (recherche/09 n° 24)."), when="support >= 2", short="chevilles de suspente"),
         besoin("eclisses", "eclisse", "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)", "u", "snip-fc18", UNE("SNIP."), short="éclisses"),
-        besoin("corniere", "corniere", "surface * table.perimetre * regle.chute_corniere", "ml", "mobiiz-geometrie", DOUTE("Périmètre estimé (pièce carrée)."), estimate="périmètre estimé d'après la surface : ajuste à tes pièces", short="cornière de rive"),
+        besoin("corniere", "corniere", "surface * table.perimetre * regle.chute_corniere", "ml", "snip-fc18", OK2("Méthode périmètre × 1,05 : SNIP et Pladur (recherche/09 n° 64) ; le périmètre reste estimé (pièce carrée)."), estimate="périmètre estimé d'après la surface : ajuste à tes pièces", short="cornière de rive"),
         besoin("vis-ttpc-25", "vis", "surface * si(couches < 2, " + E.format(a="regle.vis_e60", b="regle.vis_e50", c="regle.vis_e40") + ", regle.vis_int)", "u", "snip-fc18", CONFLIT("SNIP.", "Placo 10."), short="vis"),
         besoin("vis-ttpc-35", "vis_ext", "surface * regle.vis_ext", "u", "snip-fc18", OK2("SNIP 12/m², Placo 10-15."), when="couches >= 2", short="vis 2e peau"),
-        besoin("vis-trpf", "trpf", "surface * regle.trpf_par_m2", "u", "snip-fc18", DOUTE("SNIP ; inutile avec des suspentes clipsées."), short="vis TRPF"),
         *fixations_rail("surface * table.perimetre * regle.chute_corniere"),
         besoin("isolant", "isolant", "surface * regle.isolant_par_m2", "m2", "pladur-2019", OK2("1,05 m²/m²."), core=False, short="isolant"),
         *besoins_finitions("surface"),
@@ -812,7 +812,7 @@ def separative():
          "faces": regle("2", "u", "mobiiz-geometrie", OK2("Deux faces."), label="{v} faces"),
          "plaques_par_face": regle("2", "u", "dtu-2541-2022", OK2("SAA et SAD : 2 BA13 par face (Placo SAA 120, SAD 160 ; Siniat S180)."), label="{v} plaques par face"),
          "e60": regle("0.60", "m", "dtu-2541-2022", OK2("Entraxe 0,60.")),
-         "files_montants": regle("2", "u", "dtu-2541-2022", d, label="{v} files de montants"),
+         "files_montants": regle("2", "u", "dtu-2541-2022", OK2("Séparative à double ossature : SNIP p. 7 (4,20 ml/m² = 2 × 2,10) et Pladur Mémento 2017 p. 64 (3,50 = 2 × 1,75) (recherche/09 n° 59)."), label="{v} files de montants"),
          "vis_int": regle("10", "u/m2", "snip-fc18", d, label="{v} vis 1re peau par m²"),
          "vis_ext": regle("27", "u/m2", "snip-fc18", d, label="{v} vis 2e peau par m²"),
          "trpf": regle("4", "u/m2", "snip-fc18", d, label="{v} TRPF par m²"),
@@ -933,8 +933,84 @@ def pare_vapeur():
             "triggers": ["vapour_barrier"], "params": params, "slots": slots, "constants": c, "needs": needs}
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# COUPE-FEU (décision de Greg, 20 novembre 2026) : tout le système d'UNE marque, avec son procès-verbal ;
+# une seule question « Quelle marque ? » ; chaque ligne du système porte la marque, jamais « ou équivalent ».
+# ---------------------------------------------------------------------------------------------------------------
+SOURCES += [
+    {"id": "placo-pv-feu", "kind": "manufacturer", "title": "Placo : systèmes coupe-feu (Offre Placo 2024 p. 60, fiches systèmes Placoflam 72/48 EI 60 PV RS 15-020, 98/48 EI 120 PV RS 15-022, Intégrale Plafonds 2023 montage PRF)", "documentRef": "recherche/11-coupe-feu-par-marque.md, sources P1, P4, S47", "url": "https://dam.pim-cps.saint-gobain.com/MAM/assets/1/C1A269993195482DA567890D5C26E716/doc/CEDB5A77BEAE4BDA8E2753C0A9B3A813/SO03-Intgrale_Placo_Second_Oeuvre_04.2023_-_Plafonds.pdf", "retrievedAt": "2026-11-20"},
+    {"id": "siniat-pv-feu", "kind": "manufacturer", "title": "Siniat : fiches systèmes coupe-feu 2025-2026 (D72/48 EI 30, D98/48 EI 60, D106/70, plafonds S47 2 Prégyflam REI 60)", "url": "https://www.siniat.fr/-/print2pdf/system/pi477485/siniat-fiche-technique/fr-fr/plafond-pregymetal-sur-fourrures-s47-2-ba13-flam-rei60-avec-isolant.pdf", "retrievedAt": "2026-11-20"},
+    {"id": "knauf-pv-feu", "kind": "manufacturer", "title": "Knauf : catalogue Plaquiste 2020, cloisons KM (72/48 EI 30, KF EI 60 PV EFR-19-V-002073, 98/48 EI 60 à EI 120)", "url": "https://deltourmateriaux.com/wp-content/uploads/2020/08/cloisons-catalogue-2020-plaquiste-knauf.pdf", "retrievedAt": "2026-11-20", "note": "Antérieur au DTU 2022 : hauteurs à revalider sur une fiche 2026."},
+]
+
+TROIS_MARQUES = OK2("Placo, Siniat et Knauf disent chacun que les performances feu ne valent qu'avec leurs propres composants (recherche/11 §4.1) : aucun « ou équivalent ».")
+
+EI = {
+    "key": "ei", "label": "Classement coupe-feu", "unit": "u", "kind": "site_data",
+    "question": "Quel classement coupe-feu ?",
+    "choices": [{"label": "Pas de coupe-feu", "value": "0"}, {"label": "EI 30", "value": "30"}, {"label": "EI 60", "value": "60"}, {"label": "EI 90", "value": "90"}, {"label": "EI 120", "value": "120"}],
+    "display": {"0": "sans exigence feu", "30": "EI 30", "60": "EI 60", "90": "EI 90", "120": "EI 120"},
+    "textValues": [{"value": "120", "keywords": ["ei 120", "ei120", "rei 120", "rei120", "cf 2h", "coupe-feu 2h"]}, {"value": "90", "keywords": ["ei 90", "ei90", "rei 90", "rei90"]},
+                   {"value": "60", "keywords": ["ei 60", "ei60", "rei 60", "rei60", "cf 1h", "coupe-feu 1h", "coupe feu 1h"]}, {"value": "30", "keywords": ["ei 30", "ei30", "rei 30", "rei30", "cf 1/2h", "coupe-feu 1/2h"]}],
+    "default": {**prov("placo-pv-feu", OK2("Sans mot de classement au devis (EI, REI, CF, PV), l'ouvrage n'a pas d'exigence feu : le classement se lit, il ne se déduit jamais (recherche/11 §4.1, trois marques).")), "value": "0", "note": "pas d'exigence feu écrite"},
+}
+
+MARQUE = {
+    "key": "marque_systeme", "label": "Marque du système coupe-feu", "unit": "u", "kind": "site_data",
+    "question": "Ton système coupe-feu, c'est quelle marque ?",
+    "hint": "Tout le système suit cette marque et son procès-verbal : plaques, ossature, vis, laine.",
+    "named": True,
+    "choices": [{"label": "Placo", "value": "1", "dit": ["placo", "placoflam"]}, {"label": "Knauf", "value": "2", "dit": ["knauf", "kf"]}, {"label": "Siniat", "value": "3", "dit": ["siniat", "pregyflam", "prégy"]}],
+    "display": {"1": "Placo", "2": "Knauf", "3": "Siniat"},
+    "textValues": [{"value": "1", "keywords": ["placo", "placoflam", "placostil"]}, {"value": "2", "keywords": ["knauf", "kf 13", "metal stud"]}, {"value": "3", "keywords": ["siniat", "pregyflam", "pregymetal"]}],
+}
+
+
+def _quand(when, extra):
+    """Combine deux conditions d'existence (1 = vrai)."""
+    if not when:
+        return extra
+    return f"si({extra}, si({when}, 1, 0), 0)"
+
+
+def coupe_feu(work, articles, noms):
+    """Chaque besoin d'article du système existe en deux : standard (ei < 1) et coupe-feu (ei >= 1), où la ligne porte
+    la marque et attend sa réponse (precisionRequires). `noms` : désignation de base des besoins qui n'en ont pas."""
+    work["params"] = work["params"] + [EI, MARQUE]
+    out = []
+    for n in work["needs"]:
+        if n["id"] not in articles:
+            out.append(n)
+            continue
+        std = dict(n, when=_quand(n.get("when"), "ei < 1"))
+        feu = dict(n, id=n["id"] + "-feu", when=_quand(n.get("when"), "ei >= 1"), precisionRequires=["marque_systeme"])
+        base = n.get("designation") or noms[n["id"]]
+        feu["designation"] = base.replace("BA13 {type_plaque}", "{marque_systeme} {type_plaque} BA13") if "{type_plaque}" in base else f"{base} {{marque_systeme}}"
+        feu["precision"] = ((n.get("precision") + " ; ") if n.get("precision") else "") + "système coupe-feu {ei}, marque unique selon son procès-verbal"
+        out += [std, feu]
+    work["needs"] = out
+    return work
+
+
 def referentiel():
-    work_items = [cloison(), separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), plafond(), joints(), isolation_rouleaux(), soufflage(), pare_vapeur()]
+    cl = coupe_feu(cloison(), ["plaques", "montants", "rails", "vis-ttpc-25", "vis-ttpc-35", "vis-trpf"],
+                   {"rails": "Rails R{montant|mm#}, longueur 3 m", "vis-ttpc-25": "Vis TTPC 25", "vis-ttpc-35": "Vis TTPC 35", "vis-trpf": "Vis TRPF 13"})
+    pl = coupe_feu(plafond(), ["plaques", "fourrures", "suspentes-longues", "suspentes-secables", "eclisses", "corniere", "vis-ttpc-25", "vis-ttpc-35"],
+                   {"fourrures": "Fourrures, longueur 3 m", "suspentes-longues": "Suspentes longues", "suspentes-secables": "Suspentes sécables", "eclisses": "Éclisses de fourrure", "corniere": "Cornières de rive, longueur 3 m", "vis-ttpc-25": "Vis TTPC 25", "vis-ttpc-35": "Vis TTPC 35"})
+    for w in (cl, pl):
+        w["params"] = [dict(x, default=TYPE_PLAQUE_FEU_DEFAUT) if x["key"] == "type_plaque" else x for x in w["params"]]
+    # Cloison coupe-feu en 72/48 : laine minérale obligatoire (Placo RS 15-019 / 15-020, Siniat EFR-24-005466, Knauf 06-V-263).
+    PRODUCTS.append(produit("laine-minerale-pv", "insulation", "Laine minérale 45 mm du système coupe-feu (selon son procès-verbal)", "Laine minérale 45 mm (PV)",
+                            [{"id": "m2", "label": {"one": "m²", "many": "m²"}, "contains": un(1, "m2"), "primary": True}], ["laine minerale pv"]))
+    cl["slots"].append(slot("laine_feu", "insulation", "Laine minérale du système coupe-feu", "laine-minerale-pv", "Laine minérale 45 mm exigée par le PV.", "placo-pv-feu", "cloison", ["laine minerale"]))
+    cl["needs"] = [dict(n, when=_quand(n.get("when"), "si(ei >= 1, si(couches < 2, 0, 1), 1)")) if n["id"] == "isolant" else n for n in cl["needs"]]
+    cl["needs"].append(besoin("laine-feu", "laine_feu", "surface * regle.isolant_par_m2", "m2", "placo-pv-feu", OK2("Laine minérale 45 mm obligatoire en 72/48 coupe-feu : Placo (RS 15-019, RS 15-020), Siniat (LV 45, EFR-24-005466), Knauf (« avec laine minérale uniquement »), recherche/11 §4.1 point 3."),
+                              when="si(ei >= 1, si(couches < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], designation="Laine minérale 45 mm {marque_systeme} (selon le PV)", short="laine du système coupe-feu"))
+    # Plafond coupe-feu : deux plaques par défaut (REI 60 : Placo PRF 2 Placoflam, Siniat 2 Prégyflam) ; peau visible vissée à 15 cm.
+    pl["params"] = [dict(x, default={**prov("siniat-pv-feu", OK2("REI 60 sous plancher : 2 plaques feu chez Placo (PRF, RS 16-039) et Siniat (EFR-21-004119) ; Knauf Métal Chrono : 1 KF BA15 (recherche/11 §4.3).")), "formula": "si(ei > 30, 2, 1)", "note": "une plaque, deux en REI 60 et plus, par défaut"}) if x["key"] == "couches" else x for x in pl["params"]]
+    pl["constants"]["vis_feu"] = regle("23", "u/m2", "placo-pv-feu", UNE("Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."), label="{v} vis par m² (montage feu)")
+    pl["needs"] = [dict(n, formula="surface * regle.vis_feu") if n["id"] == "vis-ttpc-35-feu" else n for n in pl["needs"]]
+    work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur()]
     return {
         "id": "plaquiste-isolation",
         "version": VERSION,

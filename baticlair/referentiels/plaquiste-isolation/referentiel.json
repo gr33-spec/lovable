@@ -309,6 +309,29 @@
       "title": "Gedimat, membrane Vario Xtra 60 m² et adhésif Vario KB1 40 m",
       "url": "https://www.gedimat.fr/adhesif-vario-kb1-rouleau-de-40mx60mm-isover,1867391,3,21,961.htm",
       "retrievedAt": "2026-11-19"
+    },
+    {
+      "id": "placo-pv-feu",
+      "kind": "manufacturer",
+      "title": "Placo : systèmes coupe-feu (Offre Placo 2024 p. 60, fiches systèmes Placoflam 72/48 EI 60 PV RS 15-020, 98/48 EI 120 PV RS 15-022, Intégrale Plafonds 2023 montage PRF)",
+      "documentRef": "recherche/11-coupe-feu-par-marque.md, sources P1, P4, S47",
+      "url": "https://dam.pim-cps.saint-gobain.com/MAM/assets/1/C1A269993195482DA567890D5C26E716/doc/CEDB5A77BEAE4BDA8E2753C0A9B3A813/SO03-Intgrale_Placo_Second_Oeuvre_04.2023_-_Plafonds.pdf",
+      "retrievedAt": "2026-11-20"
+    },
+    {
+      "id": "siniat-pv-feu",
+      "kind": "manufacturer",
+      "title": "Siniat : fiches systèmes coupe-feu 2025-2026 (D72/48 EI 30, D98/48 EI 60, D106/70, plafonds S47 2 Prégyflam REI 60)",
+      "url": "https://www.siniat.fr/-/print2pdf/system/pi477485/siniat-fiche-technique/fr-fr/plafond-pregymetal-sur-fourrures-s47-2-ba13-flam-rei60-avec-isolant.pdf",
+      "retrievedAt": "2026-11-20"
+    },
+    {
+      "id": "knauf-pv-feu",
+      "kind": "manufacturer",
+      "title": "Knauf : catalogue Plaquiste 2020, cloisons KM (72/48 EI 30, KF EI 60 PV EFR-19-V-002073, 98/48 EI 60 à EI 120)",
+      "url": "https://deltourmateriaux.com/wp-content/uploads/2020/08/cloisons-catalogue-2020-plaquiste-knauf.pdf",
+      "retrievedAt": "2026-11-20",
+      "note": "Antérieur au DTU 2022 : hauteurs à revalider sur une fiche 2026."
     }
   ],
   "families": [
@@ -2047,6 +2070,39 @@
           "primary": true
         }
       ]
+    },
+    {
+      "id": "laine-minerale-pv",
+      "family": "insulation",
+      "label": "Laine minérale 45 mm du système coupe-feu (selon son procès-verbal)",
+      "shortLabel": "Laine minérale 45 mm (PV)",
+      "aliases": [
+        "laine minerale pv"
+      ],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "m2",
+          "label": {
+            "one": "m²",
+            "many": "m²"
+          },
+          "contains": {
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Mobiiz (définition)"
+            },
+            "version": 1,
+            "kind": "packaging",
+            "value": "1",
+            "unit": "m2"
+          },
+          "primary": true
+        }
+      ]
     }
   ],
   "workItems": [
@@ -2269,8 +2325,8 @@
               "note": "Recherche du 2026-11-19 — 2 sources : NF DTU 25.41 (fév. 2022) via Rockwool 12/2023, recoupé par la fiche Siniat D72/48 (02/09/2026) et Pladur : 72/48 en M48-35, 2,50 m (simples 0,60) / 2,75 (simples 0,40) / 3,05 (doublés 0,60) / 3,40 (doublés 0,40) ; 98/48 : 3,00 / 3,40 / 3,70 / 4,15 (recherche/03 §1.1)."
             },
             "version": 1,
-            "formula": "si(montant > regle.montant_large, 1, si(couches < 2, si(hauteur <= regle.h_7248_s60, 1, si(hauteur <= regle.h_7248_s40, 2, si(hauteur <= regle.h_7248_d60, 3, 4))), si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4)))))",
-            "note": "Hauteurs limites NF DTU 25.41 (février 2022), montant M48-35 courant : on prend le montage le moins cher qui tient la hauteur (simples 0,40 avant doublés 0,60)."
+            "formula": "si(ei > 30, si(couches < 2, 4, si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4)))), si(montant > regle.montant_large, 1, si(couches < 2, si(hauteur <= regle.h_7248_s60, 1, si(hauteur <= regle.h_7248_s40, 2, si(hauteur <= regle.h_7248_d60, 3, 4))), si(hauteur <= regle.h_9848_s60, 1, si(hauteur <= regle.h_9848_s40, 2, si(hauteur <= regle.h_9848_d60, 3, 4))))))",
+            "note": "Hauteurs limites NF DTU 25.41 (février 2022), montant M48-35 courant : on prend le montage le moins cher qui tient la hauteur (simples 0,40 avant doublés 0,60). Coupe-feu EI 60 en 72/48 : montants doublés à 0,40 (Placo PV RS 15-020, Knauf PV EFR-19-V-002073)."
           }
         },
         {
@@ -2353,14 +2409,14 @@
             }
           ],
           "default": {
-            "source": "negoces-plaques",
+            "source": "placo-pv-feu",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 2 sources : Plaque standard quand le devis ne dit rien : c'est l'article courant du comptoir (recherche/01 §9, recherche/06)."
+              "note": "Recherche du 2026-11-19 — 2 sources : Plaque par défaut selon le classement : EI 30 en 72/48 et EI 60 en 98/48 en plaques STANDARD chez les trois marques ; 72/48 EI 60 et 98/48 EI 120 en plaques feu (Placoflam, KF) chez Placo et Knauf (recherche/11 §4.2)."
             },
             "version": 1,
-            "value": "1",
-            "note": "plaque standard, par défaut"
+            "formula": "si(ei > 30, si(couches < 2, 3, si(ei > 60, 3, 1)), 1)",
+            "note": "plaque standard, ou plaque feu quand le système coupe-feu l'exige, par défaut"
           }
         },
         {
@@ -2482,6 +2538,164 @@
             "2": "Hilti",
             "3": "Paslode"
           }
+        },
+        {
+          "key": "ei",
+          "label": "Classement coupe-feu",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Quel classement coupe-feu ?",
+          "choices": [
+            {
+              "label": "Pas de coupe-feu",
+              "value": "0"
+            },
+            {
+              "label": "EI 30",
+              "value": "30"
+            },
+            {
+              "label": "EI 60",
+              "value": "60"
+            },
+            {
+              "label": "EI 90",
+              "value": "90"
+            },
+            {
+              "label": "EI 120",
+              "value": "120"
+            }
+          ],
+          "display": {
+            "0": "sans exigence feu",
+            "30": "EI 30",
+            "60": "EI 60",
+            "90": "EI 90",
+            "120": "EI 120"
+          },
+          "textValues": [
+            {
+              "value": "120",
+              "keywords": [
+                "ei 120",
+                "ei120",
+                "rei 120",
+                "rei120",
+                "cf 2h",
+                "coupe-feu 2h"
+              ]
+            },
+            {
+              "value": "90",
+              "keywords": [
+                "ei 90",
+                "ei90",
+                "rei 90",
+                "rei90"
+              ]
+            },
+            {
+              "value": "60",
+              "keywords": [
+                "ei 60",
+                "ei60",
+                "rei 60",
+                "rei60",
+                "cf 1h",
+                "coupe-feu 1h",
+                "coupe feu 1h"
+              ]
+            },
+            {
+              "value": "30",
+              "keywords": [
+                "ei 30",
+                "ei30",
+                "rei 30",
+                "rei30",
+                "cf 1/2h",
+                "coupe-feu 1/2h"
+              ]
+            }
+          ],
+          "default": {
+            "source": "placo-pv-feu",
+            "verification": {
+              "status": "draft",
+              "note": "Recherche du 2026-11-19 — 2 sources : Sans mot de classement au devis (EI, REI, CF, PV), l'ouvrage n'a pas d'exigence feu : le classement se lit, il ne se déduit jamais (recherche/11 §4.1, trois marques)."
+            },
+            "version": 1,
+            "value": "0",
+            "note": "pas d'exigence feu écrite"
+          }
+        },
+        {
+          "key": "marque_systeme",
+          "label": "Marque du système coupe-feu",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Ton système coupe-feu, c'est quelle marque ?",
+          "hint": "Tout le système suit cette marque et son procès-verbal : plaques, ossature, vis, laine.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Placo",
+              "value": "1",
+              "dit": [
+                "placo",
+                "placoflam"
+              ]
+            },
+            {
+              "label": "Knauf",
+              "value": "2",
+              "dit": [
+                "knauf",
+                "kf"
+              ]
+            },
+            {
+              "label": "Siniat",
+              "value": "3",
+              "dit": [
+                "siniat",
+                "pregyflam",
+                "prégy"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Placo",
+            "2": "Knauf",
+            "3": "Siniat"
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "placo",
+                "placoflam",
+                "placostil"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "knauf",
+                "kf 13",
+                "metal stud"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "siniat",
+                "pregyflam",
+                "pregymetal"
+              ]
+            }
+          ]
         }
       ],
       "slots": [
@@ -2667,6 +2881,20 @@
             "text": "Enduit prêt à l'emploi, seau de 25 kg.",
             "source": "placo-integrale-2023-bande",
             "productId": "enduit-pate"
+          }
+        },
+        {
+          "key": "laine_feu",
+          "family": "insulation",
+          "label": "Laine minérale du système coupe-feu",
+          "formOf": "cloison",
+          "keywords": [
+            "laine minerale"
+          ],
+          "usual": {
+            "text": "Laine minérale 45 mm exigée par le PV.",
+            "source": "placo-pv-feu",
+            "productId": "laine-minerale-pv"
           }
         }
       ],
@@ -3116,12 +3344,11 @@
           "source": "dtu-2541-2022",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 3,70 m retenu (valeur la plus basse)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 3,75 m : fiche Placo sp00020105 (98/48 doublés 0,60, 3,75 m), Siniat carnet DTU et Pladur ; seul le guide Rockwool dit 3,70 (recherche/09 n° 30, à valider par Greg). Règle changée : avant 3,70 m."
           },
           "version": 1,
-          "conflict": "Rockwool (DTU 2022) 3,70 ; Siniat carnet et Pladur 3,75.",
           "kind": "installation_condition",
-          "value": "3.70",
+          "value": "3.75",
           "unit": "m"
         },
         "h_m70_s60": {
@@ -3139,10 +3366,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 30 vis/m² (SNIP fiche 18, déc. 2024 : vis à 30 cm sur montants + 5 vis/ml sur les rails)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 30 vis/m² (vis à 30 cm + vis des rails) : SNIP fiche 18 et fiche solution Placo actuelle sp00011223 (29,19). Le « 22 » venait d'une ancienne fiche Placo (recherche/09 n° 31)."
           },
           "version": 1,
-          "conflict": "Placo (fiche solution 72/48) dit 22 sans les vis de rail ; Pladur 41 ; Gypso 25. SNIP retenu, document de la profession le plus récent.",
           "kind": "installation_condition",
           "value": "30",
           "unit": "u/m2",
@@ -3152,7 +3378,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18 : 37 vis/m² à 0,40 (Placo ancien : 30)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 37 vis/m² à 0,40 : SNIP fiche 18 et fiche solution Placo sp00011244 (36,75) (recherche/09 n° 6)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3236,7 +3462,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18, 98/48 : 2e peau, TTPC 35 (2 × 12,5 mm + 10 mm)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 2e peau TTPC 35 : SNIP 27 et Placo sp00011452 (26,25) (recherche/09 n° 11)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3260,7 +3486,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18."
+            "note": "Recherche du 2026-11-19 — 2 sources : SNIP 32 et Placo sp00020105 (31,5) (recherche/09)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -3461,12 +3687,33 @@
             "status": "draft",
             "note": "Recherche du 2026-11-19 — 2 sources : Plaques = 2 faces × plaques par face × 1,05 (SNIP 2,10 m²/m² ; Pladur 2,1 ; Placo 2,10)."
           },
-          "version": 1
+          "version": 1,
+          "when": "ei < 1"
+        },
+        {
+          "id": "plaques-feu",
+          "slot": "plaque",
+          "formula": "arrondi_sup(longueur_cloison * regle.faces * couches * regle.chute_plaques / regle.largeur_plaque)",
+          "unit": "u",
+          "core": true,
+          "designation": "Plaques {marque_systeme} {type_plaque} BA13 1,20 × {longueur_plaque|m}",
+          "precision": "{couches} sur {longueur_cloison|m} de cloison, hauteur {hauteur|m} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "exclusions": "Vides de portes non déduits (le devis vend la surface pleine) ; hors huisseries.",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Plaques = 2 faces × plaques par face × 1,05 (SNIP 2,10 m²/m² ; Pladur 2,1 ; Placo 2,10)."
+          },
+          "version": 1,
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ]
         },
         {
           "id": "montants",
           "slot": "montant",
-          "formula": "arrondi_sup((longueur_cloison / entraxe + 1) * doubles * regle.chute_ossature)",
+          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature)",
           "unit": "u",
           "core": true,
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
@@ -3476,10 +3723,31 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Un montant par entraxe + 1, × 1,05 ; soit ≈ 1,75 ml/m² à 0,60 (Pladur)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Un montant par entraxe + 1 ; en doublés, les deux montants de bout ne se doublent pas : (n + (doubles − 1)(n − 2)) × 1,05. Redonne le SNIP (2,10 / 2,89 / 3,68 / 5,25 ml/m²) et Placo Intégrale 2021-22 (recherche/09 n° 35). Hors montants d'huisserie."
           },
           "version": 1,
-          "conflict": "SNIP et Placo comptent 2,10 ml/m² : ils incluent montants de départ, d'about et d'huisserie. À trancher par un plaquiste."
+          "when": "ei < 1"
+        },
+        {
+          "id": "montants-feu",
+          "slot": "montant",
+          "formula": "arrondi_sup((longueur_cloison / entraxe + 1 + (doubles - 1) * (longueur_cloison / entraxe - 1)) * regle.chute_ossature)",
+          "unit": "u",
+          "core": true,
+          "designation": "Montants M{montant|mm#} longueur {longueur_montant|m} {marque_systeme}",
+          "precision": "{montage} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "short": "montants",
+          "exclusions": "Hors montants d'huisserie et d'angle (Placo les compte dans ses 2,10 ml/m²) : à ajouter par porte.",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Un montant par entraxe + 1 ; en doublés, les deux montants de bout ne se doublent pas : (n + (doubles − 1)(n − 2)) × 1,05. Redonne le SNIP (2,10 / 2,89 / 3,68 / 5,25 ml/m²) et Placo Intégrale 2021-22 (recherche/09 n° 35). Hors montants d'huisserie."
+          },
+          "version": 1,
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ]
         },
         {
           "id": "rails",
@@ -3494,7 +3762,28 @@
             "status": "draft",
             "note": "Recherche du 2026-11-19 — 2 sources : 2 × longueur × 1,05 : SNIP (0,84 ml/m² à 2,50 m) et Pladur (0,84 / 0,75 / 0,70 selon la hauteur)."
           },
-          "version": 1
+          "version": 1,
+          "when": "ei < 1"
+        },
+        {
+          "id": "rails-feu",
+          "slot": "rail",
+          "formula": "longueur_cloison * regle.rails_par_cloison * regle.chute_ossature",
+          "unit": "ml",
+          "core": true,
+          "precision": "rails haut et bas ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "short": "rails",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 2 × longueur × 1,05 : SNIP (0,84 ml/m² à 2,50 m) et Pladur (0,84 / 0,75 / 0,70 selon la hauteur)."
+          },
+          "version": 1,
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Rails R{montant|mm#}, longueur 3 m {marque_systeme}"
         },
         {
           "id": "vis-ttpc-25",
@@ -3508,7 +3797,28 @@
             "status": "draft",
             "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP par montage."
           },
-          "version": 1
+          "version": 1,
+          "when": "ei < 1"
+        },
+        {
+          "id": "vis-ttpc-25-feu",
+          "slot": "vis",
+          "formula": "surface * si(couches < 2, si(montage < 2, regle.vis_1p_s60, si(montage < 3, regle.vis_1p_s40, si(montage < 4, regle.vis_1p_d60, regle.vis_1p_d40))), si(montage < 2, regle.vis_int_s60, si(montage < 3, regle.vis_int_s40, si(montage < 4, regle.vis_int_d60, regle.vis_int_d40))))",
+          "unit": "u",
+          "core": true,
+          "short": "vis TTPC 25",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP par montage."
+          },
+          "version": 1,
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Vis TTPC 25 {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "vis-ttpc-35",
@@ -3516,7 +3826,7 @@
           "formula": "surface * si(montage < 2, regle.vis_ext_s60, si(montage < 3, regle.vis_ext_s40, si(montage < 4, regle.vis_ext_d60, regle.vis_ext_d40)))",
           "unit": "u",
           "core": true,
-          "when": "couches >= 2",
+          "when": "si(ei < 1, si(couches >= 2, 1, 0), 0)",
           "short": "vis TTPC 35",
           "precision": "2e peau",
           "source": "snip-fc18",
@@ -3525,6 +3835,26 @@
             "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP, parement double."
           },
           "version": 1
+        },
+        {
+          "id": "vis-ttpc-35-feu",
+          "slot": "vis_ext",
+          "formula": "surface * si(montage < 2, regle.vis_ext_s60, si(montage < 3, regle.vis_ext_s40, si(montage < 4, regle.vis_ext_d60, regle.vis_ext_d40)))",
+          "unit": "u",
+          "core": true,
+          "when": "si(ei >= 1, si(couches >= 2, 1, 0), 0)",
+          "short": "vis TTPC 35",
+          "precision": "2e peau ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP, parement double."
+          },
+          "version": 1,
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Vis TTPC 35 {marque_systeme}"
         },
         {
           "id": "vis-trpf",
@@ -3538,7 +3868,28 @@
             "status": "draft",
             "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP."
           },
-          "version": 1
+          "version": 1,
+          "when": "ei < 1"
+        },
+        {
+          "id": "vis-trpf-feu",
+          "slot": "trpf",
+          "formula": "surface * si(montage < 2, regle.trpf_s60, si(montage < 3, regle.trpf_s40, si(montage < 4, regle.trpf_d60, regle.trpf_d40)))",
+          "unit": "u",
+          "core": true,
+          "short": "vis TRPF",
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Ratio SNIP."
+          },
+          "version": 1,
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Vis TRPF 13 {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "fixations-clous",
@@ -3588,7 +3939,8 @@
             "status": "draft",
             "note": "Recherche du 2026-11-19 — 2 sources : 1,05 m²/m² : SNIP et Placo."
           },
-          "version": 1
+          "version": 1,
+          "when": "si(ei >= 1, si(couches < 2, 0, 1), 1)"
         },
         {
           "id": "bande",
@@ -3634,6 +3986,25 @@
             "note": "Recherche du 2026-11-19 — 2 sources : Formule : m² × ratio Placo."
           },
           "version": 1
+        },
+        {
+          "id": "laine-feu",
+          "slot": "laine_feu",
+          "formula": "surface * regle.isolant_par_m2",
+          "unit": "m2",
+          "core": true,
+          "source": "placo-pv-feu",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Laine minérale 45 mm obligatoire en 72/48 coupe-feu : Placo (RS 15-019, RS 15-020), Siniat (LV 45, EFR-24-005466), Knauf (« avec laine minérale uniquement »), recherche/11 §4.1 point 3."
+          },
+          "version": 1,
+          "when": "si(ei >= 1, si(couches < 2, 1, 0), 0)",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Laine minérale 45 mm {marque_systeme} (selon le PV)",
+          "short": "laine du système coupe-feu"
         }
       ]
     },
@@ -4461,7 +4832,7 @@
           "source": "dtu-2541-2022",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Aucun quantitatif fabricant SAA / SAD lu : déduit de la constitution (Placo SAA 120 / SAD 160, Siniat S180) et des ratios de la 98/48."
+            "note": "Recherche du 2026-11-19 — 2 sources : Séparative à double ossature : SNIP p. 7 (4,20 ml/m² = 2 × 2,10) et Pladur Mémento 2017 p. 64 (3,50 = 2 × 1,75) (recherche/09 n° 59)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -6393,7 +6764,7 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : SNIP fiche 18."
+            "note": "Recherche du 2026-11-19 — 2 sources : SNIP 2/m² et Pladur Mémento 2017 (vis MM 2) (recherche/09 n° 15)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -6495,13 +6866,12 @@
           "unit": "u",
           "formula": "arrondi_sup((longueur_mur / regle.entraxe + 1) * regle.chute)",
           "shown": false,
-          "source": "pladur-2019",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Une fourrure par 0,60 m + 1, × 1,05 (≈ 1,75 ml/m², Pladur)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Une fourrure verticale tous les 0,60 m + 1, × 1,05 : SNIP et Pladur (recherche/09 n° 40)."
           },
-          "version": 1,
-          "conflict": "Placo et SNIP comptent 2,0 à 2,5 ml/m² (fourrure horizontale de départ ou de fixation des appuis)."
+          "version": 1
         },
         {
           "key": "lignes_appuis",
@@ -6536,16 +6906,15 @@
         {
           "id": "fourrures",
           "slot": "fourrure",
-          "formula": "nb_fourrures * si(hauteur <= regle.longueur_fourrure, regle.longueur_fourrure, hauteur * regle.chute)",
+          "formula": "nb_fourrures * si(hauteur <= regle.longueur_fourrure, regle.longueur_fourrure, hauteur * regle.chute) + longueur_mur * lignes_appuis * regle.chute",
           "unit": "ml",
           "core": true,
-          "source": "pladur-2019",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Une fourrure entière par file (hauteur ≤ 3 m)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Une fourrure entière par file verticale, plus la fourrure HORIZONTALE chevillée au mur qui porte les appuis (une par ligne d'appuis) : SNIP p. 11 et notice Isover Optima2 (recherche/09 n° 40-41)."
           },
           "version": 1,
-          "conflict": "Placo / SNIP : 2,0 à 2,5 ml/m².",
           "short": "fourrures",
           "precision": "fourrures verticales tous les 60 cm"
         },
@@ -6573,10 +6942,9 @@
           "source": "rockwool-murs-2024",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Un appui par fourrure et par ligne (≈ 0,8/m² à 2,50 m, SNIP 0,80)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Un appui par fourrure verticale et par ligne : SNIP 0,80/m² et notice Isover Optima2 ; le « 2 appuis/m² » Placo ancien ne se retrouve nulle part (recherche/09 n° 42)."
           },
           "version": 1,
-          "conflict": "Placo (ancien) compte 2 appuis/m², Pladur 1.",
           "designation": "Appuis intermédiaires pour isolant de {epaisseur_isolant|mm#} mm",
           "short": "appuis"
         },
@@ -7823,16 +8191,15 @@
         {
           "id": "montants",
           "slot": "montant",
-          "formula": "arrondi_sup((longueur_mur / entraxe + 1) * doubles * regle.chute)",
+          "formula": "arrondi_sup((longueur_mur / entraxe + 1 + (doubles - 1) * (longueur_mur / entraxe - 1)) * regle.chute)",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : Un montant par entraxe + 1, × 1,05."
+            "note": "Recherche du 2026-11-19 — 2 sources : Même règle que la cloison : SNIP et Placo (recherche/09 n° 45)."
           },
           "version": 1,
-          "conflict": "SNIP compte 2,10 ml/m² (montants de départ compris).",
           "designation": "Montants M{montant|mm#} longueur {longueur_montant|m}",
           "precision": "{montage}",
           "short": "montants"
@@ -8143,14 +8510,14 @@
             }
           ],
           "default": {
-            "source": "placo-integrale-plafonds-2023",
+            "source": "siniat-pv-feu",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 2 sources : Plafond courant : une BA13 (Placo, Pladur)."
+              "note": "Recherche du 2026-11-19 — 2 sources : REI 60 sous plancher : 2 plaques feu chez Placo (PRF, RS 16-039) et Siniat (EFR-21-004119) ; Knauf Métal Chrono : 1 KF BA15 (recherche/11 §4.3)."
             },
             "version": 1,
-            "value": "1",
-            "note": "une plaque, par défaut"
+            "formula": "si(ei > 30, 2, 1)",
+            "note": "une plaque, deux en REI 60 et plus, par défaut"
           }
         },
         {
@@ -8260,14 +8627,14 @@
             }
           ],
           "default": {
-            "source": "negoces-plaques",
+            "source": "placo-pv-feu",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 2 sources : Plaque standard quand le devis ne dit rien : c'est l'article courant du comptoir (recherche/01 §9, recherche/06)."
+              "note": "Recherche du 2026-11-19 — 2 sources : Plaque par défaut selon le classement : EI 30 en 72/48 et EI 60 en 98/48 en plaques STANDARD chez les trois marques ; 72/48 EI 60 et 98/48 EI 120 en plaques feu (Placoflam, KF) chez Placo et Knauf (recherche/11 §4.2)."
             },
             "version": 1,
-            "value": "1",
-            "note": "plaque standard, par défaut"
+            "formula": "si(ei > 30, si(couches < 2, 3, si(ei > 60, 3, 1)), 1)",
+            "note": "plaque standard, ou plaque feu quand le système coupe-feu l'exige, par défaut"
           }
         },
         {
@@ -8389,6 +8756,164 @@
             "2": "Hilti",
             "3": "Paslode"
           }
+        },
+        {
+          "key": "ei",
+          "label": "Classement coupe-feu",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Quel classement coupe-feu ?",
+          "choices": [
+            {
+              "label": "Pas de coupe-feu",
+              "value": "0"
+            },
+            {
+              "label": "EI 30",
+              "value": "30"
+            },
+            {
+              "label": "EI 60",
+              "value": "60"
+            },
+            {
+              "label": "EI 90",
+              "value": "90"
+            },
+            {
+              "label": "EI 120",
+              "value": "120"
+            }
+          ],
+          "display": {
+            "0": "sans exigence feu",
+            "30": "EI 30",
+            "60": "EI 60",
+            "90": "EI 90",
+            "120": "EI 120"
+          },
+          "textValues": [
+            {
+              "value": "120",
+              "keywords": [
+                "ei 120",
+                "ei120",
+                "rei 120",
+                "rei120",
+                "cf 2h",
+                "coupe-feu 2h"
+              ]
+            },
+            {
+              "value": "90",
+              "keywords": [
+                "ei 90",
+                "ei90",
+                "rei 90",
+                "rei90"
+              ]
+            },
+            {
+              "value": "60",
+              "keywords": [
+                "ei 60",
+                "ei60",
+                "rei 60",
+                "rei60",
+                "cf 1h",
+                "coupe-feu 1h",
+                "coupe feu 1h"
+              ]
+            },
+            {
+              "value": "30",
+              "keywords": [
+                "ei 30",
+                "ei30",
+                "rei 30",
+                "rei30",
+                "cf 1/2h",
+                "coupe-feu 1/2h"
+              ]
+            }
+          ],
+          "default": {
+            "source": "placo-pv-feu",
+            "verification": {
+              "status": "draft",
+              "note": "Recherche du 2026-11-19 — 2 sources : Sans mot de classement au devis (EI, REI, CF, PV), l'ouvrage n'a pas d'exigence feu : le classement se lit, il ne se déduit jamais (recherche/11 §4.1, trois marques)."
+            },
+            "version": 1,
+            "value": "0",
+            "note": "pas d'exigence feu écrite"
+          }
+        },
+        {
+          "key": "marque_systeme",
+          "label": "Marque du système coupe-feu",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Ton système coupe-feu, c'est quelle marque ?",
+          "hint": "Tout le système suit cette marque et son procès-verbal : plaques, ossature, vis, laine.",
+          "named": true,
+          "choices": [
+            {
+              "label": "Placo",
+              "value": "1",
+              "dit": [
+                "placo",
+                "placoflam"
+              ]
+            },
+            {
+              "label": "Knauf",
+              "value": "2",
+              "dit": [
+                "knauf",
+                "kf"
+              ]
+            },
+            {
+              "label": "Siniat",
+              "value": "3",
+              "dit": [
+                "siniat",
+                "pregyflam",
+                "prégy"
+              ]
+            }
+          ],
+          "display": {
+            "1": "Placo",
+            "2": "Knauf",
+            "3": "Siniat"
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "placo",
+                "placoflam",
+                "placostil"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "knauf",
+                "kf 13",
+                "metal stud"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "siniat",
+                "pregyflam",
+                "pregymetal"
+              ]
+            }
+          ]
         }
       ],
       "slots": [
@@ -8698,10 +9223,9 @@
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 1,79 ml/m² à 0,60 : SNIP fiche 18 (2024) et Placo « solution plancher bois »."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,79 ml/m² à 0,60 : SNIP fiche 18 et fiche solution Placo sp00012110 (1,79) ; le « 2 » de l'Intégrale 2023 est un arrondi (recherche/09 n° 46)."
           },
           "version": 1,
-          "conflict": "L'Intégrale Placo 2023 compte 2,0 ml/m² ; Pladur 1,75.",
           "kind": "installation_condition",
           "value": "1.79",
           "unit": "ml/m2",
@@ -8732,28 +9256,26 @@
           "label": "{v} de fourrures par m²"
         },
         "suspentes_e60": {
-          "source": "placo-integrale-plafonds-2023",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 1,8 suspente/m² à 0,60 : Placo Intégrale 2023 ; retenu par défaut car il compte les suspentes de bout de fourrure des petites pièces (recherche/02b)."
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,56 suspente/m² à 0,60 : SNIP fiche 18 et fiche Placo sp00012110 (2026) ; Pladur 1,46. Valable pour une grande pièce : une pièce de 4 × 4 m en demande ≈ 1,75 ; la boîte de 100 couvre l'écart sur un chantier courant (recherche/09 n° 47). Règle changée : avant 1,8 (Intégrale 2023)."
           },
           "version": 1,
-          "conflict": "SNIP fiche 18 : 1,56 (plafond de 8 × 10 m) ; Pladur 1,46. L'écart dépend de la taille de la pièce.",
           "kind": "installation_condition",
-          "value": "1.8",
+          "value": "1.56",
           "unit": "u/m2",
           "label": "{v} suspentes par m²"
         },
         "suspentes_e50": {
-          "source": "placo-integrale-plafonds-2023",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — contradiction : 2,2 (Placo 2023)."
+            "note": "Recherche du 2026-11-19 — 1 source : 1,84 (SNIP) ; Pladur 1,75 à 5 % près (recherche/09 n° 48). Règle changée : avant 2,2."
           },
           "version": 1,
-          "conflict": "SNIP 1,84 ; Pladur 1,75.",
           "kind": "installation_condition",
-          "value": "2.2",
+          "value": "1.84",
           "unit": "u/m2",
           "label": "{v} suspentes par m²"
         },
@@ -8856,18 +9378,6 @@
           "unit": "u/m2",
           "label": "{v} vis 2e peau par m²"
         },
-        "trpf_par_m2": {
-          "source": "snip-fc18",
-          "verification": {
-            "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : 4 TRPF/m² (SNIP : suspente-fourrure) ; inutile si les suspentes sont clipsées (Stil F 530) : à confirmer."
-          },
-          "version": 1,
-          "kind": "installation_condition",
-          "value": "4",
-          "unit": "u/m2",
-          "label": "{v} TRPF par m²"
-        },
         "vis_par_suspente_bois": {
           "source": "placo-integrale-plafonds-2023",
           "verification": {
@@ -8905,10 +9415,10 @@
           "label": "isolant + 5 %"
         },
         "chute_corniere": {
-          "source": "placo-integrale-plafonds-2023",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : 5 % de coupes d'angle sur la cornière : aucune source chiffrée."
+            "note": "Recherche du 2026-11-19 — 2 sources : Périmètre × 1,05 : retrouvé exactement dans SNIP (0,47 ml/m² pour 8 × 10 m) et Pladur (0,44 pour 8 × 12 m) (recherche/09 n° 62)."
           },
           "version": 1,
           "kind": "installation_condition",
@@ -8951,6 +9461,18 @@
           "value": "0.47",
           "unit": "kg/m2",
           "label": "{v} d'enduit prêt à l'emploi par m²"
+        },
+        "vis_feu": {
+          "source": "placo-pv-feu",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."
+          },
+          "version": 1,
+          "kind": "installation_condition",
+          "value": "23",
+          "unit": "u/m2",
+          "label": "{v} vis par m² (montage feu)"
         }
       },
       "derived": [
@@ -9039,7 +9561,27 @@
             "note": "Recherche du 2026-11-19 — 2 sources : 1,05 m² de plaque par m² et par peau (Placo, Pladur)."
           },
           "version": 1,
-          "designation": "Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}"
+          "designation": "Plaques BA13 {type_plaque} 1,20 × {longueur_plaque|m}",
+          "when": "ei < 1"
+        },
+        {
+          "id": "plaques-feu",
+          "slot": "plaque",
+          "formula": "arrondi_sup(surface * couches * regle.chute / (regle.largeur_plaque * longueur_plaque))",
+          "unit": "u",
+          "core": true,
+          "source": "placo-integrale-plafonds-2023",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : 1,05 m² de plaque par m² et par peau (Placo, Pladur)."
+          },
+          "version": 1,
+          "designation": "Plaques {marque_systeme} {type_plaque} BA13 1,20 × {longueur_plaque|m}",
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "fourrures",
@@ -9055,7 +9597,29 @@
           "version": 1,
           "conflict": "Placo 2,0 à 0,60.",
           "short": "fourrures",
-          "precision": "entraxe {entraxe_fourrures|cm}"
+          "precision": "entraxe {entraxe_fourrures|cm}",
+          "when": "ei < 1"
+        },
+        {
+          "id": "fourrures-feu",
+          "slot": "fourrure",
+          "formula": "surface * si(entraxe_fourrures >= regle.e60, regle.fourrures_e60, si(entraxe_fourrures >= regle.e50, regle.fourrures_e50, regle.fourrures_e40))",
+          "unit": "ml",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+          },
+          "version": 1,
+          "conflict": "Placo 2,0 à 0,60.",
+          "short": "fourrures",
+          "precision": "entraxe {entraxe_fourrures|cm} ; système coupe-feu {ei}, marque unique selon son procès-verbal",
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Fourrures, longueur 3 m {marque_systeme}"
         },
         {
           "id": "suspentes-longues",
@@ -9070,8 +9634,29 @@
           },
           "version": 1,
           "conflict": "Placo 1,8.",
-          "when": "plenum < 2",
+          "when": "si(ei < 1, si(plenum < 2, 1, 0), 0)",
           "short": "suspentes"
+        },
+        {
+          "id": "suspentes-longues-feu",
+          "slot": "suspente",
+          "formula": "nb_suspentes",
+          "unit": "u",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+          },
+          "version": 1,
+          "conflict": "Placo 1,8.",
+          "when": "si(ei >= 1, si(plenum < 2, 1, 0), 0)",
+          "short": "suspentes",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Suspentes longues {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "suspentes-secables",
@@ -9086,8 +9671,29 @@
           },
           "version": 1,
           "conflict": "Placo 1,8.",
-          "when": "plenum >= 2",
+          "when": "si(ei < 1, si(plenum >= 2, 1, 0), 0)",
           "short": "suspentes"
+        },
+        {
+          "id": "suspentes-secables-feu",
+          "slot": "suspente_secable",
+          "formula": "nb_suspentes",
+          "unit": "u",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — contradiction : Ratio SNIP."
+          },
+          "version": 1,
+          "conflict": "Placo 1,8.",
+          "when": "si(ei >= 1, si(plenum >= 2, 1, 0), 0)",
+          "short": "suspentes",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Suspentes sécables {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "vis-suspentes",
@@ -9113,7 +9719,7 @@
           "source": "placo-integrale-plafonds-2023",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — 1 source : Une cheville métallique Ø 6 par suspente sous béton (Placo 2023 ; Knauf clou-cheville 6 × 40)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Une cheville métallique par suspente sous béton : Placo Intégrale 2023 et Pladur 2019 (chevilles sous agrément à chaque point) (recherche/09 n° 24)."
           },
           "version": 1,
           "when": "support >= 2",
@@ -9131,7 +9737,28 @@
             "note": "Recherche du 2026-11-19 — 1 source : SNIP."
           },
           "version": 1,
-          "short": "éclisses"
+          "short": "éclisses",
+          "when": "ei < 1"
+        },
+        {
+          "id": "eclisses-feu",
+          "slot": "eclisse",
+          "formula": "surface * si(entraxe_fourrures >= regle.e60, regle.eclisses_e60, regle.eclisses_e50)",
+          "unit": "u",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 1 source : SNIP."
+          },
+          "version": 1,
+          "short": "éclisses",
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Éclisses de fourrure {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "corniere",
@@ -9139,14 +9766,36 @@
           "formula": "surface * table.perimetre * regle.chute_corniere",
           "unit": "ml",
           "core": true,
-          "source": "mobiiz-geometrie",
+          "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : Périmètre estimé (pièce carrée)."
+            "note": "Recherche du 2026-11-19 — 2 sources : Méthode périmètre × 1,05 : SNIP et Pladur (recherche/09 n° 64) ; le périmètre reste estimé (pièce carrée)."
           },
           "version": 1,
           "estimate": "périmètre estimé d'après la surface : ajuste à tes pièces",
-          "short": "cornière de rive"
+          "short": "cornière de rive",
+          "when": "ei < 1"
+        },
+        {
+          "id": "corniere-feu",
+          "slot": "corniere",
+          "formula": "surface * table.perimetre * regle.chute_corniere",
+          "unit": "ml",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — 2 sources : Méthode périmètre × 1,05 : SNIP et Pladur (recherche/09 n° 64) ; le périmètre reste estimé (pièce carrée)."
+          },
+          "version": 1,
+          "estimate": "périmètre estimé d'après la surface : ajuste à tes pièces",
+          "short": "cornière de rive",
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Cornières de rive, longueur 3 m {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "vis-ttpc-25",
@@ -9161,7 +9810,29 @@
           },
           "version": 1,
           "conflict": "Placo 10.",
-          "short": "vis"
+          "short": "vis",
+          "when": "ei < 1"
+        },
+        {
+          "id": "vis-ttpc-25-feu",
+          "slot": "vis",
+          "formula": "surface * si(couches < 2, si(entraxe_fourrures >= regle.e60, regle.vis_e60, si(entraxe_fourrures >= regle.e50, regle.vis_e50, regle.vis_e40)), regle.vis_int)",
+          "unit": "u",
+          "core": true,
+          "source": "snip-fc18",
+          "verification": {
+            "status": "draft",
+            "note": "Recherche du 2026-11-19 — contradiction : SNIP."
+          },
+          "version": 1,
+          "conflict": "Placo 10.",
+          "short": "vis",
+          "when": "ei >= 1",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Vis TTPC 25 {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "vis-ttpc-35",
@@ -9175,22 +9846,28 @@
             "note": "Recherche du 2026-11-19 — 2 sources : SNIP 12/m², Placo 10-15."
           },
           "version": 1,
-          "when": "couches >= 2",
+          "when": "si(ei < 1, si(couches >= 2, 1, 0), 0)",
           "short": "vis 2e peau"
         },
         {
-          "id": "vis-trpf",
-          "slot": "trpf",
-          "formula": "surface * regle.trpf_par_m2",
+          "id": "vis-ttpc-35-feu",
+          "slot": "vis_ext",
+          "formula": "surface * regle.vis_feu",
           "unit": "u",
           "core": true,
           "source": "snip-fc18",
           "verification": {
             "status": "draft",
-            "note": "Recherche du 2026-11-19 — à confirmer : SNIP ; inutile avec des suspentes clipsées."
+            "note": "Recherche du 2026-11-19 — 2 sources : SNIP 12/m², Placo 10-15."
           },
           "version": 1,
-          "short": "vis TRPF"
+          "when": "si(ei >= 1, si(couches >= 2, 1, 0), 0)",
+          "short": "vis 2e peau",
+          "precisionRequires": [
+            "marque_systeme"
+          ],
+          "designation": "Vis TTPC 35 {marque_systeme}",
+          "precision": "système coupe-feu {ei}, marque unique selon son procès-verbal"
         },
         {
           "id": "fixations-clous",
