@@ -1,0 +1,66 @@
+[
+  {
+    "article": "Écran sous-toiture HPV, rouleau 1,50 × 50 m (75 m²)",
+    "quantite": 2,
+    "unite": "rouleaux",
+    "a_chiffrer": false,
+    "calcul": "120 m² × 1,15 m²/m² (Écrans sous toiture > écran souple : consommation recouvrements compris, pente 30° > 16,7° donc recouvrement 10 cm) = 138 m² ; ÷ 75 m² par rouleau (écran HPV : format 1,50 × 50 m) = 1,84 → 2 rouleaux. La marque inconnue ne change pas la quantité (format courant de toutes les marques).",
+    "ligne_devis": "2 — Écran sous-toiture"
+  },
+  {
+    "article": "Contre-liteau sapin traité classe 2, 27×40",
+    "quantite": 200,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Contre-liteau sur écran : 1 file par fermette, ml = surface ÷ entraxe = 120 ÷ 0,60 = 200 ml (vente au ml). La fiche ne donne ni perte ni chute pour le contre-liteau (la chute d'aboutage ne vise que les liteaux aboutés sur chevron ; 7,50 m de rampant ne tombe pas juste en longueurs du commerce, longueurs vendues absentes de la fiche) : aucune majoration appliquée.",
+    "ligne_devis": "3 — Contre-liteaux et liteaux"
+  },
+  {
+    "article": "Liteau sapin traité classe 2, 27×40",
+    "quantite": 336,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 1 ÷ pureau = 1 ÷ 0,375 = 2,667 ml/m² (règle générale tuiles à emboîtement ; HP 10 : 2,66 ml/m² au pureau maxi) × 120 m² = 320 ml ; + 5 % perte casse/coupes (Bois de couverture > liteau > tous) = 336 ml. Chute d'aboutage (0 % en 4,20 m, 10 % en 4,00 m sur fermettes à 60 cm) non appliquée : la fiche ne dit pas la longueur vendue.",
+    "ligne_devis": "3 — Contre-liteaux et liteaux"
+  },
+  {
+    "article": "Tuile terre cuite HP 10 Huguenot (Edilians) rouge",
+    "quantite": 1260,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 10 tuiles/m² (couvreur ; HP 10 : 1 ÷ (0,268 × 0,375) = 9,95/m², plage fiche 9,9 à 12) × 120 m² = 1 200 ; + 5 % casse et coupes (Pertes > tuiles à emboîtement : 3 à 5 %, a_confirmer, borne haute retenue) = 1 260 pièces (palette de 240 : 5,25 palettes). La fiche ne dit pas s'il faut déduire la place des tuiles de rive de la surface courante : pas de déduction.",
+    "ligne_devis": "4 — Couverture tuiles"
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 rouge, gauche (réf. 205.73)",
+    "quantite": 41,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "4 rives de 7,50 m = 30 ml, soit 15 ml côté gauche ; 15 ml × 2,7/ml (HP 10 : rive à rabat 2,7/ml ; 1 ÷ pureau = 2,667) = 40,5 → 41 ; casse 1 % (Pertes > faîtières, arêtiers, tuiles de rive, arrondi pièce sup.) = 40,9 → 41 pièces.",
+    "ligne_devis": "5 — Rives"
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 rouge, droite (réf. 205.72)",
+    "quantite": 41,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Côté droit : 15 ml × 2,7/ml = 40,5 → 41 ; casse 1 % = 40,9 → 41 pièces (même règle, rive tuile 1 ÷ pureau par côté, gauche et droite = deux articles).",
+    "ligne_devis": "5 — Rives"
+  },
+  {
+    "article": "Faîtière terre cuite demi-ronde à emboîtement rouge",
+    "quantite": 25,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 8,00 ml × 3/ml (donnée du couvreur ; fiche faîtage tuile : 1/2 ronde 40-42 cm = 3/ml) = 24 ; casse 1 % = 24,24 → 25 pièces. Si le négoce sert une demi-ronde de 50 (référence inconnue du couvreur) : 2,5/ml (ou 2/ml Monier) → 21 pièces. Clips de faîtière (1 par faîtière), lisse de rehausse, supports de lisse et abouts : la fiche les donne comme composition du faîtage à sec mais ne les dit pas indissociables, non écrits au devis, non sortis.",
+    "ligne_devis": "6 — Faîtage à sec"
+  },
+  {
+    "article": "Closoir de faîtage souple ventilé, rouleau de 5 m",
+    "quantite": 2,
+    "unite": "rouleaux",
+    "a_chiffrer": false,
+    "calcul": "8,00 ml + 5 cm de recouvrement à la jonction (closoir souple : recouvrement 5 cm) = 8,05 ml ÷ 5 m par rouleau (Monier Metalroll / Figaroll : 5 m) = 1,61 → 2 rouleaux.",
+    "ligne_devis": "6 — Faîtage à sec"
+  }
+]

@@ -1,0 +1,197 @@
+{
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+    {"donnee": "ouvrage", "valeur": "couverture de hangar agricole en bac acier", "origine": "lue", "regle": "", "preuve": "objet : « couv. hangar agricole (bât. neuf) » ; ligne 2 : « couv. BA »"},
+    {"donnee": "état", "valeur": "bâtiment neuf", "origine": "lue", "regle": "", "preuve": "objet : « (bât. neuf) »"},
+    {"donnee": "matériau", "valeur": "bac acier 63/100 simple peau, ép. 0,63 mm", "origine": "lue", "regle": "", "preuve": "ligne 2 : « couv. BA 63/100 simple peau, ep. 0,63 mm »"},
+    {"donnee": "type de bac", "valeur": "simple peau", "origine": "lue", "regle": "", "preuve": "ligne 2 : « simple peau »"},
+    {"donnee": "teinte", "valeur": "RAL 7016", "origine": "lue", "regle": "", "preuve": "ligne 2 : « RAL 7016 » ; ligne 3 : « RAL 7016 »"},
+    {"donnee": "feutre anti-condensation", "valeur": "avec, en sous-face", "origine": "lue", "regle": "", "preuve": "ligne 2 : « avec feutre anti-condensation en sous-face »"},
+    {"donnee": "surface", "valeur": "150 m²", "origine": "lue", "regle": "", "preuve": "ligne 2 : « 150 M2 »"},
+    {"donnee": "nombre de pans", "valeur": "2", "origine": "lue", "regle": "", "preuve": "NB : « toiture 2 pans »"},
+    {"donnee": "rampant", "valeur": "6,00 m", "origine": "lue", "regle": "", "preuve": "NB : « rampant 6,00 m »"},
+    {"donnee": "longueur de pan (faîtage)", "valeur": "12,50 m", "origine": "lue", "regle": "", "preuve": "ligne 3 : « faîtière BA RAL 7016, lg 12,50 m »"},
+    {"donnee": "cohérence de la surface", "valeur": "150 m²", "origine": "deduite", "regle": "2 pans × rampant 6,00 m × 12,50 m = 150 m², égal à la surface écrite", "preuve": ""},
+    {"donnee": "accessoires de couverture", "valeur": "vis autoperceuses avec rondelle EPDM, closoirs mousse", "origine": "lue", "regle": "", "preuve": "ligne 2 : « y/c access. (vis autoperc. rondelle EPDM, closoirs mousse) »"},
+    {"donnee": "faîtière", "valeur": "bac acier RAL 7016, 12,50 m", "origine": "lue", "regle": "", "preuve": "ligne 3 : « faîtière BA RAL 7016, lg 12,50 m » ; « 12,5 ML »"},
+    {"donnee": "gouttière", "valeur": "PVC gris, dév. 25, 25 m", "origine": "lue", "regle": "", "preuve": "ligne 4 : « goutt. PVC gris dév. 25 » ; « 25 ML »"},
+    {"donnee": "lignes de gouttière", "valeur": "2 lignes de 12,50 m", "origine": "lue", "regle": "", "preuve": "ligne 4 : « 2 x 12,50 m »"},
+    {"donnee": "nombre de descentes", "valeur": "2", "origine": "lue", "regle": "", "preuve": "ligne 5 : « desc. EP » ; « 2 U »"},
+    {"donnee": "descentes par ligne de gouttière", "valeur": "1", "origine": "deduite", "regle": "2 descentes pour 2 lignes de gouttière", "preuve": ""},
+    {"donnee": "matière des descentes", "valeur": "PVC gris", "origine": "lue", "regle": "", "preuve": "ligne 5 : « desc. EP PVC gris »"},
+    {"donnee": "diamètre des descentes", "valeur": "Ø 80 mm", "origine": "lue", "regle": "", "preuve": "ligne 5 : « Ø80 »"},
+    {"donnee": "hauteur d'une descente", "valeur": "4,00 m", "origine": "lue", "regle": "", "preuve": "ligne 5 : « ht 4,00 m »"},
+    {"donnee": "charpente et pannes", "valeur": "hors lot, posées par le charpentier", "origine": "lue", "regle": "", "preuve": "NB : « Charpente et pannes hors lot (posées par le charpentier avant notre intervention) »"}
+  ],
+  "bref": [
+    "Couverture neuve d'un hangar agricole, 2 pans, rampant 6,00 m.",
+    "Charpente et pannes hors lot, posées par le charpentier.",
+    "Bac acier 150 m², 63/100 simple peau, ép. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face.",
+    "Vis autoperceuses avec rondelle EPDM pour le bac acier.",
+    "Closoirs mousse pour le bac acier.",
+    "Faîtière bac acier 12,50 m, RAL 7016.",
+    "Gouttière 25 m, PVC gris, dév. 25, en 2 lignes de 12,50 m.",
+    "2 descentes EP PVC gris Ø80, hauteur 4,00 m.",
+    "Chaque pan fait 12,50 m de long : 2 × 6,00 m × 12,50 m = 150 m², la surface du devis.",
+    "Une descente par ligne de gouttière."
+  ],
+  "questions": [],
+  "lignes": [
+    {
+      "ref": "1",
+      "designation": "Install. chantier, nacelle et sécu.",
+      "quantite": "1",
+      "unite": "FT",
+      "role": "hors_quantitatif",
+      "fournitures": []
+    },
+    {
+      "ref": "2",
+      "designation": "F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)",
+      "quantite": "150",
+      "unite": "M2",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Bac acier 63/100 simple peau, ép. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face",
+          "quantite": "150",
+          "unite": "m²",
+          "ouvrage": "couverture-bac-acier",
+          "emplacement": "plaque",
+          "donnees": [
+            {"cle": "surface", "valeur": "150"},
+            {"cle": "type_bac", "valeur": "1"},
+            {"cle": "teinte_bac", "valeur": "7016"},
+            {"cle": "feutre_bac", "valeur": "1"},
+            {"cle": "longueur_rampant", "valeur": "6"},
+            {"cle": "nb_pans", "valeur": "2"}
+          ],
+          "attend": [],
+          "a_preciser": ["profil"],
+          "precision": "2 pans, rampant 6,00 m, pans de 12,50 m de long"
+        },
+        {
+          "nom": "Vis autoperceuses avec rondelle EPDM",
+          "quantite": "",
+          "unite": "u",
+          "ouvrage": "couverture-bac-acier",
+          "emplacement": "vis",
+          "donnees": [],
+          "attend": [],
+          "a_preciser": [],
+          "precision": "pour bac acier 63/100"
+        },
+        {
+          "nom": "Closoirs mousse",
+          "quantite": "",
+          "unite": "u",
+          "ouvrage": "couverture-bac-acier",
+          "emplacement": "closoir",
+          "donnees": [],
+          "attend": [],
+          "a_preciser": ["profil du bac"],
+          "precision": "pour bac acier 63/100"
+        }
+      ]
+    },
+    {
+      "ref": "3",
+      "designation": "F. et P. faîtière BA RAL 7016, lg 12,50 m",
+      "quantite": "12,5",
+      "unite": "ML",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Faîtière bac acier RAL 7016",
+          "quantite": "12,5",
+          "unite": "ml",
+          "ouvrage": "couverture-bac-acier",
+          "emplacement": "faitiere",
+          "donnees": [
+            {"cle": "teinte_bac", "valeur": "7016"}
+          ],
+          "attend": [],
+          "a_preciser": [],
+          "precision": "faîtage de 12,50 m"
+        }
+      ]
+    },
+    {
+      "ref": "4",
+      "designation": "F. et P. goutt. PVC gris dév. 25, 2 x 12,50 m",
+      "quantite": "25",
+      "unite": "ML",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Gouttière PVC gris dév. 25",
+          "quantite": "25",
+          "unite": "ml",
+          "ouvrage": "gouttiere-pvc-alu",
+          "emplacement": "profil",
+          "donnees": [
+            {"cle": "longueur_gouttiere", "valeur": "25"},
+            {"cle": "matiere_gouttiere", "valeur": "1"},
+            {"cle": "teinte_gouttiere", "valeur": "1"},
+            {"cle": "developpe_gouttiere", "valeur": "25"},
+            {"cle": "nb_lignes", "valeur": "2"},
+            {"cle": "nb_descentes", "valeur": "2"},
+            {"cle": "diametre_descente", "valeur": "80"}
+          ],
+          "attend": [],
+          "a_preciser": [],
+          "precision": "2 lignes de 12,50 m ; 2 descentes Ø80 (ligne 5)"
+        }
+      ]
+    },
+    {
+      "ref": "5",
+      "designation": "F. et P. desc. EP PVC gris Ø80, ht 4,00 m",
+      "quantite": "2",
+      "unite": "U",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Descente EP PVC gris Ø80",
+          "quantite": "",
+          "unite": "u",
+          "ouvrage": "descente",
+          "emplacement": "tube",
+          "donnees": [
+            {"cle": "nb_descentes", "valeur": "2"},
+            {"cle": "diametre_descente", "valeur": "80"},
+            {"cle": "hauteur_descente", "valeur": "4"}
+          ],
+          "attend": [],
+          "a_preciser": [],
+          "precision": "2 descentes de 4,00 m de haut"
+        }
+      ]
+    },
+    {
+      "ref": "6",
+      "designation": "Nettoyage fin de chantier, évac. des chutes",
+      "quantite": "1",
+      "unite": "FT",
+      "role": "hors_quantitatif",
+      "fournitures": []
+    }
+  ],
+  "contexte": [
+    {"cle": "client", "valeur": "EARL DU ROHAN, M. Gwenaël Morvan"},
+    {"cle": "adresse", "valeur": "Lieu-dit Kerdrain"},
+    {"cle": "ville", "valeur": "Loudéac"},
+    {"cle": "code postal", "valeur": "22600"},
+    {"cle": "numéro du devis", "valeur": "DV-2611-038"},
+    {"cle": "date", "valeur": "16/11/2026"},
+    {"cle": "validité", "valeur": "2 mois"},
+    {"cle": "objet", "valeur": "couverture hangar agricole"},
+    {"cle": "neuf ou rénovation", "valeur": "neuf"},
+    {"cle": "suivi par", "valeur": "Y. Le Bihan"},
+    {"cle": "délai d'intervention", "valeur": "5 à 6 semaines après accord, selon météo"}
+  ],
+  "notes": [
+    "Charpente et pannes hors lot : posées par le charpentier avant ton intervention, rien à acheter pour la structure."
+  ]
+}

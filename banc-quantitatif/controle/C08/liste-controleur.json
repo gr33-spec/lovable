@@ -1,0 +1,34 @@
+[
+  {
+    "article": "Feuille de zinc naturel 2 × 1 m, épaisseur 0,65 mm (pour noue de 50, pliée par le couvreur)",
+    "quantite": 2,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "Il plie lui-même → feuilles 2×1 m (feuille de zinc : format_courant 2000×1000, épaisseur 0,65). Zinc en bandes : 6 ml + recouvrement aux 2 jonctions (10 cm → +5 %) = 6,3 ml, arrondi aux longueurs de 2 m = 4 bandes ; bandes_de_2_m_tirees_d_une_feuille dev_500 = 2 → 4 / 2 = 2 feuilles.",
+    "ligne_devis": "1) Remplact noue zinc 6 ml"
+  },
+  {
+    "article": "Ardoise naturelle d'Espagne 1er choix 32×22, ép. 3,5 mm, gris-noir (identique à l'existant)",
+    "quantite": 168,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune règle de remaniage (part d'ardoises neuves) : pris le tiers dit par le couvreur. Crochet de 9 → R = C − 5 mm = 85 mm ; pureau (320 − 85)/2 = 117,5 mm ; ardoises/m² = 1/[0,1175 × (0,220 + 0,003)] = 38,2 ; 12 m² × 38,2 = 458 ardoises déposées ; × 1/3 = 153 ; + 10 % (perte_casse_et_coupes_toit_complique, noues) = 168 pièces.",
+    "ligne_devis": "2) Remaniage ardoises autour noue, ardoises identiques à l'existant 12 m2"
+  },
+  {
+    "article": "Mortier bâtard pour solin, sac de 25 kg",
+    "quantite": 1,
+    "unite": "sacs de 25 kg",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? la seule consommation « mortier de solin » vient d'un mortier d'étanchéité (Technichem B304, une_source), pas d'un mortier bâtard. Pris 2 kg/ml : 3 ml × 2 = 6 kg → sac de 25 kg (mortier de faîtage, conditionnement) → 1 sac (même avec 5 à 10 kg/ml du mortier de couverture : 30 kg max → 2 sacs ; 1 sac retenu d'après la règle propre au solin).",
+    "ligne_devis": "3) Reprise solin au mortier 3 ml"
+  },
+  {
+    "article": "Tuyau de descente zinc naturel Ø80, longueur 2 m",
+    "quantite": null,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": true,
+    "calcul": "Nombre de tubes = hauteur de la descente / 2 m (longueurs_vendues 2 m, zinc Ø80), arrondi au-dessus ; hauteur de la descente non mesurée (ne_sait_pas) → à chiffrer.",
+    "ligne_devis": "4) Remplact DEP Ø80 1 u"
+  }
+]

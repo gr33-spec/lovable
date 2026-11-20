@@ -1,0 +1,24 @@
+{"lignes":[
+{"ref":"1","designation":"Installation de chantier","mesure":"m17","role":"hors_quantitatif","fournitures":[]},
+{"ref":"2","designation":"Dépose de la couverture existante","mesure":"m21","role":"pose","fournitures":[]},
+{"ref":"3","designation":"Dépose des anciens châssis de toit","mesure":"m25","role":"pose","fournitures":[]},
+{"ref":"4","designation":"Couverture en ardoise naturelle 30×20 : pose au crochet noir","mesure":"m30","role":"fourniture_et_pose","fournitures":[
+{"nom":"Ardoise naturelle 30×20","mesure":"m30","ouvrage":"couverture-ardoises-crochet","emplacement":"ardoise","donnees":[{"cle":"surface","etiquette":"m30","choix":"","mots":""},{"cle":"pente","etiquette":"m33","choix":"","mots":""},{"cle":"longueur_rampant","etiquette":"m34","choix":"","mots":""}],"a_preciser":[],"precision":""},
+{"nom":"Crochet noir","mesure":"m30","ouvrage":"couverture-ardoises-crochet","emplacement":"crochet","donnees":[{"cle":"surface","etiquette":"m30","choix":"","mots":""},{"cle":"pente","etiquette":"m33","choix":"","mots":""},{"cle":"longueur_rampant","etiquette":"m34","choix":"","mots":""}],"a_preciser":[],"precision":""}]},
+{"ref":"5","designation":"Jouées de lucarnes","mesure":"m36","role":"fourniture_et_pose","fournitures":[
+{"nom":"Ardoise naturelle 30×20","mesure":"","ouvrage":"couverture-ardoises-crochet","emplacement":"ardoise","donnees":[],"a_preciser":[],"precision":""},
+{"nom":"Crochet noir","mesure":"","ouvrage":"couverture-ardoises-crochet","emplacement":"crochet","donnees":[],"a_preciser":[],"precision":""}]},
+{"ref":"6","designation":"Noues de lucarnes","mesure":"m42","role":"fourniture_et_pose","fournitures":[
+{"nom":"Noue en zinc","mesure":"m45","ouvrage":"noue","emplacement":"noue","donnees":[],"a_preciser":[],"precision":""}]},
+{"ref":"7","designation":"Fenêtres de toit","mesure":"m48","role":"fourniture_et_pose","fournitures":[
+{"nom":"Fenêtre de toit Velux GGL MK04","mesure":"m48","ouvrage":"fenetre-de-toit","emplacement":"fenetre","donnees":[{"cle":"nb_fenetres","etiquette":"m48","choix":"","mots":""},{"cle":"taille_fenetre","etiquette":"m51","choix":"","mots":""}],"a_preciser":[],"precision":""},
+{"nom":"Raccords d'étanchéité","mesure":"m48","ouvrage":"fenetre-de-toit","emplacement":"raccord","donnees":[{"cle":"nb_fenetres","etiquette":"m48","choix":"","mots":""},{"cle":"raccord_couverture","etiquette":"","choix":"2","mots":"pour ardoise"}],"a_preciser":[],"precision":""}]},
+{"ref":"8","designation":"Abergement de cheminée","mesure":"m53","role":"fourniture_et_pose","fournitures":[
+{"nom":"Abergement de cheminée en zinc","mesure":"m53","ouvrage":"abergement-cheminee","emplacement":"abergement","donnees":[{"cle":"nb_cheminees","etiquette":"m53","choix":"","mots":""},{"cle":"perimetre_cheminee","etiquette":"m56","choix":"","mots":""}],"a_preciser":[],"precision":""}]},
+{"ref":"9","designation":"Faîtage","mesure":"m58","role":"fourniture_et_pose","fournitures":[
+{"nom":"Faîtières terre cuite","mesure":"m58","ouvrage":"faitage","emplacement":"faitiere","donnees":[{"cle":"longueur_faitage","etiquette":"m58","choix":"","mots":""}],"a_preciser":[],"precision":""}]},
+{"ref":"10","designation":"Sorties de toit","mesure":"m62","role":"fourniture_et_pose","fournitures":[
+{"nom":"Sortie de toit Ø125 pour VMC","mesure":"m62","ouvrage":"sortie-de-toit","emplacement":"sortie","donnees":[{"cle":"nb_sorties","etiquette":"m62","choix":"","mots":""},{"cle":"diametre_sortie","etiquette":"m65","choix":"","mots":""},{"cle":"usage_sortie","etiquette":"","choix":"2","mots":"pour VMC"}],"a_preciser":[],"precision":""}]},
+{"ref":"11","designation":"Évacuation des gravats","mesure":"m67","role":"hors_quantitatif","fournitures":[]},
+{"ref":"12","designation":"Fin de chantier","mesure":"m71","role":"hors_quantitatif","fournitures":[]}
+]}

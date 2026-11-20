@@ -1,0 +1,58 @@
+[
+  {
+    "article": "Tuile canal terre cuite courant (Edilians Canal 50, courant à tenons 454), rouge vieilli",
+    "quantite": 991,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (les 4 valeurs Canal 50 ne disent pas leur recouvrement ; 11,1/m² pris pour 150 mm, 2e palier comme la série 140/150/160/170 ; perte « au moins 1 % ; 5 % courant en formation » a_confirmer, 5 % retenu) — Tuiles canal > tuile canal, Edilians Canal 50 : 11,1 u/m² + « 1 courant pour 1 couvert » + « 2 articles distincts au comptoir » ; Pertes > tuiles canal : 85 × 11,1 = 943,5 × 1,05 = 990,7 → 991 (≈ 5 palettes de 200)",
+    "ligne_devis": "Fourniture et pose de tuilles canal terre cuite, courants et couverts, sur 85m2"
+  },
+  {
+    "article": "Tuile canal terre cuite couvert (Edilians Canal 50, couvert 414), rouge vieilli",
+    "quantite": null,
+    "unite": "pièces",
+    "a_chiffrer": true,
+    "calcul": "Le couvreur ne sait pas si la cliente garde des anciennes tuiles en couvert (réemploi non décidé) : quantité non calculable. Sans réemploi : Edilians Canal 50 11,1 u/m² (150 mm) × 85 = 943,5 × 1,05 (Pertes > tuiles canal, 5 %) = 990,7 → 991 pièces",
+    "ligne_devis": "Fourniture et pose de tuilles canal terre cuite, courants et couverts, sur 85m2"
+  },
+  {
+    "article": "Liteau sapin traité classe 2, 27×40",
+    "quantite": 256,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (liteaux_ml_par_m2 du Canal 50 sans recouvrement nommé ; 2,86 pris pour 150 mm ; chute d'aboutage non comptée : entraxe des chevrons inconnu) — Tuiles canal > Edilians Canal 50 : 2,86 ml/m² ; Bois de couverture > liteau, tous : perte 5 %, vente au ml : 85 × 2,86 = 243,1 × 1,05 = 255,3 → 256 ml",
+    "ligne_devis": "Liteaux neufs sur toute la toiture 85m2"
+  },
+  {
+    "article": "Bardelis (tuile de rive canal) terre cuite gauche, rouge vieilli",
+    "quantite": 17,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Tuiles canal > bardelis gauche ou droit : 2,7 u/ml de rive par côté ; Pertes > faîtières, arêtiers, tuiles de rive : ml × pièces/ml, casse 1 %, arrondi pièce sup. : rive de 6 m d'un côté du pan sud : 6 × 2,7 = 16,2 × 1,01 = 16,4 → 17",
+    "ligne_devis": "Les rives 2 x 6ml soit 12ml"
+  },
+  {
+    "article": "Bardelis (tuile de rive canal) terre cuite droit, rouge vieilli",
+    "quantite": 17,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Tuiles canal > bardelis gauche ou droit : 2,7 u/ml de rive par côté ; Pertes > faîtières, arêtiers, tuiles de rive : casse 1 %, arrondi pièce sup. : rive de 6 m de l'autre côté du pan sud : 6 × 2,7 = 16,2 × 1,01 = 16,4 → 17",
+    "ligne_devis": "Les rives 2 x 6ml soit 12ml"
+  },
+  {
+    "article": "Faîtière canal terre cuite 50 cm, rouge vieilli",
+    "quantite": 28,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Tuiles canal > faîtière canal 50 cm : 2,5 à 3 u/ml (pureau variable Edilians), 3/ml retenu (donnée du couvreur) ; Pertes > faîtières : casse 1 %, arrondi pièce sup. : 9 × 3 = 27 × 1,01 = 27,3 → 28",
+    "ligne_devis": "Faitage 9ml scellé au mortier"
+  },
+  {
+    "article": "Mortier de couverture (scellement du faîtage), sac 25 kg",
+    "quantite": 4,
+    "unite": "sacs de 25 kg",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (consommation 5 à 10 kg/ml, une valeur a_confirmer ; fourchette large pour des faîtières canal scellées ; la fiche parle de mortier prêt à gâcher, le couvreur fait un mortier bâtard chaux-sable) — Faîtages > mortier de faîtage : 10 kg/ml × 9 ml = 90 kg ÷ 25 = 3,6 → 4 sacs (à 5 kg/ml : 2 sacs)",
+    "ligne_devis": "Faitage 9ml scellé au mortier"
+  }
+]

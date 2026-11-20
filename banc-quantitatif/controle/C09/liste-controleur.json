@@ -1,0 +1,50 @@
+[
+  {
+    "article": "Voliges sapin 18 mm pour voligeage jointif (section 18 × 105 ou 18 × 125 selon livraison)",
+    "quantite": 63,
+    "unite": "m²",
+    "a_chiffrer": false,
+    "calcul": "Bois de couverture › volige « toutes » : unité de vente m², perte 5 % ; Pertes › voliges 5 à 10 % (toit simple 2 pans → 5 %) : 60 m² × 1,05 = 63 m². La section inconnue ne change pas les m² commandés.",
+    "ligne_devis": "2 — Voligeage jointif en voliges sapin, 60,00 m²"
+  },
+  {
+    "article": "Bacs zinc joint debout profilés, zinc naturel 0,70 mm, bobine 500 mm (entraxe 430 mm), longueur 5,00 m",
+    "quantite": 28,
+    "unite": "bacs de 5,00 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune règle de nombre de bacs ni de surlongueur pour des bacs profilés commandés à la longueur ; pris : bobine de zinc joint debout 500 → entraxe 430 mm (imposé zone 3, littoral breton) : par pan arrondi sup.(6 000 / 430) = 14 bacs × 2 pans = 28 bacs à la longueur du rampant 5,00 m.",
+    "ligne_devis": "3 — Couverture zinc à joint debout, zinc naturel 0,70 mm, 2 pans, rampant 5,00 m, 60,00 m²"
+  },
+  {
+    "article": "Bande d'égout à ourlet façonnée, zinc naturel 0,70 mm, développé 330 mm, longueur 2 m",
+    "quantite": 7,
+    "unite": "bandes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "Zinc en bandes (égout) : ml + recouvrement aux jonctions (+2,5 % à 5 cm, +5 % à 10 cm), arrondi à 2 m ; bande façonnée longueur standard 2 m : 12 × 1,025 = 12,3 (ou 12,6) → 14 m → 7 bandes. FICHE ? méthode « a_confirmer » et recouvrement non tranché (5 ou 10 cm, même résultat ici).",
+    "ligne_devis": "4 — Bande d'égout en zinc naturel, 12,00 ml"
+  },
+  {
+    "article": "Faîtage zinc façonné (bande de faîtage), zinc naturel 0,70 mm, développé 330 mm, longueur 2 m",
+    "quantite": 4,
+    "unite": "longueurs de 2 m",
+    "a_chiffrer": false,
+    "calcul": "Faîtage zinc façonné : longueur vendue 2 m ; zinc en bandes : ml + recouvrement (+2,5 à 5 %), arrondi à 2 m : 6 × 1,025 = 6,15 (ou 6,3) → 8 m → 4 longueurs. FICHE ? méthode des bandes « a_confirmer ».",
+    "ligne_devis": "5 — Faîtage en zinc naturel (bande de faîtage), 6,00 ml"
+  },
+  {
+    "article": "Gouttière zinc naturel demi-ronde de 33 (développé 330 mm), longueur 4 m",
+    "quantite": 4,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "Pertes › gouttières zinc : ml + 30 mm par jonction soudée, arrondi aux longueurs de 4 m, pas de % (longueur vendue standard 4 m) : par ligne 6,00 + 0,03 (1 jonction) = 6,03 → 8 m = 2 longueurs × 2 lignes = 4 longueurs. Épaisseur non écrite au devis : 0,65 courante (fiche).",
+    "ligne_devis": "6 — Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, 12,00 ml"
+  },
+  {
+    "article": "Tuyau de descente zinc naturel Ø 100, longueur 2 m",
+    "quantite": 6,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "Descente EP zinc : longueurs vendues 2 / 3 / 4 m, en Bretagne tuyau de descente 2 m (le couvreur prend des 2 m) : par descente arrondi sup.(5,00 / 2) = 3 tubes × 2 descentes = 6 tubes. Coudes et colliers non écrits au devis : rien.",
+    "ligne_devis": "7 — Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, 2 u"
+  }
+]
