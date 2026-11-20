@@ -10,7 +10,7 @@
   --mz-encre: #130901;
   --mz-papier: #F6F3EE;
   --mz-blanc: #FBF8F3;
-  --mz-gris: #614822;
+  --mz-gris: #4F4B45;
   --mz-ligne: #99844C4D;
   --mz-rayon: 14px;
   --mz-ombre: 0 1px 0 rgba(19, 9, 1, 0.06), 0 14px 34px -20px rgba(19, 9, 1, 0.38);
@@ -1233,7 +1233,7 @@
 .mz-rond,
 .mz-trois-n {
   --mz-encre: var(--mz-noir);
-  --mz-gris: #614822;
+  --mz-gris: #4F4B45;
   --mz-ligne: #99844C4D;
   color: var(--mz-noir);
 }
@@ -1401,7 +1401,7 @@
 }
 .mz-sans {
   border-color: #99844C;
-  color: #614822;
+  color: #4F4B45;
 }
 .mz-badge {
   border-color: currentColor;

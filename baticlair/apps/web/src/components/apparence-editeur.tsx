@@ -1,5 +1,7 @@
 "use client";
 
+import { choisirVibrations, useVibrations } from "@/lib/haptique";
+
 import { Check, Expand, ImageUp, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { COULEURS_PDF, MODELES_PDF, MODELES_PDF_INFO, type CouleurPdf, type ModelePdf } from "../../../../packages/domain/src/documents/modele-pdf";
@@ -145,6 +147,7 @@ export function EditeurApparence() {
       {onglet === "application" ? (
         <div role="tabpanel" id="panneau-application" aria-labelledby="onglet-application" className="flex flex-col gap-3 lg:max-w-md">
           <CarteApparence />
+          <CarteVibrations />
           <p className="px-1 text-[13px] text-muted">L&apos;apparence de l&apos;application ne change pas le PDF envoyé à tes négoces.</p>
         </div>
       ) : (
@@ -493,5 +496,19 @@ function BarreEnregistrer({ modifie, pending, statut, onEnregistrer }: { modifie
         </p>
       ) : null}
     </div>
+  );
+}
+
+/** « Vibrations au toucher » (Greg, 20 novembre 2026) : allumées par défaut, gardées sur cet appareil. */
+function CarteVibrations() {
+  const actives = useVibrations();
+  return (
+    <label className="flex min-h-14 cursor-pointer items-center justify-between gap-3 rounded-[20px] border border-line bg-surface px-4 py-3">
+      <span className="flex flex-col">
+        <span className="text-[16px] font-bold">Vibrations au toucher</span>
+        <span className="text-[13px] text-muted">Un petit retour quand tu touches un bouton ou un choix (si ton téléphone le permet).</span>
+      </span>
+      <input type="checkbox" role="switch" checked={actives} onChange={(e) => choisirVibrations(e.target.checked)} className="size-6 shrink-0 accent-accent" aria-label="Vibrations au toucher" />
+    </label>
   );
 }

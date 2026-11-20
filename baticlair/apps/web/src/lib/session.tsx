@@ -100,7 +100,7 @@ export function SessionGate({ children, requireCompany = true }: { children: Rea
       <div className="fixed top-0 left-0 flex h-dvh w-full flex-col items-center justify-center gap-4 p-6 text-center" style={{ background: "#FBF8F3", color: "#130901" }}>
         <p className="max-w-md text-lg font-bold">{failure.message}</p>
         {failure.supportId ? (
-          <p className="text-sm" style={{ color: "#614822" }}>
+          <p className="text-sm" style={{ color: "#4F4B45" }}>
             Code support : {failure.supportId}
           </p>
         ) : null}

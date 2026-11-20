@@ -142,7 +142,7 @@ function SketchPicker({ label, onAttach }: { label: string; onAttach: (file: Fil
           }
         }}
       />
-      <label htmlFor={id} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#F2F1EE] px-3 text-sm font-extrabold text-[#614822] ${busy ? "pointer-events-none opacity-60" : ""}`}>
+      <label htmlFor={id} className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#F2F1EE] px-3 text-sm font-extrabold text-[#4F4B45] ${busy ? "pointer-events-none opacity-60" : ""}`}>
         {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Paperclip size={16} aria-hidden="true" />}
         {busy ? "Envoi du croquis…" : "Joindre une photo ou un PDF"}
       </label>

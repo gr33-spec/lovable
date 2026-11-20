@@ -15,7 +15,7 @@ export default function ErrorPage({ error, retry }: { error: Error & { digest?: 
     <main className="fixed inset-0 z-50 flex flex-col justify-center overflow-y-auto bg-[#FBF8F3] px-5 text-[#130901] [color-scheme:light]">
      <div className="mx-auto flex w-full max-w-md flex-col gap-4">
       <h1 className="font-display text-[26px] leading-tight font-extrabold">Oups, cet écran a eu un souci</h1>
-      <p className="text-[15px] text-[#614822]">Rien n&apos;est perdu : ton chantier est enregistré. On est prévenus.</p>
+      <p className="text-[15px] text-[#4F4B45]">Rien n&apos;est perdu : ton chantier est enregistré. On est prévenus.</p>
       <button type="button" onClick={() => retry()} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-[#FFC800] px-5 text-base font-extrabold text-[#130901]">
         Réessayer
       </button>
