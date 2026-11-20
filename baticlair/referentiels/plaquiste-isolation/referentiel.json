@@ -8505,14 +8505,14 @@
             }
           ],
           "default": {
-            "source": "siniat-pv-feu",
+            "source": "placo-integrale-plafonds-2023",
             "verification": {
               "status": "draft",
-              "note": "Recherche du 2026-11-19 — 2 sources : REI 60 sous plancher : 2 plaques feu chez Placo (PRF, RS 16-039) et Siniat (EFR-21-004119) ; Knauf Métal Chrono : 1 KF BA15 (recherche/11 §4.3)."
+              "note": "Recherche du 2026-11-19 — 2 sources : Plafond courant : une BA13 (Placo, Pladur)."
             },
             "version": 1,
-            "formula": "si(ei > 30, 2, 1)",
-            "note": "une plaque, deux en REI 60 et plus, par défaut"
+            "value": "1",
+            "note": "une plaque, par défaut"
           }
         },
         {

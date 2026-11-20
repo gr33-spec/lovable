@@ -1012,7 +1012,7 @@ def referentiel():
     cl["needs"].append(besoin("laine-feu", "laine_feu", "surface * regle.isolant_par_m2", "m2", "placo-pv-feu", OK2("Laine minérale 45 mm obligatoire en 72/48 coupe-feu : Placo (RS 15-019, RS 15-020), Siniat (LV 45, EFR-24-005466), Knauf (« avec laine minérale uniquement »), recherche/11 §4.1 point 3."),
                               when="si(ei >= 1, si(couches < 2, 1, 0), 0)", precisionRequires=["marque_systeme"], designation="Laine minérale 45 mm {marque_systeme} (selon le PV)", short="laine du système coupe-feu"))
     # Plafond coupe-feu : deux plaques par défaut (REI 60 : Placo PRF 2 Placoflam, Siniat 2 Prégyflam) ; peau visible vissée à 15 cm.
-    pl["params"] = [dict(x, default={**prov("siniat-pv-feu", OK2("REI 60 sous plancher : 2 plaques feu chez Placo (PRF, RS 16-039) et Siniat (EFR-21-004119) ; Knauf Métal Chrono : 1 KF BA15 (recherche/11 §4.3).")), "formula": "si(ei > 30, 2, 1)", "note": "une plaque, deux en REI 60 et plus, par défaut"}) if x["key"] == "couches" else x for x in pl["params"]]
+    # Plafond coupe-feu : le nombre de plaques reste lu au devis (une valeur par défaut calculée laisserait la 2e peau « possible » dans les conditions du moteur).
     pl["constants"]["vis_feu"] = regle("23", "u/m2", "placo-pv-feu", UNE("Montage feu PRF : peau visible vissée tous les 15 cm, jusqu'à 23 vis/m² (Placo Intégrale Plafonds 2023 p. 104) ; Siniat et Knauf : vissage dans le PV, non publié."), label="{v} vis par m² (montage feu)")
     pl["needs"] = [dict(n, formula="surface * regle.vis_feu") if n["id"] == "vis-ttpc-35-feu" else n for n in pl["needs"]]
     work_items = [cl, separative(), doublage_colle(), doublage_fourrures(), contre_cloison(), pl, joints(), isolation_rouleaux(), soufflage(), pare_vapeur()]
