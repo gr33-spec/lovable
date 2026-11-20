@@ -1,0 +1,801 @@
+{
+  "famille": "securite_toiture",
+  "generated": "2026-11-20",
+  "perimetre": "Crochets de sécurité NF EN 517, crochets de service, ancrages et lignes de vie NF EN 795, échelles de couvreur. Aucune règle française chiffrée de nombre de crochets au m² trouvée (ni DTU, ni INRS) : on demande le nombre.",
+  "entrees": [
+    {
+      "id": "crochet_securite_types_en517",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "types_en_517",
+      "valeur": "type A : reprend les efforts dans le sens de la pente ; type B : dans le sens de la pente ET dans le plan de la toiture (perpendiculaire)",
+      "unite": "",
+      "condition": "crochet de sécurité = ancrage pour échelle de couvreur et EPI ; pour s'y attacher par harnais, prendre un crochet B ou un ancrage EN 795",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Agence wallonne du Patrimoine, FARCC 1.7 « Crochets de service (d'échelle) : spécifications produit et mise en œuvre » (2020)",
+          "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-7-crochet-de-service-dechelle-specifications-produit-et-mise-en-oeuvre.pdf",
+          "type": "guide",
+          "extrait": "crochet de type A : leur rôle est d'absorber les efforts de traction agissant dans le sens de la pente de la couverture",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "swisspor, « SAFSYS Crochets DH-DD, instructions de montage » (FR, v2)",
+          "url": "https://www.swisspor.com/api-media/11634/download/SAFSYS%20Crochets%20DH-DD%20instructions%20de%20montage.pdf",
+          "type": "fabricant",
+          "extrait": "crochets de sécurité de type B conformément à la norme EN 517:2006",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, fiche « Crochets de sécurité et Ancrage | Secur+ » (Frénéhard & Michaux)",
+          "url": "https://www.batiproduits.com/fiche/produits/crochets-de-securite-et-ancrage-secur-p69039028.html",
+          "type": "fabricant",
+          "extrait": "la norme EN 517 : 2006 classes A et B pour les crochets de sécurité",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_norme",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "norme",
+      "valeur": "NF EN 517 (remplace la NF P37-403 « crochet de service », annulée)",
+      "unite": "",
+      "condition": "toute la France",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "AFNOR Boutique, notice NF P37-403 « Accessoires de couverture, crochet de service » (statut de la norme)",
+          "url": "https://www.boutique.afnor.org/en-gb/standard/nf-p37403/roofing-accessories-service-hook-for-roofs/fa006585/65643",
+          "type": "guide",
+          "extrait": "NF P37-403 … annulée, remplacée par NF EN 517 (statut affiché sur la notice AFNOR)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Agence wallonne du Patrimoine, FARCC 1.7 « Crochets de service (d'échelle) : spécifications produit et mise en œuvre » (2020)",
+          "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-7-crochet-de-service-dechelle-specifications-produit-et-mise-en-oeuvre.pdf",
+          "type": "guide",
+          "extrait": "NBN EN 517 : Accessoires préfabriqués pour couverture - Crochets de sécurité. Avril 2006",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_espacement",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "entraxe_max_horizontal",
+      "valeur": 2,
+      "unite": "m",
+      "condition": "entre deux crochets de sécurité d'une même rangée, pour circuler en sécurité ; ne jamais s'ancrer sous le travailleur",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "Ils doivent être positionnés tous les deux mètres pour assurer une protection efficace et ne jamais être utilisés en dessous du travailleur.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frénéhard & Michaux, notice crochets de sécurité SECUR+ (A5, 24-10), diffusée par Distriartisan (403 au robot, lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/-CROCHET-SECU-A5-24-10.pdf",
+          "type": "fabricant",
+          "extrait": "respecter un entraxe maximum de 2 mètres entre chaque crochet de sécurité",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "La FARCC wallonne donne 2,8 m maximum pour des crochets de SERVICE (d'échelle), qu'elle ne considère pas comme des crochets de sécurité : autre usage."
+    },
+    {
+      "id": "crochet_securite_pres_points_intervention",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "distance_aux_points_d_intervention",
+      "valeur": 1,
+      "unite": "m",
+      "condition": "poser des crochets à environ 1 m des endroits à entretenir plus tard (cheminée, fenêtre de toit, antenne)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Frénéhard & Michaux, notice crochets de sécurité SECUR+ (A5, 24-10), diffusée par Distriartisan (403 au robot, lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/-CROCHET-SECU-A5-24-10.pdf",
+          "type": "fabricant",
+          "extrait": "Poser des crochets de sécurité à 1 mètre des endroits qui nécessiteront des interventions ultérieures",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_fixations",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "fixations_par_crochet",
+      "valeur": 3,
+      "unite": "u",
+      "condition": "3 pointes annelées (ou 1 axe crampon traversant) sur chevron ; vis à bois : profondeur ≥ 90 mm (swisspor) ; fixations fournies avec le crochet chez Frénéhard",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "se fixent sur le dessus de la poutre ou chevron en bois avec 3 clous annelés ou un axe crampon",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frénéhard & Michaux, fiche crochet de sécurité cambré 25 « Monuments historiques » (MLFSEMHCA25), diffusée par Distriartisan (lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/MLFSEMHCA2501.pdf",
+          "type": "fabricant",
+          "extrait": "fixé sur chevron à l'aide d'au moins 3 pointes annelées",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "swisspor, « SAFSYS Crochets DH-DD, instructions de montage » (FR, v2)",
+          "url": "https://www.swisspor.com/api-media/11634/download/SAFSYS%20Crochets%20DH-DD%20instructions%20de%20montage.pdf",
+          "type": "fabricant",
+          "extrait": "3 vis à bois par crochet (fournies) • Profondeur de vissage d'au moins 90 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_section_chevron",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "section_mini_chevron",
+      "valeur": "4,2 × 6,3 (Tractel) ; 8 × 10 (swisspor)",
+      "unite": "cm",
+      "condition": "selon le modèle de crochet",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "Section mini de la poutre 4.2 X6.3 cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "swisspor, « SAFSYS Crochets DH-DD, instructions de montage » (FR, v2)",
+          "url": "https://www.swisspor.com/api-media/11634/download/SAFSYS%20Crochets%20DH-DD%20instructions%20de%20montage.pdf",
+          "type": "fabricant",
+          "extrait": "Section des chevrons min. 8 x 10 cm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "4,2 × 6,3 cm (Tractel, crochet plat cloué) contre 8 × 10 cm (swisspor, crochet vissé) : la valeur dépend du modèle.",
+      "raison": "Les deux fabricants donnent des sections très différentes, propres à leur modèle ; pas de règle générale."
+    },
+    {
+      "id": "crochet_securite_personnes",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "personnes_par_crochet",
+      "valeur": 1,
+      "unite": "u",
+      "condition": "crochet de toiture inclinée swisspor type B ; à vérifier sur la notice des autres marques",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "swisspor, « SAFSYS Crochets DH-DD, instructions de montage » (FR, v2)",
+          "url": "https://www.swisspor.com/api-media/11634/download/SAFSYS%20Crochets%20DH-DD%20instructions%20de%20montage.pdf",
+          "type": "fabricant",
+          "extrait": "Les crochets de sécurité en toiture inclinée peuvent être utilisés par une personne au maximum à la fois.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_remplacement",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "remplacement_apres_chute",
+      "valeur": "remplacer le crochet après qu'il a retenu une chute",
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Frénéhard & Michaux, notice crochets de sécurité SECUR+ (A5, 24-10), diffusée par Distriartisan (403 au robot, lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/-CROCHET-SECU-A5-24-10.pdf",
+          "type": "fabricant",
+          "extrait": "Le crochet doit être remplacé après avoir reçu une chute",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_formes",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "formes_vendues",
+      "valeur": "droit (plat), cambré 25 ou 50 mm, chantourné / torsadé (fixation sur le flanc du chevron)",
+      "unite": "",
+      "condition": "la forme suit la couverture (ardoise, tuile plate, tuile à relief) ; galvanisé à chaud ou inox, parfois teinte ardoise",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Batiproduits, fiche « Crochets de sécurité et Ancrage | Secur+ » (Frénéhard & Michaux)",
+          "url": "https://www.batiproduits.com/fiche/produits/crochets-de-securite-et-ancrage-secur-p69039028.html",
+          "type": "fabricant",
+          "extrait": "peuvent être droits, cambrés (25 ou 50 mm) ou chantournés",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "Ancrage toiture plat … Ancrage toiture cambré … Ancrage toiture torsadé",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_combine_en795",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "double_norme",
+      "valeur": "crochet EN 517 (échelle) + anneau EN 795 classe A (EPI antichute) sur la même pièce",
+      "unite": "",
+      "condition": "ancrages de toiture combinés Tractel, Frénéhard « Monuments historiques »",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "conformes à la norme EN795 A … et EN 517 pour l'accrochage des échelles de toiture sur le crochet",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frénéhard & Michaux, fiche crochet de sécurité cambré 25 « Monuments historiques » (MLFSEMHCA25), diffusée par Distriartisan (lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/MLFSEMHCA2501.pdf",
+          "type": "fabricant",
+          "extrait": "517 classe A relative aux crochets de sécurité et NF EN 795 classe A2",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_securite_nombre_par_m2",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "crochets_par_m2",
+      "valeur": null,
+      "unite": "u/m²",
+      "condition": "aucun ratio au m² : le nombre se déduit de la longueur du versant (1 tous les 2 m par rangée) et des points à entretenir",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "Ils doivent être positionnés tous les deux mètres",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frénéhard & Michaux, notice crochets de sécurité SECUR+ (A5, 24-10), diffusée par Distriartisan (403 au robot, lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/-CROCHET-SECU-A5-24-10.pdf",
+          "type": "fabricant",
+          "extrait": "respecter un entraxe maximum de 2 mètres",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Aucune source (fabricant, DTU, INRS) ne donne un nombre de crochets au m² ; nombre de rangées non chiffré en France. Règle fondateur : demander le nombre à l'artisan."
+    },
+    {
+      "id": "crochet_securite_bord_toit",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "distance_au_bord",
+      "valeur": 0.5,
+      "unite": "m",
+      "condition": "exemple suisse : un crochet manquant à 50 cm du bord du toit (rive) ; pas de règle française trouvée",
+      "regions": [
+        "Suisse"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Commune d'Ollon (Suisse), « Crochets de sécurité sur toiture » (exemples de pose, OTConst)",
+          "url": "https://www.ollon.ch/data/dataimages/Upload/Crochets-securite-sur-toiture.pdf",
+          "type": "guide",
+          "extrait": "Manque un crochet à 50 cm du bord du toit",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_service_section",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "",
+      "modele": "",
+      "attribut": "section_ronde_mini",
+      "valeur": 16,
+      "unite": "mm",
+      "condition": "crochet de SERVICE (d'échelle) en Wallonie : rond Ø 16 mm mini, acier galvanisé ou inox AISI 304, écartement ≤ 2,8 m",
+      "regions": [
+        "Belgique"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Agence wallonne du Patrimoine, FARCC 1.7 « Crochets de service (d'échelle) : spécifications produit et mise en œuvre » (2020)",
+          "url": "https://agencewallonnedupatrimoine.be/wp-content/uploads/2020/11/farcc1-7-crochet-de-service-dechelle-specifications-produit-et-mise-en-oeuvre.pdf",
+          "type": "guide",
+          "extrait": "auront une section circulaire d'un diamètre minimum de 16 mm … L'écartement entre les crochets sera de maximum 2,8 m.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "crochet_tractel_accessoires",
+      "famille": "securite_toiture",
+      "sous_famille": "crochets de sécurité (NF EN 517)",
+      "marque": "Tractel",
+      "modele": "",
+      "attribut": "vendu_par",
+      "valeur": "crochet à la pièce ; axe crampon 50 / 90 / 130 mm à la pièce ; pointes annelées par lot de 10",
+      "unite": "",
+      "condition": "Tractel ; chez Frénéhard les fixations sont livrées avec le crochet",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "66928 Axe crampon – 50mm … 66948 Axe crampon – 130mm … 66958 Lot de 10 pointes annelées",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "en795_classes",
+      "famille": "securite_toiture",
+      "sous_famille": "lignes de vie et ancrages (NF EN 795)",
+      "marque": "",
+      "modele": "",
+      "attribut": "classes_en_795",
+      "valeur": "A : ancrage fixe sur la structure ; B : ancrage provisoire transportable ; C : ligne de vie à câble (support flexible horizontal) ; D : ligne de vie sur rail rigide ; E : corps mort lesté (toiture-terrasse)",
+      "unite": "",
+      "condition": "la fiche couverture parle surtout de A (point d'ancrage) et C (ligne de vie câble)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Petzl, « Certification of anchors » (types d'ancrage EN 795)",
+          "url": "https://petzl.com/CA/en/Sport/Certification-of-anchors",
+          "type": "fabricant",
+          "extrait": "certain anchor types can no longer claim EN 795 compliance (rail rigide D, ancrages lestés E)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frareg, « Recommandation ancrage » (classes EN 795)",
+          "url": "https://frareg.com/cms/wp-content/uploads/recommandation_ancrage.pdf",
+          "type": "guide",
+          "extrait": "classe (A/B/C/D/E) … norme EN 795 (marquage de l'ancrage)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+          "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+          "type": "fabricant",
+          "extrait": "conforme à la norme EN 795 : 2012 et la spécification technique TS16415 : 2013 type C",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ligne_de_vie_portee_max",
+      "famille": "securite_toiture",
+      "sous_famille": "lignes de vie et ancrages (NF EN 795)",
+      "marque": "",
+      "modele": "",
+      "attribut": "portee_max_entre_ancrages_intermediaires",
+      "valeur": 15,
+      "unite": "m",
+      "condition": "ligne de vie câble EN 795 type C ; au-delà, ancrage intermédiaire",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+          "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+          "type": "fabricant",
+          "extrait": "espacements entre points intermédiaires maximale de 15 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Tractel, fiche technique Travsmart EN 795:2012 150 kg (T2212, 03/2023) (lue par le moteur de recherche)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travsmart%20150kg/T2212%20TS%20Travsmart%20EN795%202012_150kg%20d%C3%A9taill%C3%A9e.ind%2001.03%2023%20FR.pdf",
+          "type": "fabricant",
+          "extrait": "distance maximale entre les ancres : 15 m",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ligne_de_vie_mono_portee",
+      "famille": "securite_toiture",
+      "sous_famille": "lignes de vie et ancrages (NF EN 795)",
+      "marque": "Tractel",
+      "modele": "",
+      "attribut": "portee_max_mono_portee",
+      "valeur": 30,
+      "unite": "m",
+      "condition": "ligne sans ancrage intermédiaire (Tractel Travsmart, Travsafe tout inox)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique Travsmart EN 795:2012 150 kg (T2212, 03/2023) (lue par le moteur de recherche)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travsmart%20150kg/T2212%20TS%20Travsmart%20EN795%202012_150kg%20d%C3%A9taill%C3%A9e.ind%2001.03%2023%20FR.pdf",
+          "type": "fabricant",
+          "extrait": "la distance maximale entre les ancres d'extrémité pour une installation mono-portée est de 30m",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ligne_de_vie_utilisateurs",
+      "famille": "securite_toiture",
+      "sous_famille": "lignes de vie et ancrages (NF EN 795)",
+      "marque": "",
+      "modele": "",
+      "attribut": "utilisateurs_simultanes",
+      "valeur": "2 à 5 selon le système (Travflex 2 : 2 × 150 kg ; Travsafe : 3 × 150 kg ; Conekt NewPro : 5)",
+      "unite": "u",
+      "condition": "jamais deux personnes sur un tronçon non certifié multi-utilisateurs",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique Travflex 2 150 kg (T-2800, 07/2021) (lue par le moteur de recherche)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travflex%E2%84%A2%202%20150kg/T-2800_TS_Travflex_2_150kg.ind-01.07-21%20FR.pdf",
+          "type": "fabricant",
+          "extrait": "multi-utilisateurs : 2 utilisateurs 150kg, 3 utilisateurs 100kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Tractel, fiche technique Travsafe 150 kg (T2589) (lue par le moteur de recherche)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travsafe%E2%84%A2%20150kg/T2589-%20FT%20Travsafe_ind01_FR.pdf",
+          "type": "fabricant",
+          "extrait": "3 x utilisateurs 150 kg, 5 x utilisateurs 100 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+          "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+          "type": "fabricant",
+          "extrait": "jusqu'à 5 utilisateurs en simultané",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Chiffre propre à chaque système : pas de valeur commune ; chaque source ne parle que de son produit."
+    },
+    {
+      "id": "ligne_de_vie_cable",
+      "famille": "securite_toiture",
+      "sous_famille": "lignes de vie et ancrages (NF EN 795)",
+      "marque": "Échelle Européenne",
+      "modele": "",
+      "attribut": "cable",
+      "valeur": "inox 7 × 19, Ø 10 mm, rupture 53,1 kN (Conekt NewPro)",
+      "unite": "mm",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+          "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+          "type": "fabricant",
+          "extrait": "câble Inox 7x19 torons de diamètre 10 mm … charge de rupture de 53,1 kN",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ligne_de_vie_vendue",
+      "famille": "securite_toiture",
+      "sous_famille": "lignes de vie et ancrages (NF EN 795)",
+      "marque": "",
+      "modele": "",
+      "attribut": "vendu_par",
+      "valeur": "en kit ou sur étude (ancrages d'extrémité, intermédiaires, absorbeur, câble au mètre) ; posée et vérifiée par un installateur",
+      "unite": "",
+      "condition": "pas un article de comptoir courant ; le comptoir demande la longueur et le nombre d'ancrages intermédiaires",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+          "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+          "type": "fabricant",
+          "extrait": "implantations … espacements entre points intermédiaires maximale de 15 m",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Composition des kits et longueurs vendues non relevées chez un négoce breton."
+    },
+    {
+      "id": "echelle_couvreur_centaure",
+      "famille": "securite_toiture",
+      "sous_famille": "échelles de couvreur",
+      "marque": "Centaure",
+      "modele": "",
+      "attribut": "elements_et_longueurs",
+      "valeur": "aluminium en éléments emboîtables : 5 × 1,25 m (barreaux tous les 250 mm, 1,25 à 6,25 m) ; 5 × 1,32 m (330 mm, jusqu'à 6,60 m) ; 5 × 1,17 m (390 mm, jusqu'à 5,85 m)",
+      "unite": "m",
+      "condition": "crochet de faîtage vendu en option ; roulettes pour pousser l'échelle, retournée à 180° au faîtage",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Centaure, fiche produit échelle de toit aluminium (réf. 485025), diffusée par Sonepar",
+          "url": "https://res.cloudinary.com/sonepar-fr/raw/upload/s---8vuKGwX--/v1/documents/6024/Fiche_produit_echelle_toit_alu.pdf",
+          "type": "negoce",
+          "extrait": "cinq éléments de 1,25 m … longueurs possibles de 1,25 à 6,25 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Auchan, « Centaure échelle de toit aluminium écartement 33 cm 6,60 m »",
+          "url": "https://www.auchan.fr/centaure-echelle-de-toit-aluminium-ecartement-33cm-6-60-m/pr-9a6288dc-f95c-42d2-951c-eeb1d381e394",
+          "type": "negoce",
+          "extrait": "écartement 33cm 6,60 m ; crochet de faîtage vendu en option",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Bati-Avenue, fiche produit échelle de toit aluminium Centaure (catalogue 2016)",
+          "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/f/i/fiche_produit_echelle_de_toit_aluminium_1466.pdf",
+          "type": "negoce",
+          "extrait": "entraxe 390 mm, cinq éléments de 1,17 m",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Trois négoces, une seule fiche fabricant (Centaure) : une source."
+    },
+    {
+      "id": "echelle_couvreur_autres",
+      "famille": "securite_toiture",
+      "sous_famille": "échelles de couvreur",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueurs_vendues",
+      "valeur": "Hailo Safety Roof bois : éléments de 2 m (2 × 2 m, 4 m, 5 m) ; Tubesca-Comabi Evoklip : 6,10 / 6,30 / 6,70 m avec crochets de toit",
+      "unite": "m",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Bricomarché, « Échelle de toit bois - Safety Roof 2x2m - 150kg HAILO »",
+          "url": "https://www.bricomarche.com/p/echelle-de-toit-safety-roof-2-2m/3700867910180",
+          "type": "negoce",
+          "extrait": "Échelle de toit bois - Safety Roof 2x2m - 150kg HAILO",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Bricomarché, « Échelle de couvreur de 6.10m de longueur : échelle avec crochets de toit - EVOKLIP/250 TUBESCA COMABI »",
+          "url": "https://www.bricomarche.com/p/echelle-de-couvreur-de-6.10m-de-longueur-echelle-avec-crochets-de-toit-evoklip/250/3178740192808",
+          "type": "negoce",
+          "extrait": "Échelle de couvreur de 6.10m de longueur : échelle avec crochets de toit - EVOKLIP/250",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "echelle_toit_fixe_norme",
+      "famille": "securite_toiture",
+      "sous_famille": "échelles de couvreur",
+      "marque": "",
+      "modele": "",
+      "attribut": "norme",
+      "valeur": "NF EN 12951 (échelle de toit fixée à demeure) ; NF EN 516 (passerelles, plateformes de circulation)",
+      "unite": "",
+      "condition": "l'échelle de couvreur mobile n'est pas une échelle fixe",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "AFNOR Boutique, NF EN 12951 « Échelles de toit fixées à demeure »",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-en-12951/accessoires-prefabriques-pour-couverture-echelles-de-toit-fixes-a-demeure-sp/fa123214/25324",
+          "type": "guide",
+          "extrait": "NF EN 12951 Accessoires préfabriqués pour couverture - Échelles de toit fixées à demeure",
+          "consulte": "2026-11-20"
+        }
+      ]
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Famille « Sécurité et accès (crochets de sécurité, échelle de toit, ligne de vie) » : mots-clés seulement, aucun ratio",
+      "origine": "baticlair/packages/domain/src/referential/data/roofing.ts (~l. 1500) et src/trades/roofing.ts:26",
+      "valeur_actuelle": "pas de calcul",
+      "verdict": "confirme",
+      "bonne_valeur": "demander le nombre de crochets à l'artisan (règle fondateur : quantité trop particulière) ; repère pour la question : 1 crochet tous les 2 m par rangée, à 1 m des points à entretenir",
+      "sources": [
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "Ils doivent être positionnés tous les deux mètres",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frénéhard & Michaux, notice crochets de sécurité SECUR+ (A5, 24-10), diffusée par Distriartisan (403 au robot, lue par le moteur de recherche)",
+          "url": "https://www.distriartisan.fr///media/wysiwyg/documents/FK_Frenehard/-CROCHET-SECU-A5-24-10.pdf",
+          "type": "fabricant",
+          "extrait": "respecter un entraxe maximum de 2 mètres entre chaque crochet de sécurité",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Aucune source ne donne un nombre au m² ; l'entraxe 2 m est le seul chiffre recoupé."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Crochet de sécurité de toiture (NF EN 517)",
+      "ce_que_le_vendeur_demande": [
+        "couverture : ardoise (plat ou cambré 25), tuile plate, tuile à relief (cambré 50 ou chantourné)",
+        "type A (échelle) ou B (aussi harnais), ou combiné EN 795 A",
+        "matière : galvanisé, inox, teinte ardoise",
+        "nombre"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à la pièce, fixations fournies (Frénéhard) ou à part : pointes annelées par 10, axe crampon (Tractel)",
+      "sources": [
+        {
+          "titre": "Batiproduits, fiche « Crochets de sécurité et Ancrage | Secur+ » (Frénéhard & Michaux)",
+          "url": "https://www.batiproduits.com/fiche/produits/crochets-de-securite-et-ancrage-secur-p69039028.html",
+          "type": "fabricant",
+          "extrait": "droits, cambrés (25 ou 50 mm) ou chantournés",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Tractel, fiche technique « Ancrage de toiture », ancrage permanent (réf. T-2545/FR, révision 01, 12/2019)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSP/Anchorage/permanent%20anchorage/Ancrage%20de%20toiture/Ancrage%20de%20toiture%20FR/FT_T2545_Ancrage%20de%20toiture_FR.ind01.12-19.pdf",
+          "type": "fabricant",
+          "extrait": "66958 Lot de 10 pointes annelées",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Échelle de couvreur",
+      "ce_que_le_vendeur_demande": [
+        "matière : aluminium ou bois",
+        "longueur (nombre d'éléments)",
+        "entraxe des barreaux (250 / 330 / 390 mm)",
+        "crochet de faîtage"
+      ],
+      "unite_de_vente": "pièce (kit d'éléments)",
+      "conditionnement": "éléments emboîtables, crochet de faîtage en option",
+      "sources": [
+        {
+          "titre": "Centaure, fiche produit échelle de toit aluminium (réf. 485025), diffusée par Sonepar",
+          "url": "https://res.cloudinary.com/sonepar-fr/raw/upload/s---8vuKGwX--/v1/documents/6024/Fiche_produit_echelle_toit_alu.pdf",
+          "type": "negoce",
+          "extrait": "cinq éléments de 1,25 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Auchan, « Centaure échelle de toit aluminium écartement 33 cm 6,60 m »",
+          "url": "https://www.auchan.fr/centaure-echelle-de-toit-aluminium-ecartement-33cm-6-60-m/pr-9a6288dc-f95c-42d2-951c-eeb1d381e394",
+          "type": "negoce",
+          "extrait": "crochet de faîtage vendu en option",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Ligne de vie et points d'ancrage (EN 795)",
+      "ce_que_le_vendeur_demande": [
+        "longueur de la ligne",
+        "nombre d'ancrages intermédiaires (≤ 15 m entre deux)",
+        "nombre d'utilisateurs",
+        "support (charpente bois, béton, bac acier)"
+      ],
+      "unite_de_vente": "kit ou sur étude",
+      "conditionnement": "ancrages, câble, absorbeur, chariot : selon le fabricant",
+      "sources": [
+        {
+          "titre": "Échelle Européenne, fiche produit ligne de vie câble CONEKT NEWPRO (lue par le moteur de recherche)",
+          "url": "https://www.echelle-europeenne.com/media/12710880/3/200/1/2219813_fp_conekt_ldvc_auto_.pdf",
+          "type": "fabricant",
+          "extrait": "espacements entre points intermédiaires maximale de 15 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Tractel, fiche technique Travsmart EN 795:2012 150 kg (T2212, 03/2023) (lue par le moteur de recherche)",
+          "url": "https://www.tractel.com/PIM/Technical%20Data%20Sheets/HSS/Permanent%20lifeline%20150kg/travsmart%20150kg/T2212%20TS%20Travsmart%20EN795%202012_150kg%20d%C3%A9taill%C3%A9e.ind%2001.03%2023%20FR.pdf",
+          "type": "fabricant",
+          "extrait": "distance maximale entre les ancres : 15 m",
+          "consulte": "2026-11-20"
+        }
+      ]
+    }
+  ]
+}

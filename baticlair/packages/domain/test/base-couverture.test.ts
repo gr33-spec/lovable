@@ -19,9 +19,9 @@ describe("base de référence couverture", () => {
 
   it("est classée par famille, du toit à la zinguerie et au bois", () => {
     const codes = lue.base.familles.map((f) => f.code);
-    expect(codes.length).toBe(13);
+    expect(new Set(codes).size).toBe(codes.length); // une famille lue dans deux fichiers n'en fait qu'une
     expect(codes.slice(0, 2)).toEqual(["ardoise", "tuile_emboitement"]);
-    expect(codes.slice(-3)).toEqual(["bois_couverture", "pertes", "comptoir_exposee"]);
+    expect(codes).toEqual(expect.arrayContaining(["bois_couverture", "pertes", "comptoir_exposee", "sarking", "abergement", "sous_face"]));
   });
 
   it("connaît les modèles que les artisans écrivent (HP10, PV10, ardoise 32×22)", () => {
