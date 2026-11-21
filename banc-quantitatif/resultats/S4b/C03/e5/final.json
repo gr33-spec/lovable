@@ -1,0 +1,158 @@
+{
+ "posees": [
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "6 m"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Gouttière 1/2 rde zn nat. dév. 33",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": "sur 3 façades, y compris 2 angles",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "a-preciser:2"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "DEP zn Ø100",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Dauphins fonte",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "en pied de DEP",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   }
+  ],
+  "sansFourniture": [
+   "Dépose anc. gout. + DEP, évac. déchetterie",
+   "Echaf. roulant + protections, mise en place et repli"
+  ],
+  "questions": [
+   "param:hauteur_descente"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Gouttière 1/2 rde zn nat. dév. 33",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": "sur 3 façades, y compris 2 angles",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "a-preciser:2"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "DEP zn Ø100",
+    "quantite": "9",
+    "unite": "pièces",
+    "affiche": "9 pièces",
+    "etat": "ready",
+    "precision": "3 descentes × 6 m",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphins fonte",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "en pied de DEP",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   }
+  ],
+  "sansFourniture": [
+   "Dépose anc. gout. + DEP, évac. déchetterie",
+   "Echaf. roulant + protections, mise en place et repli"
+  ],
+  "questions": []
+ }
+}

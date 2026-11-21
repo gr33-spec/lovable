@@ -1,0 +1,12 @@
+[
+ "ligne 2 : « Écran sous-toiture HPV » deux quantités (110 contre ), à demander.",
+ "ligne 3 : « Liteaux sapin traité » deux quantités (100 contre ), à demander.",
+ "ligne 4 : donnée teinte_fc divergente (noires contre 2), retirée : le code la demandera.",
+ "ligne 6 : « Bandes de rive en zinc, développé 250 » deux quantités ( contre 22), à demander.",
+ "ligne 7 : « Gouttières PVC sable » deux quantités ( contre 20), à demander.",
+ "ligne 7 : donnée matiere_gouttiere divergente (pvc contre 1), retirée : le code la demandera.",
+ "ligne 7 : donnée teinte_gouttiere divergente (sable contre 3), retirée : le code la demandera.",
+ "ligne 7 : donnée nb_lignes divergente (2 contre rien), retirée : le code la demandera.",
+ "ligne 7 : donnée diametre_descente divergente (80 contre rien), retirée : le code la demandera.",
+ "ligne 9 : « Sortie de toit Ø100 pour évent » deux quantités ( contre 1), à demander."
+]

@@ -1,0 +1,633 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "réfection de la couverture en ardoise naturelle, lucarnes, fenêtres de toit et zinguerie",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « réfection de la couverture en ardoise naturelle, lucarnes, fenêtres de toit et ouvrages de zinguerie »"
+  },
+  {
+   "donnee": "état",
+   "valeur": "rénovation, couverture existante déposée (ardoises, crochets et liteaux)",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « Dépose des ardoises, crochets et liteaux »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "ardoise naturelle 30×20",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Couverture en ardoise naturelle 30×20 »"
+  },
+  {
+   "donnee": "pose",
+   "valeur": "au crochet noir",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « pose au crochet noir »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "140 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « 140 m² »"
+  },
+  {
+   "donnee": "pente",
+   "valeur": "50°",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Pente 50° »"
+  },
+  {
+   "donnee": "rampant",
+   "valeur": "7 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « rampant 7 m »"
+  },
+  {
+   "donnee": "longueur de crochet",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "lucarnes",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « jouées des 2 lucarnes »"
+  },
+  {
+   "donnee": "jouées de lucarnes",
+   "valeur": "ardoise naturelle 30×20 au crochet noir",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir »"
+  },
+  {
+   "donnee": "surface des jouées",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "nombre de noues",
+   "valeur": "4",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « 4 noues de 1,80 m »"
+  },
+  {
+   "donnee": "longueur de noue",
+   "valeur": "7,20 m",
+   "origine": "deduite",
+   "regle": "4 noues × 1,80 m",
+   "preuve": ""
+  },
+  {
+   "donnee": "matière des noues",
+   "valeur": "zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « noues en zinc »"
+  },
+  {
+   "donnee": "développé de noue",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "fenêtres de toit",
+   "valeur": "2 Velux GGL MK04 78×98",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « 2 u … Velux GGL MK04 78×98 »"
+  },
+  {
+   "donnee": "raccord de fenêtre de toit",
+   "valeur": "pour ardoise",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « raccords d'étanchéité pour ardoise »"
+  },
+  {
+   "donnee": "châssis de toit déposés",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Dépose des anciens châssis de toit 2 u »"
+  },
+  {
+   "donnee": "nombre de cheminées",
+   "valeur": "1",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « Abergement de cheminée 1 u »"
+  },
+  {
+   "donnee": "périmètre de cheminée",
+   "valeur": "3 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « périmètre 3 m »"
+  },
+  {
+   "donnee": "matière de l'abergement",
+   "valeur": "zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « abergement de cheminée en zinc »"
+  },
+  {
+   "donnee": "longueur de faîtage",
+   "valeur": "11 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 9 : « 11 ml »"
+  },
+  {
+   "donnee": "faîtage",
+   "valeur": "faîtières terre cuite",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 9 : « faîtage en faîtières terre cuite »"
+  },
+  {
+   "donnee": "nombre de sorties de toit",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 10 : « 2 u »"
+  },
+  {
+   "donnee": "diamètre des sorties",
+   "valeur": "Ø125",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 10 : « sorties de toit Ø125 »"
+  },
+  {
+   "donnee": "usage des sorties",
+   "valeur": "ventilation (VMC)",
+   "origine": "deduite",
+   "regle": "« pour VMC » = conduit de ventilation",
+   "preuve": ""
+  },
+  {
+   "donnee": "couverture autour des sorties",
+   "valeur": "ardoise",
+   "origine": "deduite",
+   "regle": "la couverture est en ardoise naturelle (ligne 4)",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Réfection d'une couverture en ardoise naturelle, avec dépose de l'existant.",
+  "Ardoises naturelles 30×20 sur 140 m², pente 50°, rampant 7 m.",
+  "Crochets d'ardoise noirs pour cette couverture.",
+  "Jouées des 2 lucarnes en ardoises naturelles 30×20 au crochet noir.",
+  "Noues en zinc 7,20 m, soit 4 noues de 1,80 m, pour les lucarnes.",
+  "2 fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+  "Les 2 anciens châssis de toit sont déposés sans réemploi.",
+  "1 abergement de cheminée en zinc, périmètre 3 m.",
+  "Faîtage 11 m en faîtières terre cuite.",
+  "2 sorties de toit Ø125 pour VMC."
+ ],
+ "questions": [
+  {
+   "cle": "longueur_crochet",
+   "texte": "Tes crochets d'ardoise, tu les prends de quelle longueur, en cm (ex. 11) ?",
+   "boutons": [],
+   "unite": "cm",
+   "donnee": "longueur de crochet",
+   "ligne": ""
+  },
+  {
+   "cle": "surface",
+   "texte": "Les jouées des 2 lucarnes font quelle surface en tout, en m² (ex. 6) ?",
+   "boutons": [],
+   "unite": "m²",
+   "donnee": "surface des jouées",
+   "ligne": "5"
+  },
+  {
+   "cle": "developpe_noue",
+   "texte": "Tes noues de lucarnes, de 50 ou de 66 ?",
+   "boutons": [
+    {
+     "label": "De 50",
+     "valeur": "500"
+    },
+    {
+     "label": "De 66",
+     "valeur": "660"
+    }
+   ],
+   "unite": "mm",
+   "donnee": "développé de noue",
+   "ligne": "6"
+  },
+  {
+   "cle": "faconnage",
+   "texte": "Tes pièces pliées (noues, abergement de cheminée) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    {
+     "label": "Je façonne (feuilles ou bobineau)",
+     "valeur": "1"
+    },
+    {
+     "label": "Je commande façonné",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "façonnage",
+   "ligne": ""
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier. Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Dépose de la couverture existante. Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "quantite": "140",
+   "unite": "m²",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "Dépose des anciens châssis de toit. Dépose sans réemploi.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture en ardoise naturelle 30×20 : pose au crochet noir. Fourniture et pose. Pente 50°, rampant 7 m.",
+   "quantite": "140",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises naturelles 30×20",
+     "quantite": "140",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "140"
+      },
+      {
+       "cle": "pente",
+       "valeur": "50"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "qualité de l'ardoise"
+     ],
+     "precision": ""
+    },
+    {
+     "nom": "Crochets d'ardoise noirs",
+     "quantite": "",
+     "unite": "u",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "crochet",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "140"
+      },
+      {
+       "cle": "pente",
+       "valeur": "50"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7"
+      }
+     ],
+     "attend": [
+      "longueur_crochet"
+     ],
+     "a_preciser": [],
+     "precision": "pour ardoises 30×20"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Jouées de lucarnes. Fourniture et pose : habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises naturelles 30×20",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [],
+     "attend": [
+      "surface"
+     ],
+     "a_preciser": [
+      "qualité de l'ardoise"
+     ],
+     "precision": "jouées des 2 lucarnes"
+    },
+    {
+     "nom": "Crochets d'ardoise noirs",
+     "quantite": "",
+     "unite": "u",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "crochet",
+     "donnees": [],
+     "attend": [
+      "surface",
+      "longueur_crochet"
+     ],
+     "a_preciser": [],
+     "precision": "jouées des 2 lucarnes, pour ardoises 30×20"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Noues de lucarnes. Fourniture et pose de noues en zinc : 4 noues de 1,80 m.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Noues en zinc",
+     "quantite": "7,20",
+     "unite": "ml",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [
+      {
+       "cle": "longueur_noue",
+       "valeur": "7.2"
+      }
+     ],
+     "attend": [
+      "developpe_noue",
+      "faconnage"
+     ],
+     "a_preciser": [
+      "épaisseur du zinc",
+      "aspect du zinc"
+     ],
+     "precision": "4 noues de 1,80 m, pour lucarnes"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Fenêtres de toit. Fourniture et pose de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Velux GGL MK04 78×98",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "fenetre-de-toit",
+     "emplacement": "fenetre",
+     "donnees": [
+      {
+       "cle": "nb_fenetres",
+       "valeur": "2"
+      },
+      {
+       "cle": "taille_fenetre",
+       "valeur": "7898"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Raccords d'étanchéité MK04 pour ardoise",
+     "quantite": "",
+     "unite": "u",
+     "ouvrage": "fenetre-de-toit",
+     "emplacement": "raccord",
+     "donnees": [
+      {
+       "cle": "nb_fenetres",
+       "valeur": "2"
+      },
+      {
+       "cle": "taille_fenetre",
+       "valeur": "7898"
+      },
+      {
+       "cle": "raccord_couverture",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "un raccord par fenêtre, pour ardoise"
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Abergement de cheminée. Fourniture et pose d'un abergement de cheminée en zinc, périmètre 3 m.",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Abergement de cheminée en zinc",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "abergement-cheminee",
+     "emplacement": "abergement",
+     "donnees": [
+      {
+       "cle": "nb_cheminees",
+       "valeur": "1"
+      },
+      {
+       "cle": "perimetre_cheminee",
+       "valeur": "3"
+      }
+     ],
+     "attend": [
+      "faconnage"
+     ],
+     "a_preciser": [
+      "épaisseur du zinc",
+      "aspect du zinc"
+     ],
+     "precision": "périmètre 3 m"
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Faîtage. Fourniture et pose d'un faîtage en faîtières terre cuite.",
+   "quantite": "11",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières terre cuite",
+     "quantite": "11",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "11"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "10",
+   "designation": "Sorties de toit. Fourniture et pose de sorties de toit Ø125 pour VMC.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Sorties de toit Ø125 pour VMC",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "sortie-de-toit",
+     "emplacement": "sortie",
+     "donnees": [
+      {
+       "cle": "nb_sorties",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_sortie",
+       "valeur": "125"
+      },
+      {
+       "cle": "usage_sortie",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "teinte"
+     ],
+     "precision": "sur couverture ardoise"
+    }
+   ]
+  },
+  {
+   "ref": "11",
+   "designation": "Évacuation des gravats. Tri et évacuation des gravats en déchetterie agréée.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "12",
+   "designation": "Fin de chantier. Nettoyage du chantier et repli de l'échafaudage.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "artisan",
+   "valeur": "Couverture Le Goff"
+  },
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Jean-Paul Riou"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "8, rue Saint-André"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Tréguier"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "22220"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D26-0387"
+  },
+  {
+   "cle": "date",
+   "valeur": "3 novembre 2026"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation, maison d'habitation de plus de 2 ans"
+  },
+  {
+   "cle": "délai d'intervention",
+   "valeur": "8 à 10 semaines après accord"
+  },
+  {
+   "cle": "durée des travaux",
+   "valeur": "environ 3 semaines"
+  }
+ ],
+ "notes": [
+  "Le remplacement éventuel de bois de charpente n'est pas compté : il fera l'objet d'un avenant."
+ ]
+}

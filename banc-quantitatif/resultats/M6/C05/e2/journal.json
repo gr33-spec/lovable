@@ -1,0 +1,5 @@
+[
+ "ligne 6 : donnée longueur_noue divergente (4 noues de 1,80 m contre 4 1.80 m), retirée : le code la demandera.",
+ "ligne 10 : donnée usage_sortie divergente (ventilation contre rien), retirée : le code la demandera.",
+ "ligne 10 : donnée support_sortie divergente (ardoise contre rien), retirée : le code la demandera."
+]

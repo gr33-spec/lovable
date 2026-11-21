@@ -1,0 +1,123 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Remplact noue zinc",
+   "quantite": "6",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Noue zinc",
+     "quantite": "6",
+     "unite": "ml",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [
+      {
+       "cle": "longueur_noue",
+       "valeur": "6"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "epaisseur",
+      "aspect",
+      "developpe"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Remaniage ardoises autour noue, ardoises identiques à l'existant",
+   "quantite": "12",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises identiques à l'existant",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "format",
+      "qualité"
+     ],
+     "precision": "identiques à l'existant, remaniage autour de la noue"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Reprise solin au mortier",
+   "quantite": "3",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Mortier",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour reprise de solin"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Remplact DEP Ø80",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "DEP Ø80",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "matière",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Echelle de toit + évac gravats",
+   "quantite": "forfait",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

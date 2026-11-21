@@ -1,0 +1,9 @@
+[
+ "ligne 3 : donnée surface divergente (96 contre rien), retirée : le code la demandera.",
+ "ligne 4 : donnée surface divergente (96 contre rien), retirée : le code la demandera.",
+ "ligne 5 : donnée surface divergente (96 contre rien), retirée : le code la demandera.",
+ "ligne 5 : donnée pente divergente (45 contre rien), retirée : le code la demandera.",
+ "ligne 5 : donnée longueur_rampant divergente (6 contre rien), retirée : le code la demandera.",
+ "ligne 8 : « Descente d'eau pluviale zinc Ø80 » deux quantités ( contre 2), à demander.",
+ "ligne 9 : donnée nb_descentes divergente (2 contre rien), retirée : le code la demandera."
+]
