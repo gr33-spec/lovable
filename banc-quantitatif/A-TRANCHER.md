@@ -1,42 +1,60 @@
-# À trancher par Greg (banc du calcul, 21 novembre 2026)
+# À trancher par Greg (banc du calcul, mis à jour le 21 novembre 2026 au soir)
 
-Sur ces points, la fiche est « à confirmer » ou muette, et le contrôleur ne compte pas comme le moteur. Tant que tu n'as pas
-tranché, le banc garde le chiffre du contrôleur et ces lignes restent « fausses ». Elles pèsent une vingtaine de lignes sur
-les 42 qui restent.
+Le banc est à 81 lignes justes sur 100. Les 19 lignes qui restent dépendent presque toutes des points ci-dessous.
 
-1. **Ardoises : comment compter ?** (9 lignes : C01, C05, C08, C10, C11, liteaux compris)
-   - Le moteur : surface × ardoises au m² (recouvrement du DTU selon la pente, la zone et le rampant), puis la perte.
-   - Le contrôleur (fiche, « méthode du métré ») : surface + plus-values des points singuliers (un pureau par mètre d'égout,
-     0,16 m² par mètre de rive, le doublage du faîtage, 0,66 m² par mètre d'arêtier…), puis + 5 % de casse.
-   - Écart : 8 % sur un toit simple (C01 : 3 992 contre 4 330), 20 % sur un toit à 4 pans (C11 : 5 376 contre 6 494).
+## 1. Ardoises : la consommation des ouvrages au mètre (10 lignes : C01, C05, C10, C11)
 
-2. **Tuiles à emboîtement : 3 % ou 5 % de casse et de coupe ?** Le moteur prend 3 %, le contrôleur 5 % (la fiche dit « 3 à 5 % »).
-   C02 : 1 230 ou 1 260 tuiles HP 10.
+La recherche est dans `baticlair/referentiels/couverture/recherche/ardoise-ouvrages-au-metre.md`. Une seule source chiffre
+tout : le manuel du CAP couvreur. Les fabricants (Cupa, Rathscheck) et le guide du ministère de la Culture décrivent la
+façon, pas la quantité. Seul l'égout est confirmé par deux sources.
 
-3. **Faîtières, arêtières, tuiles de rive : + 1 % de casse ?** La fiche le dit (FDES, « à confirmer »). 8 ml à 3 au mètre :
-   24 (moteur) ou 25 (contrôleur). Touche C02, C05, C06, C12.
+| Ouvrage | Manuel du CAP | Ton référentiel (§3) | Statut |
+|---|---|---|---|
+| Égout droit | 1 pureau par mètre (4,5 ardoises en 32×22) | pareil | confirmé, deux sources |
+| Faîtage | rien en plus | un rang en plus | désaccord |
+| Rive droite | 0,16 m² par mètre | 1 ardoise par rang (0,22 m²) | une source |
+| Arêtier fermé | 0,66 m² par mètre, les deux côtés (26 ardoises) | 2 par rang et par versant (0,73 m²) | une source |
+| Arêtier à 3 biaises (ta règle du 21 novembre) | non chiffré | 6 ardoises par rang, soit 42 par mètre | aucune source écrite |
+| Noue zinc ouverte | 0,50 m² par mètre (déduit) | 0,36 m² | à confirmer |
+| Noue ronde, à fendis | 1,50 m² par mètre (58 ardoises) | 1,09 m² | une source |
 
-4. **Bandes zinc façonnées de 2 m : compter le recouvrement ?** Ta règle : ml ÷ 2, arrondi au-dessus (« 13 ml fait 7 »).
-   La fiche (« à confirmer ») : + 5 cm par jonction. 12 ml : 6 bandes (toi) ou 7 (fiche) ; 14 ml : 7 ou 8. Touche C09, C13.
-   Avec 5 cm par jonction, tes 13 ml font toujours 7.
+Ce que tu dois trancher :
+a) Arêtier à 3 biaises : on ajoute les 6 ardoises par rang en entier (42 par mètre), ou seulement ce qu'elles prennent en
+   plus de la surface déjà comptée (le manuel : 26 par mètre) ?
+b) Faîtage : un rang d'ardoises en plus, ou rien ?
+c) Rives et noues : ta règle du référentiel (1 ardoise par rang en rive, 0,36 m² pour la noue zinc), ou le manuel ?
+d) L'égout : le devis ne l'écrit presque jamais. Je prends la longueur de la gouttière quand elle est écrite, sinon je pose
+   la question « Quelle longueur d'égout ? » ?
 
-5. **Crochets d'ardoise : en pièces ou en boîtes ?** Le moteur sort « 3 992 pièces », le contrôleur « 9 boîtes de 500 ».
+Tant que tu n'as pas tranché, le moteur ne change pas et ces lignes restent fausses au banc.
 
-6. **Tuiles de rive : une ligne ou deux (gauches et droites) ?** Le moteur sort une ligne « tuiles de rive ». Le contrôleur en
-   sort deux, 2,7 au mètre de chaque côté. Même question pour la tuile canal : une ligne « courants et couverts » ou deux.
+## 2. Bac acier (C07)
 
-7. **Gouttière zinc, deux points.**
-   - Appliqué (fiche confirmée) : + 30 mm par jonction soudée. Effet : 24 ml tout rond donne 7 longueurs, plus 6.
-   - Une équerre du commerce retire-t-elle de la longueur à commander ? (C03 : 28 ml et 2 angles, 8 longueurs à la lettre, 7 pour l'arbitre.)
+- Faîtière : ton référentiel dit « ml ÷ 2, arrondi au-dessus, + 1 » (8 pour 12,50 m). Les fabricants (Bacacier, Joris Ide :
+  2,10 m hors tout, 2,00 m utile) et le contrôleur comptent 7. On garde le « + 1 » ?
+- Vis : ton référentiel en compte près de 8 au m² (12 boîtes de 100 pour 150 m²). Joris Ide dit 2,5 au m² (une seule source),
+  soit 4 à 5 boîtes. Lequel ?
 
-8. **Gouttière alu ou PVC : arrondir ligne par ligne ?** 2 × 9 m + 1 × 6 m : 6 longueurs de 4 m (le total) ou 8 (3 + 3 + 2).
+## 3. Tuile HP 10 (C12)
 
-9. **Liteaux.** Les contre-liteaux prennent-ils les 5 % de chute des liteaux ? (C02 : 200 ou 210 ml.)
-   Et les liteaux d'ardoise se comptent-ils avec le pureau du crochet (contrôleur) ou du DTU (moteur) ? (suit la question 1)
+- Faîtière : le devis dit « faîtage à sec » sans modèle. Edilians vend l'angulaire (3 au mètre) et la demi-ronde (2,5 au
+  mètre). Je pose la question « Quelle faîtière ? » avec ces deux boutons ? Aujourd'hui : 3 au mètre d'office.
+- Sortie de toit sur tuile : le moteur sort une embase plomb et un chapeau. Edilians vend une tuile à douille HP 10 et une
+  lanterne. Je sors la tuile à douille et la lanterne quand la tuile est connue ?
 
-## Déjà réglé par tes règles (rien à trancher si elles tiennent)
+## 4. Remaniage (C08)
 
-- Tubes de descente : 2 m, en zinc comme en PVC (ta règle du 19 novembre). Le contrôleur comptait 4 m pour le PVC.
-- La naissance de gouttière reste une suggestion.
-- **Règle changée, à valider :** un arêtier en bande zinc suit maintenant ta réponse « je plie » (des feuilles 2 × 1 m).
-  Avant : toujours des bandes façonnées de 2 m.
+« Remaniage de 12 m² d'ardoises identiques à l'existant » : le moteur compte 12 m² d'ardoises neuves (489). Le contrôleur en
+compte un tiers (168). Je pose la question « Combien de m² d'ardoises neuves ? » quand la ligne dit « remaniage » ?
+
+## 5. Mortier de faîtage (C06)
+
+« Faîtage scellé au mortier » : le mortier est cité, il devrait sortir. Les fabricants (Weber, VPI) disent 5 à 10 kg par
+mètre. Je sors la ligne « à chiffrer » avec la question « Combien de sacs de mortier ? », ou je compte 7,5 kg par mètre ?
+
+## Déjà appliqué d'après tes décisions du 21 novembre
+
+Tuiles à 5 % ; rives et bardelis en deux lignes ; tuile canal en deux lignes ; crochets en boîtes de 500 avec le nombre de
+pièces ; bandes zinc sans recouvrement, avec la note ; équerre de gouttière sans effet ; gouttière PVC ou alu sur le total ;
+contre-liteaux à 5 % ; bande porte-solin non dite en suggestion ; arêtier zinc qui suit « je plie » ; 30 mm par jonction de
+gouttière zinc ; tubes de descente de 2 m en PVC comme en zinc.
