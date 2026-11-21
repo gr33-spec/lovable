@@ -1,0 +1,4 @@
+{
+ "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?": false,
+ "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?": true
+}

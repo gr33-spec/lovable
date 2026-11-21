@@ -1,0 +1,92 @@
+{
+ "posees": [
+  {
+   "key": "fiche:modele_tuile",
+   "text": "Quelle tuile ?",
+   "options": [],
+   "reponse": "Edilians HP10 Huguenot, rouge nuancé"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuile terre cuite mécanique neuve, identique à l'existant",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": "Remplacement unitaire à l'identique de tuiles cassées ou défectueuses",
+    "lignes": [
+     "1"
+    ],
+    "attend": [
+     "fiche:modele_tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Petites fournitures de fixation",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Pour refixation mécanique de l'élément de rive de toit",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+  ],
+  "questions": [
+   "fiche:modele_tuile"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuile terre cuite mécanique neuve, identique à l'existant",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": "Remplacement unitaire à l'identique de tuiles cassées ou défectueuses ; Modèle et teinte : Edilians HP10 Huguenot, rouge nuancé",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Petites fournitures de fixation",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Pour refixation mécanique de l'élément de rive de toit",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+  ],
+  "questions": []
+ }
+}

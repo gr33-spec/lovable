@@ -1,7 +1,10 @@
 [
- {"id": "param:developpe ¦ Développé de la bande zinc ?", "bouton": "200 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "200 mm."},
- {"id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?", "bouton": "Non", "valeur": "", "unite": "u", "ne_sait_pas": false, "dit": "Non, pas de dauphin."},
- {"id": "param:developpe ¦ Solin : développé de la bande zinc ?", "bouton": "200 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "200 mm."},
- {"id": "param:nb_descentes ¦ Combien de descentes ?", "bouton": "", "valeur": "1", "unite": "u", "ne_sait_pas": false, "dit": "Une seule descente."},
- {"id": "param:longueur_bande ¦ Longueur de bande zinc ?", "bouton": "", "valeur": "8", "unite": "m", "ne_sait_pas": false, "dit": "8 mètres."}
+ {
+  "id": "param:diametre_descente ¦ Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+  "bouton": "Ø 80",
+  "valeur": "",
+  "unite": "mm",
+  "ne_sait_pas": false,
+  "dit": "Ø 80."
+ }
 ]

@@ -1,0 +1,6 @@
+{
+ "fiche:format_ardoise_jouees ¦ Les ardoises des jouées, c'est le même format que le toit (30×22) ?": false,
+ "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?": false,
+ "param:nb_descentes ¦ Combien de descentes pour cette gouttière ?": false,
+ "param:pente ¦ Pente du toit ?": false
+}

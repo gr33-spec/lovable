@@ -97,5 +97,24 @@
    "ne_sait_pas": false,
    "dit": "65 cm."
   }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, raccordée sur regard, pas de dauphin."
+  }
  }
 }

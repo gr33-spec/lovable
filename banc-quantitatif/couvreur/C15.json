@@ -38,5 +38,21 @@
    "ne_sait_pas": false,
    "dit": "De 25."
   }
+ },
+ "fiche:modele_tuile ¦ Quelle tuile grand moule en terre cuite tu prends (modèle) ?": {
+  "question": {
+   "id": "fiche:modele_tuile ¦ Quelle tuile grand moule en terre cuite tu prends (modèle) ?",
+   "question": "Quelle tuile grand moule en terre cuite tu prends (modèle) ?",
+   "boutons": [],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "Terreal Volnay PV rouge vieilli",
+   "unite": "",
+   "ne_sait_pas": false,
+   "dit": "Terreal Volnay PV, rouge vieilli."
+  }
  }
 }

@@ -114,5 +114,59 @@
    "ne_sait_pas": false,
    "dit": "5,50 m"
   }
+ },
+ "param:developpe_noue ¦ Noue de 50 ou de 66 ?": {
+  "question": {
+   "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
+   "question": "Noue de 50 ou de 66 ?",
+   "boutons": [
+    "De 50",
+    "De 66"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "De 50",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "De 50."
+  }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Oui",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Oui, dauphin fonte."
+  }
+ },
+ "param:longueur_crochet ¦ Quelle longueur de crochet ?": {
+  "question": {
+   "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
+   "question": "Quelle longueur de crochet ?",
+   "boutons": [],
+   "unite": "cm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "11",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "11 cm."
+  }
  }
 }

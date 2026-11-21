@@ -82,5 +82,65 @@
    "ne_sait_pas": false,
    "dit": "250 mm."
   }
+ },
+ "param:longueur_bande ¦ Longueur de bande zinc ?": {
+  "question": {
+   "id": "param:longueur_bande ¦ Longueur de bande zinc ?",
+   "question": "Longueur de bande zinc ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "14",
+   "unite": "ml",
+   "ne_sait_pas": false,
+   "dit": "14 ml de bande de rive"
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Bandes de rive en zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Bandes de rive en zinc : développé de la bande zinc ?",
+   "question": "Bandes de rive en zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Bandes zinc façonnées : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Bandes zinc façonnées : développé de la bande zinc ?",
+   "question": "Bandes zinc façonnées : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
  }
 }

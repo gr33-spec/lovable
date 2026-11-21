@@ -1,0 +1,389 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:qualite_ardoise",
+   "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  },
+  {
+   "key": "param:developpe@bande-porte-solin",
+   "text": "Bande porte-solin zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "100 mm (solin, couvre-joint)"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Bandes de rive en zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "200 mm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles 32x22 32×22",
+    "quantite": "2122",
+    "unite": "pièces",
+    "affiche": "2 122 pièces",
+    "etat": "ready",
+    "precision": "48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [
+     "param:qualite_ardoise"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2122",
+    "unite": "pièces",
+    "affiche": "2 122 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [
+     "param:qualite_ardoise"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets de gouttière Havraise",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": "pour fixation sur chevrons, espacement tous les 50 cm",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 4 ml de bande",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bande de faîtage zinc dev 25cm",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Bande porte-solin zinc",
+    "quantite": "4",
+    "unite": "ml",
+    "affiche": "4 ml",
+    "etat": "ready",
+    "precision": "pour le solin d'étanchéité contre le mur existant",
+    "lignes": [
+     "10"
+    ],
+    "attend": [
+     "a-preciser:10"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Mortier de ciment pour solin",
+    "quantite": "1",
+    "unite": "sac de 25 kg",
+    "affiche": "1 sac de 25 kg",
+    "etat": "ready",
+    "precision": "4 ml × 2 kg/ml",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2",
+    "unite": "tubes de 3 m",
+    "affiche": "2 tubes de 3 m",
+    "etat": "ready",
+    "precision": "2 descentes de 3 mètres",
+    "lignes": [
+     "12"
+    ],
+    "attend": [
+     "a-preciser:12"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Coude zinc diam. 80mm",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "2 jeux de 2 coudes pour le dévoiement des descentes",
+    "lignes": [
+     "13"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Gouttière Havraise en zinc",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Gouttière Havraise en zinc",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic+bande-porte-solin/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Pose de couverture en ardoises 32x22",
+   "Pose de gouttière Havraise sur chevrons",
+   "Pose de bandes de rive en zinc (verrière)",
+   "Pose de bande de faîtage en zinc",
+   "Pose de bande porte-solin et réalisation du solin ciment",
+   "Pose de tuyaux de descente et coudes zinc",
+   "Pose de couverture en ardoises 32x22. Mise en œuvre et pose de la couverture en ardoises naturelles de format 32x22 avec crochets de 11, y compris découpes et ajustements pour le rampant (pente 30°) et les demi-croupes (pente 45°).",
+   "Pose de gouttière Havraise sur chevrons. Pose et fixation sur chevrons de la gouttière Havraise en zinc et de ses crochets de support, avec réalisation des soudures et raccordements nécessaires."
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise",
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 32×22",
+    "quantite": "2122",
+    "unite": "pièces",
+    "affiche": "2 122 pièces",
+    "etat": "ready",
+    "precision": "48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 11 cm",
+    "quantite": "2122",
+    "unite": "pièces",
+    "affiche": "2 122 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets de gouttière Havraise",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": "pour fixation sur chevrons, espacement tous les 50 cm",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 4 ml de bande, développé 20 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 10 cm",
+    "lignes": [
+     "6",
+     "8",
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Mortier de ciment pour solin",
+    "quantite": "1",
+    "unite": "sac de 25 kg",
+    "affiche": "1 sac de 25 kg",
+    "etat": "ready",
+    "precision": "4 ml × 2 kg/ml",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tuyau de descente zinc diam. 80mm",
+    "quantite": "2",
+    "unite": "tubes de 3 m",
+    "affiche": "2 tubes de 3 m",
+    "etat": "ready",
+    "precision": "2 descentes de 3 mètres",
+    "lignes": [
+     "12"
+    ],
+    "attend": [
+     "a-preciser:12"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Coude zinc diam. 80mm",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "2 jeux de 2 coudes pour le dévoiement des descentes",
+    "lignes": [
+     "13"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Gouttière Havraise en zinc",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Gouttière Havraise en zinc",
+    "raison": "Du métal au mètre sans largeur ni épaisseur : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic+bande-porte-solin/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Pose de couverture en ardoises 32x22",
+   "Pose de gouttière Havraise sur chevrons",
+   "Pose de bandes de rive en zinc (verrière)",
+   "Pose de bande de faîtage en zinc",
+   "Pose de bande porte-solin et réalisation du solin ciment",
+   "Pose de tuyaux de descente et coudes zinc",
+   "Pose de couverture en ardoises 32x22. Mise en œuvre et pose de la couverture en ardoises naturelles de format 32x22 avec crochets de 11, y compris découpes et ajustements pour le rampant (pente 30°) et les demi-croupes (pente 45°).",
+   "Pose de gouttière Havraise sur chevrons. Pose et fixation sur chevrons de la gouttière Havraise en zinc et de ses crochets de support, avec réalisation des soudures et raccordements nécessaires."
+  ],
+  "questions": []
+ }
+}

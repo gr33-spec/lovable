@@ -1,52 +1,13 @@
 [
  {
-  "id": "param:developpe ¦ Développé de la bande zinc ?",
-  "question": "Développé de la bande zinc ?",
+  "id": "param:diametre_descente ¦ Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+  "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
   "boutons": [
-   "100 mm (solin, couvre-joint)",
-   "200 mm",
-   "250 mm",
-   "330 mm",
-   "400 mm"
+   "Ø 80",
+   "Ø 100",
+   "Ø 120"
   ],
   "unite": "mm",
-  "aide": null
- },
- {
-  "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
-  "question": "Un dauphin en pied de chaque descente ?",
-  "boutons": [
-   "Oui",
-   "Non"
-  ],
-  "unite": "u",
-  "aide": null
- },
- {
-  "id": "param:developpe ¦ Solin : développé de la bande zinc ?",
-  "question": "Solin : développé de la bande zinc ?",
-  "boutons": [
-   "100 mm (solin, couvre-joint)",
-   "200 mm",
-   "250 mm",
-   "330 mm",
-   "400 mm"
-  ],
-  "unite": "mm",
-  "aide": null
- },
- {
-  "id": "param:nb_descentes ¦ Combien de descentes ?",
-  "question": "Combien de descentes ?",
-  "boutons": [],
-  "unite": "u",
-  "aide": null
- },
- {
-  "id": "param:longueur_bande ¦ Longueur de bande zinc ?",
-  "question": "Longueur de bande zinc ?",
-  "boutons": [],
-  "unite": "m",
-  "aide": null
+  "aide": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m²."
  }
 ]

@@ -1,0 +1,389 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "3 m"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Habillages de rive : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "250 mm"
+  },
+  {
+   "key": "param:developpe@faitage-zinc",
+   "text": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:developpe_cheneau",
+   "text": "Ton chéneau fait quel développé ?",
+   "options": [
+    "Jusqu'à 50 cm",
+    "Jusqu'à 65 cm",
+    "Jusqu'à 1 m"
+   ],
+   "reponse": "Jusqu'à 65 cm"
+  },
+  {
+   "key": "param:dauphin",
+   "text": "Un dauphin en pied de chaque descente ?",
+   "options": [
+    "Oui",
+    "Non"
+   ],
+   "reponse": "Non"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tasseaux bois trapézoïdaux de 50 mm",
+    "quantite": "56",
+    "unite": "ml",
+    "affiche": "56 ml",
+    "etat": "ready",
+    "precision": "14 rangs × 4 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Couvre-joints Anthra-Zinc 0,65 mm pour tasseaux de 50 mm",
+    "quantite": "56",
+    "unite": "ml",
+    "affiche": "56 ml",
+    "etat": "ready",
+    "precision": "14 rangs × 4 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobine Anthra-Zinc 0,65 mm, largeur 650 mm",
+    "quantite": "54",
+    "unite": "ml",
+    "affiche": "54 ml",
+    "etat": "ready",
+    "precision": "13 bacs × 4,15 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobineau Anthra-Zinc 0,65 mm, × 17 m",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 8 m de chéneau, marge 5 % comprise",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "param:developpe_cheneau",
+     "param:largeur_bobineau"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Habillages de rive",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Bandes porte-solin avec bavette et joint mastic d'étanchéité pour entourage de cheminées",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "a-preciser:5"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Tubes de descente",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Platine zinc de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125, soudée sur la couverture zinc ; Ø 100, soudée sur la couverture zinc",
+    "lignes": [
+     "7",
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125 ; Ø 100",
+    "lignes": [
+     "7",
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [
+   "Dépose ancienne couverture : dépose de l'ancienne couverture et mise en décharge / évacuation des gravats",
+   "Installation et location échafaudage : transport, montage, location et repli d'échafaudage de sécurité sur une hauteur de 3 m environ"
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:hauteur_descente",
+   "param:developpe@bandes-zinc",
+   "param:developpe@faitage-zinc",
+   "param:developpe_cheneau",
+   "param:dauphin"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tasseaux bois trapézoïdaux de 50 mm",
+    "quantite": "56",
+    "unite": "ml",
+    "affiche": "56 ml",
+    "etat": "ready",
+    "precision": "14 rangs × 4 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Couvre-joints Anthra-Zinc 0,65 mm pour tasseaux de 50 mm",
+    "quantite": "56",
+    "unite": "ml",
+    "affiche": "56 ml",
+    "etat": "ready",
+    "precision": "14 rangs × 4 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobine Anthra-Zinc 0,65 mm, largeur 650 mm",
+    "quantite": "54",
+    "unite": "ml",
+    "affiche": "54 ml",
+    "etat": "ready",
+    "precision": "13 bacs × 4,15 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobineau Anthra-Zinc 0,65 mm, 650 mm × 17 m",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 8 m de chéneau, marge 5 % comprise",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles Anthra-Zinc 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 8 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 33 cm",
+    "lignes": [
+     "3",
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes porte-solin avec bavette et joint mastic d'étanchéité pour entourage de cheminées",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "a-preciser:5"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 3 m ; Hauteur de descente : 3 m ; Dauphin : Non",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Colliers de descente Ø80",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "Hauteur de descente : 3 m ; Dauphin : Non",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Platine zinc de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125, soudée sur la couverture zinc ; Ø 100, soudée sur la couverture zinc",
+    "lignes": [
+     "7",
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125 ; Ø 100",
+    "lignes": [
+     "7",
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [
+   "Dépose ancienne couverture : dépose de l'ancienne couverture et mise en décharge / évacuation des gravats",
+   "Installation et location échafaudage : transport, montage, location et repli d'échafaudage de sécurité sur une hauteur de 3 m environ"
+  ],
+  "questions": []
+ }
+}

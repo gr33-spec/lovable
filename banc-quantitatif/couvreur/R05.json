@@ -79,5 +79,86 @@
    "ne_sait_pas": false,
    "dit": "Espagne 1er choix."
   }
+ },
+ "fiche:format_ardoise_jouees ¦ Les ardoises des jouées, c'est le même format que le toit (30×22) ?": {
+  "question": {
+   "id": "fiche:format_ardoise_jouees ¦ Les ardoises des jouées, c'est le même format que le toit (30×22) ?",
+   "question": "Les ardoises des jouées, c'est le même format que le toit (30×22) ?",
+   "boutons": [
+    "Oui, 30×22",
+    "Non, un autre format"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Oui, 30×22",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Oui, mêmes 30×22 que le toit."
+  }
+ },
+ "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?": {
+  "question": {
+   "id": "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?",
+   "question": "Longueur du rampant (de l'égout au faîtage) ?",
+   "boutons": [
+    "Jusqu'à 5,5 m",
+    "5,5 à 8 m",
+    "Plus de 8 m",
+    "Plus de 11 m"
+   ],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "5,5 à 8 m",
+   "valeur": "",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "5,90 m, donc 5,5 à 8."
+  }
+ },
+ "param:nb_descentes ¦ Combien de descentes pour cette gouttière ?": {
+  "question": {
+   "id": "param:nb_descentes ¦ Combien de descentes pour cette gouttière ?",
+   "question": "Combien de descentes pour cette gouttière ?",
+   "boutons": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "2",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "2 descentes."
+  }
+ },
+ "param:pente ¦ Pente du toit ?": {
+  "question": {
+   "id": "param:pente ¦ Pente du toit ?",
+   "question": "Pente du toit ?",
+   "boutons": [
+    "30°",
+    "35°",
+    "45°"
+   ],
+   "unite": "°",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "45°",
+   "valeur": "",
+   "unite": "°",
+   "ne_sait_pas": false,
+   "dit": "45 degrés."
+  }
  }
 }

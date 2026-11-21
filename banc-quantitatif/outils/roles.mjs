@@ -96,3 +96,20 @@ if (cmd === "ranger-jugements") for (const c of fs.readdirSync("controle")) {
   fs.writeFileSync(`controle/${c}/questions.json`, JSON.stringify({ ...(lire(`controle/${c}/questions.json`) ?? {}), ...(j.questions ?? {}) }, null, 1));
   fs.rmSync(`controle/${c}/jugements.json`); fs.rmSync(`controle/${c}/a-juger.json`, { force: true });
 }
+
+// La vraie mesure : la liste d'une méthode comparée à la liste du contrôleur (corrigée par l'arbitre), pas au moteur.
+if (cmd === "verite") { const [m, ...chs] = cs; for (const c of chs) {
+  const f = lire(`resultats/${m}/${c}/e1/final.json`); if (!f || !fs.existsSync(`controle/${c}/liste-controleur.json`)) continue;
+  fs.writeFileSync(`controle/${c}/liste-${m}.json`, JSON.stringify({ liste: [...f.final.liste.map((l) => ({ article: l.label, quantite: l.quantite, unite: l.unite, detail: l.precision })), ...f.final.aChiffrer.map((l) => ({ article: l.label, a_chiffrer: true }))] }, null, 1));
+  const id = `verite-${m}-${c}`;
+  ecrire(`travaux/${id}.md`, `${tete(id, "LE CONTRÔLEUR : tu notes une liste de matériaux contre la liste juste, ligne par ligne")}
+1. Lis la liste juste : \`controle/${c}/liste-controleur.json\`${fs.existsSync(`controle/${c}/arbitrage.json`) ? `, corrigée par \`controle/${c}/arbitrage.json\` (pour un article arbitré, « bonne_valeur » fait foi ; « ne doit pas sortir » = l'article n'est pas attendu)` : ""}.
+2. Lis la liste à noter : \`controle/${c}/liste-${m}.json\`.
+3. Pour chaque ligne de la liste juste, cherche le même article du comptoir dans la liste à noter (le libellé peut différer ; une différence de conditionnement qui revient au même est juste) et classe-la :
+   - "juste" : même article, même quantité à commander, même unité (ou « à chiffrer » des deux côtés) ;
+   - "quantite_fausse" : l'article y est, mais la quantité ou l'unité diffère (y compris une quantité donnée alors qu'il faut « à chiffrer », ou l'inverse) ;
+   - "manquante" : l'article n'y est pas.
+   Puis les lignes de la liste à noter qui ne correspondent à aucune ligne juste : "en_trop".
+4. Écris dans \`controle/${c}/vs-${m}.json\` : {"juste": n, "quantite_fausse": n, "manquante": n, "en_trop": n, "detail": [{"article", "classe", "attendu", "obtenu"}]} (detail : seulement les lignes qui ne sont pas justes).
+${regles}`);
+  console.log(`${id}|sonnet|medium`); } }

@@ -1,0 +1,33 @@
+{
+ "m": "S4b",
+ "c": "C13",
+ "e": 1,
+ "nRef": 6,
+ "justes": 5,
+ "quantite": 1,
+ "manquantes": 0,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 4,
+ "questionsRef": 4,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [
+   "Bandes de rive zinc, zinc naturel 0,65 mm : 7 longueurs de 2 m attendu, à chiffrer  lu"
+  ],
+  "manquantes": [],
+  "inventees": [
+   "Feuilles zinc naturel 2 × 1 m, 0,65 mm (2 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:longueur_bande",
+    "text": "Longueur de bande zinc ?"
+   }
+  ]
+ }
+}

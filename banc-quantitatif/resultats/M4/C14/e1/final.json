@@ -1,0 +1,206 @@
+{
+ "posees": [
+  {
+   "key": "param:developpe",
+   "text": "Solin : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "200 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:developpe_cheneau",
+   "text": "Ton chéneau fait quel développé ?",
+   "options": [
+    "Jusqu'à 50 cm",
+    "Jusqu'à 65 cm",
+    "Jusqu'à 1 m"
+   ],
+   "reponse": "Jusqu'à 65 cm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Bobine Anthra-Zinc 0,65 mm, largeur 650 mm",
+    "quantite": "48",
+    "unite": "ml",
+    "affiche": "48 ml",
+    "etat": "ready",
+    "precision": "13 bacs × 3,65 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tasseaux bois trapézoïdaux de 50 mm",
+    "quantite": "49",
+    "unite": "ml",
+    "affiche": "49 ml",
+    "etat": "ready",
+    "precision": "14 rangs × 3,5 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobineau Anthra-Zinc 0,65 mm, × 17 m",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 8 m de chéneau, marge 5 % comprise",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "param:developpe_cheneau",
+     "param:largeur_bobineau"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Descente d'eaux pluviales zinc anthracite Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 3 m",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Solin",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": [
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:developpe_cheneau"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Bobine Anthra-Zinc 0,65 mm, largeur 650 mm",
+    "quantite": "48",
+    "unite": "ml",
+    "affiche": "48 ml",
+    "etat": "ready",
+    "precision": "13 bacs × 3,65 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tasseaux bois trapézoïdaux de 50 mm",
+    "quantite": "49",
+    "unite": "ml",
+    "affiche": "49 ml",
+    "etat": "ready",
+    "precision": "14 rangs × 3,5 m",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobineau Anthra-Zinc 0,65 mm, 650 mm × 17 m",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 8 m de chéneau, marge 5 % comprise",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Descente d'eaux pluviales zinc anthracite Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 3 m",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles Anthra-Zinc 2 × 1 m, 0,65 mm",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 8 ml de bande, développé 20 cm",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": []
+ }
+}
