@@ -5,7 +5,7 @@ import type { TransactionalEmailSender } from "../../platform/email/email.port.j
 import { CONFIG, EMAIL_SENDER } from "../../platform/tokens.js";
 import { AchatGroupeModule, RapprochementService } from "../achat-groupe/index.js";
 import { CommandeDuMoisService, GroupeModule } from "../groupe/index.js";
-import { DroitsService, RecentrageModule } from "../recentrage/index.js";
+import { DroitsService, ObservatoireService, RecentrageModule } from "../recentrage/index.js";
 import { PilotageModule } from "../pilotage/index.js";
 import { TenancyModule } from "../tenancy/index.js";
 import { AchatsGroupesV1Service } from "./application/achats-groupes-v1.service.js";
@@ -21,7 +21,7 @@ import { AchatsGroupesV1AdminController, AchatsGroupesV1Controller, AchatsGroupe
   providers: [
     {
       provide: AchatsGroupesV1Service,
-      useFactory: (p: PrismaService, commande: CommandeDuMoisService, e: TransactionalEmailSender, c: AppConfig, droits: DroitsService) =>
+      useFactory: (p: PrismaService, commande: CommandeDuMoisService, e: TransactionalEmailSender, c: AppConfig, droits: DroitsService, observatoire: ObservatoireService) =>
         new AchatsGroupesV1Service(
           p,
           {
@@ -32,13 +32,15 @@ import { AchatsGroupesV1AdminController, AchatsGroupesV1Controller, AchatsGroupe
               const projet = await p.project.findFirst({ where: { id: projectId, companyId: tenant.companyId }, select: { name: true } });
               return { nom: projet?.name ?? "Quantitatif", lignes };
             },
+            // Greg, 21 novembre 2026 (prix) : l'offre d'un achat groupé et sa commande vont à l'observatoire, sans nom.
+            observatoire,
           },
           e,
           // La prévisualisation (test.mobiiz.fr) tourne en NODE_ENV=production : la clôture anticipée de test y reste permise
           // (recette en ligne, Greg, 7 novembre 2026) ; la vraie production la refuse toujours.
           { actif: c.achatsGroupesV1, webAppUrl: c.webAppUrl, env: c.previewOriginPattern ? "preview" : c.env, metiersOuverts: c.metiersOuverts },
         ),
-      inject: [PrismaService, CommandeDuMoisService, EMAIL_SENDER, CONFIG, DroitsService],
+      inject: [PrismaService, CommandeDuMoisService, EMAIL_SENDER, CONFIG, DroitsService, ObservatoireService],
     },
   ],
   exports: [AchatsGroupesV1Service],
