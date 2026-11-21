@@ -1,0 +1,81 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuile terre cuite mécanique",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": "tuile neuve identique à l'existant, en remplacement de tuiles cassées ou défectueuses",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Petites fournitures de fixation",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour la refixation mécanique de l'élément de rive de toit arraché",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuile terre cuite mécanique",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": "tuile neuve identique à l'existant, en remplacement de tuiles cassées ou défectueuses",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Petites fournitures de fixation",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour la refixation mécanique de l'élément de rive de toit arraché",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+  ],
+  "questions": []
+ }
+}

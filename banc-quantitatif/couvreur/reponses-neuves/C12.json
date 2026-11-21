@@ -1,0 +1,10 @@
+[
+ {
+  "id": "param:longueur_plomb ¦ Longueur de bande de plomb ?",
+  "bouton": "",
+  "valeur": "4",
+  "unite": "m",
+  "ne_sait_pas": false,
+  "dit": "4 mètres linéaires en tout."
+ }
+]

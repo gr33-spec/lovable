@@ -1,0 +1,36 @@
+[
+ {
+  "id": "param:developpe ¦ Bande de solin en zinc anthracite : développé de la bande zinc ?",
+  "question": "Bande de solin en zinc anthracite : développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ },
+ {
+  "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "boutons": [
+   "Je façonne (feuilles ou bobineau)",
+   "Je commande façonné"
+  ],
+  "unite": "u",
+  "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+ },
+ {
+  "id": "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?",
+  "question": "Ton chéneau fait quel développé ?",
+  "boutons": [
+   "Jusqu'à 50 cm",
+   "Jusqu'à 65 cm",
+   "Jusqu'à 1 m"
+  ],
+  "unite": "mm",
+  "aide": "La largeur de zinc avant façonnage : elle choisit la largeur du bobineau (500, 650 ou 1 000 mm)."
+ }
+]

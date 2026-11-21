@@ -1,0 +1,60 @@
+[
+ {
+  "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "boutons": [
+   "Je façonne (feuilles ou bobineau)",
+   "Je commande façonné"
+  ],
+  "unite": "u",
+  "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+ },
+ {
+  "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+  "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+  "boutons": [
+   "Espagne 1er choix",
+   "Ardoise NF (type Cupa)"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?",
+  "question": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+  "boutons": [
+   "De 25",
+   "De 28",
+   "De 33",
+   "De 40"
+  ],
+  "unite": "cm",
+  "aide": "Le développé : la largeur de la feuille avant façonnage."
+ },
+ {
+  "id": "param:developpe@bande-porte-solin ¦ Bande porte-solin zinc : développé de la bande zinc ?",
+  "question": "Bande porte-solin zinc : développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ },
+ {
+  "id": "param:developpe@bandes-zinc ¦ Bandes de rive zinc : développé de la bande zinc ?",
+  "question": "Bandes de rive zinc : développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ }
+]
