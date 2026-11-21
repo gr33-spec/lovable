@@ -1,5 +1,17 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-72 — Suggestion « Sortie de ventilation » sur toute couverture (Greg, 2026-11-21 au soir)
+
+Le banc du calcul ne bouge pas : 94 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Sortie de ventilation non écrite au devis | rien | une case de l'étape « Suggestions » : « Sortie de ventilation (VMC, extraction d'air) », sur toute couverture (tuile, ardoise, zinc, bac acier) ; cochée : une pièce, modifiable | Greg, 21 novembre 2026 |
+| Article commandé | — | tuile à douille et lanterne sur tuile ; sortie pour ardoise, pour zinc, pour bac acier | Greg, 21 novembre 2026 (« l'article s'adapte au matériau ») |
+
+- Pas proposée quand le devis écrit déjà une sortie de toit. Jamais d'office, même sur la fiche complète.
+- Les longueurs que le devis n'écrit pas (arêtier, noue, faîtage, gouttière : 0 m) ne sont plus dites en hypothèse ; la précision des ardoises dit « arêtiers, noues, faîtage et égout du devis compris ».
+
 ## roofing-2026.11.21-71 — Ardoises : ouvrages au mètre, question de l'égout, remaniage (Greg, 2026-11-21 au soir)
 
 Le banc du calcul passe de 88 sur 100 à 94 sur 99 (une ligne « incertaine » : les crochets à pointe).

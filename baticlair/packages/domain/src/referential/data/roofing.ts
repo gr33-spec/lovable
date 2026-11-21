@@ -1346,9 +1346,53 @@ function slate(h: number, l: number): Product {
   };
 }
 
+/**
+ * SUGGESTION « SORTIE DE VENTILATION » (Greg, 21 novembre 2026, soir). « Sur toute réfection de toiture (ardoise, tuile,
+ * zinc…), si le devis n'en parle pas, propose en Suggestions : Sortie de ventilation (VMC, extraction d'air). Le même mot
+ * partout pour l'artisan ; l'article commandé s'adapte au matériau. » Une case de l'étape « Suggestions », jamais d'office ;
+ * pas proposée quand le devis écrit déjà une sortie de toit. Cochée : une pièce, modifiable.
+ */
+const SORTIE_VENTILATION_LABEL = "Sortie de ventilation (VMC, extraction d'air)";
+const SORTIE_VENTILATION_PAR_COUVERTURE: Record<string, string> = {
+  "couverture-tuiles-emboitement": "sortie-ventilation-tuile",
+  "couverture-tuiles-canal": "sortie-ventilation-tuile",
+  "couverture-ardoises-crochet": "sortie-ventilation-ardoise",
+  "couverture-ardoises-fibres-ciment": "sortie-ventilation-ardoise",
+  "couverture-zinc-tasseaux": "sortie-ventilation-zinc",
+  "couverture-zinc-joint-debout": "sortie-ventilation-zinc",
+  "couverture-bac-acier": "sortie-ventilation-bac-acier",
+};
+function avecSortieDeVentilation(works: Referential["workItems"]): Referential["workItems"] {
+  return works.map((w) => {
+    const productId = SORTIE_VENTILATION_PAR_COUVERTURE[w.id];
+    if (!productId) return w;
+    return {
+      ...w,
+      slots: [
+        ...w.slots,
+        { key: "sortie_ventilation", family: "outlet_vent", label: "Sortie de ventilation", usual: { text: "Une sortie de ventilation adaptée à la couverture.", source: F, productId }, suggested: { label: SORTIE_VENTILATION_LABEL, unlessWorks: ["sortie-de-toit"] } },
+      ],
+      needs: [
+        ...w.needs,
+        {
+          id: "sortie-ventilation",
+          slot: "sortie_ventilation",
+          // Une pièce quand la case est cochée ; le nombre se corrige d'un toucher.
+          formula: "1",
+          unit: "u",
+          core: true,
+          exclusions: "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    };
+  });
+}
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-71",
+  version: "roofing-2026.11.21-72",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1731,6 +1775,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
     // Sortie de toit : un ouvrage compté (réponse du fondateur, 2026-10-04) ; la ligne du devis en est la mesure.
+    { code: "outlet_vent", label: "Sortie de ventilation", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de ventilation"] },
     { code: "outlet_tile", label: "Tuile à douille", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["tuile a douille"] },
     { code: "outlet_lantern", label: "Lanterne", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["lanterne"] },
     { code: "roof_outlet", label: "Sortie de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de toit"] },
@@ -2160,6 +2205,10 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
     }),
     // §45.5 : pattes fixes et pattes coulissantes sont deux articles au comptoir, les pointes un troisième.
+    generic("sortie-ventilation-tuile", "outlet_vent", "Tuile à douille et sa lanterne (modèle de la tuile posée)", "Tuile à douille et lanterne (sortie de ventilation)"),
+    generic("sortie-ventilation-ardoise", "outlet_vent", "Sortie de ventilation pour couverture en ardoise", "Sortie de ventilation pour ardoise"),
+    generic("sortie-ventilation-zinc", "outlet_vent", "Sortie de ventilation pour couverture zinc", "Sortie de ventilation pour zinc"),
+    generic("sortie-ventilation-bac-acier", "outlet_vent", "Sortie de ventilation pour bac acier", "Sortie de ventilation pour bac acier"),
     generic("tuile-a-douille", "outlet_tile", "Tuile à douille (modèle de la tuile posée), au diamètre du conduit", "Tuile à douille"),
     generic("lanterne-sortie", "outlet_lantern", "Lanterne de ventilation pour tuile à douille", "Lanterne de sortie de toit"),
     generic("embase-plomb-sortie", "outlet_base", "Embase plomb pour sortie de toit, au diamètre du conduit", "Embase plomb de sortie de toit"),
@@ -2234,7 +2283,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
     }),
     generic("collier-descente-standard", "downpipe_clamp", "Collier de descente (modèle à préciser)", "Colliers"),
   ],
-  workItems: [
+  workItems: avecSortieDeVentilation([
     {
       id: "couverture-tuiles-emboitement",
       trade: "roofing",
@@ -4718,7 +4767,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         },
       ],
     },
-  ],
+  ]),
   wasteRules: [
     // Pertes du référentiel du fondateur (pan simple) : appliquées après le calcul, avant l'arrondi au conditionnement.
     { family: "roof_slate", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Casse et coupes de rive, pans rectangulaires simples." },

@@ -703,6 +703,8 @@ export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: str
     for (const slot of work.slots) {
       const key = `${work.id}/${slot.key}`;
       if (!slot.suggested || input.mentioned.includes(slot.key) || out.some((o) => o.key === key || o.label === slot.suggested!.label)) continue;
+      // Le devis en parle déjà ailleurs (une sortie de toit écrite) : rien à proposer.
+      if (slot.suggested.unlessWorks?.some((id) => plan.inputs.some((i) => baseOf(i.workItemId) === id))) continue;
       out.push({ key, label: slot.suggested.label });
     }
   }

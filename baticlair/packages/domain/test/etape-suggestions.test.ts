@@ -18,15 +18,17 @@ const noms = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.map((b) => b.labe
 describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, avant les questions", () => {
   it("à l'ouverture : naissances, talons, angles, puis les consommables (silicone, vis) ; jamais les crochets déjà écrits ; cinq au plus ; rien n'est ajouté", () => {
     const e = ecran();
+    // Greg, 21 novembre 2026 (soir) : sur toute couverture dont le devis ne dit pas de sortie de toit, la sortie de
+    // ventilation se propose ; elle prend la place de la cinquième case (les vis), cinq au plus.
     expect(e.suggestions.map((o) => o.label)).toEqual([
+      "Sortie de ventilation (VMC, extraction d'air)",
       "Naissances de gouttière",
       "Talons de gouttière (si tu ne les fabriques pas)",
       "Angles de gouttière (si tu ne les fabriques pas)",
       "Cartouches de silicone zinc",
-      "Vis inox 4 × 40",
     ]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/sortie_ventilation", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "bandes-zinc/mastic+bande-porte-solin/mastic"]);
     expect(e.suggestions.length).toBe(SUGGESTIONS_MAX);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
@@ -68,16 +70,18 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     expect(angles?.quantity).toMatch(/^2\b/);
   });
 
-  it("un devis sans oubli probable n'a pas d'étape : aucune suggestion, pas de carte", () => {
+  it("un devis d'ardoises seules : la seule suggestion est la sortie de ventilation (Greg, 21 novembre 2026 ; avant : aucune, pas de carte)", () => {
     const ardoisesSeules = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => /ardoise/i.test(l.designation)), questions: [] };
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
-    expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([]);
-    expect(e.suggestions).toEqual([]);
+    const seule = [{ key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" }];
+    expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual(seule);
+    expect(e.suggestions).toEqual(seule);
   });
 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {
     const slots = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.slots.filter((s) => s.suggested).map((s) => `${w.id}/${s.key} : ${s.suggested!.label}`));
-    expect(slots).toEqual([
+    // Sans ordre : chaque couverture porte la sienne, là où son ouvrage est rangé dans la fiche.
+    expect([...slots].sort()).toEqual([
       // Greg, 21 novembre 2026 : la bande porte-solin d'un abergement, non dite au devis, se propose ici (avant : ajoutée d'office).
       "abergement-cheminee/porte_solin : Bandes porte-solin de l'abergement",
       "gouttiere/crochet : Crochets de gouttière",
@@ -87,6 +91,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "gouttiere-pvc-alu/talon : Talons de gouttière",
       "gouttiere-pvc-alu/angle : Angles de gouttière",
       "gouttiere-pvc-alu/naissance : Naissances de gouttière",
-    ]);
+      // Greg, 21 novembre 2026 (soir) : le même mot sur chaque couverture ; l'article s'adapte au matériau.
+      ...["couverture-tuiles-emboitement", "couverture-tuiles-canal", "couverture-ardoises-crochet", "couverture-ardoises-fibres-ciment", "couverture-zinc-tasseaux", "couverture-zinc-joint-debout", "couverture-bac-acier"].map((w) => `${w}/sortie_ventilation : Sortie de ventilation (VMC, extraction d'air)`),
+    ].sort());
   });
 });

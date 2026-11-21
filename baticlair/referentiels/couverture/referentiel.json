@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-71",
+  "version": "roofing-2026.11.21-72",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -978,6 +978,16 @@
         "chatiere",
         "tuile chatiere",
         "tuile de ventilation"
+      ]
+    },
+    {
+      "code": "outlet_vent",
+      "label": "Sortie de ventilation",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "sortie de ventilation"
       ]
     },
     {
@@ -4941,6 +4951,130 @@
       ]
     },
     {
+      "id": "sortie-ventilation-tuile",
+      "family": "outlet_vent",
+      "label": "Tuile à douille et sa lanterne (modèle de la tuile posée)",
+      "shortLabel": "Tuile à douille et lanterne (sortie de ventilation)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "sortie-ventilation-ardoise",
+      "family": "outlet_vent",
+      "label": "Sortie de ventilation pour couverture en ardoise",
+      "shortLabel": "Sortie de ventilation pour ardoise",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "sortie-ventilation-zinc",
+      "family": "outlet_vent",
+      "label": "Sortie de ventilation pour couverture zinc",
+      "shortLabel": "Sortie de ventilation pour zinc",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "sortie-ventilation-bac-acier",
+      "family": "outlet_vent",
+      "label": "Sortie de ventilation pour bac acier",
+      "shortLabel": "Sortie de ventilation pour bac acier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "tuile-a-douille",
       "family": "outlet_tile",
       "label": "Tuile à douille (modèle de la tuile posée), au diamètre du conduit",
@@ -6263,6 +6397,22 @@
             "productId": "tuile-rive-droite-standard"
           },
           "formOf": "rive"
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-tuile"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
+          }
         }
       ],
       "constants": {
@@ -6425,6 +6575,22 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 2
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -6584,6 +6750,22 @@
             "productId": "bardelis-droit-standard"
           },
           "formOf": "rive"
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-tuile"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
+          }
         }
       ],
       "constants": {
@@ -6741,6 +6923,22 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 2
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -7328,6 +7526,22 @@
             "text": "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "ecran-hpv-standard"
+          }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-ardoise"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
           }
         }
       ],
@@ -9209,6 +9423,22 @@
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
           },
           "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -9443,6 +9673,22 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "ecran-hpv-standard"
           }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-ardoise"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
+          }
         }
       ],
       "constants": {
@@ -9615,6 +9861,22 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         }
@@ -15881,6 +16143,22 @@
             "source": "vmzinc-tasseaux",
             "productId": "couvre-joint-tasseau-zinc"
           }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-zinc"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
+          }
         }
       ],
       "constants": {
@@ -16078,6 +16356,22 @@
             "note": "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau."
           },
           "version": 2
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -16493,6 +16787,22 @@
             "text": "Volige sapin 18 mm sous le zinc (§7).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "volige-sapin-standard"
+          }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-zinc"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
           }
         }
       ],
@@ -17227,6 +17537,22 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -17576,6 +17902,22 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "faitiere-bac-acier"
           }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-bac-acier"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ]
+          }
         }
       ],
       "constants": {
@@ -17789,6 +18131,22 @@
           "precisionRequires": [
             "teinte_bac"
           ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",

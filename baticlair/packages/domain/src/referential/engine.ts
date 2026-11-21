@@ -446,6 +446,9 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const consumableOf = (rule: NeedRule) => !writtenSlot(rule.slot) && isConsumableNeed(ref, work, rule);
   const everything = options.everyArticle === true || ref.writtenOnly === false;
   const written = (rule: NeedRule): boolean => {
+    // Un article qui n'existe que comme suggestion transversale (la sortie de ventilation, proposée sur toute couverture) ne
+    // sort que coché, même sur la fiche complète : il n'est l'accessoire d'aucun article écrit.
+    if (!writtenSlot(rule.slot) && work.slots.find((x) => x.key === rule.slot)?.suggested?.unlessWorks) return false;
     if (everything || writtenSlot(rule.slot)) return true;
     if (!isConsumableNeed(ref, work, rule)) return citedSlot(rule.slot) !== undefined;
     if (consumables !== undefined && Number(consumables) < 1) return false;
