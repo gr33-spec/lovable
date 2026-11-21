@@ -81,6 +81,13 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   je-ne-sais-pas-aux-bacs, partner-keys, quantitatifs, version-figee) : la question de l'égout et les ardoises en plus quand
   une gouttière ou un faîtage est écrit. Adaptation confiée à un agent ; à sa fin : relire son rapport (chaque nombre
   vérifié par la formule), relancer tout le serveur (40 min, seul), puis les parcours Playwright, puis rapport à Greg.
+- 22 novembre : les 7 fichiers du serveur adaptés par l'agent (helper `apps/api/test/support/egout.ts`), verts ensemble
+  (44 tests). Chaîne complète du serveur relancée sur la -72, puis parcours à rejouer.
+- Défauts relevés par l'agent, PAS corrigés : (a) devis bacs + ardoises : la question de l'égout (et la qualité d'ardoise)
+  disparaît quand le façonnage est répondu, puis revient après la longueur des bacs ; (b) libellé tronqué « Couverture zinc
+  joint debout à » tant que la longueur des bacs manque ; (c) le test `version-figee` fabrique son ancienne version avec la
+  fiche du jour : il ne prouve pas qu'un vrai quantitatif d'avant le 21 novembre se rejoue (à vérifier avant la mise en
+  ligne : un quantitatif déjà validé ne doit pas se rouvrir avec la question de l'égout).
 - TANT QUE serveur et parcours ne sont pas verts : lot PAS prêt pour le site de test.
 
 ## État au 21 novembre, nuit : fiche -71

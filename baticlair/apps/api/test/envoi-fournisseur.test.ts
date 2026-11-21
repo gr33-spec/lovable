@@ -60,8 +60,10 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     const { packet } = res.body;
     expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });
     // Bloc 1 : les lignes prêtes à charger (ardoises, crochets, liteaux, gouttière…), jamais une mesure en m².
+    // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises à l'égout, sur la longueur de la gouttière du devis (24 m ÷ 0,22 m
+    // = 109,09 ardoises), compté avant la perte : (8 936,01 + 109,09) × 1,05 = 9 497,36 → 9 498 ; avant 9 383 → 9 498. Crochets : 19 boîtes, inchangé.
     expect(packet.articles).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 383 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 19 boîtes de 500/), expect.stringMatching(/^Chatière de ventilation : 4 pièces/)]),
+      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 498 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 19 boîtes de 500/), expect.stringMatching(/^Chatière de ventilation : 4 pièces/)]),
     );
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
     // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.

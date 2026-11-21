@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { attendreLaQuestionDeLEgout, egoutCompris, QUESTION_EGOUT } from "./support/egout.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
@@ -30,8 +31,13 @@ describe("la note de l'artisan entre dans le calcul", () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const res = await agent.post("/v1/quantitatifs").send({ ...BREST, infos: "Rénovation complète. Pente 35°. Rampant 6 m. Les Velux sont conservés." });
     expect(res.status).toBe(201);
-    const q = res.body as Q;
-    expect(q.infos.texte).toBe("Rénovation complète. Pente 35°. Rampant 6 m. Les Velux sont conservés.");
+    const cree = res.body as Q;
+    expect(cree.infos.texte).toBe("Rénovation complète. Pente 35°. Rampant 6 m. Les Velux sont conservés.");
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
+    // C'est la SEULE question : ni la pente ni le rampant ne se demandent. Après « Oui », tout est comme avant.
+    expect(cree.questions.map((x) => x.id)).toEqual([QUESTION_EGOUT]);
+    attendreLaQuestionDeLEgout(cree.questions);
+    const q = await egoutCompris<Q>(agent, cree.id);
     // Sans note : 45° et rampant 5,5 m par défaut, 9 383 ardoises (test de la porte ; Brest en situation exposée). À 35° et 6 m de rampant, le
     // recouvrement du NF DTU 40.11 (table de 5,50 à 11 m, fiche couverture) monte : 10 537 ardoises (Brest exposée, fiche couverture).
     expect(ardoises(q).quantite).toBe(10537);
@@ -44,7 +50,10 @@ describe("la note de l'artisan entre dans le calcul", () => {
 
   it("la note se change après coup (chat) : elle est gardée et montrée ; le calcul ne bouge pas sans relecture (aucune règle de lecture en code, §51.5)", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const q = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
+    const cree = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
+    attendreLaQuestionDeLEgout(cree.questions);
+    const q = await egoutCompris<Q>(agent, cree.id);
     expect(ardoises(q).quantite).toBe(9383);
     expect((await agent.put(`/v1/projects/${q.projetId}/infos`).send({ texte: "Pente 35°" })).status).toBe(204);
     const after = (await agent.get(`/v1/quantitatifs/${q.id}`)).body as Q;
@@ -61,7 +70,10 @@ describe("la note de l'artisan entre dans le calcul", () => {
 
   it("un croquis avec commentaire : la photo est gardée (jamais lue par l'IA), le commentaire rejoint la note", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
-    const q = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
+    const cree = (await agent.post("/v1/quantitatifs").send(BREST)).body as Q;
+    attendreLaQuestionDeLEgout(cree.questions);
+    const q = await egoutCompris<Q>(agent, cree.id);
     const res = await agent
       .post(`/v1/projects/${q.projetId}/infos/croquis`)
       .field("commentaire", "Les deux traits rouges sont les rampants : 6,50 m chacun. Noue : 8 m.")
@@ -96,6 +108,11 @@ describe("deux documents qui se contredisent : une question avec les deux valeur
     // L'artisan tranche d'un bouton : la question disparaît, le calcul cite sa réponse.
     const after = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:pente", valeur: "40" }] })).body as Q;
     expect(after.questions.find((x) => x.id === "engine:param:pente")).toBeUndefined();
-    expect(ardoises(after).explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:pente", valeur: "40", confiance: "artisan" }));
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
+    // La pente tranchée, les ardoises attendent encore l'égout ; après « Oui », le calcul cite la réponse sur la pente.
+    attendreLaQuestionDeLEgout(after.questions);
+    expect(after.lignes.find((l) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22")).toBeUndefined();
+    const fin = await egoutCompris<Q>(agent, q.id);
+    expect(ardoises(fin).explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:pente", valeur: "40", confiance: "artisan" }));
   });
 });
