@@ -79,7 +79,9 @@ export function rejouer(c: Chantier) {
   const sansReponse: string[] = [];
   let e = ecranDeLecture({ ref, lecture, answers, preferences: {} });
   for (let tour = 0; tour < 12; tour++) {
-    const ouvertes = e.questions.filter((q) => !posees.includes(q.key));
+    // Les questions de la lecture, et celles du calcul qui portent sur un article (« Quelle ardoise ? »).
+    const duCalcul = e.purchase.questions.flatMap((d) => (d.question && d.question.key.startsWith("product:") ? [d.question] : []));
+    const ouvertes = [...e.questions, ...duCalcul.filter((q) => !e.questions.some((x) => x.key === q.key))].filter((q) => !posees.includes(q.key));
     if (ouvertes.length === 0) break;
     for (const q of ouvertes) {
       posees.push(q.key);

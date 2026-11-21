@@ -1015,7 +1015,11 @@ export function ecranDeLecture(input: {
   for (const q of fallback) {
     if (deCesOuvragesSeulement(q)) continue;
     const donnee = scopedParam(q.key)?.name ?? q.key.replace(/^param:/, "");
-    if (asked.some((a) => a.key === q.key) || !q.key.startsWith("param:")) continue;
+    // Greg, 21 novembre 2026 : « Chaque case vide que la fiche métier exige devient une question. » L'article que le calcul ne
+    // peut pas compter sans son modèle (« ardoises identiques à l'existant », banc du calcul C08) a sa question, posée par le
+    // code avec les modèles de la fiche ; avant : seulement si le modèle la posait.
+    const articleACHoisir = q.key.startsWith("product:") && q.kind === "choose_product";
+    if (asked.some((a) => a.key === q.key) || !(q.key.startsWith("param:") || articleACHoisir)) continue;
     const m = /^param:([a-z0-9_]+)(?:@([a-z0-9_-]+))?$/.exec(q.key) ?? /^product:([a-z0-9_]+)$/.exec(q.key);
     const cle = m ? (q.key.startsWith("product:") ? `produit_${m[1]!}` : m[1]!) : q.key.replace(/[^a-z0-9_]/g, "_");
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === cle);

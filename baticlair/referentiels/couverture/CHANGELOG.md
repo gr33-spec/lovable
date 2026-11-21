@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-66 — « Quelle ardoise ? » posée par le code (Greg, 2026-11-21)
+
+- **Règle changée (questions par le code)** : quand le calcul ne peut pas compter un article sans son modèle (« ardoises identiques à l'existant », « tuile mécanique grand moule » sans référence), le code pose la question de l'article avec les modèles de la fiche (« Quelle ardoise ? Donne son format. »). Avant : la question n'existait que si la lecture la posait ; sinon la ligne restait « à chiffrer » sans question. Greg, 21 novembre 2026 : « Chaque case vide que la fiche métier exige devient une question. »
+- Aucune quantité ne change.
+
 ## roofing-2026.11.21-65 — Banc du calcul, lot 3 : les décisions de Greg du 21 novembre 2026
 
 Le banc du calcul passe de 56 sur 98 à 78 sur 100 lignes justes (la référence du banc suit les décisions ci-dessous).

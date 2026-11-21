@@ -237,6 +237,12 @@
   },
   "param:dauphin": {
    "bouton": "Non"
+  },
+  "product:ardoise": {
+   "valeur": "ardoise-32x22"
+  },
+  "param:qualite_ardoise": {
+   "bouton": "Espagne 1er choix"
   }
  },
  "attendu": [

@@ -1644,6 +1644,13 @@
     "raison": "Recouvrement à préciser"
    },
    {
+    "designation": "Liteaux sable",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement à préciser"
+   },
+   {
     "designation": "Bardelis gauches",
     "quantite": "27 pièces",
     "unite": "pièces",
@@ -1656,22 +1663,13 @@
     "unite": "pièces",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Liteaux 27×40 (Liteaux sable)",
-    "quantite": null,
-    "unite": null,
-    "etat": "supplier",
-    "raison": null
    }
   ],
   "questions": [
    "param:recouvrement_canal",
    "product:tuile"
   ],
-  "aChiffrer": [
-   "Liteaux 27×40 (Liteaux sable)"
-  ]
+  "aChiffrer": []
  },
  {
   "fichier": "roofing-387647310f13.json",
@@ -3154,6 +3152,13 @@
     "raison": "Recouvrement à préciser"
    },
    {
+    "designation": "Liteaux sable",
+    "quantite": null,
+    "unite": null,
+    "etat": "check",
+    "raison": "Recouvrement à préciser"
+   },
+   {
     "designation": "Bardelis gauches",
     "quantite": "27 pièces",
     "unite": "pièces",
@@ -3166,22 +3171,13 @@
     "unite": "pièces",
     "etat": "ok",
     "raison": null
-   },
-   {
-    "designation": "Liteaux 27×40 (Liteaux sable)",
-    "quantite": null,
-    "unite": null,
-    "etat": "supplier",
-    "raison": null
    }
   ],
   "questions": [
    "param:recouvrement_canal",
    "product:tuile"
   ],
-  "aChiffrer": [
-   "Liteaux 27×40 (Liteaux sable)"
-  ]
+  "aChiffrer": []
  },
  {
   "fichier": "roofing-8270554b475f.json",

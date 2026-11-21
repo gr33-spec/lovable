@@ -319,6 +319,9 @@
   "fiche:modele_tuile": {
    "valeur": "Terreal Volnay PV rouge vieilli"
   },
+  "product:tuile": {
+   "valeur": "Terreal Volnay PV rouge vieilli"
+  },
   "param:hauteur_descente": {
    "valeur": "4",
    "unite": "m"
@@ -331,7 +334,7 @@
   {
    "article": "Tuiles à emboîtement",
    "mots": [
-    "tuile",
+    "tuile|volnay",
     "!rive",
     "!faiti"
    ],

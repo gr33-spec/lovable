@@ -738,6 +738,19 @@ function computeNeed(
         const family = ref.families.find((f) => f.code === work.slots.find((s) => s.key === head)?.family);
         const def = family?.attributes.find((a) => a.key === attr);
         const fact = p?.attributes[attr];
+        // Banc du calcul (C08, 21 novembre 2026, « ardoises identiques à l'existant ») : le produit n'est pas dit et le calcul
+        // en a besoin par une règle dérivée (le pureau) : c'est UNE question (« quelle ardoise ? »), jamais une ligne « à
+        // chiffrer » sans la question qui la débloque.
+        if (!p) {
+          const headSlot = work.slots.find((s) => s.key === head);
+          const candidates = headSlot ? ref.products.filter((x) => x.family === headSlot.family) : [];
+          if (headSlot && candidates.length > 0 && !input.declined?.includes(headSlot.key)) {
+            throw new Stop({
+              status: "question",
+              question: { key: `product:${headSlot.key}`, kind: "choose_product", text: headSlot.ask ?? `Quel produit pour : ${headSlot.label.toLowerCase()} ?`, options: candidates.map((x) => ({ label: x.shortLabel, value: x.id })) },
+            });
+          }
+        }
         if (!p || !fact) {
           throw new Stop({
             status: "unknown",
