@@ -706,7 +706,10 @@ export function purchaseView(
     const label = [name, ...chars.filter((c) => !norm(name).includes(norm(c)))].join(" ");
     // La quantité du devis telle quelle, sauf une mesure qui n'est pas une unité de commande (120 m² de tuiles) : la
     // ligne reste vide et la mesure se lit dans la précision (§49.3.3, jamais d'unité interdite).
-    const measure = /^(m2|m²)$/i.test((o.read.unit ?? "").trim()) && supplierTest(label, o.read.unit) !== null;
+    // Le nombre écrit compte des OUVRAGES, pas des articles (« 1 descente », dont la hauteur fait le nombre de tubes) : il
+    // n'est jamais montré comme un nombre de pièces ; il se lit dans la précision (banc du calcul, C08, 21 novembre 2026).
+    const compteDesOuvrages = work!.params.some((p) => p.fromLineQuantity && p.unit === "u" && p.forSlots?.includes(planned.slot));
+    const measure = compteDesOuvrages || (/^(m2|m²)$/i.test((o.read.unit ?? "").trim()) && supplierTest(label, o.read.unit) !== null);
     const written = o.read.quantity && !measure ? writtenQuantity(o.read.quantity, o.read.unit) : null;
     const said = [o.read.quantity, o.read.unit === "m2" ? "m²" : o.read.unit].filter(Boolean).join(" ");
     toBuy.push({

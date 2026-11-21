@@ -1471,8 +1471,8 @@
   "lignes": [
    {
     "designation": "Descente d'eau pluviale, diamètre descentes 80 mm",
-    "quantite": "2 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Hauteur d'une descente à préciser"
    },
@@ -2063,8 +2063,8 @@
    },
    {
     "designation": "Descente d'eau pluviale, diamètre descentes 80 mm",
-    "quantite": "2 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Hauteur d'une descente à préciser"
    }
