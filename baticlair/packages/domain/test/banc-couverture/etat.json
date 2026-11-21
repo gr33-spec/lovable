@@ -59,15 +59,15 @@
  },
  "C06": {
   "lignes": {
-   "Tuiles canal, courants": "manquante",
-   "Tuiles canal, couverts": "manquante",
-   "Liteaux 27×40": "quantite",
+   "Tuiles canal, courants": "juste",
+   "Tuiles canal, couverts": "juste",
+   "Liteaux 27×40": "juste",
    "Bardelis gauches": "juste",
    "Bardelis droits": "juste",
    "Faîtières canal": "juste",
    "Mortier de faîtage": "manquante"
   },
-  "enTrop": 1
+  "enTrop": 0
  },
  "C07": {
   "lignes": {

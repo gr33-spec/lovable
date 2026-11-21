@@ -1,5 +1,19 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-67 — Banc du calcul, lot 4 : tuile canal en deux lignes, faîtière de bac acier (Greg, 2026-11-21)
+
+Le banc du calcul passe de 78 à 81 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Tuile canal | une ligne « tuiles canal » (couverts + courants) | **deux lignes** : « Tuiles canal, courants » et « Tuiles canal, couverts », autant de l'un que de l'autre | Greg, 21 novembre 2026 ; Edilians (Canal 50, réf. 414 et 454) et Terreal : deux articles (`recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`) |
+| Exemple : Canal Gironde 50, R 150, 100 m² | 2 617 tuiles | 1 309 courants + 1 309 couverts | |
+| Faîtière de bac acier | ligne « faîtière BA, lg 12,50 m » rangée dans le faîtage de tuile (3 au mètre : 38 pièces) | la faîtière du bac acier, en longueurs de 2 m sur la longueur écrite : 12,50 ÷ 2 arrondi au-dessus + 1 = 8 | §8 du référentiel (« ml / 2 arrondi sup., + 1 ») ; longueur utile 2,00 m confirmée (Bacacier, Joris Ide, même recherche) |
+
+- « BA », « couv. BA » sont lus comme le bac acier ; la vis et le closoir cités sur sa ligne restent cités.
+- À trancher par Greg : le « + 1 » de la faîtière de bac acier (le contrôleur et les fabricants comptent 7 pour 12,50 m) ; le nombre de vis (le référentiel en compte près de 8 au m², un fabricant 2,5).
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
 ## roofing-2026.11.21-66 — « Quelle ardoise ? » posée par le code (Greg, 2026-11-21)
 
 - **Règle changée (questions par le code)** : quand le calcul ne peut pas compter un article sans son modèle (« ardoises identiques à l'existant », « tuile mécanique grand moule » sans référence), le code pose la question de l'article avec les modèles de la fiche (« Quelle ardoise ? Donne son format. »). Avant : la question n'existait que si la lecture la posait ; sinon la ligne restait « à chiffrer » sans question. Greg, 21 novembre 2026 : « Chaque case vide que la fiche métier exige devient une question. »

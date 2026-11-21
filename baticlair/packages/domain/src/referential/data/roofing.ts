@@ -1287,7 +1287,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-66",
+  version: "roofing-2026.11.21-67",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1571,6 +1571,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     // Tuile canal (§35.3, DTU 40.22) : couvert + courant, nombre au m² selon le recouvrement. « Romane canal » reste
     // une tuile à emboîtement grand moule (§5) : seuls les mots ci-dessous désignent une vraie tuile canal.
+    // Les deux articles d'une tuile canal au comptoir : le courant et le couvert (Greg, 21 novembre 2026).
+    { code: "roof_tile_canal_part", label: "Tuile canal, courant ou couvert", needUnit: "u", attributes: [], keyAttributes: [] },
     {
       code: "roof_tile_canal",
       label: "Tuile canal",
@@ -1713,7 +1715,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       needUnit: "m2",
       attributes: [],
       keyAttributes: [],
-      keywords: ["bac acier", "bacs acier", "bacs aciers", "tole nervuree", "toles nervurees", "panneau sandwich", "panneaux sandwich", "bac sec", "couverture acier"],
+      // « couv. BA 63/100 », « faîtière BA » : l'abréviation des couvreurs (banc du calcul, C07, 21 novembre 2026).
+      keywords: ["bac acier", "bacs acier", "bacs aciers", "tole nervuree", "toles nervurees", "panneau sandwich", "panneaux sandwich", "bac sec", "couverture acier", "ba", "couv ba"],
     },
     { code: "steel_sheet", label: "Plaque bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "steel_screw", label: "Vis de bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
@@ -2098,7 +2101,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       // §50.7 : « 31 bacs », la longueur dans le nom (« longueur 7,15 m »).
       sellingUnits: [{ id: "bac", label: { one: "bac", many: "bacs" }, contains: ONE_PIECE, primary: true }],
     }),
-    generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
+generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (modèle de la tuile posée)", "Tuiles canal, courants"),
+    generic("tuile-canal-couvert", "roof_tile_canal_part", "Tuile canal, couvert (modèle de la tuile posée)", "Tuiles canal, couverts"),
+        generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
     generic("bardelis-gauche-standard", "verge_tile", "Bardelis gauche (tuile de rive canal), modèle de la tuile posée", "Bardelis gauches"),
     generic("bardelis-droit-standard", "verge_tile", "Bardelis droit (tuile de rive canal), modèle de la tuile posée", "Bardelis droits"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
@@ -2274,6 +2279,11 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "tuile", family: "roof_tile_canal", label: "Tuiles canal" },
+        // Greg, 21 novembre 2026 : « Tuile canal : deux lignes, courants et couverts. » Deux articles au comptoir (le couvert et
+        // le courant à tenons), autant de l'un que de l'autre : Edilians (Canal 50, réf. 414 et 454) et Terreal, recherche du
+        // 21 novembre 2026 (`referentiels/couverture/recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`).
+        { key: "courant", family: "roof_tile_canal_part", label: "Tuiles canal, courants", usual: { text: "Le courant du modèle de tuile canal posé.", source: "edilians-canal", productId: "tuile-canal-courant" }, formOf: "tuile" },
+        { key: "couvert", family: "roof_tile_canal_part", label: "Tuiles canal, couverts", usual: { text: "Le couvert du modèle de tuile canal posé.", source: "edilians-canal", productId: "tuile-canal-couvert" }, formOf: "tuile" },
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte", "liteaunage"], usual: USUAL_LITEAU_TUILE },
         { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" } },
         { key: "rive_gauche", family: "verge_tile", label: "Bardelis gauches", usual: { text: "Bardelis gauche du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-gauche-standard" }, formOf: "rive" },
@@ -2288,15 +2298,26 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
       needs: [
         {
-          id: "tuiles-canal",
-          slot: "tuile",
-          formula: "surface * regle.couvert_et_courant * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          id: "tuiles-canal-courants",
+          slot: "courant",
+          formula: "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
           unit: "u",
           core: true,
-          exclusions: "Couvert et courant ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          exclusions: "Les courants seuls (autant que de couverts) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
           source: "edilians-canal",
           verification: FOUNDER_DOC,
-          version: 1,
+          version: 2,
+        },
+        {
+          id: "tuiles-canal-couverts",
+          slot: "couvert",
+          formula: "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          unit: "u",
+          core: true,
+          exclusions: "Les couverts seuls (autant que de courants) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          source: "edilians-canal",
+          verification: FOUNDER_DOC,
+          version: 2,
         },
         {
           id: "liteaux-canal",
@@ -3862,13 +3883,23 @@ export const ROOFING_REFERENTIAL: Referential = {
       section: "principal",
       label: "Couverture bac acier (plaques à longueur, vis, closoirs, faîtière)",
       triggers: ["steel_tray"],
-      params: [SURFACE_PARAM, LONGUEUR_PLAQUES_PARAM, TYPE_BAC_PARAM, TEINTE_BAC_PARAM, FEUTRE_BAC_PARAM, PANS_BAC_PARAM],
+      params: [
+        SURFACE_PARAM,
+        LONGUEUR_PLAQUES_PARAM,
+        TYPE_BAC_PARAM,
+        TEINTE_BAC_PARAM,
+        FEUTRE_BAC_PARAM,
+        PANS_BAC_PARAM,
+        // Banc du calcul (C07, « faîtière BA, lg 12,50 m », 12,5 ML) : la longueur de faîtage écrite sur la ligne de la faîtière
+        // fait foi ; sans elle, c'est la largeur d'un pan, comme avant. Jamais demandée.
+        { key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, forSlots: ["faitiere"], neverAsk: true, default: { formula: "largeur_pan", source: F, verification: FOUNDER_DOC, version: 1, note: "le faîtage fait la largeur d'un pan" } },
+      ],
       slots: [
         { key: "couverture", family: "steel_tray", label: "Bac acier", measureOnly: true },
         { key: "plaque", family: "steel_sheet", label: "Plaques bac acier", usual: { text: "Bac de largeur utile 1,00 m, une plaque par rampant (§8).", source: F, productId: "plaque-bac-acier" }, formOf: "couverture" },
-        { key: "vis", family: "steel_screw", label: "Vis", usual: { text: "Vis autoperceuses avec rondelle EPDM (§8).", source: F, productId: "vis-bac-acier" } },
-        { key: "closoir", family: "steel_closure", label: "Closoirs", usual: { text: "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).", source: F, productId: "closoir-bac-acier" } },
-        { key: "faitiere", family: "steel_ridge", label: "Faîtières", usual: { text: "Faîtière de bac en longueurs de 2 m (§8).", source: F, productId: "faitiere-bac-acier" } },
+        { key: "vis", family: "steel_screw", label: "Vis", keywords: ["vis"], usual: { text: "Vis autoperceuses avec rondelle EPDM (§8).", source: F, productId: "vis-bac-acier" } },
+        { key: "closoir", family: "steel_closure", label: "Closoirs", keywords: ["closoir", "closoirs"], usual: { text: "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).", source: F, productId: "closoir-bac-acier" } },
+        { key: "faitiere", family: "steel_ridge", label: "Faîtières", keywords: ["faitiere", "faitieres", "faitage"], usual: { text: "Faîtière de bac en longueurs de 2 m (§8).", source: F, productId: "faitiere-bac-acier" } },
       ],
       constants: {
         largeur_utile: condition("1", "m", F, FOUNDER_DOC, "« Largeur utile courante 1,00 m (bac 1000) » (§8)."),
@@ -3942,7 +3973,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "faitieres",
           slot: "faitiere",
           when: "nb_pans >= 2",
-          formula: "arrondi_sup(largeur_pan / regle.faitiere) + 1",
+          formula: "arrondi_sup(longueur_faitage / regle.faitiere) + 1",
           unit: "u",
           core: true,
           exclusions: "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
@@ -4502,6 +4533,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { family: "roof_tile", rate: "5", source: F, verification: FOUNDER_DOC, version: 2, note: "Tuiles à emboîtement : 5 % de casse (Greg, 21 novembre 2026)." },
     // Fiche couverture (2026-11-20) : la tuile canal a sa marge, jamais 0 % (casse à la pose 1 %, CTMNC ; coupes en plus).
     { family: "roof_tile_canal", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
+    { family: "roof_tile_canal_part", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
     { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
     { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes façonnées." },
     { family: "hip_strip", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Zinc en bande (faîtage, noue, rive) : 5 % » (§2), arêtier « ml × 1,05 » (§3)." },

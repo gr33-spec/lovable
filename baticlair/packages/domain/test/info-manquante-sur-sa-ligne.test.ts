@@ -21,7 +21,7 @@ describe("une info qui manque va à l'article qu'elle nomme", () => {
     const question = v.questions.find((q) => q.key.startsWith("engine:fiche:"))!;
     expect(question.text).toBe("Traitement des liteaux ?");
     const liteaux = v.toBuy.find((b) => /^Liteaux/.test(b.label))!;
-    const tuiles = v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))!;
+    const tuiles = v.toBuy.find((b) => b.needIds.includes("tuiles-canal-courants"))!;
     expect(liteaux.waitsOn).toContain(question.question!.key);
     expect(liteaux.asks?.map((a) => a.key)).toContain(question.question!.key);
     expect(tuiles.waitsOn ?? []).not.toContain(question.question!.key);

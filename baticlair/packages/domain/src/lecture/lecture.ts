@@ -1328,7 +1328,13 @@ function finishPurchase(
       // Ce que le calcul attend pour compter l'article (le nombre de descentes d'une naissance) a aussi ses boutons sur la
       // ligne : la question posée, même laissée sans réponse (« je ne sais pas »), jamais une ligne orange sans réglage.
       const duCalcul = (item.waitsOn ?? []).map((k) => asked.find((a) => a.key === k && unresolved(a))).filter((a): a is Asked => !!a);
-      const waits = [...new Set([...[...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a), ...duCalcul])];
+      // La forme d'achat d'un article écrit (les courants et les couverts de « tuiles canal », Greg, 21 novembre 2026) attend
+      // les mêmes réponses que la ligne qui l'écrit : une question laissée ouverte sur cette ligne se voit sur chacune.
+      const ecrite = item.lineIds.map((id) => byLine.get(id)).find((l): l is LigneLecture => !!l?.fourniture);
+      const emplacementEcrit = ecrite ? workOfLine(ecrite.id) : undefined;
+      const formeDeLEcrit = !!emplacementEcrit && own.some((n) => n.workItemId === emplacementEcrit.workItemId && ctx.ref.workItems.find((w) => w.id === baseOf(n.workItemId))?.slots.find((x) => x.key === n.slot)?.formOf === emplacementEcrit.slot);
+      const deLaLigne = formeDeLEcrit && ecrite && !estimated ? ecrite.fourniture!.attend.map((cle) => open(cle, ecrite.ligne.ref)).filter((a): a is Asked => !!a) : [];
+      const waits = [...new Set([...[...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a), ...duCalcul, ...deLaLigne])];
       const pending = [...new Set([...(item.waitsOn ?? []), ...waits.map((a) => a.key)])];
       if (waits.length > 0) reasons.set(item.key, raisonCourte(waits.map((a) => a.q.donnee)));
       // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.

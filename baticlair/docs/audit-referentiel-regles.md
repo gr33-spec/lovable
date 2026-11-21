@@ -1,8 +1,8 @@
 # Audit du référentiel couverture : une règle, une section, un test
 
-Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.21-66`.
+Généré par `packages/domain/test/audit-regles-uniques.test.ts` (`npx vitest run -u`), tiroir `roofing-2026.11.21-67`.
 
-211 règles de calcul : 80 constantes, 8 tables, 31 valeurs intermédiaires, 92 besoins. Règles sans test qui les cite : 0.
+212 règles de calcul : 80 constantes, 8 tables, 31 valeurs intermédiaires, 93 besoins. Règles sans test qui les cite : 0.
 
 Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à défaut, ceux qui citent sa section (« par §x »).
 
@@ -199,7 +199,7 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `etain-gouttiere` | `(arrondi_sup(longueur_gouttiere / regle.longueur_barre_gouttiere) - 1 + nb_descentes) * regle.etain_par_jonction` | §7, §25 | gouttiere | regles-sans-test-audit.test.ts |
 | Besoin | `faitage-joint-debout` | `largeur_pan * regle.marge_zinc_lineaire` | §7, §36 | couverture-zinc-joint-debout | couverture-regions.test.ts (par §7, §36), dernier-recours.test.ts (par §7, §36), joint-debout.test.ts (par §7, §36) |
 | Besoin | `faitieres` | `longueur_faitage * faitiere.pieces_par_ml` | §5 | faitage | dernier-recours.test.ts |
-| Besoin | `faitieres` | `arrondi_sup(largeur_pan / regle.faitiere) + 1` | §8 | couverture-bac-acier | dernier-recours.test.ts |
+| Besoin | `faitieres` | `arrondi_sup(longueur_faitage / regle.faitiere) + 1` | §8 | couverture-bac-acier | dernier-recours.test.ts |
 | Besoin | `feuilles-abergement` | `arrondi_sup(ml_zinc / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_abergement))))` | §25.2 | abergement-cheminee | dernier-recours.test.ts |
 | Besoin | `feuilles-aretier-zinc` | `arrondi_sup(longueur_aretier / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))))` | §48.6 | aretier | bobineau.test.ts (par §48.6), chantier-test-45-5.test.ts (par §48.6), dernier-recours.test.ts (par §48.6) |
 | Besoin | `feuilles-bandes` | `arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))` | §25.2 | bandes-zinc | dernier-recours.test.ts, test-du-fournisseur.test.ts |
@@ -238,7 +238,8 @@ Colonne « Tests » : les fichiers de test qui citent la règle par son nom ; à
 | Besoin | `tasseaux-zinc` | `nb_rangs * longueur_rampant` | §7 | couverture-zinc-tasseaux | dernier-recours.test.ts (par §7), joint-debout.test.ts (par §7), lecture-de00000071.test.ts (par §7) |
 | Besoin | `tubes` | `nb_descentes * arrondi_sup(hauteur_descente / longueur_tube)` | §7, §15 | descente | devis-d2026-020.test.ts, surlongueur-et-bache.test.ts, commande-claire-negoce.test.ts, fiches-epreuves-faux-lecteur.test.ts |
 | Besoin | `tuiles` | `surface / (tuile.largeur_utile * pureau)` | §5, §35 | couverture-tuiles-emboitement | ardoise-cupa.test.ts, assistant-mobiiz.test.ts, autre-reponse-ecrite.test.ts, bref-materiau-ecrit.test.ts, catalogues-par-metier.test.ts, chantier-en-bref-texte.test.ts, chaque-reponse-dans-sa-ligne.test.ts, characteristics.test.ts, coeur-metier-ecarts.test.ts, confiance-memoire.test.ts, conversation-ag-v1.test.ts, couverture-fabricants.test.ts, dernier-recours.test.ts, deux-toitures.test.ts, hypotheses-par-defaut.test.ts, info-manquante-sur-sa-ligne.test.ts, interdits.test.ts, interpretation-ia.test.ts, lecture-d2026105-modele-tuile.test.ts, lot-b-paquet-4.test.ts, lot-couverture-1.test.ts, lot-couverture-2.test.ts, marchandise-seule.test.ts, opportunites-achat-en-gros.test.ts, referential.test.ts, regle-du-comptoir.test.ts, regles-sans-test-audit.test.ts, test-du-fournisseur.test.ts, tuiles-canal.test.ts, une-ligne-une-fourniture.test.ts, bref-materiau-ecrit.test.ts, catalogues-par-metier.test.ts, detections-exceptions.test.ts, interpretation-ia.test.ts, offers.test.ts, pdf-bref-encadre.test.ts, platform.test.ts, suppliers-price-requests.test.ts, une-ligne-une-fourniture.test.ts |
-| Besoin | `tuiles-canal` | `surface * regle.couvert_et_courant * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))` | §5 | couverture-tuiles-canal | info-manquante-sur-sa-ligne.test.ts, tuiles-canal.test.ts |
+| Besoin | `tuiles-canal-courants` | `surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))` | §5 | couverture-tuiles-canal | info-manquante-sur-sa-ligne.test.ts, tuiles-canal.test.ts |
+| Besoin | `tuiles-canal-couverts` | `surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))` | §5 | couverture-tuiles-canal | tuiles-canal.test.ts |
 | Besoin | `tuiles-de-rive-droites` | `longueur_rives / 2 / pureau` | §5, §35 | couverture-tuiles-emboitement | hypotheses-par-defaut.test.ts |
 | Besoin | `tuiles-de-rive-gauches` | `longueur_rives / 2 / pureau` | §5, §35 | couverture-tuiles-emboitement | hypotheses-par-defaut.test.ts |
 | Besoin | `vis` | `arrondi_sup(surface * regle.vis_par_m2 + nb_pans * 2 * longueur_rampant * regle.vis_par_ml_rive)` | §8 | couverture-bac-acier | adresse-mobiiz.test.ts, apprentissage-habitudes.test.ts, assistant-mobiiz.test.ts, chantier-test-45-5.test.ts, dernier-recours.test.ts, etape-suggestions.test.ts, fiches-metier.test.ts, lot-couverture-4.test.ts, platrerie.test.ts, question-du-modele-rattachee.test.ts, regles-sans-test-audit.test.ts, catalogues-par-metier.test.ts, demande-de-devis-45.test.ts, etape-suggestions.test.ts, referentiel-par-metier.test.ts |

@@ -212,6 +212,9 @@
  "reponses": {
   "param:recouvrement_canal": {
    "bouton": "150 mm"
+  },
+  "product:tuile": {
+   "valeur": "edilians-canal-50"
   }
  },
  "attendu": [
@@ -221,7 +224,7 @@
     "courant",
     "!couvert"
    ],
-   "quantite": 991,
+   "quantite": 972,
    "unite": "n"
   },
   {
@@ -230,8 +233,8 @@
     "couvert",
     "!courant"
    ],
-   "quantite": null,
-   "unite": ""
+   "quantite": 972,
+   "unite": "n"
   },
   {
    "article": "Liteaux 27×40",

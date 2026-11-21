@@ -3573,8 +3573,8 @@
     "designation": "Chapeau de sortie de toit",
     "quantite": "1 pièce",
     "unite": "pièce",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Couverture autour à préciser"
    }
   ],
   "questions": [

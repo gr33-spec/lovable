@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-66",
+  "version": "roofing-2026.11.21-67",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -711,6 +711,13 @@
       ]
     },
     {
+      "code": "roof_tile_canal_part",
+      "label": "Tuile canal, courant ou couvert",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
       "code": "roof_tile_canal",
       "label": "Tuile canal",
       "needUnit": "u",
@@ -1073,7 +1080,9 @@
         "panneau sandwich",
         "panneaux sandwich",
         "bac sec",
-        "couverture acier"
+        "couverture acier",
+        "ba",
+        "couv ba"
       ]
     },
     {
@@ -5217,6 +5226,68 @@
       ]
     },
     {
+      "id": "tuile-canal-courant",
+      "family": "roof_tile_canal_part",
+      "label": "Tuile canal, courant (modèle de la tuile posée)",
+      "shortLabel": "Tuiles canal, courants",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-canal-couvert",
+      "family": "roof_tile_canal_part",
+      "label": "Tuile canal, couvert (modèle de la tuile posée)",
+      "shortLabel": "Tuiles canal, couverts",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "bardelis-standard",
       "family": "verge_tile",
       "label": "Bardelis (tuile de rive canal), modèle de la tuile posée",
@@ -6100,6 +6171,28 @@
           "label": "Tuiles canal"
         },
         {
+          "key": "courant",
+          "family": "roof_tile_canal_part",
+          "label": "Tuiles canal, courants",
+          "usual": {
+            "text": "Le courant du modèle de tuile canal posé.",
+            "source": "edilians-canal",
+            "productId": "tuile-canal-courant"
+          },
+          "formOf": "tuile"
+        },
+        {
+          "key": "couvert",
+          "family": "roof_tile_canal_part",
+          "label": "Tuiles canal, couverts",
+          "usual": {
+            "text": "Le couvert du modèle de tuile canal posé.",
+            "source": "edilians-canal",
+            "productId": "tuile-canal-couvert"
+          },
+          "formOf": "tuile"
+        },
+        {
           "key": "liteau",
           "family": "batten",
           "label": "Liteaux",
@@ -6224,12 +6317,12 @@
       },
       "needs": [
         {
-          "id": "tuiles-canal",
-          "slot": "tuile",
-          "formula": "surface * regle.couvert_et_courant * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          "id": "tuiles-canal-courants",
+          "slot": "courant",
+          "formula": "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
           "unit": "u",
           "core": true,
-          "exclusions": "Couvert et courant ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          "exclusions": "Les courants seuls (autant que de couverts) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
           "source": "edilians-canal",
           "verification": {
             "status": "verified",
@@ -6237,7 +6330,23 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 2
+        },
+        {
+          "id": "tuiles-canal-couverts",
+          "slot": "couvert",
+          "formula": "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Les couverts seuls (autant que de courants) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
         },
         {
           "id": "liteaux-canal",
@@ -16670,6 +16779,30 @@
               ]
             }
           ]
+        },
+        {
+          "key": "longueur_faitage",
+          "label": "Longueur du faîtage",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du faîtage ?",
+          "fromLineQuantity": true,
+          "forSlots": [
+            "faitiere"
+          ],
+          "neverAsk": true,
+          "default": {
+            "formula": "largeur_pan",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le faîtage fait la largeur d'un pan"
+          }
         }
       ],
       "slots": [
@@ -16694,6 +16827,9 @@
           "key": "vis",
           "family": "steel_screw",
           "label": "Vis",
+          "keywords": [
+            "vis"
+          ],
           "usual": {
             "text": "Vis autoperceuses avec rondelle EPDM (§8).",
             "source": "fondateur-referentiel-2026-10-03",
@@ -16704,6 +16840,10 @@
           "key": "closoir",
           "family": "steel_closure",
           "label": "Closoirs",
+          "keywords": [
+            "closoir",
+            "closoirs"
+          ],
           "usual": {
             "text": "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).",
             "source": "fondateur-referentiel-2026-10-03",
@@ -16714,6 +16854,11 @@
           "key": "faitiere",
           "family": "steel_ridge",
           "label": "Faîtières",
+          "keywords": [
+            "faitiere",
+            "faitieres",
+            "faitage"
+          ],
           "usual": {
             "text": "Faîtière de bac en longueurs de 2 m (§8).",
             "source": "fondateur-referentiel-2026-10-03",
@@ -16923,7 +17068,7 @@
           "id": "faitieres",
           "slot": "faitiere",
           "when": "nb_pans >= 2",
-          "formula": "arrondi_sup(largeur_pan / regle.faitiere) + 1",
+          "formula": "arrondi_sup(longueur_faitage / regle.faitiere) + 1",
           "unit": "u",
           "core": true,
           "exclusions": "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
@@ -19595,6 +19740,18 @@
     },
     {
       "family": "roof_tile_canal",
+      "rate": "3",
+      "source": "fiche-couverture",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-11-19",
+        "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+      },
+      "version": 1,
+      "note": "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)."
+    },
+    {
+      "family": "roof_tile_canal_part",
       "rate": "3",
       "source": "fiche-couverture",
       "verification": {
