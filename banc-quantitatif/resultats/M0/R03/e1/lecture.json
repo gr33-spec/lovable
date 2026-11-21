@@ -1,0 +1,812 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "couverture de l'extension en ardoises naturelles au crochet",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « pour la couverture de l'extension » ; ligne 2 : « pose de la couverture en ardoises naturelles »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "ardoises naturelles",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Fourniture d'ardoises naturelles »"
+  },
+  {
+   "donnee": "format d'ardoise",
+   "valeur": "32x22",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « ardoises naturelles 32x22 »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "48 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « 48 m² »"
+  },
+  {
+   "donnee": "crochets d'ardoise",
+   "valeur": "inox",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « crochets de fixation en inox de 11 »"
+  },
+  {
+   "donnee": "longueur de crochet",
+   "valeur": "11 cm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « crochets de 11 »"
+  },
+  {
+   "donnee": "pente du rampant",
+   "valeur": "30°",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « le rampant (pente 30°) »"
+  },
+  {
+   "donnee": "pente des demi-croupes",
+   "valeur": "45°",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « les demi-croupes (pente 45°) »"
+  },
+  {
+   "donnee": "longueur du rampant",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "qualité de l'ardoise",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "gouttière",
+   "valeur": "Havraise en zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « gouttière Havraise en zinc »"
+  },
+  {
+   "donnee": "longueur de gouttière",
+   "valeur": "10 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « 10 m »"
+  },
+  {
+   "donnee": "développé de gouttière",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "angles de gouttière",
+   "valeur": "1",
+   "origine": "deduite",
+   "regle": "« retour d'angle » écrit au singulier : un angle",
+   "preuve": ""
+  },
+  {
+   "donnee": "crochets de gouttière",
+   "valeur": "20 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « 20 unités »"
+  },
+  {
+   "donnee": "pose des crochets de gouttière",
+   "valeur": "sur chevrons",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « fixation de la gouttière havraise sur chevrons »"
+  },
+  {
+   "donnee": "espacement des crochets de gouttière",
+   "valeur": "50 cm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « espacement tous les 50 cm »"
+  },
+  {
+   "donnee": "matière des crochets de gouttière",
+   "valeur": "acier galvanisé ou zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « crochets en acier galvanisé ou zinc »"
+  },
+  {
+   "donnee": "soudures",
+   "valeur": "oui",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « réalisation des soudures et raccordements nécessaires »"
+  },
+  {
+   "donnee": "nombre de descentes",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 12 : « 2 descentes de 3 mètres »"
+  },
+  {
+   "donnee": "hauteur d'une descente",
+   "valeur": "3 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 12 : « 2 descentes de 3 mètres »"
+  },
+  {
+   "donnee": "diamètre des descentes",
+   "valeur": "80 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 12 : « diamètre 80 mm »"
+  },
+  {
+   "donnee": "longueur de tuyau de descente",
+   "valeur": "6 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 12 : « 6 m »"
+  },
+  {
+   "donnee": "coudes",
+   "valeur": "4 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 13 : « 4 unités »"
+  },
+  {
+   "donnee": "coudes par descente",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 13 : « 2 jeux de 2 coudes »"
+  },
+  {
+   "donnee": "naissances",
+   "valeur": "2 u, Ø 80 mm",
+   "origine": "deduite",
+   "regle": "une naissance par descente (§48.7), au diamètre des descentes",
+   "preuve": ""
+  },
+  {
+   "donnee": "verrière",
+   "valeur": "conservée",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « la verrière conservée »"
+  },
+  {
+   "donnee": "longueur de bande de rive zinc",
+   "valeur": "4 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « 4 m »"
+  },
+  {
+   "donnee": "développé de la bande de rive",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "je façonne",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « Façonnage et pose des bandes de rive »"
+  },
+  {
+   "donnee": "longueur de faîtage",
+   "valeur": "8 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « 8 m »"
+  },
+  {
+   "donnee": "développé du faîtage",
+   "valeur": "25 cm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « bande de faîtage zinc dev 25cm »"
+  },
+  {
+   "donnee": "longueur de bande porte-solin",
+   "valeur": "4 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 10 : « 4 m »"
+  },
+  {
+   "donnee": "développé de la bande porte-solin",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "mortier de solin",
+   "valeur": "mortier de ciment",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 10 : « du mortier de ciment nécessaire à la réalisation du solin d'étanchéité »"
+  },
+  {
+   "donnee": "consommables de pose",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Couverture de l'extension en ardoises naturelles au crochet, pente 30° au rampant et 45° aux demi-croupes.",
+  "48 m² d'ardoises naturelles 32x22.",
+  "Crochets de fixation en inox de 11, un par ardoise.",
+  "Gouttière Havraise en zinc 10 m, pour l'évacuation des eaux pluviales, y compris retour d'angle et gouttière au-dessus de la verrière.",
+  "Crochets de gouttière Havraise 20 u, sur chevrons, tous les 50 cm.",
+  "Bandes de rive en zinc 4 m, façonnées sur place, pour la finition latérale de la verrière.",
+  "Bande de faîtage zinc dev 25 cm 8 m, pour le couronnement de la toiture.",
+  "Bande porte-solin zinc 4 m et mortier de ciment, pour le solin d'étanchéité contre le mur existant.",
+  "Tuyaux de descente zinc diam. 80 mm 6 m : 2 descentes de 3 m.",
+  "Coudes zinc diam. 80 mm 4 u : 2 coudes par descente, pour le dévoiement.",
+  "2 descentes : 2 naissances Ø 80 sur la gouttière.",
+  "La verrière est conservée : pas de verrière neuve."
+ ],
+ "questions": [
+  {
+   "cle": "qualite_ardoise",
+   "texte": "Tes ardoises naturelles 32x22 : Espagne 1er choix ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    {
+     "label": "Espagne 1er choix",
+     "valeur": "1"
+    },
+    {
+     "label": "Ardoise NF (type Cupa)",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "qualité de l'ardoise",
+   "ligne": "1"
+  },
+  {
+   "cle": "longueur_rampant",
+   "texte": "Ton rampant fait quelle longueur, de l'égout au faîtage ?",
+   "boutons": [
+    {
+     "label": "Jusqu'à 5,50 m",
+     "valeur": "5.5"
+    },
+    {
+     "label": "5,50 à 8 m",
+     "valeur": "8"
+    },
+    {
+     "label": "Plus de 8 m",
+     "valeur": "10"
+    },
+    {
+     "label": "Plus de 11 m",
+     "valeur": "12"
+    }
+   ],
+   "unite": "m",
+   "donnee": "longueur du rampant",
+   "ligne": ""
+  },
+  {
+   "cle": "developpe_gouttiere",
+   "texte": "Ta gouttière havraise, elle fait quel développé : 25, 28, 33 ou 40 ?",
+   "boutons": [
+    {
+     "label": "De 25",
+     "valeur": "25"
+    },
+    {
+     "label": "De 28",
+     "valeur": "28"
+    },
+    {
+     "label": "De 33",
+     "valeur": "33"
+    },
+    {
+     "label": "De 40",
+     "valeur": "40"
+    }
+   ],
+   "unite": "cm",
+   "donnee": "développé de gouttière",
+   "ligne": ""
+  },
+  {
+   "cle": "developpe",
+   "texte": "Tes bandes de rive de la verrière, tu les fais dans quel développé ?",
+   "boutons": [
+    {
+     "label": "10 cm",
+     "valeur": "100"
+    },
+    {
+     "label": "20 cm",
+     "valeur": "200"
+    },
+    {
+     "label": "25 cm",
+     "valeur": "250"
+    },
+    {
+     "label": "33 cm",
+     "valeur": "330"
+    },
+    {
+     "label": "40 cm",
+     "valeur": "400"
+    }
+   ],
+   "unite": "mm",
+   "donnee": "développé de la bande de rive",
+   "ligne": "6"
+  },
+  {
+   "cle": "developpe",
+   "texte": "Ta bande porte-solin, tu la fais dans quel développé ?",
+   "boutons": [
+    {
+     "label": "10 cm",
+     "valeur": "100"
+    },
+    {
+     "label": "20 cm",
+     "valeur": "200"
+    },
+    {
+     "label": "25 cm",
+     "valeur": "250"
+    },
+    {
+     "label": "33 cm",
+     "valeur": "330"
+    },
+    {
+     "label": "40 cm",
+     "valeur": "400"
+    }
+   ],
+   "unite": "mm",
+   "donnee": "développé de la bande porte-solin",
+   "ligne": "10"
+  },
+  {
+   "cle": "consommables",
+   "texte": "Je t'ajoute les consommables de pose (étain et décapant pour les soudures, pattes pour le zinc façonné, silicone pour le solin) ?",
+   "boutons": [
+    {
+     "label": "Oui",
+     "valeur": "1"
+    },
+    {
+     "label": "Non",
+     "valeur": "0"
+    }
+   ],
+   "unite": "",
+   "donnee": "consommables de pose",
+   "ligne": ""
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Fourniture d'ardoises naturelles 32x22 et crochets de 11 — Fourniture d'ardoises naturelles de format 32x22 et des crochets de fixation en inox de 11 pour la couverture de l'extension.",
+   "quantite": "48",
+   "unite": "m²",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Ardoises naturelles 32x22",
+     "quantite": "48",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "48"
+      },
+      {
+       "cle": "pente",
+       "valeur": "30"
+      }
+     ],
+     "attend": [
+      "qualite_ardoise",
+      "longueur_rampant"
+     ],
+     "a_preciser": [],
+     "precision": "pour la couverture de l'extension ; pente 30° au rampant, 45° aux demi-croupes"
+    },
+    {
+     "nom": "Crochets de fixation en inox de 11",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "crochet",
+     "donnees": [
+      {
+       "cle": "longueur_crochet",
+       "valeur": "11"
+      }
+     ],
+     "attend": [
+      "longueur_rampant"
+     ],
+     "a_preciser": [
+      "diamètre du crochet"
+     ],
+     "precision": "pour ardoises naturelles 32x22"
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Pose de couverture en ardoises 32x22 — Mise en œuvre et pose de la couverture en ardoises naturelles de format 32x22 avec crochets de 11, y compris découpes et ajustements pour le rampant (pente 30°) et les demi-croupes (pente 45°).",
+   "quantite": "48",
+   "unite": "m²",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "Fourniture de gouttière Havraise en zinc — Fourniture de gouttières de type Havraise en zinc pour l'évacuation des eaux pluviales (y compris retour d'angle et gouttière au-dessus de la verrière).",
+   "quantite": "10",
+   "unite": "m",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Gouttière Havraise en zinc",
+     "quantite": "10",
+     "unite": "ml",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "10"
+      },
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "nb_angles",
+       "valeur": "1"
+      },
+      {
+       "cle": "fixation_crochet",
+       "valeur": "1"
+      }
+     ],
+     "attend": [
+      "developpe_gouttiere"
+     ],
+     "a_preciser": [],
+     "precision": "pour l'évacuation des eaux pluviales, y compris retour d'angle et gouttière au-dessus de la verrière"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Fourniture de crochets de gouttière Havraise — Fourniture de crochets en acier galvanisé ou zinc pour la fixation de la gouttière havraise sur chevrons (espacement tous les 50 cm).",
+   "quantite": "20",
+   "unite": "unités",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Crochets de gouttière Havraise",
+     "quantite": "20",
+     "unite": "u",
+     "ouvrage": "gouttiere",
+     "emplacement": "crochet",
+     "donnees": [
+      {
+       "cle": "fixation_crochet",
+       "valeur": "1"
+      }
+     ],
+     "attend": [
+      "developpe_gouttiere"
+     ],
+     "a_preciser": [
+      "matière (le devis dit « acier galvanisé ou zinc »)"
+     ],
+     "precision": "fixation sur chevrons, espacement tous les 50 cm"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Pose de gouttière Havraise sur chevrons — Pose et fixation sur chevrons de la gouttière Havraise en zinc et de ses crochets de support, avec réalisation des soudures et raccordements nécessaires.",
+   "quantite": "10",
+   "unite": "m",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "6",
+   "designation": "Fourniture de bandes de rive en zinc (verrière) — Fourniture de bandes de rive en zinc pour la finition latérale de la verrière conservée.",
+   "quantite": "4",
+   "unite": "m",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bandes de rive en zinc",
+     "quantite": "4",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "4"
+      },
+      {
+       "cle": "faconnage",
+       "valeur": "1"
+      }
+     ],
+     "attend": [
+      "developpe"
+     ],
+     "a_preciser": [
+      "épaisseur du zinc"
+     ],
+     "precision": "pour la finition latérale de la verrière conservée ; façonnage sur place"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Pose de bandes de rive en zinc (verrière) — Façonnage et pose des bandes de rive en zinc sur les côtés de la verrière.",
+   "quantite": "4",
+   "unite": "m",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "8",
+   "designation": "Fourniture de bande de faîtage zinc dev 25cm — Fourniture de bandes de faîtage en zinc avec un développé de 25 cm pour couronnement de la toiture.",
+   "quantite": "8",
+   "unite": "m",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bande de faîtage zinc dev 25 cm",
+     "quantite": "8",
+     "unite": "ml",
+     "ouvrage": "faitage-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "8"
+      },
+      {
+       "cle": "developpe",
+       "valeur": "250"
+      },
+      {
+       "cle": "faconnage",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "épaisseur du zinc"
+     ],
+     "precision": "pour couronnement de la toiture"
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Pose de bande de faîtage en zinc — Pose et fixation de la bande de faîtage en zinc au sommet de la toiture.",
+   "quantite": "8",
+   "unite": "m",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "10",
+   "designation": "Fourniture de bande porte-solin zinc et mortier ciment — Fourniture de la bande porte-solin en zinc et du mortier de ciment nécessaire à la réalisation du solin d'étanchéité contre le mur existant.",
+   "quantite": "4",
+   "unite": "m",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bande porte-solin zinc",
+     "quantite": "4",
+     "unite": "ml",
+     "ouvrage": "bande-porte-solin",
+     "emplacement": "porte_solin",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "4"
+      },
+      {
+       "cle": "faconnage",
+       "valeur": "1"
+      }
+     ],
+     "attend": [
+      "developpe"
+     ],
+     "a_preciser": [
+      "épaisseur du zinc"
+     ],
+     "precision": "pour le solin d'étanchéité contre le mur existant"
+    },
+    {
+     "nom": "Mortier de ciment",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "bande-porte-solin",
+     "emplacement": "mortier",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "4"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour le solin d'étanchéité contre le mur existant"
+    }
+   ]
+  },
+  {
+   "ref": "11",
+   "designation": "Pose de bande porte-solin et réalisation du solin ciment — Pose de la bande porte-solin et réalisation du solin au mortier de ciment pour assurer la jonction étanche entre la toiture et le mur.",
+   "quantite": "4",
+   "unite": "m",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "12",
+   "designation": "Fourniture de tuyau de descente zinc diam. 80mm — Fourniture de tuyaux de descente d'eaux pluviales en zinc de diamètre 80 mm (2 descentes de 3 mètres).",
+   "quantite": "6",
+   "unite": "m",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tuyau de descente zinc diam. 80 mm",
+     "quantite": "6",
+     "unite": "ml",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "3"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "eaux pluviales, 2 descentes de 3 mètres"
+    }
+   ]
+  },
+  {
+   "ref": "13",
+   "designation": "Fourniture de coude zinc diam. 80mm — Fourniture de coudes en zinc de diamètre 80 mm pour le dévoiement des descentes (2 jeux de 2 coudes).",
+   "quantite": "4",
+   "unite": "unités",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Coude zinc diam. 80 mm",
+     "quantite": "4",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "coude",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "coudes_par_descente",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour le dévoiement des descentes (2 jeux de 2 coudes)"
+    }
+   ]
+  },
+  {
+   "ref": "14",
+   "designation": "Pose de tuyaux de descente et coudes zinc — Mise en œuvre, fixation et raccordement des tuyaux de descente et coudes en zinc sur la maçonnerie ou charpente.",
+   "quantite": "6",
+   "unite": "m",
+   "role": "pose",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "entreprise",
+   "valeur": "Couverture Lemarchand"
+  },
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Vasseur"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "8 rue des Capucins"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "14600"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Honfleur"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D-2026-020"
+  },
+  {
+   "cle": "date",
+   "valeur": "06/10/2026"
+  },
+  {
+   "cle": "validité",
+   "valeur": "2 mois"
+  },
+  {
+   "cle": "chantier",
+   "valeur": "couverture de l'extension, verrière conservée, solin contre le mur existant"
+  }
+ ],
+ "notes": []
+}

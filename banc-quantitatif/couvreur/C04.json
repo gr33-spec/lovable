@@ -57,5 +57,25 @@
    "ne_sait_pas": false,
    "dit": "75 mètres de couvre-joints."
   }
+ },
+ "param:epaisseur_zinc ¦ Épaisseur du zinc ?": {
+  "question": {
+   "id": "param:epaisseur_zinc ¦ Épaisseur du zinc ?",
+   "question": "Épaisseur du zinc ?",
+   "boutons": [
+    "0,65 mm",
+    "0,70 mm",
+    "0,80 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "0,70 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "0,70 mm"
+  }
  }
 }

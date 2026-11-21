@@ -180,5 +180,24 @@
    "ne_sait_pas": false,
    "dit": "250 mm."
   }
+ },
+ "param:fixation_crochet ¦ Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?": {
+  "question": {
+   "id": "param:fixation_crochet ¦ Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+   "question": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+   "boutons": [
+    "Sur les chevrons",
+    "En façade (bandeau)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "En façade (bandeau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "En façade, sur le bandeau."
+  }
  }
 }

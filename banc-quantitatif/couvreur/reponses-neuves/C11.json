@@ -1,0 +1,5 @@
+[
+ {"id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?", "bouton": "De 50", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "De 50."},
+ {"id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?", "bouton": "Oui", "valeur": "", "unite": "u", "ne_sait_pas": false, "dit": "Oui, dauphin fonte."},
+ {"id": "param:longueur_crochet ¦ Quelle longueur de crochet ?", "bouton": "", "valeur": "11", "unite": "cm", "ne_sait_pas": false, "dit": "11 cm."}
+]

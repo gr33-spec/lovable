@@ -1,0 +1,47 @@
+[
+ {
+  "id": "fiche:format_ardoise_jouees ¦ Les ardoises des jouées, c'est le même format que le toit (30×22) ?",
+  "question": "Les ardoises des jouées, c'est le même format que le toit (30×22) ?",
+  "boutons": [
+   "Oui, 30×22",
+   "Non, un autre format"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?",
+  "question": "Longueur du rampant (de l'égout au faîtage) ?",
+  "boutons": [
+   "Jusqu'à 5,5 m",
+   "5,5 à 8 m",
+   "Plus de 8 m",
+   "Plus de 11 m"
+  ],
+  "unite": "m",
+  "aide": null
+ },
+ {
+  "id": "param:nb_descentes ¦ Combien de descentes pour cette gouttière ?",
+  "question": "Combien de descentes pour cette gouttière ?",
+  "boutons": [
+   "1",
+   "2",
+   "3",
+   "4"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:pente ¦ Pente du toit ?",
+  "question": "Pente du toit ?",
+  "boutons": [
+   "30°",
+   "35°",
+   "45°"
+  ],
+  "unite": "°",
+  "aide": null
+ }
+]

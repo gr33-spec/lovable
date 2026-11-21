@@ -109,15 +109,15 @@ if (cmd === "noter") {
 // Stabilité : le même devis lu plusieurs fois donne-t-il la même liste et les mêmes questions ?
 if (cmd === "stabilite") {
   const par = {};
-  for (const [m, c, e] of tous) { const f = lire(`${dossier(m, c, e)}/final.json`); if (!f) continue; const sig = (x) => JSON.stringify([x.liste.map((l) => [norm(l.label), l.quantite, l.unite]), x.aChiffrer.map((l) => norm(l.label))]); ((par[m] ??= {})[c] ??= []).push({ e, liste: sig(f.final), questions: JSON.stringify(f.posees.map((q) => q.key)), ouverture: sig(f.ouverture) }); }
+  for (const [m, c, e] of tous) { const f = lire(`${dossier(m, c, e)}/final.json`); if (!f) continue; const sig = (x) => JSON.stringify([x.liste.map((l) => [norm(l.label), l.quantite, l.unite]), x.aChiffrer.map((l) => norm(l.label))]); const cmd2 = (x) => JSON.stringify([...x.liste.map((l) => `${l.quantite} ${norm(l.unite ?? "")}`), ...x.aChiffrer.map(() => "à chiffrer")].sort()); ((par[m] ??= {})[c] ??= []).push({ e, commande: cmd2(f.final), liste: sig(f.final), questions: JSON.stringify(f.posees.map((q) => q.key)), ouverture: sig(f.ouverture) }); }
   const out = {};
   for (const [m, cs] of Object.entries(par)) {
-    let memesListes = 0, memesQuestions = 0, tout = 0, n = 0, lectures = 0; const instables = [];
-    for (const [c, es] of Object.entries(cs)) { n++; lectures += es.length; const L = new Set(es.map((x) => x.liste)).size === 1, Q = new Set(es.map((x) => x.questions)).size === 1; if (L) memesListes++; if (Q) memesQuestions++; if (L && Q) tout++; else instables.push(`${c} (${new Set(es.map((x) => x.liste)).size} listes, ${new Set(es.map((x) => x.questions)).size} séries de questions sur ${es.length})`); }
-    out[m] = { chantiers: n, lectures, memeListe: memesListes, memesQuestions, stables: tout, instables };
+    let memesListes = 0, memesQuestions = 0, tout = 0, n = 0, lectures = 0, memeCommande = 0; const instables = [];
+    for (const [c, es] of Object.entries(cs)) { n++; lectures += es.length; const L = new Set(es.map((x) => x.liste)).size === 1, Q = new Set(es.map((x) => x.questions)).size === 1; if (new Set(es.map((x) => x.commande)).size === 1) memeCommande++; if (L) memesListes++; if (Q) memesQuestions++; if (L && Q) tout++; else instables.push(`${c} (${new Set(es.map((x) => x.liste)).size} listes, ${new Set(es.map((x) => x.questions)).size} séries de questions sur ${es.length})`); }
+    out[m] = { chantiers: n, lectures, memeCommande, memeListe: memesListes, memesQuestions, stables: tout, instables };
   }
   ecrire("resultats/stabilite.json", out);
-  for (const [m, o] of Object.entries(out)) console.log(m.padEnd(5), `${o.stables}/${o.chantiers} chantiers stables (${o.lectures} lectures) ; même liste ${o.memeListe}, mêmes questions ${o.memesQuestions} ; instables : ${o.instables.join(", ") || "aucun"}`);
+  for (const [m, o] of Object.entries(out)) console.log(m.padEnd(5), `${o.stables}/${o.chantiers} chantiers stables (${o.lectures} lectures) ; mêmes quantités ${o.memeCommande}, même liste mot pour mot ${o.memeListe}, mêmes questions ${o.memesQuestions} ; instables : ${o.instables.join(", ") || "aucun"}`);
 }
 
 // Les trois façons de poser les questions, comparées par le code sur les lectures de référence (aucun appel).

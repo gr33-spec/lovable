@@ -1,0 +1,7 @@
+[
+ {"id": "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?", "bouton": "Jusqu'à 5,5 m", "valeur": "", "unite": "m", "ne_sait_pas": false, "dit": "3,30 m de rampant"},
+ {"id": "param:developpe@bandes-zinc ¦ Bandes de rive en zinc : développé de la bande zinc ?", "bouton": "200 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "200 pour les rives"},
+ {"id": "param:developpe@bandes-zinc ¦ Bandes de rive en zinc (verrière) : développé de la bande zinc ?", "bouton": "200 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "200 pour la verrière"},
+ {"id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?", "bouton": "250 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "250 pour le faîtage"},
+ {"id": "param:developpe@bandes-zinc ¦ Bandes zinc façonnées : développé de la bande zinc ?", "bouton": "200 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "200 pour les bandes de rive"}
+]

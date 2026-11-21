@@ -1,0 +1,52 @@
+[
+ {
+  "id": "param:developpe ¦ Développé de la bande zinc ?",
+  "question": "Développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ },
+ {
+  "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+  "question": "Un dauphin en pied de chaque descente ?",
+  "boutons": [
+   "Oui",
+   "Non"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:developpe ¦ Solin : développé de la bande zinc ?",
+  "question": "Solin : développé de la bande zinc ?",
+  "boutons": [
+   "100 mm (solin, couvre-joint)",
+   "200 mm",
+   "250 mm",
+   "330 mm",
+   "400 mm"
+  ],
+  "unite": "mm",
+  "aide": null
+ },
+ {
+  "id": "param:nb_descentes ¦ Combien de descentes ?",
+  "question": "Combien de descentes ?",
+  "boutons": [],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:longueur_bande ¦ Longueur de bande zinc ?",
+  "question": "Longueur de bande zinc ?",
+  "boutons": [],
+  "unite": "m",
+  "aide": null
+ }
+]

@@ -1,0 +1,163 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "F. et P. bdes de rive zn, 2 x 7 ml",
+   "quantite": "2 x 7",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bandes zinc façonnées",
+     "quantite": "2 x 7",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "2 x 7"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "2 bdes porte-solin de 3 m, posées",
+   "quantite": "2",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bandes porte-solin",
+     "quantite": "2",
+     "unite": "",
+     "ouvrage": "bande-porte-solin",
+     "emplacement": "porte_solin",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "gouttière 1/2 rde zn de 25",
+   "quantite": "14",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttière",
+     "quantite": "14",
+     "unite": "",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "14"
+      },
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "25"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "1 DEP Ø80 haut. 5 m",
+   "quantite": "1",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tubes de descente",
+     "quantite": "1",
+     "unite": "",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "5"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "1 dauphin",
+   "quantite": "1",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Dauphins",
+     "quantite": "1",
+     "unite": "",
+     "ouvrage": "descente",
+     "emplacement": "dauphin",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "1 abergt cheminée zn",
+   "quantite": "1",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Abergement de cheminée",
+     "quantite": "1",
+     "unite": "",
+     "ouvrage": "abergement-cheminee",
+     "emplacement": "abergement",
+     "donnees": [
+      {
+       "cle": "nb_cheminees",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

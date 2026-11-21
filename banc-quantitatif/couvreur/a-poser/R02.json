@@ -1,0 +1,59 @@
+[
+ {
+  "id": "param:coudes_par_descente ¦ Tes « 2 jeux de coudes » par descente, ça fait combien de coudes ?",
+  "question": "Tes « 2 jeux de coudes » par descente, ça fait combien de coudes ?",
+  "boutons": [
+   "2 coudes",
+   "4 coudes"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?",
+  "question": "Sortie de toit : quel diamètre ?",
+  "boutons": [
+   "Ø 80",
+   "Ø 100",
+   "Ø 125",
+   "Ø 150",
+   "Ø 180",
+   "VMC"
+  ],
+  "unite": "mm",
+  "aide": null
+ },
+ {
+  "id": "param:pente ¦ Pente du toit ?",
+  "question": "Pente du toit ?",
+  "boutons": [
+   "30°",
+   "35°",
+   "45°"
+  ],
+  "unite": "°",
+  "aide": null
+ },
+ {
+  "id": "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?",
+  "question": "Sortie de toit : conduit de fumée ou ventilation ?",
+  "boutons": [
+   "Conduit de fumée",
+   "Ventilation"
+  ],
+  "unite": "u",
+  "aide": null
+ },
+ {
+  "id": "param:nb_descentes ¦ Combien de descentes pour cette gouttière ?",
+  "question": "Combien de descentes pour cette gouttière ?",
+  "boutons": [
+   "1",
+   "2",
+   "3",
+   "4"
+  ],
+  "unite": "u",
+  "aide": null
+ }
+]

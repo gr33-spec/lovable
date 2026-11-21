@@ -1,0 +1,141 @@
+{
+ "posees": [
+  {
+   "key": "param:recouvrement_canal",
+   "text": "Recouvrement des tuiles canal ?",
+   "options": [
+    "140 mm",
+    "150 mm",
+    "160 mm",
+    "170 mm"
+   ],
+   "reponse": "150 mm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuiles canal",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "85 m² au devis",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Bardelis (rives)",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Liteaux)",
+    "raison": "Calcul impossible sans « Liteaux au m² à R 170 » de tuile.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation à la décheterie",
+   "Divers et imprévus"
+  ],
+  "questions": [
+   "param:recouvrement_canal"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuiles canal",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "85 m² au devis",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Bardelis (rives)",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Liteaux)",
+    "raison": "Calcul impossible sans « Liteaux au m² à R 170 » de tuile.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation à la décheterie",
+   "Divers et imprévus"
+  ],
+  "questions": []
+ }
+}

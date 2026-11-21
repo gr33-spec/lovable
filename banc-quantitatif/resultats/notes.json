@@ -240,7 +240,7 @@
   }
  },
  {
-  "m": "M4",
+  "m": "M11",
   "c": "C01",
   "e": 1,
   "nRef": 8,
@@ -264,254 +264,7 @@
   }
  },
  {
-  "m": "M4",
-  "c": "C02",
-  "e": 1,
-  "nRef": 7,
-  "justes": 5,
-  "quantite": 1,
-  "manquantes": 1,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 0,
-  "questionsRef": 0,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [
-    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
-   ],
-   "manquantes": [
-    "Liteaux 27×40 (210 ml)"
-   ],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C03",
-  "e": 1,
-  "nRef": 4,
-  "justes": 4,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 1,
-  "questionsRef": 1,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C04",
-  "e": 1,
-  "nRef": 6,
-  "justes": 6,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 2,
-  "questionsRef": 2,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C05",
-  "e": 1,
-  "nRef": 9,
-  "justes": 7,
-  "quantite": 2,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 4,
-  "questionsRef": 4,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [
-    "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
-    "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
-   ],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C06",
-  "e": 1,
-  "nRef": 4,
-  "justes": 4,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 1,
-  "questionsRef": 1,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C07",
-  "e": 1,
-  "nRef": 6,
-  "justes": 6,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 1,
-  "questionsRef": 1,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C08",
-  "e": 1,
-  "nRef": 4,
-  "justes": 4,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 2,
-  "questionsRef": 2,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C09",
-  "e": 1,
-  "nRef": 6,
-  "justes": 6,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 4,
-  "questionsRef": 4,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "M4",
-  "c": "C10",
-  "e": 1,
-  "nRef": 9,
-  "justes": 9,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 3,
-  "questionsRef": 3,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "S4",
-  "c": "C01",
-  "e": 1,
-  "nRef": 8,
-  "justes": 8,
-  "quantite": 0,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
-  "questions": 2,
-  "questionsRef": 2,
-  "questionsHorsRef": 0,
-  "questionsInutiles": 0,
-  "questionsNonJugees": 0,
-  "questionsOubliees": 0,
-  "detail": {
-   "quantite": [],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
-   "horsRef": []
-  }
- },
- {
-  "m": "S4",
+  "m": "M11",
   "c": "C02",
   "e": 1,
   "nRef": 7,
@@ -537,7 +290,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C03",
   "e": 1,
   "nRef": 4,
@@ -563,7 +316,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C04",
   "e": 1,
   "nRef": 6,
@@ -587,7 +340,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C05",
   "e": 1,
   "nRef": 9,
@@ -614,7 +367,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -638,7 +391,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C07",
   "e": 1,
   "nRef": 6,
@@ -662,7 +415,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C08",
   "e": 1,
   "nRef": 4,
@@ -688,7 +441,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -712,7 +465,7 @@
   }
  },
  {
-  "m": "S4",
+  "m": "M11",
   "c": "C10",
   "e": 1,
   "nRef": 9,
@@ -741,7 +494,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C01",
   "e": 1,
   "nRef": 8,
@@ -765,15 +518,15 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C02",
   "e": 1,
   "nRef": 7,
-  "justes": 6,
-  "quantite": 1,
-  "manquantes": 0,
-  "inventees": 0,
-  "doutes": 0,
+  "justes": 5,
+  "quantite": 0,
+  "manquantes": 1,
+  "inventees": 1,
+  "doutes": 1,
   "questions": 0,
   "questionsRef": 0,
   "questionsHorsRef": 0,
@@ -781,25 +534,32 @@
   "questionsNonJugees": 0,
   "questionsOubliees": 0,
   "detail": {
-   "quantite": [
-    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge : à chiffrer  attendu, 1 pièces lu"
+   "quantite": [],
+   "manquantes": [
+    "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge (à chiffrer )"
    ],
-   "manquantes": [],
-   "inventees": [],
-   "doutes": [],
+   "inventees": [
+    "Tuiles (1 pièces)"
+   ],
+   "doutes": [
+    {
+     "ref": "Faîtières terre cuite rouge",
+     "lue": "Faîtières"
+    }
+   ],
    "horsRef": []
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C03",
   "e": 1,
   "nRef": 4,
-  "justes": 3,
+  "justes": 1,
   "quantite": 0,
   "manquantes": 1,
   "inventees": 0,
-  "doutes": 0,
+  "doutes": 2,
   "questions": 1,
   "questionsRef": 1,
   "questionsHorsRef": 0,
@@ -812,12 +572,21 @@
     "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
    ],
    "inventees": [],
-   "doutes": [],
+   "doutes": [
+    {
+     "ref": "Descente zinc Ø100",
+     "lue": "Tubes de descente Ø100, longueur 2 m"
+    },
+    {
+     "ref": "Dauphins fonte Ø100",
+     "lue": "Dauphins"
+    }
+   ],
    "horsRef": []
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C04",
   "e": 1,
   "nRef": 6,
@@ -841,7 +610,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C05",
   "e": 1,
   "nRef": 9,
@@ -868,7 +637,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C06",
   "e": 1,
   "nRef": 4,
@@ -892,7 +661,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C07",
   "e": 1,
   "nRef": 6,
@@ -916,7 +685,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C08",
   "e": 1,
   "nRef": 4,
@@ -942,7 +711,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C09",
   "e": 1,
   "nRef": 6,
@@ -966,7 +735,7 @@
   }
  },
  {
-  "m": "M11",
+  "m": "M12",
   "c": "C10",
   "e": 1,
   "nRef": 9,

@@ -1,0 +1,195 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Install. chantier, échaf. de pied 2 façades, protections",
+   "quantite": "1",
+   "unite": "Ft",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Dépose couv. existante tuiles, évac. gravats en déchetterie",
+   "quantite": "90",
+   "unite": "m2",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "F. et P. couv. tuile mécanique grand moule terre cuite, pente 35°, rampant 6 m",
+   "quantite": "90",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuile mécanique grand moule terre cuite",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "90"
+      },
+      {
+       "cle": "pente",
+       "valeur": "35"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "6"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Dépose anc. tôles ondulées, évac.",
+   "quantite": "25",
+   "unite": "m2",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "5",
+   "designation": "F. et P. couv. bac acier RAL 8012, sans feutre, 1 pan, rampant 4 m",
+   "quantite": "25",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bac acier RAL 8012 sans feutre",
+     "quantite": "25",
+     "unite": "m2",
+     "ouvrage": "couverture-bac-acier",
+     "emplacement": "couverture",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "25"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "4"
+      },
+      {
+       "cle": "teinte_bac",
+       "valeur": "8012"
+      },
+      {
+       "cle": "feutre_bac",
+       "valeur": "2"
+      },
+      {
+       "cle": "nb_pans",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "F. et P. goutt. alu gris anthracite, 2 x 9 m + 1 x 6 m",
+   "quantite": "24",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttière alu gris anthracite",
+     "quantite": "24",
+     "unite": "ml",
+     "ouvrage": "gouttiere-pvc-alu",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "24"
+      },
+      {
+       "cle": "matiere_gouttiere",
+       "valeur": "2"
+      },
+      {
+       "cle": "teinte_gouttiere",
+       "valeur": "5"
+      },
+      {
+       "cle": "nb_lignes",
+       "valeur": "3"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "développé",
+      "profil"
+     ],
+     "precision": "2 x 9 m + 1 x 6 m"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "F. et P. DEP alu gris anthracite Ø80, sans dauphin",
+   "quantite": "3",
+   "unite": "U",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "DEP alu gris anthracite Ø80",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "3"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "dauphin",
+       "valeur": "0"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "hauteur"
+     ],
+     "precision": "sans dauphin"
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Nettoyage fin de chantier, repli échaf.",
+   "quantite": "1",
+   "unite": "Ft",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

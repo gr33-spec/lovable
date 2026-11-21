@@ -1,0 +1,271 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@couverture-zinc-joint-debout",
+   "text": "Couverture zinc à joint debout : tu façonnes toi-même ou tu commandes façonné ?",
+   "options": [
+    "Je façonne (bobines)",
+    "Je commande façonné (bacs)"
+   ],
+   "reponse": "Je commande façonné (bacs)"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je commande façonné"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Bande d'égout en zinc naturel : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:developpe@faitage-zinc",
+   "text": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Voliges sapin 18 mm",
+    "quantite": "63",
+    "unite": "m²",
+    "affiche": "63 m²",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "60 m² au devis",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "param:faconnage@couverture-zinc-joint-debout"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Bande d'égout en zinc naturel",
+    "quantite": "12",
+    "unite": "ml",
+    "affiche": "12 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "6",
+    "unite": "ml",
+    "affiche": "6 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttière dév. 33",
+    "quantite": "3",
+    "unite": "longueurs de 4 m",
+    "affiche": "3 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø100, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5 m",
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "couverture-zinc-joint-debout/fixation_patte",
+    "label": "Pointes annelées 2,5 × 28 mm"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier : échafaudage de pied, montage, location et démontage"
+  ],
+  "questions": [
+   "param:faconnage@couverture-zinc-joint-debout",
+   "param:faconnage@pieces-pliees",
+   "param:developpe@bandes-zinc",
+   "param:developpe@faitage-zinc"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Voliges sapin 18 mm",
+    "quantite": "63",
+    "unite": "m²",
+    "affiche": "63 m²",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bacs joint debout zinc naturel 0,70 mm, longueur 5,15 m",
+    "quantite": "28",
+    "unite": "bacs",
+    "affiche": "28 bacs",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bande d'égout en zinc naturel, zinc naturel 0,70 mm",
+    "quantite": "6",
+    "unite": "longueurs de 2 m",
+    "affiche": "6 longueurs de 2 m",
+    "etat": "ready",
+    "precision": "12 ml à couvrir, développé 33 cm",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtage zinc naturel 0,70 mm, bande dév. 33 cm",
+    "quantite": "4",
+    "unite": "longueurs de 2 m",
+    "affiche": "4 longueurs de 2 m",
+    "etat": "ready",
+    "precision": "6 ml de faîtage à couvrir",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière dév. 33",
+    "quantite": "3",
+    "unite": "longueurs de 4 m",
+    "affiche": "3 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø100, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5 m",
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "couverture-zinc-joint-debout/fixation_patte",
+    "label": "Pointes annelées 2,5 × 28 mm"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier : échafaudage de pied, montage, location et démontage"
+  ],
+  "questions": []
+ }
+}
