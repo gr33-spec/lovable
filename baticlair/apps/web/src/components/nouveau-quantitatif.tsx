@@ -111,12 +111,15 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
   const [ajoutes, setAjoutes] = useState(0);
   const router = useRouter();
   const { me, company } = useSession();
-  const reprise = useSearchParams().get("liste") === "1";
+  const params = useSearchParams();
+  const reprise = params.get("liste") === "1";
+  /** Accueil premium (Greg, 20 novembre 2026) : « Un devis », « Une photo » ouvrent la feuille « Ajouter » ; « Dicter » lance la dictée. */
+  const entree = params.get("entree");
   const prenom = me.user.name.trim().split(/\s+/)[0] ?? "";
   const [elements, setElements] = useState<Element[]>([]);
   const [liste, setListe] = useState<{ id: string; projetId: string; n: number } | null>(null);
   const [occupe, setOccupe] = useState(false);
-  const [feuille, setFeuille] = useState(false);
+  const [feuille, setFeuille] = useState(() => entree === "devis" || entree === "photo");
   const [catalogue, setCatalogue] = useState(reprise);
   const [aConfirmer, setAConfirmer] = useState<{ fichiers: File[]; nature: "devis" | "liste" } | null>(null);
   const [lecture, setLecture] = useState(false);
@@ -127,6 +130,15 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
   const compteur = useRef(0);
   const ids = { photo: useId(), galerie: useId(), document: useId() };
   const cleDepot = useRef(newActionKey());
+  const entreeFaite = useRef(false);
+  useEffect(() => {
+    if (entreeFaite.current || surAjout) return;
+    entreeFaite.current = true;
+    if (entree === "dictee") {
+      champ.avantDictee();
+      dictee.demarrer();
+    }
+  }, [entree, surAjout, champ, dictee]);
   // Plein écran par-dessus l'app : l'en-tête et le menu derrière deviennent inertes (ni touchés, ni lus) tant qu'elle est ouverte.
   useEffect(() => {
     // ouvert à côté d'une liste (ordinateur), il ne fige pas la liste, qui reste lisible et modifiable.

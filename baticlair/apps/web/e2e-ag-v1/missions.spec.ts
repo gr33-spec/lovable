@@ -77,8 +77,9 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   // groupé ou une mission d'un autre parcours du même département peut s'afficher, c'est voulu.)
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Greg" })).toBeVisible();
-  await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
-  await expect(page.getByRole("main").getByRole("link", { name: /^Créer un quantitatif/ })).toBeVisible();
+  // Accueil premium (Greg, 20 novembre 2026) : sans dossier, pas de « Mon activité » ; « Nouveau quantitatif » d'abord.
+  await expect(page.getByRole("region", { name: "Mon activité" })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("link", { name: "Nouveau quantitatif", exact: true })).toBeVisible();
   await expect(page.getByRole("main").getByRole("link", { name: /^Voir les achats groupés|^Missions entre entreprises/ })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Activité récente" })).toHaveCount(0);
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
@@ -142,23 +143,16 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
 
   // B : son dossier professionnel (capture 24), puis la mission (09), sa réponse (14, 51) et « Réponse envoyée » (45).
   const b = await nouvelArtisan(browser, "Bruno", "Armor Littoral");
-  // L'accueil de B (lot UX mobile) : « Missions près de toi », la mission du même département par son métier et sa ville,
-  // jamais le nom de l'entreprise qui publie ; A ne voit pas sa propre mission dans cette section.
+  // Accueil premium (Greg, 20 novembre 2026 ; RÈGLE CHANGÉE : avant, « Missions près de toi ») : pas de bloc Missions sur
+  // l'accueil ; jamais le nom de l'entreprise qui publie.
   await b.page.goto("/");
-  // (La base des parcours est partagée : d'autres missions du département peuvent occuper les trois places.)
-  const pres = b.page.getByRole("region", { name: "Missions près de toi" });
-  await expect(pres.getByRole("listitem").first()).toBeVisible();
-  expect(await pres.getByRole("listitem").count()).toBeLessThanOrEqual(3);
-  for (const lien of await pres.getByRole("listitem").getByRole("link").all()) {
-    await expect(lien).toHaveAttribute("href", /^\/missions\/[0-9a-f-]{36}$/);
-    await expect(lien).toHaveAccessibleName(/^Mission : .+ à .+, à partir du \d/);
-  }
-  await expect(pres.getByRole("link", { name: "Voir toutes les missions" })).toHaveAttribute("href", "/missions");
+  await expect(b.page.getByRole("region", { name: "Nouveau quantitatif" })).toBeVisible();
+  await expect(b.page.getByRole("region", { name: "Missions près de toi" })).toHaveCount(0);
   await expect(b.page.getByRole("main")).not.toContainText("Toitures Martin");
   expect(await b.page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Greg" })).toBeVisible();
-  await expect(page.getByText("Rien à faire pour le moment.").or(page.getByRole("region", { name: "À faire maintenant" })).first()).toBeVisible();
+  await expect(page.getByRole("region", { name: "Nouveau quantitatif" })).toBeVisible();
   await expect(page.getByRole("main")).not.toContainText(ville);
   await b.page.goto("/compte/documents");
   await expect(b.page.getByRole("heading", { name: "Ton dossier professionnel" })).toBeVisible();

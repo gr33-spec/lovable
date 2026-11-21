@@ -535,3 +535,19 @@ html[data-theme="clair"] {
     scroll-padding-bottom: var(--nav-space);
   }
 }
+
+/* L'accueil premium (Greg, 20 novembre 2026) : chaque zone apparaît doucement, une fois ; coupé par prefers-reduced-motion. */
+@keyframes accueil-apparait {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.accueil-apparait {
+  animation: accueil-apparait 260ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .accueil-apparait {
+    animation: none;
+  }
+}

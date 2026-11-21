@@ -364,6 +364,19 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Carte de l'onboarding : zoom en un seul mouvement mené par le navigateur, flou posé une fois le zoom fini, départements préchargés. Règle changée : sur la carte, les NUMÉROS seuls (avant : noms et numéros mêlés) ; les noms dans la barre « Continuer ». Règle changée (même jour) : sous la carte d'une région, plus la liste des départements, seulement le département choisi et « Continuer » ; seuls les départements trop petits pour le pouce (75, 92, 93, 94, et 90, 68, 66) gardent un bouton à leur numéro ; la barre ne montre que le département de la région affichée. Règle changée (même jour) : sous la France entière, seulement l'outre-mer en boutons ; les régions se touchent sur la carte (avant : leurs noms en boutons aussi). Pas de zoom de la page au double toucher sur l'onboarding.
 - Retours haptiques dans toute l'application (`lib/haptique.ts`, `RetoursHaptiques` dans la mise en page racine) : un léger au choix (région, département, métier, case, onglet), un appui sur un bouton d'action ; jamais sur un simple lien. Android : vibration du navigateur ; iPhone (iOS 18 et plus) : le clic de l'interrupteur natif. Coupables dans Profil › Apparence (« Vibrations au toucher », allumées par défaut, gardées sur l'appareil).
 
+## Décisions du 20 novembre 2026 : l'accueil premium
+
+- RÈGLE CHANGÉE (Greg, 20 novembre 2026) : avant, un tableau de bord (« À faire maintenant », « Mes demandes en cours », « Messages et réponses », achats groupés, « Missions près de toi », « Activité récente ») → TROIS ZONES : « Nouveau quantitatif » (photo du métier, le bouton, devis / photo / dictée seulement s'ils marchent), « Mon activité » (un dossier une seule fois, deux cartes sur téléphone, « Voir tout » vers Demandes ; rien = pas de zone), « Achats groupés » (« Rejoins les couvreurs des Côtes-d'Armor », un groupé de son métier avec « Rejoindre », règle des 3, chrono sous 48 h jusqu'à « Clôturé », sinon « Sois le premier dans ton département »). Plus de bloc Missions ni de carte « Messages et réponses » sur l'accueil. « Bonjour » moins haut.
+- Nouveau compte : « Pour bien démarrer », trois étapes cochées d'après les vrais dossiers ; se ferme et ne revient pas (sur l'appareil).
+- Code : `components/accueil.tsx`, `packages/domain/src/accueil/mon-activite.ts` ; photos : `apps/web/public/accueil/`, `lib/photos-accueil.ts`, crédits `baticlair/docs/photos-accueil.md` (remplaçables par celles de Greg).
+- Prix : état des lieux et proposition dans `baticlair/docs/prix-etat-des-lieux-2026-11-20.md` (rien n'est touché dans la base).
+
+## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
+
+- Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.
+- Le compteur d'économies, quand on aura les vrais prix payés par l'artisan.
+- La lecture des factures du négoce de l'artisan.
+
 ## À faire avant l'ouverture d'un nouveau métier
 
 - Un bouton admin « Prévenir les inscrits de ce métier », qui envoie un e-mail à tous les inscrits de ce métier (entreprises du métier et ancienne liste d'attente). Pas encore codé (Greg, 20 novembre 2026).
