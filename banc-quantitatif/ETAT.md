@@ -23,6 +23,8 @@ Objectif : 95 % de lignes justes contre la liste du contrôleur, sur les 15 chan
       modèle absent du tiroir, présent dans la base) ; fibres-ciment selon le recouvrement (recherche faite). Recherches :
       `baticlair/referentiels/couverture/recherche/ardoise-ouvrages-au-metre.md` et `bac-acier-canal-fibres-ciment-2026-11-21.md`.
       NE RIEN POUSSER sur la branche de test sans l'accord de Greg (rapport d'abord).
+      Chaîne au 21 novembre soir (fiche -68) : moteur 1305 verts, serveur 921 verts, site construit ; parcours Playwright
+      lancés une fois (résultat à lire avant tout envoi sur le site de test). Rapport des lots 3 et 4 rendu à Greg.
 - [ ] Étape 3. La lecture : questions par le code, noms et bref par le code, méthode 11, examen.
 
 Règles de Greg qui passent avant la fiche et le contrôleur : un article non dit va en Suggestions (la naissance aussi) ;
