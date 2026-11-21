@@ -119,6 +119,13 @@
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
     },
     {
+      "id": "recherche-fixations-2026-11-20",
+      "kind": "manufacturer",
+      "title": "Pointes de liteaux : une par croisement avec le chevron (NF DTU 40.11 §4.2.1.4, DTU 40.21, Koramic, guide du ministère de la Culture) ; pointes au kg (Alsafix, ArcelorMittal)",
+      "documentRef": "referentiels/couverture/recherche/fixations.json",
+      "retrievedAt": "2026-11-20"
+    },
+    {
       "id": "fondateur-skill-regles-metier-2026-11-18",
       "kind": "trade_practice",
       "title": "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
@@ -1254,6 +1261,13 @@
     {
       "code": "roof_window_lining",
       "label": "Habillage intérieur de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "batten_nail",
+      "label": "Pointes de liteaux",
       "needUnit": "u",
       "attributes": [],
       "keyAttributes": []
@@ -4760,6 +4774,70 @@
       ]
     },
     {
+      "id": "pointes-liteau-28x60",
+      "family": "batten_nail",
+      "label": "Pointes galva annelées 2,8 × 60 pour liteaux, boîte de 1 kg",
+      "shortLabel": "Pointes galva 2,8 × 60",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "335",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "2,8 × 60 : ≈ 335 pointes au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pointes-liteau-31x70",
+      "family": "batten_nail",
+      "label": "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg",
+      "shortLabel": "Pointes galva 3,1 × 70",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "230",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "raccord-fenetre-toit",
       "family": "roof_window_flashing",
       "label": "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre",
@@ -5926,6 +6004,19 @@
           }
         },
         {
+          "key": "pointe",
+          "family": "batten_nail",
+          "label": "Pointes de liteaux",
+          "usual": {
+            "text": "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "pointes-liteau-31x70"
+          },
+          "suggested": {
+            "label": "Pointes pour liteaux"
+          }
+        },
+        {
           "key": "rive",
           "family": "verge_tile",
           "label": "Tuiles de rive",
@@ -5943,6 +6034,19 @@
         }
       ],
       "constants": {
+        "liteau_vendu": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "m",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "label": "liteau de {v} : une pointe de plus à chaque bout"
+        },
         "seuil_pente_ecran": {
           "kind": "installation_condition",
           "value": "16.7",
@@ -6029,6 +6133,22 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "pointes-liteaux",
+          "slot": "pointe",
+          "formula": "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          "unit": "u",
+          "core": false,
+          "precision": "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          "exclusions": "Pointes de contre-liteaux et de voliges à part.",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
           },
           "version": 1
         },
@@ -6735,9 +6855,35 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "ecran-hpv-standard"
           }
+        },
+        {
+          "key": "pointe",
+          "family": "batten_nail",
+          "label": "Pointes de liteaux",
+          "usual": {
+            "text": "Une pointe par croisement liteau / chevron (NF DTU 40.11).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "pointes-liteau-28x60"
+          },
+          "suggested": {
+            "label": "Pointes pour liteaux"
+          }
         }
       ],
       "constants": {
+        "liteau_vendu": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "m",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "label": "liteau de {v} : une pointe de plus à chaque bout"
+        },
         "seuil_pente_ecran": {
           "kind": "installation_condition",
           "value": "16.7",
@@ -8539,6 +8685,22 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "pointes-liteaux",
+          "slot": "pointe",
+          "formula": "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          "unit": "u",
+          "core": false,
+          "precision": "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          "exclusions": "Pointes de contre-liteaux et de voliges à part.",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
           },
           "version": 1
         },

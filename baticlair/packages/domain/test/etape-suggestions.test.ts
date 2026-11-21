@@ -19,6 +19,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   it("à l'ouverture : naissances, talons, angles, puis les consommables (silicone, vis) ; jamais les crochets déjà écrits ; sans limite de nombre (skill du fondateur, 18/11/2026 ; avant : cinq au plus, les pattes n'étaient pas proposées) ; rien n'est ajouté", () => {
     const e = ecran();
     expect(e.suggestions.map((o) => o.label)).toEqual([
+      "Pointes pour liteaux", // skill du fondateur (« Pointes pour liteaux… : en Suggestion ») ; ratio : fixations.json
       "Naissances de gouttière",
       "Talons de gouttière (si tu ne les fabriques pas)",
       "Angles de gouttière (si tu ne les fabriques pas)",
@@ -28,7 +29,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "Pattes de fixation",
     ]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/pointe", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -69,19 +70,23 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     expect(angles?.quantity).toMatch(/^2\b/);
   });
 
-  it("un devis sans oubli probable n'a pas d'étape : aucune suggestion, pas de carte", () => {
+  it("un devis d'ardoises seules : une seule case, les pointes de liteaux ; un devis sans oubli probable n'a pas d'étape", () => {
     const ardoisesSeules = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => /ardoise/i.test(l.designation)), questions: [] };
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
-    expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([]);
-    expect(e.suggestions).toEqual([]);
+    expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([{ key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" }]);
+    const rien = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: { ...ardoisesSeules, lignes: [] }, answers: {}, preferences: {} });
+    expect(rien.suggestions).toEqual([]);
   });
 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {
     const slots = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.slots.filter((s) => s.suggested).map((s) => `${w.id}/${s.key} : ${s.suggested!.label}`));
     expect(slots).toEqual([
+      // Pointes de liteaux (skill du fondateur ; une par croisement liteau / chevron, recherche fixations du 20/11/2026).
+      "couverture-tuiles-emboitement/pointe : Pointes pour liteaux",
       // Rives (skill du fondateur : « rive absente du devis : d'abord en Suggestion »).
       "couverture-tuiles-emboitement/rive : Tuiles de rive",
       "couverture-tuiles-canal/rive : Bardelis (tuiles de rive)",
+      "couverture-ardoises-crochet/pointe : Pointes pour liteaux",
       // Clous (skill du fondateur : « Clous (en Suggestion, jamais d'office) »).
       "couverture-ardoises-fibres-ciment/clou : Clous d'ardoise fibres-ciment",
       // Velux (skill du fondateur, 18/11/2026 ; BFX : tarif Velux France 2024) : un par fenêtre, à sa taille.
@@ -109,5 +114,14 @@ describe("dauphins cochés (skill du fondateur : « Dauphin, cuvette, jonctions 
     const e = ecran({ [SUGGESTIONS_KEY]: "descente/dauphin" });
     expect(cles(e).join(" ")).not.toMatch(/dauphin/);
     expect(noms(e).some((n) => /dauphin/i.test(n))).toBe(true);
+  });
+});
+
+describe("pointes de liteaux cochées (skill du fondateur ; recherche fixations du 20/11/2026)", () => {
+  it("ardoise : pointes 2,8 × 60 en boîtes de 1 kg, une par croisement avec un chevron plus une par bout de liteau", () => {
+    const e = ecran({ [SUGGESTIONS_KEY]: "couverture-ardoises-crochet/pointe" });
+    const p = e.purchase.toBuy.find((b) => /Pointes galva 2,8 × 60/.test(b.label));
+    expect(p?.quantity).toMatch(/boîtes? de 1 kg/);
+    expect(p?.precision ?? "").toMatch(/croisement avec un chevron/);
   });
 });

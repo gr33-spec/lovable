@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **90.0 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **89.8 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -1823,6 +1823,99 @@ Taux de chiffres confirmés : **90.0 %**. Règle : confirme : deux sources indé
 - **Toutes marques cuivre 2,7 × 30 tête large** (a_confirmer 1) : clous_par_kg 572 u/kg
 - **Toutes marques inox A2 / A4 tête large 2,7 à 3,0 × 30** (a_confirmer 1) : clous_par_kg None u/kg
 - **PGB Europe (TEL D.1160B) cuivre Ø 2,5 / 2,8 / 3,0 × 25 à 65** (une_source 1) : conditionnement 5 kg
+
+## Fixations : pointes, clous d'ardoise, fixation des tuiles, cuvettes, chatières
+
+### pointes de liteaux
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pointes_par_croisement_liteau_chevron | 1 u | liteau de largeur ≤ 50 mm (18×38, 27×40, 25×27…), à chaque croisement liteau / chevron (ou contre-liteau) ; liteau sur 3 appuis au moins | confirme |
+| pointes_par_ml_de_liteau | 1 ÷ entraxe des chevrons (m) + 1 ÷ longueur d'un liteau (m) u/ml | une pointe par croisement + la pointe de l'about (liteaux aboutés sur chevron, joints décalés) ; ex. entraxe 0,50 m et liteaux de 4 m : 2,25 /ml ; entraxe 0,60 m : 1,92 /ml | confirme |
+| pointes_par_m2_de_toiture | (1 ÷ pureau en m) × (1 ÷ entraxe + 1 ÷ longueur de liteau) u/m² | ardoise pureau 0,115 m, liteaux de 4 m : 19,6 /m² (entraxe 0,50) ou 16,7 /m² (0,60) ; tuile pureau 0,34 m : 6,6 /m² (0,50) ou 5,6 /m² (0,60) ; m² en rampant | confirme |
+| diametre_minimal | 2.7 mm | pointes de fixation des liteaux et voliges sous ardoise (NF DTU 40.11 P1-2 §3.3.1.1) ; une pointe 2,0×45 ou 2,5×50 ne convient donc pas sous ardoise | une_source |
+| longueur_minimale | e ≤ 15 mm : 2,5 × e ; 15 < e ≤ 38 mm : 2 × e (e = épaisseur de la pièce fixée) mm | tableau de pose cité par Koramic (DTU 40.23, tableau 3) ; soit liteau 18 mm ≥ 36 mm, liteau ou contre-liteau 27 mm ≥ 54 mm | une_source |
+| epaisseur_maxi_a_fixer | {'2,5 x 50': 17, '2,8 x 60': 20, '3,1 x 70': 27, '3,1 x 80': 30, '3,6 x 90': 33} mm | pointe tête plate carré torsadée galvanisée à chaud (Alsafix TP CT HDG), selon la fiche fabricant | une_source |
+| pointe_conseillee | {'liteau 18×38 (ardoise, Bretagne)': '2,8 × 60 (2,7 × 60) galva', 'liteau 27×40 (tuile)': '3,1 × 70 galva', 'contre-liteau 27×38 (sur chevron)': '3,1 × 70 galva', 'volige 18 mm': '2,8 × 60 galva, 2 par chevron', 'volige 22 à 27 mm': '3,1 × 70 galva, 2 par chevron'} mm | ce qui respecte à la fois Ø ≥ 2,7 (DTU 40.11), longueur ≥ 2 × e (Koramic / DTU 40.23), ≥ 2,5 × e pour la volige (Ministère) et l'épaisseur à fixer Alsafix ; tige torsadée ou annelée conseillée (meilleure tenue) | confirme |
+| longueur_sur_contre_liteau | à confirmer : la pointe du liteau traverse-t-elle le contre-liteau jusqu'au chevron (27 + 27 mm → 3,1 × 80 ou 3,6 × 90) ou seulement le contre-liteau ? mm | pose avec écran sous-toiture (NF DTU 40.29) | a_confirmer |
+| types_de_tige_admis | lisse, crénelée (crantée), torsadée ou annelée ; annelée = « clou cranté » ; galvanisée ou inox (chêne, châtaignier : galva ou inox) texte | DTU 40.11 P1-2 §3.3.1.1 ; DTU 40.23 §3.3.1.1.1 (lisse, crantée, torsadée) ; NOTE DTU 40.23 : torsadées ou crantées tiennent mieux | confirme |
+
+
+### pointes de voliges
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pointes_par_chevron | 2 u | élément de plus de 50 mm de large (volige 100 à 200 mm, quelle que soit l'épaisseur) | confirme |
+| pointes_par_m2_de_toiture | 2 × (1 ÷ (largeur de volige + jeu) en m) × (1 ÷ entraxe des chevrons en m) u/m² | jeu entre voliges 5 à 10 mm (DTU 40.11 §4.2.1.1) ; volige 150 + 7 mm : 25,5 /m² (0,50) ou 21,2 /m² (0,60) ; volige 200 + 7 mm : 19,3 /m² (0,50) ou 16,1 /m² (0,60) ; + les pointes d'about | confirme |
+
+
+### pointes de contre-liteaux
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| espacement_des_pointes | non trouvé (pratique annoncée 1 pointe tous les 30 à 60 cm le long du chevron, sans source) cm | contre-liteau cloué dans l'axe du chevron | a_confirmer |
+
+
+### pointes (conditionnement)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pointes_par_kg | 510 u/kg | 2,5 × 50 galvanisée torsadée : ArcelorMittal Sitor 524 ; Alsafix CT HDG 500 (2 500 par boîte de 5 kg) ; tête plate lisse galva 2,4 × 50 : 473 | confirme |
+| pointes_par_kg | 335 u/kg | 2,8 × 60 galvanisée : Alsafix CT HDG 340 (1 700 / 5 kg) ; Alsafix TEL HDG 340 ; ArcelorMittal Sitor galva 2,85 × 60 : 336 ; tête plate galva 2,7 × 60 : 312 ; annelée inox 2,8/3,1 × 60 (Alsafix) : 282 | confirme |
+| pointes_par_kg | 230 u/kg | 3,1 × 70 galvanisée : Alsafix CT HDG 234 (1 170 / 5 kg) ; Alsafix TEL HDG 240 ; ArcelorMittal Sitor galva 3,2 × 70 : 228 ; tête plate galva 3,0 × 70 : 216 ; annelée inox 3,1/3,4 × 70 : 244 | confirme |
+| pointes_par_kg | 205 u/kg | 3,1 × 80 galvanisée : Alsafix CT HDG 210 (1 048 / 5 kg) ; ArcelorMittal Sitor galva 3,2 × 80 : 200 | confirme |
+| pointes_par_kg | non trouvé (2,0 × 35 galva tête plate : 974 /kg ; 2,0 × 45 estimé ≈ 750) u/kg | pointe trop fine pour liteaux et voliges sous ardoise (Ø < 2,7) | a_confirmer |
+| conditionnements | ['boîte ou carton de 1 kg', 'carton de 2,5 kg', 'boîte ou seau de 5 kg'] kg | pointes en vrac galvanisées : 5 kg pour les torsadées (1 kg sur demande chez ArcelorMittal) ; tête extra-large Alsafix en 1 / 2,5 / 5 kg ; annelées inox en 1 et 5 kg | confirme |
+| kg_pour_100_m2 | {'ardoise, liteau 18×38, pointe 2,8×60, entraxe 0,50': 5.9, 'ardoise, entraxe 0,60': 5.0, 'tuile pureau 0,34, liteau 27×40, pointe 3,1×70, entraxe 0,50': 2.9, 'tuile, entraxe 0,60': 2.4, 'volige 200 mm, pointe 3,1×70, entraxe 0,50': 8.4} kg | calcul : pointes/m² × 100 ÷ pointes/kg (335 pour 2,8×60, 230 pour 3,1×70) ; sans perte ; arrondir à la boîte (1, 2,5 ou 5 kg) | confirme |
+
+
+### clous d'ardoise naturelle
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| clous_par_ardoise_dernier_rang | 2 u | dernier rang sous le faîtage (rive de tête) : 2 clous au moins par ardoise, en pose au crochet comme au clou | confirme |
+| clous_par_ardoise_doublis | 2 u | doublis d'égout : 2 clous, pas de crochet | confirme |
+| clous_par_ardoise_premier_rang | 2 u | 1er rang d'égout : 2 clous (Ministère) ; CAPEB : crochet ET clous | confirme |
+| clous_par_ardoise_de_rive | 2 u | toutes les ardoises de rive latérale, entières et demies : 2 clous (DTU, rive gauche ; Ministère) ; CAPEB rive droite : demie = clou de tête + clou de milieu, entière = clou de tête + crochet | confirme |
+| clous_par_fendis | 1 u | fendis de noue en ardoise : 1 clou de tête ; pied de noue : 2 clous ; noquets : 2 clous | une_source |
+| nombre_de_clous | égout : 2 rangs (doublis + 1er rang) × (longueur d'égout ÷ largeur d'ardoise) × 2 ; faîtage : (longueur ÷ largeur) × 2 par versant ; rive : (rampant ÷ pureau) × 2 par rive ; pose au clou : 2 par ardoise u | pose au crochet en partie courante ; ex. ardoise 32×22, égout 10 m : 2 × 45,5 × 2 = 182 clous | confirme |
+| clous_par_kg | 665 u/kg | acier galvanisé tête extra-large : 2,7 × 30 = 653 (ArcelorMittal) ; 2,8 × 30 = 680 (Alsafix HDG) ; 2,4/2,5 × 27 : 919 / 880 | confirme |
+| clous_par_kg | {'3 × 30': 418, '3 × 35': 358, '3 × 27': 464} u/kg | cuivre carré cranté : 3 × 30 = 420 (ArcelorMittal) et 417 (Alsafix) ; 3 × 35 = 360 / 357 ; 3 × 27 = 464 (Alsafix) | confirme |
+| clous_par_kg | ≈ galva de même dimension (≈ 650 à 680 pour 2,7/2,8 × 30) u/kg | acier inoxydable : densité 7,9 contre 7,85, écart < 1 % | a_confirmer |
+| conditionnements | ['1 kg', '2,5 kg', '5 kg'] kg | galva TEL : cartons de 1, 2,5 et 5 kg (Alsafix) ; boîte de 5 kg (ArcelorMittal) ; cuivre : 5 kg (Alsafix, ArcelorMittal), 1 kg chez la clouterie Rivierre (ardoise.json) | confirme |
+
+
+### fixation des tuiles à emboîtement
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| tuiles_fixees_egout | toutes fraction | 1er rang d'égout, quelle que soit la région de vent (Edilians : crochet « PM » réf. CRP03) | confirme |
+| tuiles_fixees_rives | toutes fraction | tuiles de rive latérales et accessoires de rive : vis + rondelle d'étanchéité (Edilians) ; vissage ou clouage (Koramic) | confirme |
+| faitieres_fixees | toutes, 1 crochet ou clip par faîtière / arêtier (voir points-singuliers.json clip_faitiere_par_piece) u | faîtage à sec : crochet adapté vissé dans la lisse (Edilians) | confirme |
+| vis_par_tuile_de_rive | à confirmer (1 vis + rondelle supposée) u | tuile de rive individuelle ou rive universelle | a_confirmer |
+| tuiles_fixees_partie_courante_bretagne | {'22, 29, 56 (région de vent 3), sans écran, pente ≤ 100 %': {'site normal': '1 sur 3', 'site exposé': 'toutes'}, '22, 29, 56, sans écran, 100-175 %': {'site normal': '1 sur 2', 'site exposé': 'toutes'}, '22, 29, 56, avec écran, pente ≤ 175 %': {'site normal': '1 sur 5', 'site exposé': '1 sur 5'}, '35 (région 2), sans écran, ≤ 100 %': {'site normal': '1 sur 5', 'site exposé': '1 sur 3'}, '35, sans écran, 100-175 %': {'site normal': '1 sur 3', 'site exposé': 'toutes'}, '35, avec écran, ≤ 100 %': {'site normal': 'aucune', 'site exposé': '1 sur 5'}, '35, avec écran, 100-175 %': {'site normal': '1 sur 5', 'site exposé': '1 sur 5'}, 'toute la Bretagne, pente > 175 %': 'toutes'} fraction | bâtiment fermé, hauteur ≤ 15 m, crochetage ou pannetonnage ; tableau DTU 40.21 §5.4 lu chez Edilians et Koramic (tuiles-emboitement.json) appliqué aux régions de vent de regions.json ; Edilians conseille au moins 1 sur 5 partout | confirme |
+| nombre_de_fixations | arrondi_sup(tuiles de partie courante × fraction) + tuiles du 1er rang d'égout + tuiles de rive (vis) + 1 par faîtière / arêtier u | fraction : 1/5, 1/3, 1/2 ou 1 selon le tableau ; partie courante = total − égout − rives | confirme |
+| crochet_selon_section_de_liteau | {'25×27': 'Mono 14', '27×40': 'Mono 16', '40×40': 'Mono 17'} référence | crochet Mono Edilians (plain carré) ; Koramic : crochet de pannetonnage choisi selon la section, liteau ≤ 40 mm de large | une_source |
+| crochets_par_boite | 400 u/boîte | crochets inox Dimos (X-Tile, Croch'tuile) : 400 (Croch'tuile aussi en 203) ; crochet tuile canal Frénéhard : 400, 5,6 kg, 144 boîtes par palette | une_source |
+| vis_de_tuile | 4,5 × 45 ou 4,5 × 60 inox + rondelle EPDM mm | fixation au vissage (bardage vertical chez Koramic ; rives et forte pente chez Edilians, sans dimension) | une_source |
+
+
+### cuvette / boîte à eau
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| quand_en_mettre | une cuvette de branchement ou de face réunit deux descentes (ou deux gouttières) en une seule ; une boîte à eau reçoit l'eau d'un chéneau ou d'une sortie d'acrotère (toiture-terrasse), avec trop-plein ; une descente simple sous gouttière n'en a pas (naissance directe) texte | jamais calculée : une par point de jonction ou par sortie de chéneau, nombre dit par l'artisan (cohérent avec zinguerie.json cuvette_crapaudine) | confirme |
+| diametres_de_sortie | [80, 100, 120] mm | Ø 80 et 100 courants (Rheinzink boîte à eau, cuvettes zinc) ; Ø 120 en zinc et cuivre (edilians.eu) ; boîte à eau carrée 200 × 200 × 200 | confirme |
+| unite_de_vente | pièce (carton de 70 chez Rheinzink) u |  | une_source |
+
+
+### chatières
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| section_totale_de_ventilation | {"comble perdu, ou au-dessus d'un écran": '1/5000 de la surface projetée = 2 cm²/m²', "comble aménagé sans écran, ou sous l'écran": '1/3000 = 3,3 cm²/m²', 'écran non HPV ventilé': "1/5000 au-dessus + 1/3000 sous l'écran"} de la surface projetée | moitié en partie basse, moitié près du faîtage (DTU 40.11 §4.5.2, DTU 40.23 tableau 6) ; même règle déjà dans points-singuliers.json et accessoires-tuiles.json : rien ne change | confirme |
+| nombre_de_chatieres | arrondi_sup(surface projetée (m²) × 2 ou 3,3 cm²/m² ÷ section d'une chatière en cm²), arrondi au nombre pair (moitié en bas, moitié en haut) u | ex. 100 m² projetés, comble perdu, chatière 50 cm² (HP 10) : 200 ÷ 50 = 4 ; rampant isolé sans écran : 333 ÷ 50 = 7, porté à 8 pour répartir moitié / moitié | confirme |
+
 
 ## Zinguerie et écrans : modèles et références du marché
 

@@ -1,0 +1,1916 @@
+{
+  "famille": "fixations",
+  "generated": "2026-11-20",
+  "entrees": [
+    {
+      "id": "pointes_liteau_par_croisement",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_croisement_liteau_chevron",
+      "valeur": 1,
+      "unite": "u",
+      "condition": "liteau de largeur ≤ 50 mm (18×38, 27×40, 25×27…), à chaque croisement liteau / chevron (ou contre-liteau) ; liteau sur 3 appuis au moins",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 (NF P31-204-1, sept. 1996) §4.2.1.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.22 (NF P31-201-1, mai 1993) §3.2.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-22-p31-201-couverture-en-tuiles-canal-de-terre-cuite/dtu-40-22-nf-p31-201-1-mai-1993/chapitre-3-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "fixés à l'aide de pointes ou d'agrafes à chaque intersection d'un chevron et d'un liteau",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "pointes_volige_par_chevron",
+      "famille": "fixations",
+      "sous_famille": "pointes de voliges",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_chevron",
+      "valeur": 2,
+      "unite": "u",
+      "condition": "élément de plus de 50 mm de large (volige 100 à 200 mm, quelle que soit l'épaisseur)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "pointes_liteaux_formule_ml",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_ml_de_liteau",
+      "valeur": "1 ÷ entraxe des chevrons (m) + 1 ÷ longueur d'un liteau (m)",
+      "unite": "u/ml",
+      "condition": "une pointe par croisement + la pointe de l'about (liteaux aboutés sur chevron, joints décalés) ; ex. entraxe 0,50 m et liteaux de 4 m : 2,25 /ml ; entraxe 0,60 m : 1,92 /ml",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 (NF P31-204-1, sept. 1996) §4.2.1.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Calcul dérivé de la règle « 1 pointe par croisement » ; le terme « 1 ÷ longueur » compte la pointe d'about (≈ +12 % à 50 cm, +15 % à 60 cm avec des liteaux de 4 m). Sans abouts : 1 ÷ entraxe."
+    },
+    {
+      "id": "pointes_liteaux_formule_m2",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_m2_de_toiture",
+      "valeur": "(1 ÷ pureau en m) × (1 ÷ entraxe + 1 ÷ longueur de liteau)",
+      "unite": "u/m²",
+      "condition": "ardoise pureau 0,115 m, liteaux de 4 m : 19,6 /m² (entraxe 0,50) ou 16,7 /m² (0,60) ; tuile pureau 0,34 m : 6,6 /m² (0,50) ou 5,6 /m² (0,60) ; m² en rampant",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 (NF P31-204-1, sept. 1996) §4.2.1.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": [
+        "0,115 m : 8,70 ml/m² × 2,25 = 19,6 ; × 1,917 = 16,7",
+        "0,34 m : 2,94 ml/m² × 2,25 = 6,6 ; × 1,917 = 5,6"
+      ]
+    },
+    {
+      "id": "pointes_volige_formule_m2",
+      "famille": "fixations",
+      "sous_famille": "pointes de voliges",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_m2_de_toiture",
+      "valeur": "2 × (1 ÷ (largeur de volige + jeu) en m) × (1 ÷ entraxe des chevrons en m)",
+      "unite": "u/m²",
+      "condition": "jeu entre voliges 5 à 10 mm (DTU 40.11 §4.2.1.1) ; volige 150 + 7 mm : 25,5 /m² (0,50) ou 21,2 /m² (0,60) ; volige 200 + 7 mm : 19,3 /m² (0,50) ou 16,1 /m² (0,60) ; + les pointes d'about",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": [
+        "1 ÷ 0,157 = 6,37 ml/m² × 2 × 2 = 25,5 ; × 2 ÷ 0,6 = 21,2",
+        "1 ÷ 0,207 = 4,83 ml/m² × 2 × 2 = 19,3 ; × 2 ÷ 0,6 = 16,1"
+      ]
+    },
+    {
+      "id": "pointes_diametre_minimal_ardoise",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "diametre_minimal",
+      "valeur": 2.7,
+      "unite": "mm",
+      "condition": "pointes de fixation des liteaux et voliges sous ardoise (NF DTU 40.11 P1-2 §3.3.1.1) ; une pointe 2,0×45 ou 2,5×50 ne convient donc pas sous ardoise",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-2 (déc. 2020) §3.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-2-decembre-2020/3-materiaux-html",
+          "type": "dtu",
+          "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Une seule source lisible (DTU 40.11 2020) ; les DTU tuiles (40.21, 40.23) ne fixent pas ce diamètre dans les textes lus."
+    },
+    {
+      "id": "pointes_longueur_regle_dtu",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_minimale",
+      "valeur": "e ≤ 15 mm : 2,5 × e ; 15 < e ≤ 38 mm : 2 × e (e = épaisseur de la pièce fixée)",
+      "unite": "mm",
+      "condition": "tableau de pose cité par Koramic (DTU 40.23, tableau 3) ; soit liteau 18 mm ≥ 36 mm, liteau ou contre-liteau 27 mm ≥ 54 mm",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 (NF P31-204-1, sept. 1996) §4.2.1.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Koramic 2 × e (27 → 54 mm) ; Ministère 2,5 × e pour les voliges (18 → 45 mm, 25 → 63 mm) ; Alsafix (épaisseur à fixer) plus prudent : 27 mm → pointe de 70. Prendre la pointe vendue juste au-dessus du plus long : voir pointes_choix_par_section.",
+      "raison": "Les tableaux DTU sont des images non lisibles en ligne (40.11 P1-2 tableau 1, 40.23 tableau 3) ; seul Koramic recopie les valeurs. Le guide du Ministère dit 2,5 × l'épaisseur pour la volige : plus long que 2 × e."
+    },
+    {
+      "id": "pointes_epaisseur_a_fixer_alsafix",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "epaisseur_maxi_a_fixer",
+      "valeur": {
+        "2,5 x 50": 17,
+        "2,8 x 60": 20,
+        "3,1 x 70": 27,
+        "3,1 x 80": 30,
+        "3,6 x 90": 33
+      },
+      "unite": "mm",
+      "condition": "pointe tête plate carré torsadée galvanisée à chaud (Alsafix TP CT HDG), selon la fiche fabricant",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Colonne « épaisseur à fixer » d'une seule fiche fabricant ; cohérente avec la règle 2 × e (plus prudente)."
+    },
+    {
+      "id": "pointes_choix_par_section",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointe_conseillee",
+      "valeur": {
+        "liteau 18×38 (ardoise, Bretagne)": "2,8 × 60 (2,7 × 60) galva",
+        "liteau 27×40 (tuile)": "3,1 × 70 galva",
+        "contre-liteau 27×38 (sur chevron)": "3,1 × 70 galva",
+        "volige 18 mm": "2,8 × 60 galva, 2 par chevron",
+        "volige 22 à 27 mm": "3,1 × 70 galva, 2 par chevron"
+      },
+      "unite": "mm",
+      "condition": "ce qui respecte à la fois Ø ≥ 2,7 (DTU 40.11), longueur ≥ 2 × e (Koramic / DTU 40.23), ≥ 2,5 × e pour la volige (Ministère) et l'épaisseur à fixer Alsafix ; tige torsadée ou annelée conseillée (meilleure tenue)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-2 (déc. 2020) §3.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-2-decembre-2020/3-materiaux-html",
+          "type": "dtu",
+          "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Règle croisée de quatre sources ; aucune source ne donne directement « 18×38 → 2,8×60 ». Un 2,5 × 50 suffit en longueur pour un 18 mm sous tuile (36 mm mini) mais pas sous ardoise (Ø 2,7)."
+    },
+    {
+      "id": "pointes_liteau_sur_contre_liteau",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_sur_contre_liteau",
+      "valeur": "à confirmer : la pointe du liteau traverse-t-elle le contre-liteau jusqu'au chevron (27 + 27 mm → 3,1 × 80 ou 3,6 × 90) ou seulement le contre-liteau ?",
+      "unite": "mm",
+      "condition": "pose avec écran sous-toiture (NF DTU 40.29)",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Le NF DTU 40.29 (écrans) n'est pas lisible en ligne ; DTU 40.11 dit seulement que liteaux et voliges reposent sur des contrelattes."
+    },
+    {
+      "id": "pointes_contre_liteau_espacement",
+      "famille": "fixations",
+      "sous_famille": "pointes de contre-liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "espacement_des_pointes",
+      "valeur": "non trouvé (pratique annoncée 1 pointe tous les 30 à 60 cm le long du chevron, sans source)",
+      "unite": "cm",
+      "condition": "contre-liteau cloué dans l'axe du chevron",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [],
+      "raison": "NF DTU 40.29 non accessible ; les notices d'écran lues (Elos, Siplast Sup'Air, Isover) renvoient au DTU ou au fabricant de couverture sans chiffre."
+    },
+    {
+      "id": "pointes_tige",
+      "famille": "fixations",
+      "sous_famille": "pointes de liteaux",
+      "marque": "",
+      "modele": "",
+      "attribut": "types_de_tige_admis",
+      "valeur": "lisse, crénelée (crantée), torsadée ou annelée ; annelée = « clou cranté » ; galvanisée ou inox (chêne, châtaignier : galva ou inox)",
+      "unite": "texte",
+      "condition": "DTU 40.11 P1-2 §3.3.1.1 ; DTU 40.23 §3.3.1.1.1 (lisse, crantée, torsadée) ; NOTE DTU 40.23 : torsadées ou crantées tiennent mieux",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-2 (déc. 2020) §3.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-2-decembre-2020/3-materiaux-html",
+          "type": "dtu",
+          "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Couverture en tuiles plates » (2011)",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "[liteaux] fixés par des pointes en acier galvanisé ou inoxydable",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "pointes_par_kg_2_5x50",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_kg",
+      "valeur": 510,
+      "unite": "u/kg",
+      "condition": "2,5 × 50 galvanisée torsadée : ArcelorMittal Sitor 524 ; Alsafix CT HDG 500 (2 500 par boîte de 5 kg) ; tête plate lisse galva 2,4 × 50 : 473",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": [
+        "masse tige π × 1,25² × 50 = 245 mm³ × 7,85 = 1,93 g → 519 /kg (tête comprise ≈ 500)"
+      ]
+    },
+    {
+      "id": "pointes_par_kg_2_8x60",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_kg",
+      "valeur": 335,
+      "unite": "u/kg",
+      "condition": "2,8 × 60 galvanisée : Alsafix CT HDG 340 (1 700 / 5 kg) ; Alsafix TEL HDG 340 ; ArcelorMittal Sitor galva 2,85 × 60 : 336 ; tête plate galva 2,7 × 60 : 312 ; annelée inox 2,8/3,1 × 60 (Alsafix) : 282",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "L'annelée se mesure au diamètre extérieur (3,1) : environ 15 % de pointes en moins au kg.",
+      "controle": [
+        "tige π × 1,4² × 60 = 369 mm³ → 2,90 g → 345 /kg"
+      ]
+    },
+    {
+      "id": "pointes_par_kg_3_1x70",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_kg",
+      "valeur": 230,
+      "unite": "u/kg",
+      "condition": "3,1 × 70 galvanisée : Alsafix CT HDG 234 (1 170 / 5 kg) ; Alsafix TEL HDG 240 ; ArcelorMittal Sitor galva 3,2 × 70 : 228 ; tête plate galva 3,0 × 70 : 216 ; annelée inox 3,1/3,4 × 70 : 244",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": [
+        "tige π × 1,55² × 70 = 528 mm³ → 4,15 g → 241 /kg"
+      ]
+    },
+    {
+      "id": "pointes_par_kg_3_1x80",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_kg",
+      "valeur": 205,
+      "unite": "u/kg",
+      "condition": "3,1 × 80 galvanisée : Alsafix CT HDG 210 (1 048 / 5 kg) ; ArcelorMittal Sitor galva 3,2 × 80 : 200",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "pointes_par_kg_2_0x45",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "pointes_par_kg",
+      "valeur": "non trouvé (2,0 × 35 galva tête plate : 974 /kg ; 2,0 × 45 estimé ≈ 750)",
+      "unite": "u/kg",
+      "condition": "pointe trop fine pour liteaux et voliges sous ardoise (Ø < 2,7)",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Aucun catalogue lu ne vend 2,0 × 45 galva ; l'estimation est un calcul de masse."
+    },
+    {
+      "id": "pointes_conditionnement",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "conditionnements",
+      "valeur": [
+        "boîte ou carton de 1 kg",
+        "carton de 2,5 kg",
+        "boîte ou seau de 5 kg"
+      ],
+      "unite": "kg",
+      "condition": "pointes en vrac galvanisées : 5 kg pour les torsadées (1 kg sur demande chez ArcelorMittal) ; tête extra-large Alsafix en 1 / 2,5 / 5 kg ; annelées inox en 1 et 5 kg",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe tête plate annelée inox A4 » (diffusée par Bati-Avenue)",
+          "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/T/P/TP310909S_517c.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,8/3,1 x 60 … 282 ; TP 3,1/3,4 x 70 … 244 (/kg) ; Cartons de 1 kg et 5 kg",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "pointes_kg_pour_100m2",
+      "famille": "fixations",
+      "sous_famille": "pointes (conditionnement)",
+      "marque": "",
+      "modele": "",
+      "attribut": "kg_pour_100_m2",
+      "valeur": {
+        "ardoise, liteau 18×38, pointe 2,8×60, entraxe 0,50": 5.9,
+        "ardoise, entraxe 0,60": 5.0,
+        "tuile pureau 0,34, liteau 27×40, pointe 3,1×70, entraxe 0,50": 2.9,
+        "tuile, entraxe 0,60": 2.4,
+        "volige 200 mm, pointe 3,1×70, entraxe 0,50": 8.4
+      },
+      "unite": "kg",
+      "condition": "calcul : pointes/m² × 100 ÷ pointes/kg (335 pour 2,8×60, 230 pour 3,1×70) ; sans perte ; arrondir à la boîte (1, 2,5 ou 5 kg)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": [
+        "19,6 × 100 ÷ 335 = 5,9 ; 16,7 × 100 ÷ 335 = 5,0",
+        "6,6 × 100 ÷ 230 = 2,9 ; 5,6 × 100 ÷ 230 = 2,4",
+        "19,3 × 100 ÷ 230 = 8,4"
+      ]
+    },
+    {
+      "id": "clou_ardoise_faitage",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_ardoise_dernier_rang",
+      "valeur": 2,
+      "unite": "u",
+      "condition": "dernier rang sous le faîtage (rive de tête) : 2 clous au moins par ardoise, en pose au crochet comme au clou",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.3 et §5.1.3.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Contredit la règle du fondateur « 1 clou au faîtage »."
+    },
+    {
+      "id": "clou_ardoise_doublis",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_ardoise_doublis",
+      "valeur": 2,
+      "unite": "u",
+      "condition": "doublis d'égout : 2 clous, pas de crochet",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "CAPEB, calepin de chantier « Couverture ardoises » (pages Rives d'égout, Rives latérales)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "clou_ardoise_premier_rang",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_ardoise_premier_rang",
+      "valeur": 2,
+      "unite": "u",
+      "condition": "1er rang d'égout : 2 clous (Ministère) ; CAPEB : crochet ET clous",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, calepin de chantier « Couverture ardoises » (pages Rives d'égout, Rives latérales)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "CAPEB ne chiffre pas les clous du 1er rang (« au crochet et aux clous ») ; le Ministère dit 2 clous."
+    },
+    {
+      "id": "clou_ardoise_rive",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_ardoise_de_rive",
+      "valeur": 2,
+      "unite": "u",
+      "condition": "toutes les ardoises de rive latérale, entières et demies : 2 clous (DTU, rive gauche ; Ministère) ; CAPEB rive droite : demie = clou de tête + clou de milieu, entière = clou de tête + crochet",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.3 et §5.1.3.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, calepin de chantier « Couverture ardoises » (pages Rives d'égout, Rives latérales)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "CAPEB admet 1 clou + 1 crochet pour l'entière en rive droite : compter 2 clous par ardoise de rive reste le maximum sûr."
+    },
+    {
+      "id": "clou_ardoise_noue_fendis",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_fendis",
+      "valeur": 1,
+      "unite": "u",
+      "condition": "fendis de noue en ardoise : 1 clou de tête ; pied de noue : 2 clous ; noquets : 2 clous",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.3 et §5.1.3.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Lu seulement dans le DTU 40.11."
+    },
+    {
+      "id": "clou_ardoise_formules",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "nombre_de_clous",
+      "valeur": "égout : 2 rangs (doublis + 1er rang) × (longueur d'égout ÷ largeur d'ardoise) × 2 ; faîtage : (longueur ÷ largeur) × 2 par versant ; rive : (rampant ÷ pureau) × 2 par rive ; pose au clou : 2 par ardoise",
+      "unite": "u",
+      "condition": "pose au crochet en partie courante ; ex. ardoise 32×22, égout 10 m : 2 × 45,5 × 2 = 182 clous",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.3 et §5.1.3.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, calepin de chantier « Couverture ardoises » (pages Rives d'égout, Rives latérales)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "clou_ardoise_par_kg_galva",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_kg",
+      "valeur": 665,
+      "unite": "u/kg",
+      "condition": "acier galvanisé tête extra-large : 2,7 × 30 = 653 (ArcelorMittal) ; 2,8 × 30 = 680 (Alsafix HDG) ; 2,4/2,5 × 27 : 919 / 880",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": [
+        "repris d'ardoise.json (653, contrôle de masse 642) ; Alsafix 680 : écart 4 %"
+      ]
+    },
+    {
+      "id": "clou_ardoise_par_kg_cuivre",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_kg",
+      "valeur": {
+        "3 × 30": 418,
+        "3 × 35": 358,
+        "3 × 27": 464
+      },
+      "unite": "u/kg",
+      "condition": "cuivre carré cranté : 3 × 30 = 420 (ArcelorMittal) et 417 (Alsafix) ; 3 × 35 = 360 / 357 ; 3 × 27 = 464 (Alsafix)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TEL carrée crantée cuivre » (diffusée par Bati-Avenue)",
+          "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/T/L/TL300407S_4268.pdf",
+          "type": "fabricant",
+          "extrait": "TEL 3 x 3 x 27 … 464 ; 3 x 3 x 30 … 417 ; 3 x 3 x 35 … 357 (/kg) ; Cartons de 5 kg, Seaux de 5 kg",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "ArcelorMittal donne 667 au kg pour le 3 × 27 cuivre carré : incohérent (même chiffre que le 2,7 × 27 roulé) ; retenir Alsafix 464."
+    },
+    {
+      "id": "clou_ardoise_par_kg_inox",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "clous_par_kg",
+      "valeur": "≈ galva de même dimension (≈ 650 à 680 pour 2,7/2,8 × 30)",
+      "unite": "u/kg",
+      "condition": "acier inoxydable : densité 7,9 contre 7,85, écart < 1 %",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [],
+      "raison": "Aucun catalogue de clou d'ardoise inox lu ; chiffre déduit par la masse."
+    },
+    {
+      "id": "clou_ardoise_conditionnement",
+      "famille": "fixations",
+      "sous_famille": "clous d'ardoise naturelle",
+      "marque": "",
+      "modele": "",
+      "attribut": "conditionnements",
+      "valeur": [
+        "1 kg",
+        "2,5 kg",
+        "5 kg"
+      ],
+      "unite": "kg",
+      "condition": "galva TEL : cartons de 1, 2,5 et 5 kg (Alsafix) ; boîte de 5 kg (ArcelorMittal) ; cuivre : 5 kg (Alsafix, ArcelorMittal), 1 kg chez la clouterie Rivierre (ardoise.json)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TEL carrée crantée cuivre » (diffusée par Bati-Avenue)",
+          "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/T/L/TL300407S_4268.pdf",
+          "type": "fabricant",
+          "extrait": "TEL 3 x 3 x 27 … 464 ; 3 x 3 x 30 … 417 ; 3 x 3 x 35 … 357 (/kg) ; Cartons de 5 kg, Seaux de 5 kg",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "tuiles_egout_toutes_fixees",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "tuiles_fixees_egout",
+      "valeur": "toutes",
+      "unite": "fraction",
+      "condition": "1er rang d'égout, quelle que soit la région de vent (Edilians : crochet « PM » réf. CRP03)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AQC, Mémo Chantier « Couvertures ardoises et tuiles » (sept. 2021)",
+          "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Couvertures-Ardoises-Tuiles-AQC.pdf",
+          "type": "guide",
+          "extrait": "FAÎTAGE, RIVES, ÉGOUTS, PÉNÉTRATION… 100 % DES TUILES FIXÉES",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "tuiles_rives_toutes_fixees",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "tuiles_fixees_rives",
+      "valeur": "toutes",
+      "unite": "fraction",
+      "condition": "tuiles de rive latérales et accessoires de rive : vis + rondelle d'étanchéité (Edilians) ; vissage ou clouage (Koramic)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AQC, Mémo Chantier « Couvertures ardoises et tuiles » (sept. 2021)",
+          "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Couvertures-Ardoises-Tuiles-AQC.pdf",
+          "type": "guide",
+          "extrait": "FAÎTAGE, RIVES, ÉGOUTS, PÉNÉTRATION… 100 % DES TUILES FIXÉES",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "tuiles_faitieres_fixees",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "faitieres_fixees",
+      "valeur": "toutes, 1 crochet ou clip par faîtière / arêtier (voir points-singuliers.json clip_faitiere_par_piece)",
+      "unite": "u",
+      "condition": "faîtage à sec : crochet adapté vissé dans la lisse (Edilians)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AQC, Mémo Chantier « Couvertures ardoises et tuiles » (sept. 2021)",
+          "url": "https://qualiteconstruction.com/wp-content/uploads/2024/05/Memo-Chantier-Couvertures-Ardoises-Tuiles-AQC.pdf",
+          "type": "guide",
+          "extrait": "FAÎTAGE, RIVES, ÉGOUTS, PÉNÉTRATION… 100 % DES TUILES FIXÉES",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Koramic se contredit : p. 31 « faîtières et arêtiers ne doivent pas être fixés avec des clous (DTU 40.21) » et p. 19 « avec un clou ou une vis munis d'une étanchéité ». Retenir crochet ou vis, jamais clou nu."
+    },
+    {
+      "id": "tuiles_rive_vis_par_tuile",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "vis_par_tuile_de_rive",
+      "valeur": "à confirmer (1 vis + rondelle supposée)",
+      "unite": "u",
+      "condition": "tuile de rive individuelle ou rive universelle",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Edilians et Koramic disent « par vis » sans dire combien par pièce."
+    },
+    {
+      "id": "tuiles_courantes_bretagne",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "tuiles_fixees_partie_courante_bretagne",
+      "valeur": {
+        "22, 29, 56 (région de vent 3), sans écran, pente ≤ 100 %": {
+          "site normal": "1 sur 3",
+          "site exposé": "toutes"
+        },
+        "22, 29, 56, sans écran, 100-175 %": {
+          "site normal": "1 sur 2",
+          "site exposé": "toutes"
+        },
+        "22, 29, 56, avec écran, pente ≤ 175 %": {
+          "site normal": "1 sur 5",
+          "site exposé": "1 sur 5"
+        },
+        "35 (région 2), sans écran, ≤ 100 %": {
+          "site normal": "1 sur 5",
+          "site exposé": "1 sur 3"
+        },
+        "35, sans écran, 100-175 %": {
+          "site normal": "1 sur 3",
+          "site exposé": "toutes"
+        },
+        "35, avec écran, ≤ 100 %": {
+          "site normal": "aucune",
+          "site exposé": "1 sur 5"
+        },
+        "35, avec écran, 100-175 %": {
+          "site normal": "1 sur 5",
+          "site exposé": "1 sur 5"
+        },
+        "toute la Bretagne, pente > 175 %": "toutes"
+      },
+      "unite": "fraction",
+      "condition": "bâtiment fermé, hauteur ≤ 15 m, crochetage ou pannetonnage ; tableau DTU 40.21 §5.4 lu chez Edilians et Koramic (tuiles-emboitement.json) appliqué aux régions de vent de regions.json ; Edilians conseille au moins 1 sur 5 partout",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Recherche Mobiiz, tuiles-emboitement.json, entrée fixation_tuiles_dtu_40_21 (Edilians 2024 p. 332 + Koramic 2016 p. 31, statut confirme)",
+          "url": "baticlair/referentiels/couverture/recherche/tuiles-emboitement.json",
+          "type": "autre",
+          "extrait": "tableau de fixation en partie courante (pente, région de vent, site, écran)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Recherche Mobiiz, regions.json (régions de vent Eurocode par département, statut confirme)",
+          "url": "baticlair/referentiels/couverture/recherche/regions.json",
+          "type": "autre",
+          "extrait": "22 : vent 3 ; 29 : vent 3 ; 56 : vent 3 ; 35 : vent 2",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "La région de vent se déduit du département ; la situation exposée (littoral ~5 km, îles, presqu'îles) et la présence d'écran sont à demander ou à lire au devis."
+    },
+    {
+      "id": "tuiles_crochets_formule",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "nombre_de_fixations",
+      "valeur": "arrondi_sup(tuiles de partie courante × fraction) + tuiles du 1er rang d'égout + tuiles de rive (vis) + 1 par faîtière / arêtier",
+      "unite": "u",
+      "condition": "fraction : 1/5, 1/3, 1/2 ou 1 selon le tableau ; partie courante = total − égout − rives",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Recherche Mobiiz, tuiles-emboitement.json, entrée fixation_tuiles_dtu_40_21 (Edilians 2024 p. 332 + Koramic 2016 p. 31, statut confirme)",
+          "url": "baticlair/referentiels/couverture/recherche/tuiles-emboitement.json",
+          "type": "autre",
+          "extrait": "tableau de fixation en partie courante (pente, région de vent, site, écran)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "tuiles_crochet_mono_par_liteau",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "Edilians",
+      "modele": "",
+      "attribut": "crochet_selon_section_de_liteau",
+      "valeur": {
+        "25×27": "Mono 14",
+        "27×40": "Mono 16",
+        "40×40": "Mono 17"
+      },
+      "unite": "référence",
+      "condition": "crochet Mono Edilians (plain carré) ; Koramic : crochet de pannetonnage choisi selon la section, liteau ≤ 40 mm de large",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, p. 347 « Détermination du crochet Mono »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Mono 14 … liteau de 25x27 ; Mono 16 … 27x40 ; Mono 17 … 40x40",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Correspondance propre à Edilians ; Koramic confirme seulement le principe."
+    },
+    {
+      "id": "tuiles_crochets_par_boite",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "crochets_par_boite",
+      "valeur": 400,
+      "unite": "u/boîte",
+      "condition": "crochets inox Dimos (X-Tile, Croch'tuile) : 400 (Croch'tuile aussi en 203) ; crochet tuile canal Frénéhard : 400, 5,6 kg, 144 boîtes par palette",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Dimos, crochet anti-soulèvement X-Tile pour tuiles à emboîtement (fiche Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/crochet-anti-soulevement-pour-tuiles-a-emboitem-p69087273.html",
+          "type": "fabricant",
+          "extrait": "400 pièces/boîte carton",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Dimos, Croch'tuile, crochet invisible pour tuiles à emboîtement (fiche Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/crochet-de-fixation-invisible-pour-tuiles-a-embo-p69087288.html",
+          "type": "fabricant",
+          "extrait": "203 ou 400 unités/boîtes",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Frénéhard & Michaux, fiche « Crochet tuile canal » (diffusée par BigMat)",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/QAFC1473_fp.pdf",
+          "type": "fabricant",
+          "extrait": "Conditionnement 400 pièces ; Palettisation 144 boîtes ; Poids de la boîte 5.556 kg",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Deux fabricants donnent 400, mais pas pour le même crochet ; aucun conditionnement trouvé pour les crochets Mono / Harpon Edilians (vendus par le négoce, demander l'unité)."
+    },
+    {
+      "id": "tuiles_vis_dimension",
+      "famille": "fixations",
+      "sous_famille": "fixation des tuiles à emboîtement",
+      "marque": "",
+      "modele": "",
+      "attribut": "vis_de_tuile",
+      "valeur": "4,5 × 45 ou 4,5 × 60 inox + rondelle EPDM",
+      "unite": "mm",
+      "condition": "fixation au vissage (bardage vertical chez Koramic ; rives et forte pente chez Edilians, sans dimension)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Dimension lue seulement chez Koramic, pour le bardage."
+    },
+    {
+      "id": "cuvette_usage",
+      "famille": "fixations",
+      "sous_famille": "cuvette / boîte à eau",
+      "marque": "",
+      "modele": "",
+      "attribut": "quand_en_mettre",
+      "valeur": "une cuvette de branchement ou de face réunit deux descentes (ou deux gouttières) en une seule ; une boîte à eau reçoit l'eau d'un chéneau ou d'une sortie d'acrotère (toiture-terrasse), avec trop-plein ; une descente simple sous gouttière n'en a pas (naissance directe)",
+      "unite": "texte",
+      "condition": "jamais calculée : une par point de jonction ou par sortie de chéneau, nombre dit par l'artisan (cohérent avec zinguerie.json cuvette_crapaudine)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "edilians.eu, cuvettes 1/2 rondes de face (zinc naturel, quartz, cuivre)",
+          "url": "https://edilians.eu/cuvettes-1-2-rondes-de-face.html",
+          "type": "negoce",
+          "extrait": "Permet de relier deux tuyaux de descente en un seul ; ø 80 mm, ø 100 mm, ø 120 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Brico Dépôt, cuvette de branchement en zinc Ø 80 mm",
+          "url": "https://www.bricodepot.fr/p/3416710017585/cuvette-de-branchement-en-zinc-o-80-mm",
+          "type": "negoce",
+          "extrait": "Raccorde deux tuyaux vers un seul diamètre 80 mm.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø80 avec trop-plein » (réf. 11008275, Richardson)",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/889/99368_11008275_fichetechniqu.pdf",
+          "type": "fabricant",
+          "extrait": "Elle est souvent utilisée sur les toitures en terrasse en sortie d'acrotère.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, calepin de chantier « Évacuation des eaux pluviales » (DTU 40.5, DTU 60.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Evacuation_eaux_pluviales.pdf",
+          "type": "guide",
+          "extrait": "Cuvette de branchement, Cuvette de face, Boîte à eau",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "VMZINC, Collecte des eaux pluviales, guide technique p. 27 (copie Gedimat)",
+          "url": "https://uploads.gedimat.fr/DOCUMENT/TYPE2/0000226475998.pdf",
+          "type": "fabricant",
+          "extrait": "Cuvette de branchement VMZINC® ; Cuvette 1/2 ronde de face ; Cuvette 1/2 ronde d'angle ; Cuvette « Nice »",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "cuvette_diametres",
+      "famille": "fixations",
+      "sous_famille": "cuvette / boîte à eau",
+      "marque": "",
+      "modele": "",
+      "attribut": "diametres_de_sortie",
+      "valeur": [
+        80,
+        100,
+        120
+      ],
+      "unite": "mm",
+      "condition": "Ø 80 et 100 courants (Rheinzink boîte à eau, cuvettes zinc) ; Ø 120 en zinc et cuivre (edilians.eu) ; boîte à eau carrée 200 × 200 × 200",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø80 avec trop-plein » (réf. 11008275, Richardson)",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/889/99368_11008275_fichetechniqu.pdf",
+          "type": "fabricant",
+          "extrait": "Elle est souvent utilisée sur les toitures en terrasse en sortie d'acrotère.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø100 avec trop-plein » (réf. 11008276, Richardson)",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/6d5/99469_11008276_fichetechniqu.pdf",
+          "type": "fabricant",
+          "extrait": "Conditionnement 1 : 1 Pce ; Conditionnement 2 : 70 Pce",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "edilians.eu, cuvettes 1/2 rondes de face (zinc naturel, quartz, cuivre)",
+          "url": "https://edilians.eu/cuvettes-1-2-rondes-de-face.html",
+          "type": "negoce",
+          "extrait": "Permet de relier deux tuyaux de descente en un seul ; ø 80 mm, ø 100 mm, ø 120 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Brico Dépôt, cuvette de branchement en zinc Ø 80 mm",
+          "url": "https://www.bricodepot.fr/p/3416710017585/cuvette-de-branchement-en-zinc-o-80-mm",
+          "type": "negoce",
+          "extrait": "Raccorde deux tuyaux vers un seul diamètre 80 mm.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "cuvette_conditionnement",
+      "famille": "fixations",
+      "sous_famille": "cuvette / boîte à eau",
+      "marque": "",
+      "modele": "",
+      "attribut": "unite_de_vente",
+      "valeur": "pièce (carton de 70 chez Rheinzink)",
+      "unite": "u",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø100 avec trop-plein » (réf. 11008276, Richardson)",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/6d5/99469_11008276_fichetechniqu.pdf",
+          "type": "fabricant",
+          "extrait": "Conditionnement 1 : 1 Pce ; Conditionnement 2 : 70 Pce",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ventilation_ratio_recoupe",
+      "famille": "fixations",
+      "sous_famille": "chatières",
+      "marque": "",
+      "modele": "",
+      "attribut": "section_totale_de_ventilation",
+      "valeur": {
+        "comble perdu, ou au-dessus d'un écran": "1/5000 de la surface projetée = 2 cm²/m²",
+        "comble aménagé sans écran, ou sous l'écran": "1/3000 = 3,3 cm²/m²",
+        "écran non HPV ventilé": "1/5000 au-dessus + 1/3000 sous l'écran"
+      },
+      "unite": "de la surface projetée",
+      "condition": "moitié en partie basse, moitié près du faîtage (DTU 40.11 §4.5.2, DTU 40.23 tableau 6) ; même règle déjà dans points-singuliers.json et accessoires-tuiles.json : rien ne change",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+          "type": "guide",
+          "extrait": "1/5000 comble perdu ; 1/3000 rampant isolé ; moitié en bas, moitié en haut (relu le 19/11, repris de points-singuliers.json)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (BigMat), p. 29-31",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "V : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée) (repris de points-singuliers.json)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.5.2, copie en ligne non officielle (dtu.golgoth.org)",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "section des orifices fonction de la paroi et de la présence d'un écran ; moitié en partie basse, moitié au voisinage du faîtage",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 §4.7, Tableau 6 « Section totale des orifices de ventilation », copie en ligne non officielle (dtu.golgoth.org)",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "en fonction de la surface projetée ; réparties par moitié entre partie basse et voisinage du faîtage",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "chatieres_formule_recoupe",
+      "famille": "fixations",
+      "sous_famille": "chatières",
+      "marque": "",
+      "modele": "",
+      "attribut": "nombre_de_chatieres",
+      "valeur": "arrondi_sup(surface projetée (m²) × 2 ou 3,3 cm²/m² ÷ section d'une chatière en cm²), arrondi au nombre pair (moitié en bas, moitié en haut)",
+      "unite": "u",
+      "condition": "ex. 100 m² projetés, comble perdu, chatière 50 cm² (HP 10) : 200 ÷ 50 = 4 ; rampant isolé sans écran : 333 ÷ 50 = 7, porté à 8 pour répartir moitié / moitié",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+          "type": "guide",
+          "extrait": "1/5000 comble perdu ; 1/3000 rampant isolé ; moitié en bas, moitié en haut (relu le 19/11, repris de points-singuliers.json)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (BigMat), p. 29-31",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "V : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée) (repris de points-singuliers.json)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 §4.7, Tableau 6 « Section totale des orifices de ventilation », copie en ligne non officielle (dtu.golgoth.org)",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "en fonction de la surface projetée ; réparties par moitié entre partie basse et voisinage du faîtage",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "accessoires-tuiles.json donne 7 pour 100 m² à 1/3000 (HP 10) sans arrondir au pair ; la répartition moitié bas / moitié haut demande un nombre pair (8). La surface est PROJETÉE : m² rampant × cos(pente)."
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Clous galva : 1 clou par ardoise au faîtage, 2 à l'égout, au doublis et à la rive",
+      "origine": "regles-metier SKILL.md (Clous)",
+      "valeur_actuelle": "faîtage 1 ; égout, doublis, rive 2",
+      "verdict": "corrige",
+      "bonne_valeur": "faîtage (dernier rang) : 2 clous au moins ; égout (doublis et 1er rang) : 2 ; rive : 2 (CAPEB admet 1 clou + 1 crochet pour l'entière en rive droite)",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.3 et §5.1.3.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+          "type": "dtu",
+          "extrait": "dernier rang fixé à 2 clous par ardoise au moins ; ardoises de rive à 2 clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, calepin de chantier « Couverture ardoises » (pages Rives d'égout, Rives latérales)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Doublis : fixation à 2 clous, pas de crochet. 1er rang : ardoise entière fixée au crochet et aux clous.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Seul le faîtage change : le DTU 40.11 fixe le dernier rang à 2 clous au moins. Égout, doublis et rive sont confirmés. Déjà signalé dans ardoise.json."
+    },
+    {
+      "ratio": "Clous d'ardoise galva (90 % des cas)",
+      "origine": "regles-metier SKILL.md (Clous)",
+      "valeur_actuelle": "galva",
+      "verdict": "confirme",
+      "bonne_valeur": "galva pour les clous cachés ; inox ou cuivre pour les clous apparents (dernier rang en lignolet, rives débordantes)",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-2 (déc. 2020) §3.3.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-2-decembre-2020/3-materiaux-html",
+          "type": "dtu",
+          "extrait": "pointes lisses, crénelées, torsadées ou annelées ; diamètre minimum 2,7 mm ; longueurs : Tableau 1 (image non lue)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE « Ouvrages de couverture – Ardoises » (2011), §3.3.5 et §4.1",
+          "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+          "type": "guide",
+          "extrait": "la longueur représente 2,5 fois l'épaisseur de la volige, à raison de deux pointes par chevron ; Le doublis et le premier rang sont fixés à l'aide de clous",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "DTU 40.11 P1-2 §3.3.2.2 (voir ardoise.json)."
+    },
+    {
+      "ratio": "Pointes pour liteaux, contre-liteaux et voliges : en Suggestion",
+      "origine": "regles-metier SKILL.md (Pointes)",
+      "valeur_actuelle": "pas de ratio",
+      "verdict": "confirme",
+      "bonne_valeur": "si coché : liteau 1 pointe par croisement (pointes/m² = (1 ÷ pureau) × (1 ÷ entraxe + 1 ÷ longueur de liteau)), volige 2 par chevron ; 2,8×60 pour 18 mm, 3,1×70 pour 27 mm ; vendu au kg (335 et 230 /kg)",
+      "sources": [
+        {
+          "titre": "NF DTU 40.11 P1-1 (déc. 2020) §4.2.1.4, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "2 pointes par chevron (élément > 0,05 m de large) ; 1 pointe (≤ 0,05 m)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DTU 40.23 (NF P31-204-1, sept. 1996) §4.2.1.1, copie en ligne non officielle (dtu.golgoth.org) — valeur seulement",
+          "url": "https://dtu.golgoth.org/docs/dtu-40-23-p31-204-couverture-en-tuiles-plates-de-terre-cuite/dtu-40-23-nf-p31-204-1-septembre-1996/4-mise-en-oeuvre-html",
+          "type": "dtu",
+          "extrait": "une pointe ou une agrafe à chaque intersection d'un chevron et d'un liteau ; longueur : Tableau 3",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Koramic (Wienerberger), Guide de pose Koramic (2016) : tableau « Longueur des pointes à utiliser » et règles de fixation",
+          "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+          "type": "fabricant",
+          "extrait": "e ≤ 15 : 2,5 x e ; 15 ≤ e ≤ 38 : 2 x e ; à chaque intersection d'un chevron, fixé avec un clou, une agrafe ou une vis",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le code peut calculer : environ 6 kg pour 100 m² d'ardoise sur liteaux à 50 cm, 3 kg pour 100 m² de tuiles."
+    },
+    {
+      "ratio": "Fixation des tuiles : ratio selon zone de vent et pente, comment les obtenir reste à décider",
+      "origine": "regles-metier SKILL.md (Fixations)",
+      "valeur_actuelle": "point ouvert",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "région de vent déduite du département (22, 29, 56 → 3 ; 35 → 2), pente lue au devis ; demander seulement « écran ? » et « bord de mer exposé ? » ; égout, rives, faîtage : toujours fixés",
+      "sources": [
+        {
+          "titre": "Recherche Mobiiz, tuiles-emboitement.json, entrée fixation_tuiles_dtu_40_21 (Edilians 2024 p. 332 + Koramic 2016 p. 31, statut confirme)",
+          "url": "baticlair/referentiels/couverture/recherche/tuiles-emboitement.json",
+          "type": "autre",
+          "extrait": "tableau de fixation en partie courante (pente, région de vent, site, écran)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Recherche Mobiiz, regions.json (régions de vent Eurocode par département, statut confirme)",
+          "url": "baticlair/referentiels/couverture/recherche/regions.json",
+          "type": "autre",
+          "extrait": "22 : vent 3 ; 29 : vent 3 ; 56 : vent 3 ; 35 : vent 2",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, guide de pose p. 347 « Modes de fixation »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Quelle que soit la situation géographique, en rive à l'égout, toutes les tuiles doivent être fixées.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Décision du fondateur à prendre : déduire ou demander. Les chiffres sont prêts (tuiles_courantes_bretagne)."
+    },
+    {
+      "ratio": "Dauphin, cuvette (boîte à eau), jonctions : en Suggestion",
+      "origine": "regles-metier SKILL.md (Zinguerie)",
+      "valeur_actuelle": "Suggestion",
+      "verdict": "confirme",
+      "bonne_valeur": "Suggestion ; nombre demandé (une par jonction de deux descentes ou par sortie de chéneau, pas une par descente) ; Ø 80 ou 100",
+      "sources": [
+        {
+          "titre": "edilians.eu, cuvettes 1/2 rondes de face (zinc naturel, quartz, cuivre)",
+          "url": "https://edilians.eu/cuvettes-1-2-rondes-de-face.html",
+          "type": "negoce",
+          "extrait": "Permet de relier deux tuyaux de descente en un seul ; ø 80 mm, ø 100 mm, ø 120 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø80 avec trop-plein » (réf. 11008275, Richardson)",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/889/99368_11008275_fichetechniqu.pdf",
+          "type": "fabricant",
+          "extrait": "Elle est souvent utilisée sur les toitures en terrasse en sortie d'acrotère.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB, calepin de chantier « Évacuation des eaux pluviales » (DTU 40.5, DTU 60.11)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Evacuation_eaux_pluviales.pdf",
+          "type": "guide",
+          "extrait": "Cuvette de branchement, Cuvette de face, Boîte à eau",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Pas calculable depuis le devis."
+    },
+    {
+      "ratio": "Chatières : le nombre, si ce n'est pas noté",
+      "origine": "regles-metier SKILL.md (Tuile)",
+      "valeur_actuelle": "demandé",
+      "verdict": "confirme",
+      "bonne_valeur": "sinon calculable : surface projetée × 2 (ou 3,3) cm²/m² ÷ section de la chatière, nombre pair",
+      "sources": [
+        {
+          "titre": "FFB, dossier « La ventilation des couvertures en petits éléments »",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+          "type": "guide",
+          "extrait": "1/5000 comble perdu ; 1/3000 rampant isolé ; moitié en bas, moitié en haut (relu le 19/11, repris de points-singuliers.json)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ubbink, catalogue Ventilation de la structure (BigMat), p. 29-31",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+          "type": "fabricant",
+          "extrait": "V : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée) (repris de points-singuliers.json)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Même règle que accessoires-tuiles.json."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Pointes de liteaux / voliges",
+      "ce_que_le_vendeur_demande": [
+        "diamètre × longueur (2,8 × 60, 3,1 × 70…)",
+        "finition (galva à chaud, inox)",
+        "tige (lisse, torsadée, annelée)",
+        "tête plate"
+      ],
+      "unite_de_vente": "le kg (boîte)",
+      "conditionnement": "1 kg, 2,5 kg, 5 kg",
+      "sources": [
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TP CT HDG » (tête plate carré torsadée galvanisée à chaud), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3660601062219-WpyRTjXYmS.pdf",
+          "type": "fabricant",
+          "extrait": "TP 2,5 x 50 CT HDG 5,00 2 500 17 ; TP 2,8 x 60 … 1 700 20 ; TP 3,1 x 70 … 1 170 27 ; TP 3,1 x 80 … 1 048 30",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Clous d'ardoise",
+      "ce_que_le_vendeur_demande": [
+        "matière (galva, cuivre, inox)",
+        "diamètre × longueur (2,7 × 30 ; cuivre 3 × 30)",
+        "tête extra-large"
+      ],
+      "unite_de_vente": "le kg",
+      "conditionnement": "1, 2,5 ou 5 kg",
+      "sources": [
+        {
+          "titre": "Alsafix, fiche technique « Pointes TEL » (tête extra large lisse, HDG galvanisée à chaud)",
+          "url": "https://www.alsafix.com/produits/article/ft/1L280455",
+          "type": "fabricant",
+          "extrait": "TEL 2,8 x 30 … 680 ; TEL 2,5 x 27 … 880 ; TEL 2,8 x 60 … 340 ; TEL 3,1 x 70 … 240 (/kg) ; Cartons de 1 kg - 2,5 et 5 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "ArcelorMittal Périgueux, Catalogue Pointes Négoce TE Pointes (2021) : tête plate galvanisée, Sitor® torsadée galvanisée, tête extra-large, cuivre",
+          "url": "https://wiresolutions.arcelormittal.com/repository/P%c3%a9rigueux/Pointes-Negoce_FR%20normal-2021.pdf",
+          "type": "fabricant",
+          "extrait": "Sitor galvanisée boîte de 5 kg : 2.50 x 50 = 524 ; 2.85 x 60 = 336 ; 3.20 x 70 = 228 ; 3.20 x 80 = 200 (Nbre pointes/kg env.)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Alsafix, fiche « Pointe TEL carrée crantée cuivre » (diffusée par Bati-Avenue)",
+          "url": "https://www.bati-avenue.com/media/akeneo_connector/media_files/T/L/TL300407S_4268.pdf",
+          "type": "fabricant",
+          "extrait": "TEL 3 x 3 x 27 … 464 ; 3 x 3 x 30 … 417 ; 3 x 3 x 35 … 357 (/kg) ; Cartons de 5 kg, Seaux de 5 kg",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Crochets de tuile",
+      "ce_que_le_vendeur_demande": [
+        "modèle de tuile ou de crochet (Mono 14/16/17, Harpon, PM d'égout)",
+        "section du liteau",
+        "inox ou galva"
+      ],
+      "unite_de_vente": "boîte",
+      "conditionnement": "souvent 400 (Dimos) ; sinon demander",
+      "sources": [
+        {
+          "titre": "Dimos, crochet anti-soulèvement X-Tile pour tuiles à emboîtement (fiche Batiproduits)",
+          "url": "https://www.batiproduits.com/fiche/produits/crochet-anti-soulevement-pour-tuiles-a-emboitem-p69087273.html",
+          "type": "fabricant",
+          "extrait": "400 pièces/boîte carton",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024, p. 347 « Détermination du crochet Mono »",
+          "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+          "type": "fabricant",
+          "extrait": "Mono 14 … liteau de 25x27 ; Mono 16 … 27x40 ; Mono 17 … 40x40",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Cuvette / boîte à eau",
+      "ce_que_le_vendeur_demande": [
+        "type (branchement, de face, d'angle, boîte à eau carrée)",
+        "diamètre de sortie (80, 100, 120)",
+        "matière (zinc naturel, quartz, cuivre)",
+        "trop-plein"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "RHEINZINK, fiche « Boîte à eau carrée 200x200x200 sortie Ø80 avec trop-plein » (réf. 11008275, Richardson)",
+          "url": "https://www.richardson.fr/files/richardson/technical_document/889/99368_11008275_fichetechniqu.pdf",
+          "type": "fabricant",
+          "extrait": "Elle est souvent utilisée sur les toitures en terrasse en sortie d'acrotère.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "edilians.eu, cuvettes 1/2 rondes de face (zinc naturel, quartz, cuivre)",
+          "url": "https://edilians.eu/cuvettes-1-2-rondes-de-face.html",
+          "type": "negoce",
+          "extrait": "Permet de relier deux tuyaux de descente en un seul ; ø 80 mm, ø 100 mm, ø 120 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    }
+  ]
+}
