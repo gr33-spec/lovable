@@ -1,8 +1,8 @@
 # Banc du calcul de la couverture
 
 - Entraînement (10 chantiers) : 51/64 (79.7 %), 0 en trop, 0 « à chiffrer » sans question
-- Examen (5 chantiers) : 31/36 (86.1 %), 1 en trop, 1 « à chiffrer » sans question
-- Ensemble : 82/100 (82 %), 1 en trop, 1 « à chiffrer » sans question
+- Examen (5 chantiers) : 32/36 (88.9 %), 1 en trop, 0 « à chiffrer » sans question
+- Ensemble : 83/100 (83 %), 1 en trop, 0 « à chiffrer » sans question
 
 | Chantier | Justes | Lignes fausses | En trop |
 |---|---|---|---|
@@ -20,10 +20,10 @@
 | C12 | 11/13 | Faîtières : 23 n attendu, Faîtières : 27 pièces ; Tuile à douille : 1 n attendu, absent | Chapeau de sortie de toit : 1 pièce |
 | C13 | 6/6 | aucune | aucune |
 | C14 | 4/4 | aucune | aucune |
-| C15 | 3/4 | Tuiles à emboîtement : 945 n attendu, Terreal Volnay PV rouge vieilli : à chiffrer | aucune |
+| C15 | 4/4 | aucune | aucune |
 
 ## « À chiffrer » sans question qui débloque
-- C15 : Terreal Volnay PV rouge vieilli (Modèle écrit par l'artisan : le fournisseur compte les pièces pour la mesure du devis.)
+aucune
 
 ## Questions sans réponse du couvreur dans le banc
 aucune

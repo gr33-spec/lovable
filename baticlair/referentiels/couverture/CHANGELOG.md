@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-69 — Tuile Volnay PV au catalogue, « 1 descente » jamais « 1 pièce » (2026-11-21)
+
+Le banc du calcul passe de 81 à 83 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Tuile Terreal Volnay PV | modèle inconnu : ligne « à chiffrer » sans question | au catalogue : largeur utile 251 mm, pureau 340 à 408 mm, palette de 240 | fiche produit Terreal (Wienerberger) de mars 2025, relevée dans la base couverture (S84) ; fabricant seul, contrôlé par le calcul |
+| Descente écrite « 1 u » sans hauteur (« je ne sais pas ») | « Tubes de descente : 1 pièce » | la ligne reste sans quantité, « 1 u au devis » en précision | le nombre écrit compte des descentes, pas des tubes |
+
 ## roofing-2026.11.21-68 — Arêtier zinc : des mots précis (2026-11-21)
 
 Le banc du calcul ne bouge pas : 81 lignes justes sur 100.

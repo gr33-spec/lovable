@@ -299,7 +299,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
 
     const { tuile: _t, ...others } = ALL_PRODUCTS;
     const missing = computeWorkItem(ref, { ...CASE, products: others });
-    expect(need(missing, "tuiles").question).toMatchObject({ kind: "choose_product", options: [{ label: "Tuiles HP10" }] });
+    expect(need(missing, "tuiles").question).toMatchObject({ kind: "choose_product", options: [{ label: "Tuiles HP10" }, { label: "Tuiles Volnay PV" }] });
 
     const outside = computeWorkItem(ref, { ...CASE, params: { ...CASE.params, pureau: { value: "40", unit: "cm", origin: "artisan" } } });
     expect(need(outside, "tuiles").question).toMatchObject({ key: "param:pureau", hint: "Entre 31 et 37,6 cm." });

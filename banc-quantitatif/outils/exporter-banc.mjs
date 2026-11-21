@@ -29,7 +29,9 @@ const A = {
   C12: [["Écran HPV", ["ecran"], 2, "rl"], ["Liteaux 27×40", ["liteau"], 266, "ml"], ["Tuiles HP 10", ["tuile", "!rive", "!faiti", "!douille"], 993, "n"], ["Tuiles de rive gauches", ["rive", "gauche"], 16, "n"], ["Tuiles de rive droites", ["rive", "droit|droite"], 16, "n"], ["Faîtières", ["faitiere"], 23, "n"], ["Fenêtres GGL SK06", ["sk06"], 2, "n"], ["Raccords SK06", ["raccord", "114", "!velux", "!ggl"], 2, "n"], ["Fenêtre GGL CK02", ["ck02"], 1, "n"], ["Raccord CK02", ["raccord", "55", "!velux", "!ggl"], 1, "n"], ["Tuile à douille", ["douille"], 1, "n"], ["Lanterne de sortie de toit Ø125", ["lanterne|sortie|chapeau", "!douille"], 1, "n"], ["Plomb en rouleau", ["plomb"], 1, "rl"]],
   C13: [["Bandes de rive zinc", ["rive"], 7, "n"], ["Bandes porte-solin", ["solin"], 2, "n"], ["Gouttière de 25", ["gouttiere", "!crochet", "!naissance", "!talon"], 4, "n"], ["Tubes de descente Ø80", ["tube|tuyau|descente", "!dauphin", "!coude", "!collier"], 3, "n"], ["Dauphin fonte", ["dauphin"], 1, "n"], ["Abergement de cheminée", ["abergement"], null, ""]],
   C14: [["Bobine zinc 650 (bacs)", ["bobine"], 47.5, "ml"], ["Bobineau zinc (chéneau)", ["bobineau"], 1, "n"], ["Tubes de descente Ø80", ["tube|tuyau|descente", "!dauphin", "!coude", "!collier"], 2, "n"], ["Feuille de zinc (solin)", ["feuille", "zinc"], 1, "n"]],
-  C15: [["Tuiles à emboîtement", ["tuile|volnay", "!rive", "!faiti"], 945, "n"], ["Plaques bac acier", ["plaque|bac", "!faitiere", "!closoir", "!vis"], 7, "n"], ["Gouttière alu de 25", ["gouttiere", "!crochet", "!naissance", "!talon", "!jonction"], 6, "n"], ["Tubes de descente alu Ø80", ["tube|tuyau|descente", "!dauphin", "!coude", "!collier"], 6, "n"]],
+  // C15, tuiles : 942 et non 945. Même règle que C02 et C12 (fiche du 19 novembre) : un nombre entier de rangs sur le rampant
+  // (6 m : 15 rangs de 0,40 m), 1 / (0,251 × 0,40) = 9,96 au m², × 90 m² × 1,05. Le contrôleur avait pris 10 au m² tout rond.
+  C15: [["Tuiles à emboîtement", ["tuile|volnay", "!rive", "!faiti"], 942, "n"], ["Plaques bac acier", ["plaque|bac", "!faitiere", "!closoir", "!vis"], 7, "n"], ["Gouttière alu de 25", ["gouttiere", "!crochet", "!naissance", "!talon", "!jonction"], 6, "n"], ["Tubes de descente alu Ø80", ["tube|tuyau|descente", "!dauphin", "!coude", "!collier"], 6, "n"]],
 };
 // Les réponses du couvreur aux questions que le moteur corrigé pose en plus : lues dans la fiche vérité du chantier
 // (`chantiers/<C>/verite.json`), jamais inventées ; ce que la fiche ne sait pas reste « je ne sais pas ».
@@ -37,7 +39,7 @@ const REPONSES_EN_PLUS = {
   C06: { "product:tuile": { valeur: "edilians-canal-50" } }, // la fiche vérité : Edilians Canal 50 ; 85 m² × 11,1 au m² (recouvrement 150) + 3 % = 972 courants et 972 couverts
   C08: { "product:ardoise": { valeur: "ardoise-32x22" }, "param:qualite_ardoise": { bouton: "Espagne 1er choix" } }, // la fiche vérité : ardoise naturelle d'Espagne 32×22
   C07: { "param:nb_descentes": { bouton: "2" }, "param:hauteur_descente": { valeur: "4", unite: "m" } },
-  C15: { "product:tuile": { valeur: "Terreal Volnay PV rouge vieilli" }, "param:hauteur_descente": { valeur: "4", unite: "m" }, "param:developpe_gouttiere": { bouton: "25" } },
+  C15: { "product:tuile": { valeur: "terreal-volnay-pv" }, "param:hauteur_descente": { valeur: "4", unite: "m" }, "param:developpe_gouttiere": { bouton: "25" } },
   C11: { "param:qualite_ardoise": { bouton: "Espagne 1er choix" }, "param:developpe": { valeur: "330", unite: "mm" } },
 };
 // Ce qui doit rester une suggestion (règle de Greg), jamais une ligne.

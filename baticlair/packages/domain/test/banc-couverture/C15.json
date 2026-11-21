@@ -320,7 +320,7 @@
    "valeur": "Terreal Volnay PV rouge vieilli"
   },
   "product:tuile": {
-   "valeur": "Terreal Volnay PV rouge vieilli"
+   "valeur": "terreal-volnay-pv"
   },
   "param:hauteur_descente": {
    "valeur": "4",
@@ -338,7 +338,7 @@
     "!rive",
     "!faiti"
    ],
-   "quantite": 945,
+   "quantite": 942,
    "unite": "n"
   },
   {

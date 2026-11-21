@@ -1287,7 +1287,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-68",
+  version: "roofing-2026.11.21-69",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1318,6 +1318,15 @@ export const ROOFING_REFERENTIAL: Referential = {
       url: "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf",
       note: "Nombres au m² (couvert seul) et liteaux au m² par recouvrement, relevés par le fondateur (référentiel §35.3).",
       retrievedAt: "2026-10-04",
+    },
+    {
+      id: "terreal-volnay-pv",
+      kind: "manufacturer",
+      title: "Fiche produit Volnay PV (Terreal, Wienerberger)",
+      publisher: "Terreal",
+      url: "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Volnay_PV_001.pdf",
+      note: "Fiche de mars 2025, relevée dans la base couverture (S84) : 10 tuiles au m², pureau 340 à 408 mm, largeur utile 251 mm. Fabricant seul ; contrôlé par le calcul 1 / (largeur utile × pureau).",
+      retrievedAt: "2026-11-19",
     },
     {
       id: "edilians-hp10",
@@ -1987,6 +1996,25 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 500", many: "boîtes de 500" }, contains: packaging("500", "u", F, FOUNDER_DOC, "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."), primary: true }],
     }),
+    // Banc du calcul (C15, 21 novembre 2026) : la Volnay PV de la base couverture entre au catalogue du moteur. Avant : un
+    // modèle inconnu, « à chiffrer » sans question.
+    {
+      id: "terreal-volnay-pv",
+      family: "roof_tile",
+      label: "Tuile terre cuite Volnay PV (Terreal)",
+      shortLabel: "Tuiles Volnay PV",
+      manufacturer: "Terreal",
+      aliases: ["volnay", "volnay pv", "terreal volnay", "terreal volnay pv"],
+      attributes: {
+        largeur_utile: spec("0.251", "m", "terreal-volnay-pv", FOUNDER_CHECKED, "251 mm (fiche Terreal 03/2025)."),
+        pureau_min: spec("0.340", "m", "terreal-volnay-pv", FOUNDER_CHECKED),
+        pureau_max: spec("0.408", "m", "terreal-volnay-pv", FOUNDER_CHECKED),
+      },
+      sellingUnits: [
+        { id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true },
+        { id: "palette", label: { one: "palette", many: "palettes" }, contains: packaging("240", "u", "terreal-volnay-pv", FOUNDER_CHECKED) },
+      ],
+    },
     generic("tuile-rive-standard", "verge_tile", "Tuile de rive (modèle de la tuile)", "Tuiles de rive"),
     generic("tuile-rive-gauche-standard", "verge_tile", "Tuile de rive gauche (modèle de la tuile)", "Tuiles de rive gauches"),
     generic("tuile-rive-droite-standard", "verge_tile", "Tuile de rive droite (modèle de la tuile)", "Tuiles de rive droites"),

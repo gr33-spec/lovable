@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-68",
+  "version": "roofing-2026.11.21-69",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -50,6 +50,15 @@
       "url": "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf",
       "note": "Nombres au m² (couvert seul) et liteaux au m² par recouvrement, relevés par le fondateur (référentiel §35.3).",
       "retrievedAt": "2026-10-04"
+    },
+    {
+      "id": "terreal-volnay-pv",
+      "kind": "manufacturer",
+      "title": "Fiche produit Volnay PV (Terreal, Wienerberger)",
+      "publisher": "Terreal",
+      "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Volnay_PV_001.pdf",
+      "note": "Fiche de mars 2025, relevée dans la base couverture (S84) : 10 tuiles au m², pureau 340 à 408 mm, largeur utile 251 mm. Fabricant seul ; contrôlé par le calcul 1 / (largeur utile × pureau).",
+      "retrievedAt": "2026-11-19"
     },
     {
       "id": "edilians-hp10",
@@ -3672,6 +3681,103 @@
             "note": "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."
           },
           "primary": true
+        }
+      ]
+    },
+    {
+      "id": "terreal-volnay-pv",
+      "family": "roof_tile",
+      "label": "Tuile terre cuite Volnay PV (Terreal)",
+      "shortLabel": "Tuiles Volnay PV",
+      "manufacturer": "Terreal",
+      "aliases": [
+        "volnay",
+        "volnay pv",
+        "terreal volnay",
+        "terreal volnay pv"
+      ],
+      "attributes": {
+        "largeur_utile": {
+          "kind": "manufacturer_spec",
+          "value": "0.251",
+          "unit": "m",
+          "source": "terreal-volnay-pv",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "251 mm (fiche Terreal 03/2025)."
+        },
+        "pureau_min": {
+          "kind": "manufacturer_spec",
+          "value": "0.340",
+          "unit": "m",
+          "source": "terreal-volnay-pv",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1
+        },
+        "pureau_max": {
+          "kind": "manufacturer_spec",
+          "value": "0.408",
+          "unit": "m",
+          "source": "terreal-volnay-pv",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        },
+        {
+          "id": "palette",
+          "label": {
+            "one": "palette",
+            "many": "palettes"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "240",
+            "unit": "u",
+            "source": "terreal-volnay-pv",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+              "note": "Page et version exactes à compléter à réception du PDF."
+            },
+            "version": 1
+          }
         }
       ]
     },
