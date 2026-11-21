@@ -109,7 +109,7 @@ export function lienAutres(autres: readonly ActionCandidate[]): string | null {
 export interface CarteActivite extends ActionCandidate {
   /** Le dossier : la même liste vue par deux sources (« À faire » et « Mes demandes ») n'a qu'une carte. */
   dossier: string;
-  type: "Demande de prix" | "Achat groupé" | "Liste";
+  type: "Demande de prix" | "Achat groupé" | "Quantitatif";
   titre: string;
   /** Une ligne, jamais deux fois la même information (« 3 réponses reçues », pas « · 3 réponses sur 3 »). */
   info: string;

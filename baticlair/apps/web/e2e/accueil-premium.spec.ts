@@ -111,8 +111,8 @@ test("nouveau compte : les zones dès l'inscription, l'accompagnement en trois �
   // L'accompagnement : trois étapes réelles, aucune cochée.
   const guide = page.getByRole("region", { name: /^Pour bien démarrer/ });
   await expect(guide).toContainText("0/");
-  await expect(guide.getByRole("link")).toHaveText([/Mon premier quantitatif/, /Demander mes premiers prix/, /Découvrir les achats groupés/].slice(0, await guide.getByRole("link").count()));
-  await expect(guide.getByRole("link", { name: /^Mon premier quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(guide.getByRole("link")).toHaveText([/Faire mon premier quantitatif/, /Demander mes premiers prix/, /Découvrir les achats groupés/].slice(0, await guide.getByRole("link").count()));
+  await expect(guide.getByRole("link", { name: /^Faire mon premier quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
   await capture(page, "nouveau-compte");
   await rienSousLaBarre(page);
   await guide.getByRole("button", { name: "Fermer l'accompagnement" }).click();
@@ -155,7 +155,7 @@ test("clair et sombre : les trois zones se lisent ; la photo a son voile ; le te
   for (const theme of ["clair", "sombre"] as const) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     await page.goto("/");
-    const titre = page.getByRole("region", { name: "Nouveau quantitatif" }).getByRole("heading", { name: "Nouveau quantitatif" });
+    const titre = page.getByRole("region", { name: "Nouveau quantitatif" }).getByRole("heading", { name: "Prépare ta liste de matériaux" });
     await expect(titre).toHaveCSS("color", "rgb(255, 255, 255)");
     await capture(page, `theme-${theme}`);
   }

@@ -460,7 +460,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     await page.getByLabel("Quantité de Ardoise naturelle 32×22 · Espagne 1er choix").fill("900");
     await page.getByRole("button", { name: "Ajouter à ma liste" }).click();
     // Étape 1 quittée, reprise : la ligne est là.
-    await partirEtReprendre(page, "Besoin groupé à terminer");
+    await partirEtReprendre(page, "^Continuer : Achat groupé, .*À terminer");
     await expect(page.getByRole("region", { name: "Qu'est-ce que tu commandes ?" })).toBeVisible();
     await expect(page.getByText(/Ardoise naturelle 32×22 · Espagne 1er choix/).first()).toBeVisible();
     // Sous charge, un clic peut tomber pendant que l'écran repris se pose : on attend l'étape 2, clic repris au besoin.
@@ -470,19 +470,19 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     }).toPass({ timeout: 30_000 });
     // Étape 2.
     await page.getByLabel("Commune de livraison").fill(`${dep}200 Autre-${dep}`);
-    await partirEtReprendre(page, "Besoin groupé à terminer");
+    await partirEtReprendre(page, "^Continuer : Achat groupé, .*À terminer");
     await expect(page.getByRole("region", { name: "Où et pour quand ?" })).toBeVisible();
     await expect(page.getByLabel("Commune de livraison")).toHaveValue(`${dep}200 Autre-${dep}`);
     await page.getByRole("button", { name: "Continuer" }).click();
     // Étape 3.
     await ajouterNegoce(page, { nom: `Négoce ${unique()}`, email: `n-${unique()}@negoce.example`, tel: "02 96 00 00 09" });
-    await partirEtReprendre(page, "Besoin groupé à terminer");
+    await partirEtReprendre(page, "^Continuer : Achat groupé, .*À terminer");
     await expect(page.getByRole("region", { name: "À quels négoces envoyer la demande ?" })).toBeVisible();
     await page.getByRole("button", { name: "Continuer" }).click();
     // Étape 4 : le SIRET sur place (jamais le Profil) ; quitté là aussi, rien n'est perdu.
     const entreprise = page.getByRole("region", { name: "Ton entreprise" });
     await expect(entreprise).toBeVisible();
-    await partirEtReprendre(page, "Besoin groupé à terminer");
+    await partirEtReprendre(page, "^Continuer : Achat groupé, .*À terminer");
     await expect(entreprise).toBeVisible();
     await entreprise.getByLabel("SIRET de ton entreprise").fill("73282932000074");
     if (!(await entreprise.getByLabel("Ton prénom").inputValue())) await entreprise.getByLabel("Ton prénom").fill("Jean");
@@ -521,7 +521,7 @@ test.describe("Brouillons : quitter et revenir sans rien perdre", () => {
     // La saisie à la main s'ouvre par « Je saisis ma liste » (plus par l'assistant, 13 novembre 2026) : la quitter ramène
     // au choix « Nouveau quantitatif ».
     await page.waitForURL(/\/chantiers\/nouveau$/);
-    await partirEtReprendre(page, "Liste à terminer");
+    await partirEtReprendre(page, "^Continuer : Quantitatif, .*À terminer");
     await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByRole("textbox").first()).toHaveValue("Liteaux 27×38 maison");
   });
 });

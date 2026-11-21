@@ -158,7 +158,7 @@ test("un besoin groupé publié : la date réagit tout de suite, puis l'accueil 
   // la règle des 3 ; jamais le nom d'une entreprise.
   await page.goto("/");
   const demandes = page.getByRole("region", { name: "Mon activité" });
-  const carte = demandes.getByRole("link", { name: /: Ardoise naturelle/ }).first();
+  const carte = demandes.getByRole("link", { name: /Achat groupé, Ardoise naturelle/ }).first();
   await expect(carte).toContainText("Achat groupé");
   await expect(carte).toContainText(/(\d+ entreprises · [\d\s]+ pièces au total|en cours de regroupement)/);
   await expect(demandes).not.toContainText("Toitures");

@@ -234,11 +234,10 @@ test("brouillon de l'envoi aux négoces (correction du 30 octobre, point 2) : qu
   await page.waitForTimeout(800);
   await page.reload();
   await expect(page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" }).getByLabel("Le mail à ton négoce")).toContainText("Bonjour,");
-  // Et l'accueil la propose (accueil premium, 20 novembre 2026) : « Mon activité », « Demande de prix à terminer », « Continuer ».
+  // Et l'accueil la propose (accueil premium, 20 novembre 2026) : « Mon activité », une demande de prix « À terminer », « Continuer ».
   await page.goto("/");
   const afaire = page.getByRole("region", { name: "Mon activité", exact: true });
-  await expect(afaire.getByText("Demande de prix à terminer")).toBeVisible();
-  await afaire.getByRole("link", { name: /^Continuer : .*Demande de prix à terminer/ }).click();
+  await afaire.getByRole("link", { name: /^Continuer : Demande de prix, .*À terminer$/ }).click();
   await page.waitForURL(new RegExp(`/chantiers/${q.body.projetId}$`));
   const recoit2 = page.getByRole("dialog", { name: "Voici ce que ton négoce va recevoir" });
   await recoit2.getByRole("button", { name: "Envoyer", exact: true }).click();

@@ -141,9 +141,10 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   const afaire = page.getByRole("region", { name: "Mon activité", exact: true });
   await expect(afaire).toBeVisible();
   const premiere = afaire.getByRole("link", { name: /^Continuer/ }).first();
-  await expect(premiere).toContainText("Liste à terminer");
+  await expect(premiere).toContainText("À terminer");
+  await expect(premiere).toContainText("Quantitatif");
   await expect(premiere).toContainText("Ta liste · 1 matériau");
-  await expect(afaire.getByRole("link", { name: /^Continuer : .*Besoin groupé à terminer/ })).toBeVisible();
+  await expect(afaire.getByRole("link", { name: /^Continuer : Achat groupé, .*À terminer$/ })).toBeVisible();
   await premiere.click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau\?liste=1$/);
   await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByLabel("Désignation")).toHaveValue("Liteaux 27×38 maison");
@@ -278,7 +279,7 @@ test("Mes listes : une liste envoyée ne se supprime pas (raison dite) ; « Sél
 test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des cartes se lisent (contraste AA)", async ({ page }) => {
   await inscrire(page);
   // L'accueil d'un nouveau compte d'abord (« Mon premier quantitatif »), puis la liste créée pour « Mes demandes ».
-  for (const [url, texte, theme] of [["/", "Mon premier quantitatif", "sombre"], ["/", "Mon premier quantitatif", "clair"], ["/chantiers?vue=suivi", "Liste du thème", "sombre"], ["/chantiers?vue=suivi", "Liste du thème", "clair"]] as const) {
+  for (const [url, texte, theme] of [["/", "Faire mon premier quantitatif", "sombre"], ["/", "Faire mon premier quantitatif", "clair"], ["/chantiers?vue=suivi", "Liste du thème", "sombre"], ["/chantiers?vue=suivi", "Liste du thème", "clair"]] as const) {
     if (url !== "/" && theme === "sombre") await liste(page, "Liste du thème");
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     {

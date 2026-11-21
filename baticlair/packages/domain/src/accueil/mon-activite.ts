@@ -99,7 +99,7 @@ export interface EtapeAccompagnement {
 }
 export function accompagnement(x: { listes: number; demandes: number; groupesVus: boolean; besoinsGroupes: number }): EtapeAccompagnement[] {
   return [
-    { id: "quantitatif", titre: "Mon premier quantitatif", faite: x.listes > 0, href: "/chantiers/nouveau" },
+    { id: "quantitatif", titre: "Faire mon premier quantitatif", faite: x.listes > 0, href: "/chantiers/nouveau" },
     { id: "prix", titre: "Demander mes premiers prix", faite: x.demandes > 0, href: x.listes > 0 ? "/demandes" : "/chantiers/nouveau" },
     { id: "groupes", titre: "Découvrir les achats groupés", faite: x.groupesVus || x.besoinsGroupes > 0, href: "/achats-groupes" },
   ];

@@ -4,7 +4,7 @@ import { Camera, Check, ChevronRight, FileText, Mic, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { monActivite, type CarteActivite } from "../../../../packages/domain/src/accueil/accueil";
-import { accompagnement, artisansDuMetier, compteARebours, deDepartement, phraseGroupe } from "../../../../packages/domain/src/accueil/mon-activite";
+import { accompagnement, artisansDuMetier, CHRONO_MS, compteARebours, deDepartement, phraseGroupe } from "../../../../packages/domain/src/accueil/mon-activite";
 import { InstallHint } from "@/components/install-hint";
 import { BandeauReprises } from "@/components/reprises";
 import { useGroupeActif } from "@/components/app-nav";
@@ -91,9 +91,9 @@ const minuscule = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 function cartesDesBrouillons(brouillons: Brouillon<unknown>[]): Carte[] {
   return brouillons.map((b) => {
     const base = { cle: `b-${b.cle}`, dossier: projetDeUrl(b.url) ?? `b-${b.cle}`, immediate: false, echeance: null, modifieLe: b.modifieLe, action: "Continuer", href: b.url, titre: b.titre };
-    if (b.type === "envoi") return { ...base, sorte: "brouillon-demande" as const, type: "Demande de prix" as const, info: "Demande de prix à terminer" };
-    if (b.type === "achat-groupe") return { ...base, sorte: "brouillon-achat" as const, type: "Achat groupé" as const, info: "Besoin groupé à terminer" };
-    return { ...base, sorte: "brouillon-liste" as const, type: "Liste" as const, info: "Liste à terminer" };
+    if (b.type === "envoi") return { ...base, sorte: "brouillon-demande" as const, type: "Demande de prix" as const, info: "À terminer" };
+    if (b.type === "achat-groupe") return { ...base, sorte: "brouillon-achat" as const, type: "Achat groupé" as const, info: "À terminer" };
+    return { ...base, sorte: "brouillon-liste" as const, type: "Quantitatif" as const, info: "À terminer" };
   });
 }
 
@@ -119,7 +119,7 @@ function cartesDesRapprochements(items: { cle: string; texte: string; href: stri
           ? ["Besoin à confirmer", "Confirmer"]
           : r.cle.startsWith("precision:")
             ? ["Une question sur ta demande", "Répondre"]
-            : ["Rien n'est ajouté sans ton accord", "Examiner"];
+            : ["Un besoin proche du tien", "Voir"];
     return { cle: r.cle, dossier: projetDeUrl(r.href) ?? r.href, sorte: "rapprochement" as const, immediate: true, echeance: null, modifieLe: null, type: groupe ? ("Achat groupé" as const) : ("Demande de prix" as const), titre: r.texte, info, action, href: r.href };
   });
 }
@@ -129,8 +129,8 @@ function cartesDesListes(next: NextAction[], projets: Map<string, { lastActivity
   // Une liste dont un parcours est en cours (brouillon) se reprend par lui : sa carte passe devant.
   for (const n of next.filter((x) => !dejaBrouillon.has(x.projectId))) {
     const modifieLe = projets.get(n.projectId)?.lastActivityAt ?? null;
-    if (n.kind === "validate_list") out.push({ cle: `n-${n.projectId}`, dossier: n.projectId, sorte: "liste-a-verifier", immediate: false, echeance: null, modifieLe, type: "Liste", titre: n.projectName, info: "Liste à vérifier", action: "Vérifier", href: `/chantiers/${n.projectId}` });
-    else if (n.kind === "send_requests") out.push({ cle: `n-${n.projectId}`, dossier: n.projectId, sorte: "demande-a-envoyer", immediate: false, echeance: null, modifieLe, type: "Liste", titre: n.projectName, info: "Liste prête, à envoyer à tes négoces", action: "Demander les prix", href: `/chantiers/${n.projectId}#fournisseurs` });
+    if (n.kind === "validate_list") out.push({ cle: `n-${n.projectId}`, dossier: n.projectId, sorte: "liste-a-verifier", immediate: false, echeance: null, modifieLe, type: "Quantitatif", titre: n.projectName, info: "À vérifier", action: "Vérifier", href: `/chantiers/${n.projectId}` });
+    else if (n.kind === "send_requests") out.push({ cle: `n-${n.projectId}`, dossier: n.projectId, sorte: "demande-a-envoyer", immediate: false, echeance: null, modifieLe, type: "Quantitatif", titre: n.projectName, info: "Prête, à envoyer à tes négoces", action: "Demander les prix", href: `/chantiers/${n.projectId}#fournisseurs` });
   }
   return out;
 }
@@ -227,20 +227,18 @@ function ZoneQuantitatif({ photo, analyses }: { photo: PhotoAccueil; analyses: b
   // La dictée dépend du navigateur : connue seulement après l'affichage (jamais un accès montré puis retiré au serveur).
   const dictee = useSyncExternalStore(sansAbonnement, dicteeDisponible, () => false);
   const acces = [
-    analyses ? { id: "devis", icone: FileText, texte: "Devis", label: "Partir d'un devis" } : null,
+    analyses ? { id: "devis", icone: FileText, texte: "Mon devis", label: "Partir de mon devis" } : null,
     analyses ? { id: "photo", icone: Camera, texte: "Photo", label: "Partir d'une photo" } : null,
     dictee ? { id: "dictee", icone: Mic, texte: "Dicter", label: "Dicter ma liste" } : null,
   ].filter((a): a is NonNullable<typeof a> => a !== null);
   return (
-    <section aria-labelledby="zone-quantitatif" className="accueil-apparait overflow-hidden rounded-[20px] bg-surface shadow-card lg:flex lg:h-full lg:flex-col">
+    <section aria-label="Nouveau quantitatif" className="accueil-apparait overflow-hidden rounded-[20px] bg-surface shadow-card lg:flex lg:h-full lg:flex-col">
       <div className="relative">
-        <Photo photo={photo} prioritaire tailles="(min-width: 1024px) 640px, 100vw" className="aspect-[16/10] w-full object-cover" />
+        <Photo photo={photo} prioritaire tailles="(min-width: 1024px) 640px, 100vw" className="aspect-[2/1] w-full object-cover lg:aspect-[16/10]" />
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4 lg:p-6">
-          <h2 id="zone-quantitatif" className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.02em] text-white text-balance lg:text-[34px]">
-            Nouveau quantitatif
-          </h2>
-          <p className="text-[15px] leading-snug text-white/90 lg:text-[17px]">Ta liste prête pour tes négoces.</p>
+          <h2 className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.02em] text-white text-balance lg:text-[34px]">Prépare ta liste de matériaux</h2>
+          <p className="text-[15px] leading-snug text-white/90 lg:text-[17px]">Prête pour tes négoces.</p>
         </div>
       </div>
       <div className="flex flex-col gap-3 p-4 lg:flex-1 lg:justify-end lg:p-6">
@@ -251,7 +249,7 @@ function ZoneQuantitatif({ photo, analyses }: { photo: PhotoAccueil; analyses: b
         {acces.length > 0 ? (
           <div role="group" aria-label="Autres façons de commencer" className="grid gap-2" style={{ gridTemplateColumns: `repeat(${acces.length}, minmax(0, 1fr))` }}>
             {acces.map(({ id, icone: Icone, texte, label }) => (
-              <Link key={id} href={`/chantiers/nouveau?mode=assistant&entree=${id}`} aria-label={label} className="pressable flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-line px-2 text-[14px] font-bold whitespace-nowrap text-ink">
+              <Link key={id} href={`/chantiers/nouveau?mode=assistant&entree=${id}`} aria-label={label} className="pressable flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-ink/30 px-2 text-[14px] font-bold whitespace-nowrap text-ink">
                 <Icone size={18} aria-hidden="true" />
                 {texte}
               </Link>
@@ -281,9 +279,22 @@ function EnTeteZone({ id, titre, href, lien, label }: { id: string; titre: strin
 
 /** Le chargement de « Mon activité » : deux silhouettes de la taille des vraies cartes. */
 function ActiviteChargement() {
+  const [lent, setLent] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setLent(true), 10_000);
+    return () => window.clearTimeout(t);
+  }, []);
   return (
     <section role="status" aria-busy="true" aria-live="polite" className="flex flex-col gap-3">
       <span className="sr-only">Chargement de ton activité…</span>
+      {lent ? (
+        <div className="flex items-center justify-between gap-3 rounded-[20px] bg-surface p-4 shadow-card">
+          <p className="text-[15px] font-bold">Connexion lente</p>
+          <button type="button" onClick={() => window.location.reload()} className="pressable flex min-h-12 items-center rounded-full border border-ink/30 px-4 text-[14px] font-extrabold">
+            Réessayer
+          </button>
+        </div>
+      ) : null}
       <div aria-hidden="true" className="h-11 w-40 rounded-full" />
       {[0, 1].map((i) => (
         <div key={i} aria-hidden="true" className="animate-pulse-soft h-[88px] rounded-[20px] bg-surface shadow-card" />
@@ -301,7 +312,7 @@ function ZoneActivite({ cartes }: { cartes: Carte[] }) {
       <ul className="flex flex-col gap-3">
         {visibles.map((c, i) => (
           <li key={c.dossier} className={i >= CARTES_TELEPHONE ? "hidden lg:block" : undefined}>
-            <Link href={c.href} aria-label={`${c.action} : ${c.titre}, ${c.info}`} className="pressable flex min-h-[88px] items-center gap-3 rounded-[20px] bg-surface p-4 shadow-card">
+            <Link href={c.href} aria-label={`${c.action} : ${c.type}, ${c.titre}, ${c.info}`} className="pressable flex min-h-[88px] items-center gap-3 rounded-[20px] bg-surface p-4 shadow-card">
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                 <span className="text-[12px] font-bold tracking-[0.04em] text-muted uppercase">{c.type}</span>
                 <span className="truncate text-[17px] leading-tight font-extrabold">{moisAbrege(c.titre)}</span>
@@ -320,11 +331,13 @@ function ZoneActivite({ cartes }: { cartes: Carte[] }) {
 /** Le chrono d'un groupé qui ferme dans moins de 48 h : la vraie clôture, chaque seconde, puis « Clôturé ». */
 function useChrono(clotureIso: string | null) {
   const [maintenant, setMaintenant] = useState<number | null>(() => (typeof window === "undefined" ? null : Date.now()));
+  // Plus de 48 h avant la clôture : aucun décompte (rien ne tourne pour rien sur un vieux téléphone).
+  const proche = clotureIso !== null && maintenant !== null && Date.parse(clotureIso) - maintenant <= CHRONO_MS;
   useEffect(() => {
-    if (!clotureIso) return;
+    if (!clotureIso || !proche) return;
     const t = window.setInterval(() => setMaintenant(Date.now()), 1000);
     return () => window.clearInterval(t);
-  }, [clotureIso]);
+  }, [clotureIso, proche]);
   return clotureIso && maintenant !== null ? compteARebours(clotureIso, maintenant) : null;
 }
 
@@ -332,15 +345,17 @@ function useChrono(clotureIso: string | null) {
 function ZoneGroupes({ ouverts, metiers }: { ouverts: { zone: { code: string; nom: string } | null; achats: AchatV1[] } | null; metiers: string[] }) {
   const zone = ouverts?.zone ?? null;
   const artisans = artisansDuMetier(metiers);
-  const titre = zone ? `Rejoins les ${artisans} ${deDepartement(zone.code, zone.nom)}` : `Rejoins les ${artisans} de ton secteur`;
+  const lieu = zone ? deDepartement(zone.code, zone.nom) : null;
   const mesLots = new Set(metiers.flatMap((t) => LOTS_DU_METIER[t] ?? []));
   // Son métier seulement ; ceux où il n'est pas encore d'abord ; la clôture la plus proche d'abord (ordre de l'API).
   const duMetier = (ouverts?.achats ?? []).filter((a) => mesLots.size === 0 || mesLots.has(a.lot));
   const achat = duMetier.find((a) => !a.monBesoinId) ?? duMetier[0] ?? null;
+  // Déjà dedans : on ne l'invite pas à « rejoindre » ce qu'il a rejoint.
+  const titre = achat?.monBesoinId ? `Les ${artisans} ${lieu ?? "de ton secteur"} achètent ensemble` : `Rejoins les ${artisans} ${lieu ?? "de ton secteur"}`;
   const chrono = useChrono(achat ? finDuJour(achat.ouvertJusquau) : null);
   const vu = () => ecrire(CLE_GROUPES_VUS, "1");
 
-  if (ouverts === null) return <div aria-hidden="true" className="animate-pulse-soft h-[148px] rounded-[20px] bg-surface shadow-card" />;
+  if (ouverts === null) return <div aria-hidden="true" className="animate-pulse-soft h-[260px] rounded-[20px] bg-surface shadow-card" />;
 
   if (!achat)
     return (
@@ -350,7 +365,7 @@ function ZoneGroupes({ ouverts, metiers }: { ouverts: { zone: { code: string; no
           <Photo photo={PHOTO_GROUPES} prioritaire={false} tailles="80px" className="size-20 shrink-0 rounded-2xl object-cover" />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <p className="text-[17px] leading-tight font-extrabold text-balance">Sois le premier dans ton département</p>
-            <p className="text-[14px] leading-snug text-muted">{titre} : publie ton besoin, ils pourront le rejoindre.</p>
+            <p className="text-[14px] leading-snug text-muted">Aucun achat groupé en cours. Publie ton besoin : les autres {artisans} pourront le rejoindre.</p>
             <Link href="/achats-groupes/publier" onClick={vu} className="pressable flex min-h-12 items-center self-start rounded-full bg-accent px-4 text-[14px] font-extrabold text-on-accent">
               Publier un besoin groupé
             </Link>
@@ -383,7 +398,7 @@ function ZoneGroupes({ ouverts, metiers }: { ouverts: { zone: { code: string; no
                 ) : (
                   <>
                     <span className="size-2 rounded-full bg-accent" aria-hidden="true" />
-                    Ferme dans <span className="tabular-nums">{chrono.texte}</span>
+                    Clôture dans <span className="tabular-nums">{chrono.texte}</span>
                   </>
                 )}
               </p>
