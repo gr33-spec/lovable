@@ -1,0 +1,19 @@
+{
+  "juste": 7,
+  "quantite_fausse": 2,
+  "manquante": 6,
+  "en_trop": 3,
+  "detail": [
+    {"article": "Liteau 27×40 sapin traité classe 2", "classe": "quantite_fausse", "attendu": "270 ml", "obtenu": "à chiffrer"},
+    {"article": "Faîtière demi-ronde à emboîtement HP 10 Huguenot ardoisé", "classe": "quantite_fausse", "attendu": "23 pièces", "obtenu": "27 pièces"},
+    {"article": "Tuile terre cuite à emboîtement Edilians HP 10 Huguenot, teinte ardoisé", "classe": "manquante", "attendu": "1026 pièces", "obtenu": null},
+    {"article": "Tuile de rive à rabat HP 10 Huguenot ardoisé, gauche (G 205.73)", "classe": "manquante", "attendu": "9 pièces", "obtenu": null},
+    {"article": "Demi-tuile de rive à rabat HP 10 ardoisé, gauche (G 205.75)", "classe": "manquante", "attendu": "9 pièces", "obtenu": null},
+    {"article": "Tuile de rive à rabat HP 10 Huguenot ardoisé, droite (D 205.72)", "classe": "manquante", "attendu": "9 pièces", "obtenu": null},
+    {"article": "Demi-tuile de rive à rabat HP 10 ardoisé, droite (D 205.74)", "classe": "manquante", "attendu": "9 pièces", "obtenu": null},
+    {"article": "Tuile à douille HP 10 Huguenot ardoisé (sortie de toit VMC)", "classe": "manquante", "attendu": "1 pièce", "obtenu": null},
+    {"article": "Embase plomb de sortie de toit Ø 125", "classe": "en_trop", "attendu": null, "obtenu": "1 pièce"},
+    {"article": "Ardoises (Ardoises)", "classe": "en_trop", "attendu": "ne doit pas sortir", "obtenu": "à chiffrer"},
+    {"article": "Ardoises (F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m)", "classe": "en_trop", "attendu": "ne doit pas sortir", "obtenu": "à chiffrer"}
+  ]
+}

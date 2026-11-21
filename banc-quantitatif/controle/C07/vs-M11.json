@@ -1,0 +1,20 @@
+{
+  "juste": 4,
+  "quantite_fausse": 2,
+  "manquante": 0,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Vis autoperceuses avec rondelle EPDM pour bac acier sur pannes métalliques",
+      "classe": "quantite_fausse",
+      "attendu": "à chiffrer",
+      "obtenu": "12 boîtes de 100"
+    },
+    {
+      "article": "Faîtière double pente bac acier RAL 7016, longueur 2 m",
+      "classe": "quantite_fausse",
+      "attendu": "7 pièces de 2 m",
+      "obtenu": "38 pièces"
+    }
+  ]
+}

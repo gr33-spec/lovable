@@ -3,11 +3,11 @@
  "c": "C13",
  "e": 1,
  "nRef": 6,
- "justes": 1,
+ "justes": 3,
  "quantite": 2,
  "manquantes": 1,
  "inventees": 1,
- "doutes": 2,
+ "doutes": 0,
  "questions": 3,
  "questionsRef": 4,
  "questionsHorsRef": 1,
@@ -25,16 +25,7 @@
   "inventees": [
    "Dauphins, diamètre des descentes 80 mm (1 )"
   ],
-  "doutes": [
-   {
-    "ref": "Gouttière demi-ronde zinc de 25",
-    "lue": "Gouttière dév. 25"
-   },
-   {
-    "ref": "Descente Ø80",
-    "lue": "Tubes de descente Ø80, longueur 2 m"
-   }
-  ],
+  "doutes": [],
   "horsRef": [
    {
     "key": "param:longueur_bande",

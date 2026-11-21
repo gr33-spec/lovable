@@ -1,0 +1,50 @@
+{
+  "juste": 0,
+  "quantite_fausse": 4,
+  "manquante": 3,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Tuile canal terre cuite courant (Edilians Canal 50, courant)",
+      "classe": "quantite_fausse",
+      "attendu": "991 pièces",
+      "obtenu": "Tuiles canal : sans quantité (85 m² au devis), courants et couverts non distingués"
+    },
+    {
+      "article": "Tuile canal terre cuite couvert (Edilians Canal 50, couvert)",
+      "classe": "manquante",
+      "attendu": "à chiffrer",
+      "obtenu": "absent (une seule ligne « Tuiles canal » pour courants et couverts)"
+    },
+    {
+      "article": "Liteau 27×40",
+      "classe": "quantite_fausse",
+      "attendu": "256 ml",
+      "obtenu": "à chiffrer"
+    },
+    {
+      "article": "Bardelis (tuile de rive canal) terre cuite gauche",
+      "classe": "quantite_fausse",
+      "attendu": "17 pièces",
+      "obtenu": "Rives : 33 pièces (gauche et droit confondus)"
+    },
+    {
+      "article": "Bardelis (tuile de rive canal) terre cuite droit",
+      "classe": "manquante",
+      "attendu": "17 pièces",
+      "obtenu": "absent (une seule ligne « Rives » de 33 pièces)"
+    },
+    {
+      "article": "Faîtière canal terre cuite 50 cm",
+      "classe": "quantite_fausse",
+      "attendu": "28 pièces",
+      "obtenu": "27 pièces"
+    },
+    {
+      "article": "Mortier de couverture (scellement du faîtage)",
+      "classe": "manquante",
+      "attendu": "à chiffrer",
+      "obtenu": "absent"
+    }
+  ]
+}

@@ -2968,9 +2968,9 @@
   "ms": 7479,
   "jetons": 75817,
   "outils": 5,
-  "entreeCar": 5270,
+  "entreeCar": 4720,
   "pages": 0,
-  "sortieCar": 465
+  "sortieCar": 0
  },
  "couvreur-C12-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
@@ -2986,61 +2986,61 @@
   "ms": 7389,
   "jetons": 75825,
   "outils": 5,
-  "entreeCar": 5716,
+  "entreeCar": 5557,
   "pages": 0,
-  "sortieCar": 179
+  "sortieCar": 0
  },
  "couvreur-C14-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
   "ms": 6773,
   "jetons": 75371,
   "outils": 5,
-  "entreeCar": 5871,
+  "entreeCar": 4835,
   "pages": 0,
-  "sortieCar": 779
+  "sortieCar": 0
  },
  "couvreur-C15-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
   "ms": 5528,
   "jetons": 75441,
   "outils": 5,
-  "entreeCar": 6571,
+  "entreeCar": 6340,
   "pages": 0,
-  "sortieCar": 252
+  "sortieCar": 0
  },
  "couvreur-R01-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
   "ms": 7031,
   "jetons": 76132,
   "outils": 5,
-  "entreeCar": 5499,
+  "entreeCar": 5295,
   "pages": 0,
-  "sortieCar": 208
+  "sortieCar": 0
  },
  "couvreur-R02-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
   "ms": 5474,
   "jetons": 74864,
   "outils": 5,
-  "entreeCar": 6586,
+  "entreeCar": 5399,
   "pages": 0,
-  "sortieCar": 912
+  "sortieCar": 0
  },
  "couvreur-R03-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
   "ms": 7204,
   "jetons": 76150,
   "outils": 5,
-  "entreeCar": 6762,
+  "entreeCar": 5187,
   "pages": 0,
-  "sortieCar": 1019
+  "sortieCar": 0
  },
  "couvreur-R05-mwpw05aw": {
   "modele": "claude-sonnet-5-5",
   "ms": 6560,
   "jetons": 75831,
   "outils": 5,
-  "entreeCar": 6526,
+  "entreeCar": 5544,
   "pages": 0,
   "sortieCar": 0
  },
@@ -3157,9 +3157,9 @@
   "ms": 5399,
   "jetons": 74382,
   "outils": 5,
-  "entreeCar": 5270,
+  "entreeCar": 4720,
   "pages": 0,
-  "sortieCar": 465
+  "sortieCar": 0
  },
  "M4-C01-e4-a": {
   "modele": "claude-opus-5-5",
@@ -3871,5 +3871,653 @@
   "entreeCar": 15061,
   "pages": 2,
   "sortieCar": 2316
+ },
+ "couvreur-C13-mwpwpjly": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7311,
+  "jetons": 75265,
+  "outils": 5,
+  "entreeCar": 5557,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-C14-mwpwpjly": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5366,
+  "jetons": 74377,
+  "outils": 5,
+  "entreeCar": 4835,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "juger-C02-mwpwpne9": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5277,
+  "jetons": 77546,
+  "outils": 6,
+  "entreeCar": 4228,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C03-mwpwpne9": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5645,
+  "jetons": 76283,
+  "outils": 6,
+  "entreeCar": 0,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C04-mwpwpne9": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5162,
+  "jetons": 77187,
+  "outils": 6,
+  "entreeCar": 3678,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C06-mwpwpnea": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5010,
+  "jetons": 76061,
+  "outils": 6,
+  "entreeCar": 0,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C10-mwpwpnea": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5451,
+  "jetons": 77490,
+  "outils": 6,
+  "entreeCar": 4271,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C11-mwpwpnea": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5861,
+  "jetons": 77418,
+  "outils": 6,
+  "entreeCar": 3612,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C13-mwpwpnea": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7447,
+  "jetons": 75155,
+  "outils": 5,
+  "entreeCar": 1932,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C14-mwpwpnea": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6434,
+  "jetons": 77360,
+  "outils": 6,
+  "entreeCar": 3354,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-C15-mwpwpnea": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5241,
+  "jetons": 75402,
+  "outils": 6,
+  "entreeCar": 3251,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-R01-mwpwpneb": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5066,
+  "jetons": 77374,
+  "outils": 6,
+  "entreeCar": 4040,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-R02-mwpwpneb": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 9018,
+  "jetons": 79246,
+  "outils": 6,
+  "entreeCar": 4716,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-R03-mwpwpneb": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 9062,
+  "jetons": 80060,
+  "outils": 6,
+  "entreeCar": 5941,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-R04-mwpwpneb": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7307,
+  "jetons": 74145,
+  "outils": 6,
+  "entreeCar": 2883,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "juger-R05-mwpwpneb": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5950,
+  "jetons": 74214,
+  "outils": 5,
+  "entreeCar": 3210,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "couvreur-C14-mwpwrh1p": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5547,
+  "jetons": 74528,
+  "outils": 5,
+  "entreeCar": 4835,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "juger-C13-mwpwrhkr": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6972,
+  "jetons": 76395,
+  "outils": 6,
+  "entreeCar": 1932,
+  "pages": 2,
+  "sortieCar": 0
+ },
+ "verite-M0-C13": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 8644,
+  "jetons": 75994,
+  "outils": 6,
+  "entreeCar": 7033,
+  "pages": 0,
+  "sortieCar": 1130
+ },
+ "verite-M4-C13": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7255,
+  "jetons": 75726,
+  "outils": 6,
+  "entreeCar": 6978,
+  "pages": 0,
+  "sortieCar": 729
+ },
+ "verite-M11-C13": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 8531,
+  "jetons": 75916,
+  "outils": 6,
+  "entreeCar": 6946,
+  "pages": 0,
+  "sortieCar": 938
+ },
+ "verite-M0-C01": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7601,
+  "jetons": 77097,
+  "outils": 6,
+  "entreeCar": 9152,
+  "pages": 0,
+  "sortieCar": 878
+ },
+ "verite-M0-C02": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 11164,
+  "jetons": 77559,
+  "outils": 6,
+  "entreeCar": 9031,
+  "pages": 0,
+  "sortieCar": 1409
+ },
+ "verite-M0-C03": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6176,
+  "jetons": 74526,
+  "outils": 6,
+  "entreeCar": 5233,
+  "pages": 0,
+  "sortieCar": 231
+ },
+ "verite-M0-C04": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5402,
+  "jetons": 75300,
+  "outils": 6,
+  "entreeCar": 6775,
+  "pages": 0,
+  "sortieCar": 79
+ },
+ "verite-M0-C05": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 10367,
+  "jetons": 77933,
+  "outils": 6,
+  "entreeCar": 9945,
+  "pages": 0,
+  "sortieCar": 1170
+ },
+ "verite-M0-C06": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 9614,
+  "jetons": 76901,
+  "outils": 6,
+  "entreeCar": 8426,
+  "pages": 0,
+  "sortieCar": 1205
+ },
+ "verite-M0-C07": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6605,
+  "jetons": 75171,
+  "outils": 6,
+  "entreeCar": 5986,
+  "pages": 0,
+  "sortieCar": 506
+ },
+ "verite-M0-C08": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6882,
+  "jetons": 74260,
+  "outils": 6,
+  "entreeCar": 4157,
+  "pages": 0,
+  "sortieCar": 662
+ },
+ "verite-M0-C09": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7962,
+  "jetons": 75560,
+  "outils": 6,
+  "entreeCar": 6218,
+  "pages": 0,
+  "sortieCar": 783
+ },
+ "verite-M0-C10": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 11593,
+  "jetons": 77765,
+  "outils": 6,
+  "entreeCar": 9772,
+  "pages": 0,
+  "sortieCar": 761
+ },
+ "verite-M0-C11": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 10500,
+  "jetons": 77386,
+  "outils": 6,
+  "entreeCar": 8736,
+  "pages": 0,
+  "sortieCar": 908
+ },
+ "verite-M0-C12": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 16041,
+  "jetons": 80291,
+  "outils": 6,
+  "entreeCar": 12694,
+  "pages": 0,
+  "sortieCar": 1439
+ },
+ "verite-M0-C15": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7992,
+  "jetons": 75354,
+  "outils": 6,
+  "entreeCar": 6220,
+  "pages": 0,
+  "sortieCar": 795
+ },
+ "verite-M4-C01": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7806,
+  "jetons": 77100,
+  "outils": 6,
+  "entreeCar": 9152,
+  "pages": 0,
+  "sortieCar": 899
+ },
+ "verite-M4-C02": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 10814,
+  "jetons": 77554,
+  "outils": 6,
+  "entreeCar": 8993,
+  "pages": 0,
+  "sortieCar": 1430
+ },
+ "verite-M4-C03": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6711,
+  "jetons": 74607,
+  "outils": 6,
+  "entreeCar": 5248,
+  "pages": 0,
+  "sortieCar": 281
+ },
+ "verite-M4-C04": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5791,
+  "jetons": 75363,
+  "outils": 6,
+  "entreeCar": 6759,
+  "pages": 0,
+  "sortieCar": 79
+ },
+ "verite-M4-C05": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 11321,
+  "jetons": 78017,
+  "outils": 6,
+  "entreeCar": 9944,
+  "pages": 0,
+  "sortieCar": 1145
+ },
+ "verite-M4-C06": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 12228,
+  "jetons": 77170,
+  "outils": 6,
+  "entreeCar": 8372,
+  "pages": 0,
+  "sortieCar": 1272
+ },
+ "verite-M4-C07": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7334,
+  "jetons": 75271,
+  "outils": 6,
+  "entreeCar": 6032,
+  "pages": 0,
+  "sortieCar": 506
+ },
+ "verite-M4-C08": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5964,
+  "jetons": 74128,
+  "outils": 6,
+  "entreeCar": 4123,
+  "pages": 0,
+  "sortieCar": 496
+ },
+ "verite-M4-C09": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 8228,
+  "jetons": 75568,
+  "outils": 6,
+  "entreeCar": 6123,
+  "pages": 0,
+  "sortieCar": 782
+ },
+ "verite-M4-C10": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 14114,
+  "jetons": 78063,
+  "outils": 6,
+  "entreeCar": 9626,
+  "pages": 0,
+  "sortieCar": 879
+ },
+ "verite-M4-C11": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 13751,
+  "jetons": 77692,
+  "outils": 6,
+  "entreeCar": 8685,
+  "pages": 0,
+  "sortieCar": 929
+ },
+ "verite-M4-C12": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 14700,
+  "jetons": 80133,
+  "outils": 6,
+  "entreeCar": 12694,
+  "pages": 0,
+  "sortieCar": 1677
+ },
+ "verite-M4-C15": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7043,
+  "jetons": 75183,
+  "outils": 6,
+  "entreeCar": 6136,
+  "pages": 0,
+  "sortieCar": 792
+ },
+ "verite-M11-C01": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 8006,
+  "jetons": 77129,
+  "outils": 6,
+  "entreeCar": 9152,
+  "pages": 0,
+  "sortieCar": 899
+ },
+ "verite-M11-C02": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 12284,
+  "jetons": 77690,
+  "outils": 6,
+  "entreeCar": 9086,
+  "pages": 0,
+  "sortieCar": 963
+ },
+ "verite-M11-C03": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6551,
+  "jetons": 74510,
+  "outils": 6,
+  "entreeCar": 5099,
+  "pages": 0,
+  "sortieCar": 388
+ },
+ "verite-M11-C04": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6023,
+  "jetons": 75328,
+  "outils": 6,
+  "entreeCar": 6759,
+  "pages": 0,
+  "sortieCar": 79
+ },
+ "verite-M11-C05": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 11542,
+  "jetons": 77962,
+  "outils": 6,
+  "entreeCar": 9944,
+  "pages": 0,
+  "sortieCar": 945
+ },
+ "verite-M11-C06": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 13465,
+  "jetons": 77322,
+  "outils": 6,
+  "entreeCar": 8331,
+  "pages": 0,
+  "sortieCar": 1494
+ },
+ "verite-M11-C07": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6669,
+  "jetons": 75151,
+  "outils": 6,
+  "entreeCar": 5987,
+  "pages": 0,
+  "sortieCar": 496
+ },
+ "verite-M11-C08": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7195,
+  "jetons": 74251,
+  "outils": 6,
+  "entreeCar": 4073,
+  "pages": 0,
+  "sortieCar": 709
+ },
+ "verite-M11-C09": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 9091,
+  "jetons": 75618,
+  "outils": 6,
+  "entreeCar": 6123,
+  "pages": 0,
+  "sortieCar": 767
+ },
+ "verite-M11-C10": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 14209,
+  "jetons": 78025,
+  "outils": 6,
+  "entreeCar": 9626,
+  "pages": 0,
+  "sortieCar": 904
+ },
+ "verite-M11-C11": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 12975,
+  "jetons": 77607,
+  "outils": 6,
+  "entreeCar": 8685,
+  "pages": 0,
+  "sortieCar": 944
+ },
+ "verite-M11-C12": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 15541,
+  "jetons": 80285,
+  "outils": 6,
+  "entreeCar": 12694,
+  "pages": 0,
+  "sortieCar": 1522
+ },
+ "verite-M11-C15": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7848,
+  "jetons": 75259,
+  "outils": 6,
+  "entreeCar": 6136,
+  "pages": 0,
+  "sortieCar": 789
+ },
+ "couvreur-C11-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6982,
+  "jetons": 74925,
+  "outils": 5,
+  "entreeCar": 4720,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-C13-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6099,
+  "jetons": 74762,
+  "outils": 5,
+  "entreeCar": 5557,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-C14-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5941,
+  "jetons": 75224,
+  "outils": 5,
+  "entreeCar": 4835,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-C15-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5278,
+  "jetons": 75008,
+  "outils": 5,
+  "entreeCar": 6340,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-R01-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5211,
+  "jetons": 74684,
+  "outils": 5,
+  "entreeCar": 5295,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-R02-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7234,
+  "jetons": 75815,
+  "outils": 5,
+  "entreeCar": 5399,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-R03-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 7333,
+  "jetons": 75981,
+  "outils": 5,
+  "entreeCar": 5187,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-R04-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5242,
+  "jetons": 73770,
+  "outils": 5,
+  "entreeCar": 3766,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "couvreur-R05-mwpwnxqp": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6161,
+  "jetons": 75422,
+  "outils": 5,
+  "entreeCar": 5544,
+  "pages": 0,
+  "sortieCar": 0
+ },
+ "verite-M0-C14": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6408,
+  "jetons": 74276,
+  "outils": 6,
+  "entreeCar": 4352,
+  "pages": 0,
+  "sortieCar": 433
+ },
+ "verite-M4-C14": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 6913,
+  "jetons": 74309,
+  "outils": 6,
+  "entreeCar": 4352,
+  "pages": 0,
+  "sortieCar": 440
+ },
+ "verite-M11-C14": {
+  "modele": "claude-sonnet-5-5",
+  "ms": 5765,
+  "jetons": 74157,
+  "outils": 6,
+  "entreeCar": 4342,
+  "pages": 0,
+  "sortieCar": 433
  }
 }

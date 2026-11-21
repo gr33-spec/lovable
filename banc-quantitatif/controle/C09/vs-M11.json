@@ -1,0 +1,26 @@
+{
+  "juste": 3,
+  "quantite_fausse": 3,
+  "manquante": 0,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Bacs zinc joint debout profilés, zinc naturel 0,70 mm, longueur 5,00 m",
+      "classe": "quantite_fausse",
+      "attendu": "28 bacs de 5,00 m",
+      "obtenu": "28 bacs, longueur 5,15 m"
+    },
+    {
+      "article": "Bande d'égout à ourlet façonnée, zinc naturel 0,70 mm, développé 330 mm, longueur 2 m",
+      "classe": "quantite_fausse",
+      "attendu": "7 bandes de 2 m",
+      "obtenu": "6 longueurs de 2 m"
+    },
+    {
+      "article": "Gouttière zinc naturel demi-ronde de 33 (développé 330 mm), longueur 4 m",
+      "classe": "quantite_fausse",
+      "attendu": "4 longueurs de 4 m",
+      "obtenu": "3 longueurs de 4 m"
+    }
+  ]
+}
