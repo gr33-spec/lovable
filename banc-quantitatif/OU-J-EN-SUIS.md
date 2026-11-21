@@ -79,7 +79,11 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
 - Fiche -73 : fibres-ciment 40×24 à 27,1 au m² (Cedral + Cembrit) ; deux lignes d'un même ouvrage qui n'écrivent pas la même
   mesure → la question se pose (`sansRediteDeLaQuantite` dans `par-le-code.ts`).
 - Serveur : 921 verts sur la -72 (pas rejoué sur la -73 ; `dist` PAS reconstruit tant que les parcours tournent).
-- Parcours Playwright lancés sur la -72 : résultat à lire, tests d'ardoise à adapter sûrement.
+- Parcours Playwright : passage sur la -72 arrêté à 1 h 30 (trop long), une vingtaine d'échecs sur `ordinateur` (assistant,
+  parcours-artisan, recentrage, deux-parcours, negocie-humain, achat-groupe). `dist` du moteur et site RECONSTRUITS sur la -73.
+  Adaptation confiée à un agent (il ne touche qu'à `apps/web/e2e/`). À sa fin : lire son rapport (vrais défauts d'écran),
+  commit, rejouer serveur complet sur la -73 (40 min, seul), puis parcours complets, puis rapport à Greg.
+- NE PAS reconstruire `dist` ni lancer de gros tests pendant que l'agent fait tourner les parcours.
 - Les 3 lignes encore fausses : liteaux C01 (+ 10 % d'aboutage ?), feuilles de zinc de l'abergement C05 (3 contre 4),
   faîtières fibres-ciment C10 (le devis ne dit pas laquelle : question « Quelle faîtière ? » à proposer à Greg).
 - Demande de Greg du 22 novembre : l'AJOUT 2 devient une flèche qui déroule le détail (voir plus bas).
