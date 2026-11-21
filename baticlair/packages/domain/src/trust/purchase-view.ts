@@ -459,6 +459,8 @@ function aggregate(
       const count = pieces ? pieces.dividedBy(Number(contenance)).toDecimalPlaces(6).ceil() : orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
       quantity = unitText(count, orders[0].unit);
       order = { count: count.toFixed(), unit: count.equals(1) ? orders[0].unit.one : orders[0].unit.many };
+      // Un article vendu en boîtes dit aussi son nombre de pièces (« 8 boîtes de 500 (3 992 pièces) », Greg, 21 novembre 2026).
+      if (contenance && quantities.every((q) => q && q.unit === "u")) approx = unitText(quantities.reduce((sum, q) => sum.plus(q!.value), new Decimal(0)).ceil(), UNIT_LABEL.u ?? { one: "pièce", many: "pièces" });
       const approxUnits = group.map((n) => n.purchase?.approx[0] ?? null);
       if (approxUnits.every((a) => a && a.unit.many === approxUnits[0]!.unit.many)) {
         approx = `≈ ${unitText(approxUnits.reduce((sum, a) => sum.plus(a!.count), new Decimal(0)), approxUnits[0]!.unit)}`;
@@ -647,7 +649,11 @@ export function purchaseView(
     const item = view.items.find((i) => i.kind === "line" && i.id === o.lineId);
     // Une ligne sans unité reste « indéterminée » jusqu'à ce que l'artisan la garde telle quelle (« C'est bon ») : alors elle part.
     const kept = o.role !== "undetermined" || item?.state === "verified";
-    if (!v || v.kind === "labor" || v.basis !== "purchase" || !kept || o.needs.length > 0) continue;
+    // Un article commandé tel qu'écrit qui compte aussi son ouvrage (« fenêtres de toit GGL MK04, avec raccords », 2 u) sort
+    // lui-même, en plus de ce que le calcul en tire (les raccords) : banc du calcul, C05 et C12, 21 novembre 2026.
+    const plannedLine = link.plan.lines.find((l) => l.ref === o.lineId);
+    const telQuEcrit = plannedLine?.status === "planned" && link.ref.workItems.find((w) => w.id === baseOf(plannedLine.workItemId))?.slots.find((x) => x.key === plannedLine.slot)?.orderedAsWritten === true;
+    if (!v || v.kind === "labor" || v.basis !== "purchase" || !kept || (o.needs.length > 0 && !telQuEcrit)) continue;
     const written = o.read.quantity ? writtenQuantity(o.read.quantity, o.read.unit) : null;
     // Le test du fournisseur (§40) : une mesure n'est jamais une commande.
     const refused = supplierTest(o.designation, o.read.unit);

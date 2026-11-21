@@ -541,8 +541,7 @@
   {
    "article": "Fenêtres GGL MK04",
    "mots": [
-    "mk04|fenetre|ggl",
-    "!raccord"
+    "velux|ggl"
    ],
    "quantite": 2,
    "unite": "n"
@@ -550,7 +549,9 @@
   {
    "article": "Raccords MK04",
    "mots": [
-    "raccord"
+    "raccord",
+    "!velux",
+    "!ggl"
    ],
    "quantite": 2,
    "unite": "n"
@@ -560,16 +561,17 @@
    "mots": [
     "faitiere"
    ],
-   "quantite": 34,
+   "quantite": 33,
    "unite": "n"
   },
   {
    "article": "Sorties de toit Ø125",
    "mots": [
-    "sortie|chapeau"
+    "sortie|chapeau|embase"
    ],
    "quantite": 2,
-   "unite": "n"
+   "unite": "n",
+   "ensemble": true
   }
  ],
  "suggestions": []

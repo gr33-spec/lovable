@@ -137,9 +137,28 @@ function sansMesureEnPieces(ref: Referential, l: LectureLigne): LectureLigne {
 // Les mêmes gestes que `SANS_ACHAT` de la lecture (une ligne qui commence ainsi n'achète rien d'elle-même).
 const GESTE = /^(?:pose|repose|depose|demontage|main d ?oeuvre|installation|location|evacuation|nettoyage|echafaudage|transport|deplacement|mise en oeuvre|refection|reprise|remplacement)\b/;
 
+/**
+ * UNE LIGNE « 1 ens » DONT LA MESURE EST DANS LE TEXTE (Greg, 21 novembre 2026, banc du calcul C05 et C12 : « 4 noues de
+ * 1,80 m », « 2 rives de 6 m », « 4 ml en tout ») : la mesure écrite est celle de la ligne. De l'arithmétique seulement,
+ * aucun métier : un produit « N × L m » ou « N <mot> de L m », sinon une seule longueur ou une seule surface écrite avec son
+ * unité. Deux mesures différentes dans le texte : rien n'est choisi, la ligne reste telle qu'écrite.
+ */
+const AU_FORFAIT = /^(?:en|ens|ensemble|forfait|ft|fft|f)$/;
+export function mesureDansLeTexte(l: LectureLigne): LectureLigne {
+  if (!AU_FORFAIT.test(motsDeLaFiche(l.unite ?? ""))) return l;
+  const t = l.designation.replace(/(\d),(\d)/g, "$1.$2");
+  const produits = [...t.matchAll(/(\d+)\s*(?:x|×|\*|\p{L}+ de)\s*(\d+(?:\.\d+)?)\s*(?:ml|m)(?![²2\p{L}])/giu)];
+  const dans = (i: number) => produits.some((p) => p.index! <= i && i < p.index! + p[0].length);
+  const simples = [...t.matchAll(/(\d+(?:\.\d+)?)\s*(m²|m2|ml|m)(?![\p{L}\d])/giu)].filter((m) => !dans(m.index!));
+  const mesure = (quantite: string, unite: string) => ({ ...l, quantite, unite, fournitures: l.fournitures.map((f) => (f.quantite === l.quantite && f.unite === l.unite ? { ...f, quantite, unite } : f)) });
+  if (produits.length === 1 && simples.length === 0) return mesure(String(+(Number(produits[0]![1]) * Number(produits[0]![2])).toFixed(2)), "ml");
+  if (produits.length === 0 && simples.length === 1) return mesure(simples[0]![1]!, /m[²2]/i.test(simples[0]![2]!) ? "m²" : "ml");
+  return l;
+}
+
 function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly LectureLigne[]): LectureLigne {
   // Le titre et sa description, séparés par « : » (le modèle écrit parfois « — ») : une seule écriture.
-  const l = { ...l0, designation: l0.designation.replace(/\s+[—–]\s+/, " : ") };
+  const l = mesureDansLeTexte({ ...l0, designation: l0.designation.replace(/\s+[—–]\s+/, " : ") });
   // Une ligne sans unité (« 10 » tôles, DE00000071) ne dit pas ce qu'elle mesure : elle garde la lecture, et son unité se
   // demande sur la ligne (§51.6).
   // Une ligne qui commence par un geste (« Pose de gouttière Havraise sur chevrons », D-2026-020) est la pose d'un article
@@ -154,21 +173,28 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   // L'article mesuré : l'emplacement que le titre nomme (« crochets de gouttière »), sinon le premier de l'ouvrage.
   // « Sans dauphin », « hors crochets » : l'article est écarté par le devis, il n'est ni nommé ni cité (banc du calcul, C15).
   const sansLesExclus = (mots: string) => mots.replace(/(?:^| )(?:sans?|hors?|non compris?) (?:les? |le |la |l )?[a-z0-9]+/g, " ");
-  const nommeAuTitre = w.slots.filter((s) => motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(titreMots), k)));
+  // Une forme d'achat (les feuilles d'une bande, les rives gauches et droites) n'est jamais l'article écrit : elle ne se nomme pas.
+  // Ce qui suit « avec », « y compris » est cité, jamais mesuré par la ligne : « fenêtres de toit GGL MK04, avec raccords
+  // d'étanchéité », 2 u, compte les fenêtres ; les raccords sont cités (banc du calcul, C05 et C12, 21 novembre 2026).
+  const avantAvec = (mots: string) => mots.split(/ (?:avec|y compri|y compris|compri|compris|dont|incluant|inclu|inclus) /)[0]!;
+  const nommeAuTitre = w.slots.filter((s) => !s.formOf && motsDEmplacement(ref, w, s).some((k) => contient(avantAvec(sansLesExclus(titreMots)), k)));
   // Une ligne qui MESURE l'ouvrage (32 m², 8 m) se range sur son emplacement mesuré, même si son titre cite un article
   // (« couverture zinc à tasseaux ») ; une ligne en pièces (« 40 crochets de gouttière ») sur l'article qu'elle nomme.
   const mesure = !/^(?:u|unite|unites|piece|pieces|pce|pcs|ens)?$/.test(motsDeLaFiche(l.unite ?? ""));
   const premier = w.slots[0]!;
   // Une ligne mesurée en mètres ne mesure jamais un article qui se compte en pièces : « gouttière de 25 sur le pourtour, y
   // compris 4 angles », 44 ml, mesure la gouttière ; les angles sont cités (banc du calcul, C11, 21 novembre 2026).
-  const enPieces = (s: Slot) => w.needs.some((n) => n.slot === s.key) && w.needs.filter((n) => n.slot === s.key).every((n) => n.unit === "u");
+  // (Sauf l'article dont la fiche lit la longueur dans la ligne : « tuiles de rive, 12 ml » mesure bien les rives.)
+  const mesureEnMetres = (s: Slot) => w.params.some((p) => p.fromLineQuantity && p.forSlots?.includes(s.key) && /^(?:m|cm|mm|m2)$/.test(p.unit));
+  const formes = (s: Slot) => w.slots.filter((x) => x.key === s.key || x.formOf === s.key).map((x) => x.key);
+  const enPieces = (s: Slot) => !mesureEnMetres(s) && w.needs.some((n) => formes(s).includes(n.slot)) && w.needs.filter((n) => formes(s).includes(n.slot)).every((n) => n.unit === "u");
   const principal = nommeAuTitre.length === 1 && !(mesure && (premier.measureOnly || enPieces(nommeAuTitre[0]!))) ? nommeAuTitre[0]! : premier;
   // Des pièces (« 10 tôles bac acier », D-2022-071) ne mesurent pas un ouvrage qui se compte en surface ou en longueur :
   // la lecture reste, jamais une question « Surface du toit ? » derrière.
   const compteEnPieces = w.params.some((x) => x.fromLineQuantity && x.unit === "u");
   if (!mesure && principal.measureOnly && !compteEnPieces) return l;
   // Les autres articles écrits sur la ligne (« sur tasseaux bois et couvre-joints ») : cités, le calcul les compte.
-  const cites = w.slots.filter((s) => s.key !== principal.key && motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(texte), k)));
+  const cites = w.slots.filter((s) => s.key !== principal.key && !s.formOf && motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(texte), k)));
   // Une donnée dite sur une autre ligne par ses mots exacts (« bandes de rive pour les 2 côtés ») vaut pour l'ouvrage,
   // quand une seule ligne la dit ; un nombre lu sur la ligne (« bacs de 4 m ») ne vaut que pour elle.
   const donnees: Record<string, string> = {};

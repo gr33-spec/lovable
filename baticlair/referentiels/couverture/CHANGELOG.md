@@ -1,5 +1,24 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-65 — Banc du calcul, lot 3 : les décisions de Greg du 21 novembre 2026
+
+Le banc du calcul passe de 56 sur 98 à 78 sur 100 lignes justes (la référence du banc suit les décisions ci-dessous).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Tuiles à emboîtement, casse et coupe | 3 % | **5 %** | Greg, 21 novembre 2026 |
+| Tuiles de rive | une ligne (longueur de rive ÷ pureau) | **deux lignes**, gauches et droites : la moitié de la longueur de rive ÷ pureau, de chaque côté | Greg, 21 novembre 2026 |
+| Bardelis (rives de tuile canal) | une ligne (2,7 au ml) | **deux lignes**, gauches et droites (2,7 au ml de chaque côté) | Greg, 21 novembre 2026 ; Edilians (§35.3) |
+| Crochets d'ardoise | à la pièce | **en boîtes de 500**, le nombre de pièces écrit sur la ligne (« 8 boîtes de 500 (3 992 pièces) ») | Greg, 21 novembre 2026 ; base couverture (boîte de 500) |
+| Bande porte-solin d'un abergement de cheminée | ajoutée d'office (forme d'achat de l'abergement) | **Règle changée** : seulement si le devis l'écrit ; sinon proposée en suggestion (« Bandes porte-solin de l'abergement ») | Greg, 21 novembre 2026 (un article non dit va en suggestion) |
+| Bandes de zinc façonnées de 2 m (rive, égout, faîtage, arêtier, porte-solin) | ml ÷ 2 arrondi au-dessus | inchangé ; la ligne dit « Longueur du devis reprise telle quelle, sans recouvrement » | Greg, 21 novembre 2026 |
+
+- Rappel des décisions sans changement de calcul : faîtières, arêtières et tuiles de rive sans 1 % de casse en plus ; une équerre de gouttière ne retire rien à la longueur ; gouttière PVC ou alu en longueurs de 4 m sur le total ; contre-liteaux à 5 % de chute comme les liteaux.
+- Tout article vendu en boîtes dit aussi son nombre de pièces sur la ligne.
+- **Fenêtres de toit** : « fenêtres de toit GGL MK04, avec raccords d'étanchéité », 2 u, sort la fenêtre telle qu'écrite ET ses raccords calculés (avant : une seule ligne). Ce qui suit « avec », « y compris » dans une ligne est cité, jamais mesuré par elle. « Raccord » seul est lu comme le raccord d'étanchéité sur une ligne de fenêtre.
+- **« 1 ens » avec la mesure dans le texte** (« 4 noues de 1,80 m », « 2 rives de 6 m », « 4 ml en tout ») : la mesure écrite devient celle de la ligne. Deux mesures différentes : rien n'est choisi.
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
 ## roofing-2026.11.21-64 — Banc du calcul, lot 2 : mots des couvreurs lus par le code (Greg, 2026-11-21)
 
 Le banc du calcul passe de 52 à 56 lignes justes sur 98. Aucune quantité de la fiche ne change : ce lot ne touche que ce que le code lit dans la ligne du devis.

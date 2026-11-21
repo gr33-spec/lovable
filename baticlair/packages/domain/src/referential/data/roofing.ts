@@ -1287,7 +1287,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-64",
+  version: "roofing-2026.11.21-65",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1979,8 +1979,14 @@ export const ROOFING_REFERENTIAL: Referential = {
     })),
     generic("clou-ardoise-fc", "slate_nail", "Clou inox pour ardoise fibres-ciment", "Clous inox d'ardoise"),
     generic("antivent-ardoise-fc", "slate_wind_hook", "Crochet d'antivent inox pour ardoise fibres-ciment", "Crochets d'antivent"),
-    generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise"),
+    // Greg, 21 novembre 2026 : « Crochets d'ardoise : en boîtes, avec le nombre de pièces écrit sur la ligne. » Boîte de 500
+    // (base couverture, crochets à agrafe de 7 à 14 cm ; règles métier : « vendus en boîte de 500 »). Avant : à la pièce.
+    generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 500", many: "boîtes de 500" }, contains: packaging("500", "u", F, FOUNDER_DOC, "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."), primary: true }],
+    }),
     generic("tuile-rive-standard", "verge_tile", "Tuile de rive (modèle de la tuile)", "Tuiles de rive"),
+    generic("tuile-rive-gauche-standard", "verge_tile", "Tuile de rive gauche (modèle de la tuile)", "Tuiles de rive gauches"),
+    generic("tuile-rive-droite-standard", "verge_tile", "Tuile de rive droite (modèle de la tuile)", "Tuiles de rive droites"),
     generic("gouttiere-standard-4m", "gutter", "Gouttière, longueurs de 4 m (profil à préciser)", "Gouttière", {
       sellingUnits: [
         { id: "longueur", label: { one: "longueur de 4 m", many: "longueurs de 4 m" }, contains: packaging("4", "m", F, FOUNDER_DOC), primary: true },
@@ -2093,6 +2099,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "bac", label: { one: "bac", many: "bacs" }, contains: ONE_PIECE, primary: true }],
     }),
     generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
+    generic("bardelis-gauche-standard", "verge_tile", "Bardelis gauche (tuile de rive canal), modèle de la tuile posée", "Bardelis gauches"),
+    generic("bardelis-droit-standard", "verge_tile", "Bardelis droit (tuile de rive canal), modèle de la tuile posée", "Bardelis droits"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
     generic("feuille-zinc-2x1", "zinc_sheet", "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)", "Feuilles zinc 2 × 1 m"),
     // Réponse du fondateur (2026-10-04) : bobineau vendu à la pièce, désignation « bobineau 650 × 31 m, 0,65 ».
@@ -2157,6 +2165,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
         { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" } },
+        // Greg, 21 novembre 2026 : « Tuiles de rive : deux lignes, gauches et droites » (ce ne sont pas les mêmes pièces).
+        { key: "rive_gauche", family: "verge_tile", label: "Tuiles de rive gauches", usual: { text: "Tuile de rive gauche du modèle de tuile posé.", source: F, productId: "tuile-rive-gauche-standard" }, formOf: "rive" },
+        { key: "rive_droite", family: "verge_tile", label: "Tuiles de rive droites", usual: { text: "Tuile de rive droite du modèle de tuile posé.", source: F, productId: "tuile-rive-droite-standard" }, formOf: "rive" },
       ],
       constants: {
         ...ECRAN_CONSTANTS,
@@ -2211,16 +2222,28 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
-          id: "tuiles-de-rive",
-          slot: "rive",
-          formula: "longueur_rives / pureau",
+          id: "tuiles-de-rive-gauches",
+          slot: "rive_gauche",
+          formula: "longueur_rives / 2 / pureau",
           unit: "u",
           core: true,
           requires: ["longueur_rives"],
-          exclusions: "Une tuile de rive par rang, sur la longueur totale des rives du devis (gauche et droite) ; hors abouts.",
+          exclusions: "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
           source: F,
           verification: FOUNDER_DOC,
-          version: 1,
+          version: 2,
+        },
+        {
+          id: "tuiles-de-rive-droites",
+          slot: "rive_droite",
+          formula: "longueur_rives / 2 / pureau",
+          unit: "u",
+          core: true,
+          requires: ["longueur_rives"],
+          exclusions: "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 2,
         },
       ],
     },
@@ -2253,6 +2276,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "tuile", family: "roof_tile_canal", label: "Tuiles canal" },
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte", "liteaunage"], usual: USUAL_LITEAU_TUILE },
         { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" } },
+        { key: "rive_gauche", family: "verge_tile", label: "Bardelis gauches", usual: { text: "Bardelis gauche du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-gauche-standard" }, formOf: "rive" },
+        { key: "rive_droite", family: "verge_tile", label: "Bardelis droits", usual: { text: "Bardelis droit du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-droit-standard" }, formOf: "rive" },
       ],
       constants: {
         couvert_et_courant: condition("2", "u", "edilians-canal", FOUNDER_DOC, "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."),
@@ -2285,16 +2310,28 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
-          id: "bardelis",
-          slot: "rive",
-          formula: "longueur_rives * regle.bardelis_par_ml",
+          id: "bardelis-gauches",
+          slot: "rive_gauche",
+          formula: "longueur_rives / 2 * regle.bardelis_par_ml",
           unit: "u",
           core: true,
           requires: ["longueur_rives"],
-          exclusions: "Rives gauche et droite du devis ; mortier de scellement à part.",
+          exclusions: "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
           source: "edilians-canal",
           verification: FOUNDER_DOC,
-          version: 1,
+          version: 2,
+        },
+        {
+          id: "bardelis-droits",
+          slot: "rive_droite",
+          formula: "longueur_rives / 2 * regle.bardelis_par_ml",
+          unit: "u",
+          core: true,
+          requires: ["longueur_rives"],
+          exclusions: "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
+          source: "edilians-canal",
+          verification: FOUNDER_DOC,
+          version: 2,
         },
       ],
     },
@@ -2682,7 +2719,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "ml",
           core: true,
           exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
-          precision: "{longueur_faitage|ml} de faîtage à couvrir",
+          precision: "{longueur_faitage|ml} de faîtage à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           // Le comptoir sert une bande à un développé (§7 : « dév. 25 à 33 cm ») : il ne le devine pas.
           designation: "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
           precisionRequires: ["developpe", "aspect_zinc"],
@@ -2884,7 +2921,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "ml",
           core: true,
           exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
-          precision: "{longueur_aretier|ml} d'arêtier à couvrir",
+          precision: "{longueur_aretier|ml} d'arêtier à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           designation: "Arêtier {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe_aretier|cm#}",
           precisionRequires: ["developpe_aretier", "aspect_zinc"],
           source: F,
@@ -2921,7 +2958,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "fenetre", family: "roof_window", label: "Fenêtres de toit", measureOnly: true, orderedAsWritten: true },
-        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
+        { key: "raccord", family: "roof_window_flashing", keywords: ["raccord", "raccords"], label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
       ],
       constants: {},
       needs: [
@@ -2983,7 +3020,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1) ; fixations à part.",
-          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          // Greg, 21 novembre 2026 : ml du devis ÷ 2, arrondi au-dessus, rien pour les jonctions ; la ligne le dit.
+          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           // §50.7 : la pièce porte son nom d'ouvrage, tel que le devis l'écrit (« Bande de ventilation en Z… »).
           designation: "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           // Une bande commandée façonnée se fabrique à son développé : le fournisseur ne peut pas le deviner.
@@ -3086,7 +3124,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
-          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          // Greg, 21 novembre 2026 : ml du devis ÷ 2, arrondi au-dessus, rien pour les jonctions ; la ligne le dit.
+          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           designation: "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
           precisionRequires: ["developpe", "aspect_zinc"],
           source: F,
@@ -3309,7 +3348,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées (dév. 330 mm)", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m, développé 33 cm (§7).", source: F, productId: "bande-zinc-faconnee-standard" }, formOf: "abergement" },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "abergement" },
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de zinc (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" }, formOf: "abergement" },
-        { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", keywords: ["solin", "porte-solin"], usual: { text: "Bande porte-solin au périmètre, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" }, formOf: "abergement" },
+        { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", keywords: ["solin", "porte-solin"], usual: { text: "Bande porte-solin au périmètre, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" }, suggested: { label: "Bandes porte-solin de l'abergement" } }, // Greg, 21 novembre 2026 : non dite au devis, elle ne sort plus d'office (avant : forme d'achat de l'abergement), elle est proposée en suggestion
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
@@ -4458,7 +4497,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     ...(Number(constanteFiche("ardoise.perte_crochets").valeur) > 0
       ? [{ family: "slate_hook", rate: constanteFiche("ardoise.perte_crochets").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 2, note: "Perte sur les crochets (fiche couverture)." }]
       : []),
-    { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
+    // Greg, 21 novembre 2026 : « Tuiles à emboîtement : 5 % de casse. » Avant : 3 %.
+    { family: "roof_tile", rate: "5", source: F, verification: FOUNDER_DOC, version: 2, note: "Tuiles à emboîtement : 5 % de casse (Greg, 21 novembre 2026)." },
     // Fiche couverture (2026-11-20) : la tuile canal a sa marge, jamais 0 % (casse à la pose 1 %, CTMNC ; coupes en plus).
     { family: "roof_tile_canal", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
     { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },

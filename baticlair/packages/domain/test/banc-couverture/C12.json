@@ -439,7 +439,7 @@
    "mots": [
     "liteau"
    ],
-   "quantite": 270,
+   "quantite": 266,
    "unite": "ml"
   },
   {
@@ -450,7 +450,7 @@
     "!faiti",
     "!douille"
    ],
-   "quantite": 1026,
+   "quantite": 993,
    "unite": "n"
   },
   {
@@ -459,9 +459,8 @@
     "rive",
     "gauche"
    ],
-   "quantite": 17,
-   "unite": "n",
-   "incertain": "l'arbitre hésite entre 17 tuiles de rive et 9 + 9 demi-tuiles"
+   "quantite": 16,
+   "unite": "n"
   },
   {
    "article": "Tuiles de rive droites",
@@ -469,9 +468,8 @@
     "rive",
     "droit|droite"
    ],
-   "quantite": 17,
-   "unite": "n",
-   "incertain": "l'arbitre hésite entre 17 tuiles de rive et 9 + 9 demi-tuiles"
+   "quantite": 16,
+   "unite": "n"
   },
   {
    "article": "Faîtières",
@@ -484,8 +482,7 @@
   {
    "article": "Fenêtres GGL SK06",
    "mots": [
-    "sk06",
-    "!raccord"
+    "sk06"
    ],
    "quantite": 2,
    "unite": "n"
@@ -493,8 +490,10 @@
   {
    "article": "Raccords SK06",
    "mots": [
-    "sk06",
-    "raccord"
+    "raccord",
+    "114",
+    "!velux",
+    "!ggl"
    ],
    "quantite": 2,
    "unite": "n"
@@ -502,8 +501,7 @@
   {
    "article": "Fenêtre GGL CK02",
    "mots": [
-    "ck02",
-    "!raccord"
+    "ck02"
    ],
    "quantite": 1,
    "unite": "n"
@@ -511,8 +509,10 @@
   {
    "article": "Raccord CK02",
    "mots": [
-    "ck02",
-    "raccord"
+    "raccord",
+    "55",
+    "!velux",
+    "!ggl"
    ],
    "quantite": 1,
    "unite": "n"

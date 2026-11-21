@@ -48,7 +48,7 @@ describe("le calcul canal (§35.3)", () => {
   it("Canal Gironde 50 à R 150 sur 100 m² : 2 617 tuiles (12,7 × 2 + 3 %), 307 ml de liteaux 27×40 (2,92 + 5 %), 54 bardelis (20 m × 2,7)", () => {
     const v = readQuote(DEVIS, A({ "product:tuile": "edilians-canal-gironde-50", "param:recouvrement_canal": { value: "150", unit: "mm" } }));
     const q = Object.fromEntries(v.toBuy.map((b) => [b.needIds[0], b.quantity]));
-    expect(q).toMatchObject({ "tuiles-canal": "2 617 pièces", "liteaux-canal": "307 ml", bardelis: "54 pièces" });
+    expect(q).toMatchObject({ "tuiles-canal": "2 617 pièces", "liteaux-canal": "307 ml", "bardelis-gauches": "27 pièces", "bardelis-droits": "27 pièces" }); // deux lignes, gauches et droites (Greg, 21 novembre 2026 ; avant une ligne de 54)
     expect(v.toQuote).toEqual([]);
     expect(v.questions).toEqual([]);
   });

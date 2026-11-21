@@ -33,7 +33,8 @@ function ligne(h: number, l: number, crochet: number) {
   const need = (id: string) => r.needs.find((n) => n.needId === id)!;
   const trace = (id: string, label: RegExp) => (need(id) as { trace?: { label: string; value: string; from?: string }[] }).trace?.find((t) => label.test(t.label));
   const ardoisesM2 = trace("ardoises", /^Ardoises au m²/);
-  const commande = (id: string) => Number(need(id).purchase?.order.count ?? Number.NaN);
+  // Le nombre de pièces. Les crochets se commandent en boîtes de 500 (Greg, 21 novembre 2026) : le tableau garde leur nombre de pièces.
+  const commande = (id: string) => (id === "crochets-ardoise" ? Math.ceil(Number(need(id).quantity?.value ?? Number.NaN)) : Number(need(id).purchase?.order.count ?? Number.NaN));
   return {
     format: `${h}×${l}`,
     crochet,

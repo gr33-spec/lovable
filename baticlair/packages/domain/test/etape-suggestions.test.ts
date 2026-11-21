@@ -78,6 +78,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {
     const slots = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.slots.filter((s) => s.suggested).map((s) => `${w.id}/${s.key} : ${s.suggested!.label}`));
     expect(slots).toEqual([
+      // Greg, 21 novembre 2026 : la bande porte-solin d'un abergement, non dite au devis, se propose ici (avant : ajoutée d'office).
+      "abergement-cheminee/porte_solin : Bandes porte-solin de l'abergement",
       "gouttiere/crochet : Crochets de gouttière",
       "gouttiere/naissance : Naissances de gouttière",
       "gouttiere/talon : Talons de gouttière (si tu ne les fabriques pas)",

@@ -849,7 +849,7 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 258 pièces",
+    "quantite": "1 283 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -888,8 +888,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -1144,8 +1144,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -1168,8 +1168,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 8 cm",
-    "quantite": "1 830 pièces",
-    "unite": "pièces",
+    "quantite": "4 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -1359,8 +1359,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": "7 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -1502,8 +1502,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": "7 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -1557,7 +1557,7 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 258 pièces",
+    "quantite": "1 283 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -1621,8 +1621,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 8 cm",
-    "quantite": "1 830 pièces",
-    "unite": "pièces",
+    "quantite": "4 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -1644,8 +1644,15 @@
     "raison": "Recouvrement à préciser"
    },
    {
-    "designation": "Bardelis",
-    "quantite": "54 pièces",
+    "designation": "Bardelis gauches",
+    "quantite": "27 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bardelis droits",
+    "quantite": "27 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -1678,8 +1685,15 @@
     "raison": "Recouvrement à préciser"
    },
    {
-    "designation": "Bardelis",
-    "quantite": "54 pièces",
+    "designation": "Bardelis gauches",
+    "quantite": "27 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bardelis droits",
+    "quantite": "27 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -1705,8 +1719,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -1834,8 +1848,15 @@
     "raison": "Recouvrement, date à préciser"
    },
    {
-    "designation": "Bardelis",
-    "quantite": "54 pièces",
+    "designation": "Bardelis gauches",
+    "quantite": "27 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bardelis droits",
+    "quantite": "27 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -1914,8 +1935,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 148 pièces",
-    "unite": "pièces",
+    "quantite": "17 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2005,8 +2026,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2068,8 +2089,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2145,8 +2166,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -2199,8 +2220,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Marque, qualité à préciser"
    },
@@ -2291,8 +2312,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -2414,7 +2435,7 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 258 pièces",
+    "quantite": "1 283 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -2445,8 +2466,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2522,8 +2543,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "2 678 pièces",
-    "unite": "pièces",
+    "quantite": "6 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2626,8 +2647,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2680,8 +2701,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -2704,8 +2725,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "ok",
     "raison": null
    },
@@ -2740,8 +2761,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": "7 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -2787,8 +2808,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -2896,8 +2917,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -2987,8 +3008,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": "7 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -3133,8 +3154,15 @@
     "raison": "Recouvrement à préciser"
    },
    {
-    "designation": "Bardelis",
-    "quantite": "54 pièces",
+    "designation": "Bardelis gauches",
+    "quantite": "27 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Bardelis droits",
+    "quantite": "27 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3161,7 +3189,7 @@
   "lignes": [
    {
     "designation": "Tuiles HP10",
-    "quantite": "1 258 pièces",
+    "quantite": "1 283 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3296,8 +3324,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 148 pièces",
-    "unite": "pièces",
+    "quantite": "17 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -3337,8 +3365,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -3400,14 +3428,21 @@
    },
    {
     "designation": "Tuiles HP10 rouge",
-    "quantite": "1 258 pièces",
+    "quantite": "1 283 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
-    "designation": "Tuiles de rive",
-    "quantite": "66 pièces",
+    "designation": "Tuiles de rive gauches",
+    "quantite": "33 pièces",
+    "unite": "pièces",
+    "etat": "ok",
+    "raison": null
+   },
+   {
+    "designation": "Tuiles de rive droites",
+    "quantite": "33 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3698,8 +3733,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -3804,8 +3839,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -3953,8 +3988,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "9 261 pièces",
-    "unite": "pièces",
+    "quantite": "19 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -4120,8 +4155,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -4284,8 +4319,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -4527,8 +4562,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "6 694 pièces",
-    "unite": "pièces",
+    "quantite": "14 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -4574,8 +4609,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": "7 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -4751,8 +4786,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -4873,8 +4908,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -4964,8 +4999,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "1 956 pièces",
-    "unite": "pièces",
+    "quantite": "4 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -5030,8 +5065,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -5121,8 +5156,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -5145,8 +5180,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": "5 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -5361,8 +5396,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": "18 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -5400,8 +5435,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "9 797 pièces",
-    "unite": "pièces",
+    "quantite": "20 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }
@@ -5442,8 +5477,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "6 694 pièces",
-    "unite": "pièces",
+    "quantite": "14 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -5498,8 +5533,8 @@
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "9 261 pièces",
-    "unite": "pièces",
+    "quantite": "19 boîtes de 500",
+    "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
    }

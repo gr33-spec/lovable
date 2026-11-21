@@ -84,7 +84,20 @@ describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes 
       mentioned: ["abergement"],
     });
     expect(order(r, "bandes-abergement")).toBe(4);
-    expect(order(r, "porte-solin-abergement")).toBe(3);
+    // Greg, 21 novembre 2026 : la bande porte-solin que le devis ne dit pas ne sort plus d'office (elle est proposée en
+    // suggestion) ; écrite au devis ou cochée, elle se compte comme avant : 6 m ÷ 2 = 3.
+    expect(r.needs.find((n) => n.needId === "porte-solin-abergement")).toBeUndefined();
+    const avecSolin = computeWorkItem(ROOFING_REFERENTIAL, {
+      workItemId: "abergement-cheminee",
+      params: {
+        nb_cheminees: { value: "2", unit: "u", origin: "devis", evidence: "Devis" },
+        perimetre_cheminee: { value: "3", unit: "m", origin: "artisan", evidence: "Réponse" },
+        faconnage: { value: "2", unit: "u", origin: "artisan", evidence: "Réponse" },
+      },
+      products: {},
+      mentioned: ["abergement", "porte_solin"],
+    });
+    expect(order(avecSolin, "porte-solin-abergement")).toBe(3);
     const bobine = computeWorkItem(ROOFING_REFERENTIAL, {
       workItemId: "abergement-cheminee",
       params: {

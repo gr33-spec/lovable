@@ -106,7 +106,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
   it("1. la liste attendue, dans l'ordre du devis (avant réponse) : chaque article écrit, la naissance d'office, rien d'autre", () => {
     expect(liste()).toEqual([
       ["Ardoises naturelles Espagne 1er choix 32×22", "2 122 pièces"],
-      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 122 pièces"],
+      ["Crochets d'ardoise inox standard, longueur 11 cm", "5 boîtes de 500"], // 2 122 pièces, en boîtes de 500 (Greg, 21 novembre 2026)
       ["Gouttière zinc Havraise", "3 longueurs de 4 m"],
       ["Naissances Ø80", "2 pièces"],
       ["Crochets de gouttière Havraise", "20 pièces"],

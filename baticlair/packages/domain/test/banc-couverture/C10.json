@@ -471,10 +471,11 @@
   {
    "article": "Sortie de toit Ø100",
    "mots": [
-    "sortie|chapeau"
+    "sortie|chapeau|embase"
    ],
    "quantite": 1,
-   "unite": "n"
+   "unite": "n",
+   "ensemble": true
   }
  ],
  "suggestions": []

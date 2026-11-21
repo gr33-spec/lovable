@@ -156,12 +156,15 @@ const worst = (states: TrustState[]): TrustState => states.reduce<TrustState>((w
  * première mesure de son ouvrage. Un besoin seulement suggéré n'appartient
  * à aucune ligne (il n'est pas dans le devis).
  */
-function needOwner(n: OwnedNeed, plan: QuotePlan, roles: ReadonlyMap<string, LineRole>): string | null {
+function needOwner(n: OwnedNeed, plan: QuotePlan, roles: ReadonlyMap<string, LineRole>, ref?: Referential): string | null {
   if (n.origin === "suggested" || !n.workItemId) return null;
+  // La forme d'achat d'un article écrit (les rives gauches et droites de « tuiles de rive ») appartient à la ligne qui l'écrit.
+  const formeDe = ref?.workItems.find((w) => w.id === baseOf(n.workItemId!))?.slots.find((x) => x.key === n.slot)?.formOf;
   const planned = plan.lines.filter((l): l is Extract<QuotePlan["lines"][number], { status: "planned" }> => l.status === "planned" && l.workItemId === n.workItemId);
   return (
     planned.find((l) => l.slot === n.slot)?.ref ??
     planned.find((l) => l.mentions.includes(n.slot))?.ref ??
+    (formeDe ? planned.find((l) => l.slot === formeDe || l.mentions.includes(formeDe))?.ref : undefined) ??
     planned.find((l) => roles.get(l.ref) === "measure")?.ref ??
     null
   );
@@ -283,7 +286,7 @@ export function artisanView(
   if (link) {
     for (const n of engine.needs) {
       if (n.question && engine.declined?.includes(n.question.key)) continue;
-      const owner = needOwner(n, link.plan, link.roles);
+      const owner = needOwner(n, link.plan, link.roles, link.ref);
       if (owner) owned.set(owner, [...(owned.get(owner) ?? []), n]);
     }
   }
@@ -412,6 +415,9 @@ export function artisanView(
           // feuilles 2 × 1 m le remplacent) n'est pas « sans règle » : il n'a rien à faire chiffrer.
           if (!slot || slot.measureOnly || needs.some((n) => n.slot === key) || engine.needs.some((n) => n.workItemId === planned0.workItemId && n.slot === key)) continue;
           if (work!.needs.some((r) => r.slot === key && r.when) && engine.needs.some((n) => n.workItemId === planned0.workItemId)) continue;
+          // Un article écrit dont les formes d'achat ont leurs règles (« tuiles de rive » : les gauches et les droites, Greg,
+          // 21 novembre 2026) n'est pas « sans règle » non plus : ses formes sont les lignes de la liste.
+          if (work!.slots.some((x) => x.formOf === key && work!.needs.some((r) => r.slot === x.key))) continue;
           needs.push({ needId: `${planned0.workItemId}/${key}`, slot: key, label: slot.label, origin: "explicit", need: null, needRange: null, order: null, missing: "Pas encore calculé : le fournisseur proposera pour la mesure du devis.", provisional: false, usual: slot.usual?.text ?? null, assumptions: [], state: "missing" });
         }
       }

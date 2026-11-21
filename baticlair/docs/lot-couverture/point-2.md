@@ -27,13 +27,13 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tuiles HP10 | 1 258 pièces | Valeur par défaut à confirmer |
+| Tuiles HP10 | 1 283 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tuiles HP10 | 1 258 pièces (≈ 6 palettes) |  | chiffrable |
+| Tuiles HP10 | 1 283 pièces (≈ 6 palettes) |  | chiffrable |
 | Fenêtre de toit Velux GGL MK04 tout confort | 2 pièces |  | chiffrable |
 
 ## Ardoises et une fenêtre de toit sans taille
@@ -54,7 +54,7 @@ Questions du comptoir :
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
 | Ardoises naturelles 30×22 | 6 694 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 10 cm | 6 694 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 14 boîtes de 500 | Qualité à préciser |
 | Fenêtre de toit | 1 pièce | Fenêtre à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
@@ -62,7 +62,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Ardoises naturelles Espagne 1er choix 30×22 | 6 694 pièces | 150 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 10 cm | 6 694 pièces | un par ardoise commandée | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 14 boîtes de 500 (6 694 pièces) | un par ardoise commandée | chiffrable |
 | Fenêtre de toit | 1 pièce | 55 × 78 | chiffrable |
 
 ## Une fenêtre de toit seule, sur tuiles plates
@@ -95,7 +95,7 @@ Questions du comptoir :
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
 | Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 18 boîtes de 500 | Qualité à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
@@ -103,7 +103,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 18 boîtes de 500 (8 925 pièces) | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 7 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

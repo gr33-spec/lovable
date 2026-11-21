@@ -19,6 +19,8 @@ export interface LigneAttendue {
   unite: string;
   /** Des lignes d'un même groupe peuvent sortir en une seule ligne du moteur, quantités additionnées. */
   groupe?: string;
+  /** L'article sort en plusieurs lignes du moteur, toutes à la même quantité (une sortie de toit : son embase et son chapeau). */
+  ensemble?: boolean;
   /** Une ligne que les sources ne tranchent pas : hors du score, dite au fondateur. */
   incertain?: string;
 }
@@ -102,7 +104,14 @@ export function rejouer(c: Chantier) {
 export function noter(c: Chantier): Note {
   const { ecran: e, posees, sansReponse } = rejouer(c);
   const sorties = [
-    ...e.purchase.toBuy.map((b) => ({ label: b.label, q: nombre(b.order?.count), u: famille(b.order?.unit), dit: b.quantity, pris: false, aChiffrer: false, raison: "", justeAChiffrer: false })),
+    // Une ligne qui attend encore la réponse à une question du calcul (le périmètre d'une cheminée que le couvreur ne sait pas)
+    // est « à chiffrer avec sa question » : sa quantité n'est pas une commande.
+    ...e.purchase.toBuy.map((b) => {
+      const attend = (b.waitsOn ?? []).filter((k) => k.startsWith("param:"));
+      return attend.length > 0
+        ? { label: b.label, q: null as number | null, u: "", dit: `à chiffrer (attend ${attend.join(", ")})`, pris: false, aChiffrer: true, raison: `attend ${attend.join(", ")}`, justeAChiffrer: true }
+        : { label: b.label, q: nombre(b.order?.count), u: famille(b.order?.unit), dit: b.quantity, pris: false, aChiffrer: false, raison: "", justeAChiffrer: false };
+    }),
     ...e.purchase.toQuote.map((t) => ({ label: t.label, q: null as number | null, u: "", dit: "à chiffrer", pris: false, aChiffrer: true, raison: t.reason, justeAChiffrer: false })),
   ];
   const lignes: Note["lignes"] = [];
@@ -113,6 +122,11 @@ export function noter(c: Chantier): Note {
     if (l.groupe && groupesFaits.has(l.groupe)) continue;
     const candidats = sorties.filter((s) => !s.pris && contient(s.label, l.mots));
     const juste = (s: (typeof sorties)[number], q: number | null, u: string) => (q === null ? s.aChiffrer : !s.aChiffrer && s.q !== null && s.u === u && egal(s.q, q, u));
+    if (l.ensemble && candidats.length > 0 && candidats.every((x) => juste(x, l.quantite, l.unite))) {
+      for (const x of candidats) x.pris = true;
+      classe("juste", candidats.map((x) => `${x.label} : ${x.dit}`).join(" + "));
+      continue;
+    }
     let s = candidats.find((x) => juste(x, l.quantite, l.unite));
     if (!s && l.groupe) {
       // Le groupe en une seule ligne, quantités additionnées (« 8 feuilles » pour 6 + 1 + 1).

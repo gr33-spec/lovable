@@ -306,19 +306,20 @@
   {
    "article": "Contre-liteaux 27×40",
    "mots": [
-    "contre"
+    "liteau"
    ],
-   "quantite": 200,
-   "unite": "ml"
+   "quantite": 210,
+   "unite": "ml",
+   "groupe": "27x40"
   },
   {
    "article": "Liteaux 27×40",
    "mots": [
-    "liteau",
-    "!contre"
+    "liteau"
    ],
    "quantite": 336,
-   "unite": "ml"
+   "unite": "ml",
+   "groupe": "27x40"
   },
   {
    "article": "Tuiles HP 10",
@@ -327,7 +328,7 @@
     "!rive",
     "!faiti"
    ],
-   "quantite": 1260,
+   "quantite": 1254,
    "unite": "n"
   },
   {
@@ -336,7 +337,7 @@
     "rive",
     "gauche"
    ],
-   "quantite": 41,
+   "quantite": 40,
    "unite": "n"
   },
   {
@@ -345,7 +346,7 @@
     "rive",
     "droit|droite"
    ],
-   "quantite": 41,
+   "quantite": 40,
    "unite": "n"
   },
   {
@@ -353,7 +354,7 @@
    "mots": [
     "faitiere"
    ],
-   "quantite": 25,
+   "quantite": 24,
    "unite": "n"
   },
   {

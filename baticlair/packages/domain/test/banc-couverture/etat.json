@@ -15,15 +15,15 @@
  "C02": {
   "lignes": {
    "Écran HPV": "juste",
-   "Contre-liteaux 27×40": "manquante",
-   "Liteaux 27×40": "quantite",
-   "Tuiles HP 10": "quantite",
-   "Tuiles de rive gauches": "manquante",
-   "Tuiles de rive droites": "manquante",
-   "Faîtières": "quantite",
+   "Contre-liteaux 27×40": "juste",
+   "Liteaux 27×40": "juste",
+   "Tuiles HP 10": "juste",
+   "Tuiles de rive gauches": "juste",
+   "Tuiles de rive droites": "juste",
+   "Faîtières": "juste",
    "Closoir ventilé": "juste"
   },
-  "enTrop": 1
+  "enTrop": 0
  },
  "C03": {
   "lignes": {
@@ -50,24 +50,24 @@
    "Ardoises 30×20": "quantite",
    "Crochets d'ardoise": "quantite",
    "Feuilles de zinc": "quantite",
-   "Fenêtres GGL MK04": "manquante",
+   "Fenêtres GGL MK04": "juste",
    "Raccords MK04": "juste",
-   "Faîtières": "quantite",
+   "Faîtières": "juste",
    "Sorties de toit Ø125": "juste"
   },
-  "enTrop": 3
+  "enTrop": 0
  },
  "C06": {
   "lignes": {
    "Tuiles canal, courants": "manquante",
    "Tuiles canal, couverts": "manquante",
    "Liteaux 27×40": "quantite",
-   "Bardelis gauches": "manquante",
-   "Bardelis droits": "manquante",
-   "Faîtières canal": "quantite",
+   "Bardelis gauches": "juste",
+   "Bardelis droits": "juste",
+   "Faîtières canal": "juste",
    "Mortier de faîtage": "manquante"
   },
-  "enTrop": 2
+  "enTrop": 1
  },
  "C07": {
   "lignes": {
@@ -93,7 +93,7 @@
   "lignes": {
    "Voliges": "juste",
    "Bacs joint debout": "juste",
-   "Bande d'égout": "quantite",
+   "Bande d'égout": "juste",
    "Faîtage zinc": "juste",
    "Gouttière de 33": "juste",
    "Tubes de descente Ø100": "juste"
@@ -111,12 +111,12 @@
    "Tubes de descente PVC Ø80": "juste",
    "Sortie de toit Ø100": "juste"
   },
-  "enTrop": 1
+  "enTrop": 0
  },
  "C11": {
   "lignes": {
    "Ardoises 35×25": "quantite",
-   "Crochets à agrafe": "quantite",
+   "Crochets à agrafe": "juste",
    "Crochets à pointe": "manquante",
    "Feuilles de zinc (arêtiers)": "juste",
    "Feuilles de zinc (faîtage)": "juste",
@@ -130,29 +130,29 @@
  "C12": {
   "lignes": {
    "Écran HPV": "juste",
-   "Liteaux 27×40": "quantite",
-   "Tuiles HP 10": "quantite",
-   "Tuiles de rive gauches": "incertain",
-   "Tuiles de rive droites": "incertain",
+   "Liteaux 27×40": "juste",
+   "Tuiles HP 10": "juste",
+   "Tuiles de rive gauches": "juste",
+   "Tuiles de rive droites": "juste",
    "Faîtières": "quantite",
-   "Fenêtres GGL SK06": "manquante",
+   "Fenêtres GGL SK06": "juste",
    "Raccords SK06": "juste",
-   "Fenêtre GGL CK02": "manquante",
+   "Fenêtre GGL CK02": "juste",
    "Raccord CK02": "juste",
    "Tuile à douille": "manquante",
    "Lanterne de sortie de toit Ø125": "juste",
    "Plomb en rouleau": "juste"
   },
-  "enTrop": 2
+  "enTrop": 1
  },
  "C13": {
   "lignes": {
-   "Bandes de rive zinc": "quantite",
+   "Bandes de rive zinc": "juste",
    "Bandes porte-solin": "juste",
    "Gouttière de 25": "juste",
    "Tubes de descente Ø80": "juste",
    "Dauphin fonte": "juste",
-   "Abergement de cheminée": "quantite"
+   "Abergement de cheminée": "juste"
   },
   "enTrop": 0
  },
@@ -169,7 +169,7 @@
   "lignes": {
    "Tuiles à emboîtement": "quantite",
    "Plaques bac acier": "juste",
-   "Gouttière alu de 25": "quantite",
+   "Gouttière alu de 25": "juste",
    "Tubes de descente alu Ø80": "juste"
   },
   "enTrop": 0

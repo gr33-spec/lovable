@@ -23,7 +23,8 @@ const COMPLETE = {
   "Ardoises naturelles Espagne 1er choix 30×22": "8 925 pièces",
   // Fiche couverture (2026-11-19) : NF DTU 40.11, 45°, région III → recouvrement 89 mm, crochet 89 + 3 mm → 10 cm, un par ardoise
   // (avant : recouvrement 95 mm, 9 271 ardoises, crochets 11 cm, 9 457).
-  "Crochets d'ardoise inox standard, longueur 10 cm": "8 925 pièces",
+  // Greg, 21 novembre 2026 : en boîtes de 500, le nombre de pièces écrit sur la ligne (8 925 pièces → 18 boîtes).
+  "Crochets d'ardoise inox standard, longueur 10 cm": "18 boîtes de 500",
 };
 
 describe("jamais de quantité demandée à l'artisan", () => {
@@ -46,7 +47,7 @@ describe("jamais de quantité demandée à l'artisan", () => {
   });
 
   it("autres formats du référentiel (§3) : 32×22 calculé comme 30×22", () => {
-    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises naturelles Espagne 1er choix 32×22": "8 148 pièces", "Crochets d'ardoise inox standard, longueur 10 cm": "8 148 pièces" });
+    expect(bought(one("Ardoises naturelles 32x22 pose au crochet", "200", "m²"))).toMatchObject({ "Ardoises naturelles Espagne 1er choix 32×22": "8 148 pièces", "Crochets d'ardoise inox standard, longueur 10 cm": "17 boîtes de 500" }); // 8 148 pièces, en boîtes de 500
   });
 
   // NF DTU 40.11 (fiche couverture, 2026-11-19) : un rampant de 6 m prend la table « 5,50 à 11 m » : 94 mm à 45° en région III,
@@ -56,7 +57,7 @@ describe("jamais de quantité demandée à l'artisan", () => {
       "param:longueur_rampant": { value: "6", unit: "m" },
     });
     expect(bought(v)["Ardoises naturelles Espagne 1er choix 32×22"]).toBe("8 316 pièces");
-    expect(bought(v)["Crochets d'ardoise inox standard, longueur 10 cm"]).toBe("8 316 pièces");
+    expect(bought(v)["Crochets d'ardoise inox standard, longueur 10 cm"]).toBe("17 boîtes de 500"); // 8 316 pièces, en boîtes de 500
     expect(v.questions.some((d) => d.question?.key === "product:ardoise")).toBe(false);
     expect(v.canValidate).toBe(true);
   });

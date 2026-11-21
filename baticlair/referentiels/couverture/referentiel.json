@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-64",
+  "version": "roofing-2026.11.21-65",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -3643,6 +3643,39 @@
       "attributes": {},
       "sellingUnits": [
         {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 500",
+            "many": "boîtes de 500"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "500",
+            "unit": "u",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-rive-standard",
+      "family": "verge_tile",
+      "label": "Tuile de rive (modèle de la tuile)",
+      "shortLabel": "Tuiles de rive",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
           "id": "piece",
           "label": {
             "one": "pièce",
@@ -3665,10 +3698,41 @@
       ]
     },
     {
-      "id": "tuile-rive-standard",
+      "id": "tuile-rive-gauche-standard",
       "family": "verge_tile",
-      "label": "Tuile de rive (modèle de la tuile)",
-      "shortLabel": "Tuiles de rive",
+      "label": "Tuile de rive gauche (modèle de la tuile)",
+      "shortLabel": "Tuiles de rive gauches",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-rive-droite-standard",
+      "family": "verge_tile",
+      "label": "Tuile de rive droite (modèle de la tuile)",
+      "shortLabel": "Tuiles de rive droites",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -5184,6 +5248,68 @@
       ]
     },
     {
+      "id": "bardelis-gauche-standard",
+      "family": "verge_tile",
+      "label": "Bardelis gauche (tuile de rive canal), modèle de la tuile posée",
+      "shortLabel": "Bardelis gauches",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bardelis-droit-standard",
+      "family": "verge_tile",
+      "label": "Bardelis droit (tuile de rive canal), modèle de la tuile posée",
+      "shortLabel": "Bardelis droits",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "feuille-zinc-2x1",
       "family": "zinc_sheet",
       "label": "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)",
@@ -5704,6 +5830,28 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "tuile-rive-standard"
           }
+        },
+        {
+          "key": "rive_gauche",
+          "family": "verge_tile",
+          "label": "Tuiles de rive gauches",
+          "usual": {
+            "text": "Tuile de rive gauche du modèle de tuile posé.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "tuile-rive-gauche-standard"
+          },
+          "formOf": "rive"
+        },
+        {
+          "key": "rive_droite",
+          "family": "verge_tile",
+          "label": "Tuiles de rive droites",
+          "usual": {
+            "text": "Tuile de rive droite du modèle de tuile posé.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "tuile-rive-droite-standard"
+          },
+          "formOf": "rive"
         }
       ],
       "constants": {
@@ -5830,15 +5978,15 @@
           "version": 1
         },
         {
-          "id": "tuiles-de-rive",
-          "slot": "rive",
-          "formula": "longueur_rives / pureau",
+          "id": "tuiles-de-rive-gauches",
+          "slot": "rive_gauche",
+          "formula": "longueur_rives / 2 / pureau",
           "unit": "u",
           "core": true,
           "requires": [
             "longueur_rives"
           ],
-          "exclusions": "Une tuile de rive par rang, sur la longueur totale des rives du devis (gauche et droite) ; hors abouts.",
+          "exclusions": "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -5846,7 +5994,26 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 2
+        },
+        {
+          "id": "tuiles-de-rive-droites",
+          "slot": "rive_droite",
+          "formula": "longueur_rives / 2 / pureau",
+          "unit": "u",
+          "core": true,
+          "requires": [
+            "longueur_rives"
+          ],
+          "exclusions": "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
         }
       ]
     },
@@ -5962,6 +6129,28 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bardelis-standard"
           }
+        },
+        {
+          "key": "rive_gauche",
+          "family": "verge_tile",
+          "label": "Bardelis gauches",
+          "usual": {
+            "text": "Bardelis gauche du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bardelis-gauche-standard"
+          },
+          "formOf": "rive"
+        },
+        {
+          "key": "rive_droite",
+          "family": "verge_tile",
+          "label": "Bardelis droits",
+          "usual": {
+            "text": "Bardelis droit du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bardelis-droit-standard"
+          },
+          "formOf": "rive"
         }
       ],
       "constants": {
@@ -6067,15 +6256,15 @@
           "version": 1
         },
         {
-          "id": "bardelis",
-          "slot": "rive",
-          "formula": "longueur_rives * regle.bardelis_par_ml",
+          "id": "bardelis-gauches",
+          "slot": "rive_gauche",
+          "formula": "longueur_rives / 2 * regle.bardelis_par_ml",
           "unit": "u",
           "core": true,
           "requires": [
             "longueur_rives"
           ],
-          "exclusions": "Rives gauche et droite du devis ; mortier de scellement à part.",
+          "exclusions": "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
           "source": "edilians-canal",
           "verification": {
             "status": "verified",
@@ -6083,7 +6272,26 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 2
+        },
+        {
+          "id": "bardelis-droits",
+          "slot": "rive_droite",
+          "formula": "longueur_rives / 2 * regle.bardelis_par_ml",
+          "unit": "u",
+          "core": true,
+          "requires": [
+            "longueur_rives"
+          ],
+          "exclusions": "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
         }
       ]
     },
@@ -9484,7 +9692,7 @@
           "unit": "ml",
           "core": true,
           "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
-          "precision": "{longueur_faitage|ml} de faîtage à couvrir",
+          "precision": "{longueur_faitage|ml} de faîtage à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
           "precisionRequires": [
             "developpe",
@@ -11018,7 +11226,7 @@
           "unit": "ml",
           "core": true,
           "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
-          "precision": "{longueur_aretier|ml} d'arêtier à couvrir",
+          "precision": "{longueur_aretier|ml} d'arêtier à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "Arêtier {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe_aretier|cm#}",
           "precisionRequires": [
             "developpe_aretier",
@@ -11308,6 +11516,10 @@
         {
           "key": "raccord",
           "family": "roof_window_flashing",
+          "keywords": [
+            "raccord",
+            "raccords"
+          ],
           "label": "Raccords d'étanchéité",
           "usual": {
             "text": "Un raccord par fenêtre, adapté à la couverture (§11).",
@@ -12031,7 +12243,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1) ; fixations à part.",
-          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
             "developpe",
@@ -12737,7 +12949,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
-          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
             "developpe",
@@ -13837,7 +14049,9 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "porte-solin-standard"
           },
-          "formOf": "abergement"
+          "suggested": {
+            "label": "Bandes porte-solin de l'abergement"
+          }
         }
       ],
       "constants": {
@@ -19367,7 +19581,7 @@
     },
     {
       "family": "roof_tile",
-      "rate": "3",
+      "rate": "5",
       "source": "fondateur-referentiel-2026-10-03",
       "verification": {
         "status": "verified",
@@ -19375,8 +19589,8 @@
         "verifiedBy": "Fondateur (couvreur)",
         "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
       },
-      "version": 1,
-      "note": "Tuiles mécaniques."
+      "version": 2,
+      "note": "Tuiles à emboîtement : 5 % de casse (Greg, 21 novembre 2026)."
     },
     {
       "family": "roof_tile_canal",

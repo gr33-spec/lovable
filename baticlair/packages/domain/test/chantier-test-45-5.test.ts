@@ -41,7 +41,7 @@ describe("chantier Test : les corrections du §45.5", () => {
   it("bandes zinc commandées façonnées : en longueurs de 2 m, avec ce qu'elles couvrent", () => {
     const v = readQuote(TEST, { ...REPONSES, "param:faconnage": u("2") });
     // §50.7 : la pièce porte son nom (« Bande zinc d'égout ») ; §1 : 13 ml en longueurs de 2 m → 7.
-    expect(line(v, "Bande zinc d'égout, Quartz-Zinc 0,65 mm")).toMatchObject({ quantity: "7 longueurs de 2 m", precision: "13 ml à couvrir, développé 33 cm" });
+    expect(line(v, "Bande zinc d'égout, Quartz-Zinc 0,65 mm")).toMatchObject({ quantity: "7 longueurs de 2 m", precision: "13 ml à couvrir, développé 33 cm. Longueur du devis reprise telle quelle, sans recouvrement" });
   });
 
   it("égout et faîtage absents du devis : ni question, ni ligne, ni suggestion (règle numéro un)", () => {

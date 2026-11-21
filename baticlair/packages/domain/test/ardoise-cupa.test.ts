@@ -10,7 +10,9 @@ import { REFERENTIEL_COMPLET } from "./support/complet.js";
  *  - le recouvrement se lit par région ardoise (I / II / III), pas par zone climatique des tuiles.
  */
 const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
-const order = (r: ReturnType<typeof computeWorkItem>, id: string) => Number(need(r, id).purchase?.order.count);
+// Le nombre de pièces à commander. Les crochets se commandent en boîtes de 500 (Greg, 21 novembre 2026) : leur nombre de
+// pièces est celui du besoin, écrit sur la ligne.
+const order = (r: ReturnType<typeof computeWorkItem>, id: string) => (id === "crochets-ardoise" ? Math.ceil(Number(need(r, id).quantity?.value)) : Number(need(r, id).purchase?.order.count));
 const input = (params: WorkItemInput["params"] = {}, format = "ardoise-30x22", waste?: Record<string, string>): WorkItemInput => ({
   workItemId: "couverture-ardoises-crochet",
   // La qualité de l'ardoise (question du comptoir, §47.8) : habitude de l'entreprise.

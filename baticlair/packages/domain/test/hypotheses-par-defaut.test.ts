@@ -93,7 +93,9 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     const withRives = computeWorkItem(REFERENTIEL_COMPLET, { ...tuiles, params: { ...tuiles.params, longueur_rives: { value: "24", unit: "m", origin: "devis" } } });
     // Pureau : rampant 5,5 m (hypothèse) partagé en 15 rangs entiers au pureau maxi de 0,376 m → 0,3667 m (fiche couverture,
     // 2026-11-19 ; avant : pureau mini 0,31 m en zone littorale). 24 m / 0,3667 m = 65,45 tuiles de rive → 66 (avant 78).
-    expect(need(withRives, "tuiles-de-rive")).toMatchObject({ status: "calculated", purchase: { order: { count: "66" } } });
+    // Greg, 21 novembre 2026 : deux lignes, gauches et droites (12 m de chaque côté) : 12 / 0,3667 = 32,7 → 33 de chaque (avant : une ligne de 66).
+    expect(need(withRives, "tuiles-de-rive-gauches")).toMatchObject({ status: "calculated", purchase: { order: { count: "33" } } });
+    expect(need(withRives, "tuiles-de-rive-droites")).toMatchObject({ status: "calculated", purchase: { order: { count: "33" } } });
   });
 
   it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
@@ -103,7 +105,8 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(r, "ardoises")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "9408" } } });
     expect(need(r, "ardoises").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5", unit: "%" });
     // Crochets = un par ardoise commandée, 9 408 (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 597).
-    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "9408" } } });
+    // Greg, 21 novembre 2026 : les crochets se commandent en boîtes de 500, le nombre de pièces reste écrit (9 408 → 19 boîtes).
+    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "19" } } });
     expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2100" } });
   });
 
