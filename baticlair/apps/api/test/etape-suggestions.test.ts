@@ -35,12 +35,14 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { projetId } = await chantier(agent);
     const e = await ecran(agent, projetId);
     expect(e.suggestions).toEqual([
+      // Greg, 21 novembre 2026 (soir) : la sortie de ventilation se propose sur toute couverture dont le devis ne dit pas de
+      // sortie de toit ; cinq cases au plus : elle prend la place des vis.
+      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" },
       { key: "gouttiere/naissance", label: "Naissances de gouttière" },
       { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)" },
       { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)" },
       // Greg, 18 novembre 2026 : les consommables en cases (plus jamais d'office, plus de question oui / non).
       { key: "bandes-zinc/mastic+bande-porte-solin/mastic", label: "Cartouches de silicone zinc" },
-      { key: "bandes-zinc/vis", label: "Vis inox 4 × 40" },
     ]);
     expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // Plus de question oui / non sur les consommables.
