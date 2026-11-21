@@ -87,7 +87,11 @@ describe("noues et arêtiers : les règles du fondateur", () => {
   it("arêtier seul : le comptoir demande tuiles ou zinc ; en zinc, la bande de 25 ou de 33 et 3 pattes par mètre", () => {
     const before = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }]);
     expect(before.questions.map((q) => q.question?.text)).toContain("Arêtier en tuiles (arêtières) ou en bande zinc ?");
-    const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm") });
+    // Banc du calcul (21 novembre 2026) : un arêtier en bande zinc est une pièce pliée ; la réponse « je plie » du devis vaut
+    // pour lui. Commandé façonné : des bandes de 2 m (comme avant). Plié sur place : des feuilles 2 × 1 m.
+    const plie = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm"), "param:faconnage@pieces-pliees": u("1") });
+    expect(plie.toBuy.find((b) => b.label.startsWith("Feuilles"))!.quantity).toBe("2 pièces"); // 9 ml ÷ (2 m × 3 bandes de 33 dans 1 m) = 1,5 → 2
+    const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm"), "param:faconnage@pieces-pliees": u("2") });
     expect(v.questions).toEqual([]);
     expect(labels(v)).toEqual(expect.arrayContaining([expect.stringMatching(/^Arêtier zinc naturel 0,65 mm, bande dév\. 33/), expect.stringMatching(/^Pattes de fixation/)]));
     expect(v.toBuy.find((b) => b.label.startsWith("Arêtier zinc"))!.quantity).toBe("5 longueurs de 2 m"); // 9 × 1,05 = 9,45 ml en longueurs de 2 m (fiche couverture, 2026-11-19 ; avant 3 m)

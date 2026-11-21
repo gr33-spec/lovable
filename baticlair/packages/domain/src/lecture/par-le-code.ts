@@ -51,18 +51,28 @@ const motsDeFamille = (ref: Referential, code: string) => (ref.families.find((f)
  * L'ouvrage que nomme un texte : celui dont la fiche trouve le plus de mots (puis le plus long) ; deux ouvrages à égalité,
  * aucun (jamais deviner).
  */
-export function ouvrageNomme(ref: Referential, texte: string): WorkItemType | null {
-  const t = motsDeLaFiche(texte);
+export function ouvrageNomme(ref: Referential, texte: string, lu?: string | null): WorkItemType | null {
+  // Un mot qui finit par « é » dit une façon ou une teinte, jamais le nom d'un ouvrage : « tuiles HP10 ardoisé » est une
+  // tuile de teinte ardoisée, pas une ardoise (banc du calcul, C12, 21 novembre 2026). Il est retiré avant de chercher.
+  const t = motsDeLaFiche(texte.replace(/[\p{L}]+é(?:e|s|es)?(?![\p{L}])/gu, " "));
   let best: { w: WorkItemType; n: number; len: number }[] = [];
   for (const w of ref.workItems) {
     const hits = [...new Set(w.triggers.flatMap((f) => motsDeFamille(ref, f)))].filter((k) => contient(t, k));
     if (hits.length === 0) continue;
     const score = { w, n: hits.length, len: Math.max(...hits.map((h) => h.length)) };
     const top = best[0];
-    if (!top || score.n > top.n || (score.n === top.n && score.len > top.len)) best = [score];
-    else if (score.n === top.n && score.len === top.len) best.push(score);
+    if (!top || score.n > top.n) best = [score];
+    else if (score.n === top.n) best.push(score);
   }
-  return best.length === 1 ? best[0]!.w : null;
+  if (best.length === 0) return null;
+  // Plusieurs ouvrages nommés par autant de mots (« gouttières PVC » : la gouttière zinc par « gouttière », la gouttière PVC
+  // par « PVC ») : celui que la lecture a rangé départage, s'il est l'un d'eux (banc du calcul, C10, 21 novembre 2026) ; sinon
+  // le mot le plus long, et à égalité aucun (jamais deviner). Un ouvrage que la ligne ne nomme pas n'est jamais retenu.
+  const choisi = lu ? best.find((b) => b.w.id === lu) : undefined;
+  if (choisi) return choisi.w;
+  const len = Math.max(...best.map((b) => b.len));
+  const longs = best.filter((b) => b.len === len);
+  return longs.length === 1 ? longs[0]!.w : null;
 }
 
 const motsDEmplacement = (ref: Referential, w: WorkItemType, s: Slot) =>
@@ -133,7 +143,8 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   // qu'une autre ligne fournit : elle ne fait que citer (l'étain, les colliers), la lecture reste.
   if (!ACHAT.has(l.role) || !l.unite?.trim() || GESTE.test(normalizeText(l.designation))) return l;
   const titre = titreDe(l.designation);
-  const w = ouvrageNomme(ref, titre) ?? ouvrageNomme(ref, l.designation);
+  const lu = l.fournitures[0]?.ouvrage ?? null;
+  const w = ouvrageNomme(ref, titre, lu) ?? ouvrageNomme(ref, l.designation, lu);
   if (!w || w.slots.length === 0) return l;
   const texte = motsDeLaFiche(l.designation);
   const titreMots = motsDeLaFiche(titre);
@@ -159,6 +170,9 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
     if (new Set(ailleurs).size === 1) donnees[p.key] = ailleurs[0]!;
   }
   Object.assign(donnees, donneesEcrites(w.params, l.designation));
+  // La quantité de la ligne mesure déjà l'ouvrage (30 ml d'arêtier) : un détail du texte (« 4 arêtiers de 7,50 m ») ne la
+  // remplace jamais (banc du calcul, C11, 21 novembre 2026).
+  if (mesure) for (const p of w.params) if (p.fromLineQuantity && /^(?:m|cm|mm|m2)$/.test(p.unit)) delete donnees[p.key];
   const description = l.designation.slice(titre.length).replace(/^\s*[:—–]\s*/, "").trim() || l.designation.trim();
   // Une ligne qui compte l'ouvrage (« descente, 1 unité ») : l'article se calcule et prend le nom de la fiche (« Tubes de
   // descente »), que le calcul complète (Ø, longueur) ; un article écrit tel quel garde les mots du devis.

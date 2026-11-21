@@ -24,12 +24,18 @@ function tableau(n: readonly Note[]): string {
   return out.join("\n");
 }
 
+// Pour regarder un chantier de près pendant une correction : `BANC_VOIR=C01,C05 npx vitest run test/banc-couverture.test.ts`.
+const voir = () => { if (process.env.BANC_VOIR) for (const x of notes.filter((n) => process.env.BANC_VOIR!.split(",").includes(n.id))) {
+  console.log(`\n== ${x.id} : ${score([x]).justes}/${score([x]).attendues}\n` + x.lignes.map((l) => `${l.classe === "juste" ? "  ok " : " FAUX"} ${l.article} : ${l.attendu} attendu → ${l.obtenu}`).join("\n") + `\n en trop : ${x.enTrop.join(" ; ") || "rien"}\n questions : ${x.questions.join(", ")}\n sans réponse : ${x.sansReponse.join(" ; ") || "aucune"}\n à chiffrer sans question : ${x.sansQuestion.join(" ; ") || "aucune"}`);
+} };
+
 describe("banc du calcul de la couverture : 15 chantiers rejoués sans IA", () => {
   const avant: Etat | null = existsSync(ETAT) ? (JSON.parse(readFileSync(ETAT, "utf8")) as Etat) : null;
   const baisses: string[] = [];
   if (avant) for (const x of notes) { const a = avant[x.id]; if (!a) continue; for (const l of x.lignes) if (a.lignes[l.article] === "juste" && l.classe !== "juste") baisses.push(`${x.id} « ${l.article} » était juste : ${l.attendu} attendu, ${l.obtenu}`); if (x.enTrop.length > a.enTrop) baisses.push(`${x.id} : ${x.enTrop.length} ligne(s) en trop (${a.enTrop} avant) : ${x.enTrop.join(" ; ")}`); }
 
   it("les 15 chantiers se rejouent (10 d'entraînement, 5 d'examen)", () => {
+    voir();
     expect(notes).toHaveLength(15);
     expect(notes.filter((n) => n.jeu === "examen")).toHaveLength(5);
   });

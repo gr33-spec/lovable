@@ -6,7 +6,7 @@
    "Ardoises 32×22": "quantite",
    "Crochets d'ardoise": "quantite",
    "Feuilles de zinc (faîtage)": "juste",
-   "Gouttière de 25": "quantite",
+   "Gouttière de 25": "juste",
    "Tubes de descente Ø80": "juste",
    "Dauphins fonte": "juste"
   },
@@ -15,7 +15,7 @@
  "C02": {
   "lignes": {
    "Écran HPV": "juste",
-   "Contre-liteaux 27×40": "quantite",
+   "Contre-liteaux 27×40": "manquante",
    "Liteaux 27×40": "quantite",
    "Tuiles HP 10": "quantite",
    "Tuiles de rive gauches": "manquante",
@@ -95,7 +95,7 @@
    "Bacs joint debout": "juste",
    "Bande d'égout": "quantite",
    "Faîtage zinc": "juste",
-   "Gouttière de 33": "quantite",
+   "Gouttière de 33": "juste",
    "Tubes de descente Ø100": "juste"
   },
   "enTrop": 0
@@ -136,14 +136,14 @@
    "Tuiles de rive droites": "incertain",
    "Faîtières": "quantite",
    "Fenêtres GGL SK06": "manquante",
-   "Raccords SK06": "manquante",
+   "Raccords SK06": "juste",
    "Fenêtre GGL CK02": "manquante",
    "Raccord CK02": "juste",
    "Tuile à douille": "manquante",
    "Lanterne de sortie de toit Ø125": "juste",
    "Plomb en rouleau": "juste"
   },
-  "enTrop": 3
+  "enTrop": 2
  },
  "C13": {
   "lignes": {

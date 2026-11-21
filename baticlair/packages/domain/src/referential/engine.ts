@@ -1169,7 +1169,7 @@ function computeNeed(
       ...(unknownParams.length > 0 ? { unknownParams } : {}),
       status: "calculated",
       ...(exact
-        ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }
+        ? { quantity: { value: (rule.covers && input.params[rule.covers] ? new Decimal(input.params[rule.covers]!.value) : need.lo).toDecimalPlaces(2).toFixed(), unit: rule.unit } }
         : { quantityRange: { min: need.lo.toDecimalPlaces(2).toFixed(), max: need.hi.toDecimalPlaces(2).toFixed(), unit: rule.unit } }),
       ...(purchase ? { purchase: { order: { count: purchase.orderLo.toFixed(), unit: purchase.unit }, approx: purchase.approx } } : {}),
       ...(enPieces ? { purchase: enPieces } : {}),

@@ -295,11 +295,14 @@ function produitDe(ref: Referential, slot: Slot, named: string): { id: string } 
  * produits possibles : aucun (jamais deviner). Retour de Greg, 17 novembre 2026 : « 48 m² d'ardoises 32×22 et crochets de 11
  * finissaient dans "À préciser" ».
  */
-function produitDansLeNom(ref: Referential, slot: Slot, nom: string): { id: string } | undefined {
+function produitDansLeNom(ref: Referential, slot: Slot, nom: string, references = false): { id: string } | undefined {
   // Un emplacement qui a déjà son article courant (les liteaux 18×40) garde son hypothèse, dite et modifiable.
   if (slot.usual) return undefined;
   const texte = ` ${normalizeText(nom)} `;
-  const hits = ref.products.filter((p) => p.family === slot.family && p.aliases.some((a) => /\d\s*x\s*\d/.test(normalizeText(a)) && texte.includes(` ${normalizeText(a)} `)));
+  // Un format (« 32 x 22 ») ; dans la désignation du devis seulement (`references`), aussi une référence de modèle qui porte un
+  // chiffre (« HP 10 », banc du calcul C02, 21 novembre 2026). Jamais un mot courant, qui nommerait un produit par hasard, ni
+  // le nom d'un article proposé par l'appli (« Tuiles HP10 » tant que l'artisan n'a pas choisi).
+  const hits = ref.products.filter((p) => p.family === slot.family && p.aliases.some((a) => (references ? /\d/.test(a) : /\d\s*x\s*\d/.test(normalizeText(a))) && texte.includes(` ${normalizeText(a)} `)));
   return hits.length === 1 ? hits[0] : undefined;
 }
 
@@ -395,7 +398,9 @@ export function planDeLecture(
       }
     }
     // Le produit du référentiel que la ligne nomme (« produit » : son identifiant, ou son nom tel que l'export le donne).
-    const produit = (f.donnees.produit ? produitDe(ref, slot, f.donnees.produit) : undefined) ?? produitDansLeNom(ref, slot, f.nom);
+    // Banc du calcul (C01, 21 novembre 2026) : une ligne « fourniture et pose » rangée par le code prend le nom de la fiche
+    // (« Ardoises ») ; le format écrit au devis (« 32×22 ») reste lu dans la désignation de la ligne, jamais perdu.
+    const produit = (f.donnees.produit ? produitDe(ref, slot, f.donnees.produit) : undefined) ?? produitDansLeNom(ref, slot, f.nom) ?? produitDansLeNom(ref, slot, l.ligne.designation, true);
     if (produit) input.products[slot.key] = { productId: produit.id, origin: "devis" };
     // Les données écrites sur la ligne, telles que le modèle les a lues (« taille_fenetre » : « 114x118 »).
     for (const [key, raw] of Object.entries(f.donnees)) {

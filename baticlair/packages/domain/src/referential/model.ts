@@ -428,6 +428,11 @@ export interface NeedRule extends Provenance {
   /** Ce que la règle ne compte pas (dit à l'artisan dans « Voir le calcul »). */
   exclusions?: string;
   /**
+   * La donnée que le besoin COUVRE, quand il compte plus qu'elle (« 13 ml » de gouttière, plus 30 mm par jonction) : la liste
+   * dit ce qui est couvert (« 13 ml à couvrir »), jamais la longueur gonflée des recouvrements.
+   */
+  covers?: string;
+  /**
    * Ce qui sert au comptoir (§45.3, colonne « précision ») : l'usage de la pièce
    * (« pour façonner la bande d'égout »), une position (« zone fixe de chaque bac »).
    * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).

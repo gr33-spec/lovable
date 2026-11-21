@@ -1283,7 +1283,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.20-62",
+  version: "roofing-2026.11.21-63",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2791,6 +2791,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         ARETIER_PARAM,
         NB_ARETIERS_PARAM,
         DEVELOPPE_ARETIER_PARAM,
+        // Banc du calcul (C11, 21 novembre 2026) : un arêtier en bande zinc est une pièce pliée comme les autres ; la réponse
+        // « je plie » donnée une fois pour le devis vaut pour lui (des feuilles 2 × 1 m), sinon des bandes façonnées.
+        FACONNAGE_BANDES_PARAM,
         EPAISSEUR_ZINC_PARAM,
         ASPECT_ZINC_PARAM,
       ],
@@ -2799,10 +2802,11 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "closoir", family: "hip_closure", label: "Closoir d'arêtier", usual: { text: "Closoir ventilé d'arêtier, 23 cm, rouleau de 5 m (§5).", source: F, productId: "closoir-aretier-5m" } },
         { key: "crochet", family: "hip_fixing", label: "Crochets d'arêtier", keywords: ["crochet"], usual: { text: "Pose à sec : un crochet par arêtier (§5).", source: F, productId: "crochet-aretier-standard" } },
         { key: "about", family: "hip_end", label: "Abouts d'arêtier", usual: { text: "Un about par arêtier (§5).", source: F, productId: "about-aretier-standard" } },
-        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).", source: F, productId: "bande-aretier-zinc-standard" } },
+        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", keywords: ["bande", "zinc"], usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).", source: F, productId: "bande-aretier-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre (§3).", source: F, productId: "patte-zinc-standard" } },
+        { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).", source: F, productId: "feuille-zinc-2x1" }, formOf: "bande" },
       ],
-      constants: { pattes_par_metre: PATTES_PAR_METRE },
+      constants: { ...ZINC_PLAT_CONSTANTS, pattes_par_metre: PATTES_PAR_METRE },
       needs: [
         {
           id: "aretieres",
@@ -2853,9 +2857,25 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
+          id: "feuilles-aretier-zinc",
+          slot: "feuille",
+          when: "si(aretier_matiere < 2, 9, faconnage) < 2",
+          formula: "arrondi_sup(longueur_aretier / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))))",
+          unit: "u",
+          core: true,
+          exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
+          precision: "pour {longueur_aretier|ml} d'arêtier, développé {developpe_aretier|cm}",
+          estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          precisionRequires: ["aspect_zinc"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
           id: "bande-aretier-zinc",
           slot: "bande",
-          when: "aretier_matiere >= 2",
+          when: "si(aretier_matiere < 2, 0, faconnage) >= 2",
           formula: "longueur_aretier",
           unit: "ml",
           core: true,
@@ -3985,6 +4005,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         // §2 : « Jonctions (soudure) : nb longueurs − 1 par ligne ; étain + décapant ≈ 15 g/jonction » (à valider, §25.7).
         etain_par_jonction: rule("0.015", "kg", F, todo("§2 et §25.3 : ≈ 15 g d'étain par jonction, à valider par un couvreur (§25.7)."), "étain {v} par jonction"),
         longueur_barre_gouttiere: condition("4", "m", F, FOUNDER_DOC, "Gouttière zinc en longueurs de 4 m (§25.2)."),
+        // Base couverture, « gouttières zinc » (confirmé) : « ml de gouttière + 30 mm par jonction soudée, arrondi aux
+        // longueurs de 4 m ; pas de % en plus ». Banc du calcul, 21 novembre 2026 : 2 × 8 m = 5 longueurs, pas 4.
+        recouvrement_jonction: condition("0.03", "m", F, FOUNDER_DOC, "Gouttière zinc : 30 mm de recouvrement par jonction soudée (base couverture, gouttières zinc)."),
         flacons_decapant: rule("1", "u", F, todo("§25.3 : 1 flacon de 250 ml pour ≈ 40 ml de soudure, à valider (§25.7)."), "décapant {v} flacon pour les soudures"),
         ...CROCHETS_GOUTTIERE,
         talons_par_ligne: condition("2", "u", F, FOUNDER_DOC, "« 2 talons par ligne droite » (§15, « même logique que le zinc »)."),
@@ -4004,10 +4027,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "profil",
           slot: "profil",
-          formula: "longueur_gouttiere",
+          // Les jonctions : une de moins que de longueurs ; chaque jonction soudée mange 30 mm (base couverture).
+          formula: "longueur_gouttiere + regle.recouvrement_jonction * (arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1)",
           unit: "ml",
           core: true,
-          exclusions: "Hors recouvrements ou jonctions propres au système.",
+          exclusions: "Recouvrement des jonctions soudées compris (30 mm par jonction).",
+          covers: "longueur_gouttiere",
           // Comme au comptoir : « Gouttière zinc demi-ronde dév. 33 » ; le développé, il ne le devine pas.
           designation: "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
           precisionRequires: ["developpe_gouttiere"],

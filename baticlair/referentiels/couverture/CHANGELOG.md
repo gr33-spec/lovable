@@ -1,5 +1,21 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-63 — Banc du calcul, lot 1 : jonctions de gouttière, arêtier zinc plié, rangement des lignes (Greg, 2026-11-21)
+
+Le banc du calcul (`packages/domain/test/banc-couverture.test.ts`, 15 chantiers rejoués sans IA contre la liste du contrôleur) passe de 49 à 52 lignes justes sur 98.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Gouttière zinc, longueurs de 4 m | ml ÷ 4, arrondi au-dessus | ml + 30 mm par jonction soudée (`recouvrement_jonction`), puis arrondi aux longueurs de 4 m | Base couverture, « gouttières zinc » (confirmé) |
+| Exemple : 2 × 8 m de gouttière | 4 longueurs | 5 longueurs | |
+| Exemple : 2 × 6 m | 3 longueurs | 4 longueurs | |
+| Arêtier en bande zinc | toujours des bandes façonnées de 2 m | **Règle changée** : suit la réponse « je plie / j'achète tout fait » donnée une fois pour le devis ; plié : feuilles 2 × 1 m d'après le développé | Greg, 17 novembre 2026 (« une seule réponse pour tout le devis ») ; liste du contrôleur, chantier C11 |
+
+- **Rangement des lignes par le code** : un mot qui finit par « é » dit une teinte ou une façon, jamais un ouvrage (« tuiles HP10 ardoisé » est une tuile). Quand les mots d'une ligne nomment autant plusieurs ouvrages (« gouttières PVC »), celui que la lecture a rangé départage, s'il est l'un d'eux.
+- La quantité d'une ligne qui mesure l'ouvrage (30 ml d'arêtier) n'est jamais remplacée par un détail du texte (« 4 arêtiers de 7,50 m »).
+- Le format ou la référence du modèle écrits dans la désignation du devis (« 32×22 », « HP 10 ») sont lus même quand le code renomme l'article.
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
 ## roofing-2026.11.20-62 — Tasseaux sourcés, chéneau encaissé, questions décidées par le code (Greg, 2026-11-20, devis D-2026-024)
 
 - **Zinc à tasseaux, tasseaux et couvre-joints** : la quantité est chiffrée. Rangs = bacs − 1 + rives sur tasseau ; chaque rang fait la longueur du rampant. Sources recoupées : RHEINZINK « Tasseau, pose et pliage » (§1.6.4, §1.6.5, §1.15), VMZINC « Toiture Delta » (rive à tasseau : couvre-joint, tasseau de rive, patte, bande de rive), NedZink « Conseils de zinc » (rive : le premier et le dernier bac relevés contre un tasseau). Une rive a son tasseau, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm) sans tasseau. Le texte du NF DTU 40.41 est payant et protégé : il n'est ni lu ni recopié. Avant : « à chiffrer », sans quantité, en attendant Greg (« bacs + 1 »).
