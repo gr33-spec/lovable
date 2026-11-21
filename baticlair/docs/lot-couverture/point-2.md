@@ -27,13 +27,13 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces | Valeur par défaut à confirmer |
+| Tuiles HP10 | 1 258 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces (≈ 7 palettes) |  | chiffrable |
+| Tuiles HP10 | 1 258 pièces (≈ 6 palettes) |  | chiffrable |
 | Fenêtre de toit Velux GGL MK04 tout confort | 2 pièces |  | chiffrable |
 
 ## Ardoises et une fenêtre de toit sans taille
@@ -53,16 +53,16 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 6 953 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 6 694 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 6 694 pièces | Qualité à préciser |
 | Fenêtre de toit | 1 pièce | Fenêtre à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 6 953 pièces | 150 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 6 694 pièces | 150 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 6 694 pièces | un par ardoise commandée | chiffrable |
 | Fenêtre de toit | 1 pièce | 55 × 78 | chiffrable |
 
 ## Une fenêtre de toit seule, sur tuiles plates
@@ -88,22 +88,22 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

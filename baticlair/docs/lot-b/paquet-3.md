@@ -7,9 +7,9 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Charpente | 0 | 2 | 0 | 2 |
+| Charpente | 0 | 2 | 0 | 1 |
 | Étanchéité | 0 | 1 | 0 | 0 |
-| Bardage | 0 | 1 | 0 | 2 |
+| Bardage | 0 | 1 | 0 | 1 |
 | Façade | 0 | 2 | 0 | 0 |
 
 ## Charpente
@@ -25,7 +25,6 @@ Devis de test :
 
 Questions du comptoir :
 - Chevrons : en quelle longueur (rampant + débord) ? (4 m / 4,5 m / 5 m / 6 m)
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -38,7 +37,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Chevrons sapin-épicéa traité classe 2 63×75, L 4 m | 42 chevrons |  | chiffrable |
 | Planches de rive 22×200, L 4 m | 7 planches |  | chiffrable |
-| Pointes torsadées 3,4 × 90 | 252 pièces |  | chiffrable |
 
 ## Étanchéité
 
@@ -74,7 +72,6 @@ Devis de test :
 
 Questions du comptoir :
 - Bardage : douglas ou mélèze ? (Bardage douglas 21×132, L 4 m / Bardage mélèze 21×132, L 4 m)
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -85,7 +82,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Bardage douglas 21×132, L 4 m | 27 bottes de 5 lames |  | chiffrable |
-| Pointes inox bardage 2,5 × 50 | 1 600 pièces |  | chiffrable |
 
 ## Façade
 
@@ -117,22 +113,22 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

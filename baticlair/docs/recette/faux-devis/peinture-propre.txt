@@ -1,0 +1,13 @@
+ENTREPRISE EXEMPLE PEINTURE — 22300 Lannion
+DEVIS N° EX-2026-112 du 05/11/2026
+Chantier : remise en peinture d'un appartement T3, Lannion
+
+Désignation                                              Qté    Unité   P.U. HT   Total HT
+Protection des sols et du mobilier                          1    forfait 180,00      180,00
+Rebouchage et ponçage des murs                             95    m²       6,00       570,00
+Impression acrylique sur murs et plafonds                 140    m²       5,50       770,00
+Peinture acrylique mate blanche, plafonds, 2 couches       45    m²      14,00       630,00
+Peinture acrylique velours, murs, 2 couches, teinte RAL 9010  95  m²     15,00     1 425,00
+Laque satinée sur boiseries (portes et plinthes)           22    m²      24,00       528,00
+
+Total HT 4 103,00 — TVA 10 % 410,30 — Total TTC 4 513,30

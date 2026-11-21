@@ -4,4 +4,6 @@ export interface AuthenticatedUser {
   email: string;
   name: string;
   emailVerified: boolean;
+  /** La session de connexion (la double authentification de l'admin lui est attachée) ; absente pour une clé API. */
+  sessionId?: string;
 }

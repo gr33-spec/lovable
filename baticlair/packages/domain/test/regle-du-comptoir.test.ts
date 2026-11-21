@@ -29,6 +29,10 @@ const COMPTOIR: Record<string, string> = {
   support_sortie: "« embase plomb ou platine zinc ? »",
   longueur_gouttiere: "les mètres de gouttière",
   developpe_gouttiere: "« gouttière de 25 ou de 33 ? »",
+  // Greg, 20 novembre 2026 (D-2026-024).
+  nb_rives_tasseau: "« ton pan finit comment : une rive de chaque côté, une rive et un mur ? » (tasseau de rive ou relevé)",
+  longueur_cheneau: "les mètres de chéneau, quand le devis ne les donne pas",
+  developpe_cheneau: "« ton chéneau fait quel développé ? » : la largeur du bobineau",
   fixation_crochet: "« crochets à queue ou bandeau ? »",
   nb_descentes: "le nombre de naissances et de descentes",
   diametre_descente: "« descente de 80 ou de 100 ? »",
@@ -89,9 +93,11 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:developpe",
       "param:developpe_gouttiere",
       "param:diametre_descente",
-      "param:faconnage@bandes-zinc",
       "param:faconnage@couverture-zinc-joint-debout",
+      "param:faconnage@pieces-pliees",
       "param:fixation_crochet",
+      // La fiche complète compte les angles de la gouttière ; le calcul les demande dès l'ouverture (Greg, 20 novembre 2026).
+      "param:nb_angles",
       "param:nb_descentes",
     ]);
     // Quartz lu au devis : pas de question d'aspect.
@@ -106,6 +112,8 @@ describe("la règle du comptoir (§47.8)", () => {
       "param:developpe_gouttiere": u("33", "cm"),
       "param:fixation_crochet": u("2"),
       "param:diametre_descente": u("80", "mm"),
+      // La fiche complète compte aussi les angles de la gouttière (étape « Suggestions », 18 novembre 2026) : aucun ici.
+      "param:nb_angles": u("0"),
     });
     expect(v.questions).toEqual([]);
     // §49.1 : dans l'ordre du devis ; les consommables (pointes) ferment la liste.
@@ -114,10 +122,11 @@ describe("la règle du comptoir (§47.8)", () => {
       "Pattes coulissantes joint debout",
       "Pattes fixes joint debout",
       "Voliges sapin 18 mm",
-      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour bande zinc d'égout", // §48.6 et §50.7 (la pièce dite) : feuilles 2 × 1 m, jamais de bobineau pour une bande
+      "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", // §48.6 : feuilles 2 × 1 m, jamais de bobineau pour une bande ; le nom ne dit plus l'usage (Greg, 17 novembre 2026)
       "Gouttière zinc demi-ronde dév. 33",
       "Crochets de gouttière bandeau dév. 33",
       "Naissances dév. 33 Ø80",
+      "Talons de gouttière dév. 33", // la fiche complète (tous les articles) : deux talons par ligne droite (§15) ; pour un artisan, proposés à l'étape « Suggestions »
       "Pointes annelées 2,5 × 28 mm",
     ]);
     for (const b of v.toBuy) expect(supplierTest(b.label, b.order?.unit ?? null)).toBeNull();
@@ -125,25 +134,26 @@ describe("la règle du comptoir (§47.8)", () => {
 
   it("chantier de Brest : la qualité d'ardoise, la pose des crochets, le Ø et le nombre de descentes ; le développé est lu au devis", () => {
     const v = readQuoteComplet(BREST, {}, [], {});
-    expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_descentes", "param:qualite_ardoise"]);
+    expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_angles", "param:nb_descentes", "param:qualite_ardoise"]);
     // Un devis qui dit tout ne pose aucune question.
     const complet = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantity: "200", unit: "m²" },
         { ref: "2", designation: "Gouttière demi-ronde zinc développé 33, crochets bandeau, 2 descentes Ø80", quantity: "24", unit: "ml" },
       ],
-      {},
+      // La fiche complète compte aussi les angles (aucun ici), que le devis ne dit pas.
+      { "param:nb_angles": u("0") },
       [],
       {},
     );
     expect(complet.questions).toEqual([]);
     expect(complet.toBuy.map((b) => b.label)).toEqual(
-      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 11 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
+      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 10 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
     );
   });
 
   it("l'aspect du zinc : lu au devis (quartz, anthra), naturel quand rien n'est dit (hypothèse), demandé quand le devis dit « prépatiné » sans la teinte", () => {
-    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1") });
+    const zinc = (designation: string) => readQuoteComplet([{ ref: "1", designation, quantity: "91", unit: "m²" }], { "param:faconnage": u("1"), "param:longueur_rampant": { value: "5.5", unit: "m" } });
     expect(zinc("Couverture zinc joint debout anthra-zinc").toBuy[0]!.label).toBe("Bobine Anthra-Zinc 0,65 mm, largeur 500 mm");
     const nature = zinc("Couverture zinc joint debout");
     expect(nature.toBuy[0]!.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");

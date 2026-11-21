@@ -1,6 +1,6 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
-import { normalizeText } from "@baticlair/domain";
+import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
 import type { BillingService } from "../../billing/index.js";
 import type { DocumentsService } from "../../documents/index.js";
@@ -8,6 +8,7 @@ import type { ProjectsService } from "../../projects/index.js";
 import { takeoffDto, type ReviewedTakeoff, type TakeoffService } from "../../takeoff/index.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import { quantitatifView } from "./quantitatif-view.js";
+import { NOM_APP, nomDeListe } from "@baticlair/domain";
 
 export interface LigneEntree {
   libelle: string;
@@ -48,6 +49,9 @@ export type Correction =
   | { action: "preciser"; id: string; precision: string }
   | { action: "bref"; cle: string; texte: string }
   | { action: "retirer_article"; id: string }
+  // Assistant Mobiiz (31 octobre 2026) : « Annuler » un retrait ; l'adresse du chantier et la livraison dites par l'artisan.
+  | { action: "remettre_article"; id: string }
+  | { action: "chantier"; champ: "adresse" | "livraison"; texte: string }
   | { action: "suggestion"; id: string; reponse: "oui" | "non" };
 
 type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
@@ -69,6 +73,10 @@ export class QuantitatifsService {
 
   get iaDisponible(): boolean {
     return this.takeoffs.aiAvailable;
+  }
+
+  get listeDisponible(): boolean {
+    return this.takeoffs.listeAvailable;
   }
 
   /**
@@ -94,7 +102,7 @@ export class QuantitatifsService {
       throw new DomainError("no_referential", `No referential for trade « ${ctx.metier ?? trade} »`, {
         metier: METIER_NAMES[trade] ?? ctx.metier ?? trade,
         disponibles,
-        message: `BatiClair ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
+        message: `${NOM_APP} ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
       });
     }
     return trade;
@@ -119,8 +127,36 @@ export class QuantitatifsService {
     return this.get(tenant, row.id, rendu);
   }
 
+  /**
+   * « J'AI DÉJÀ MA LISTE » : photo ou PDF d'une liste déjà comptée (écrite à la main, bon ou devis de négoce, tableau).
+   * Les lignes sont lues telles qu'écrites, sans calcul ni question ; la liste arrive sur le même écran qu'un devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, rendu: Rendu = {}) {
+    assertCanWrite(tenant);
+    if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
+    const project = await this.projects.get(tenant, projectId);
+    const trade = project.trade && referentialFor(project.trade) ? project.trade : (tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing");
+    const reviewed = await this.takeoffs.fromListe(tenant, projectId, trade, file);
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: null, apiKeyId: null },
+    });
+    return this.view(row, reviewed, rendu);
+  }
+
+  /**
+   * UN DOCUMENT DANS LA LISTE EN COURS (Greg, 12 novembre 2026) : la liste, le bon ou le devis de négoce est LU, ses lignes
+   * sont rendues à l'écran, qui les propose à part ; rien n'est créé ni gardé. Format générique (`nature`, `lignes`) : un
+   * devis client ou un plan pourront plus tard alimenter le même brouillon par la même route.
+   */
+  async lireDocument(tenant: TenantContext, file: { name: string; bytes: Uint8Array }) {
+    assertCanWrite(tenant);
+    const trade = tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing";
+    const { lignes } = await this.takeoffs.lireListe(tenant, null, trade, file);
+    return { nature: "liste" as const, lignes: lignes.map((l) => ({ libelle: l.designation.slice(0, 160), quantite: l.quantite, unite: l.unite })) };
+  }
+
   /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
-  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}) {
+  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}, options: { confirmeGros?: boolean } = {}) {
     assertCanWrite(tenant);
     this.tradeFor(tenant, ctx);
     await this.assertQuota(tenant, ctx);
@@ -134,7 +170,7 @@ export class QuantitatifsService {
         data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
       }));
     // Déjà lu : rien n'est relu ni décompté. Lecture en cours : elle n'est pas relancée.
-    await this.takeoffs.start(tenant, documentId);
+    await this.takeoffs.start(tenant, documentId, options);
     return this.get(tenant, row.id, rendu);
   }
 
@@ -191,7 +227,9 @@ export class QuantitatifsService {
     }
     const reading = row.documentId ? await this.takeoffs.readingStateOf(tenant, row.documentId) : null;
     if (reading?.status === "failed") return { ...base, etat: "erreur" as const, erreur: { raison: reading.reason ?? "analysis_failed" } };
-    return { ...base, etat: "en_cours" as const };
+    // Les lignes une par une (Greg, 17 novembre 2026) : pour l'écran de l'appli seulement, ce que la lecture a déjà lu.
+    const lues = rendu.ecran && reading?.status === "reading" && reading.total ? { lecture: { lignes: reading.lignes ?? [], total: reading.total } } : {};
+    return { ...base, etat: "en_cours" as const, ...lues };
   }
 
   /**
@@ -220,6 +258,18 @@ export class QuantitatifsService {
     for (const [i, envoyee] of reponses.entries()) {
       let r = envoyee;
       if (done.has(r.question)) continue;
+      // Étape « Suggestions » (Greg, 17 novembre 2026) : les cases cochées, parmi celles proposées, ou « aucune ».
+      // Jamais un article qui n'a pas été proposé ; une fois répondue, l'étape est close.
+      if (r.question === SUGGESTIONS_KEY) {
+        const proposees = new Set((reviewed.suggestions ?? []).map((o) => o.key));
+        const aucune = r.valeur === null || r.valeur.trim() === SUGGESTIONS_AUCUNE;
+        const cochees = aucune ? [] : [...new Set(r.valeur!.split(",").map((x) => x.trim()).filter(Boolean))];
+        if (proposees.size === 0 || (!aucune && cochees.length === 0) || cochees.some((c) => !proposees.has(c))) {
+          throw validationFailed("Unknown suggestion", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        }
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, SUGGESTIONS_KEY, cochees.length > 0 ? cochees.join(",") : SUGGESTIONS_AUCUNE);
+        continue;
+      }
       const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
       const q = decision?.question;
       // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
@@ -237,6 +287,13 @@ export class QuantitatifsService {
         const text = r.valeur?.trim() ?? null;
         if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
+        continue;
+      }
+      // L'apprentissage (Greg, 24 octobre 2026) : « Annuler » sur une ligne « Ajusté selon tes habitudes ».
+      const habitudeKey = r.question.replace(/^engine:/, "");
+      if (/^habitude:.{1,200}$/.test(habitudeKey)) {
+        if (r.valeur !== "non") throw validationFailed("This question takes « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, habitudeKey, "non");
         continue;
       }
       // Temps deux (§51.6) : l'unité d'une ligne qui n'en a pas (un bouton, ou l'unité écrite sous « Autre »).
@@ -288,7 +345,10 @@ export class QuantitatifsService {
       if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: `reponses.${i}.valeur`, message: r.question }]);
       let value: EngineAnswer;
       // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
-      const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named);
+      // Comme pour l'unité : une qualité qui se nomme (l'ardoise) dont la question n'est plus ouverte au moment où sa réponse
+      // arrive (les réponses partent d'un coup ; une autre vient de changer l'état) reste une qualité qui se nomme, d'après
+      // sa fiche. Avant (18 novembre 2026) : « Ardoise d'Angers » était refusée « Not a number » et la question reposée.
+      const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named) || donneeDeLaFiche(reviewed.takeoff.trade, key)?.named === true;
       if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
       else if (named && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) {
         const text = r.valeur.trim();
@@ -300,10 +360,19 @@ export class QuantitatifsService {
           (r.unite || undefined) ??
           q?.unit ??
           reviewed.purchase.assumptions.find((a) => a.key === key)?.unit ??
-          reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit;
+          reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit ??
+          // Recette en ligne du 18 novembre 2026 : l'écran envoie ses réponses d'un coup. Une donnée du métier dont la
+          // question n'est plus ouverte (déjà prise par un envoi précédent, ou réglée par une autre réponse) garde l'unité
+          // de sa fiche : la réponse est prise, jamais refusée « sans unité » puis reposée sans fin.
+          uniteDeLaFiche(reviewed.takeoff.trade, key);
         if (!unit) throw validationFailed("Missing unit", [{ path: `reponses.${i}.unite`, message: r.question }]);
-        if (!/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
-        value = { value: r.valeur.trim().replace(",", "."), unit };
+        // Un bouton dit en mots (« bandeau ») pour une donnée à boutons de la fiche, même quand sa question n'est pas
+        // ouverte (le code ne la pose pas) : la valeur du référentiel (« 2 »), jamais un refus.
+        let lu = r.valeur.trim();
+        const def = donneeDeLaFiche(reviewed.takeoff.trade, key);
+        if (!/^\d+(?:[.,]\d+)?$/.test(lu) && def?.choices?.length) lu = valeurDuReferentiel(def, { label: lu, valeur: lu });
+        if (!/^\d+(?:[.,]\d+)?$/.test(lu)) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        value = { value: lu.replace(",", "."), unit };
       }
       reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, value);
     }
@@ -324,10 +393,17 @@ export class QuantitatifsService {
     retraits: readonly string[] = [],
   ) {
     const row = await this.row(tenant, id);
+    const obligatoires = (r: ReviewedTakeoff) => r.purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
+    const dejaPosees = new Set(reponses.length > 0 ? obligatoires(await this.ready(tenant, row)).map((d) => d.question!.key) : []);
     if (reponses.length > 0) await this.answer(tenant, id, reponses);
     // §49.4 : le façonnage d'une pièce de zinguerie écrite se répond à l'écran des questions, jamais clos en silence.
-    const mandatory = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
+    const apres = await this.ready(tenant, row);
+    const mandatory = obligatoires(apres);
     if (mandatory.length > 0) {
+      // Recette en ligne du 16 novembre 2026 (zinc à joint debout) : une réponse tout juste donnée peut faire naître le
+      // façonnage d'une autre pièce. Ce n'est pas un refus : l'écran des questions revient avec elle, AVANT le calcul, et
+      // les réponses déjà enregistrées ne se renvoient pas. Une question obligatoire déjà posée et sautée reste refusée.
+      if (reponses.length > 0 && mandatory.every((d) => !dejaPosees.has(d.question!.key))) return this.view(row, apres, rendu);
       throw validationFailed("Answer the forming questions first", { reason: "faconnage_required", questions: mandatory.map((d) => d.question!.key) });
     }
     // §51.2 : une réponse « Autre » relue qui ouvre une donnée manquante pose UNE question de plus, AVANT de calculer :
@@ -340,7 +416,8 @@ export class QuantitatifsService {
     if (opened.length > 0) return this.view(row, before, rendu);
     // Temps deux (directive du fondateur, 2026-10-12) : quand tout est répondu, un deuxième appel relit la fiche avec les
     // réponses et peut poser UNE question de plus, avant le calcul ; une seule fois par devis.
-    if (reponses.some((r) => r.valeur !== null)) {
+    // Les réponses sont maintenant enregistrées au fil de la discussion : le calcul peut arriver sans en porter une seule.
+    if (reponses.some((r) => r.valeur !== null) || Object.entries(before.takeoff.answers).some(([k, v]) => v !== null && v !== undefined && /^(param|product|fiche):/.test(k))) {
       const relu = await this.takeoffs.bilan(tenant, before.takeoff.id);
       if (relu?.opened) return this.view(row, relu.reviewed, rendu);
     }
@@ -397,6 +474,14 @@ export class QuantitatifsService {
             : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
         return this.view(row, after, rendu);
       }
+      case "remettre_article": {
+        // Assistant (« Annuler ») : un article retiré revient, tel que le moteur le calcule ; rien d'autre ne bouge.
+        if (reviewed.takeoff.answers[`retire:${correction.id}`] !== "oui") throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, null), rendu);
+      }
+      case "chantier":
+        // Assistant (points 9 et 11) : seulement ce que l'artisan dit ; vide, la donnée est retirée. Elle part dans le PDF.
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `chantier:${correction.champ}`, correction.texte.trim() || null), rendu);
       case "bref": {
         // §50.7 : seule une ligne du bref montré se corrige ; vide, elle est retirée (au document comme chez le fournisseur).
         // « avec-client » : l'artisan ajoute (« oui ») ou retire (vide) le client et l'adresse du bref.
@@ -473,8 +558,8 @@ export class QuantitatifsService {
     }
     // Un quantitatif sans chantier en crée un : la formule limite les nouveaux chantiers, comme dans l'app.
     await this.billing.assertCanCreateProject(tenant);
-    const day = new Date().toISOString().slice(0, 10);
-    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || `Devis du ${day}`, address: ctx.adresse ?? null });
+    // Point 7 (28 octobre 2026) : « Liste du 28 octobre », jamais « Devis du 2026-10-28 ».
+    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || nomDeListe(new Date()), address: ctx.adresse ?? null });
     return project.id;
   }
 
@@ -548,4 +633,14 @@ export class QuantitatifsService {
     if (line) await this.projects.update(tenant, projectId, { siteNotes: [project.siteNotes?.trim(), line].filter(Boolean).join("\n") });
     return { id: doc.id, nom: doc.originalName };
   }
+}
+
+/** L'unité qu'une donnée (« param:nb_descentes », « param:faconnage@noue ») porte dans la fiche de son métier, ou d'un autre. */
+function donneeDeLaFiche(trade: string, key: string) {
+  const name = key.replace(/^param:/, "").split("@")[0]!;
+  const own = referentialFor(trade);
+  return [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((d) => d.key === name);
+}
+function uniteDeLaFiche(trade: string, key: string): string | undefined {
+  return donneeDeLaFiche(trade, key)?.unit || undefined;
 }

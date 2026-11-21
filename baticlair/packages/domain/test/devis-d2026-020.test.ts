@@ -52,15 +52,18 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
 });
 
 describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le reste suit", () => {
-  it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 8 cm → crochet 9 cm)", () => {
+  // NF DTU 40.11 (fiche couverture) : zone 1, 45° → recouvrement 73 mm → crochet 73 + 3 = 76 mm, soit 8 cm (avant 9).
+  it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 73 mm → crochet 8 cm)", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
-    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 9 cm");
+    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 8 cm");
   });
-  it("« crochet inox de 11 cm » : crochets de 11 cm, recouvrement 10 cm, pureau 11 cm, ardoises recomptées", () => {
+  // Règle du fondateur, confirmée le 2026-11-19 (fiche couverture, ardoise.jeu_de_tete_crochet) : recouvrement = crochet − 5 mm,
+  // pureau = (320 − 105) ÷ 2 = 107,5 mm. Avant : crochet − 1 cm, pureau 11 cm.
+  it("« crochet inox de 11 cm » : crochets de 11 cm, recouvrement 10,5 cm, pureau 10,75 cm, ardoises recomptées", () => {
     const sans = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 posées au crochet inox de 11 cm")], {}, ZONE_1);
     expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 11 cm");
-    expect(v.assumptions.find((a) => a.key === "param:pureau")?.value).toBe("11");
+    expect(v.assumptions.find((a) => a.key === "param:pureau")?.value).toBe("10,75");
     // Plus de recouvrement, plus d'ardoises : la liste reste cohérente avec le crochet commandé.
     expect(Number(slates(v)!.quantity!.replace(/\D/g, ""))).toBeGreaterThan(Number(slates(sans)!.quantity!.replace(/\D/g, "")));
     // « inox » qualifie le crochet, pas l'ardoise.
@@ -72,7 +75,7 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
   });
   it("« Ø 2,7 mm » n'est pas une longueur de crochet", () => {
     const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], {}, ZONE_1);
-    expect(crochets(v)?.label).toMatch(/longueur 9 cm/);
+    expect(crochets(v)?.label).toMatch(/longueur 8 cm/);
   });
 });
 
@@ -102,15 +105,17 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
 
   it("1. la liste attendue, dans l'ordre du devis (avant réponse) : chaque article écrit, la naissance d'office, rien d'autre", () => {
     expect(liste()).toEqual([
-      ["Ardoises naturelles Espagne 1er choix 32×22", "2 052 pièces"],
-      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 094 pièces"],
+      ["Ardoises naturelles Espagne 1er choix 32×22", "2 122 pièces"],
+      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 122 pièces"],
       ["Gouttière zinc Havraise", "3 longueurs de 4 m"],
       ["Naissances Ø80", "2 pièces"],
       ["Crochets de gouttière Havraise", "20 pièces"],
-      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes de rive en zinc (verrière)", "1 pièce"],
+      // Le nom des feuilles ne dit plus leur usage (Greg, 17 novembre 2026) : il est dans le détail de la ligne.
+      ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "1 pièce"],
       ["Faîtage en bande zinc, dév. 25 cm", "8 ml"],
       ["Bande porte-solin zinc", "4 ml"],
-      ["Mortier d'étanchéité pour solin, sac 25 kg", "1 sac de 25 kg"],
+      // Le mortier n'est plus renommé « mortier d'étanchéité » (Greg, 17 novembre 2026 : « ne transforme pas mes mots »).
+      ["Mortier de ciment pour solin", "1 sac de 25 kg"],
       ["Tuyau de descente zinc diam. 80mm", "2 tubes de 3 m"],
       ["Coude zinc diam. 80mm", "4 pièces"],
       ["Colliers de descente Ø80", "6 pièces"],
@@ -119,10 +124,10 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(v.suggestions).toEqual([]);
   });
 
-  it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = ardoises × 1,02", () => {
+  it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = un par ardoise", () => {
     const ardoises = v.toBuy[0]!;
-    expect(ardoises.precision).toBe("48 m² × 40,7 ardoises/m² (crochet 11 cm, pente 30°) + 5 % de marge");
-    expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)");
+    expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°) + 5 % de marge");
+    expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée");
     expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
   });
 
@@ -150,22 +155,22 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(plan.inputs.find((i) => i.workItemId === "bandes-zinc")?.params.faconnage?.value).toBe("1");
   });
 
-  it("faîtage dév. 25 cm et porte-solin : une question façonnage chacun ; façonnés, des feuilles chacun (jamais fusionnées)", () => {
-    expect(row(v.toBuy[6]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@faitage-zinc" });
-    expect(row(v.toBuy[7]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@bande-porte-solin" });
-    expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision?.split(" :")[0]])).toEqual([
-      [["6"], "1 pièce", "pour 4 ml de bande"],
-      [["8"], "1 pièce", "pour 8 ml de faîtage"],
-      [["10"], "1 pièce", "pour 4 ml de porte-solin"],
+  it("faîtage dév. 25 cm et porte-solin : la même question de pliage pour les deux (Greg, 17 novembre 2026) ; pliés, leurs feuilles rejoignent celles de la rive sur UNE ligne, avec le total", () => {
+    expect(row(v.toBuy[6]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@pieces-pliees" });
+    expect(row(v.toBuy[7]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:faconnage@pieces-pliees" });
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : une seule ligne par article identique, avec le total (1 + 1 + 1 feuille,
+    // chaque pièce comptée à part, chutes non réemployées). Avant : trois lignes de feuilles, une par pièce.
+    expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision])).toEqual([
+      [["6", "8", "10"], "3 pièces", "pour 4 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 25 cm"],
     ]);
     // Commandé tout fait : des longueurs, pas des feuilles.
     const achete = read({ ...REPONSES, "param:faconnage@faitage-zinc": u("2") });
     expect(achete.toBuy.find((b) => b.lineIds.includes("8"))?.label).toMatch(/^Faîtage zinc naturel 0,65 mm, bande dév\. 25 cm/);
   });
 
-  it("§49.7 mortier du porte-solin : mortier d'étanchéité, 4 ml × 2 kg/ml = 8 kg ⇒ 1 sac de 25 kg, vert ; tuyau Ø80 en 2 tubes de 3 m ; 4 coudes ; colliers Ø80 orange (fixation non chiffrée)", () => {
+  it("§49.7 mortier du porte-solin : au nom du devis (« mortier de ciment », jamais renommé : Greg, 17 novembre 2026), 4 ml × 2 kg/ml = 8 kg ⇒ 1 sac de 25 kg, vert ; tuyau Ø80 en 2 tubes de 3 m ; 4 coudes ; colliers Ø80 orange (fixation non chiffrée)", () => {
     const mortier = v.toBuy[8]!;
-    expect(mortier).toMatchObject({ label: "Mortier d'étanchéité pour solin, sac 25 kg", quantity: "1 sac de 25 kg", precision: "4 ml × 2 kg/ml", lineIds: ["10"] });
+    expect(mortier).toMatchObject({ label: "Mortier de ciment pour solin", quantity: "1 sac de 25 kg", precision: "4 ml × 2 kg/ml", lineIds: ["10"] });
     expect(row(mortier.key)?.status).toBe("ok");
     for (const b of [v.toBuy[9]!, v.toBuy[10]!]) expect(row(b.key)?.status).toBe("ok");
     expect(v.toBuy[9]!.order).toEqual({ count: "2", unit: "tubes de 3 m" });
@@ -173,8 +178,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     expect(row(v.toBuy[11]!.key)).toMatchObject({ status: "check", reason: "Le devis parle de colliers sans les chiffrer : quantité calculée, à vérifier" });
   });
 
-  it("consommables : seulement si l'artisan dit oui, liés aux lignes écrites, orange et en fin de liste ; non : rien", () => {
-    expect(keys()).toContain("engine:param:consommables");
+  it("consommables : jamais d'office ni de question oui / non (Greg, 18 novembre 2026 : ils se cochent) ; un « oui » déjà donné les garde, liés aux lignes écrites, orange et en fin de liste", () => {
+    expect(keys()).not.toContain("engine:param:consommables");
     expect(repondu.toBuy.filter((b) => b.consumable)).toEqual([]);
     const oui = read({ ...REPONSES, "param:consommables": u("1") });
     const consommables = oui.toBuy.filter((b) => b.consumable);

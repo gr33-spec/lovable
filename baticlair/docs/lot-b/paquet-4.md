@@ -8,8 +8,8 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
 | Plafonds suspendus | 0 | 1 | 0 | 0 |
-| Menuiserie intérieure | 1 | 2 | 0 | 1 |
-| Cuisine | 2 | 0 | 0 | 1 |
+| Menuiserie intérieure | 1 | 2 | 0 | 0 |
+| Cuisine | 2 | 0 | 0 | 0 |
 | Photovoltaïque | 1 | 0 | 0 | 0 |
 
 ## Plafonds suspendus
@@ -46,8 +46,7 @@ Devis de test :
 
 **À l'ouverture : 1 verte · 2 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -61,9 +60,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Bloc-porte isoplane 83x204 huisserie 72, poussant droit | 5 pièces |  | chiffrable |
 | Plinthes MDF 10×70, barre 2,40 m | 22 barres |  | chiffrable |
 | Lambris sapin, paquet 2,5 m² | 7 paquets de 2,5 m² (15,4 m²) |  | chiffrable |
-| Mastic-colle plinthes 310 ml | 4 cartouches de 310 ml (48 m à couvrir) |  | chiffrable |
-| Clips lambris, boîte de 100 | 1 boîte de 100 |  | chiffrable |
-| Vis d'huisserie 6 × 100 + chevilles | 30 pièces |  | chiffrable |
 
 ## Cuisine
 
@@ -76,8 +72,7 @@ Devis de test :
 
 **À l'ouverture : 2 vertes · 0 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -85,7 +80,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Meubles bas Delinia ID façades Ruxe blanc mat | 6 pièces |  | chiffrable |
 | Plan de travail stratifié 38 mm chêne | 3,6 ml |  | chiffrable |
-| Kit de finition de plan de travail | 1 kit |  | chiffrable |
 
 ## Photovoltaïque
 
@@ -110,22 +104,22 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

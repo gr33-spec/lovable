@@ -1,0 +1,1118 @@
+{
+  "famille": "abergement",
+  "generated": "2026-11-20",
+  "perimetre": "Abergements de souche et de cheminée (zinc, plomb, préfabriqués, bandes souples), noquets, bande porte-solin, plomb laminé. Les bandes zinc façonnées (2 m), le mortier de solin et l'étain sont dans zinguerie.json et points-singuliers.json.",
+  "entrees": [
+    {
+      "id": "aberg_composition",
+      "famille": "abergement",
+      "sous_famille": "abergement de souche (métal façonné)",
+      "marque": "",
+      "modele": "",
+      "attribut": "pièces d'un abergement complet",
+      "valeur": [
+        "bavette (devant, en aval, sur le dernier rang)",
+        "2 rives latérales : noquets (ardoise, tuile plate) ou couloirs (tuile à relief)",
+        "derrière / besace (amont, petit chéneau qui rejette l'eau sur les côtés)",
+        "bande porte-solin + solin (mortier ou mastic) sur le pourtour"
+      ],
+      "unite": "liste",
+      "condition": "souche, contrefort, édicule ; tuile ou ardoise",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2 abergement en métal sur le pourtour de la souche",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "Sa longueur est égale à la largeur de l'ouvrage augmentée de 10 à 12 cm de chaque côté",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB Hérault, Couverture tuiles (schémas souches : bavette, besace, noquets, porte-solin)",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_tuiles.pdf",
+          "type": "guide",
+          "extrait": "Souches : Bavette métallique ; avec une besace métallique ; Noquets métalliques ; porte solin",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Nomad Education, CAP couvreur : réalisation des abergements de cheminée en zinc ou plomb",
+          "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/realisation-des-abergements-de-cheminee-en-zinc-ou-cy44b205",
+          "type": "guide",
+          "extrait": "relevés : 100 mm minimum au-dessus de la couverture ; noquets sur ardoises : un noquet par rang d'ardoise",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "aberg_bavette_longueur",
+      "famille": "abergement",
+      "sous_famille": "abergement de souche (métal façonné)",
+      "marque": "",
+      "modele": "",
+      "attribut": "débord de la bavette de chaque côté de la souche",
+      "valeur": "10 à 12",
+      "unite": "cm",
+      "condition": "longueur de bavette = largeur de la souche + 2 × 10 à 12 cm ; partie visible au moins égale à un pureau ; goussets soudés aux angles",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2 abergement en métal sur le pourtour de la souche",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "Sa longueur est égale à la largeur de l'ouvrage augmentée de 10 à 12 cm de chaque côté",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Monier (BMI) Belgique, documentation technique Wakaflex, diffusée par Handy Home Ottevaere",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PDROMONWAK2805AN.pdf",
+          "type": "fabricant",
+          "extrait": "Rouleau de 5m x 140mm / 280mm / 370mm / 560mm ; Rouleau de 10m x 280mm ; chevauchement minimal de 50 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Wakaflex : environ 100 mm sur les tuiles, au-delà du premier bourrelet ; au moins 120 mm sur tuile plate."
+    },
+    {
+      "id": "aberg_derriere",
+      "famille": "abergement",
+      "sous_famille": "abergement de souche (métal façonné)",
+      "marque": "",
+      "modele": "",
+      "attribut": "derrière (besace) : débords, recouvrement et relevé",
+      "valeur": {
+        "debord_chaque_cote_cm": "12 à 15",
+        "recouvrement_tuiles_cm_min": 6,
+        "espace_libre_amont": "3 à 4 pureaux",
+        "releve_cm": "10 à 12"
+      },
+      "unite": "",
+      "condition": "tuile plate ; une pince à chaque extrémité, goussets soudés",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2, derrière en métal",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "augmentée de 12 à 15 cm de chaque côté ; Les tuiles viennent en recouvrement sur 6 cm au minimum ; relevé de 10 à 12 cm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Wakaflex à l'arrière : au moins 350 mm de bande (150 sur la maçonnerie, 100 de raccord, 100 de chevauchement)."
+    },
+    {
+      "id": "aberg_releve",
+      "famille": "abergement",
+      "sous_famille": "abergement de souche (métal façonné)",
+      "marque": "",
+      "modele": "",
+      "attribut": "relevé contre la souche",
+      "valeur": 10,
+      "unite": "cm",
+      "condition": "minimum ; recouvert par la bande porte-solin ou le solin",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2, derrière en métal",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "augmentée de 12 à 15 cm de chaque côté ; Les tuiles viennent en recouvrement sur 6 cm au minimum ; relevé de 10 à 12 cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Nomad Education, CAP couvreur : réalisation des abergements de cheminée en zinc ou plomb",
+          "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/realisation-des-abergements-de-cheminee-en-zinc-ou-cy44b205",
+          "type": "guide",
+          "extrait": "relevés : 100 mm minimum au-dessus de la couverture ; noquets sur ardoises : un noquet par rang d'ardoise",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "CAPEB Hérault, Couverture ardoises (guide de bonnes pratiques), rive contre maçonnerie",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Largeur : demi-ardoise. Longueur : égale à celle du modèle d'ardoise utilisé. Le noquet se place généralement tous les 2 rangs",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Culture : 10 à 12 cm ; CAP : 100 mm mini ; CAPEB (rive ardoise contre maçonnerie) : relief 9 cm mini ; Wakaflex : au moins 15 cm contre la maçonnerie."
+    },
+    {
+      "id": "aberg_noquet_dimensions",
+      "famille": "abergement",
+      "sous_famille": "noquets",
+      "marque": "",
+      "modele": "",
+      "attribut": "dimensions d'un noquet",
+      "valeur": {
+        "longueur": "longueur de l'ardoise ou de la tuile",
+        "largeur_ardoise": "demi-ardoise (partie plate) + relevé contre le mur"
+      },
+      "unite": "",
+      "condition": "noquet posé tous les deux rangs",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, Couverture ardoises (guide de bonnes pratiques), rive contre maçonnerie",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Largeur : demi-ardoise. Longueur : égale à celle du modèle d'ardoise utilisé. Le noquet se place généralement tous les 2 rangs",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE Ouvrages de couverture – Tuiles plates, fascicule technique et CCTP (août 2011), §4.3 et §4.10",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "de longueur égale à celle des tuiles s'il est placé tous les deux rangs, ce qui est le cas le plus courant",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "aberg_noquets_par_ml",
+      "famille": "abergement",
+      "sous_famille": "noquets",
+      "marque": "",
+      "modele": "",
+      "attribut": "nombre de noquets au ml de jouée",
+      "valeur": "1 ÷ (2 × pureau)",
+      "unite": "u/ml",
+      "condition": "cas le plus courant : un noquet tous les deux rangs (longueur = longueur de l'élément) ; ex. pureau 11 cm → 4,5/ml ; 13 cm → 3,8/ml ; tuile plate pureau 10 cm → 5/ml ; arrondir au supérieur + 1",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, Couverture ardoises (guide de bonnes pratiques), rive contre maçonnerie",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Largeur : demi-ardoise. Longueur : égale à celle du modèle d'ardoise utilisé. Le noquet se place généralement tous les 2 rangs",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE Ouvrages de couverture – Tuiles plates, fascicule technique et CCTP (août 2011), §4.3 et §4.10",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "de longueur égale à celle des tuiles s'il est placé tous les deux rangs, ce qui est le cas le plus courant",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Le CAP couvreur (Nomad Education) écrit « un noquet par rang » (soit 1 ÷ pureau, le double) ; le CCTP du ministère laisse le choix « tous les rangs ou tous les deux rangs ». Le pureau vient du modèle (ardoise.json, tuiles-plates).",
+      "controle": "tous les 2 rangs : n = ml ÷ (2 × pureau) ; tous les rangs : n = ml ÷ pureau"
+    },
+    {
+      "id": "aberg_noquets_par_feuille",
+      "famille": "abergement",
+      "sous_famille": "noquets",
+      "marque": "",
+      "modele": "",
+      "attribut": "noquets taillés dans une feuille de zinc 2 × 1 m",
+      "valeur": "≈ 30 (ardoise 32 × 22)",
+      "unite": "u/feuille",
+      "condition": "noquet 32 cm de long × ≈ 20 cm de développé (11 cm de partie plate + ≈ 9 cm de relevé) : 6 × 5 = 30",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, Couverture ardoises (guide de bonnes pratiques), rive contre maçonnerie",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Largeur : demi-ardoise. Longueur : égale à celle du modèle d'ardoise utilisé. Le noquet se place généralement tous les 2 rangs",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Calcul seulement : le développé exact du noquet (relevé) n'est donné par aucune source ; la doc (§30) dit ≈ 18 noquets de 30 × 33 cm."
+    },
+    {
+      "id": "aberg_porte_solin",
+      "famille": "abergement",
+      "sous_famille": "bande porte-solin",
+      "marque": "",
+      "modele": "",
+      "attribut": "développé et longueur",
+      "valeur": "dév. 100 mm, 2 m",
+      "unite": "",
+      "condition": "retombée ≈ 50 mm + partie horizontale 15-20 mm + relevé 20-30 mm ≈ 85 à 100 mm ; vendue façonnée en 2 m",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.3.4 bande porte-solin",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "retombée de 50 mm environ ; partie horizontale de 15 à 20 mm ; relevé de 20 à 30 mm contre le mur",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Fiche fabricant Abergement universel réglable zinc + plomb plissé (réf. 34ABEZNUNI), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661201005736-apVdYVVk1k.pdf",
+          "type": "fabricant",
+          "extrait": "Plomb plissé épaisseur 0.6 mm ; Largeur de la bavette : 200 mm ; réglable entre 30 et 53 centimètres ; SOLIN STOP-ENDUIT Dév : 100, Lg : 2ml",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Mr Bricolage, solin mastic 100 zinc 2 ml Edilians",
+          "url": "https://www.mr-bricolage.fr/solin-mastic-100-zinc-2ml-edilians.html",
+          "type": "negoce",
+          "extrait": "solin mastic zinc Edilians, largeur 10 cm, longueur 2 mètres",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Le 2 m est déjà confirmé dans zinguerie.json (bandes façonnées)."
+    },
+    {
+      "id": "aberg_solin_suspendu",
+      "famille": "abergement",
+      "sous_famille": "bande porte-solin",
+      "marque": "",
+      "modele": "",
+      "attribut": "hauteur du solin mortier suspendu au-dessus des tuiles",
+      "valeur": "20 à 30",
+      "unite": "mm",
+      "condition": "rive avec noquets et solin suspendu",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE Ouvrages de couverture – Tuiles plates, fascicule technique et CCTP (août 2011), §4.3 et §4.10",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "de longueur égale à celle des tuiles s'il est placé tous les deux rangs, ce qui est le cas le plus courant",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "aberg_plomb_masse",
+      "famille": "abergement",
+      "sous_famille": "plomb laminé",
+      "marque": "",
+      "modele": "",
+      "attribut": "masse surfacique",
+      "valeur": {
+        "1,25": 14.2,
+        "1,5": 17.0,
+        "2": 22.7,
+        "2,5": 28.4,
+        "3": 34.05
+      },
+      "unite": "kg/m² selon épaisseur (mm)",
+      "condition": "plomb laminé EN 12588, masse volumique 11,35 kg/dm³",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "D'Huart Industrie (Marseille, groupe Calder), fiche Plomb naturel, plomb laminé de couverture EN 12588 (2011)",
+          "url": "https://batpro-madagascar.com/wp-content/uploads/2024/01/41667-FEUILLE-DE-PLOMB-LAMINE-DE-5X1X2MM.pdf",
+          "type": "fabricant",
+          "extrait": "Bandes ou filets longueur 10, 5 et 2 m - largeur de 160 à 400 mm épaisseur de 1.25 à 3.00 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "D'Huart ne donne pas la masse ; elle se déduit de la densité (calcul physique) ; déjà dans le code (17 / 22,7 / 28,4).",
+      "controle": "masse = 11,35 × épaisseur : 1,5 × 11,35 = 17,0 ; 2 × 11,35 = 22,7 ; 2,5 × 11,35 = 28,4 ; contrôle LPF : bande 10 m × 0,16 m × 17 = 27,2 kg (27,50 au catalogue)"
+    },
+    {
+      "id": "aberg_plomb_formats",
+      "famille": "abergement",
+      "sous_famille": "plomb laminé",
+      "marque": "",
+      "modele": "",
+      "attribut": "formats vendus (bandes en rouleau)",
+      "valeur": {
+        "longueurs_m": [
+          10,
+          5,
+          2
+        ],
+        "largeurs_bandes_mm": "160 à 400 (500 en 2,5 mm)",
+        "epaisseurs_mm": "1,25 à 3",
+        "tables": "1 m de large en 2, 5 ou 10 m",
+        "Le Plomb Français": "10 m × 160 / 200 / 250 / 300 (1,25 à 2 mm) ; 5 m × 330 (1,5 et 2 mm) ; 5 m × 300 à 500 (2,5 mm)"
+      },
+      "unite": "",
+      "condition": "plomb de couverture ; en grande surface de bricolage : 10 m × 100 ou 160 mm en 1,25 mm",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "D'Huart Industrie (Marseille, groupe Calder), fiche Plomb naturel, plomb laminé de couverture EN 12588 (2011)",
+          "url": "https://batpro-madagascar.com/wp-content/uploads/2024/01/41667-FEUILLE-DE-PLOMB-LAMINE-DE-5X1X2MM.pdf",
+          "type": "fabricant",
+          "extrait": "Bandes ou filets longueur 10, 5 et 2 m - largeur de 160 à 400 mm épaisseur de 1.25 à 3.00 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Brico Dépôt, bande de plomb 10 m × 100 mm (1,25 mm) et 10 m × 160 mm",
+          "url": "https://www.bricodepot.fr/p/3416710018537/bande-de-plomb-long-10-m-x-larg-160-mm",
+          "type": "negoce",
+          "extrait": "Bande de plomb long. 10 m x larg. 160 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "aberg_plomb_epaisseur_usage",
+      "famille": "abergement",
+      "sous_famille": "plomb laminé",
+      "marque": "Le Plomb Français",
+      "modele": "guide des épaisseurs",
+      "attribut": "épaisseur selon l'ouvrage",
+      "valeur": {
+        "1,5 mm": "faîtage adossé, rive, bande d'égout : éléments de 1 ml maxi",
+        "2 mm": "cheminée, corniche, acrotère : éléments de 1,50 ml maxi",
+        "2,5 mm": "noue, corniche couverture",
+        "3 mm": "noue, couverture, chéneau"
+      },
+      "unite": "",
+      "condition": "pose selon NF DTU 40.46",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Le code met 1,5 mm par défaut (réponse du fondateur) ; pour un entourage de cheminée, le fabricant indique 2 mm."
+    },
+    {
+      "id": "aberg_bavette_plomb_prefab",
+      "famille": "abergement",
+      "sous_famille": "abergement préfabriqué",
+      "marque": "",
+      "modele": "",
+      "attribut": "largeur de la bavette plomb plissé",
+      "valeur": "200 à 300",
+      "unite": "mm",
+      "condition": "Edilians 250 mm (6 coloris) ; Terreal 300 mm en rouleau séparé ; abergement universel 200 mm (plomb plissé 0,6 mm)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, fiche Abergements de cheminée fixes et réglables (edilians.eu)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_abergements_-_cheminee.pdf",
+          "type": "fabricant",
+          "extrait": "Bavette d'une largeur de 250 mm ; réglable 30 à 60 cm et 60 à 110 cm ; S'adapte aux pentes jusqu'à 100%",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, Abergement réglable en zinc (17 février 2015), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/71754a07-9f11-4be1-8c75-3bbee578ab15/ficheproduitcaractristiquesgnrales-812798.pdf",
+          "type": "fabricant",
+          "extrait": "livrés avec une bavette plomb de largeur 300 mm en rouleau séparé",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Fiche fabricant Abergement universel réglable zinc + plomb plissé (réf. 34ABEZNUNI), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661201005736-apVdYVVk1k.pdf",
+          "type": "fabricant",
+          "extrait": "Plomb plissé épaisseur 0.6 mm ; Largeur de la bavette : 200 mm ; réglable entre 30 et 53 centimètres ; SOLIN STOP-ENDUIT Dév : 100, Lg : 2ml",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "aberg_prefab_reglable",
+      "famille": "abergement",
+      "sous_famille": "abergement préfabriqué",
+      "marque": "",
+      "modele": "",
+      "attribut": "plages de réglage et pentes",
+      "valeur": {
+        "Edilians réglable": "30-60 cm et 60-110 cm, pentes jusqu'à 100 %",
+        "Edilians fixe": "boisseaux 26 × 26 à 60 × 40 cm, pentes 25 à 45 %, table plomb 9/10",
+        "Terreal": "petit format (boisseaux 350 × 350 à 400 × 400, 300 × 500), grand format (530 × 760 à 1000 × 1000)",
+        "Universel (BigMat)": "30 à 53 cm, rallonges 500 / 800 mm, pentes ≤ 63 %"
+      },
+      "unite": "",
+      "condition": "boisseaux et souches ; commande à l'unité selon les cotes extérieures",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilians, fiche Abergements de cheminée fixes et réglables (edilians.eu)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_abergements_-_cheminee.pdf",
+          "type": "fabricant",
+          "extrait": "Bavette d'une largeur de 250 mm ; réglable 30 à 60 cm et 60 à 110 cm ; S'adapte aux pentes jusqu'à 100%",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, Abergement réglable en zinc (17 février 2015), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/71754a07-9f11-4be1-8c75-3bbee578ab15/ficheproduitcaractristiquesgnrales-812798.pdf",
+          "type": "fabricant",
+          "extrait": "livrés avec une bavette plomb de largeur 300 mm en rouleau séparé",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Fiche fabricant Abergement universel réglable zinc + plomb plissé (réf. 34ABEZNUNI), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661201005736-apVdYVVk1k.pdf",
+          "type": "fabricant",
+          "extrait": "Plomb plissé épaisseur 0.6 mm ; Largeur de la bavette : 200 mm ; réglable entre 30 et 53 centimètres ; SOLIN STOP-ENDUIT Dév : 100, Lg : 2ml",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Chaque gamme a ses propres plages : la cote extérieure de la souche (parallèle × perpendiculaire au faîtage) choisit le modèle."
+    },
+    {
+      "id": "aberg_bande_souple_rouleau",
+      "famille": "abergement",
+      "sous_famille": "bande d'abergement souple sans plomb",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur de rouleau",
+      "valeur": 5,
+      "unite": "m",
+      "condition": "Wakaflex, Flexeo, Easy-Form, Ubiflex Finio (Wakaflex 280 mm existe aussi en 10 m ; Ubiflex Standard en 12 m)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Monier (BMI) Belgique, documentation technique Wakaflex, diffusée par Handy Home Ottevaere",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PDROMONWAK2805AN.pdf",
+          "type": "fabricant",
+          "extrait": "Rouleau de 5m x 140mm / 280mm / 370mm / 560mm ; Rouleau de 10m x 280mm ; chevauchement minimal de 50 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, fiche technique Flexeo 2019 (edilians.com), lue dans l'aperçu du moteur de recherche",
+          "url": "https://edilians.com/media/productattach/e/d/edilians_-_fiche_technique_flexeo_-_2019_-_bd.pdf",
+          "type": "fabricant",
+          "extrait": "2 largeurs (280 et 450 mm) ; FLEXEO-280 rouleau 5 ml ; Rouge, Anthracite, Gris",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, bande de solin universelle Easy-Form (Klöber)",
+          "url": "https://www.batiproduits.com/amp/fiche/produits/bande-de-solin-universelle-easy-form-p68884078.html",
+          "type": "fabricant",
+          "extrait": "longueur de 5 m (rouleau) ; largeurs 200 mm, 250 mm, 300 mm, 450 mm, 600 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ubbink, fiche Ubiflex Finio (cdn-blob.ubbink.com), lue dans l'aperçu du moteur de recherche",
+          "url": "https://cdn-blob.ubbink.com/syncforce/861431e7-f24b-401a-8cc6-ed2410bb6bc2/F0014354_0001.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur préconisée selon l'application 250mm 300mm 400mm 500mm ; Longueur : 5 m - (rouleau) ; Épaisseur : 1.9 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Wattuneed (négoce en ligne), Wakaflex réf. WAKA14-A",
+          "url": "https://www.wattuneed.com/fr/colles-resines-mastics/25612-wakaflex-140-mm-anthracite-0768563818646.html",
+          "type": "negoce",
+          "extrait": "rouleau de 5 m x 300 mm, en PIB armé d'un treillis d'aluminium",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "aberg_bande_souple_largeurs",
+      "famille": "abergement",
+      "sous_famille": "bande d'abergement souple sans plomb",
+      "marque": "",
+      "modele": "",
+      "attribut": "largeurs vendues",
+      "valeur": {
+        "Wakaflex": [
+          140,
+          180,
+          280,
+          370,
+          560
+        ],
+        "Flexeo": [
+          280,
+          450
+        ],
+        "Easy-Form": [
+          200,
+          250,
+          300,
+          450,
+          600
+        ],
+        "Ubiflex Finio": [
+          250,
+          300,
+          400,
+          500
+        ]
+      },
+      "unite": "mm",
+      "condition": "largeur courante pour une souche : 280 à 300 mm",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Monier (BMI) France, fiche Wakaflex (janvier 2020), diffusée par Envain Matériaux",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_Wakaflex.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur 14 cm* 18 cm* 28 cm 37 cm 56 cm ; Rouge Sienne, Ardoise, Gris Plomb, Brun ; * Hors Avis Technique ; 1,8 mm ; 3,7 kg/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Monier (BMI) Belgique, documentation technique Wakaflex, diffusée par Handy Home Ottevaere",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PDROMONWAK2805AN.pdf",
+          "type": "fabricant",
+          "extrait": "Rouleau de 5m x 140mm / 280mm / 370mm / 560mm ; Rouleau de 10m x 280mm ; chevauchement minimal de 50 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, fiche technique Flexeo 2019 (edilians.com), lue dans l'aperçu du moteur de recherche",
+          "url": "https://edilians.com/media/productattach/e/d/edilians_-_fiche_technique_flexeo_-_2019_-_bd.pdf",
+          "type": "fabricant",
+          "extrait": "2 largeurs (280 et 450 mm) ; FLEXEO-280 rouleau 5 ml ; Rouge, Anthracite, Gris",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, bande de solin universelle Easy-Form (Klöber)",
+          "url": "https://www.batiproduits.com/amp/fiche/produits/bande-de-solin-universelle-easy-form-p68884078.html",
+          "type": "fabricant",
+          "extrait": "longueur de 5 m (rouleau) ; largeurs 200 mm, 250 mm, 300 mm, 450 mm, 600 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ubbink, fiche Ubiflex Finio (cdn-blob.ubbink.com), lue dans l'aperçu du moteur de recherche",
+          "url": "https://cdn-blob.ubbink.com/syncforce/861431e7-f24b-401a-8cc6-ed2410bb6bc2/F0014354_0001.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur préconisée selon l'application 250mm 300mm 400mm 500mm ; Longueur : 5 m - (rouleau) ; Épaisseur : 1.9 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Chaque largeur ne vient que de son fabricant. Wakaflex 140 et 180 : hors avis technique (France). Le négoce Wattuneed indique 300 mm pour une référence 140 : erreur probable."
+    },
+    {
+      "id": "aberg_wakaflex",
+      "famille": "abergement",
+      "sous_famille": "bande d'abergement souple sans plomb",
+      "marque": "Monier (BMI)",
+      "modele": "Wakaflex",
+      "attribut": "caractéristiques et règles de pose",
+      "valeur": {
+        "epaisseur_mm": 1.8,
+        "masse_kg_m2": 3.7,
+        "coloris_france": [
+          "Rouge Sienne",
+          "Ardoise",
+          "Gris Plomb",
+          "Brun"
+        ],
+        "chevauchement_entre_bandes_mm": 50,
+        "recouvrement_tuiles_cm": "10 (> 22°) ou 15 (< 22°) ; 12 mini sur tuile plate",
+        "sur_maconnerie_cm_min": 15,
+        "arriere_mm_min": 350
+      },
+      "unite": "",
+      "condition": "profilé de finition Wakastrip après-enduit 2,40 m",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Monier (BMI) France, fiche Wakaflex (janvier 2020), diffusée par Envain Matériaux",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_Wakaflex.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur 14 cm* 18 cm* 28 cm 37 cm 56 cm ; Rouge Sienne, Ardoise, Gris Plomb, Brun ; * Hors Avis Technique ; 1,8 mm ; 3,7 kg/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Monier (BMI) Belgique, documentation technique Wakaflex, diffusée par Handy Home Ottevaere",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PDROMONWAK2805AN.pdf",
+          "type": "fabricant",
+          "extrait": "Rouleau de 5m x 140mm / 280mm / 370mm / 560mm ; Rouleau de 10m x 280mm ; chevauchement minimal de 50 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Deux documents Monier (France 2020, Belgique) : une seule source."
+    },
+    {
+      "id": "aberg_bande_souple_ml_par_souche",
+      "famille": "abergement",
+      "sous_famille": "bande d'abergement souple sans plomb",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur de bande par souche",
+      "valeur": "≈ périmètre + 1 m",
+      "unite": "ml",
+      "condition": "devant : L + 2 × 10-15 cm ; côtés : 2 × (P + chevauchement tuile + 10-15 cm) ; arrière : L + 2 × 10-15 cm, en 350 mm de large mini (souvent 2 bandes ou une bande de 370 / 560)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Monier (BMI) Belgique, documentation technique Wakaflex, diffusée par Handy Home Ottevaere",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PDROMONWAK2805AN.pdf",
+          "type": "fabricant",
+          "extrait": "Rouleau de 5m x 140mm / 280mm / 370mm / 560mm ; Rouleau de 10m x 280mm ; chevauchement minimal de 50 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "souche 60 × 60 : 0,85 + 2 × 0,83 + 0,90 ≈ 3,4 ml pour 2,4 m de périmètre (× 1,4) ; souche 40 × 40 : ≈ 2,6 ml pour 1,6 m (× 1,6)"
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Noquets plomb (ardoise contre mur) : 1 noquet par rang : ml / pureau",
+      "origine": "referentiel-couverture.md §12 (ligne 377)",
+      "valeur_actuelle": "ml / pureau",
+      "verdict": "corrige",
+      "bonne_valeur": "ml / (2 × pureau) dans le cas courant (noquet de la longueur de l'élément, tous les deux rangs) ; ml / pureau seulement si le devis dit « à chaque rang »",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, Couverture ardoises (guide de bonnes pratiques), rive contre maçonnerie",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Largeur : demi-ardoise. Longueur : égale à celle du modèle d'ardoise utilisé. Le noquet se place généralement tous les 2 rangs",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide MOA/MOE Ouvrages de couverture – Tuiles plates, fascicule technique et CCTP (août 2011), §4.3 et §4.10",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "de longueur égale à celle des tuiles s'il est placé tous les deux rangs, ce qui est le cas le plus courant",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Nomad Education, CAP couvreur : réalisation des abergements de cheminée en zinc ou plomb",
+          "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/realisation-des-abergements-de-cheminee-en-zinc-ou-cy44b205",
+          "type": "guide",
+          "extrait": "relevés : 100 mm minimum au-dessus de la couverture ; noquets sur ardoises : un noquet par rang d'ardoise",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "CAPEB et ministère de la Culture : tous les deux rangs est le cas le plus courant ; le CAP enseigne un par rang. Le double compte surestime les noquets de 100 %."
+    },
+    {
+      "ratio": "Noquets : 1 par rang, ≈ 18 noquets de 30 × 33 cm par feuille 2 × 1 m",
+      "origine": "referentiel-couverture.md §30 (ligne 764)",
+      "valeur_actuelle": "1 par rang ; 18 par feuille",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "nombre : tous les deux rangs (voir ci-dessus) ; par feuille : ≈ 30 pour un noquet d'ardoise 32 × 20 cm (calcul)",
+      "sources": [
+        {
+          "titre": "CAPEB Hérault, Couverture ardoises (guide de bonnes pratiques), rive contre maçonnerie",
+          "url": "https://www.capeb.fr/www/capeb/media//herault/document/Couverture_ardoises.pdf",
+          "type": "guide",
+          "extrait": "Largeur : demi-ardoise. Longueur : égale à celle du modèle d'ardoise utilisé. Le noquet se place généralement tous les 2 rangs",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le développé exact du noquet n'est donné par aucune source ; 33 cm de large paraît fort pour un noquet d'ardoise (demi-ardoise + relevé ≈ 20 cm)."
+    },
+    {
+      "ratio": "rouleau_plomb = 6 m (« §12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer »)",
+      "origine": "referential/data/roofing.ts:2961",
+      "valeur_actuelle": "6 m",
+      "verdict": "corrige",
+      "bonne_valeur": "10 m pour les bandes jusqu'à 300 mm ; 5 m pour 330 mm et plus ; 2 m existe",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "D'Huart Industrie (Marseille, groupe Calder), fiche Plomb naturel, plomb laminé de couverture EN 12588 (2011)",
+          "url": "https://batpro-madagascar.com/wp-content/uploads/2024/01/41667-FEUILLE-DE-PLOMB-LAMINE-DE-5X1X2MM.pdf",
+          "type": "fabricant",
+          "extrait": "Bandes ou filets longueur 10, 5 et 2 m - largeur de 160 à 400 mm épaisseur de 1.25 à 3.00 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Brico Dépôt, bande de plomb 10 m × 100 mm (1,25 mm) et 10 m × 160 mm",
+          "url": "https://www.bricodepot.fr/p/3416710018537/bande-de-plomb-long-10-m-x-larg-160-mm",
+          "type": "negoce",
+          "extrait": "Bande de plomb long. 10 m x larg. 160 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Deux fabricants (Le Plomb Français, D'Huart) vendent les bandes en 10, 5 et 2 m ; aucun rouleau de 3 ou 6 m trouvé."
+    },
+    {
+      "ratio": "Plomb en bandes de largeur 20 à 100 cm, longueur 3 à 6 m",
+      "origine": "referentiel-couverture.md §12 (ligne 370)",
+      "valeur_actuelle": "20-100 cm ; 3-6 m",
+      "verdict": "corrige",
+      "bonne_valeur": "bandes de 16 à 40 cm (50 cm en 2,5 mm) en 10, 5 ou 2 m ; au-delà, table de 1 m de large (2, 5 ou 10 m)",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "D'Huart Industrie (Marseille, groupe Calder), fiche Plomb naturel, plomb laminé de couverture EN 12588 (2011)",
+          "url": "https://batpro-madagascar.com/wp-content/uploads/2024/01/41667-FEUILLE-DE-PLOMB-LAMINE-DE-5X1X2MM.pdf",
+          "type": "fabricant",
+          "extrait": "Bandes ou filets longueur 10, 5 et 2 m - largeur de 160 à 400 mm épaisseur de 1.25 à 3.00 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Les largeurs de 50 à 100 cm sont des tables, pas des bandes."
+    },
+    {
+      "ratio": "Plomb 1,5 / 2 / 2,5 mm = 17 / 22,7 / 28,4 kg/m²",
+      "origine": "referential/data/roofing.ts:991 ; referentiel-couverture.md §12",
+      "valeur_actuelle": "17 / 22,7 / 28,4",
+      "verdict": "confirme",
+      "bonne_valeur": "inchangé",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "D'Huart Industrie (Marseille, groupe Calder), fiche Plomb naturel, plomb laminé de couverture EN 12588 (2011)",
+          "url": "https://batpro-madagascar.com/wp-content/uploads/2024/01/41667-FEUILLE-DE-PLOMB-LAMINE-DE-5X1X2MM.pdf",
+          "type": "fabricant",
+          "extrait": "Bandes ou filets longueur 10, 5 et 2 m - largeur de 160 à 400 mm épaisseur de 1.25 à 3.00 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le Plomb Français publie ces masses ; elles découlent de la densité 11,35."
+    },
+    {
+      "ratio": "Épaisseur de plomb par défaut 1,5 mm (réponse du fondateur)",
+      "origine": "referential/data/roofing.ts:1004",
+      "valeur_actuelle": "1,5 mm",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "1,5 mm pour rives, faîtages, bavettes courtes (éléments ≤ 1 ml) ; 2 mm conseillé pour une cheminée (éléments ≤ 1,50 ml)",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Règle du fondateur à garder ; signaler que le fabricant indique 2 mm pour un entourage de cheminée (la doc §12 dit aussi « plomb 2 mm courant »)."
+    },
+    {
+      "ratio": "Abergement de cheminée : périmètre × 1,3 en ml de zinc dév. 33 à 40 cm",
+      "origine": "referentiel-couverture.md §7 (ligne 250) ; referential/data/roofing.ts:3101-3102",
+      "valeur_actuelle": "× 1,3 ; dév. 330",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "≈ périmètre + 1 m de bande (× 1,4 pour une souche de 60 × 60, × 1,6 pour 40 × 40) ; dév. 33 cm suffit pour la bavette et les côtés, le derrière demande plus (3 à 4 pureaux + 6 cm + relevé 10-12 cm)",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2 abergement en métal sur le pourtour de la souche",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "Sa longueur est égale à la largeur de l'ouvrage augmentée de 10 à 12 cm de chaque côté",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2, derrière en métal",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "augmentée de 12 à 15 cm de chaque côté ; Les tuiles viennent en recouvrement sur 6 cm au minimum ; relevé de 10 à 12 cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Monier (BMI) Belgique, documentation technique Wakaflex, diffusée par Handy Home Ottevaere",
+          "url": "https://handyhomeottevaere.be/assets/images/moxie/shop/navision/TF_FR_PDROMONWAK2805AN.pdf",
+          "type": "fabricant",
+          "extrait": "Rouleau de 5m x 140mm / 280mm / 370mm / 560mm ; Rouleau de 10m x 280mm ; chevauchement minimal de 50 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le × 1,3 sous-estime les petites souches : les débords de 10 à 15 cm de chaque côté pèsent plus quand le périmètre est court. Aucune source ne donne un coefficient : c'est un calcul."
+    },
+    {
+      "ratio": "Abergement plomb : périmètre × 0,40 m de dév. × 1,2 = m² → kg ; plomb 2 mm courant",
+      "origine": "referentiel-couverture.md §12 (ligne 375)",
+      "valeur_actuelle": "0,40 m × 1,2",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "aucune source ne donne 0,40 m ni 1,2 ; le plomb se commande en bande de 250 à 400 mm en 5 ou 10 m (ou bavette plissée 200-300 mm pour un préfabriqué)",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, fiche Abergements de cheminée fixes et réglables (edilians.eu)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_abergements_-_cheminee.pdf",
+          "type": "fabricant",
+          "extrait": "Bavette d'une largeur de 250 mm ; réglable 30 à 60 cm et 60 à 110 cm ; S'adapte aux pentes jusqu'à 100%",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, Abergement réglable en zinc (17 février 2015), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/71754a07-9f11-4be1-8c75-3bbee578ab15/ficheproduitcaractristiquesgnrales-812798.pdf",
+          "type": "fabricant",
+          "extrait": "livrés avec une bavette plomb de largeur 300 mm en rouleau séparé",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le calcul en kg n'est pas l'unité de comptoir : on demande des rouleaux (largeur × longueur × épaisseur)."
+    },
+    {
+      "ratio": "Bavettes et solins plomb : bande porte-solin 1/ml ; chevilles 4/ml",
+      "origine": "referentiel-couverture.md §12 (ligne 376)",
+      "valeur_actuelle": "1/ml ; 4/ml",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "bande porte-solin vendue en 2 m, dév. 100 (0,5 pièce par ml + recouvrements) ; chevilles : aucune source",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.3.4 bande porte-solin",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "retombée de 50 mm environ ; partie horizontale de 15 à 20 mm ; relevé de 20 à 30 mm contre le mur",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Fiche fabricant Abergement universel réglable zinc + plomb plissé (réf. 34ABEZNUNI), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661201005736-apVdYVVk1k.pdf",
+          "type": "fabricant",
+          "extrait": "Plomb plissé épaisseur 0.6 mm ; Largeur de la bavette : 200 mm ; réglable entre 30 et 53 centimètres ; SOLIN STOP-ENDUIT Dév : 100, Lg : 2ml",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Mr Bricolage, solin mastic 100 zinc 2 ml Edilians",
+          "url": "https://www.mr-bricolage.fr/solin-mastic-100-zinc-2ml-edilians.html",
+          "type": "negoce",
+          "extrait": "solin mastic zinc Edilians, largeur 10 cm, longueur 2 mètres",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "« 1/ml » confond la pièce et le mètre : la pièce fait 2 m."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Plomb laminé en rouleau",
+      "ce_que_le_vendeur_demande": [
+        "épaisseur (1,5 / 2 / 2,5 mm)",
+        "largeur de bande (160 à 400 mm)",
+        "longueur du rouleau (10, 5 ou 2 m)",
+        "naturel ou laqué / plissé"
+      ],
+      "unite_de_vente": "rouleau (bande), au poids pour la facture",
+      "conditionnement": "Le Plomb Français : 10 m × 160-300 mm, 5 m × 330 mm",
+      "sources": [
+        {
+          "titre": "Le Plomb Français (filiale du groupe, Estrées-Saint-Denis), catalogue plomb laminé juillet 2012, diffusé par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3701367100439-6ttgI7jjeA.pdf",
+          "type": "fabricant",
+          "extrait": "1,5 mm : 17,00 kg/m² ; bandes 10 m × 160/200/250/300 mm ; 5 m × 330 mm ; 2 mm : cheminée éléments de 1,50 mL maxi",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "D'Huart Industrie (Marseille, groupe Calder), fiche Plomb naturel, plomb laminé de couverture EN 12588 (2011)",
+          "url": "https://batpro-madagascar.com/wp-content/uploads/2024/01/41667-FEUILLE-DE-PLOMB-LAMINE-DE-5X1X2MM.pdf",
+          "type": "fabricant",
+          "extrait": "Bandes ou filets longueur 10, 5 et 2 m - largeur de 160 à 400 mm épaisseur de 1.25 à 3.00 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "abergement"
+    },
+    {
+      "article": "Abergement préfabriqué de cheminée",
+      "ce_que_le_vendeur_demande": [
+        "cotes extérieures du boisseau (parallèle × perpendiculaire au faîtage)",
+        "type de couverture (ardoise, tuile plate, tuile à relief)",
+        "pente",
+        "zinc ou cuivre",
+        "coloris de bavette"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "carton individuel ; rallonges à part",
+      "sources": [
+        {
+          "titre": "Edilians, fiche Abergements de cheminée fixes et réglables (edilians.eu)",
+          "url": "https://edilians.eu/media/productattach/f/t/ft_-_abergements_-_cheminee.pdf",
+          "type": "fabricant",
+          "extrait": "Bavette d'une largeur de 250 mm ; réglable 30 à 60 cm et 60 à 110 cm ; S'adapte aux pentes jusqu'à 100%",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Terreal, Abergement réglable en zinc (17 février 2015), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/71754a07-9f11-4be1-8c75-3bbee578ab15/ficheproduitcaractristiquesgnrales-812798.pdf",
+          "type": "fabricant",
+          "extrait": "livrés avec une bavette plomb de largeur 300 mm en rouleau séparé",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Fiche fabricant Abergement universel réglable zinc + plomb plissé (réf. 34ABEZNUNI), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661201005736-apVdYVVk1k.pdf",
+          "type": "fabricant",
+          "extrait": "Plomb plissé épaisseur 0.6 mm ; Largeur de la bavette : 200 mm ; réglable entre 30 et 53 centimètres ; SOLIN STOP-ENDUIT Dév : 100, Lg : 2ml",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "abergement"
+    },
+    {
+      "article": "Bande d'abergement souple (Wakaflex, Flexeo, Easy-Form, Ubiflex)",
+      "ce_que_le_vendeur_demande": [
+        "marque",
+        "largeur (280-300 mm courant)",
+        "coloris",
+        "nombre de rouleaux de 5 m"
+      ],
+      "unite_de_vente": "rouleau",
+      "conditionnement": "5 m (Wakaflex 280 aussi en 10 m)",
+      "sources": [
+        {
+          "titre": "Monier (BMI) France, fiche Wakaflex (janvier 2020), diffusée par Envain Matériaux",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_Wakaflex.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur 14 cm* 18 cm* 28 cm 37 cm 56 cm ; Rouge Sienne, Ardoise, Gris Plomb, Brun ; * Hors Avis Technique ; 1,8 mm ; 3,7 kg/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilians, fiche technique Flexeo 2019 (edilians.com), lue dans l'aperçu du moteur de recherche",
+          "url": "https://edilians.com/media/productattach/e/d/edilians_-_fiche_technique_flexeo_-_2019_-_bd.pdf",
+          "type": "fabricant",
+          "extrait": "2 largeurs (280 et 450 mm) ; FLEXEO-280 rouleau 5 ml ; Rouge, Anthracite, Gris",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, bande de solin universelle Easy-Form (Klöber)",
+          "url": "https://www.batiproduits.com/amp/fiche/produits/bande-de-solin-universelle-easy-form-p68884078.html",
+          "type": "fabricant",
+          "extrait": "longueur de 5 m (rouleau) ; largeurs 200 mm, 250 mm, 300 mm, 450 mm, 600 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "abergement"
+    },
+    {
+      "article": "Bande porte-solin / solin à biseau ou stop-enduit",
+      "ce_que_le_vendeur_demande": [
+        "matière et finition (zinc naturel, quartz, anthra, cuivre)",
+        "développé (100 mm)",
+        "nombre de longueurs de 2 m"
+      ],
+      "unite_de_vente": "pièce de 2 m",
+      "conditionnement": "à l'unité",
+      "sources": [
+        {
+          "titre": "Fiche fabricant Abergement universel réglable zinc + plomb plissé (réf. 34ABEZNUNI), diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3661201005736-apVdYVVk1k.pdf",
+          "type": "fabricant",
+          "extrait": "Plomb plissé épaisseur 0.6 mm ; Largeur de la bavette : 200 mm ; réglable entre 30 et 53 centimètres ; SOLIN STOP-ENDUIT Dév : 100, Lg : 2ml",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Mr Bricolage, solin mastic 100 zinc 2 ml Edilians",
+          "url": "https://www.mr-bricolage.fr/solin-mastic-100-zinc-2ml-edilians.html",
+          "type": "negoce",
+          "extrait": "solin mastic zinc Edilians, largeur 10 cm, longueur 2 mètres",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "abergement"
+    },
+    {
+      "article": "Abergement façonné sur mesure (zinc)",
+      "ce_que_le_vendeur_demande": [
+        "dimensions de la souche",
+        "pureau ou modèle de couverture",
+        "épaisseur zinc 0,65 / 0,80",
+        "ou feuilles 2 × 1 m si l'artisan façonne"
+      ],
+      "unite_de_vente": "pièce (ouvrage compté à l'unité au CCTP) ou feuilles",
+      "conditionnement": "le ministère compte l'abergement « à l'unité »",
+      "sources": [
+        {
+          "titre": "Ministère de la Culture, Guide tuiles plates (2011), §4.10.2 abergement en métal sur le pourtour de la souche",
+          "url": "https://www.culture.gouv.fr/fr/content/download/50139/file/GuideMoaMoe_Couverture_TuilesPlates_20110801.pdf",
+          "type": "guide",
+          "extrait": "Sa longueur est égale à la largeur de l'ouvrage augmentée de 10 à 12 cm de chaque côté",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Nomad Education, CAP couvreur : réalisation des abergements de cheminée en zinc ou plomb",
+          "url": "https://www.nomadeducation.fr/revisions/cap-couvreur-lbf05556/realisation-des-abergements-de-cheminee-en-zinc-ou-cy44b205",
+          "type": "guide",
+          "extrait": "relevés : 100 mm minimum au-dessus de la couverture ; noquets sur ardoises : un noquet par rang d'ardoise",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "abergement"
+    }
+  ]
+}

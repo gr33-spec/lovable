@@ -7,7 +7,7 @@ export function AssistantMessage({ children, label }: { children: React.ReactNod
   return (
     <div className="flex items-start gap-2.5" aria-label={label}>
       {/* Sur téléphone, pas de colonne d'avatar : chaque pixel de largeur sert au contenu. */}
-      <span aria-hidden="true" className="flex size-8 shrink-0 max-lg:hidden items-center justify-center rounded-[10px] bg-accent font-display text-[15px] font-extrabold text-white">
+      <span aria-hidden="true" className="flex size-8 shrink-0 max-lg:hidden items-center justify-center rounded-[10px] bg-accent font-display text-[15px] font-extrabold text-on-accent">
         B
       </span>
       <div className="flex min-w-0 grow flex-col gap-3 lg:pt-1">{children}</div>

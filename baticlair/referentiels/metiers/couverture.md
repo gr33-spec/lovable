@@ -13,3 +13,7 @@ document: docs/referentiel-couverture.md
 Le métier garde son tiroir (`packages/domain/src/referential/data/roofing.ts`) et son référentiel complet, écrit et relu
 par le fondateur : `docs/referentiel-couverture.md` (sections 1 à 52). Mission du 19 octobre : « couverture (existe, ne
 touche pas) ». Cette fiche ne sert qu'au registre des métiers couverts.
+
+Base de référence (mission du 19 novembre 2026) : `referentiels/couverture/fiche-couverture.json`, classée famille >
+marque > modèle, et sa carte des régions `referentiels/couverture/carte-regions.json` (format commun :
+`docs/format-base-metier.md`). Le tiroir y passe ses données par étapes, tests verts à chaque pas.

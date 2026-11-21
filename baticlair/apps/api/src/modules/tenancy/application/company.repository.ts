@@ -23,7 +23,8 @@ export interface CompanyRepository {
   setProfile(companyId: string, profile: Omit<CompanyProfile, "hasLogo">): Promise<void>;
   logo(companyId: string): Promise<{ bytes: Uint8Array; type: string } | null>;
   setLogo(companyId: string, logo: { bytes: Uint8Array; type: string } | null): Promise<void>;
-  createWithOwner(name: string, ownerUserId: string, trades: string[]): Promise<CompanyMembershipView>;
+  createWithOwner(name: string, ownerUserId: string, trades: string[], departement?: string | null, extra?: { phone: string | null; parcoursInscription: string | null }): Promise<CompanyMembershipView>;
+  setDepartement(companyId: string, departement: string): Promise<void>;
   setTrades(companyId: string, trades: string[]): Promise<void>;
   listMembershipsOfUser(userId: string): Promise<CompanyMembershipView[]>;
   findMembership(userId: string, companyId: string): Promise<CompanyMembershipView | null>;

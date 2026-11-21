@@ -16,7 +16,7 @@ describe("une surface par ouvrage", () => {
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:surface");
     // Sans adresse : le même nombre que le devis d'ardoises seul, sans le garage.
     const seul = readQuote([LIGNES[0]!]).toBuy.find((b) => b.needIds.includes("ardoises"))?.quantity;
-    expect(seul).toBe("9 271 pièces");
+    expect(seul).toBe("8 925 pièces");
     expect(v.toBuy.find((b) => b.needIds.includes("ardoises"))?.quantity).toBe(seul);
   });
   it("le nombre de descentes écrit sur la ligne « descente » sert toujours à la gouttière", () => {

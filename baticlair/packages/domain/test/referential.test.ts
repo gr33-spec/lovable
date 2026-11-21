@@ -80,7 +80,8 @@ describe("référentiel couverture", () => {
 
   it("règles de calcul validées par le fondateur : tracées (qui, quand) et calculées pour l'artisan", () => {
     expect(REFERENTIEL_COMPLET.products[0]!.attributes.largeur_utile!.verification.status).toBe("verified");
-    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs) {
+    // Les pointes de liteaux (Suggestion) viennent de la recherche du 20/11/2026 (DTU 40.21, Koramic), pas du fondateur.
+    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs.filter((x) => x.id !== "pointes-liteaux")) {
       expect(n.verification).toMatchObject({ status: "verified", verifiedBy: "Fondateur (couvreur)" });
       expect(n.verification.verifiedAt).toMatch(/^2026-10-0[23]$/);
     }
@@ -137,7 +138,7 @@ describe("référentiel couverture", () => {
     expect(tuiles.manufacturerSpecs.map((s) => s.key).sort()).toEqual(["largeur_utile", "pureau_max", "pureau_min"]);
     const ecran = requiredInputs(REFERENTIEL_COMPLET, "couverture-tuiles-emboitement", "ecran");
     expect(ecran.params.map((p) => p.key)).toEqual(["surface", "pente"]);
-    expect(ecran.installationConditions.sort()).toEqual(["recouvrement_faible_pente", "recouvrement_forte_pente", "seuil_pente_ecran"]);
+    expect(ecran.installationConditions.sort()).toEqual(["coef_ecran_faible_pente", "coef_ecran_forte_pente", "seuil_pente_ecran"]);
   });
 
   it("refuse une donnée incohérente plutôt que de la corriger", () => {
@@ -179,8 +180,8 @@ describe("moteur : ouvrage → besoins → achat", () => {
     expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, origin: "explicit", purchase: { order: { count: "350", unit: { many: "ml" } }, approx: [{ count: "7" }] } });
     // 120 m² ÷ 0,60 m = 200 ml ; absent du devis mais cœur de l'ouvrage (le support n'est jamais oublié) : déduit.
     expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, origin: "deduced" });
-    // Pente 45 % ≥ 30 % : recouvrement 10 cm → 120 × 1,5 ÷ 1,4 = 128,57 m² → 2 rouleaux de 75 m².
-    expect(need(r, "ecran")).toMatchObject({ quantity: { value: "128.57", unit: "m2" }, purchase: { order: { count: "2", unit: { many: "rouleaux" } } } });
+    // Pente 45 % > 30 % : surface + 10 % (fiche couverture, 2026-11-19) → 120 × 1,10 = 132 m² → 2 rouleaux de 75 m².
+    expect(need(r, "ecran")).toMatchObject({ quantity: { value: "132", unit: "m2" }, purchase: { order: { count: "2", unit: { many: "rouleaux" } } } });
 
     // « Voir le calcul » : chaque nombre a son origine.
     const trace = need(r, "tuiles").trace;
@@ -190,20 +191,20 @@ describe("moteur : ouvrage → besoins → achat", () => {
     expect(need(r, "tuiles").exclusions).toMatch(/Hors tuiles de rive/);
   });
 
-  it("écran : à 30 % de pente pile, recouvrement de 20 cm (« ≤ 30 % », cas limite)", () => {
+  it("écran : à 30 % de pente pile, surface + 20 % (lés recouverts de 20 cm, « ≤ 30 % », cas limite)", () => {
     const r = computeWorkItem(ref, { ...CASE, params: { ...CASE.params, pente: { value: "30", unit: "%", origin: "artisan" } } });
-    // 120 × 1,5 ÷ (1,5 − 0,20) = 138,46 m² → 2 rouleaux de 75 m².
-    expect(need(r, "ecran")).toMatchObject({ quantity: { value: "138.46" }, purchase: { order: { count: "2" } } });
+    // 120 × 1,20 = 144 m² (fiche couverture ; avant 120 × 1,5 ÷ 1,3 = 138,46) → 2 rouleaux de 75 m².
+    expect(need(r, "ecran")).toMatchObject({ quantity: { value: "144" }, purchase: { order: { count: "2" } } });
   });
 
   it("une donnée inconnue n'est demandée que si elle change la commande (calcul sur toutes ses valeurs possibles)", () => {
     const { pente: _p, ...sansPente } = CASE.params;
     // 120 m² : 2 rouleaux quelle que soit la pente → pas de question, fourchette du besoin dite.
     const r = computeWorkItem(ref, { ...CASE, params: sansPente });
-    expect(need(r, "ecran")).toMatchObject({ status: "calculated", quantityRange: { min: "128.57", max: "138.46" }, purchase: { order: { count: "2" } } });
+    expect(need(r, "ecran")).toMatchObject({ status: "calculated", quantityRange: { min: "132", max: "144" }, purchase: { order: { count: "2" } } });
     expect(need(r, "ecran").quantity).toBeUndefined();
-    // 70 m² : 75 m² (pente > 30 %) = 1 rouleau, mais 80,77 m² (≤ 30 %) = 2 rouleaux → la pente compte, on la demande.
-    const small = computeWorkItem(ref, { ...CASE, params: { ...sansPente, surface: { value: "70", unit: "m2", origin: "devis" } } });
+    // 65 m² : 71,5 m² (pente > 30 %) = 1 rouleau, mais 78 m² (≤ 30 %) = 2 rouleaux → la pente compte, on la demande.
+    const small = computeWorkItem(ref, { ...CASE, params: { ...sansPente, surface: { value: "65", unit: "m2", origin: "devis" } } });
     expect(need(small, "ecran")).toMatchObject({ status: "question", question: { key: "param:pente", impact: "De 1 à 2 rouleaux selon la réponse." } });
     // Sans aucune borne connue (entraxe), la commande peut tout valoir : question.
     const { entraxe_supports: _e, ...sansEntraxe } = CASE.params;

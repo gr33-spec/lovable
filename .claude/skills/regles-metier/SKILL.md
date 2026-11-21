@@ -17,8 +17,14 @@ le fondateur n'a pas tranché, **le référentiel reste en vigueur pour le
 code** : ne rien changer dans le moteur sur la base de ce skill sans son
 accord explicite. Les conflits :
 
-1. Étape « Suggestions » (cases à cocher) : le référentiel l'interdit (§49.1
-   point 5) et n'a qu'une question oui/non « Consommables de pose » (§49.1.4).
+1. TRANCHÉ le 19 novembre 2026 : les Suggestions du fondateur l'emportent sur
+   le §49.1 point 5. Un article non dit peut être proposé dans l'étape
+   « Suggestions » (cases décochées + « Continuer »), jamais ajouté d'office.
+   Branché le 20 novembre 2026 (roofing-2026.11.20-63) : sans limite de nombre ;
+   rives, bardelis, dauphins (la case vaut le « oui »), jonctions, clous
+   fibres-ciment, six kits Velux (BDX, BBX, BFX, volet, store, habillage), en
+   plus des naissances, talons, angles, crochets et consommables. Restent sans
+   article au tiroir : pointes, clous d'ardoise naturelle, cuvettes, solins.
 2. Articles d'office (contre-liteaux avec l'écran, closoir avec le faîtage à
    sec, crochets de gouttière, colliers, raccord Velux) : le référentiel ne
    sort que ce qui est écrit au devis, plus la naissance comme seul accessoire
@@ -29,7 +35,16 @@ accord explicite. Les conflits :
 4. Crochets d'ardoise : 1 par ardoise ici, contre ardoises × 1,02 dans le
    référentiel (§49.6).
 5. Pureau : + 2,5 mm ici, contre crochet − 1 cm de recouvrement (soit + 5 mm)
-   dans le code (Cupa §34).
+   dans le code (Cupa §34). Recherche du 19 novembre 2026 : la formule du
+   fondateur est confirmée (manuel CAP, guide du ministère de la Culture, Cupa) ;
+   le code est à corriger (`referentiels/couverture/recherche/ardoise.md`).
+
+6. Chatières (« le nombre, si ce n'est pas noté ») et visserie (« description
+   puis nombre ») : demander un nombre contredit « l'app ne demande jamais une
+   quantité » (`CLAUDE.md`). Signalé le 20 novembre 2026, pas branché. La
+   recherche donne le nombre de chatières par modèle (4 à 12 pour 100 m²).
+7. Plomb : 1,5 mm par défaut ici ; le fabricant conseille 2 mm pour une
+   cheminée (recherche du 20 novembre 2026). Signalé, règle gardée.
 
 ## Principes communs (tous métiers)
 

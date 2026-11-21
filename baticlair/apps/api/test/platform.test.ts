@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ConfigError, loadConfig } from "../src/platform/config/config.js";
+import { ConfigError, loadConfig, originesAcceptees } from "../src/platform/config/config.js";
 import { ResendEmailSender } from "../src/platform/email/resend-email.sender.js";
 import { toSupportId } from "../src/platform/logging/request-context.js";
 
@@ -26,6 +26,23 @@ describe("loadConfig", () => {
 
   it("refuse un e-mail simulé en production", () => {
     expect(() => loadConfig({ ...base, NODE_ENV: "production", EMAIL_PROVIDER: "console" })).toThrow(/EMAIL_PROVIDER/);
+    // Plusieurs origines web (une prévisualisation) : la première sert aux liens, toutes sont acceptées.
+    const multi = loadConfig({ ...base, WEB_APP_URL: "https://app.example, https://preview.example/" });
+    expect(multi.webAppUrl).toBe("https://app.example");
+    expect(multi.webAppOrigins).toEqual(["https://app.example", "https://preview.example"]);
+    // En prévisualisation Vercel, les adresses du web de prévisualisation (compte gr33-spec) sont acceptées d'office.
+    const preview = loadConfig({ ...base, VERCEL_ENV: "preview" });
+    expect(originesAcceptees(preview, "https://baticlair-git-claude-xyz-gr33-spec.vercel.app")).toBe(true);
+    expect(originesAcceptees(preview, "https://baticlair-git-claude-xyz-autre.vercel.app")).toBe(false);
+    expect(originesAcceptees(loadConfig(base), "https://baticlair-git-claude-xyz-gr33-spec.vercel.app")).toBe(false);
+    expect(originesAcceptees(preview, undefined)).toBeNull();
+    // Groupé : le repli « SIRET bien formé = vérifié » est réservé à la prévisualisation (décision du fondateur, 2026-10-20).
+    expect(() => loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "production" })).toThrow(/SIRET_VERIFICATION/);
+    expect(loadConfig({ ...base, SIRET_VERIFICATION: "forme", VERCEL_ENV: "preview" }).groupe.siretVerification).toBe("forme");
+    // L'abonnement (24 octobre 2026) : le paiement simulé est refusé en production ; Stripe demande ses trois clés.
+    expect(() => loadConfig({ ...base, VERCEL_ENV: "production" })).toThrow(/PAIEMENT : « simule »/);
+    expect(loadConfig({ ...base, VERCEL_ENV: "production", ABONNEMENT: "off" }).abonnement.actif).toBe(false);
+    expect(() => loadConfig({ ...base, PAIEMENT: "stripe", STRIPE_SECRET_KEY: "sk_test_x" })).toThrow(/STRIPE_WEBHOOK_SECRET/);
   });
 
   it("choisit le service d'e-mail selon l'environnement", () => {
@@ -78,6 +95,21 @@ describe("ResendEmailSender", () => {
     expect(calls[0]!.url).toBe("https://api.resend.com/emails");
     expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ from: "BatiClair <a@b.fr>", to: ["jean@example.fr"], subject: "Sujet", text: "Corps" });
     expect(logs).toHaveLength(0);
+  });
+
+  it("« Répondre » va à contact@ par défaut ; un e-mail qui a sa propre adresse de réponse la garde (Greg, 25 octobre 2026)", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fakeFetch = (async (_url: string, init: RequestInit) => {
+      bodies.push(JSON.parse(String(init.body)) as Record<string, unknown>);
+      return new Response("{}", { status: 200 });
+    }) as unknown as typeof fetch;
+    const sender = new ResendEmailSender("re_secret", "Mobiiz <contact@mobiiz.fr>", { error: () => undefined } as never, fakeFetch, "contact@mobiiz.fr");
+    await sender.send({ to: "jean@example.fr", subject: "S", text: "T" });
+    await sender.send({ to: "negoce@example.fr", subject: "Bon de commande", text: "T", replyTo: "artisan@example.fr" });
+    expect(bodies.map((b) => b.reply_to)).toEqual(["contact@mobiiz.fr", "artisan@example.fr"]);
+    const c = loadConfig({ ...base, EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_x", EMAIL_DOMAINE: "mobiiz.fr" });
+    expect(c.resend).toEqual({ apiKey: "re_x", from: "Mobiiz <contact@mobiiz.fr>", replyTo: "contact@mobiiz.fr" });
+    expect(loadConfig({ ...base, EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_x", EMAIL_DOMAINE: "mobiiz.fr", EMAIL_REPONDRE_A: "contact@mobiiz.fr" }).resend?.replyTo).toBe("contact@mobiiz.fr");
   });
 
   it("journalise un échec sans interrompre l'inscription", async () => {

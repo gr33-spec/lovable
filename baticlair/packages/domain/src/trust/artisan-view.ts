@@ -6,6 +6,7 @@ import type { QuotePlan } from "../referential/plan.js";
 import type { TakeoffValidation } from "../takeoff/validation.js";
 import { withoutLabour, writtenNumber } from "./marchandise.js";
 import { assessNeed, assessTakeoffLine, type Assessment, type TrustState } from "./assessment.js";
+import { NOM_APP } from "../groupe/marque.js";
 
 /**
  * CE QUE VOIT L'ARTISAN : des DÉCISIONS, pas des lignes en erreur.
@@ -227,10 +228,10 @@ function groupDecision(kind: "unknown" | "units", lines: ViewLine[], unitlessIds
     return {
       key: "group:unknown",
       state: "to_confirm",
-      title: one ?? "Articles que BatiClair ne connaît pas encore",
+      title: one ?? `Articles que ${NOM_APP} ne connaît pas encore`,
       text: one
-        ? `BatiClair ne connaît pas encore cet article. Le demander tel qu'écrit${pieces ? ", à la pièce" : ""} ?`
-        : `${n} articles que BatiClair ne connaît pas encore${unitless > 0 ? `, dont ${unitless} sans unité` : ""}. Les demander aux fournisseurs tels qu'écrits${pieces ? (unitless === n ? ", à la pièce" : ", à la pièce quand l'unité manque") : ""} ?`,
+        ? `${NOM_APP} ne connaît pas encore cet article. Le demander tel qu'écrit${pieces ? ", à la pièce" : ""} ?`
+        : `${n} articles que ${NOM_APP} ne connaît pas encore${unitless > 0 ? `, dont ${unitless} sans unité` : ""}. Les demander aux fournisseurs tels qu'écrits${pieces ? (unitless === n ? ", à la pièce" : ", à la pièce quand l'unité manque") : ""} ?`,
       lineIds: ids,
       ...(pieces ? { pieceLineIds } : {}),
       primary: pieces ? { action: "pieces", label: one ? "Oui, à la pièce" : "Oui, tels qu'écrits" } : { action: "keep", label: one ? "Oui, tel qu'écrit" : "Oui, tels qu'écrits" },
@@ -437,7 +438,7 @@ export function artisanView(
         v.basis === "work" && needs.length === 0 && !counted
           ? planned && planned.status === "not_covered"
             ? planned.reason
-            : "BatiClair ne sait pas encore calculer les matériaux de cet ouvrage."
+            : `${NOM_APP} ne sait pas encore calculer les matériaux de cet ouvrage.`
           : null;
       ouvrages.push({
         lineId: item.id,
@@ -584,7 +585,17 @@ export function computeWithAnswers(
         params[name] = { value: "0", unit: named.unit, origin: "artisan", text: answer.trim(), evidence: "Votre réponse" };
       }
     }
-    // §48.2 « zinc, pièce par pièce » : une réponse propre à cet ouvrage (« param:faconnage@noue ») passe devant celle du chantier.
+    // La réponse d'un groupe (« param:faconnage@pieces-pliees » : une seule réponse pour tout le devis) vaut pour chaque
+    // ouvrage du groupe ; ce que la ligne du devis écrit pour sa pièce reste (« façonnage et pose des bandes de rive »).
+    for (const [key, answer] of Object.entries(answers)) {
+      const scoped = scopedParam(key);
+      if (!scoped || !answer || typeof answer === "string") continue;
+      const def = work.params.find((p) => p.key === scoped.name);
+      if (!def?.groupe || def.groupe.id !== scoped.workItemId || params[scoped.name]?.origin === "devis") continue;
+      params[scoped.name] = { ...answer, origin: "artisan" };
+    }
+    // Une réponse propre à cet ouvrage (« param:faconnage@noue », « …@bandes-zinc__4 ») passe devant celle du chantier et
+    // devant celle du groupe : l'artisan a changé ce choix pour cette pièce.
     for (const [key, answer] of Object.entries(answers)) {
       const scoped = scopedParam(key);
       if (!scoped || scoped.workItemId !== input.workItemId || !answer) continue;
@@ -600,8 +611,8 @@ export function computeWithAnswers(
     for (const def of work.params) {
       // L'habitude du lot (« la noue, je la façonne ») passe devant celle de toute la zinguerie.
       // Une instance par ligne (« bandes-zinc__12 ») suit l'habitude de son ouvrage.
-      const habit = preferences.params?.[`${def.key}@${baseOf(input.workItemId)}`] ?? preferences.params?.[def.key];
-      if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined) continue;
+      const habit = preferences.params?.[`${def.key}@${baseOf(input.workItemId)}`] ?? (def.groupe ? preferences.params?.[`${def.key}@${def.groupe.id}`] : undefined) ?? preferences.params?.[def.key];
+      if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined || (def.groupe && answers[scopedKey(def.key, def.groupe.id)] !== undefined)) continue;
       params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
     }
     // §49.1 point 4 : la question consommables vaut pour tout le chantier ; l'habitude de l'artisan (« comme d'habitude ? »)
@@ -610,7 +621,8 @@ export function computeWithAnswers(
     const usualConsumables = preferences.params?.[CONSUMABLES_KEY];
     if (consumables && typeof consumables !== "string") params[CONSUMABLES_KEY] = { ...consumables, origin: "artisan" };
     else if (typeof consumables === "string" && consumables !== "") params[CONSUMABLES_KEY] = { value: consumables, unit: "u", origin: "artisan" };
-    else if (consumables === undefined && usualConsumables !== undefined) params[CONSUMABLES_KEY] = { value: usualConsumables, unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" };
+    // Avec l'étape « Suggestions » (Greg, 18 novembre 2026), les consommables se cochent : l'habitude ne les ajoute plus.
+    else if (consumables === undefined && usualConsumables !== undefined && !input.suggestions) params[CONSUMABLES_KEY] = { value: usualConsumables, unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" };
     return { ...input, products, params, preferences: prefs, ...(declinedSlots.length > 0 ? { declined: declinedSlots } : {}) };
   });
   // Les données demandées pièce par pièce : seulement quand plusieurs ouvrages du devis en dépendent (sinon une question).
@@ -624,10 +636,18 @@ export function computeWithAnswers(
     // §48.2 « zinc, pièce par pièce » : quand plusieurs ouvrages (noue, bandes, joint debout) demandent le façonnage,
     // la question se pose pour chacun, avec ses mots ; un seul ouvrage garde la question unique.
     // Une pièce écrite au devis (ouvrage « perLine ») a sa question à son nom, même seule de son ouvrage.
+    // UNE SEULE RÉPONSE POUR TOUT LE DEVIS (`groupe`, écrit dans la fiche du métier) : les ouvrages du groupe partagent la
+    // question du groupe et sa clé (« param:faconnage@pieces-pliees ») ; elle n'est posée qu'une fois.
+    for (const n of needs) {
+      const key = n.question?.key ?? "";
+      if (!key.startsWith("param:") || scopedParam(key)) continue;
+      const g = groupeDe(ref, n.workItemId, key.slice("param:".length));
+      if (g) n.question = { ...n.question!, key: scopedKey(key.slice("param:".length), g.id), text: g.question, ...(g.hint ? { hint: g.hint } : {}) };
+    }
     for (const n of needs) {
       const piece = ins.find((i) => i.workItemId === n.workItemId)?.label;
       if (!piece || !n.question || !PER_PIECE.has(n.question.key) || piecewise.includes(n.question.key)) continue;
-      n.question = { ...n.question, text: `${piece} : tu façonnes toi-même ou tu commandes façonné ?` };
+      n.question = { ...n.question, text: questionDePiece(piece, n.question.key, n.question.text) };
     }
     for (const key of piecewise) {
       for (const n of needs) {
@@ -635,7 +655,7 @@ export function computeWithAnswers(
         // Chaque lot dit son nom (deux lots peuvent partager la même phrase : bandes et abergement) ; une pièce écrite au
         // devis (instance par ligne) dit le sien, tel qu'écrit (« Bande de ventilation en Z en zinc quartz »).
         const lot = ins.find((i) => i.workItemId === n.workItemId)?.label ?? lotLabel(ref.workItems.find((w) => w.id === baseOf(n.workItemId))?.label ?? "");
-        n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId), text: lot ? `${lot} : tu façonnes toi-même ou tu commandes façonné ?` : n.question.text };
+        n.question = { ...n.question, key: scopedKey(key.slice("param:".length), n.workItemId), text: lot ? questionDePiece(lot, key, n.question.text) : n.question.text };
       }
     }
     // Une pièce écrite au devis (« bandes-zinc__12 ») a SES questions : à son nom, avec sa clé (sa réponse ne vaut que
@@ -755,7 +775,12 @@ export function computeWithAnswers(
 }
 
 /** Les données qui se demandent ouvrage par ouvrage (§48.2, « zinc, pièce par pièce ») : la clé porte l'ouvrage. */
-const PER_PIECE = new Set(["param:faconnage"]);
+// Le développé aussi (Greg, 20 novembre 2026, D-2026-024) : la rive et le faîtage ont chacun le leur, jamais une question
+// « Développé de la bande zinc ? » pour les deux.
+const PER_PIECE = new Set(["param:faconnage", "param:developpe"]);
+/** La question d'une pièce, à son nom : « Rive : tu façonnes toi-même… ? », « Faîtage : développé de la bande zinc ? ». */
+export const questionDePiece = (piece: string, key: string, text: string) =>
+  key === "param:faconnage" ? `${piece} : tu façonnes toi-même ou tu commandes façonné ?` : `${piece} : ${text.charAt(0).toLowerCase()}${text.slice(1)}`;
 /** Le nom d'un lot de zinguerie, tel que l'artisan le dit (« Noue zinc », « Bandes zinc (solin, rive, égout…) »). */
 export function lotLabel(label: string): string {
   // §48.6 : une question nomme UNE pièce ; la parenthèse de l'ouvrage (« (zinc + porte-solin) », « (solin, rive…) ») n'en dit pas d'autre.
@@ -764,6 +789,63 @@ export function lotLabel(label: string): string {
 /** Les données posées lot par lot quand plusieurs ouvrages du devis en dépendent (§48.2, retour de Greg). */
 export function piecewiseParams(ref: Referential, plan: QuotePlan): string[] {
   return [...PER_PIECE].filter((key) => new Set(plan.inputs.filter((i) => ref.workItems.find((w) => w.id === baseOf(i.workItemId))?.params.some((p) => `param:${p.key}` === key)).map((i) => i.workItemId)).size >= 2);
+}
+/** Le groupe d'une donnée pour un ouvrage (« une seule réponse pour tout le devis »), ou rien. */
+export function groupeDe(ref: Referential, workItemId: string, name: string): { id: string; question: string; hint?: string } | undefined {
+  return ref.workItems.find((w) => w.id === baseOf(workItemId))?.params.find((p) => p.key === name)?.groupe;
+}
+/** Le choix d'une pièce d'un groupe, tel que l'artisan le voit et le change au récapitulatif. */
+export interface ChoixDePiece {
+  /** La clé de la pièce (« param:faconnage@bandes-zinc__3 ») : y répondre change le choix pour elle seule. */
+  key: string;
+  /** Le nom de la pièce, tel que le devis l'écrit. */
+  piece: string;
+  value: string;
+  unit: string;
+  options: { label: string; value: string }[];
+}
+/**
+ * « Il peut modifier ce choix pour une pièce dans le récapitulatif » (Greg, 17 novembre 2026) : chaque pièce d'un groupe
+ * (« une seule réponse pour tout le devis ») avec le choix qui vaut pour elle : le sien s'il l'a changé, sinon celui du
+ * devis. Une pièce dont la ligne du devis écrit déjà la valeur n'y est pas : ce que le devis écrit ne se choisit pas.
+ */
+export function choixParPiece(ref: Referential, plan: QuotePlan, answers: Readonly<Record<string, EngineAnswer | null | undefined>>): ChoixDePiece[] {
+  return plan.inputs.flatMap((i) => {
+    const work = ref.workItems.find((w) => w.id === baseOf(i.workItemId));
+    return (work?.params ?? []).flatMap((def) => {
+      if (!def.groupe || !def.choices?.length || i.params[def.key]?.origin === "devis") return [];
+      // Le choix de la pièce, sinon celui du groupe, sinon une réponse donnée pour tout le chantier (« param:faconnage »).
+      const v = [answers[scopedKey(def.key, i.workItemId)], answers[scopedKey(def.key, def.groupe.id)], answers[`param:${def.key}`]].find((x) => x && typeof x !== "string");
+      if (!v || typeof v === "string") return [];
+      return [{ key: scopedKey(def.key, i.workItemId), piece: i.label ?? lotLabel(work!.label), value: v.value, unit: def.unit, options: def.choices.map((c) => ({ label: c.label, value: c.value })) }];
+    });
+  });
+}
+/** Une donnée à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même. */
+export interface DonneeDicible {
+  key: string;
+  text: string;
+  unit: string;
+  options: { label: string; value: string; dit?: string[] }[];
+}
+/**
+ * CE QUE L'ARTISAN PEUT DIRE SANS QU'ON LE LUI DEMANDE (Greg, 17 novembre 2026 : « "crochets sur chevrons" : je veux les 6
+ * comprises »). Les données à boutons des ouvrages du devis qui n'ont ni question posée, ni réponse, ni valeur écrite au
+ * devis. Elles ne sont JAMAIS posées : si l'artisan en nomme un bouton dans sa réponse, elle est notée et confirmée.
+ * `prises` : les clés des questions posées et des habitudes, qui ont déjà leur place dans la discussion.
+ */
+export function donneesDicibles(ref: Referential, plan: QuotePlan, answers: Readonly<Record<string, EngineAnswer | null | undefined>>, prises: readonly string[]): DonneeDicible[] {
+  const nomDe = (key: string) => /^(?:engine:)?param:([a-z0-9_]+)/.exec(key)?.[1];
+  const occupees = new Set([...prises, ...Object.keys(answers)].map(nomDe).filter(Boolean));
+  const vues = new Map<string, DonneeDicible>();
+  for (const i of plan.inputs) {
+    const work = ref.workItems.find((w) => w.id === baseOf(i.workItemId));
+    for (const def of work?.params ?? []) {
+      if ((def.choices?.length ?? 0) < 2 || !def.question || def.named || occupees.has(def.key) || i.params[def.key] || vues.has(def.key)) continue;
+      vues.set(def.key, { key: `param:${def.key}`, text: def.question, unit: def.unit, options: def.choices!.map((c) => ({ label: c.label, value: c.value, ...(c.dit ? { dit: c.dit } : {}) })) });
+    }
+  }
+  return [...vues.values()];
 }
 /** « param:faconnage@noue » : la donnée « faconnage » de l'ouvrage « noue » seulement. */
 export const scopedKey = (name: string, workItemId: string) => `param:${name}@${workItemId}`;
@@ -780,7 +862,7 @@ function withAnswer(ref: Referential, inputs: WorkItemInput[], q: Question, valu
   if (scoped) {
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === scoped.name);
     if (!def) return null;
-    return inputs.map((i) => (i.workItemId === scoped.workItemId ? { ...i, params: { ...i.params, [scoped.name]: { value, unit: def.unit, origin: "artisan" as const, evidence: "Réponse possible" } } } : i));
+    return inputs.map((i) => (i.workItemId === scoped.workItemId || groupeDe(ref, i.workItemId, scoped.name)?.id === scoped.workItemId ? { ...i, params: { ...i.params, [scoped.name]: { value, unit: def.unit, origin: "artisan" as const, evidence: "Réponse possible" } } } : i));
   }
   const [kind, name] = q.key.split(":") as [string, string];
   if (kind === "product") {

@@ -177,11 +177,12 @@ describe("demandes de prix", () => {
     const created = await agent.post(`/v1/projects/${projectId}/price-requests`).send({
       supplierIds: [p.body.id, t.body.id],
       message: "Livraison sur chantier possible ?",
-      dueDate: "2026-10-15",
+      dueDate: "2099-10-15",
     });
     expect(created.status).toBe(201);
-    // Les six lignes du devis, plus les naissances que la gouttière à 2 descentes appelle (§49.1, point 3).
-    expect(created.body.lines).toHaveLength(7);
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026, étape « Suggestions ») : les six lignes du devis, et rien d'autre. Les
+    // naissances de la gouttière ne sont plus ajoutées d'office : elles se cochent dans les suggestions. Avant : 7 lignes.
+    expect(created.body.lines).toHaveLength(6);
     expect(created.body.recipients).toHaveLength(2);
     const first = created.body.recipients[0];
     expect(first).toMatchObject({
@@ -189,12 +190,17 @@ describe("demandes de prix", () => {
       supplier: { name: "Point.P", email: "contact@pointp.fr" },
     });
     // §45.2 : une demande de devis, un mail court ; la liste est dans le PDF joint.
-    expect(first.email.subject).toBe("Demande de devis · Toitures Martin · chantier Toiture Dupont (Vannes)");
-    expect(first.email.body).toMatch(/^Bonjour,\n\nJe vous envoie la liste des fournitures pour /);
+    // Lot final, point 3 : « Entreprise : demande de prix [famille], [commune] ».
+    expect(first.email.subject).toBe("Toitures Martin : demande de prix couverture, Vannes");
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Bonjour, » sans prénom, e-mail court. Le message de l'artisan remplace la
+    // phrase d'ouverture ; la pièce jointe et la date souhaitée restent dites.
+    expect(first.email.body).toMatch(/^Bonjour,\nLivraison sur chantier possible \?\nLa liste est en pièce jointe \(\d+ articles?\)\.\nSi possible, réponse souhaitée avant le 15 octobre\./);
+    // Greg, 12 novembre 2026 : jamais de pression, le nombre de négoces consultés n'est pas dit.
+    expect(first.email.body).not.toMatch(/plusieurs (fournisseurs|négoces)/i);
     // §51.5 : la ligne part sous la désignation lue par le modèle, sans la référence d'article du devis.
-    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² : 1 250 u");
+    // (L'unité est celle de la liste de l'app, « pièces », la même dans le document : Greg, 17 novembre 2026.)
+    expect(created.body.packet.articles).toContain("Tuile romane canal rouge 12,5 u/m² : 1 250 pièces");
     expect(first.email.body).toContain("Livraison sur chantier possible ?");
-    expect(first.email.body).toContain("Pouvez-vous me chiffrer l'ensemble avant le 15 octobre ?");
 
     const sent = await agent.patch(`/v1/price-request-recipients/${first.id}`).send({ status: "sent" });
     expect(sent.body.recipients[0]).toMatchObject({ status: "sent" });

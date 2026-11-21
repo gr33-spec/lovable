@@ -55,9 +55,10 @@ describe("chantier Test : les corrections du §45.5", () => {
   it("bande de 13 ml façonnée sur place : des feuilles 2 × 1 m estimées d'après le développé (§48.6), jamais un bobineau", () => {
     const v = readQuote(TEST, REPONSES);
     expect(line(v, "Feuilles")).toMatchObject({
-      label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour bande zinc d'égout",
+      // Règle changée (Greg, 17 novembre 2026) : le nom ne dit plus l'usage ; il est dans le détail de la ligne.
+      label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm",
       quantity: "3 pièces",
-      precision: "pour 13 ml de bande : estimation d'après un développé de 33 cm, ajuste selon ton façonnage",
+      precision: "pour 13 ml de bande, développé 33 cm",
     });
     expect(line(v, "Bobineau")).toBeUndefined();
   });

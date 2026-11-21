@@ -1,0 +1,52 @@
+﻿Métier;Famille;Produit;Format / dimension / qualité;Désignation envoyée au négoce;Unité;Mots du chantier (recherche);Clé
+Menuiserie;Bois de menuiserie;Planche sapin rabotée;27×200 · 2,50 m;Planche sapin rabotée 27×200 · 2,50 m;pièces;planche, sapin, raboté;menuiserie/bois-de-menuiserie/planche-sapin-rabotee/27x200-2-50-m
+Menuiserie;Bois de menuiserie;Planche sapin rabotée;27×200 · 4 m;Planche sapin rabotée 27×200 · 4 m;pièces;planche, sapin, raboté;menuiserie/bois-de-menuiserie/planche-sapin-rabotee/27x200-4-m
+Menuiserie;Bois de menuiserie;Planche sapin rabotée;22×150 · 2,50 m;Planche sapin rabotée 22×150 · 2,50 m;pièces;planche, sapin, raboté;menuiserie/bois-de-menuiserie/planche-sapin-rabotee/22x150-2-50-m
+Menuiserie;Bois de menuiserie;Planche sapin rabotée;22×150 · 4 m;Planche sapin rabotée 22×150 · 4 m;pièces;planche, sapin, raboté;menuiserie/bois-de-menuiserie/planche-sapin-rabotee/22x150-4-m
+Menuiserie;Bois de menuiserie;Planche sapin rabotée;18×120 · 2,50 m;Planche sapin rabotée 18×120 · 2,50 m;pièces;planche, sapin, raboté;menuiserie/bois-de-menuiserie/planche-sapin-rabotee/18x120-2-50-m
+Menuiserie;Bois de menuiserie;Planche sapin rabotée;18×120 · 4 m;Planche sapin rabotée 18×120 · 4 m;pièces;planche, sapin, raboté;menuiserie/bois-de-menuiserie/planche-sapin-rabotee/18x120-4-m
+Menuiserie;Bois de menuiserie;Tasseau raboté;27×27 · 2,40 m;Tasseau raboté 27×27 · 2,40 m;pièces;tasseau, liteau rabote;menuiserie/bois-de-menuiserie/tasseau-rabote/27x27-2-40-m
+Menuiserie;Bois de menuiserie;Tasseau raboté;27×40 · 2,40 m;Tasseau raboté 27×40 · 2,40 m;pièces;tasseau, liteau rabote;menuiserie/bois-de-menuiserie/tasseau-rabote/27x40-2-40-m
+Menuiserie;Bois de menuiserie;Tasseau raboté;40×40 · 2,40 m;Tasseau raboté 40×40 · 2,40 m;pièces;tasseau, liteau rabote;menuiserie/bois-de-menuiserie/tasseau-rabote/40x40-2-40-m
+Menuiserie;Bois de menuiserie;Lame de bardage;douglas 21×145;Lame de bardage douglas 21×145;m²;bardage, clin, lame;menuiserie/bois-de-menuiserie/lame-de-bardage/douglas-21x145
+Menuiserie;Bois de menuiserie;Lame de bardage;mélèze 21×130;Lame de bardage mélèze 21×130;m²;bardage, clin, lame;menuiserie/bois-de-menuiserie/lame-de-bardage/meleze-21x130
+Menuiserie;Bois de menuiserie;Lame de bardage;pin traité 21×145;Lame de bardage pin traité 21×145;m²;bardage, clin, lame;menuiserie/bois-de-menuiserie/lame-de-bardage/pin-traite-21x145
+Menuiserie;Bois de menuiserie;Lame de terrasse;pin traité classe 4 27×145;Lame de terrasse pin traité classe 4 27×145;m²;terrasse, platelage, deck;menuiserie/bois-de-menuiserie/lame-de-terrasse/pin-traite-classe-4-27x145
+Menuiserie;Bois de menuiserie;Lame de terrasse;bois exotique 21×145;Lame de terrasse bois exotique 21×145;m²;terrasse, platelage, deck;menuiserie/bois-de-menuiserie/lame-de-terrasse/bois-exotique-21x145
+Menuiserie;Bois de menuiserie;Lame de terrasse;composite 22×140;Lame de terrasse composite 22×140;m²;terrasse, platelage, deck;menuiserie/bois-de-menuiserie/lame-de-terrasse/composite-22x140
+Menuiserie;Panneaux;Panneau MDF;10 mm · 2800×2070;Panneau MDF 10 mm · 2800×2070;pièces;mdf, medium;menuiserie/panneaux/panneau-mdf/10-mm-2800x2070
+Menuiserie;Panneaux;Panneau MDF;16 mm · 2800×2070;Panneau MDF 16 mm · 2800×2070;pièces;mdf, medium;menuiserie/panneaux/panneau-mdf/16-mm-2800x2070
+Menuiserie;Panneaux;Panneau MDF;19 mm · 2800×2070;Panneau MDF 19 mm · 2800×2070;pièces;mdf, medium;menuiserie/panneaux/panneau-mdf/19-mm-2800x2070
+Menuiserie;Panneaux;Panneau mélaminé blanc;16 mm · 2800×2070;Panneau mélaminé blanc 16 mm · 2800×2070;pièces;melamine, agglo blanc;menuiserie/panneaux/panneau-melamine-blanc/16-mm-2800x2070
+Menuiserie;Panneaux;Panneau mélaminé blanc;19 mm · 2800×2070;Panneau mélaminé blanc 19 mm · 2800×2070;pièces;melamine, agglo blanc;menuiserie/panneaux/panneau-melamine-blanc/19-mm-2800x2070
+Menuiserie;Panneaux;Contreplaqué peuplier;5 mm · 2500×1220;Contreplaqué peuplier 5 mm · 2500×1220;pièces;contreplaque, cp peuplier;menuiserie/panneaux/contreplaque-peuplier/5-mm-2500x1220
+Menuiserie;Panneaux;Contreplaqué peuplier;10 mm · 2500×1220;Contreplaqué peuplier 10 mm · 2500×1220;pièces;contreplaque, cp peuplier;menuiserie/panneaux/contreplaque-peuplier/10-mm-2500x1220
+Menuiserie;Panneaux;Contreplaqué peuplier;15 mm · 2500×1220;Contreplaqué peuplier 15 mm · 2500×1220;pièces;contreplaque, cp peuplier;menuiserie/panneaux/contreplaque-peuplier/15-mm-2500x1220
+Menuiserie;Portes;Bloc-porte intérieur âme alvéolaire;73×204 · poussant gauche;Bloc-porte intérieur âme alvéolaire 73×204 · poussant gauche;pièces;bloc porte, porte interieure, huisserie;menuiserie/portes/bloc-porte-interieur-ame-alveolaire/73x204-poussant-gauche
+Menuiserie;Portes;Bloc-porte intérieur âme alvéolaire;73×204 · poussant droit;Bloc-porte intérieur âme alvéolaire 73×204 · poussant droit;pièces;bloc porte, porte interieure, huisserie;menuiserie/portes/bloc-porte-interieur-ame-alveolaire/73x204-poussant-droit
+Menuiserie;Portes;Bloc-porte intérieur âme alvéolaire;83×204 · poussant gauche;Bloc-porte intérieur âme alvéolaire 83×204 · poussant gauche;pièces;bloc porte, porte interieure, huisserie;menuiserie/portes/bloc-porte-interieur-ame-alveolaire/83x204-poussant-gauche
+Menuiserie;Portes;Bloc-porte intérieur âme alvéolaire;83×204 · poussant droit;Bloc-porte intérieur âme alvéolaire 83×204 · poussant droit;pièces;bloc porte, porte interieure, huisserie;menuiserie/portes/bloc-porte-interieur-ame-alveolaire/83x204-poussant-droit
+Menuiserie;Portes;Bloc-porte intérieur âme alvéolaire;93×204 · poussant gauche;Bloc-porte intérieur âme alvéolaire 93×204 · poussant gauche;pièces;bloc porte, porte interieure, huisserie;menuiserie/portes/bloc-porte-interieur-ame-alveolaire/93x204-poussant-gauche
+Menuiserie;Portes;Bloc-porte intérieur âme alvéolaire;93×204 · poussant droit;Bloc-porte intérieur âme alvéolaire 93×204 · poussant droit;pièces;bloc porte, porte interieure, huisserie;menuiserie/portes/bloc-porte-interieur-ame-alveolaire/93x204-poussant-droit
+Menuiserie;Portes;Porte d'entrée;90×215 pleine;Porte d'entrée 90×215 pleine;pièces;porte entree;menuiserie/portes/porte-d-entree/90x215-pleine
+Menuiserie;Portes;Porte d'entrée;90×215 vitrée;Porte d'entrée 90×215 vitrée;pièces;porte entree;menuiserie/portes/porte-d-entree/90x215-vitree
+Menuiserie;Fenêtres;Fenêtre PVC 2 vantaux;95×115;Fenêtre PVC 2 vantaux 95×115;pièces;fenetre, menuiserie pvc;menuiserie/fenetres/fenetre-pvc-2-vantaux/95x115
+Menuiserie;Fenêtres;Fenêtre PVC 2 vantaux;115×125;Fenêtre PVC 2 vantaux 115×125;pièces;fenetre, menuiserie pvc;menuiserie/fenetres/fenetre-pvc-2-vantaux/115x125
+Menuiserie;Fenêtres;Fenêtre PVC 2 vantaux;125×135;Fenêtre PVC 2 vantaux 125×135;pièces;fenetre, menuiserie pvc;menuiserie/fenetres/fenetre-pvc-2-vantaux/125x135
+Menuiserie;Fenêtres;Fenêtre aluminium 2 vantaux;95×115;Fenêtre aluminium 2 vantaux 95×115;pièces;fenetre alu;menuiserie/fenetres/fenetre-aluminium-2-vantaux/95x115
+Menuiserie;Fenêtres;Fenêtre aluminium 2 vantaux;115×125;Fenêtre aluminium 2 vantaux 115×125;pièces;fenetre alu;menuiserie/fenetres/fenetre-aluminium-2-vantaux/115x125
+Menuiserie;Fenêtres;Porte-fenêtre PVC 2 vantaux;125×215;Porte-fenêtre PVC 2 vantaux 125×215;pièces;porte fenetre;menuiserie/fenetres/porte-fenetre-pvc-2-vantaux/125x215
+Menuiserie;Fenêtres;Porte-fenêtre PVC 2 vantaux;145×215;Porte-fenêtre PVC 2 vantaux 145×215;pièces;porte fenetre;menuiserie/fenetres/porte-fenetre-pvc-2-vantaux/145x215
+Menuiserie;Quincaillerie;Paumelle;110 mm;Paumelle 110 mm;pièces;charniere, gond;menuiserie/quincaillerie/paumelle/110-mm
+Menuiserie;Quincaillerie;Paumelle;140 mm;Paumelle 140 mm;pièces;charniere, gond;menuiserie/quincaillerie/paumelle/140-mm
+Menuiserie;Quincaillerie;Serrure à larder;bec de cane;Serrure à larder bec de cane;pièces;serrure;menuiserie/quincaillerie/serrure-a-larder/bec-de-cane
+Menuiserie;Quincaillerie;Serrure à larder;clé I;Serrure à larder clé I;pièces;serrure;menuiserie/quincaillerie/serrure-a-larder/cle-i
+Menuiserie;Quincaillerie;Serrure à larder;condamnation;Serrure à larder condamnation;pièces;serrure;menuiserie/quincaillerie/serrure-a-larder/condamnation
+Menuiserie;Quincaillerie;Ensemble de poignées sur rosace;inox;Ensemble de poignées sur rosace inox;pièces;poignee, béquille;menuiserie/quincaillerie/ensemble-de-poignees-sur-rosace/inox
+Menuiserie;Quincaillerie;Ensemble de poignées sur rosace;noir;Ensemble de poignées sur rosace noir;pièces;poignee, béquille;menuiserie/quincaillerie/ensemble-de-poignees-sur-rosace/noir
+Menuiserie;Fixations;Vis bois agglo;4 × 30;Vis bois agglo 4 × 30;boîtes de 200;vis, vis agglo;menuiserie/fixations/vis-bois-agglo/4x30
+Menuiserie;Fixations;Vis bois agglo;4 × 40;Vis bois agglo 4 × 40;boîtes de 200;vis, vis agglo;menuiserie/fixations/vis-bois-agglo/4x40
+Menuiserie;Fixations;Vis bois agglo;5 × 50;Vis bois agglo 5 × 50;boîtes de 200;vis, vis agglo;menuiserie/fixations/vis-bois-agglo/5x50
+Menuiserie;Fixations;Vis bois agglo;5 × 70;Vis bois agglo 5 × 70;boîtes de 200;vis, vis agglo;menuiserie/fixations/vis-bois-agglo/5x70
+Menuiserie;Fixations;Mousse expansive;750 ml;Mousse expansive 750 ml;aérosols;mousse, mousse pu;menuiserie/fixations/mousse-expansive/750-ml
+Menuiserie;Fixations;Mastic acrylique;310 ml blanc;Mastic acrylique 310 ml blanc;cartouches;mastic, acrylique, joint;menuiserie/fixations/mastic-acrylique/310-ml-blanc

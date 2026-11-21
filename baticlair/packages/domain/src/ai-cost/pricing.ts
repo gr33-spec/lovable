@@ -68,6 +68,22 @@ export const PRICE_TABLES: readonly PriceTable[] = [
       },
     },
   },
+  {
+    // 16 novembre 2026 : Claude Haiku 5.5 entre dans la grille (lecture des réponses brèves, rattachement), et la lecture
+    // de cache de Sonnet 5.5 passe à 0,10 $. Écritures et lectures de cache de Haiku 5.5 : multiplicateurs habituels du
+    // fournisseur (1,25 × et 2 × l'entrée à l'écriture, 0,1 × à la lecture). La grille d'avant n'est pas modifiée.
+    version: "anthropic-2026-11-16",
+    effectiveFrom: "2026-11-16",
+    currency: "USD",
+    source: "https://platform.claude.com/docs/en/about-claude/pricing",
+    batchMultiplier: "0.5",
+    models: {
+      "claude-haiku-5-5": { inputPerMTok: "0.10", outputPerMTok: "0.50", cacheWrite5mPerMTok: "0.125", cacheWrite1hPerMTok: "0.20", cacheReadPerMTok: "0.01" },
+      "claude-haiku-4-5": { inputPerMTok: "1", outputPerMTok: "5", cacheWrite5mPerMTok: "1.25", cacheWrite1hPerMTok: "2", cacheReadPerMTok: "0.10" },
+      "claude-sonnet-5-5": { inputPerMTok: "2", outputPerMTok: "10", cacheWrite5mPerMTok: "2.50", cacheWrite1hPerMTok: "4", cacheReadPerMTok: "0.10" },
+      "claude-opus-5-5": { inputPerMTok: "4", outputPerMTok: "20", cacheWrite5mPerMTok: "5", cacheWrite1hPerMTok: "8", cacheReadPerMTok: "0.20" },
+    },
+  },
 ];
 
 export class UnknownModelPriceError extends Error {

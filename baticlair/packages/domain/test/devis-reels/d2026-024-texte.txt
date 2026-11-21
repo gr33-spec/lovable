@@ -1,0 +1,37 @@
+[1:010] Description  Qté  Prix unitaire  TVA  Total HT
+[1:011] Fourniture et pose couverture zinc à tasseaux  32 m²  135,00 €  20 %  4 320,00 €
+[1:012] Fourniture et pose de la couverture en zinc prépatiné
+[1:013] anthracite sur tasseaux bois et couvre-joints, bacs de 4 m
+[1:014] Fourniture et pose chéneau zinc anthracite  8 m  87,00 €  20 %  696,00 €
+[1:015] Fourniture, façonnage, soudures et pose d'un chéneau
+[1:016] encaissé en zinc anthracite contre mur mitoyen
+[1:017] Fourniture et pose habillages de rive  8 m  51,00 €  20 %  408,00 €
+[1:018] Fourniture et pose des bandes de rive en zinc anthracite
+[1:019] pour les 2 côtés (2 x 4 m)
+[1:020] Fourniture et pose faîtage zinc anthracite  8 m  58,00 €  20 %  464,00 €
+[1:021] Fourniture et fixation de la bande de faîtage ventilée en
+[1:022] zinc anthracite sur toute la longueur
+[1:023] Fourniture et pose bandes porte-solin cheminées  2 unités  195,00 €  20 %  390,00 €
+[1:024] Fourniture et pose de bandes porte-solin avec bavette et
+[1:025] joint mastic d'étanchéité pour entourage de [adresse retirée]
+[1:026] Fourniture et pose descente d'eaux pluviales Ø80  1 unité  165,00 €  20 %  165,00 €
+[1:027] Fourniture et pose de la descente d'eaux pluviales Ø80
+[1:028] zinc anthracite avec bagues, colliers et raccordement au
+[1:029] chéneau
+[1:030] Fourniture et pose sortie de toiture Ø125  1 unité  155,00 €  20 %  155,00 €
+[1:031] Fourniture et intégration étanche d'une sortie de toit zinc
+[1:032] anthracite Ø125 avec chapeau pour VMC
+[1:033] Fourniture et pose sortie de toiture Ø100  1 unité  145,00 €  20 %  145,00 €
+[1:034] Fourniture et intégration étanche d'une sortie de toit zinc
+[1:035] anthracite Ø100 avec chapeau pour chute/évent
+[1:036] Dépose ancienne couverture  32 m²  18,00 €  20 %  576,00 €
+[1:037] Dépose de l'ancienne couverture de toiture et mise en
+[1:038] décharge / évacuation des gravats
+[2:001] Description  Qté  Prix unitaire  TVA  Total HT
+[2:002] Installation et location échafaudage  1 unité  450,00 €  20 %  450,00 €
+[2:003] Transport, montage, location et repli d'échafaudage de
+[2:004] sécurité sur une hauteur de 3 m environ
+[2:005] Total HT  7 769,00 €
+[2:006] Montant total de TVA  1 553,80 €
+[2:007] Total TTC  9 322,80 €
+[2:008] Date et signature précédées de la mention « Bon pour accord »

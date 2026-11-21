@@ -1,4 +1,4 @@
-import { normalizeTrades } from "@baticlair/domain";
+import { departement as departementConnu, normalizeTrades, PARCOURS_ESSAI, portableLisible, portableValide } from "@baticlair/domain";
 import { DomainError } from "../../../platform/errors/domain-error.js";
 import { isUuid } from "../../../platform/validation/ids.js";
 import { normalizeCompanyName } from "../domain/company-name.js";
@@ -15,9 +15,51 @@ const blank = (v: string | null | undefined, max: number) => {
 export class TenancyService {
   constructor(private readonly companies: CompanyRepository) {}
 
+  /** R7 : ce qui suit la création d'une entreprise (son adresse Mobiiz) ; branché par le module de l'adresse. */
+  private apresCreation: (companyId: string) => Promise<void> = async () => {};
+  brancherApresCreation(f: (companyId: string) => Promise<void>): void {
+    this.apresCreation = f;
+  }
+
+  /** Lot 6 (Greg, 7 novembre 2026) : une entreprise demandée dont l'utilisateur n'est pas membre (branché par le module). */
+  private accesCroise: (userId: string, companyId: string) => Promise<void> = async () => {};
+  brancherAccesCroise(f: (userId: string, companyId: string) => Promise<void>): void {
+    this.accesCroise = f;
+  }
+
   /** Onboarding : crée l'entreprise et en fait l'utilisateur propriétaire. */
-  createCompany(userId: string, rawName: string, trades: readonly string[] = []): Promise<CompanyMembershipView> {
-    return this.companies.createWithOwner(normalizeCompanyName(rawName), userId, normalizeTrades(trades));
+  /**
+   * PAGES RÉGIONALES (Greg, 19 novembre 2026) : le département choisi à l'inscription (depuis la carte d'une page régionale
+   * ou la liste de l'écran) est gardé s'il est connu ; un code inconnu est ignoré, jamais un refus.
+   */
+  async createCompany(
+    userId: string,
+    rawName: string,
+    trades: readonly string[] = [],
+    departement?: string | null,
+    essai: { telephone: string | null; parcours: string | null } = { telephone: null, parcours: null },
+  ): Promise<CompanyMembershipView> {
+    const dep = departement ? (departementConnu(departement)?.code ?? null) : null;
+    // Le nouvel onboarding : le portable est exigé (06 ou 07), il sert ensuite de numéro de l'entreprise.
+    if (essai.parcours === PARCOURS_ESSAI && !portableValide(essai.telephone)) throw new DomainError("validation_failed", "Mobile phone expected", { reason: "portable_invalide" });
+    // Nouvel onboarding (Greg, 19 novembre 2026) : AUCUN nom d'entreprise tant que le SIRET n'est pas validé ; c'est
+    // l'annuaire qui le donne à la confirmation. L'adresse Mobiiz attend aussi ce nom (créée au premier envoi).
+    const essaiOuvert = essai.parcours === PARCOURS_ESSAI;
+    const vue = await this.companies.createWithOwner(essaiOuvert ? "" : normalizeCompanyName(rawName), userId, normalizeTrades(trades), dep, {
+      phone: essai.telephone && portableValide(essai.telephone) ? portableLisible(essai.telephone) : null,
+      parcoursInscription: essai.parcours === PARCOURS_ESSAI ? PARCOURS_ESSAI : null,
+    });
+    if (!essaiOuvert) await this.apresCreation(vue.companyId).catch(() => undefined);
+    return vue;
+  }
+
+  /** Le département choisi par l'artisan (carte ou SIRET) ; un code inconnu est refusé. */
+  async setDepartement(tenant: TenantContext, code: string): Promise<string> {
+    assertCanWrite(tenant);
+    const dep = departementConnu(code);
+    if (!dep) throw new DomainError("validation_failed", "Unknown department", { reason: "departement_inconnu" });
+    await this.companies.setDepartement(tenant.companyId, dep.code);
+    return dep.code;
   }
 
   /** L'artisan change ses métiers (Mon compte) : s'applique aux prochains devis lus. */
@@ -87,7 +129,11 @@ export class TenancyService {
       const membership = isUuid(requestedCompanyId)
         ? await this.companies.findMembership(userId, requestedCompanyId)
         : null;
-      if (!membership) throw new DomainError("not_found", "Company not found");
+      if (!membership) {
+        // L'accès reste refusé (404, jamais un indice) ; une alerte de sécurité minimale est créée si l'entreprise existe.
+        if (isUuid(requestedCompanyId)) await this.accesCroise(userId, requestedCompanyId).catch(() => undefined);
+        throw new DomainError("not_found", "Company not found");
+      }
       return { companyId: membership.companyId, userId, role: membership.role, trades: normalizeTrades(membership.trades) };
     }
 

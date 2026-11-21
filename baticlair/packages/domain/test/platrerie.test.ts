@@ -28,8 +28,9 @@ describe("référentiel plâtrerie : cohérent et chargé comme la couverture", 
     const bought = Object.fromEntries(purchase.toBuy.map((b) => [b.needIds[0], b.quantity]));
     expect(bought).toEqual({ plaques: "15 plaques" });
     expect(purchase.toBuy.some((b) => b.label.startsWith("Cloison"))).toBe(false);
-    // §49.4 : la seule question, celle des consommables (rails et montants : pas écrits comme articles, chiffres d'usage).
-    expect(purchase.questions.map((q) => q.question?.key)).toEqual(["param:consommables"]);
+    // RÈGLE CHANGÉE (Greg, 18 novembre 2026) : plus de question oui / non sur les consommables ; ils se cochent à l'étape
+    // « Suggestions ». Avant : la seule question, celle des consommables. Une réponse « oui » déjà donnée vaut toujours.
+    expect(purchase.questions.map((q) => q.question?.key)).toEqual([]);
     const oui = read(false, PLATRERIE_REFERENTIAL, { "param:consommables": { value: "1", unit: "u" } }).purchase;
     const avec = Object.fromEntries(oui.toBuy.map((b) => [b.needIds[0], b.quantity]));
     expect(avec).toEqual({ plaques: "15 plaques", vis: "600 vis", bande: "80 ml", enduit: "16 kg" });

@@ -43,7 +43,11 @@ export function forbiddenFlags(purchase: PurchaseView): OrangeFlag[] {
       flag("m2", b.key, b.label, "Interdit : vendu à la pièce, au ml ou en bobine, jamais au m². Le comptoir ne peut pas le charger tel quel.");
     }
     if (has(b.label, VAGUE_LABEL) || VAGUE_UNIT.test(unit)) flag("vague", b.key, b.label, "Interdit : « lot », « forfait », « ensemble » : le comptoir ne sait pas quoi charger.");
-    if (ML.test(unit) && has(b.label, METAL) && !has(b.label, DIMENSION)) flag("metal-ml", b.key, b.label, "Interdit : métal au mètre sans largeur, développé ni épaisseur.");
+    // Retour de Greg du 18 novembre 2026 (D-2026-024) : une bande de zinc qui ATTEND encore sa réponse (le pliage, le
+    // développé) n'est pas « interdite » : ce qui lui manque est déjà demandé, une seule fois, par sa question. Avant : la
+    // ligne sortait en plus comme une question « Interdit : métal au mètre… » avec un bouton « C'est bon ».
+    const enAttente = (b.waitsOn?.length ?? 0) > 0 || b.key.startsWith("manque:");
+    if (!enAttente && ML.test(unit) && has(b.label, METAL) && !has(b.label, DIMENSION)) flag("metal-ml", b.key, b.label, "Interdit : métal au mètre sans largeur, développé ni épaisseur.");
   }
   return flags;
 }

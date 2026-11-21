@@ -1,20 +1,32 @@
 "use client";
 
+import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
 import { FileUp, Loader2, Mail, MoreHorizontal, Plus, Send, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AssistantMessage, Say } from "@/components/chat";
 import { DemoAnswer, isDemoSupplier } from "@/components/demo";
 import { NotificationsPrompt } from "@/components/notifications-prompt";
-import { CompareQuotes, OfferLines, offerFacts, ProjectComparison } from "@/components/project-offers";
+import { ContenuAdresseMobiiz, RappelAdresseMobiiz } from "@/components/adresse-mobiiz";
+import { OfferLines, ProjectComparison } from "@/components/project-offers";
 import { SupplierForm } from "@/components/supplier-form";
-import { Badge, Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { Badge, Button, Card, ErrorNotice, Spinner, INPUT } from "@/components/ui";
 import { attachFile } from "@/lib/upload";
 import { fetchWhole } from "@/components/file-viewer";
-import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
+import { api, ApiError, getActiveCompanyId, MAX_DOCUMENT_BYTES, newActionKey, type EmailRecu, type Offer, type PriceRequest, type PriceRequestRecipient, type PriceRequestSettings, type Supplier } from "@/lib/api";
 import { openDocument, openFile } from "@/lib/open-document";
 import { isPhoto, MAX_QUOTE_PHOTOS, preparePhotos } from "@/lib/photos";
 import { useProgressRefresh } from "@/components/project-progress";
+import { useSession } from "@/lib/session";
 import { useResource } from "@/lib/use-resource";
+import { useBrouillon } from "@/lib/brouillon";
+import { useAncienMode } from "@/components/negocie";
+import { useActionChantier } from "@/lib/actions-chantier";
+import { EtapeApercu, EtapeIdentite, FORMULAIRE_IDENTITE, useIdentite } from "@/components/envoi-negoces";
+import { NEGOCES_PAR_DEMANDE } from "../../../../packages/domain/src/groupe/offre-artisan";
+import { TON, phraseRelanceArtisan } from "../../../../packages/domain/src/groupe/ton";
+import { euros, type DemandePerso, type OffrePerso } from "@/lib/recentrage";
+import { dateHeureCourte, premiereLigneDuMessage } from "../../../../packages/domain/src/groupe/reponse-negoce";
 
 
 function toError(e: unknown): ApiError {
@@ -86,7 +98,7 @@ export function ProjectPriceRequests({
   archived: boolean;
   canCreate: boolean;
   quantitatifId?: string | null;
-  /** « Envoyer au fournisseur » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
+  /** « Envoyer aux négoces » du document : ouvre « À qui j'envoie ? » (ou montre les fournisseurs si la demande est partie). */
   openSignal?: number;
   /** §48.5 : une sélection vient de partir depuis la liste : on relit les demandes. */
   refreshSignal?: number;
@@ -103,15 +115,86 @@ export function ProjectPriceRequests({
   useEffect(() => {
     if (refreshSignal > 0) reload();
   }, [refreshSignal, reload]);
+  // Recette n° 2 du 14 novembre 2026 (bloquant N1) : la demande du chantier est celle de TOUTE la liste, ou, depuis le tri
+  // par métier, les demandes parties ensemble (même lot). Chacune a son suivi : ses offres, « Comparer », « Commander ».
+  // Avant : une demande triée était prise pour une « sélection envoyée à part » et ses offres ne s'affichaient plus.
+  const principales = demandesPrincipales(data?.items ?? []);
+  const sent = principales.length > 0;
+  useEffect(() => {
+    if (data) onSentChange?.(sent);
+  }, [data, sent, onSentChange]);
+  // Ouvrir la demande, c'est lire ses réponses (recette du 18 novembre 2026 : la pastille de Messages restait allumée).
+  useEffect(() => {
+    for (const d of data?.items ?? []) for (const r of d.recipients) if (r.status === "received") void api("/v1/boite/lu", { method: "POST", body: { cle: `reponse:${r.id}` } }).catch(() => undefined);
+  }, [data]);
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data) return <Spinner />;
+  const commun = { projectId, archived, canCreate, quantitatifId: quantitatifId ?? null, openSignal, data, setData, reload, principales, ...(onPreviewClosed ? { onPreviewClosed } : {}) };
+  if (principales.length <= 1) return <SuiviDemande {...commun} focus={principales[0] ?? null} premier seul />;
+  return (
+    <div className="flex flex-col gap-6">
+      {principales.map((r, i) => (
+        <SuiviDemande key={r.id} {...commun} focus={r} premier={i === 0} seul={false} titre={`Demande ${i + 1} sur ${principales.length} · ${r.lines.length} ligne${r.lines.length > 1 ? "s" : ""} · ${r.recipients.map((x) => x.supplier.name).join(", ")}`} />
+      ))}
+    </div>
+  );
+}
 
+/** La demande de toute la liste, sinon les demandes du dernier envoi trié par métier (même lot), dans l'ordre de l'envoi. */
+export function demandesPrincipales(items: PriceRequest[]): PriceRequest[] {
+  const entiere = items.find((r) => !r.articles?.length);
+  if (entiere) return [entiere];
+  const dernier = [...items].filter((r) => r.lot).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]?.lot;
+  return dernier ? items.filter((r) => r.lot === dernier).sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id)) : [];
+}
+
+/** Le suivi d'UNE demande : ses négoces, leurs devis, « Comparer », « Commander ». */
+function SuiviDemande({
+  projectId,
+  archived,
+  canCreate,
+  quantitatifId,
+  openSignal,
+  onPreviewClosed,
+  data,
+  setData,
+  reload,
+  principales,
+  focus,
+  premier,
+  seul,
+  titre,
+}: {
+  projectId: string;
+  archived: boolean;
+  canCreate: boolean;
+  quantitatifId: string | null;
+  openSignal: number;
+  onPreviewClosed?: () => void;
+  data: { items: PriceRequest[] };
+  setData: (d: { items: PriceRequest[] }) => void;
+  reload: () => void;
+  principales: PriceRequest[];
+  /** La demande suivie par ce bloc ; null : rien n'est encore parti (« À qui j'envoie la liste ? »). */
+  focus: PriceRequest | null;
+  /** Le premier bloc porte l'ancre « fournisseurs » et les sélections envoyées à part. */
+  premier: boolean;
+  /** Une seule demande : les actions du menu « ··· » du chantier portent sur elle. */
+  seul: boolean;
+  titre?: string;
+}) {
   const refreshProgress = useProgressRefresh();
+  // Commande du mois (Greg, 23 octobre) : plus de « X offres reçues / Comparer les offres » par chantier ; le prix vient de
+  // le regroupement, le chantier garde seulement l'envoi aux négoces.
+  const { features } = useSession();
+  const modeMois = useAncienMode() && features.commandeCommune !== "lots";
   // Des e-mails partent-ils du serveur (§43) ? Sinon, l'artisan envoie depuis sa messagerie.
   const fetchSettings = useCallback((signal: AbortSignal) => api<PriceRequestSettings & { deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
   const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
   // § 43.4 : après un envoi (jamais avant), l'écran « Active tes notifications » peut se proposer.
   const [sentCount, setSentCount] = useState(0);
   // §48.5 : la demande du chantier est celle de TOUTE la liste ; les sélections envoyées à part se suivent à côté.
-  const requestId = data?.items.find((r) => !r.articles?.length)?.id ?? null;
+  const requestId = focus?.id ?? null;
   // Devis déjà lus, par destinataire ; `version` fait suivre la comparaison.
   const [version, setVersion] = useState(0);
   const fetchOffers = useCallback(
@@ -122,15 +205,115 @@ export function ProjectPriceRequests({
     [requestId],
   );
   const offers = useResource(fetchOffers);
-  const whole = (data?.items ?? []).filter((r) => !r.articles?.length);
-  const parts = (data?.items ?? []).filter((r) => (r.articles?.length ?? 0) > 0);
-  const sent = Boolean(whole[0]);
-  useEffect(() => {
-    if (data) onSentChange?.(sent);
-  }, [data, sent, onSentChange]);
-
-  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
-  if (!data) return <Spinner />;
+  // R7 : les e-mails reçus des négoces pour ce chantier (la première ligne de leur message va sur leur carte).
+  const fetchRecus = useCallback((signal: AbortSignal) => api<{ items: EmailRecu[] }>(`/v1/recus?projectId=${encodeURIComponent(projectId)}`, { signal }), [projectId]);
+  const recus = useResource(fetchRecus);
+  // Point 7 (Greg, 28 octobre 2026) : un négoce qui a répondu par le lien (prix ligne par ligne ou Excel) se compare
+  // automatiquement, livraison comprise ; les autres devis s'ouvrent, sans lecture.
+  const parLien = Boolean(focus?.recipients.some((r) => r.status === "received" && !r.document));
+  const fetchChiffrages = useCallback(
+    (signal: AbortSignal) => (requestId && parLien ? api<DemandePerso>(`/v1/demandes-perso/${requestId}`, { signal }).then((d) => d.offres) : Promise.resolve([] as OffrePerso[])),
+    [requestId, parLien],
+  );
+  const chiffrages = useResource(fetchChiffrages).data ?? [];
+  // Point 8 (Greg, 28 octobre 2026) : un seul bouton principal par étape ; le reste dans le menu « ··· » du chantier.
+  const [feuille, setFeuille] = useState(false);
+  // « Commander » depuis l'onglet Offres (Greg, 19 novembre 2026) : `?commander=<destinataire>` ouvre la MÊME confirmation
+  // que « Voir le devis reçu » (négoce, total, date de livraison souhaitée, « Confirmer la commande » / « Annuler ») ;
+  // ensuite le parcours de commande habituel. « Annuler » ramène à l'onglet Offres.
+  const params = useSearchParams();
+  const routeur = useRouter();
+  const chemin = usePathname();
+  const aCommander = params.get("commander");
+  // Chaque appui sur « Commander » porte son repère (`t`) : la confirmation s'ouvre une fois par appui, jamais rouverte
+  // pendant que la page se recharge après la commande.
+  const appui = aCommander ? `${aCommander}:${params.get("t") ?? ""}` : null;
+  const [traite, setTraite] = useState<string | null>(null);
+  const [direct, setDirect] = useState<string | null>(null);
+  const oublierCommander = (onglet: "offres" | null) => {
+    const suite = new URLSearchParams(params.toString());
+    suite.delete("commander");
+    suite.delete("t");
+    if (onglet) suite.set("onglet", onglet);
+    const q = suite.toString();
+    routeur.replace(q ? `${chemin}?${q}` : chemin, { scroll: false });
+  };
+  const [ajout, setAjout] = useState(false);
+  const [renvoi, setRenvoi] = useState(false);
+  const [suppression, setSuppression] = useState(false);
+  const [actionError, setActionError] = useState<ApiError | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; retenus: string[]; recipientId?: string; livraisonSouhaitee?: string | null } | null>(null);
+  const [retrait, setRetrait] = useState(false);
+  const whole = focus ? [focus] : [];
+  // Les sélections envoyées à part (§48.5) : tout ce qui n'est pas une demande principale, montré une fois.
+  const parts = premier ? data.items.filter((r) => (r.articles?.length ?? 0) > 0 && !principales.some((p) => p.id === r.id)) : [];
+  const enCours = whole[0] ?? null;
+  const retenue = Boolean(enCours?.retainedSupplierIds.length);
+  // Une vraie commande (bon parti au négoce) ne se défait pas depuis le menu.
+  const commandee = Boolean(enCours?.recipients.some((r) => r.commandeLe));
+  const actif = Boolean(enCours) && !archived && seul;
+  const montrer = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  async function classer(retenus: string[], retirerDesGroupes = false) {
+    if (!enCours) return;
+    setActionError(null);
+    setConflit(null);
+    try {
+      const r = await api<PriceRequest>(`/v1/price-requests/${enCours.id}/classification`, { method: "PATCH", body: retenus.length ? { classified: true, retainedSupplierIds: retenus, ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } : { classified: false } });
+      setData({ items: [r, ...data.items.filter((x) => x.id !== r.id)] });
+      setFeuille(false);
+      refreshProgress();
+    } catch (e) {
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = conflitGroupe(e);
+      if (phrase) {
+        // La feuille plein écran se ferme : la question se pose sur le chantier, bien visible.
+        setFeuille(false);
+        setConflit({ phrase, retenus });
+        montrer("conflit-groupe");
+      } else setActionError(toError(e));
+    }
+  }
+  /**
+   * Greg, 14 novembre 2026 (recette n° 2) : « Commander » est une vraie commande. Le serveur envoie le bon de commande au
+   * négoce, et ne note la commande qu'une fois le mail parti. Rend la phrase d'erreur à montrer, ou null si c'est fait.
+   */
+  async function commander(recipientId: string, livraisonSouhaitee: string | null, retirerDesGroupes = false): Promise<ApiError | null> {
+    if (!enCours) return null;
+    setConflit(null);
+    try {
+      await api(`/v1/demandes-perso/${encodeURIComponent(enCours.id)}/commander`, { method: "POST", body: { recipientId, ...(livraisonSouhaitee ? { livraisonSouhaitee } : {}), ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } });
+      setFeuille(false);
+      reload();
+      refreshProgress();
+      return null;
+    } catch (e) {
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = conflitGroupe(e);
+      if (phrase) {
+        setFeuille(false);
+        setConflit({ phrase, retenus: [], recipientId, livraisonSouhaitee });
+        montrer("conflit-groupe");
+        return null;
+      }
+      return toError(e);
+    }
+  }
+  async function supprimer() {
+    if (!enCours) return;
+    setActionError(null);
+    try {
+      await api<null>(`/v1/price-requests/${enCours.id}`, { method: "DELETE" });
+      setSuppression(false);
+      reload();
+      refreshProgress();
+    } catch (e) {
+      setActionError(toError(e));
+    }
+  }
+  useActionChantier("ajouter-negoce", "Ajouter un négoce", () => (setAjout(true), montrer("ajouter-negoce")), actif && !retenue);
+  useActionChantier("renvoyer", "Renvoyer à un négoce", () => (setRenvoi(true), montrer("renvoyer")), actif && !retenue && Boolean(enCours?.recipients.some((r) => r.status === "sent")));
+  useActionChantier("changer-negoce", "Changer de négoce", () => void classer([]), actif && retenue && !commandee);
+  useActionChantier("supprimer-demande", "Supprimer la demande", () => (setSuppression(true), montrer("supprimer-demande")), actif);
 
   const request = whole[0] ?? null;
   if (request && openSignal > 0) requestAnimationFrame(() => document.getElementById("fournisseurs")?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -207,38 +390,138 @@ export function ProjectPriceRequests({
     );
   }
 
-  const received = request.recipients.filter((r) => r.status === "received" && r.document);
-  const unread = received.filter((r) => !offerOf(r.id)).length;
-  const waiting = request.recipients.filter((r) => r.status === "sent").length;
+  const emailDe = (recipientId: string) =>
+    (recus.data?.items ?? []).filter((e) => e.demande?.recipientId === recipientId).sort((x, y) => y.recuLe.localeCompare(x.recuLe))[0] ?? null;
+  // Point 7 (Greg, 28 octobre 2026) : un devis reçu ne se lit plus par l'IA ; il s'ouvre, et l'artisan retient un négoce.
+  const offreDe = (recipientId: string) => chiffrages.find((o) => o.recipientId === recipientId) ?? null;
+  const rang = (r: PriceRequestRecipient) => {
+    const i = chiffrages.findIndex((o) => o.recipientId === r.id);
+    return i < 0 ? chiffrages.length : i;
+  };
+  const repondus = request.recipients.filter((r) => r.document || emailDe(r.id) || offreDe(r.id)).sort((a, b) => rang(a) - rang(b));
+  const comparer = repondus.filter((r) => offreDe(r.id)).length >= 2;
+  const retenus = request.recipients.filter((r) => request.retainedSupplierIds.includes(r.supplier.id));
+  const aEnvoyer = request.recipients.filter((r) => r.status === "to_send");
   const hasOffers = (offers.data?.items.length ?? 0) > 0;
+  if (aCommander && appui !== traite && request.retainedSupplierIds.length === 0 && repondus.some((r) => r.id === aCommander)) {
+    setTraite(appui);
+    setDirect(aCommander);
+    setFeuille(true);
+  }
 
   return (
-    <section id="fournisseurs" aria-label="Fournisseurs" className="flex scroll-mt-4 flex-col gap-3">
-      {/* Une fois les offres comparées, la phrase d'attente n'a plus rien à dire : la comparaison parle. */}
-      {hasOffers && waiting === 0 ? null : (
+    <section {...(premier ? { id: "fournisseurs" } : {})} aria-label={titre ?? "Fournisseurs"} className="flex scroll-mt-4 flex-col gap-3">
+      {titre ? <h2 className="text-[15px] font-extrabold">{titre}</h2> : null}
+      {retenus.length > 0 ? (
+        <div role="status" aria-label="Commandé" className="flex flex-col gap-2 rounded-xl bg-ok-bg p-4 text-ok">
+          <p className="text-[16px] font-extrabold">Commandé chez {retenus.map((r) => r.supplier.name).join(", ")}.</p>
+          <p className="text-[14px]">
+            {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}
+            {/* Greg, 14 novembre 2026 : « commandé » ne se dit que quand le bon de commande est réellement parti. */}
+            {retenus.some((r) => r.commandeLe)
+              ? ` · bon de commande envoyé le ${dateHeureCourte(new Date(retenus.find((r) => r.commandeLe)!.commandeLe!))}`
+              : request.classifiedAt
+                ? ` · retenu le ${dateHeureCourte(new Date(request.classifiedAt))}`
+                : ""}
+          </p>
+          {request.apresCommande?.livraisonSouhaitee ? (
+            <p className="text-[14px]">Livraison souhaitée le {new Date(`${request.apresCommande.livraisonSouhaitee}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}. Vous vous appelez pour caler les détails.</p>
+          ) : null}
+          {retenus
+            .filter((r) => r.document)
+            .map((r) => (
+              <button key={r.id} type="button" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")} className="inline-flex min-h-11 items-center self-start text-[15px] font-bold text-ink underline">
+                Ouvrir le devis (PDF)
+              </button>
+            ))}
+          <PrevenirAutres request={request} onFait={reloadAll} />
+        </div>
+      ) : aEnvoyer.length > 0 ? (
         <AssistantMessage>
-          <Say>
-            {request.recipients.some((r) => r.status === "to_send")
-              ? "La demande est prête. Envoie-la à chaque fournisseur :"
-              : "Demande envoyée. Quand un fournisseur te répond, ajoute son devis sur sa carte."}
-          </Say>
+          <Say>La demande est prête. Envoie-la à chaque négoce :</Say>
         </AssistantMessage>
-      )}
-      {!archived && unread > 0 && offers.data ? (
-        <CompareQuotes
-          requestId={request.id}
-          received={received.length}
-          waiting={waiting}
-          aiAvailable={offers.data.aiAvailable}
-          onDone={(result) => {
-            offers.setData({ aiAvailable: result.aiAvailable, items: result.items });
-            setVersion((v) => v + 1);
-            refreshProgress();
+      ) : repondus.length > 0 ? (
+        // Le suivi du chantier dit déjà « N devis reçus sur M demandes » : ici, seulement le bouton de l'étape.
+        <Button onClick={() => setFeuille(true)} className="w-full">
+          {comparer ? "Comparer" : repondus.length > 1 ? "Voir les devis reçus" : "Voir le devis reçu"}
+        </Button>
+      ) : null}
+      {retenus.length === 0 ? <RappelDeSuivi request={request} onFait={reloadAll} /> : null}
+      {retenus.length === 0 && request.suivi?.regleLe ? (
+        <p role="status" aria-label="Demande réglée" className="rounded-xl bg-ground p-3 text-[15px] font-semibold">
+          Demande réglée le {dateHeureCourte(new Date(request.suivi.regleLe))}.
+        </p>
+      ) : null}
+      {retenus.length === 0
+        ? request.recipients
+            .filter((r) => r.status === "sent" && r.rappelLe && !repondus.includes(r))
+            .map((r) => (
+              // Lot final, point 6 : le négoce n'a pas répondu à mi-délai ; on appelle le commercial, ou on renvoie.
+              <div key={`rappel-${r.id}`} role="group" aria-label={`${r.supplier.name} n'a pas encore répondu`} className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+                <p className="text-[15px] font-semibold">{phraseRelanceArtisan(r.supplier.name)}</p>
+                <div className="flex flex-wrap gap-2">
+                  {r.supplier.phone ? (
+                    <a href={`tel:${r.supplier.phone.replace(/[^\d+]/g, "")}`} className="pressable inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-6 text-[15px] font-extrabold text-on-accent">
+                      Appeler {r.supplier.contactName?.trim() || r.supplier.name}
+                    </a>
+                  ) : null}
+                  <a href={mailtoHref(r)} className="pressable inline-flex min-h-12 items-center justify-center rounded-full border border-line bg-surface px-5 text-[15px] font-bold">
+                    Renvoyer la demande
+                  </a>
+                </div>
+              </div>
+            ))
+        : null}
+      {actionError ? <ErrorNotice error={actionError} /> : null}
+      {conflit ? (
+        <div id="conflit-groupe" className="scroll-mt-4">
+        <ConflitGroupe
+          phrase={conflit.phrase}
+          pending={retrait}
+          onAnnuler={() => setConflit(null)}
+          onRetirer={() => {
+            setRetrait(true);
+            const suite = conflit.recipientId
+              ? commander(conflit.recipientId, conflit.livraisonSouhaitee ?? null, true).then((e) => {
+                  if (e) setActionError(e);
+                })
+              : classer(conflit.retenus, true);
+            void suite.finally(() => setRetrait(false));
           }}
         />
+        </div>
       ) : null}
-      {hasOffers ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
-      <h2 className="text-xs font-extrabold tracking-[0.04em] text-muted">FOURNISSEURS</h2>
+      {suppression ? (
+        <div id="supprimer-demande" role="group" aria-label="Supprimer la demande" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+          <p className="text-[15px] font-semibold">Supprimer cette demande ? Les négoces ne sont pas prévenus ; ta liste reste.</p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="secondary" onClick={() => setSuppression(false)}>
+              Annuler
+            </Button>
+            <Button variant="ink" onClick={() => void supprimer()}>
+              Oui, supprimer
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      {renvoi ? (
+        <div id="renvoyer" role="group" aria-label="Renvoyer à un négoce" className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
+          <p className="text-[15px] font-semibold">À qui renvoyer la demande ?</p>
+          {request.recipients
+            .filter((r) => r.status === "sent")
+            .map((r) => (
+              <a key={r.id} href={mailtoHref(r)} onClick={() => setRenvoi(false)} className="inline-flex min-h-12 items-center justify-between rounded-xl border border-line px-3 text-[15px] font-semibold">
+                Renvoyer à {r.supplier.name}
+                <Mail size={18} aria-hidden="true" />
+              </a>
+            ))}
+          <button type="button" onClick={() => setRenvoi(false)} className="min-h-11 self-start text-[15px] font-semibold text-muted underline">
+            Fermer
+          </button>
+        </div>
+      ) : null}
+      <div id="ajouter-negoce">{!archived ? <AddRecipients request={request} open={ajout} onClose={() => setAjout(false)} onChange={replace} /> : null}</div>
+      {hasOffers && !modeMois && retenus.length === 0 ? <ProjectComparison request={request} version={version} archived={archived} onRequestChange={replace} /> : null}
       <NotificationsPrompt trigger={sentCount} />
       <ul className="flex flex-col gap-2" aria-label="Tes fournisseurs">
         {request.recipients.map((r) => (
@@ -249,7 +532,7 @@ export function ProjectPriceRequests({
               request={request}
               archived={archived}
               deliversEmail={deliversEmail}
-              onSent={() => setSentCount((n) => n + 1)}
+              onSent={() => setSentCount((k) => k + 1)}
               onChange={replace}
               onOfferChange={offerChanged}
               onReload={reloadAll}
@@ -257,9 +540,294 @@ export function ProjectPriceRequests({
           </li>
         ))}
       </ul>
-      {!archived ? <AddRecipients request={request} onChange={replace} /> : null}
       {partsBlock}
+      {feuille ? (
+        <DevisRecus
+          request={request}
+          repondus={repondus}
+          emailDe={emailDe}
+          offreDe={offreDe}
+          initial={direct ? (repondus.find((r) => r.id === direct) ?? null) : null}
+          onCommander={(id, date) =>
+            commander(id, date).then((e) => {
+              if (!e && direct) (setDirect(null), oublierCommander(null));
+              return e;
+            })
+          }
+          onFermer={() => {
+            setFeuille(false);
+            if (direct) (setDirect(null), oublierCommander("offres"));
+          }}
+        />
+      ) : null}
     </section>
+  );
+}
+
+/**
+ * UN PRIX « À VÉRIFIER » (recette n° 2 du 14 novembre 2026 : « 620 € la pièce part sans alerte ») : le prix d'une ligne très
+ * éloigné des autres prix reçus pour la même ligne. Il reste affiché tel que le négoce l'a écrit ; l'artisan est prévenu
+ * avant de comparer et avant de commander. Aucun prix n'est corrigé ni inventé.
+ */
+function PrixAVerifier({ offre }: { offre: OffrePerso }) {
+  const p = offre.prixAVerifier ?? [];
+  if (p.length === 0) return null;
+  return (
+    <div role="note" aria-label="Prix à vérifier" className="flex flex-col gap-0.5 rounded-xl bg-warn-bg p-3 text-[14px] text-warn">
+      <p className="font-extrabold">Prix à vérifier avec ton négoce</p>
+      {p.map((x) => (
+        <p key={x.designation} className="break-words">
+          {x.designation} : {x.prixHt.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} € {x.unite ? `par ${x.unite.replace(/s$/, "")}` : "l'unité"}, très loin des autres prix reçus.
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * LE RAPPEL DE SUIVI (Greg, 16 novembre 2026) : 7 jours après les réponses, sans commande, « Où en es-tu avec cette
+ * demande ? ». Un seul bouton, « C'est réglé ». Sans clic, la question reste. Pas de fil de discussion avec le négoce :
+ * pour une demande individuelle, l'artisan et son négoce s'appellent.
+ */
+function RappelDeSuivi({ request, onFait }: { request: PriceRequest; onFait: () => void }) {
+  const [pending, setPending] = useState(false);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
+  if (!request.suivi?.rappelLe || request.suivi.regleLe) return null;
+  return (
+    <div role="group" aria-label="Où en es-tu avec cette demande ?" className="flex flex-col gap-2 rounded-xl border-2 border-[var(--color-warn)] bg-surface p-4">
+      <p className="text-[17px] font-extrabold">Où en es-tu avec cette demande ?</p>
+      <p className="text-[14px] text-muted">Tes négoces ont répondu il y a plus d&apos;une semaine. Si c&apos;est commandé ou abandonné, dis-le : la demande sort de tes choses à faire.</p>
+      <Button
+        pending={pending}
+        onClick={() => {
+          setPending(true);
+          setErreur(null);
+          void api(`/v1/demandes-perso/${encodeURIComponent(request.id)}/regle`, { method: "POST" })
+            .then(onFait)
+            .catch((e: unknown) => setErreur(e instanceof ApiError ? e : new ApiError("internal_error", 500)))
+            .finally(() => setPending(false));
+        }}
+      >
+        C&apos;est réglé
+      </Button>
+      {erreur ? <ErrorNotice error={erreur} /> : null}
+    </div>
+  );
+}
+
+/**
+ * « PRÉVENIR LES AUTRES NÉGOCES CONSULTÉS ? OUI / NON » (Greg, 16 novembre 2026), juste après la commande. « Oui » : un
+ * e-mail poli part aux autres (« Merci pour votre offre, elle n'a pas été retenue cette fois. Je vous recontacte pour mes
+ * prochains chantiers. »), jamais le prix ni le nom du négoce retenu. La question se pose une fois ; le choix reste écrit.
+ */
+function PrevenirAutres({ request, onFait }: { request: PriceRequest; onFait: () => void }) {
+  const [pending, setPending] = useState<"oui" | "non" | null>(null);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
+  const a = request.apresCommande;
+  if (!a || a.autres === 0 || !request.recipients.some((r) => r.commandeLe)) return null;
+  if (a.autresChoix === "oui") return <p className="text-[14px] font-semibold">Les autres négoces consultés sont prévenus.</p>;
+  if (a.autresChoix === "non") return null;
+  const repondre = (prevenir: boolean) => {
+    setPending(prevenir ? "oui" : "non");
+    setErreur(null);
+    void api(`/v1/demandes-perso/${encodeURIComponent(request.id)}/prevenir-autres`, { method: "POST", body: { prevenir } })
+      .then(onFait)
+      .catch((e: unknown) => setErreur(e instanceof ApiError ? e : new ApiError("internal_error", 500)))
+      .finally(() => setPending(null));
+  };
+  return (
+    <div role="group" aria-label="Prévenir les autres négoces consultés ?" className="flex flex-col gap-2 rounded-xl bg-surface p-3 text-ink">
+      <p className="text-[16px] font-extrabold">Prévenir les autres négoces consultés ?</p>
+      <p className="text-[14px] text-muted">
+        {a.autres > 1 ? `Les ${a.autres} autres reçoivent` : "L'autre reçoit"} un e-mail poli : « Merci pour votre offre, elle n&apos;a pas été retenue cette fois. Je vous recontacte pour mes prochains chantiers. » Ni le prix ni le nom du négoce retenu n&apos;y figurent.
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <Button pending={pending === "oui"} disabled={pending !== null} onClick={() => repondre(true)}>
+          Oui
+        </Button>
+        <Button variant="secondary" pending={pending === "non"} disabled={pending !== null} onClick={() => repondre(false)}>
+          Non
+        </Button>
+      </div>
+      {erreur ? <ErrorNotice error={erreur} /> : null}
+    </div>
+  );
+}
+
+/**
+ * « Voir les devis reçus » (Greg, 28 octobre 2026, points 7 et 8) : en plein écran, une carte par négoce qui a répondu :
+ * « X t'a répondu · 28 oct. à 8 h 31 », la première ligne de son message, « Ouvrir le devis (PDF) » et « Je retiens ce
+ * négoce » (la demande passe à « Commandé »). Aucune lecture IA, aucun nom de fichier. Un négoce qui a répondu par le
+ * lien montre son total livraison comprise, et les réponses par le lien passent devant, de la moins chère à la plus chère.
+ */
+function DevisRecus({
+  request,
+  repondus,
+  emailDe,
+  offreDe,
+  initial = null,
+  onCommander,
+  onFermer,
+}: {
+  /** Ouverte depuis l'onglet Offres : la confirmation de ce négoce d'emblée, et « Annuler » referme tout. */
+  initial?: PriceRequestRecipient | null;
+  request: PriceRequest;
+  repondus: PriceRequestRecipient[];
+  emailDe: (id: string) => EmailRecu | null;
+  offreDe: (id: string) => OffrePerso | null;
+  /** Envoie le bon de commande au négoce, avec la date de livraison souhaitée ; rend l'erreur à montrer, ou null. */
+  onCommander: (recipientId: string, livraisonSouhaitee: string | null) => Promise<ApiError | null>;
+  onFermer: () => void;
+}) {
+  // « Commander » ouvre d'abord la confirmation : rien ne part sur un seul appui.
+  const [choisi, setChoisi] = useState<PriceRequestRecipient | null>(initial);
+  const annuler = () => (initial ? onFermer() : (setChoisi(null), setErreur(null)));
+  // Greg, 16 novembre 2026 : l'artisan choisit une date de livraison souhaitée ; elle part dans le mail et sur le bon.
+  const [livraison, setLivraison] = useState("");
+  const aujourdhui = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
+  const livraisonValable = /^\d{4}-\d{2}-\d{2}$/.test(livraison) && livraison >= aujourdhui;
+  const [envoi, setEnvoi] = useState(false);
+  const [erreur, setErreur] = useState<ApiError | null>(null);
+  useEffect(() => {
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = avant;
+    };
+  }, []);
+  if (choisi) {
+    const o = offreDe(choisi.id);
+    return (
+      <div role="dialog" aria-modal="true" aria-label="Confirmer la commande" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+        <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+          <h2 className="font-display text-[20px] font-extrabold">Confirmer la commande</h2>
+          <button type="button" onClick={annuler} aria-label={initial ? "Annuler la commande" : "Revenir aux devis"} className="inline-flex size-11 items-center justify-center rounded-xl">
+            <X size={20} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="mx-auto flex w-full max-w-2xl min-h-0 grow flex-col gap-3 overflow-y-auto px-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+          <Card className="flex flex-col gap-2.5 p-4">
+            <p className="text-[17px] font-extrabold">Tu commandes chez {choisi.supplier.name}.</p>
+            {o ? (
+              <>
+                <p className="text-[18px] font-extrabold tabular-nums">{euros(o.totalLivreHt)} HT livré</p>
+                <p className="text-[14px] text-muted">
+                  {o.lignesChiffrees} ligne{o.lignesChiffrees > 1 ? "s" : ""} chiffrée{o.lignesChiffrees > 1 ? "s" : ""}
+                  {o.livraisonHt > 0 ? ` · dont livraison ${euros(o.livraisonHt)}` : ""}
+                </p>
+                {o.lignesManquantes.length > 0 ? (
+                  <p className="text-[14px] font-semibold text-warn">
+                    {o.lignesManquantes.length} ligne{o.lignesManquantes.length > 1 ? "s" : ""} non chiffrée{o.lignesManquantes.length > 1 ? "s" : ""} : {o.lignesManquantes.length > 1 ? "elles ne sont" : "elle n'est"} pas dans la commande.
+                  </p>
+                ) : null}
+                <PrixAVerifier offre={o} />
+              </>
+            ) : (
+              <p className="text-[15px] text-muted">
+                {request.lines.length} ligne{request.lines.length > 1 ? "s" : ""}, aux prix de son devis.
+              </p>
+            )}
+            <label className="flex flex-col gap-1 text-[15px] font-semibold">
+              Date de livraison souhaitée
+              <input type="date" required min={aujourdhui} value={livraison} onChange={(e) => setLivraison(e.target.value)} className={INPUT} />
+            </label>
+            {livraison && !livraisonValable ? (
+              <p role="alert" className="text-[14px] font-semibold text-danger">
+                Cette date est déjà passée. Choisis une date à venir.
+              </p>
+            ) : null}
+            <p className="text-[15px]">
+              Le bon de commande part tout de suite par e-mail à {choisi.supplier.name} ({choisi.supplier.email}){livraisonValable ? `, avec ce mot : « C'est OK pour moi, livraison souhaitée le ${new Date(`${livraison}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}, on s'appelle pour caler les détails. »` : "."}
+            </p>
+          </Card>
+          {erreur ? <ErrorNotice error={erreur} /> : null}
+          <Button
+            variant="accent"
+            pending={envoi}
+            disabled={!livraisonValable}
+            onClick={() => {
+              setEnvoi(true);
+              setErreur(null);
+              void onCommander(choisi.id, livraison)
+                .then((e) => setErreur(e))
+                .finally(() => setEnvoi(false));
+            }}
+          >
+            Confirmer la commande
+          </Button>
+          <Button variant="secondary" disabled={envoi} onClick={annuler}>
+            Annuler
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Devis reçus" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+      <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
+        <h2 className="font-display text-[20px] font-extrabold">{repondus.length > 1 ? "Devis reçus" : "Devis reçu"}</h2>
+        <button type="button" onClick={onFermer} aria-label="Revenir au chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
+      <ul className="mx-auto flex w-full max-w-2xl min-h-0 grow flex-col gap-3 overflow-y-auto px-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+        {repondus.map((r) => {
+          const e = emailDe(r.id);
+          const quand = e ? new Date(e.recuLe) : r.sentAt ? null : null;
+          const ligne = premiereLigneDuMessage(e?.texte);
+          const autres = (e?.fichiers ?? []).filter((f) => !f.devisRecu);
+          const o = offreDe(r.id);
+          return (
+            <li key={r.id}>
+              <Card aria-label={`Devis de ${r.supplier.name}`} className="flex flex-col gap-2.5 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-[16px] font-extrabold">
+                    {r.supplier.name} t&apos;a répondu{quand ? ` · ${dateHeureCourte(quand)}` : ""}
+                  </p>
+                  {/* « Le moins cher » ne se dit qu'entre au moins deux offres réellement comparables : complètes et encore valables. */}
+                  {o && o.complete && o.valide && o.ecartHt === 0 && repondus.map((x) => offreDe(x.id)).filter((x) => x && x.complete && x.valide).length >= 2 ? <Badge tone="ok">Le moins cher</Badge> : r.document ? <Badge tone="ok">Devis reçu</Badge> : null}
+                </div>
+                {ligne ? <p className="text-[15px] text-muted">{ligne}</p> : null}
+                {o ? (
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[18px] font-extrabold tabular-nums">{euros(o.totalLivreHt)} HT livré</p>
+                    <p className="text-[14px] text-muted">
+                      {o.livraisonHt > 0 ? `dont livraison ${euros(o.livraisonHt)}` : "livraison offerte"}
+                      {o.delaiJours !== null ? ` · ${o.delaiJours} jour${o.delaiJours > 1 ? "s" : ""}` : ""}
+                      {o.ecartHt ? ` · ${euros(o.ecartHt)} de plus` : ""}
+                    </p>
+                    {o.lignesManquantes.length > 0 ? (
+                      <p className="text-[14px] font-semibold text-warn">
+                        {o.lignesManquantes.length} ligne{o.lignesManquantes.length > 1 ? "s" : ""} non chiffrée{o.lignesManquantes.length > 1 ? "s" : ""}
+                      </p>
+                    ) : null}
+                    {!o.valide ? <p className="text-[14px] font-semibold text-warn">Offre échue</p> : null}
+                    <PrixAVerifier offre={o} />
+                  </div>
+                ) : null}
+                {r.document ? (
+                  <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
+                    Ouvrir le devis (PDF)
+                  </Button>
+                ) : null}
+                {e
+                  ? autres.map((f, i) => (
+                      <Button key={f.id} variant="secondary" onClick={() => openFile({ url: `/v1/recus/${encodeURIComponent(e.id)}/fichiers/${encodeURIComponent(f.id)}`, title: `Pièce jointe de ${r.supplier.name}`, fileName: f.nom })}>
+                        {autres.length > 1 ? `Ouvrir la pièce jointe ${i + 1}` : "Ouvrir la pièce jointe"}
+                      </Button>
+                    ))
+                  : null}
+                {request.retainedSupplierIds.length === 0 ? (
+                  <Button variant="ink" onClick={() => setChoisi(r)}>
+                    Commander
+                  </Button>
+                ) : null}
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -270,7 +838,10 @@ function SupplierPicker({
   dark,
   onNames,
   allByDefault = false,
+  max = NEGOCES_PAR_DEMANDE,
 }: {
+  /** Jusqu'à 5 négoces par demande (Greg, 11 novembre 2026) : ce qu'il reste à cocher pour cette demande. */
+  max?: number;
   /** Retour du fondateur (2026-10-10) : « les fournisseurs cochés par défaut » ; l'artisan décoche ceux qui ne reçoivent pas. */
   allByDefault?: boolean;
   exclude?: string[];
@@ -288,8 +859,9 @@ function SupplierPicker({
   useEffect(() => {
     if (!data || !allByDefault || defaulted.current) return;
     defaulted.current = true;
-    for (const s of data.items) if (!exclude.includes(s.id)) onToggle(s.id, true);
-  }, [data, allByDefault, exclude, onToggle]);
+    // Cochés par défaut, dans la limite d'une demande : au-delà, l'artisan choisit lesquels.
+    for (const s of data.items.filter((x) => !exclude.includes(x.id)).slice(0, Math.max(0, max))) onToggle(s.id, true);
+  }, [data, allByDefault, exclude, onToggle, max]);
   useEffect(() => {
     if (data && onNames) onNames(new Map(data.items.map((s) => [s.id, s.name])));
   }, [data, onNames]);
@@ -297,17 +869,22 @@ function SupplierPicker({
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
   const choices = data.items.filter((s) => !exclude.includes(s.id));
+  const plein = selected.size >= max;
 
   return (
     <div className="flex flex-col gap-2">
+      <p className={`text-[14px] ${dark ? "text-[#99844C]" : "text-muted"}`}>
+        {max <= 0 ? `Cette demande a déjà ${NEGOCES_PAR_DEMANDE} négoces.` : `Jusqu'à ${NEGOCES_PAR_DEMANDE} négoces par demande.`}
+        {max > 0 && plein && choices.length > selected.size ? " Décoche un négoce pour en choisir un autre." : ""}
+      </p>
       {choices.length === 0 && !creating ? (
-        <p className={`text-sm ${dark ? "text-[#c9ced6]" : "text-muted"}`}>
+        <p className={`text-sm ${dark ? "text-[#99844C66]" : "text-muted"}`}>
           {data.items.length === 0 ? "Ton carnet de fournisseurs est vide. Ajoutes-en un :" : "Tous tes fournisseurs sont déjà dans cette demande."}
         </p>
       ) : null}
       {choices.map((s) => (
         <label key={s.id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl bg-surface px-4 text-ink shadow-card">
-          <input type="checkbox" checked={selected.has(s.id)} onChange={(e) => onToggle(s.id, e.target.checked)} className="size-5 accent-accent" />
+          <input type="checkbox" checked={selected.has(s.id)} disabled={!selected.has(s.id) && plein} onChange={(e) => onToggle(s.id, e.target.checked)} className="size-5 accent-accent" />
           <span className="flex min-w-0 flex-col">
             <span className="font-bold">{s.name}</span>
             <span className="truncate text-[13px] text-muted">{s.email}</span>
@@ -343,6 +920,57 @@ function SupplierPicker({
   );
 }
 
+interface SaisieEnvoi extends Record<string, unknown> {
+  ouvert: boolean;
+  selected: string[];
+  message: string;
+  etapeEnvoi: "negoces" | "apercu";
+  messageLibre: string | null;
+  tutoie: boolean | null;
+  dueDate: string;
+}
+
+/** Le tri de la demande par métier de chaque négoce (`POST …/price-requests/repartition`). */
+interface Repartition {
+  toutPourTous: boolean;
+  groupes: { supplierIds: string[]; negoces: string[]; articles: string[]; lignes: string[] }[];
+  sansSpecialiste: { libelle: string; metier: string }[];
+  sansLigne: string[];
+}
+
+/**
+ * « QUI REÇOIT QUOI » (Greg, 14 novembre 2026) : sous les négoces cochés, ce que chacun recevra. Rien ne s'affiche quand
+ * tous reçoivent toute la liste. Une ligne que personne ne couvre part chez tous, et c'est dit.
+ */
+function QuiRecoitQuoi({ projectId, ids }: { projectId: string; ids: string }) {
+  const charger = useCallback(
+    (signal: AbortSignal) => api<Repartition>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/repartition`, { method: "POST", body: { supplierIds: ids.split(",") }, signal }),
+    [projectId, ids],
+  );
+  const { data } = useResource(charger);
+  if (!data || data.toutPourTous) return null;
+  return (
+    <section aria-label="Qui reçoit quoi" className="flex flex-col gap-2 rounded-2xl border border-line bg-surface p-3 text-[14px]">
+      <h3 className="text-[15px] font-extrabold">Qui reçoit quoi</h3>
+      <p className="text-muted">Chaque négoce reçoit les lignes de son métier.</p>
+      <ul className="flex flex-col gap-1.5">
+        {data.groupes.map((g) => (
+          <li key={g.supplierIds.join(",")}>
+            <span className="font-bold">{g.negoces.join(", ")}</span> : {g.lignes.length} ligne{g.lignes.length > 1 ? "s" : ""} ({g.lignes.slice(0, 3).join(", ")}
+            {g.lignes.length > 3 ? "…" : ""})
+          </li>
+        ))}
+      </ul>
+      {data.sansLigne.length > 0 ? <p className="font-semibold text-warn">{data.sansLigne.join(", ")} : aucune ligne de son métier dans cette liste. Rien ne lui est envoyé.</p> : null}
+      {data.sansSpecialiste.length > 0 ? (
+        <p className="font-semibold text-warn">
+          Aucun négoce coché ne fait {[...new Set(data.sansSpecialiste.map((l) => l.metier.toLowerCase()))].join(", ")} : {data.sansSpecialiste.length > 1 ? `ces ${data.sansSpecialiste.length} lignes partent` : "cette ligne part"} chez tous.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function NewRequest({
   openAtStart,
   projectId,
@@ -361,10 +989,41 @@ function NewRequest({
   onCreated: (r: PriceRequest) => void;
 }) {
   const id = useId();
-  const [previewing, setPreviewing] = useState(openAtStart && quantitatifId !== null);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [message, setMessage] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  // Correction après test de Greg (30 octobre 2026, point 2) : l'envoi commencé (négoces cochés, message, étape) est gardé
+  // sur le serveur ; revenir sur le chantier rouvre la feuille où on l'a laissée.
+  const b = useBrouillon<SaisieEnvoi>(
+    `envoi:${projectId}`,
+    { type: "envoi", url: `/chantiers/${projectId}`, titre: (d) => `Demande de prix à ${d.selected.length} négoce${d.selected.length > 1 ? "s" : ""}`, vide: (d) => !d.ouvert && !d.message && d.messageLibre === null },
+    { ouvert: openAtStart && quantitatifId !== null, selected: [], message: "", etapeEnvoi: "negoces", messageLibre: null, tutoie: null, dueDate: "" },
+  );
+  const previewing = b.donnees.ouvert;
+  const setPreviewing = (v: boolean) => b.modifier((d) => ({ ...d, ouvert: v }));
+  const selected = new Set(b.donnees.selected);
+  const { message, messageLibre, tutoie, dueDate } = b.donnees;
+  const etape = b.donnees.etapeEnvoi;
+  const setMessage = (v: string) => b.modifier((d) => ({ ...d, message: v }));
+  const setEtape = (v: "negoces" | "apercu") => b.modifier((d) => ({ ...d, etapeEnvoi: v }));
+  const setMessageLibre = (v: string | null) => b.modifier((d) => ({ ...d, messageLibre: v }));
+  const setTutoie = (v: boolean) => b.modifier((d) => ({ ...d, tutoie: v }));
+  const setDueDate = (v: string) => b.modifier((d) => ({ ...d, dueDate: v }));
+  // Lot final, points 1 et 4 : « Avant d'envoyer » la première fois, puis « À qui j'envoie ? », puis l'aperçu du mail.
+  const identite = useIdentite();
+  // « Voici ton adresse Mobiiz », une seule fois, au premier envoi (Greg, 19 novembre 2026). L'état n'est lu qu'une fois
+  // l'entreprise confirmée (l'adresse se fabrique alors avec son vrai nom) ; « inconnu » le temps de la réponse.
+  const [adresseEtat, setAdresseEtat] = useState<"inconnu" | "a-voir" | "vue">("inconnu");
+  const [vuePending, setVuePending] = useState(false);
+  const dejaVue = useCallback(() => setAdresseEtat("vue"), []);
+  const identiteComplete = !!identite.data?.complete;
+  useEffect(() => {
+    if (!previewing || !identiteComplete || adresseEtat !== "inconnu") return;
+    const c = new AbortController();
+    api<{ vueLe: string | null }>("/v1/company/adresse-mobiiz", { signal: c.signal }).then(
+      (a) => setAdresseEtat(a.vueLe ? "vue" : "a-voir"),
+      () => setAdresseEtat("vue"),
+    );
+    return () => c.abort();
+  }, [previewing, identiteComplete, adresseEtat]);
+  const [enregistre, setEnregistre] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const key = useRef(newActionKey());
@@ -378,11 +1037,11 @@ function NewRequest({
   };
 
   const toggle = (supplierId: string, on: boolean) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(supplierId);
-      else next.delete(supplierId);
-      return next;
+    b.modifier((d) => {
+      const next = new Set(d.selected);
+      if (on && next.size < NEGOCES_PAR_DEMANDE) next.add(supplierId);
+      else if (!on) next.delete(supplierId);
+      return { ...d, selected: [...next] };
     });
 
   // §45.9 : « Envoyer » de l'aperçu crée la demande et, quand le serveur envoie les mails, l'envoie à chacun.
@@ -390,17 +1049,26 @@ function NewRequest({
     setPending(true);
     setError(null);
     try {
-      let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
-        method: "POST",
-        body: { supplierIds: [...selected], message: message || null, dueDate: dueDate || null },
-        idempotencyKey: key.current,
-      });
-      if (deliversEmail) {
-        for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
-        onSent();
+      // Greg, 14 novembre 2026 (recette du 13, B7) : la demande trie ses lignes par métier de chaque négoce. Les négoces
+      // qui reçoivent les mêmes lignes partent dans la même demande ; sans tri à faire, une seule demande, comme avant.
+      const tri = await api<Repartition>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests/repartition`, { method: "POST", body: { supplierIds: [...selected] } });
+      const groupes: { supplierIds: string[]; articles?: string[] }[] = tri.toutPourTous || tri.groupes.length === 0 ? [{ supplierIds: [...selected] }] : tri.groupes;
+      const creees: PriceRequest[] = [];
+      // Les demandes d'un envoi trié portent le même lot : l'écran les suit ensemble (offres, « Comparer », « Commander »).
+      const lot = groupes.some((g) => g.articles) ? key.current : null;
+      for (const [i, g] of groupes.entries()) {
+        let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
+          method: "POST",
+          body: { supplierIds: g.supplierIds, ...(g.articles ? { articles: g.articles } : {}), ...(lot ? { lot } : {}), message: messageLibre ?? (message || null), dueDate: dueDate || null, ...(tutoie === null ? {} : { tutoie }) },
+          idempotencyKey: i === 0 ? key.current : `${key.current}-${i}`,
+        });
+        if (deliversEmail) for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
+        creees.push(request);
       }
+      if (deliversEmail) onSent();
+      b.effacer();
       setPreviewing(false);
-      onCreated(request);
+      for (const request of creees) onCreated(request);
     } catch (e) {
       setError(toError(e));
       setPending(false);
@@ -409,7 +1077,8 @@ function NewRequest({
 
   return (
     <div className="flex flex-col gap-3">
-      <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
+      <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
+      {selected.size > 0 ? <QuiRecoitQuoi projectId={projectId} ids={[...selected].sort().join(",")} /> : null}
       <details className="rounded-2xl bg-surface p-3 text-sm shadow-card">
         <summary className="cursor-pointer font-bold">Ajouter un message ou une date de réponse (facultatif)</summary>
         <label className="flex min-h-11 items-center gap-3 text-sm">
@@ -426,14 +1095,16 @@ function NewRequest({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="ex. Livraison sur chantier possible ?"
-            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-subtle"
+            className="rounded-2xl bg-surface p-3 text-base text-ink outline-none placeholder:text-muted"
           />
           <label htmlFor={`${id}-due`} className="font-bold">
-            Réponse souhaitée avant le
+            Réponse souhaitée avant le (facultatif)
           </label>
           <input
             id={`${id}-due`}
             type="date"
+            // Recette n° 2 du 14 novembre 2026 : une date déjà passée ne se choisit pas (le serveur la refuse aussi).
+            min={new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date())}
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
             className="min-h-12 rounded-2xl bg-surface px-3 text-base text-ink outline-none"
@@ -441,42 +1112,91 @@ function NewRequest({
         </div>
       </details>
       {error ? <ErrorNotice error={error} /> : null}
-      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => void create()}>
+      <Button variant="accent" pending={pending} disabled={selected.size === 0} onClick={() => (setEtape("negoces"), setPreviewing(true))}>
         <Mail size={18} aria-hidden="true" />
         {selected.size === 0 ? "Coche au moins un fournisseur" : "Envoyer la demande de devis"}
       </Button>
       {previewing ? (
         // §50.7 : l'écran « Ton chantier » EST le document ; l'envoi ne montre plus d'aperçu, seulement à qui il part.
-        <SendSheet
-          canSend={selected.size > 0}
-          sending={pending}
-          onSend={() => void create()}
-          onClose={() => {
-            setPreviewing(false);
-            onPreviewClosed?.();
-          }}
-        >
-          <SupplierPicker allByDefault selected={selected} onToggle={toggle} dark={false} />
-        </SendSheet>
+        identite.data && !identite.data.complete ? (
+          // Lot final, point 1 : la première fois, « Avant d'envoyer » (SIRET, prénom, portable), une seule fois.
+          <SendSheet // Chaque étape a sa propre fenêtre : un bouton « Continuer » ne passe jamais d'une étape à l'autre sous le doigt.
+            key="identite"
+            titre="Avant d'envoyer"
+            principal={{ label: "Continuer", form: FORMULAIRE_IDENTITE, pending: enregistre }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            <EtapeIdentite identite={identite.data} onFait={(i) => identite.setData(i)} onPending={setEnregistre} />
+          </SendSheet>
+        ) : identite.data && adresseEtat === "inconnu" ? null : identite.data && adresseEtat === "a-voir" ? (
+          <SendSheet
+            key="adresse"
+            titre="Voici ton adresse Mobiiz :"
+            principal={{
+              label: "C'est compris",
+              pending: vuePending,
+              onClick: () => {
+                setVuePending(true);
+                void api("/v1/company/adresse-mobiiz/vue", { method: "POST" })
+                  .catch(() => undefined)
+                  .finally(() => {
+                    setVuePending(false);
+                    setAdresseEtat("vue");
+                  });
+              },
+            }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            <ContenuAdresseMobiiz onDejaVue={dejaVue} />
+          </SendSheet>
+        ) : etape === "negoces" ? (
+          <SendSheet key="negoces"
+            titre="À qui j'envoie ?"
+            principal={{ label: selected.size === 0 ? "Choisis un négoce" : "Continuer", disabled: selected.size === 0 || !identite.data, onClick: () => setEtape("apercu") }}
+            onClose={() => {
+              setPreviewing(false);
+              onPreviewClosed?.();
+            }}
+          >
+            {/* Lot final, ton : avant l'envoi à ses négoces, une phrase de collègue (docs/groupe/TON.md). */}
+            <p className="text-[15px] font-semibold">{TON.avantEnvoiNegoces}</p>
+            {/* R7 : le rappel en une ligne au premier envoi (Greg, 27 octobre 2026). */}
+            <RappelAdresseMobiiz />
+            <SupplierPicker allByDefault={b.pret && !b.repris} selected={selected} onToggle={toggle} dark={false} />
+            {selected.size > 0 ? <QuiRecoitQuoi projectId={projectId} ids={[...selected].sort().join(",")} /> : null}
+          </SendSheet>
+        ) : (
+          // Lot final, point 4 : « Voici ce que ton négoce va recevoir », l'aperçu fidèle ; un seul bouton, « Envoyer ».
+          <SendSheet key="apercu"
+            titre="Voici ce que ton négoce va recevoir"
+            principal={{ label: "Envoyer", disabled: selected.size === 0, pending, onClick: () => void create() }}
+            onClose={() => setEtape("negoces")}
+          >
+            <EtapeApercu projectId={projectId} supplierId={[...selected][0] ?? null} message={messageLibre} onMessage={setMessageLibre} tutoie={tutoie} onTutoie={setTutoie} />
+            {error ? <ErrorNotice error={error} /> : null}
+          </SendSheet>
+        )
       ) : null}
     </div>
   );
 }
 
-function AddRecipients({ request, onChange }: { request: PriceRequest; onChange: (r: PriceRequest) => void }) {
-  const [open, setOpen] = useState(false);
+/** « Ajouter un négoce » (menu « ··· » du chantier, point 8) : le carnet, sans ceux qui ont déjà la demande. */
+function AddRecipients({ request, open, onClose, onChange }: { request: PriceRequest; open: boolean; onClose: () => void; onChange: (r: PriceRequest) => void }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
+  const setOpen = (v: boolean) => {
+    if (!v) onClose();
+  };
 
-  if (!open) {
-    return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
-        <Plus size={18} aria-hidden="true" />
-        Demander à un autre fournisseur
-      </Button>
-    );
-  }
+  if (!open) return null;
 
   async function add() {
     setPending(true);
@@ -494,16 +1214,17 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
 
   return (
     <Card className="flex flex-col gap-3 p-4">
-      <span className="font-bold">Ajouter des fournisseurs à la demande</span>
+      <span className="font-bold">Ajouter un négoce à la demande</span>
       <SupplierPicker
         exclude={request.recipients.map((r) => r.supplier.id)}
         selected={selected}
         dark={false}
+        max={NEGOCES_PAR_DEMANDE - request.recipients.length}
         onToggle={(id, on) =>
           setSelected((prev) => {
             const next = new Set(prev);
-            if (on) next.add(id);
-            else next.delete(id);
+            if (on && next.size < NEGOCES_PAR_DEMANDE - request.recipients.length) next.add(id);
+            else if (!on) next.delete(id);
             return next;
           })
         }
@@ -524,20 +1245,20 @@ function AddRecipients({ request, onChange }: { request: PriceRequest; onChange:
 type CardState = { label: string; tone: "ok" | "warn" | "neutral"; info: string };
 
 /** Où en est le fournisseur, en deux mots, et une seule information utile. */
-function cardState(r: PriceRequestRecipient, offer: Offer | null): CardState {
-  if (offer) {
-    const facts = offerFacts(offer);
-    return { label: facts.toCheck ? "À vérifier" : "Comparé", tone: facts.toCheck ? "warn" : "ok", info: facts.text };
-  }
+function cardState(r: PriceRequestRecipient): CardState {
   switch (r.status) {
     case "to_send":
       return { label: "À envoyer", tone: "warn", info: r.supplier.email };
     case "sent":
-      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${new Date(r.sentAt).toLocaleDateString("fr-FR")}` : "Demande envoyée" };
+      // Le parcours du négoce (6 novembre 2026) : sa question d'abord, puis « Va répondre ».
+      if (r.negoce?.precision && !r.negoce.precision.reponse) return { label: "Question", tone: "warn", info: "Il a besoin d'une précision : réponds-lui dans le Suivi." };
+      if (r.negoce?.vaRepondreLe) return { label: "Va répondre", tone: "ok", info: r.sentAt ? `Demande envoyée le ${dateHeureCourte(new Date(r.sentAt))}` : "Demande envoyée" };
+      return { label: "En attente", tone: "neutral", info: r.sentAt ? `Demande envoyée le ${dateHeureCourte(new Date(r.sentAt))}` : "Demande envoyée" };
     case "received":
-      return { label: "Devis reçu", tone: "ok", info: "Prêt à comparer" };
+      // Point 7 (28 octobre 2026) : plus de « Prêt à comparer » : le devis s'ouvre tel quel.
+      return { label: "Devis reçu", tone: "ok", info: "" };
     case "declined":
-      return { label: "Pas de réponse", tone: "neutral", info: "" };
+      return { label: "Ne chiffre pas", tone: "neutral", info: r.negoce?.refusMotif ? `« ${r.negoce.refusMotif} »` : "" };
   }
 }
 
@@ -573,7 +1294,7 @@ function RecipientCard({
   const [panel, setPanel] = useState<Panel>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
-  const state = cardState(r, offer);
+  const state = cardState(r);
   const demo = isDemoSupplier(r.supplier.email);
   const send = () =>
     run(async () => {
@@ -645,8 +1366,9 @@ function RecipientCard({
 
   const items: { label: string; onSelect: () => void }[] = [];
   if (r.email) items.push({ label: panel === "email" ? "Masquer l'e-mail" : "Voir l'e-mail", onSelect: () => toggle("email") });
-  if (r.document) items.push({ label: "Ouvrir son devis", onSelect: () => void openDocument(r.document!.id, r.document!.name, r.document!.name) });
   if (offer) items.push({ label: panel === "lines" ? "Masquer les lignes" : "Voir les lignes de son devis", onSelect: () => toggle("lines") });
+  if (request.packet)
+    items.push({ label: "Voir la demande de devis (PDF)", onSelect: () => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" }) });
   if (!archived) {
     if (r.status === "to_send") {
       items.push({ label: "Copier le texte de l'e-mail", onSelect: () => void copy() });
@@ -659,9 +1381,7 @@ function RecipientCard({
     }
     if (r.status === "declined") items.push({ label: "Remettre en attente", onSelect: () => void setStatus("sent") });
     // Devis reçu par un autre chemin (téléphone, comptoir, photo) : on peut toujours le ranger ici.
-    if (!r.document && (r.status !== "sent" || demo)) {
-      items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
-    }
+    if (!r.document) items.push({ label: panel === "upload" ? "Masquer l'ajout du devis" : "Ajouter son devis reçu", onSelect: () => toggle("upload") });
     if (r.document) items.push({ label: "Retirer ce devis", onSelect: () => void removeQuote(r.document!.id) });
   }
 
@@ -670,7 +1390,7 @@ function RecipientCard({
       <div className="flex items-start gap-3">
         <div className="flex min-w-0 grow flex-col">
           <span className="text-[17px] leading-snug font-extrabold">{r.supplier.name}</span>
-          {state.info ? <span className={`text-[13px] ${state.tone === "warn" && offer ? "font-semibold text-warn" : "text-muted"}`}>{state.info}</span> : null}
+          {state.info ? <span className="text-[13px] text-muted">{state.info}</span> : null}
         </div>
         <Badge tone={state.tone}>{state.label}</Badge>
         {items.length > 0 ? (
@@ -690,7 +1410,7 @@ function RecipientCard({
         <ul role="menu" aria-label={`Actions : ${r.supplier.name}`} className="flex flex-col divide-y divide-line rounded-2xl bg-ground px-3">
           {items.map((item) => (
             <li key={item.label} role="none">
-              <button type="button" role="menuitem" onClick={item.onSelect} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
+              <button type="button" role="menuitem" onClick={() => { setMenu(false); item.onSelect(); }} className="flex min-h-11 w-full items-center text-left text-sm font-bold">
                 {item.label}
               </button>
             </li>
@@ -726,18 +1446,13 @@ function RecipientCard({
           </Button>
         )
       ) : null}
-      {!archived && request.packet ? (
-        <button
-          type="button"
-          onClick={() => openFile({ url: `/v1/price-requests/${encodeURIComponent(request.id)}/demande-de-devis.pdf`, title: "Demande de devis", fileName: "demande-de-devis.pdf" })}
-          className="inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-bold text-accent-text"
-        >
-          Voir la demande de devis (PDF)
-        </button>
+      {r.document ? (
+        // Point 7 (Greg, 28 octobre 2026) : le devis reçu s'ouvre tel quel (aucune lecture IA).
+        <Button variant="secondary" onClick={() => void openDocument(r.document!.id, `Devis ${r.supplier.name}`, "devis.pdf")}>
+          Ouvrir le devis (PDF)
+        </Button>
       ) : null}
-      {!archived && !r.document && ((!demo && r.status === "sent") || panel === "upload") ? (
-        <QuoteUpload recipientId={r.id} onChange={onChange} />
-      ) : null}
+      {!archived && !r.document && panel === "upload" ? <QuoteUpload recipientId={r.id} onChange={onChange} /> : null}
       {pending ? <Spinner /> : null}
     </Card>
   );
@@ -827,10 +1542,20 @@ function EmailPreview({ to, email }: { to: string; email: { subject: string; bod
 }
 
 /**
- * §50.7 : après « Envoyer au fournisseur », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
+ * §50.7 : après « Envoyer aux négoces », une seule chose à faire : choisir à qui. Le document est l'écran « Ton chantier »
  * qu'on vient de quitter (plus d'écran « Ce que le fournisseur va recevoir »).
  */
-function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: boolean; sending: boolean; onSend: () => void; onClose: () => void; children: React.ReactNode }) {
+function SendSheet({
+  titre,
+  principal,
+  onClose,
+  children,
+}: {
+  titre: string;
+  principal: { label: string; disabled?: boolean; pending?: boolean; onClick?: () => void; form?: string };
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -839,9 +1564,9 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
     };
   }, []);
   return (
-    <div role="dialog" aria-modal="true" aria-label="À qui j'envoie ?" className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
+    <div role="dialog" aria-modal="true" aria-label={titre} className="fixed top-0 left-0 z-50 flex h-dvh w-full flex-col bg-ground">
       <div className="flex items-center justify-between gap-2 px-4 pt-[max(12px,env(safe-area-inset-top))] pb-2">
-        <h2 className="font-display text-[20px] font-extrabold">À qui j&apos;envoie ?</h2>
+        <h2 className="font-display text-[20px] font-extrabold">{titre}</h2>
         <button type="button" onClick={onClose} aria-label="Revenir à mon chantier" className="inline-flex size-11 items-center justify-center rounded-xl">
           <X size={20} aria-hidden="true" />
         </button>
@@ -849,10 +1574,15 @@ function SendSheet({ canSend, sending, onSend, onClose, children }: { canSend: b
       <div className="min-h-0 grow overflow-y-auto px-3 pb-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-3">{children}</div>
       </div>
-      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-[0_-8px_16px_-12px_rgba(16,24,40,0.25)]">
-        <Button className="min-h-14 w-full max-w-2xl text-[17px]" pending={sending} disabled={!canSend} onClick={onSend}>
-          <Send size={18} aria-hidden="true" />
-          {canSend ? "Envoyer" : "Choisis un fournisseur"}
+      <div className="flex shrink-0 flex-col items-center gap-1 bg-ground px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] border-t border-line">
+        <Button
+          className="min-h-14 w-full max-w-2xl text-[17px]"
+          pending={principal.pending ?? false}
+          disabled={principal.disabled ?? false}
+          {...(principal.form ? { type: "submit" as const, form: principal.form } : { onClick: principal.onClick })}
+        >
+          {principal.label === "Envoyer" ? <Send size={18} aria-hidden="true" /> : null}
+          {principal.label}
         </Button>
         <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
           Revenir à la liste

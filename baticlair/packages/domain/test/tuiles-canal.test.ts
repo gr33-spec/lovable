@@ -44,10 +44,11 @@ describe("la tuile canal est reconnue, même quand la ligne commence par « Tuil
 });
 
 describe("le calcul canal (§35.3)", () => {
-  it("Canal Gironde 50 à R 150 sur 100 m² : 2 540 tuiles (12,7 × 2), 307 ml de liteaux 27×40 (2,92 + 5 %), 54 bardelis (20 m × 2,7)", () => {
+  // + 3 % de casse et de coupe (fiche couverture, 2026-11-20, tuile.perte_canal ; avant 0 %).
+  it("Canal Gironde 50 à R 150 sur 100 m² : 2 617 tuiles (12,7 × 2 + 3 %), 307 ml de liteaux 27×40 (2,92 + 5 %), 54 bardelis (20 m × 2,7)", () => {
     const v = readQuote(DEVIS, A({ "product:tuile": "edilians-canal-gironde-50", "param:recouvrement_canal": { value: "150", unit: "mm" } }));
     const q = Object.fromEntries(v.toBuy.map((b) => [b.needIds[0], b.quantity]));
-    expect(q).toMatchObject({ "tuiles-canal": "2 540 pièces", "liteaux-canal": "307 ml", bardelis: "54 pièces" });
+    expect(q).toMatchObject({ "tuiles-canal": "2 617 pièces", "liteaux-canal": "307 ml", bardelis: "54 pièces" });
     expect(v.toQuote).toEqual([]);
     expect(v.questions).toEqual([]);
   });
@@ -55,7 +56,7 @@ describe("le calcul canal (§35.3)", () => {
   it("tuile à blocage : le recouvrement est fixe (150 mm), la question ne change rien et n'est pas posée", () => {
     const v = readQuote(DEVIS, A({ "product:tuile": "edilians-canal-gironde-blocage" }));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:recouvrement_canal");
-    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))?.quantity).toBe("2 540 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))?.quantity).toBe("2 617 pièces");
   });
 
   it("le devis nomme le modèle (« Canal Charentaise ») : une simple confirmation, pas un choix parmi six", () => {
@@ -66,7 +67,7 @@ describe("le calcul canal (§35.3)", () => {
     const v = readQuote([{ ref: "1", designation: "Tuiles canal Charentaise", quantity: "100", unit: "m²" }], A({ "product:tuile": "edilians-canal-charentaise", "param:recouvrement_canal": { value: "160", unit: "mm" } }));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("product:tuile");
     // 100 × 18,1 × 2 = 3 620.
-    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))?.quantity).toBe("3 620 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))?.quantity).toBe("3 729 pièces"); // 3 620 + 3 % (fiche couverture, 2026-11-20)
   });
 });
 

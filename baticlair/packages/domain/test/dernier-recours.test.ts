@@ -17,14 +17,14 @@ const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find
 const order = (r: ReturnType<typeof computeWorkItem>, id: string) => Number(need(r, id).purchase?.order.count);
 
 describe("modèle refusé : le générique compte, le fournisseur met sa marque", () => {
-  it("D-2026-015 : faîtières ventilées refusées → 29 faîtières (modèle à préciser) et 29 crochets, plus rien à chiffrer", () => {
+  it("D-2026-015 : faîtières ventilées refusées → 30 faîtières (modèle à préciser, 3 au ml) et 30 crochets, plus rien à chiffrer", () => {
     const c = REAL_QUOTES.find((q) => q.id === "D-2026-015")!;
     const v = readQuote(c.lines, c.answers);
     expect(v.toQuote).toEqual([]);
     const faitieres = v.toBuy.find((b) => b.needIds.includes("faitieres"))!;
     expect(faitieres.label).toMatch(/^Faîtières \(modèle à préciser\)/);
-    expect(faitieres.quantity).toBe("29 pièces");
-    expect(v.toBuy.find((b) => b.needIds.includes("crochets-faitiere"))?.quantity).toBe("29 pièces");
+    expect(faitieres.quantity).toBe("30 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("crochets-faitiere"))?.quantity).toBe("30 pièces");
     // L'hypothèse « modèle » n'est pas re-posée : l'artisan a déjà répondu.
     expect(v.assumptions.some((a) => a.key === "product:faitiere")).toBe(false);
   });
@@ -49,7 +49,7 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
   it("je façonne, 6 ml au plus : des feuilles de zinc 2 × 1 m, jamais du zinc au kg (§25.2) : 5,5 m × 0,25 m / 2 m² = 0,69 → 1 feuille", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250", longueur_bande: "5" }));
     expect(order(r, "feuilles-bandes")).toBe(1);
-    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes zinc");
+    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm");
     expect(r.needs.some((n) => n.purchase?.order.unit.many === "kg")).toBe(false);
   });
 

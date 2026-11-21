@@ -25,7 +25,7 @@ const PAQUET: Metier[] = [
       { ref: "2", designation: "Plinthes MDF blanches collées", quantity: "48", unit: "ml" },
       { ref: "3", designation: "Lambris sapin plafond chambre", quantity: "14", unit: "m²" },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {
@@ -36,7 +36,7 @@ const PAQUET: Metier[] = [
       { ref: "1", designation: "Meubles bas Delinia ID façades Ruxe blanc mat", quantity: "6", unit: "u" },
       { ref: "2", designation: "Plan de travail stratifié 38 mm chêne", quantity: "3.6", unit: "ml" },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 2, orange: 0, gris: 0 },
   },
   {

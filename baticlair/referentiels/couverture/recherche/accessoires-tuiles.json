@@ -1,0 +1,2667 @@
+{
+ "famille": "accessoires_tuiles",
+ "generated": "2026-11-20",
+ "perimetre": "Accessoires des tuiles terre cuite les plus courantes en Bretagne (Edilians HP 10 et PV 10, Alpha 10, Koramic Actua, Monier Signy, Terreal Romane Canal) : chatières, tuiles à douille, demi-tuiles, rives, abouts et frontons, coloris ; closoirs ventilés par classe de galbe ; mortier de faîtage scellé ; corrections des incohérences HP 10 / PV 10 du testeur-négoce. Les chiffres déjà dans tuiles-emboitement.json et points-singuliers.json ne sont pas refaits, seulement complétés ou corrigés.",
+ "regle_confirmation": "confirme_fabricant = fiche officielle du fabricant, sur son domaine, datée + contrôle par le calcul du modèle (1/(largeur utile × pureau) à 3 % ou à l'arrondi publié). Décision du fondateur, 19/11/2026.",
+ "entrees": [
+  {
+   "id": "chatiere_hp10_reference",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "chatiere_reference",
+   "valeur": "205.20",
+   "unite": "référence",
+   "condition": "tuile de ventilation du modèle, même coloris que la tuile",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation HP 10 Huguenot (section de ventilation 50 cm2) Réf. 205.20",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_hp10_section",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 50,
+   "unite": "cm² par tuile",
+   "condition": "section avec grille, lue sur la fiche du modèle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation HP 10 Huguenot (section de ventilation 50 cm2) Réf. 205.20",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_pv10_reference",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "chatiere_reference",
+   "valeur": "214.20",
+   "unite": "référence",
+   "condition": "tuile de ventilation du modèle, même coloris que la tuile",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation PV 10 Huguenot (section de ventilation 50 cm2) Réf. 214.20",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_pv10_section",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 50,
+   "unite": "cm² par tuile",
+   "condition": "section avec grille, lue sur la fiche du modèle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation PV 10 Huguenot (section de ventilation 50 cm2) Réf. 214.20",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_alpha10_reference",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "chatiere_reference",
+   "valeur": "200.20",
+   "unite": "référence",
+   "condition": "tuile de ventilation du modèle, même coloris que la tuile",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation … (section de ventilation 19 cm2) … Réf. 200.20",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_alpha10_section",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 19,
+   "unite": "cm² par tuile",
+   "condition": "section avec grille, lue sur la fiche du modèle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation … (section de ventilation 19 cm2) … Réf. 200.20",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_actua_reference",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "chatiere_reference",
+   "valeur": "MACT 8640 (+ grille 6070272)",
+   "unite": "référence",
+   "condition": "tuile de ventilation du modèle, même coloris que la tuile",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "MACT 8640 26 cm² … Tuile chatière Grille pour chatière … 26 cm2 avec grille",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile chatière (26 cm2) … (0,08 pc / m2 projeté)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "chatiere_actua_section",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 26,
+   "unite": "cm² par tuile",
+   "condition": "section avec grille, lue sur la fiche du modèle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "MACT 8640 26 cm² … Tuile chatière Grille pour chatière … 26 cm2 avec grille",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile chatière (26 cm2) … (0,08 pc / m2 projeté)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "chatiere_romane_canal_reference",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "chatiere_reference",
+   "valeur": "610 RC",
+   "unite": "référence",
+   "condition": "tuile de ventilation du modèle, même coloris que la tuile",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile chatière (section de ventilation 18 cm²) / 3,7 kg … 610 RC",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_romane_canal_section",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 18,
+   "unite": "cm² par tuile",
+   "condition": "section avec grille, lue sur la fiche du modèle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile chatière (section de ventilation 18 cm²) / 3,7 kg … 610 RC",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_signy_reference",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "chatiere_reference",
+   "valeur": "(pas de code sur la fiche)",
+   "unite": "référence",
+   "condition": "tuile de ventilation du modèle, même coloris que la tuile",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 33 cm²) … 4,5 kg/pièce",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_signy_section",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "chatiere_section_ventilation",
+   "valeur": 33,
+   "unite": "cm² par tuile",
+   "condition": "section avec grille, lue sur la fiche du modèle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 33 cm²) … 4,5 kg/pièce",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "chatiere_nombre_formule",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Terreal, Koramic, Ubbink, FFB",
+   "modele": "toutes tuiles",
+   "attribut": "chatieres_nombre_total",
+   "valeur": "arrondi supérieur de (surface projetée × 1/5000 ou 1/3000) ÷ section de la chatière, la moitié en bas du versant, la moitié en haut",
+   "unite": "formule",
+   "condition": "1/5000 : comble perdu (isolant au plancher) ou au-dessus d'un écran HPV ; 1/3000 : rampant isolé sans écran. Surface projetée au sol.",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "moitié à l'égout, moitié près du faîtage ; 1/5000 comble perdu, 1/3000 rampant isolé",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Le nombre de chatières est arrondi à l'entier supérieur, conformément aux recommandations du DTU.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "CALCUL DU NOMBRE DE CHATIÈRES … 1 / 5000 … 1 / 3000",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ubbink, catalogue Ventilation de la structure (diffusé par BigMat), calcul du nombre de chatières",
+     "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/8713645207711-QCyt6Ef1MF.pdf",
+     "type": "fabricant",
+     "extrait": "V : 2 cm2 / m2 ; V2 : 3.3 cm2 / m2 (surface projetée)",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "Koramic Actua 26 cm² : 1/5000 → 100/150/200/250 m² = 7,7/11,5/15,4/19,2 → fiche 8/12/16/20 ; 1/3000 → 12,8/19,2/25,6/32,1 → fiche 13/20/26/33 : OK (arrondi supérieur)",
+    "Terreal Romane Canal 18 cm² : 1/5000 → 11,1/16,7/22,2/27,8 → fiche 11/17/22/28 ; 1/3000 → 18,5/27,8/37,0/46,3 → fiche 19/28/37/47 : OK"
+   ],
+   "ecart": "Terreal arrondit au plus proche à 100 et 200 m² (11 et 22 au lieu de 12 et 23) alors que sa fiche annonce l'arrondi supérieur ; Koramic arrondit toujours au-dessus. Retenir l'arrondi supérieur, puis un nombre pair (moitié bas, moitié haut)."
+  },
+  {
+   "id": "chatiere_hp10_nombre",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "chatieres_par_surface",
+   "valeur": {
+    "100 m², comble perdu (1/5000)": 4,
+    "100 m², rampant isolé sans écran (1/3000)": 7,
+    "par m² projeté, 1/5000": 0.04,
+    "par m² projeté, 1/3000": 0.067
+   },
+   "unite": "u",
+   "condition": "section 50 cm² ; total bas + haut ; arrondir au-dessus puis à un nombre pair",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation HP 10 Huguenot (section de ventilation 50 cm2) Réf. 205.20",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "1/5000 comble perdu, 1/3000 rampant isolé ; moitié à l'égout, moitié près du faîtage",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK",
+    "50 cm² : 100 m² × 2 cm²/m² ÷ 50 = 4.0 → 4 ; 100 m² × 3,33 cm²/m² ÷ 50 = 6.7 → 7"
+   ]
+  },
+  {
+   "id": "chatiere_pv10_nombre",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "chatieres_par_surface",
+   "valeur": {
+    "100 m², comble perdu (1/5000)": 4,
+    "100 m², rampant isolé sans écran (1/3000)": 7,
+    "par m² projeté, 1/5000": 0.04,
+    "par m² projeté, 1/3000": 0.067
+   },
+   "unite": "u",
+   "condition": "section 50 cm² ; total bas + haut ; arrondir au-dessus puis à un nombre pair",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation PV 10 Huguenot (section de ventilation 50 cm2) Réf. 214.20",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "1/5000 comble perdu, 1/3000 rampant isolé ; moitié à l'égout, moitié près du faîtage",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK",
+    "50 cm² : 100 m² × 2 cm²/m² ÷ 50 = 4.0 → 4 ; 100 m² × 3,33 cm²/m² ÷ 50 = 6.7 → 7"
+   ]
+  },
+  {
+   "id": "chatiere_alpha10_nombre",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "chatieres_par_surface",
+   "valeur": {
+    "100 m², comble perdu (1/5000)": 11,
+    "100 m², rampant isolé sans écran (1/3000)": 18,
+    "par m² projeté, 1/5000": 0.105,
+    "par m² projeté, 1/3000": 0.175
+   },
+   "unite": "u",
+   "condition": "section 19 cm² ; total bas + haut ; arrondir au-dessus puis à un nombre pair",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de ventilation … (section de ventilation 19 cm2) … Réf. 200.20",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "1/5000 comble perdu, 1/3000 rampant isolé ; moitié à l'égout, moitié près du faîtage",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK",
+    "19 cm² : 100 m² × 2 cm²/m² ÷ 19 = 10.5 → 11 ; 100 m² × 3,33 cm²/m² ÷ 19 = 17.5 → 18"
+   ]
+  },
+  {
+   "id": "chatiere_actua_nombre",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "chatieres_par_surface",
+   "valeur": {
+    "100 m², comble perdu (1/5000)": 8,
+    "100 m², rampant isolé sans écran (1/3000)": 13,
+    "par m² projeté, 1/5000": 0.077,
+    "par m² projeté, 1/3000": 0.128
+   },
+   "unite": "u",
+   "condition": "section 26 cm² ; total bas + haut ; arrondir au-dessus puis à un nombre pair ; table de la fiche : 100 m² → 8 (1/5000) et 13 (1/3000) ; guide 2026 : 0,08 pièce par m² projeté",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "MACT 8640 26 cm² … Tuile chatière Grille pour chatière … 26 cm2 avec grille",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "1/5000 comble perdu, 1/3000 rampant isolé ; moitié à l'égout, moitié près du faîtage",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK",
+    "26 cm² : 100 m² × 2 cm²/m² ÷ 26 = 7.7 → 8 ; 100 m² × 3,33 cm²/m² ÷ 26 = 12.8 → 13",
+    "table de la fiche : 100 m² → 8 (1/5000) et 13 (1/3000) ; guide 2026 : 0,08 pièce par m² projeté : identique au calcul"
+   ]
+  },
+  {
+   "id": "chatiere_romane_canal_nombre",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "chatieres_par_surface",
+   "valeur": {
+    "100 m², comble perdu (1/5000)": 12,
+    "100 m², rampant isolé sans écran (1/3000)": 19,
+    "par m² projeté, 1/5000": 0.111,
+    "par m² projeté, 1/3000": 0.185
+   },
+   "unite": "u",
+   "condition": "section 18 cm² ; total bas + haut ; arrondir au-dessus puis à un nombre pair ; table de la fiche : 100 m² → 11 (1/5000) et 19 (1/3000)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile chatière (section de ventilation 18 cm²) / 3,7 kg … 610 RC",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "1/5000 comble perdu, 1/3000 rampant isolé ; moitié à l'égout, moitié près du faîtage",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK",
+    "18 cm² : 100 m² × 2 cm²/m² ÷ 18 = 11.1 → 12 ; 100 m² × 3,33 cm²/m² ÷ 18 = 18.5 → 19",
+    "Terreal imprime 11 (arrondi au plus proche) ; le calcul à l'arrondi supérieur donne 12"
+   ]
+  },
+  {
+   "id": "chatiere_signy_nombre",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "chatière (tuile de ventilation)",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "chatieres_par_surface",
+   "valeur": {
+    "100 m², comble perdu (1/5000)": 7,
+    "100 m², rampant isolé sans écran (1/3000)": 11,
+    "par m² projeté, 1/5000": 0.061,
+    "par m² projeté, 1/3000": 0.101
+   },
+   "unite": "u",
+   "condition": "section 33 cm² ; total bas + haut ; arrondir au-dessus puis à un nombre pair",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Tuile chatière grillagée (ouverture 33 cm²) … 4,5 kg/pièce",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FFB, dossier « La ventilation des couvertures en petits éléments » (cite la série NF DTU 40.2x)",
+     "url": "https://www.ffbatiment.fr/techniques-batiment/enveloppe-du-batiment/couverture/dossier/ventilation-couvertures-en-petits-elements",
+     "type": "guide",
+     "extrait": "1/5000 comble perdu, 1/3000 rampant isolé ; moitié à l'égout, moitié près du faîtage",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK",
+    "33 cm² : 100 m² × 2 cm²/m² ÷ 33 = 6.1 → 7 ; 100 m² × 3,33 cm²/m² ÷ 33 = 10.1 → 11"
+   ]
+  },
+  {
+   "id": "douille_hp10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile à douille / sortie",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "tuile_a_douille",
+   "valeur": {
+    "tuile à douille Ø 160 (conforme VMC)": "205.32",
+    "lanterne bi-section Ø 126 et Ø 160": "1007 (section d'aération 259 cm²)",
+    "kit de raccordement VMC Ø 160": "MANG.160"
+   },
+   "unite": "références",
+   "condition": "1 par sortie (VMC, hotte, ventilation primaire)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à douille HP 10 Huguenot Ø 160 (Conforme VMC) Réf. 205.32 … Lanterne bi-section … 259 cm2 … Réf. 1007",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "douille_pv10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile à douille / sortie",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "tuile_a_douille",
+   "valeur": {
+    "tuile à douille Ø 160 (conforme VMC)": "214.32",
+    "lanterne bi-section Ø 126 et Ø 160": "1007 (259 cm²)",
+    "kit de raccordement VMC Ø 160": "MANG.160"
+   },
+   "unite": "références",
+   "condition": "1 par sortie",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à douille PV 10 Huguenot Ø 160 (Conforme VMC) Réf. 214.32 … Réf. 1007",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "douille_alpha10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile à douille / sortie",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "tuile_a_douille",
+   "valeur": {
+    "tuile à douille Ø 160 (conforme VMC)": "200.32",
+    "lanterne bi-section Ø 126 et Ø 160": "1007 (259 cm²)",
+    "kit de raccordement VMC Ø 160": "MANG.160"
+   },
+   "unite": "références",
+   "condition": "1 par sortie",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à douille Ø 160 (Conforme VMC) … Réf. 200.32 … Lanterne bi-section … Réf. 1007",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK"
+   ]
+  },
+  {
+   "id": "douille_actua",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile à douille / sortie",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "tuile_a_douille",
+   "valeur": {
+    "kit tuile à douille Ø 150": "MACT 8729",
+    "section": "165 cm²"
+   },
+   "unite": "références",
+   "condition": "1 par sortie",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "MACT 8729 … Kit tuile à douille Ø 150 mm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Kit tuile à douille Ø 150 mm (165 cm2)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "douille_romane_canal",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile à douille / sortie",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "tuile_a_douille",
+   "valeur": {
+    "tuile à douille Ø 150 (3,6 kg)": "65 RC",
+    "chaterne-chapeau Ø 150": "780 XT",
+    "chaterne-plateau Ø 150": "785 XT",
+    "lanterne (chapiteau) Ø 150": "660 XT",
+    "connecteur VMC Ø 150 → Ø 160": "955 XX (Cobra)"
+   },
+   "unite": "références",
+   "condition": "1 par sortie ; le système VMC complet = tuile à douille + chapeau ou lanterne + connecteur",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à douille Ø 150 / 3,6 kg 65 RC … Connecteur aéraulique de VMC … 955 XX - COBRA",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "douille_signy",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile à douille / sortie",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "tuile_a_douille",
+   "valeur": {
+    "tuile à douille complète (lanterne + adaptateurs + tuile)": "Ø 100, 125 ou 150 mm, 10 kg",
+    "kit traversée d'écran universel": "Ø 100/125/150/180 mm"
+   },
+   "unite": "texte",
+   "condition": "1 par sortie ; le vendeur demande le diamètre",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Tuile à douille complète (Ø 100 - 125 - 150 mm Lanterne + adaptateurs plastiques + tuile) 10 kg/pièce",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "demi_tuile_hp10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "demi-tuile / ajustement",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "demi_tuile",
+   "valeur": {
+    "1/2 tuile": "205.01 (170 mm hors tout)",
+    "tuile de finition (sur commande)": "205.80",
+    "1/2 tuile de finition": "205.86"
+   },
+   "unite": "références",
+   "condition": "1/2 tuile : joints croisés et rives ; tuile de finition : dernier rang au faîtage",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "1/2 tuile HP 10 Huguenot Réf. 205.01 … Tuile de finition Réf. 205.80 … 1/2 tuile de finition Réf. 205.86",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "demi_tuile_pv10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "demi-tuile / ajustement",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "demi_tuile",
+   "valeur": {
+    "1/2 tuile": "214.01"
+   },
+   "unite": "références",
+   "condition": "pas de tuile de finition sur la fiche PV 10",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "1/2 tuile PV 10 Huguenot … Réf. 214.01",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "demi_tuile_alpha10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "demi-tuile / ajustement",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "demi_tuile",
+   "valeur": {
+    "1/2 tuile": "200.01 (195 mm utile avec 1/2 tuile)"
+   },
+   "unite": "références",
+   "condition": "pose à joints croisés",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "1/2 tuile ALPHA 10 Ste Foy … Réf. 200.01 … (195 mm avec 1/2 tuile)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK"
+   ]
+  },
+  {
+   "id": "demi_tuile_actua",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "demi-tuile / ajustement",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "demi_tuile",
+   "valeur": {
+    "demi-tuile": "MACT 8010",
+    "demi-tuile à rabat G / D": "MACT 7020 / MACT 7030",
+    "tuile de bord G sans emboîtement": "MACT 8045",
+    "demi-tuile de bord G": "MACT 8040"
+   },
+   "unite": "références",
+   "condition": "codes lus dans l'ordre de la fiche, sous les dessins",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "MACT 7080 MACT 7020 MACT 7090 MACT 7030 … MACT 8045 MACT 8040 MACT 8010",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "demi_tuile_romane_canal",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "demi-tuile / ajustement",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "tuiles_ajustement",
+   "valeur": {
+    "tuile demi-pureau (4,7/ml)": "3 RC",
+    "tuile 3/4 pureau": "2 RC",
+    "sous-faîtière (4,7/ml)": "53 RC",
+    "sous-faîtière 1/2 pureau (4,7/ml)": "55 RC",
+    "sous-faîtière 3/4 pureau (4,7/ml)": "555 RC"
+   },
+   "unite": "références",
+   "condition": "Romane Canal n'a pas de demi-tuile en largeur : on ajuste en longueur (égout, faîtage) ; 4,7 par ml de faîtage ou d'égout",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile demi-pureau 4,7 au ml / 2,1 kg … 3 RC … Sous-faîtière 4,7 au ml / 3,8 kg 53 RC",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "demi_tuile_signy",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "demi-tuile / ajustement",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "demi_tuile",
+   "valeur": {
+    "demi-tuile": "1,4 au ml de rive, 192/palette",
+    "demi-tuile d'about gauche": "1,4 au ml, 128/palette",
+    "tuile d'about gauche": "1,4 au ml, 120/palette"
+   },
+   "unite": "texte",
+   "condition": "joints croisés : demi-tuile, demi-tuile de rive ou demi-tuile d'about un rang sur deux",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Demi-tuile Demi-tuile d'about Tuile d'about … 1,4 au m … 192 / palette 128 / palette 120 / palette",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "rive_hp10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "tuiles_de_rive",
+   "valeur": {
+    "tuile de rive à rabat D / G": "205.72 / 205.73",
+    "1/2 tuile de rive à rabat D / G": "205.74 / 205.75",
+    "rive individuelle PV 13 Huguenot, D à emboîtement / G à recouvrement": "215.41 / 215.42 (2,7/ml au pureau de 368 mm)",
+    "rive universelle": "1050 (3/ml)",
+    "about de rive universelle G / D": "1070 / 1071",
+    "fronton de rive universelle": "1080"
+   },
+   "unite": "références",
+   "condition": "trois systèmes au choix : rabat + 1/2 rabat, rive individuelle PV 13, rive universelle",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile de rive à rabat HP 10 Huguenot (2,7 par ml) Droite Réf. 205.72 Gauche Réf. 205.73 … Rive individuelle à emboîtement PV 13 Huguenot … 215.41 … 215.42",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "rive_pv10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "tuiles_de_rive",
+   "valeur": {
+    "rive individuelle PV 13 Huguenot, D à emboîtement / G à recouvrement": "215.41 / 215.42 (2,7/ml au pureau de 368 mm)",
+    "rive universelle": "1050 (3/ml)",
+    "grande rive universelle Patrimoine": "1048 (2,5/ml)",
+    "about de rive universelle G / D": "1070 / 1071",
+    "about de rive universelle Patrimoine G / D": "1078 / 1079",
+    "fronton de rive universelle": "1080"
+   },
+   "unite": "références",
+   "condition": "pas de tuile de rive à rabat pour la PV 10 (différence avec la HP 10)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Rive individuelle à emboîtement PV 13 Huguenot (2,7 par ml au pureau de 368 mm) Droite Réf. 215.41 Gauche Réf. 215.42",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "rive_alpha10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "tuiles_de_rive",
+   "valeur": {
+    "rive individuelle D à emboîtement / G à recouvrement": "200.41 / 200.42 (2,7/ml au pureau de 370 mm)",
+    "rive universelle": "1051 (3/ml)",
+    "about de rive universelle G / D": "1072 / 1073",
+    "fronton de rive universelle": "1083"
+   },
+   "unite": "références",
+   "condition": "pas de tuile à rabat sur la fiche Alpha 10",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Rive individuelle à emboîtement (2,7 par ml au pureau de 370 mm) Droite Réf. 200.41 … Gauche Réf. 200.42 … Rive universelle (3 par ml) Réf. 1051",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK"
+   ]
+  },
+  {
+   "id": "rive_actua",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "tuiles_de_rive",
+   "valeur": {
+    "tuile à rabat G / D (1,35/ml)": "MACT 7080 / MACT 7090",
+    "demi-tuile à rabat G / D (1,35/ml)": "MACT 7020 / MACT 7030",
+    "rive individuelle G / D (2,7/ml)": "MACT 7060 / MACT 7070",
+    "rive universelle": "M000 7600",
+    "about de rive universelle G / D": "M000 7610 / M000 7620",
+    "fronton de rive universelle": "M000 7640"
+   },
+   "unite": "références",
+   "condition": "codes lus dans l'ordre de la fiche ; nombres au ml lus dans le guide 2026",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "MACT 7080 MACT 7020 MACT 7090 MACT 7030 MACT 7060 MACT 7070 Tuile à rabat G Demi-tuile à rabat G …",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à rabat G (1,35 au ml) … Rive individuelle G Rive individuelle D (2,7 au ml)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "rive_romane_canal",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "tuiles_de_rive",
+   "valeur": {
+    "rive équerre G / D (2,6/ml)": "21 XT / 22 XT",
+    "rive ronde à ressaut G / D (2,6/ml)": "13 LC / 14 LC",
+    "rive bardelis G / D (2,6/ml)": "18 LC / 19 LC",
+    "double de rive + clip (2,6/ml)": "151 RC",
+    "double de rive de raccordement": "15 RC",
+    "rive shed (2,5/ml)": "182 XT",
+    "fronton de rive équerre / ronde / bardelis": "35 XT / 38 XT / 40 XT"
+   },
+   "unite": "références",
+   "condition": "rive G et D comptées séparément, 2,6 par ml et par côté",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Rive équerre gauche 2,6 au ml / 2,8 kg 21 XT … Rive ronde à ressaut gauche 2,6 au ml 13 LC … Rive bardelis gauche 18 LC",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "rive_signy",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "tuiles_de_rive",
+   "valeur": {
+    "rive à rabat G / D": "2,7 à 3,3 au ml, 90/palette",
+    "tuile de rive G / D (+ demi-tuile de rive)": "1,4 à 1,7 au ml chacune, 48 et 84/palette",
+    "rive universelle de 33 G / D": "3 au ml, 128/palette, Rouge Vieilli uniquement",
+    "about de rive de 33 G / D": "100/palette, Rouge Vieilli uniquement"
+   },
+   "unite": "texte",
+   "condition": "« additionner les nombres au mètre des 2 modèles » en pose alternée tuile de rive + demi-tuile de rive",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Rive à rabat gauche … 2,7 à 3,3 au m … 90 / palette … ** Disponible en Rouge Vieilli uniquement",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "rive_rabat_demi_partage",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "tuile de rive",
+   "marque": "Koramic, Monier, Edilians",
+   "modele": "tuiles à emboîtement grand moule",
+   "attribut": "rive_rabat_et_demi_par_ml_et_par_cote",
+   "valeur": {
+    "tuile de rive à rabat": "≈ 1 ÷ (2 × pureau), soit 1,35/ml au pureau de 370 mm",
+    "1/2 tuile de rive à rabat": "≈ 1 ÷ (2 × pureau), soit 1,35/ml",
+    "total par côté": "≈ 1 ÷ pureau, soit 2,7/ml"
+   },
+   "unite": "u/ml",
+   "condition": "pose à joints croisés : la tuile à rabat et la demi-tuile à rabat alternent d'un rang à l'autre sur la même rive",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à rabat G (1,35 au ml) … Demi-tuile à rabat G (1,35 au ml)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "additionner les nombres au mètre des 2 modèles … compter 1,4 à 1,7 tuiles de rive et 1,4 à 1,7 demies tuiles de rives",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Pose avec tuiles de rive à rabat … Tuile à rabat gauche 1/2 tuile à rabat droite … 1/2 tuile à rabat gauche Tuile à rabat droite",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "HP 10 au pureau de 368 mm : 1/0,368 = 2,72 pièces par ml et par côté, soit 1,36 tuile à rabat + 1,36 demi-tuile à rabat"
+   ],
+   "ecart": "Edilians imprime « 2,7 par ml » sous la tuile à rabat ET sous la 1/2 tuile à rabat : c'est le total par rive, pas 2,7 de chaque (le dessin de pose alterne les deux). Commander 2,7 + 2,7 doublerait la rive."
+  },
+  {
+   "id": "faitage_hp10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "faîtière / about / fronton",
+   "marque": "Edilians",
+   "modele": "HP 10 Huguenot",
+   "attribut": "faitage_references",
+   "valeur": {
+    "faîtière/arêtier angulaire à emboîtement (3/ml)": "710",
+    "faîtière losangée à emboîtement (2,5/ml)": "716",
+    "faîtière 1/2 rond à emboîtement (2,5/ml)": "717",
+    "faîtière Shed (3/ml)": "724",
+    "arêtier à emboîtement (2,5/ml)": "758",
+    "about de faîtière losangée / d'arêtier angulaire": "824 / 859",
+    "about d'arêtier à emboîtement / de faîtière-arêtier 1/2 rond": "863 / 869",
+    "fronton faîtière angulaire": "801",
+    "fronton faîtière Shed D / G": "805 / 806",
+    "fronton faîtière 1/2 rond / losangée": "807 / 809",
+    "crochet de faîtière angulaire / 1/2 rond": "CRP705 / CRP717"
+   },
+   "unite": "références",
+   "condition": "1 about par extrémité de faîtage sur pignon ou par pied d'arêtier, du modèle de la faîtière",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier angulaire à emboîtement (3 par ml) Réf. 710 … Faîtière 1/2 rond à emboîtement (2,5 par ml) Réf. 717 … About de faîtière losangée Réf. 824",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "faitage_pv10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "faîtière / about / fronton",
+   "marque": "Edilians",
+   "modele": "PV 10 Huguenot",
+   "attribut": "faitage_references",
+   "valeur": {
+    "faîtière/arêtier angulaire (3/ml)": "710",
+    "losangée / 1/2 rond (2,5/ml)": "716 / 717",
+    "Shed (3/ml)": "724",
+    "arêtier à emboîtement (2,5/ml)": "758",
+    "abouts": "824, 859, 863, 869",
+    "frontons": "801, 805/806, 807, 809, 816, 816.10"
+   },
+   "unite": "références",
+   "condition": "mêmes faîtières que la HP 10 ; frontons Patrimoine 816 en plus",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "à emboîtement (3 par ml) … Réf. 710 … Réf. 716 Réf. 717 … Réf. 824 … Réf. 859 Réf. 863 Réf. 869 … Réf. 816.10",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 268 × pureau 376 à 310) = 9.92 à 12.04 u/m², fiche 9,9 à 12 : OK"
+   ]
+  },
+  {
+   "id": "faitage_alpha10",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "faîtière / about / fronton",
+   "marque": "Edilians",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "faitage_references",
+   "valeur": {
+    "faîtière/arêtier 1/2 rond petit modèle (3/ml)": "700",
+    "faîtière/arêtier 1/2 rond grand modèle (2,5/ml)": "702",
+    "faîtière/arêtier à emboîtement grand modèle (3/ml)": "706",
+    "faîtière à bourrelet (2,5/ml)": "715",
+    "faîtière/arêtier angulaire (3/ml)": "749",
+    "about d'arêtier 1/2 rond petit / grand": "850 / 851",
+    "about d'arêtier / about d'arêtier angulaire": "854 / 889",
+    "fronton faîtière angulaire": "801",
+    "fronton modèle petite / grande ouverture": "803 / 804",
+    "crochets": "CRP700/706, CRP702, CRP715, CRP705"
+   },
+   "unite": "références",
+   "condition": "",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Faîtière/arêtier 1/2 rond à emboîtement modèle (3 par ml) Petit Réf. 700 … (2,5 par ml) Grand Réf. 702 … angulaire … Réf. 749",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 270 × pureau 370 à 330) = 10.01 à 11.22 u/m², fiche 10 à 11,2 : OK"
+   ]
+  },
+  {
+   "id": "faitage_actua",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "faîtière / about / fronton",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "faitage_references",
+   "valeur": {
+    "faîtière-arêtier ventilée angulaire (3/ml, 90 cm²/ml)": "M000 2800",
+    "about faîtière ventilée début / fin": "M000 2810 / M000 2820",
+    "fronton de faîtière ventilée": "M000 2840",
+    "about arêtier ventilé": "M000 2860",
+    "faîtière-arêtier Tige de botte (3/ml)": "M000 1500",
+    "faîtière 1/2 ronde ventilée Lantenne (2,5/ml, 90 cm²/ml)": "M000 1200",
+    "faîtière-arêtier 1/2 ronde Seltz n°2": "B000 1001"
+   },
+   "unite": "références",
+   "condition": "codes lus dans l'ordre de la fiche (à faire vérifier par le comptoir) ; nombres au ml et ventilation lus dans le guide 2026",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "M000 2800 M000 2810 M000 2820 M000 2840 M000 2860 M000 1500 Faîtière-arêtier ventilé About faîtière ventilée …",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Faîtière-arêtier ventilée angulaire (3,0 au ml - 90 cm2/ml) … Faîtière ½ ronde ventilée Lantenne (2,5 au ml - 90 cm2/ml)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "faitage_romane_canal",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "faîtière / about / fronton",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "faitage_references",
+   "valeur": {
+    "faîtière ventilation + clip (2,5/ml)": "291 XT",
+    "faîteau (2,8/ml)": "30 XT",
+    "about de faîtière ventilation": "391 XT",
+    "arêtier ventilation / à sceller (3/ml)": "326 XT / 336 XT",
+    "about d'arêtier ventilation / à sceller": "450 XT / 88 XT",
+    "porte-poinçon 3 / 4 branches": "485 XT / 488 XT",
+    "raccord 3 branches": "466 XT",
+    "poinçon pomme de pin n°3 (sur commande)": "491 XT"
+   },
+   "unite": "références",
+   "condition": "faîtage à sec : faîtière ventilation + clip ; scellé : arêtier et about « à sceller »",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Faîtière ventilation + clip 2,5 au ml / 3,5 kg 291 XT … About d'arêtier à sceller 2,65 kg 88 XT … Arêtier à sceller 3 au ml 336 XT",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "faitage_signy",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "faîtière / about / fronton",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "faitage_references",
+   "valeur": {
+    "faîtière à pans de 40 ventilée (2,5/ml)": "45/palette",
+    "arêtier à pans de 40 (2,5/ml)": "45/palette",
+    "fronton début/fin faîtière à pans": "40/palette",
+    "faîtière/arêtier demi-ronde ventilée (2,5/ml)": "144/palette",
+    "faîtière d'about demi-ronde début / fin": "24/palette chacune",
+    "arêtier ornemental de 40 (2,3/ml)": "",
+    "clip N faîtière/arêtier à pans": "2,5 au ml, sac de 50"
+   },
+   "unite": "texte",
+   "condition": "pas de code article sur la fiche Signy",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Faîtière à pans de 40 ventilée … 2,5 au m … 45 / palette … Faîtière/arêtier demi-ronde ventilée … 144 / palette",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "coloris_romane_canal",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "coloris",
+   "marque": "Terreal (Wienerberger)",
+   "modele": "Romane Canal",
+   "attribut": "coloris",
+   "valeur": [
+    "Rouge",
+    "Brun rustique",
+    "Ton mêlé Atlantique",
+    "Vieilli castel",
+    "Vieilli Languedoc",
+    "Rose charentais (sur commande)"
+   ],
+   "unite": "liste",
+   "condition": "gamme de la fiche février 2025 ; la fiche présente la Romane Canal comme « la tuile de référence du grand Ouest »",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Rose charentais (disponible sur commande) Rouge Brun rustique Ton mêlé Atlantique Vieilli castel Vieilli Languedoc",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 219 × pureau 385) = 11.86 u/m², fiche 12 : OK"
+   ]
+  },
+  {
+   "id": "coloris_actua",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "coloris",
+   "marque": "Koramic (Wienerberger)",
+   "modele": "Actua",
+   "attribut": "coloris",
+   "valeur": [
+    "Ardoisé",
+    "Blanc titane",
+    "Brun",
+    "Grésé bourgogne",
+    "Gris",
+    "Gris titane",
+    "Noir titane",
+    "Nuagé",
+    "Rouge naturel"
+   ],
+   "unite": "liste",
+   "condition": "gamme de la fiche novembre 2026 (« Rouge naturel », pas « Rouge »)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "Ardoisé Blanc titane Brun Grésé bourgogne Gris Gris titane Noir titane Nuagé Rouge naturel",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 262 × pureau 380) = 10.04 u/m², fiche « environ 10 » : OK"
+   ]
+  },
+  {
+   "id": "coloris_signy_accessoires",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "coloris",
+   "marque": "Monier (BMI)",
+   "modele": "Signy",
+   "attribut": "coloris_restriction_accessoires",
+   "valeur": "rive universelle de 33 et about de rive de 33 : Rouge Vieilli uniquement",
+   "unite": "texte",
+   "condition": "sur une Signy Anthracite mat ou Moka, prendre rive à rabat ou tuile de rive",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme_fabricant",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "** Disponible en Rouge Vieilli uniquement",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "1/(largeur utile 283 × pureau 375 à 300) = 9.42 à 11.78 u/m², fiche 9,5 à 11,8 : OK"
+   ]
+  },
+  {
+   "id": "coloris_courants_bretagne",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "coloris",
+   "marque": "",
+   "modele": "HP 10, PV 10, Alpha 10, Actua, Signy, Romane Canal",
+   "attribut": "coloris_les_plus_vendus_en_bretagne",
+   "valeur": null,
+   "unite": "liste",
+   "condition": "coloris réellement stockés par les négoces bretons (22, 29, 35, 56)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Recherche web « tuile HP 10 ardoisé négoce Bretagne » et « Romane Canal coloris négoce Rennes / Nantes / Vannes / Brest »",
+     "url": "https://www.edilians.com/hp-10-huguenot.html",
+     "type": "fabricant",
+     "extrait": "aucune page de négoce breton avec un stock ou un coloris par défaut",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Aucune source publique ne dit quel coloris est stocké en Bretagne. Les gammes complètes sont dans tuiles-emboitement.json (HP 10 : 6, PV 10 : 4, Alpha 10 : 7, Signy : 4) et ici (Actua, Romane Canal). À demander à un négoce breton ; en attendant, ne proposer aucun coloris par défaut."
+  },
+  {
+   "id": "closoir_hp10_largeur",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians (tuile) ; Edilians, Monier (closoirs)",
+   "modele": "HP 10 Huguenot",
+   "attribut": "closoir_largeur",
+   "valeur": {
+    "Edilians SIROKO+4": "240 mm",
+    "Edilians SHARK+ (rigide)": "SHARK+ 90",
+    "Monier Figaroll Plus": "28/32 cm",
+    "Monier Metalroll": "26/32 cm",
+    "Ubbink Airtec": "240 mm (TP)"
+   },
+   "unite": "mm",
+   "condition": "classe de galbe G0 lue sur la fiche du modèle ; même closoir au faîtage et à l'arêtier ; rouleau de 5 m (recouvrement 5 cm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Classe de galbe : G0*",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "METAROLL 26/32 : G0 / G1 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_pv10_largeur",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians (tuile) ; Edilians, Monier (closoirs)",
+   "modele": "PV 10 Huguenot",
+   "attribut": "closoir_largeur",
+   "valeur": {
+    "Edilians SIROKO+3": "310 mm",
+    "Edilians ZEF": "300 mm",
+    "Edilians SHARK+ (rigide)": "SHARK+ 90",
+    "Monier Figaroll Plus": "28/32 cm",
+    "Monier Metalroll": "26/32 cm",
+    "Ubbink Airtec": "310 mm (TG)"
+   },
+   "unite": "mm",
+   "condition": "classe de galbe G1 lue sur la fiche du modèle ; même closoir au faîtage et à l'arêtier ; rouleau de 5 m (recouvrement 5 cm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Classe de galbe : G1*",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "METAROLL 26/32 : G0 / G1 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_alpha10_largeur",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians (tuile) ; Edilians, Monier (closoirs)",
+   "modele": "Alpha 10 Ste Foy",
+   "attribut": "closoir_largeur",
+   "valeur": {
+    "Edilians SIROKO+4": "240 mm",
+    "Edilians SHARK+ (rigide)": "SHARK+ 90",
+    "Monier Figaroll Plus": "28/32 cm",
+    "Monier Metalroll": "26/32 cm",
+    "Ubbink Airtec": "240 mm (TP)"
+   },
+   "unite": "mm",
+   "condition": "classe de galbe G0 lue sur la fiche du modèle ; même closoir au faîtage et à l'arêtier ; rouleau de 5 m (recouvrement 5 cm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit Alpha 10 Ste Foy (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/200_fag_alpha_10_ste_foy_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Classe de galbe : G0*",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "METAROLL 26/32 : G0 / G1 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_actua_largeur",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Koramic (Wienerberger) (tuile) ; Edilians, Monier (closoirs)",
+   "modele": "Actua",
+   "attribut": "closoir_largeur",
+   "valeur": {
+    "Edilians SIROKO+4": "240 mm",
+    "Edilians SHARK+ (rigide)": "SHARK+ 90",
+    "Monier Figaroll Plus": "28/32 cm",
+    "Monier Metalroll": "26/32 cm",
+    "Ubbink Airtec": "240 mm (TP)"
+   },
+   "unite": "mm",
+   "condition": "classe de galbe G0 lue sur la fiche du modèle ; même closoir au faîtage et à l'arêtier ; rouleau de 5 m (recouvrement 5 cm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "galbe G0",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "METAROLL 26/32 : G0 / G1 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_signy_largeur",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Monier (BMI) (tuile) ; Edilians, Monier (closoirs)",
+   "modele": "Signy",
+   "attribut": "closoir_largeur",
+   "valeur": {
+    "Edilians SIROKO+4": "240 mm",
+    "Edilians SHARK+ (rigide)": "SHARK+ 90",
+    "Monier Figaroll Plus": "28/32 cm",
+    "Monier Metalroll": "26/32 cm",
+    "Ubbink Airtec": "240 mm (TP)"
+   },
+   "unite": "mm",
+   "condition": "classe de galbe G0 lue sur la fiche du modèle ; même closoir au faîtage et à l'arêtier ; rouleau de 5 m (recouvrement 5 cm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "SIGNY® G0",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "METAROLL 26/32 : G0 / G1 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Signy : classe G0 lue dans le tableau Monier des closoirs, la fiche Signy ne l'imprime pas."
+  },
+  {
+   "id": "closoir_romane_canal_largeur",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Terreal (Wienerberger) (tuile) ; Edilians, Monier (closoirs)",
+   "modele": "Romane Canal",
+   "attribut": "closoir_largeur",
+   "valeur": {
+    "Edilians SIROKO+2": "370 mm",
+    "Edilians ZEF": "390 mm",
+    "Edilians SHARK+ (rigide)": "SHARK+ 120",
+    "Monier Figaroll Plus": "34/38 cm",
+    "Monier Metalroll": "32/38 cm",
+    "Terreal Lahe-Roll": "370 mm",
+    "Ubbink Airtec": "360 mm (MG)"
+   },
+   "unite": "mm",
+   "condition": "classe de galbe G2 lue sur la fiche du modèle ; même closoir au faîtage et à l'arêtier ; rouleau de 5 m (recouvrement 5 cm)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Classe de galbe* G2",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SIROKO+4 240 mm, SIROKO+3 310 mm, SIROKO+2 370 mm, SIROKO+1 390 mm ; Recommandation compatibilité closoir / galbes de tuiles G0 G1 G2 G3",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "METAROLL 26/32 : G0 / G1 ; METAROLL 32/38 : G2 / G3 ; FIGAROLL PLUS 28/32 : G0 / G1 ; 34/38 : G2 / G3",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Terreal Lahe-Roll : 370 mm pour les tuiles fortement galbées (brochure 2015 : 210 / 280 / 320 / 370 mm) ; la fiche Romane Canal citée par Chausson donne 290 / 320 / 370 mm."
+  },
+  {
+   "id": "closoir_siroko_conditionnement",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians",
+   "modele": "SIROKO+ (bavette plissée alu)",
+   "attribut": "conditionnement",
+   "valeur": {
+    "rouleau": "5 ml",
+    "carton": "20 ml (4 rouleaux)",
+    "carton dévidoir": "30 ml",
+    "palette": "400 à 500 ml selon largeur",
+    "largeurs": "240 / 310 / 370 / 390 mm",
+    "coloris": "Rouge, Brun, Ardoise, Sable (selon largeur)"
+   },
+   "unite": "texte",
+   "condition": "",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "5 ml 20 ml 500 ml 240 mm SIROKO+4 … 30 ml 30 ml 360 ml 310 mm SIROKO+3.1",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_siroko_ventilation",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians",
+   "modele": "SIROKO+",
+   "attribut": "section_ventilation",
+   "valeur": "150 à 200",
+   "unite": "cm²/ml",
+   "condition": "selon la largeur",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "grande capacité de ventilation allant de 150 à 200 cm2/ml",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_zef",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians",
+   "modele": "ZEF (bavette alu)",
+   "attribut": "largeur_et_conditionnement",
+   "valeur": {
+    "300 mm (G1)": "rouleau 5 ml, CLOSEOALU01",
+    "390 mm (G2-G3)": "rouleau 5 ml CLOSEOALU04 (fin de stock) ou 10 ml CLOSEOALU05",
+    "ventilation": "150 cm²/ml"
+   },
+   "unite": "texte",
+   "condition": "",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "ZEF bavette alu 300 mm CLOSEOALU01 … 390 mm CLOSEOALU04 … 10 ml 390 mm CLOSEOALU05 … ventilation de 150 cm2/ml",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_shark_rigide",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Edilians",
+   "modele": "SHARK+ (rigide)",
+   "attribut": "longueur_et_ventilation",
+   "valeur": {
+    "longueur d'élément": "2 ml",
+    "ventilation": "100 cm²/ml",
+    "bavette": "90 (G0-G1), 120 (G2), 140 (G3) mm"
+   },
+   "unite": "texte",
+   "condition": "",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "SHARK+ … Longueur 2 ml … performante de 100 cm2/ml … SHARK+ 90 SHARK+ 120 SHARK+ 140",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "closoir_figaroll_plus",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Monier (BMI)",
+   "modele": "Figaroll Plus",
+   "attribut": "conditionnement",
+   "valeur": {
+    "rouleau": "5 ml",
+    "carton": "5 rouleaux",
+    "palette 28/32": "90 rouleaux (450 ml)",
+    "palette 34/38": "60 rouleaux (300 ml)",
+    "coloris 28/32": "Rouge Sienne, Brun, Ardoise",
+    "coloris 34/38": "Rouge Sienne, Beige Rosé",
+    "ventilation certifiée QB 35": "103 cm²/ml"
+   },
+   "unite": "texte",
+   "condition": "",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Monier, fiche Figaroll Plus (novembre 2014, hébergée par Union Matériaux)",
+     "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus%5B1%5D.pdf",
+     "type": "fabricant",
+     "extrait": "Longueur : 5 ml … Carton de 5 rouleaux … Palette de 90 rouleaux (450 ml) en 28/32 cm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, « La gamme de closoirs souples ventilés Metalroll, Figaroll Plus, Dryroll » (fiche hébergée par Envain Matériaux)",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/FT_closoirs-souples-ventiles-.pdf",
+     "type": "fabricant",
+     "extrait": "Figaroll Plus V103 (capacité de ventilation de 103 cm2/ml)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "La fiche 2014 annonce « supérieure à 150 cm²/ml » ; la fiche QB 35 plus récente certifie 103 cm²/ml : retenir 103. Conditionnement (carton, palette) : fiche 2014 seule."
+  },
+  {
+   "id": "closoir_lahe_roll",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Terreal",
+   "modele": "Lahe-Roll (alu)",
+   "attribut": "conditionnement",
+   "valeur": {
+    "largeurs": "210 / 280 / 320 / 370 mm",
+    "longueurs": "rouleaux de 5 ou 10 ml selon largeur",
+    "carton": "20 ml (2 × 10 ml ou 4 × 5 ml)",
+    "ventilation": "150 cm²/ml"
+   },
+   "unite": "texte",
+   "condition": "le closoir de la gamme Terreal (Romane Canal)",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Terreal, brochure closoir souple Lahe-Roll (2015, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_788462.pdf",
+     "type": "fabricant",
+     "extrait": "Largeur (mm) 210 280 320 370 … Carton de 20 ml (2 rouleaux de 10ml ou 4 rouleaux de 5ml) … 150 cm²/ml",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Brochure de 2015 ; la fiche Romane Canal (Chausson) liste 290 / 320 / 370 mm. Gamme actuelle à confirmer chez Terreal."
+  },
+  {
+   "id": "closoir_nombre_rouleaux",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "closoir ventilé de faîtage / arêtier",
+   "marque": "Monier, Edilians",
+   "modele": "closoir souple en rouleau de 5 m",
+   "attribut": "rouleaux",
+   "valeur": "arrondi supérieur de (ml faîtage + ml arêtiers) ÷ 4,95",
+   "unite": "formule",
+   "condition": "recouvrement de 5 cm entre deux rouleaux ; même largeur au faîtage et à l'arêtier",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Monier, fiche Figaroll Plus (novembre 2014, hébergée par Union Matériaux)",
+     "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus%5B1%5D.pdf",
+     "type": "fabricant",
+     "extrait": "S'assurer d'un recouvrement de 5 cm entre deux morceaux de FIGAROLL® PLUS … Longueur : 5 ml",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "Longueur unitaire 5 ml",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "12 ml de faîtage : 12 ÷ 4,95 = 2,4 → 3 rouleaux"
+   ]
+  },
+  {
+   "id": "mortier_conso_par_produit",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "mortier de faîtage scellé",
+   "marque": "Weber, PRB, VPI",
+   "modele": "mortiers de couverture",
+   "attribut": "consommation_par_produit",
+   "valeur": {
+    "Weber webercel tuile": "5 à 10 kg/ml de faîtage",
+    "PRB Pose Tuiles": "5 à 20 kg/ml selon les tuiles",
+    "VPI mortier bâtard terre cuite": "5 kg/ml (lit de 20 cm)",
+    "PRB Mortier bâtard": "12 à 25 kg/ml (scellement de tuile, produit généraliste)"
+   },
+   "unite": "kg/ml",
+   "condition": "faîtage scellé terre cuite",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Saint-Gobain Weber, fiche webercel tuile (parution 03/07/2025, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1194657.pdf",
+     "type": "fabricant",
+     "extrait": "Consommation : environ 5 à 10 kg/ml de faîtage. Un sac de 25 kg représente environ 15 l de mortier",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "PRB, fiche PRB Pose Tuiles (hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+     "type": "fabricant",
+     "extrait": "Environ 5 à 20 kg/ml de faîtage suivant types de tuiles",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "VPI (Vicat), fiche Mortier bâtard terre cuite 2023-2024 (hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_241212.pdf",
+     "type": "fabricant",
+     "extrait": "5 kg/m linéaire de faîtage ou lit de maçonnerie (20 cm de large)",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "PRB, fiche technique PRB Mortier bâtard (18/04/2024), site PRB",
+     "url": "https://pim.prb.fr/PRB/Fiches%20Techniques/fr/%281%29ft_prb_mortier_batard_fr_18_04_2024.pdf",
+     "type": "fabricant",
+     "extrait": "Scellement de tuile : 12 à 25 kg/ml.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Aucun fabricant ne distingue faîtière demi-ronde et angulaire : la consommation varie avec le galbe de la tuile (remplissage des ondes), pas avec la forme de la faîtière."
+  },
+  {
+   "id": "mortier_par_type_faitiere",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "mortier de faîtage scellé",
+   "marque": "Weber, PRB",
+   "modele": "mortiers de couverture",
+   "attribut": "consommation_par_type_de_faitiere",
+   "valeur": {
+    "faîtière demi-ronde ou angulaire sur tuile G0-G1 (HP 10, PV 10, Alpha 10, Actua, Signy)": "5 à 10 kg/ml (8 par défaut)",
+    "faîtière sur tuile G2 (Romane Canal)": "10 à 20 kg/ml",
+    "demi-ronde contre angulaire": "pas de différence publiée"
+   },
+   "unite": "kg/ml",
+   "condition": "lecture des fourchettes fabricant selon le galbe ; rien de publié par type de faîtière",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Saint-Gobain Weber, fiche webercel tuile (parution 03/07/2025, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1194657.pdf",
+     "type": "fabricant",
+     "extrait": "environ 5 à 10 kg/ml de faîtage",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "PRB, fiche PRB Pose Tuiles (hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+     "type": "fabricant",
+     "extrait": "Environ 5 à 20 kg/ml de faîtage suivant types de tuiles",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "raison": "Aucune fiche (Weber, PRB, VPI, Parexlanko, Bostik, Lafarge) ne chiffre la consommation par type de faîtière. Le classement par galbe reste une lecture ; à valider par un couvreur breton (pesée d'un chantier)."
+  },
+  {
+   "id": "mortier_sac_volume",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "mortier de faîtage scellé",
+   "marque": "Saint-Gobain Weber",
+   "modele": "webercel tuile",
+   "attribut": "rendement_sac",
+   "valeur": "15",
+   "unite": "l de mortier par sac de 25 kg",
+   "condition": "3,5 l d'eau par sac ; soit ≈ 1,67 kg par litre",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Saint-Gobain Weber, fiche webercel tuile (parution 03/07/2025, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1194657.pdf",
+     "type": "fabricant",
+     "extrait": "Un sac de 25 kg représente environ 15 l de mortier … environ 3,5 l d'eau par sac de 25 kg",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "mortier_sacs_par_10ml",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "mortier de faîtage scellé",
+   "marque": "Weber, PRB",
+   "modele": "sac de 25 kg",
+   "attribut": "sacs_par_10_ml",
+   "valeur": {
+    "5 kg/ml": "2 sacs",
+    "8 kg/ml (défaut)": "4 sacs (3,2 arrondi)",
+    "10 kg/ml": "4 sacs",
+    "20 kg/ml": "8 sacs"
+   },
+   "unite": "sacs de 25 kg",
+   "condition": "arrondi au sac supérieur ; ajouter les rives et arêtiers scellés",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Saint-Gobain Weber, fiche webercel tuile (parution 03/07/2025, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1194657.pdf",
+     "type": "fabricant",
+     "extrait": "Unité de vente … sac de 25 kg",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "PRB, fiche technique PRB Mortier bâtard (18/04/2024), site PRB",
+     "url": "https://pim.prb.fr/PRB/Fiches%20Techniques/fr/%281%29ft_prb_mortier_batard_fr_18_04_2024.pdf",
+     "type": "fabricant",
+     "extrait": "Sac papier de 25 kg … Palette de 1,2 t soit 48 sacs de 25 kg",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": [
+    "10 ml × 8 kg = 80 kg ÷ 25 = 3,2 → 4 sacs"
+   ]
+  },
+  {
+   "id": "mortier_sacs_formats",
+   "famille": "accessoires_tuiles",
+   "sous_famille": "mortier de faîtage scellé",
+   "marque": "Weber, PRB, VPI",
+   "modele": "mortiers de couverture",
+   "attribut": "formats_de_sac",
+   "valeur": {
+    "25 kg": "format standard des mortiers de couverture (Weber, PRB, VPI) ; palette 48 sacs (Weber, PRB) ou 56 (VPI)",
+    "5 kg": "petits travaux (Weber, PRB, VPI)",
+    "35 kg": "mortiers de maçonnerie multi-usages, pas vendus comme mortier de couverture"
+   },
+   "unite": "texte",
+   "condition": "si le devis dit « sac de 35 kg », c'est un mortier de maçonnerie : à faire préciser",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "PRB, fiche technique PRB Mortier bâtard (18/04/2024), site PRB",
+     "url": "https://pim.prb.fr/PRB/Fiches%20Techniques/fr/%281%29ft_prb_mortier_batard_fr_18_04_2024.pdf",
+     "type": "fabricant",
+     "extrait": "Sac papier de 25 kg … Sac plastique de 5 kg",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Saint-Gobain Weber, fiche webercel tuile (parution 03/07/2025, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1194657.pdf",
+     "type": "fabricant",
+     "extrait": "sur 25 kg, 5 kg",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Brico Dépôt, fiche article « Mortier multi-usages gris - sac de 35 kg »",
+     "url": "https://www.bricodepot.fr/p/3538988500603/mortier-multi-usages-gris-sac-de-35-kg",
+     "type": "negoce",
+     "extrait": "Mortier multi-usages gris - sac de 35 kg",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "25 kg et 5 kg confirmés par deux fabricants ; « pas de mortier de couverture en 35 kg » repose sur l'absence de résultat, à faire confirmer par un négoce breton."
+  }
+ ],
+ "verdict_ratios": [
+  {
+   "ratio": "Tuile de rive à rabat et 1/2 tuile de rive à rabat HP 10 : 2,7/ml chacune",
+   "origine": "tuiles-emboitement.json, edilians-hp10-huguenot_tuiles_de_rive_references",
+   "valeur_actuelle": "2,7/ml (tuile) et 2,7/ml (1/2 tuile)",
+   "verdict": "corrige",
+   "bonne_valeur": "2,7 pièces par ml et par côté AU TOTAL, soit ≈ 1,35 tuile à rabat + ≈ 1,35 demi-tuile à rabat",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à rabat G (1,35 au ml) … Demi-tuile à rabat G (1,35 au ml)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "additionner les nombres au mètre des 2 modèles",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Pose à joints croisés : les deux pièces alternent d'un rang à l'autre ; Koramic et Monier l'écrivent, Edilians imprime 2,7 sous chacune."
+  },
+  {
+   "ratio": "Chatières : nombre = surface projetée × 1/5000 (ou 1/3000) ÷ section, moitié bas / moitié haut",
+   "origine": "points-singuliers.json, verdict « Chatière : 1 pour 20 à 25 m² »",
+   "valeur_actuelle": "(surface × ratio ÷ 2) ÷ section, par niveau",
+   "verdict": "confirme",
+   "bonne_valeur": "même règle ; les tables Terreal et Koramic donnent le TOTAL (bas + haut) ; sections par modèle : HP 10 / PV 10 50, Signy 33, Actua 26, Alpha 10 19, Romane Canal 18 cm²",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "table 18 cm² : 100 m² → 11 / 19",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "table 26 cm² : 100 m² → 8 / 13",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Avec une chatière HP 10 (50 cm²), 100 m² de comble perdu = 4 chatières ; avec une Romane Canal (18 cm²), 12 : ne jamais appliquer un nombre au m² commun à tous les modèles."
+  },
+  {
+   "ratio": "Mortier de faîtage : 8 kg/ml par défaut, 12 kg/ml canal",
+   "origine": "points-singuliers.json, mortier_faitage_scelle_kg_ml",
+   "valeur_actuelle": "8 kg/ml",
+   "verdict": "a_confirmer",
+   "bonne_valeur": "8 kg/ml reste dans la fourchette G0-G1 (5 à 10) ; pour une tuile G2 (Romane Canal) 10 à 20 kg/ml ; aucune valeur par type de faîtière publiée",
+   "sources": [
+    {
+     "titre": "Saint-Gobain Weber, fiche webercel tuile (parution 03/07/2025, hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1194657.pdf",
+     "type": "fabricant",
+     "extrait": "environ 5 à 10 kg/ml de faîtage",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "PRB, fiche PRB Pose Tuiles (hébergée par le groupe SAMSE)",
+     "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1218289.pdf",
+     "type": "fabricant",
+     "extrait": "Environ 5 à 20 kg/ml de faîtage suivant types de tuiles",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "explication": "La forme de la faîtière compte moins que le galbe de la tuile."
+  }
+ ],
+ "commande_comptoir": [
+  {
+   "article": "Chatière (tuile de ventilation)",
+   "ce_que_le_vendeur_demande": [
+    "modèle de tuile",
+    "coloris",
+    "nombre (ou surface et type de comble)"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "à l'unité",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Réf. 205.20",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "610 RC",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Tuiles de rive à rabat + demi-tuiles à rabat",
+   "ce_que_le_vendeur_demande": [
+    "modèle",
+    "coloris",
+    "ml de rive gauche et droite séparés"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "à l'unité ou palette (Signy : 90 rives à rabat par palette)",
+   "sources": [
+    {
+     "titre": "BMI Monier, fiche produit Signy (document daté d'avril 2026)",
+     "url": "https://store.bmigroup.com/medias/SIGNY.pdf?context=bWFzdGVyfHJvb3R8MTQ4Nzg0NTV8YXBwbGljYXRpb24vcGRmfGFEQXhMMmcxTVM4NU9EVTJOVEEyTlRrek16RXdMMU5KUjA1WkxuQmtaZ3wwYTNjODljMGRhYmI5MjNjZWQ0NDZjYWUxZGI2YTE3YTE1YmFkZTdmOTJlNjEzYWM2NDdkNDAyNjdjNzI5OWQ5",
+     "type": "fabricant",
+     "extrait": "Rive à rabat gauche … 90 / palette",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Closoir ventilé souple",
+   "ce_que_le_vendeur_demande": [
+    "classe de galbe de la tuile (G0 à G3) ou modèle de tuile",
+    "coloris",
+    "ml faîtage + arêtiers"
+   ],
+   "unite_de_vente": "rouleau de 5 m",
+   "conditionnement": "carton 20 ml (Edilians, Terreal) ou 5 rouleaux (Monier)",
+   "sources": [
+    {
+     "titre": "Edilians, catalogue « Gamme accessoires techniques » 2026 (closoirs SIROKO+, ZEF, SHARK+)",
+     "url": "https://edilians.com/media/wysiwyg/Encyclopedie/2026/EDILIANS_-_CATALOGUE_ACCESSOIRES-2026.pdf",
+     "type": "fabricant",
+     "extrait": "5 ml 20 ml",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Monier, fiche Figaroll Plus (novembre 2014, hébergée par Union Matériaux)",
+     "url": "https://api-pro.union-materiaux.fr/api/product-notice/670572_795362_figaroll_plus%5B1%5D.pdf",
+     "type": "fabricant",
+     "extrait": "Carton de 5 rouleaux",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Mortier de couverture (faîtage scellé)",
+   "ce_que_le_vendeur_demande": [
+    "marque ou teinte (gris, ton pierre, terre cuite)",
+    "nombre de sacs"
+   ],
+   "unite_de_vente": "sac de 25 kg",
+   "conditionnement": "palette 48 sacs (Weber, PRB) ou 56 (VPI)",
+   "sources": [
+    {
+     "titre": "PRB, fiche technique PRB Mortier bâtard (18/04/2024), site PRB",
+     "url": "https://pim.prb.fr/PRB/Fiches%20Techniques/fr/%281%29ft_prb_mortier_batard_fr_18_04_2024.pdf",
+     "type": "fabricant",
+     "extrait": "Palette de 1,2 t soit 48 sacs de 25 kg",
+     "consulte": "2026-11-20"
+    }
+   ]
+  }
+ ],
+ "corrections": [
+  {
+   "sujet": "HP 10 Huguenot : condition de tuiles_par_palette citant « Terreal »",
+   "fichier": "tuiles-emboitement.json (edilians-hp10-huguenot_tuiles_par_palette) et fiche-couverture.json",
+   "constat": "La version 19-1 de la recherche écrivait « palette standard (le fabricant la donne à titre indicatif pour Terreal) » : phrase de la fiche Terreal Romane Canal recopiée sur un modèle Edilians. La passe 3 l'a remplacée par « palette standard Edilians (quantité par palette lue sur la fiche du modèle) », mais cette nouvelle phrase a été posée sur TOUS les modèles : 25 entrées Koramic, 20 Terreal et 4 Monier de tuiles-emboitement.json disent « palette standard Edilians » (91 occurrences dans fiche-couverture.json).",
+   "bonne_valeur": "HP 10 : 240 tuiles par palette, fiche Edilians (pas de mention « indicatif »). Condition à écrire par marque : « quantité par palette lue sur la fiche du modèle (<marque>) » ; pour Terreal seulement, ajouter « donnée à titre indicatif par le fabricant ».",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Quantité par palette : 240 tuiles",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "** Le nombre de tuiles par palette est donné à titre indicatif.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme_fabricant"
+  },
+  {
+   "sujet": "PV 10 Huguenot : rive décrite comme « PV 13 »",
+   "fichier": "tuiles-emboitement.json (edilians-pv10-huguenot_tuile_rive_par_ml_et_par_cote, _tuiles_de_rive_references)",
+   "constat": "Ce n'est PAS une erreur : la fiche PV 10 (mars 2026) désigne elle-même la « Rive individuelle à emboîtement PV 13 Huguenot » comme rive du PV 10. Edilians partage ces rives entre HP 10, PV 10, H 14 et Losangée Huguenot. La PV 10 n'a pas de tuile de rive à rabat (la HP 10 en a : 205.72 à 205.75).",
+   "bonne_valeur": "Rive individuelle PV 13 Huguenot : droite 215.41 (à emboîtement), gauche 215.42 (à recouvrement), 2,7/ml au pureau de 368 mm ; ou rive universelle 1050 (3/ml) ; ou grande rive universelle Patrimoine 1048 (2,5/ml). Écrire au comptoir « rive PV 13 (commune aux Huguenot) » pour éviter le doute.",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Rive individuelle à emboîtement PV 13 Huguenot (2,7 par ml au pureau de 368 mm) Droite Réf. 215.41 Gauche Réf. 215.42",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, fiche produit H 14 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/204_fag_h_14_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Rive individuelle à emboîtement PV 13 Huguenot (2,7 par ml au pureau de 368 mm) Droite Réf. 215.41",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, fiche produit Losangée Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/218_fag_losangee_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Grande rive universelle Patrimoine (2,5 par ml) Réf. 1048 … 1/2 tuile PV 13 Huguenot Réf. 215.01",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme_fabricant"
+  },
+  {
+   "sujet": "PV 10 : tous les chiffres identiques à la HP 10 (copie possible)",
+   "fichier": "tuiles-emboitement.json",
+   "constat": "Vérifié sur les deux fiches Edilians de mars 2026 : même moule (≈ 460 × 306 mm, largeur utile 268, pureau 310 à 376, 9,9 à 12/m², 4,3 kg, 43 kg/m², 240 par palette, liteaux 3,22 / 2,91 / 2,66 ml/m²). Les chiffres identiques sont réels, pas une copie.",
+   "bonne_valeur": "Garder les chiffres. Ce qui diffère et doit rester distinct : classe de galbe G0 (HP 10) / G1 (PV 10) donc largeur de closoir ; DTU 40.211 / 40.21 et table de pentes ; rives (voir ci-dessus) ; coloris 6 / 4 ; références 205.xx / 214.xx (1/2 tuile 205.01 / 214.01, chatière 205.20 / 214.20, douille 205.32 / 214.32) ; tuile de finition 205.80 / 205.86 seulement en HP 10.",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "Nb au m2 : de 9,9 à 12 … 240 tuiles … DTU 40-211 … Classe de galbe : G0*",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, fiche produit PV 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/1/214_fag_pv_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "de 9,9 à 12 selon recouvrement … 240 tuiles … extrait du DTU 40-21 … G1*",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme_fabricant"
+  },
+  {
+   "sujet": "HP 10 : rive à rabat et 1/2 rive à rabat « 2,7/ml » chacune",
+   "fichier": "tuiles-emboitement.json (edilians-hp10-huguenot_tuiles_de_rive_references)",
+   "constat": "Lu tel quel, le comptoir commanderait 2,7 + 2,7 pièces par ml et par côté.",
+   "bonne_valeur": "2,7 par ml et par côté au total : ≈ 1,35 tuile à rabat + ≈ 1,35 demi-tuile à rabat (voir rive_rabat_demi_partage).",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), Guide Toiture et Façade 2026, pages Actua",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_Toiture_et_Fa%C3%A7ade_Koramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "Tuile à rabat G (1,35 au ml) … Demi-tuile à rabat G (1,35 au ml)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme"
+  },
+  {
+   "sujet": "HP 10 : édition de la fiche citée",
+   "fichier": "tuiles-emboitement.json (sources HP 10)",
+   "constat": "La source citée est l'édition janvier 2024 (205_fag_hp_10_huguenot_19042024_bd.pdf). Le site Edilians publie l'édition mars 2026 (205_fag_hp_10_huguenot_12022026_bd.pdf). Chiffres comparés : identiques.",
+   "bonne_valeur": "Citer l'édition mars 2026.",
+   "sources": [
+    {
+     "titre": "Edilians, fiche produit HP 10 Huguenot (édition mars 2026)",
+     "url": "https://edilians.com/media/productattach/2/0/205_fag_hp_10_huguenot_12022026_bd.pdf",
+     "type": "fabricant",
+     "extrait": "© mars 2026",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme_fabricant"
+  },
+  {
+   "sujet": "Actua : coloris « Rouge »",
+   "fichier": "tuiles-emboitement.json (Actua, coloris)",
+   "constat": "La fiche Actua de novembre 2026 nomme le coloris « Rouge naturel ».",
+   "bonne_valeur": "Rouge naturel",
+   "sources": [
+    {
+     "titre": "Koramic (Wienerberger), fiche produit Actua (édition novembre 2026, FA1262/2026/11)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_TuileActua_001.pdf",
+     "type": "fabricant",
+     "extrait": "Noir titane Blanc titane Gris titane Ardoisé Nuagé Brun Rouge naturel Grésé bourgogne Gris",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme_fabricant"
+  },
+  {
+   "sujet": "Romane Canal : coloris absents",
+   "fichier": "tuiles-emboitement.json (Romane Canal)",
+   "constat": "Aucune entrée coloris pour le modèle.",
+   "bonne_valeur": "voir coloris_romane_canal (6 coloris dont Rose charentais sur commande)",
+   "sources": [
+    {
+     "titre": "Terreal (Wienerberger), fiche produit Romane Canal (édition février 2025, FA777/2025/02)",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Romane_Canal_001.pdf",
+     "type": "fabricant",
+     "extrait": "Rose charentais (disponible sur commande) Rouge Brun rustique Ton mêlé Atlantique Vieilli castel Vieilli Languedoc",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "statut": "confirme_fabricant"
+  }
+ ]
+}

@@ -12,10 +12,18 @@ export class ApiError extends Error {
     readonly details?: { path: string; message: string }[],
     /** Motif précis, quand l'API en donne un (ex. document illisible : « encrypted »). */
     readonly reason?: string,
+    /** La phrase en français que l'API donne pour ce refus (« Les regroupements arrivent bientôt… »), affichée telle quelle. */
+    readonly phrase?: string,
   ) {
     super(errorMessage(code, reason));
     this.name = "ApiError";
   }
+
+  /** Les fautes de saisie nommées par le serveur (champ et phrase), quand il en donne. */
+  fautes?: { champ: string; message: string }[];
+
+  /** Le champ refusé, quand le serveur le nomme (`field`, ou le premier chemin d'une faute de format). */
+  champ?: string;
 
   get retryable(): boolean {
     return this.code === "network" || this.status >= 500 || this.code === "request_in_progress";
@@ -23,6 +31,8 @@ export class ApiError extends Error {
 }
 
 const COMPANY_KEY = "baticlair.companyId";
+/** L'événement du navigateur lancé quand l'API répond `abonnement_requis` (le paywall l'écoute). */
+export const EVENEMENT_ABONNEMENT_REQUIS = "mobiiz:abonnement-requis";
 
 export function getActiveCompanyId(): string | null {
   try {
@@ -51,6 +61,10 @@ export interface RequestOptions {
    */
   idempotencyKey?: string;
   signal?: AbortSignal;
+  /** Le jeton du défi Turnstile (`components/turnstile.tsx`), envoyé en `x-captcha-response`. */
+  captcha?: string | null;
+  /** La requête survit à la page qu'on quitte (brouillon écrit au départ de l'écran). */
+  keepalive?: boolean;
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -58,6 +72,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
   if (options.body !== undefined && !isForm) headers["content-type"] = "application/json";
   if (options.idempotencyKey) headers["idempotency-key"] = options.idempotencyKey;
+  if (options.captcha) headers["x-captcha-response"] = options.captcha;
   const companyId = getActiveCompanyId();
   if (companyId && !path.startsWith("/v1/auth")) headers["x-company-id"] = companyId;
 
@@ -69,6 +84,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       credentials: "same-origin",
       ...(options.body !== undefined ? { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) } : {}),
       ...(options.signal ? { signal: options.signal } : {}),
+      ...(options.keepalive ? { keepalive: true } : {}),
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
@@ -85,7 +101,109 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const details = body.error?.details;
   const fieldErrors = Array.isArray(details) ? (details as { path: string; message: string }[]) : undefined;
   const reason = details && typeof details === "object" && "reason" in details ? String(details.reason) : undefined;
-  throw new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason);
+  // Le paywall de l'abonnement (24 octobre 2026) : une action payante refusée ouvre l'écran « Ton essai est terminé ».
+  // Recentrage (25 octobre 2026) : la phrase du geste refusé (« Jusqu'à 5 négoces par demande. ») suit.
+  const phrase = details && typeof details === "object" && "phrase" in details ? String(details.phrase) : details && typeof details === "object" && "message" in details ? String(details.message) : null;
+  if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS, { detail: { phrase } }));
+  const erreur = new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason, phrase ?? undefined);
+  // Missions (10 novembre 2026) : les fautes de saisie nommées par le serveur, champ par champ.
+  if (details && typeof details === "object" && "fautes" in details && Array.isArray(details.fautes)) erreur.fautes = details.fautes as { champ: string; message: string }[];
+  const champ = details && typeof details === "object" && "field" in details ? String(details.field) : fieldErrors?.[0]?.path?.split(".")[0];
+  if (champ) erreur.champ = champ;
+  throw erreur;
+}
+
+/**
+ * LE MESSAGE D'UNE ERREUR À L'ÉCRAN, JAMAIS UNE PHRASE VAGUE (retour de Greg, 24 octobre 2026 : « Ça n'a pas marché.
+ * Réessaie dans un instant. » en ajoutant son négoce, sans dire pourquoi). Dans l'ordre : la phrase propre à l'écran pour
+ * ce motif (`precis`), sinon le motif précis de l'API ou le message de son code (`lib/fr.ts`), et toujours de quoi retrouver
+ * la panne : le code support, ou le numéro d'erreur quand le serveur n'a rien répondu de lisible. `vous` : les pages des
+ * négoces (vouvoiement) ne disent que leur propre texte et le code.
+ */
+/** Recette du 13 novembre 2026 (G24) : le nom d'un champ refusé se dit en français, jamais « siret » ou « postalCode ». */
+const CHAMPS: Record<string, string> = {
+  siret: "le SIRET (14 chiffres)",
+  email: "l'adresse e-mail",
+  phone: "le numéro de téléphone",
+  telephone: "le numéro de téléphone",
+  portable: "le numéro de portable",
+  postalCode: "le code postal",
+  codePostal: "le code postal",
+  city: "la ville",
+  ville: "la ville",
+  name: "le nom",
+  nom: "le nom",
+  prenom: "le prénom",
+  password: "le mot de passe",
+  quantity: "la quantité",
+  quantite: "la quantité",
+};
+const nomDuChamp = (chemin: string) => CHAMPS[chemin.split(".").pop() ?? chemin] ?? chemin;
+
+/**
+ * UN APPEL EN DIRECT (Greg, 14 novembre 2026, étapes de l'assistant) : le serveur écrit une ligne JSON par événement ;
+ * chacune est rendue dès qu'elle arrive. Rend le dernier événement, ou null si la réponse n'est pas un flux lisible.
+ */
+export async function apiEnDirect<T>(path: string, body: unknown, surEvenement: (e: T) => void): Promise<T | null> {
+  const headers: Record<string, string> = { accept: "application/x-ndjson", "content-type": "application/json" };
+  const companyId = getActiveCompanyId();
+  if (companyId) headers["x-company-id"] = companyId;
+  let res: Response;
+  try {
+    res = await fetch(path, { method: "POST", headers, credentials: "same-origin", body: JSON.stringify(body) });
+  } catch {
+    throw new ApiError("network", 0);
+  }
+  if (!res.ok || !res.body) return null;
+  const lecteur = res.body.getReader();
+  const decodeur = new TextDecoder();
+  let reste = "";
+  let dernier: T | null = null;
+  const rendre = (ligne: string) => {
+    const t = ligne.trim();
+    if (!t) return;
+    try {
+      dernier = JSON.parse(t) as T;
+      surEvenement(dernier);
+    } catch {
+      // Une ligne illisible est ignorée : la réponse finale fait foi.
+    }
+  };
+  try {
+    for (;;) {
+      const { done, value } = await lecteur.read();
+      if (done) break;
+      reste += decodeur.decode(value, { stream: true });
+      const lignes = reste.split("\n");
+      reste = lignes.pop() ?? "";
+      lignes.forEach(rendre);
+    }
+  } catch {
+    throw new ApiError("network", 0);
+  }
+  rendre(reste);
+  return dernier;
+}
+
+export function messageErreur(e: unknown, precis: Record<string, string> = {}, o: { vous?: boolean } = {}): string {
+  const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
+  if (err.reason && precis[err.reason]) return precis[err.reason]!;
+  if (precis[err.code]) return precis[err.code]!;
+  // Greg, 27 octobre 2026 (capture : « Tu n'as pas le droit… (motif : zone_inactive). Code support… ») : quand l'API donne
+  // sa phrase en français, c'est elle qui s'affiche, jamais un motif technique.
+  if (err.phrase) return err.phrase;
+  const trace = err.supportId ? ` Code support : ${err.supportId}.` : err.status >= 500 ? ` Erreur ${err.status}.` : "";
+  if (o.vous) {
+    if (err.status === 0) return "Pas de connexion internet : réessayez dès que le réseau revient.";
+    if (err.status === 429) return "Trop d'essais en peu de temps : attendez quelques minutes, puis réessayez.";
+    if (err.status >= 500) return `Un problème est survenu de notre côté ; vos saisies sont gardées, réessayez dans un instant.${trace}`;
+    const champ = err.details?.[0]?.path;
+    return `Cette demande n'est pas acceptée${err.reason ? ` (motif : ${err.reason})` : champ ? ` (à vérifier : ${nomDuChamp(champ)})` : ""}.${trace}`;
+  }
+  // Un refus sans motif connu de l'écran : le message du code, et le motif brut ou le champ fautif pour savoir quoi faire.
+  const generique = ["validation_failed", "conflict", "forbidden", "not_found"].includes(err.code) && !(err.reason && err.message !== errorMessage(err.code));
+  const detail = generique ? (err.reason ? ` (motif : ${err.reason})` : err.details?.[0]?.path ? ` (à vérifier : ${nomDuChamp(err.details[0].path)})` : "") : "";
+  return `${err.message.replace(/\.$/, "")}${detail}.${trace}`;
 }
 
 function safeJson(text: string): unknown {
@@ -133,6 +251,21 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   lastActivityAt: string;
+  /** Avec `?resume=1` (« Mes listes », accueil ; 1er novembre 2026). */
+  resume?: ResumeListe | null;
+}
+
+/** Le résumé d'une liste : ce que montre sa carte et ce que le serveur permet (suppression définitive). */
+export interface ResumeListe {
+  lignes: number;
+  origine: "Devis" | "Photo ou document" | "Saisie" | null;
+  statut: string;
+  /** `aSuivre` : le rappel de suivi à 7 jours attend « C'est réglé » ; `regle` : l'artisan l'a dit. */
+  demande: { negoces: number; reponses: number; choisi: boolean; aSuivre?: boolean; regle?: boolean } | null;
+  achatGroupe: boolean;
+  supprimable: boolean;
+  raison: "demande" | "reponse" | "offre" | "achat_groupe" | null;
+  phrase: string | null;
 }
 
 export interface ProjectPage {
@@ -165,13 +298,13 @@ export interface ProjectDocument {
 }
 
 /** Taille maximale d'un document (même valeur par défaut que l'API) ; au-delà de 3 Mo, il part en morceaux (`lib/upload.ts`). */
-export const MAX_DOCUMENT_BYTES = 20_000_000;
+export const MAX_DOCUMENT_BYTES = 10_000_000;
 /** Une requête vers l'API ne dépasse pas 4,5 Mo chez l'hébergeur : les photos allégées tiennent dans 4 Mo. */
 export const MAX_REQUEST_BYTES = 4_000_000;
 
 export interface Health {
-  status: "ok";
-  features: { email: boolean; ai: boolean; alerts?: boolean };
+  status: "ok" | "degrade";
+  features: { email: boolean; ai: boolean; alerts?: boolean; groupe?: boolean; commandeCommune?: "mois" | "lots"; missions?: boolean; memoire?: boolean; connexions?: boolean; chantierFictif?: boolean };
 }
 
 export interface TakeoffIssue {
@@ -191,7 +324,7 @@ export interface TakeoffLine {
   reference: string | null;
   sourceRefs: string[];
   sourcePages: number[];
-  origin: "ai" | "manual";
+  origin: "ai" | "manual" | "partner" | "liste";
   edited: boolean;
   /** Doute exprimé par l'IA sur la ligne. */
   aiDoubt: string | null;
@@ -213,6 +346,9 @@ export interface TakeoffLine {
 export interface ReadingState {
   status: "reading" | "failed";
   reason: string | null;
+  /** Pendant la lecture : les lignes du devis déjà lues (ses propres mots) et leur nombre. */
+  lignes?: string[];
+  total?: number;
 }
 
 /**
@@ -226,6 +362,8 @@ export interface Quantitatif {
   /** Parcours §48 : questions de comptoir (avant le calcul), calcul en cours, ou liste prête. */
   phase?: "questions" | "calcul" | "resultat";
   erreur?: { raison: string };
+  /** Pendant la lecture (`en_cours`) : les lignes du devis déjà lues (ses propres mots) et leur nombre. */
+  lecture?: { lignes: string[]; total: number };
   valide?: boolean;
   /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
   infos?: { texte: string | null; croquis: ItemSketch[] };
@@ -233,8 +371,16 @@ export interface Quantitatif {
 }
 
 export interface Takeoff {
+  /** Le métier du quantitatif : le lot unique de « Qui reçoit quoi » (1er novembre 2026). */
+  metier?: string | null;
+  /** Nouveau cap (22 octobre) : la phrase de la pastille orange d'une ligne vague. */
+  phrasePrecision?: string;
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
   habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** Les pièces d'un choix commun au devis (le pliage), chacune avec son choix : il se change pour une pièce au récapitulatif. */
+  choixPieces?: { key: string; piece: string; value: string; unit: string; options: { label: string; value: string }[] }[];
+  /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même : jamais posées, confirmées s'il les dit. */
+  dicibles?: { key: string; text: string; unit: string; options: { label: string; value: string; dit?: string[] }[] }[];
   /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
   /** §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire. */
   bref?: { cle: string; texte: string }[];
@@ -242,15 +388,23 @@ export interface Takeoff {
   brefTexte?: string;
   /** Le client et l'adresse sont-ils dans le bref ? (non par défaut : un négoce n'en a pas besoin pour chiffrer). */
   brefAvecClient?: boolean;
+  /** Assistant Mobiiz (31 octobre 2026) : l'adresse du chantier et la livraison dites par l'artisan. */
+  chantier?: { adresse: string | null; livraison: string | null };
   /** §52 : le métier n'a pas encore été relu par un artisan, l'écran 3 porte « Ratios en cours de validation ». */
   ratiosEnValidation?: boolean;
   /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */
   lots?: { metier: string; libelle: string; lignes: number }[];
   lotsConfirmes?: string[] | null;
+  /** Étape « Suggestions » : les cases à proposer avant les questions ; vide ou absent : pas d'étape. */
+  suggestions?: { key: string; label: string }[];
   metiersAjoutables?: { metier: string; libelle: string }[];
+  /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
+  lotsNonLus?: string[];
   sansFourniture?: { lineId: string; label: string; measure: string | null }[];
   /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
   aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
+  /** Les lignes ajustées par une habitude apprise (24 octobre 2026), annulables d'un clic (`habitude:<ligne>`). */
+  ajustements?: { itemKey: string; regleId: string; texte: string }[];
   id: string;
   projectId: string;
   documentId: string | null;
@@ -306,6 +460,10 @@ export interface PurchaseItem {
   asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
   /** §49.8 : un écart devis / calcul, « Garder 20 » / « Mettre 21 ». */
   gap?: { written: string; computed: string; unit: string } | null;
+  /** Une quantité estimée (les feuilles de zinc) : « − / + » sur la ligne, sans l'ouvrir. */
+  estimation?: boolean;
+  /** Nouveau cap (22 octobre) : ce qui manque pour se grouper (format, origine, choix, marque), en boutons ; vide : précise. */
+  aPreciserPourGroupe?: { cle: string; question: string; options: string[] }[];
 }
 
 export interface PurchaseAssumption {
@@ -347,6 +505,8 @@ export interface ScreenRow {
   /** La raison d'une ligne orange (« Quantité à confirmer : colle 4 kg/m² »), sinon « À vérifier ». */
   reason?: string;
   lineIds: string[];
+  /** Greg, 7 novembre 2026 : la famille (le lot) de la ligne n'est pas sûre ; seule cette ligne porte un badge. */
+  familleIncertaine?: boolean;
 }
 export interface SupplyScreen {
   groups: { key: string; label: string; measure: string | null; kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables"; rows: ScreenRow[] }[];
@@ -469,6 +629,9 @@ export interface Supplier {
   email: string;
   phone: string | null;
   notes: string | null;
+  /** Spécialités déclarées (Greg, 1er novembre 2026) ; vides : non renseignées. */
+  specialites?: string[];
+  specialitesSource?: "artisan" | "negoce" | null;
   archived: boolean;
   createdAt: string;
   updatedAt: string;
@@ -481,7 +644,20 @@ export interface PriceRequestRecipient {
   supplier: Pick<Supplier, "id" | "name" | "contactName" | "email" | "phone">;
   status: RecipientStatus;
   sentAt: string | null;
+  /** R7 : l'étiquette de réponse de la demande (adresse « Répondre » et objet). */
+  etiquette: string | null;
+  /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu. */
+  rappelLe?: string | null;
+  /** Recette n° 2 du 14 novembre 2026 : le bon de commande est parti à ce négoce (date). */
+  commandeLe?: string | null;
   document: { id: string; name: string; status: string } | null;
+  /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision demandée. */
+  negoce?: {
+    vaRepondreLe: string | null;
+    refusMotif: string | null;
+    precision: { question: string; demandeeLe: string | null; reponse: string | null; repondueLe: string | null } | null;
+    conditions?: { livraisons: string | null; minimumCommandeHt: number | null; dechargement: string | null } | null;
+  } | null;
   /** E-mail prêt à envoyer (texte brut). */
   email: { subject: string; body: string } | null;
 }
@@ -519,8 +695,14 @@ export interface PriceRequest {
   retainedSupplierIds: string[];
   /** §48.5 : les articles de la liste envoyés à part (« Envoyer une sélection… ») ; vide = toute la liste. */
   articles?: string[];
+  /** Les demandes parties ensemble par le tri par métier portent le même lot ; absent = demande seule. */
+  lot?: string | null;
   /** §47.5 retour fournisseur : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
   orderFeedback?: OrderFeedback | null;
+  /** Après la commande (16 novembre 2026) : la date de livraison souhaitée, les autres négoces consultés, le choix pris. */
+  apresCommande?: { livraisonSouhaitee: string | null; autres: number; autresChoix: "oui" | "non" | null } | null;
+  /** Le rappel de suivi à 7 jours et « C'est réglé ». */
+  suivi?: { rappelLe: string | null; regleLe: string | null };
   recipients: PriceRequestRecipient[];
   /** §43 : les trois blocs envoyés au fournisseur (mail et PDF) ; absent pour une demande d'avant. */
   packet: { entreprise: string; chantier: string; articles: string[]; a_chiffrer: string[]; resume: string[]; joindre_detail: boolean } | null;
@@ -643,4 +825,116 @@ export interface BillingStatus {
   offers: BillingPlan[];
   requestedPlan: string | null;
   activationEnabled: boolean;
+  /** Paywall allumé ; éteint, Compte et Formules disent « Gratuit pour l'artisan ». */
+  payant?: boolean;
+}
+
+/** L'abonnement artisan (24 octobre 2026) : `GET /v1/abonnement`. */
+export interface Abonnement {
+  actif: boolean;
+  paiement: "simule" | "stripe";
+  modeTest: string | null;
+  acces: "essai" | "abonne" | "grace" | "bloque" | "gratuit";
+  /** La formule payée (Pro tant qu'il n'y en a pas). */
+  formule: Formule;
+  /** Le prix HT de la formule et sa période (« par mois », « par an »). */
+  prixHt: string;
+  prixTtc: string;
+  periode: string;
+  /** Au mois ou à l'année. */
+  periodicite?: Periodicite;
+  /** L'annuel peut-il être choisi au paiement ? (Avec Stripe : seulement si ses prix annuels sont configurés.) */
+  annuelDisponible?: boolean;
+  /** Les deux formules, Pro d'abord. */
+  offres: OffreAbonnement[];
+  /** « 19,90 € » : le prix d'entrée, par mois. */
+  prixDes: string;
+  /** Le passage de Pro à Pro Max, au prorata ; null quand il n'est pas possible. */
+  bascule: { credit: string; aPayerHt: string; aPayerTtc: string; jusquau: string } | null;
+  essaiFinLe: string | null;
+  joursEssai: number | null;
+  graceFinLe: string | null;
+  periodeFin: string | null;
+  resiliationProgrammee: boolean;
+  statut: "aucun" | "actif" | "echec" | "resilie";
+  tvaIntra: string | null;
+  bandeau: string | null;
+  bandeauRouge: boolean;
+  /** La période payée est finie et le renouvellement arrive : rien n'a été refusé (recette n° 2 du 14 novembre 2026). */
+  renouvellementEnCours?: boolean;
+  paywall: { phrase: string; economie: string | null };
+}
+
+/** Les deux formules de l'abonnement (Greg, 15 novembre 2026) : Pro 29 € HT et Pro Max 49 € HT par mois. */
+export type Formule = "pro" | "promax";
+export interface OffreAbonnement {
+  formule: Formule;
+  titre: string;
+  badge: string | null;
+  prix: string;
+  details: string[];
+  enAvant: boolean;
+  ttc?: string;
+  /** La même formule payée à l'année (dix mois facturés pour douze) : ce qui est facturé, l'équivalent par mois, l'économie. */
+  annuel?: { prix: string; equivalent: string; economie: string; details: string[]; ttc?: string };
+}
+
+/** Au mois, ou à l'année en une fois (Greg, 12 novembre 2026). */
+export type Periodicite = "mensuel" | "annuel";
+
+export interface FactureAbonnement {
+  id: string;
+  numero: string;
+  test: boolean;
+  /** Les factures d'avant le 30 octobre 2026 gardent « mensuel », « annuel », « bascule ». */
+  formule: Formule | "passage_pro" | "mensuel" | "annuel" | "bascule";
+  emiseLe: string;
+  periode: string;
+  ttc: string;
+  ht: string;
+}
+
+
+/** R7 : l'adresse Mobiiz de l'entreprise (`GET /v1/company/adresse-mobiiz`). */
+export interface EtatAdresseMobiiz {
+  adresse: string;
+  domaine: string | null;
+  email: string | null;
+  vueLe: string | null;
+  anciennes: string[];
+  modifiable: boolean;
+  /** Le nombre de demandes de prix déjà parties (le rappel ne se montre qu'au premier envoi). */
+  envois: number;
+}
+
+/** R7 : un e-mail reçu sur l'adresse Mobiiz (`GET /v1/recus`). */
+export interface EmailRecu {
+  id: string;
+  de: string;
+  expediteur: string;
+  objet: string;
+  texte: string | null;
+  recuLe: string;
+  luLe: string | null;
+  demande: { recipientId: string; projectId: string; negoce: string; chantier?: string } | null;
+  fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
+  tropLourdes: string[];
+}
+
+/** R7 : une demande partie, à laquelle rattacher un e-mail reçu (`GET /v1/recus/demandes`). */
+export interface DemandePartie {
+  recipientId: string;
+  projectId: string;
+  chantier: string;
+  negoce: string;
+  envoyeeLe: string | null;
+  recue: boolean;
+  /** « En attente de réponse » ou « Réponse déjà reçue ». */
+  etat?: string;
+}
+
+/** Les demandes récentes pour classer un e-mail, et celle que Mobiiz propose (avec sa raison), s'il y en a une. */
+export interface DemandesPourClasser {
+  items: DemandePartie[];
+  suggestion: { recipientId: string; raison: string } | null;
 }

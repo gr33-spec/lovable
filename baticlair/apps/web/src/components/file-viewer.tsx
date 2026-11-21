@@ -120,7 +120,7 @@ export function FileViewer() {
           type="button"
           onClick={close}
           aria-label="Fermer le document"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-[15px] font-bold active:bg-white/25"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-[15px] font-bold text-white active:bg-white/25"
         >
           <X size={20} aria-hidden="true" />
           Fermer
@@ -151,7 +151,7 @@ export function FileViewer() {
           </button>
         ) : null}
         {loaded ? (
-          <a href={loaded.objectUrl} download={loaded.fileName} className={`${bar} bg-cta text-white`}>
+          <a href={loaded.objectUrl} download={loaded.fileName} className={`${bar} bg-cta text-on-accent`}>
             <Download size={18} aria-hidden="true" />
             Télécharger
           </a>

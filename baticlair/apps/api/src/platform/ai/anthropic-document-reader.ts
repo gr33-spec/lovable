@@ -4,7 +4,10 @@ import { Anthropic, APIConnectionTimeoutError, APIError } from "@anthropic-ai/sd
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { AiUsage } from "@baticlair/domain";
 import type { z } from "zod";
-import type { DocumentInput, ReadAttempt } from "./document-reader.js";
+import type { ReadAttempt } from "./document-reader.js";
+import type { EffortIa, LecteurIa, ReadRequest } from "./lecteur-ia.js";
+
+export type { ReadRequest } from "./lecteur-ia.js";
 
 const NO_USAGE: AiUsage = { inputTokens: 0, outputTokens: 0 };
 
@@ -18,43 +21,44 @@ function toUsage(usage: Anthropic.Usage): AiUsage {
   };
 }
 
-export interface ReadRequest<S extends z.ZodType> {
-  /** Consignes (mises en cache côté fournisseur). */
-  system: string;
-  schema: S;
-  /**
-   * Schéma ENVOYÉ à l'API, quand il diffère de celui qui relit la réponse : l'API plafonne les champs « valeur ou
-   * vide » (16 unions, 24 optionnels au total) ; au-delà, elle refuse la demande. Absent : `schema`.
-   */
-  format?: z.ZodType;
-  document: DocumentInput;
-  /** Nom du document pour l'IA (« devis », « devis du fournisseur »). */
-  documentName: string;
-  /** Texte ajouté après le document (liste demandée, contexte…). */
-  extra?: string;
-  /** Étiquette « prompt-vN » transmise au fournisseur (suivi). */
-  tag: string;
+/**
+ * Écrire sans réfléchir d'abord (documentation Anthropic, « Effort », lue le 17 novembre 2026) : Haiku 5.5 accepte
+ * `thinking: disabled` jusqu'à l'effort « high » ; Sonnet 5.5 accepte `between_tools` aux efforts « low », « medium » et
+ * « high ». Les autres modèles (Opus 5.5 : la réflexion ne se coupe pas) et les efforts plus hauts gardent leur réglage.
+ */
+export function sansReflexion(model: string, effort: EffortIa): { thinking?: Anthropic.ThinkingConfigParam } {
+  if (effort === "xhigh" || effort === "max") return {};
+  if (/^claude-haiku-5-5/.test(model)) return { thinking: { type: "disabled" } };
+  if (/^claude-sonnet-5-5/.test(model)) return { thinking: { type: "between_tools" } };
+  return {};
 }
+
+/** Les modèles qui refusent le réglage `effort` (400). */
+const SANS_EFFORT = /^claude-(?:haiku|sonnet)-4-5/;
 
 /**
  * Lecture structurée d'un document par Claude (API Anthropic), commune à
  * toutes les lectures (devis client, devis fournisseur). Sortie imposée par
  * un schéma ; le code vérifie ensuite. Aucune donnée n'est conservée ici.
  */
-export class AnthropicDocumentReader {
+export class AnthropicDocumentReader implements LecteurIa {
   readonly provider = "anthropic";
   private readonly client: Anthropic;
 
   constructor(
     apiKey: string,
-    private readonly model: string,
-    private readonly effort: "low" | "medium" | "high" | "xhigh" | "max",
+    readonly model: string,
+    private readonly effort: EffortIa,
     /** Tests uniquement : remplace l'accès réseau. */
     fetchImpl?: typeof fetch,
+    /** Délai maximal d'une lecture (`AI_TIMEOUT_MS`). */
+    private readonly timeoutMs = 170_000,
+    /** `minimale` : le modèle écrit sa réponse sans réfléchir d'abord, quand il le permet (voir `sansReflexion`). */
+    private readonly reflexion: "auto" | "minimale" = "auto",
   ) {
     // Une lecture de devis dure de quelques secondes à une minute ; au-delà de 170 s, on arrête. Aucune relance cachée
     // du SDK (elle doublerait l'attente) : la lecture relance elle-même, dans son échéance (READING_BUDGET_MS).
-    this.client = new Anthropic({ apiKey, timeout: 170_000, maxRetries: 0, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
+    this.client = new Anthropic({ apiKey, timeout: timeoutMs, maxRetries: 0, ...(fetchImpl ? { fetch: fetchImpl } : {}) });
   }
 
   async read<S extends z.ZodType>(request: ReadRequest<S>): Promise<ReadAttempt<z.infer<S>>> {
@@ -67,9 +71,14 @@ export class AnthropicDocumentReader {
         title: `Pages du ${request.documentName} à lire en image (numéros d'origine, dans l'ordre : ${document.imagePages.join(", ")})`,
       });
     }
+    for (const image of document.images ?? []) {
+      content.push({ type: "image", source: { type: "base64", media_type: image.mediaType, data: Buffer.from(image.bytes).toString("base64") } });
+    }
     const text = document.numberedText.trim()
       ? `Texte du ${request.documentName}, lignes numérotées :\n\n${document.numberedText}`
-      : "Aucune page n'a de texte lisible : lis le document PDF ci-dessus.";
+      : document.images?.length
+        ? `Lis l'image du ${request.documentName} ci-dessus.`
+        : "Aucune page n'a de texte lisible : lis le document PDF ci-dessus.";
     content.push({ type: "text", text: request.extra ? `${text}\n\n${request.extra}` : text });
 
     const started = Date.now();
@@ -77,12 +86,15 @@ export class AnthropicDocumentReader {
     try {
       // `create` (et non `parse`) : une réponse illisible doit rester une tentative
       // mesurée (jetons consommés), pas une exception qui ferait perdre l'usage.
-      const response = await this.client.messages.create({
+      const response = await this.envoyer(request.surTexte, {
         model: this.model,
         max_tokens: 16000,
         system: [{ type: "text", text: request.system, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content }],
-        output_config: { effort: this.effort, format: zodOutputFormat(request.format ?? request.schema) },
+        // Greg, 16 novembre 2026 (essai des réponses brèves : « This model does not support the effort parameter ») : les
+        // modèles d'avant la génération 5 (Haiku 4.5, Sonnet 4.5) refusent `effort` ; il ne leur est jamais envoyé.
+        output_config: { ...(SANS_EFFORT.test(this.model) ? {} : { effort: this.effort }), format: zodOutputFormat(request.format ?? request.schema) },
+        ...(this.reflexion === "minimale" ? sansReflexion(this.model, this.effort) : {}),
         metadata: { user_id: request.tag },
       });
       const usage = toUsage(response.usage);
@@ -106,14 +118,60 @@ export class AnthropicDocumentReader {
       return { ...attempt, status: "success", output: parsed.data as z.infer<S>, errorCode: null };
     } catch (error) {
       const durationMs = Date.now() - started;
-      if (error instanceof APIConnectionTimeoutError) {
+      if (error instanceof APIConnectionTimeoutError || error instanceof LectureTropLongue) {
         return { ...base, usage: NO_USAGE, status: "timeout", output: null, errorCode: "timeout", durationMs };
       }
       if (error instanceof APIError) {
-        const code = error.status ? `http_${error.status}` : "connection";
+        // Recette du 25 octobre 2026 : « http_400 » seul ne disait pas la cause (crédit épuisé ? requête refusée ?). Le motif
+        // d'Anthropic (type et message, jamais la clé) suit le code, en clair dans le journal des appels.
+        const code = error.status ? `http_${error.status}${motifAnthropic(error)}` : "connection";
         return { ...base, usage: NO_USAGE, status: "provider_error", output: null, errorCode: code, durationMs };
       }
       throw error;
     }
   }
+
+  /**
+   * L'appel au modèle. Sans `surTexte` : une réponse d'un bloc, comme toujours. Avec : la même demande, lue au fil de
+   * l'eau (le texte déjà écrit est donné à `surTexte`), puis le même message complet à la fin. Le délai du SDK ne couvre
+   * que le début d'une réponse au fil de l'eau : le code arrête lui-même une lecture qui dépasse le délai.
+   */
+  private async envoyer(surTexte: ((texte: string) => void) | undefined, params: Anthropic.MessageCreateParamsNonStreaming): Promise<Anthropic.Message> {
+    if (!surTexte) return this.client.messages.create(params);
+    const flux = this.client.messages.stream(params);
+    let depasse = false;
+    const delai = setTimeout(() => {
+      depasse = true;
+      flux.abort();
+    }, this.timeoutMs);
+    flux.on("text", (_morceau, texte) => {
+      // Un suivi en panne ne casse jamais la lecture.
+      try {
+        surTexte(texte);
+      } catch {
+        /* rien : la lecture continue */
+      }
+    });
+    try {
+      return await flux.finalMessage();
+    } catch (error) {
+      if (depasse) throw new LectureTropLongue();
+      throw error;
+    } finally {
+      clearTimeout(delai);
+    }
+  }
+}
+
+/** Une lecture au fil de l'eau qui dépasse le délai : arrêtée par le code, comptée comme un délai dépassé. */
+class LectureTropLongue extends Error {}
+
+/** « : invalid_request_error, Your credit balance is too low… » : le type et le message d'une erreur d'Anthropic, 160 caractères au plus. */
+export function motifAnthropic(error: { error?: unknown }): string {
+  const corps = error.error as { error?: { type?: unknown; message?: unknown }; type?: unknown; message?: unknown } | undefined;
+  const e = corps?.error ?? corps;
+  const type = typeof e?.type === "string" ? e.type : "";
+  const message = typeof e?.message === "string" ? e.message.replace(/\s+/g, " ").trim() : "";
+  const motif = [type, message].filter(Boolean).join(", ");
+  return motif ? `: ${motif}`.slice(0, 162) : "";
 }

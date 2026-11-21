@@ -25,7 +25,7 @@ const CAS: Metier[] = [
     ref: ROOFING_REFERENTIAL,
     metier: "couverture",
     bench: [{ ref: "1", designation: "Couverture ardoises fibro-ciment", quantity: "80", unit: "m²" }],
-    questions: ["Ardoises fibres-ciment : bleu-noir, noir ou brun ?", "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?"],
+    questions: ["Ardoises fibres-ciment : anthracite (noir) ou brun ?", "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?"],
     couleurs: { vert: 0, orange: 1, gris: 0 },
   },
 ];

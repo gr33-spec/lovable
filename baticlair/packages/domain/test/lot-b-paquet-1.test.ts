@@ -39,8 +39,8 @@ const PAQUET: Metier[] = [
         unit: "m²",
       },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
-    couleurs: { vert: 2, orange: 2, gris: 0 },
+    questions: [],
+    couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {
     nom: "Carrelage",
@@ -169,7 +169,7 @@ const PAQUET: Metier[] = [
       },
     ],
     questions: ["Parpaings de 20, de 15 ou de 10 ?"],
-    couleurs: { vert: 0, orange: 6, gris: 0 },
+    couleurs: { vert: 0, orange: 5, gris: 0 },
   },
 ];
 

@@ -44,7 +44,7 @@ describe("la liste des fournitures, une couleur par ligne", () => {
     // quand rien ne se calcule sans la réponse (le façonnage), sinon calculée avec un « ? » (le développé).
     expect(check.map((r) => [label(v, r), r.decisionKey])).toEqual([
       ["Couverture zinc à joint debout gris", "engine:param:faconnage@couverture-zinc-joint-debout"],
-      ["Bande zinc d'égout", "engine:param:faconnage@bandes-zinc"],
+      ["Bande zinc d'égout", "engine:param:faconnage@pieces-pliees"],
       ["Gouttière zinc demi-ronde", "engine:param:developpe_gouttiere"],
       ["Naissances", "engine:param:nb_descentes"],
     ]);

@@ -8,9 +8,9 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
 | Électricité | 7 | 1 | 0 | 1 |
-| Plomberie | 0 | 3 | 0 | 1 |
-| Menuiserie | 2 | 2 | 0 | 1 |
-| Chauffage, ventilation | 1 | 1 | 0 | 2 |
+| Plomberie | 0 | 3 | 0 | 0 |
+| Menuiserie | 2 | 2 | 0 | 0 |
+| Chauffage, ventilation | 1 | 1 | 0 | 1 |
 
 ## Électricité
 
@@ -57,8 +57,7 @@ Devis de test :
 
 **À l'ouverture : 0 verte · 3 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -73,7 +72,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Multicouche 16×2, barre 4 m | 19 barres de 4 m (75,6 m à couvrir) |  | chiffrable |
 | Tube d'alimentation PVC évacuation Ø40, barre 4 m | 5 barres de 4 m (19,25 m à couvrir) |  | chiffrable |
 | PER-BAO 16×2, couronne 240 m | 3 couronnes de 240 m (569,5 m à couvrir) |  | chiffrable |
-| Colle PVC, pot 250 ml | 1 pot de 250 ml (0,06 L) |  | chiffrable |
 
 ## Menuiserie
 
@@ -88,8 +86,7 @@ Devis de test :
 
 **À l'ouverture : 2 vertes · 2 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -104,9 +101,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Porte-fenêtre PVC 2 vantaux 215x140 oscillo-battante | 1 pièce |  | chiffrable |
 | Stratifié, paquet 1,914 m² | 22 paquets de 1,914 m² | paquets entiers, même lot | chiffrable |
 | Plinthes MDF 10×70, barre 2,40 m | 15 barres |  | chiffrable |
-| Mousse PU pistolable 750 ml | 1 aérosol de 750 ml | calfeutrement sur le périmètre | chiffrable |
-| Mastic MS polymère 290 ml | 5 cartouches de 290 ml | joint extérieur sur le périmètre | chiffrable |
-| Cales de pose, sachet de 50 | 2 sachets de 50 |  | chiffrable |
 
 ## Chauffage, ventilation
 
@@ -121,7 +115,6 @@ Devis de test :
 
 Questions du comptoir :
 - VMC : autoréglable, hygro A ou hygro B ? (Hygro B / Hygro A / Autoréglable)
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -133,29 +126,28 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | --- | --- | --- | --- |
 | Kit VMC simple flux hygroréglable B, cuisine + 2 sanitaires | 1 pièce |  | chiffrable |
 | Climatiseur mural monosplit 3,5 kW Daikin Perfera | 2 pièces |  | chiffrable |
-| Adhésif alu VMC, rouleau 50 m | 1 rouleau de 50 m |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 
