@@ -1,0 +1,20 @@
+{
+  "juste": 2,
+  "quantite_fausse": 2,
+  "manquante": 0,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Ardoise naturelle d'Espagne 1er choix 32×22, ép. 3,5 mm, gris-noir (identique à l'existant)",
+      "classe": "quantite_fausse",
+      "attendu": "168 pièces",
+      "obtenu": "à chiffrer"
+    },
+    {
+      "article": "Tuyau de descente zinc naturel Ø80, longueur 2 m",
+      "classe": "quantite_fausse",
+      "attendu": "à chiffrer",
+      "obtenu": "1 pièces"
+    }
+  ]
+}

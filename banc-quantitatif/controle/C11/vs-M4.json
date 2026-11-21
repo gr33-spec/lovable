@@ -1,0 +1,13 @@
+{
+  "juste": 4,
+  "quantite_fausse": 3,
+  "manquante": 2,
+  "en_trop": 0,
+  "detail": [
+    {"article": "Ardoise naturelle 35×25, Espagne 1er choix, gris-noir", "classe": "quantite_fausse", "attendu": "6494 pièces", "obtenu": "à chiffrer"},
+    {"article": "Crochets d'ardoise inox à agrafe, Ø 2,7 mm, longueur 11 cm, agrafe 18, inox 18/10", "classe": "quantite_fausse", "attendu": "11 boîtes de 500", "obtenu": "à chiffrer"},
+    {"article": "Crochets d'ardoise inox à pointe, Ø 2,7 mm, longueur 11 cm, inox 18/10", "classe": "manquante", "attendu": "2 boîtes de 700", "obtenu": null},
+    {"article": "Gouttière demi-ronde zinc naturel de 25 (dév. 250), ép. 0,65 mm, longueur 4 m", "classe": "manquante", "attendu": "12 longueurs de 4 m", "obtenu": null},
+    {"article": "Tuyau de descente zinc naturel Ø 80, longueur 2 m", "classe": "quantite_fausse", "attendu": "12 tubes de 2 m", "obtenu": "3 pièces"}
+  ]
+}
