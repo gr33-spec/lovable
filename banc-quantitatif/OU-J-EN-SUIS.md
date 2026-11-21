@@ -65,7 +65,17 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## État au 21 novembre, nuit : fiche -71 ENREGISTRÉE ET POUSSÉE sur ma branche
+## DERNIER ÉTAT (22 novembre, tôt) : fiche -72 poussée sur ma branche
+- Fiche -72 : suggestion « Sortie de ventilation » sur les 7 couvertures (`avecSortieDeVentilation` dans `roofing.ts`,
+  `suggested.unlessWorks`), test permanent `packages/domain/test/reponses-greg-21-novembre-soir.test.ts`. Moteur 1312 verts,
+  banc 94 sur 99.
+- Serveur sur la fiche -71 : 903 verts, 18 rouges dans 7 fichiers (commande-claire-negoce, envoi-fournisseur, infos-chantier,
+  je-ne-sais-pas-aux-bacs, partner-keys, quantitatifs, version-figee) : la question de l'égout et les ardoises en plus quand
+  une gouttière ou un faîtage est écrit. Adaptation confiée à un agent ; à sa fin : relire son rapport (chaque nombre
+  vérifié par la formule), relancer tout le serveur (40 min, seul), puis les parcours Playwright, puis rapport à Greg.
+- TANT QUE serveur et parcours ne sont pas verts : lot PAS prêt pour le site de test.
+
+## État au 21 novembre, nuit : fiche -71
 - Moteur 1305 verts, banc 94 sur 99. Serveur : vert sur la fiche -70 (921) ; relancé sur la -71 (résultat à lire : des tests
   d'ardoise du serveur vont sûrement demander la réponse « Oui » à `param:egout_compris`, comme ceux du moteur). Parcours
   Playwright : PAS rejoués depuis la fiche -68.
