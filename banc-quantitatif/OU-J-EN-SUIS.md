@@ -48,10 +48,18 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
 - AJOUT 1 : sur toute réfection de toiture (ardoise, tuile, zinc…), si le devis n'en parle pas, Suggestion « Sortie de
   ventilation (VMC, extraction d'air) ». Même mot partout ; l'article s'adapte au matériau (tuile à douille et lanterne sur
   tuile, sortie adaptée sur ardoise ou zinc).
-- AJOUT 2 (lot À PART, après le calcul, touche l'écran) : un « ? » discret sur chaque ligne calculée ; au toucher, le calcul
-  en clair (« 120 m² × 39,5 ardoises au m² = 4 740 · arêtier 8 m × 26 = 208 · faîtage 10 m : 1 rang = 46 · perte 5 % »),
-  valeurs par défaut signalées. Première liste d'un artisan : bulle « Touche le ? pour voir le calcul », une seule fois.
-  Ni dans le PDF ni dans l'e-mail au négoce.
+- AJOUT 2, CORRIGÉ par Greg le 22 novembre (lot À PART, après le calcul, touche l'écran). Plus de « ? » : une petite FLÈCHE
+  discrète sur la ligne, qui déroule le détail du calcul juste en dessous.
+  - Un poste par ligne, en mots simples. Exemple pour « 7 252 ardoises » : Surface 150 m² × 39,5 = 5 925 · Arêtiers 12 m ×
+    26 = 312 · Égout 20 m = … · Faîtage 10 m, 1 rang = … · Lucarnes (ta réponse) = … · Perte 5 % = …
+  - Chaque poste se corrige d'un toucher, le total se recalcule tout de suite. Un poste corrigé à la main est marqué
+    « modifié par toi ». Les valeurs par défaut sont signalées.
+  - Lucarnes : la quantité vient TOUJOURS de la réponse de l'artisan, jamais estimée à sa place.
+  - D'abord l'ardoise et la tuile plate, puis toutes les lignes calculées, même affichage.
+  - Bulle de première utilisation : « Touche la flèche pour voir le calcul », une seule fois, disparaît au toucher.
+  - Le détail n'apparaît ni dans le PDF ni dans l'e-mail au négoce.
+  - Conséquence pour le moteur : il faudra que le calcul sorte ses POSTES (libellé, mesure, taux, résultat, par défaut ou
+    non), pas seulement une phrase de précision.
 - À VÉRIFIER ET DIRE (sans coder) : où en est l'apprentissage des corrections (retenu pour l'artisan ; même correction par
   plusieurs couvreurs → remonte pour devenir une règle après validation).
 
