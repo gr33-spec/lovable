@@ -1,5 +1,16 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-64 — Banc du calcul, lot 2 : mots des couvreurs lus par le code (Greg, 2026-11-21)
+
+Le banc du calcul passe de 52 à 56 lignes justes sur 98. Aucune quantité de la fiche ne change : ce lot ne touche que ce que le code lit dans la ligne du devis.
+
+- Descente : « DEP », « desc. EP » sont lus comme une descente ; « ht 4,00 m » comme sa hauteur.
+- « Sans dauphin », « hors crochets » : l'article écarté par le devis n'est ni nommé ni cité (avant : la ligne « DEP … sans dauphin, 3 U » sortait 3 dauphins).
+- Une ligne mesurée en mètres ne mesure jamais un article compté en pièces : « gouttière de 25 sur le pourtour, y compris 4 angles », 44 ml, mesure la gouttière ; les angles sont cités.
+- Angles de gouttière : « 4 angles », « 5 angles », « 6 angles » écrits au devis sont lus (avant : redemandés au-delà de 3).
+- Teinte de gouttière : « gris » lu comme grise ; dans « gris anthracite », le mot le plus long l'emporte (anthracite).
+- Rappel de ta règle du 19 novembre, appliquée au banc : tubes de descente de 2 m, en zinc comme en PVC.
+
 ## roofing-2026.11.21-63 — Banc du calcul, lot 1 : jonctions de gouttière, arêtier zinc plié, rangement des lignes (Greg, 2026-11-21)
 
 Le banc du calcul (`packages/domain/test/banc-couverture.test.ts`, 15 chantiers rejoués sans IA contre la liste du contrôleur) passe de 49 à 52 lignes justes sur 98.

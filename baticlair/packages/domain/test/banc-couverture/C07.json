@@ -278,6 +278,13 @@
  "reponses": {
   "param:teinte_gouttiere@gouttiere-pvc-alu__4": {
    "bouton": "Grise"
+  },
+  "param:nb_descentes": {
+   "bouton": "2"
+  },
+  "param:hauteur_descente": {
+   "valeur": "4",
+   "unite": "m"
   }
  },
  "attendu": [
@@ -336,7 +343,7 @@
     "!coude",
     "!collier"
    ],
-   "quantite": 2,
+   "quantite": 4,
    "unite": "n"
   }
  ],

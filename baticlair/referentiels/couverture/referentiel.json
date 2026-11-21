@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-63",
+  "version": "roofing-2026.11.21-64",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -639,7 +639,10 @@
       "keyAttributes": [],
       "keywords": [
         "descente",
-        "tuyau de descente"
+        "tuyau de descente",
+        "dep",
+        "desc ep",
+        "descente ep"
       ]
     },
     {
@@ -17378,6 +17381,27 @@
                 "3 angles",
                 "trois angles"
               ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 angles",
+                "quatre angles"
+              ]
+            },
+            {
+              "value": "5",
+              "keywords": [
+                "5 angles",
+                "cinq angles"
+              ]
+            },
+            {
+              "value": "6",
+              "keywords": [
+                "6 angles",
+                "six angles"
+              ]
             }
           ]
         },
@@ -18111,7 +18135,8 @@
               "keywords": [
                 "grise",
                 "grises",
-                "gris clair"
+                "gris clair",
+                "gris"
               ]
             },
             {
@@ -18140,7 +18165,8 @@
               "value": "5",
               "keywords": [
                 "anthracite",
-                "7016"
+                "7016",
+                "gris anthracite"
               ]
             }
           ],
@@ -18256,6 +18282,27 @@
               "keywords": [
                 "3 angles",
                 "trois angles"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 angles",
+                "quatre angles"
+              ]
+            },
+            {
+              "value": "5",
+              "keywords": [
+                "5 angles",
+                "cinq angles"
+              ]
+            },
+            {
+              "value": "6",
+              "keywords": [
+                "6 angles",
+                "six angles"
               ]
             }
           ]
@@ -18918,7 +18965,9 @@
           "question": "Hauteur d'une descente ?",
           "textLabels": [
             "hauteur",
-            "descente"
+            "descente",
+            "ht",
+            "haut"
           ],
           "textRange": {
             "min": "1",

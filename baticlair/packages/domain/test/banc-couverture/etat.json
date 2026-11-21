@@ -76,9 +76,9 @@
    "Closoirs mousse": "juste",
    "Faîtières bac acier": "quantite",
    "Gouttière PVC de 25": "juste",
-   "Tubes de descente PVC Ø80": "manquante"
+   "Tubes de descente PVC Ø80": "juste"
   },
-  "enTrop": 1
+  "enTrop": 0
  },
  "C08": {
   "lignes": {
@@ -108,7 +108,7 @@
    "Faîtières fibres-ciment": "quantite",
    "Feuilles de zinc (rives)": "juste",
    "Gouttière PVC de 25": "juste",
-   "Tubes de descente PVC Ø80": "quantite",
+   "Tubes de descente PVC Ø80": "juste",
    "Sortie de toit Ø100": "juste"
   },
   "enTrop": 1
@@ -121,7 +121,7 @@
    "Feuilles de zinc (arêtiers)": "juste",
    "Feuilles de zinc (faîtage)": "juste",
    "Feuilles de zinc (noues)": "juste",
-   "Gouttière de 25": "manquante",
+   "Gouttière de 25": "juste",
    "Angles de gouttière": "juste",
    "Tubes de descente Ø80": "juste"
   },
@@ -170,8 +170,8 @@
    "Tuiles à emboîtement": "quantite",
    "Plaques bac acier": "juste",
    "Gouttière alu de 25": "quantite",
-   "Tubes de descente alu Ø80": "manquante"
+   "Tubes de descente alu Ø80": "juste"
   },
-  "enTrop": 1
+  "enTrop": 0
  }
 }

@@ -91,13 +91,16 @@ export function donneesEcrites(params: readonly ParamDef[], texte: string): Reco
         continue;
       }
     }
-    const v = p.textValues?.filter((x) => x.keywords.some((k) => contient(t, motsDeLaFiche(k))));
-    if (v && new Set(v.map((x) => x.value)).size === 1) {
+    // Les mots écrits de chaque valeur ; un mot contenu dans un mot plus long d'une autre valeur ne compte pas (« gris »
+    // dans « gris anthracite » : la teinte est anthracite ; banc du calcul, C15, 21 novembre 2026).
+    const dits = (p.textValues ?? []).flatMap((x) => x.keywords.map(motsDeLaFiche).filter((k) => contient(t, k)).map((k) => ({ value: x.value, k })));
+    const v = dits.filter((d) => !dits.some((o) => o.value !== d.value && o.k !== d.k && ` ${o.k} `.includes(` ${d.k} `)));
+    if (v.length > 0 && new Set(v.map((x) => x.value)).size === 1) {
       out[p.key] = v[0]!.value;
       continue;
     }
     if (!/^(?:m|cm|mm)$/.test(p.unit) || !p.textLabels?.length) continue;
-    const labels = p.textLabels.map(motsDeLaFiche).filter((x) => x.length > 2);
+    const labels = p.textLabels.map(motsDeLaFiche).filter((x) => x.length > 1); // « ht 4,00 m » : deux lettres suffisent à un couvreur (banc du calcul, C07)
     const lus = new Set<string>();
     for (const label of labels) {
       const re = new RegExp(`(?:^| )${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} (?:de |d |: |= )?(\\d+(?:[.,]\\d+)?) ?(ml|m|cm|mm)(?= |$|[,.;)])`, "g");
@@ -149,18 +152,23 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   const texte = motsDeLaFiche(l.designation);
   const titreMots = motsDeLaFiche(titre);
   // L'article mesuré : l'emplacement que le titre nomme (« crochets de gouttière »), sinon le premier de l'ouvrage.
-  const nommeAuTitre = w.slots.filter((s) => motsDEmplacement(ref, w, s).some((k) => contient(titreMots, k)));
+  // « Sans dauphin », « hors crochets » : l'article est écarté par le devis, il n'est ni nommé ni cité (banc du calcul, C15).
+  const sansLesExclus = (mots: string) => mots.replace(/(?:^| )(?:sans?|hors?|non compris?) (?:les? |le |la |l )?[a-z0-9]+/g, " ");
+  const nommeAuTitre = w.slots.filter((s) => motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(titreMots), k)));
   // Une ligne qui MESURE l'ouvrage (32 m², 8 m) se range sur son emplacement mesuré, même si son titre cite un article
   // (« couverture zinc à tasseaux ») ; une ligne en pièces (« 40 crochets de gouttière ») sur l'article qu'elle nomme.
   const mesure = !/^(?:u|unite|unites|piece|pieces|pce|pcs|ens)?$/.test(motsDeLaFiche(l.unite ?? ""));
   const premier = w.slots[0]!;
-  const principal = nommeAuTitre.length === 1 && !(mesure && premier.measureOnly) ? nommeAuTitre[0]! : premier;
+  // Une ligne mesurée en mètres ne mesure jamais un article qui se compte en pièces : « gouttière de 25 sur le pourtour, y
+  // compris 4 angles », 44 ml, mesure la gouttière ; les angles sont cités (banc du calcul, C11, 21 novembre 2026).
+  const enPieces = (s: Slot) => w.needs.some((n) => n.slot === s.key) && w.needs.filter((n) => n.slot === s.key).every((n) => n.unit === "u");
+  const principal = nommeAuTitre.length === 1 && !(mesure && (premier.measureOnly || enPieces(nommeAuTitre[0]!))) ? nommeAuTitre[0]! : premier;
   // Des pièces (« 10 tôles bac acier », D-2022-071) ne mesurent pas un ouvrage qui se compte en surface ou en longueur :
   // la lecture reste, jamais une question « Surface du toit ? » derrière.
   const compteEnPieces = w.params.some((x) => x.fromLineQuantity && x.unit === "u");
   if (!mesure && principal.measureOnly && !compteEnPieces) return l;
   // Les autres articles écrits sur la ligne (« sur tasseaux bois et couvre-joints ») : cités, le calcul les compte.
-  const cites = w.slots.filter((s) => s.key !== principal.key && motsDEmplacement(ref, w, s).some((k) => contient(texte, k)));
+  const cites = w.slots.filter((s) => s.key !== principal.key && motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(texte), k)));
   // Une donnée dite sur une autre ligne par ses mots exacts (« bandes de rive pour les 2 côtés ») vaut pour l'ouvrage,
   // quand une seule ligne la dit ; un nombre lu sur la ligne (« bacs de 4 m ») ne vaut que pour elle.
   const donnees: Record<string, string> = {};

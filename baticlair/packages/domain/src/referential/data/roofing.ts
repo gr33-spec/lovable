@@ -939,11 +939,11 @@ const TEINTE_GOUTTIERE_PARAM: ParamDef = {
     { label: "Anthracite", value: "5" },
   ],
   textValues: [
-    { value: "1", keywords: ["grise", "grises", "gris clair"] },
+    { value: "1", keywords: ["grise", "grises", "gris clair", "gris"] },
     { value: "2", keywords: ["blanc", "blanche", "blanches"] },
     { value: "3", keywords: ["sable"] },
     { value: "4", keywords: ["brun", "brune", "marron"] },
-    { value: "5", keywords: ["anthracite", "7016"] },
+    { value: "5", keywords: ["anthracite", "7016", "gris anthracite"] },
   ],
   display: { "1": "grise", "2": "blanche", "3": "sable", "4": "brune", "5": "anthracite" },
   named: true,
@@ -966,6 +966,10 @@ const NB_ANGLES_PARAM: ParamDef = {
     { value: "1", keywords: ["1 angle", "un angle"] },
     { value: "2", keywords: ["2 angles", "deux angles"] },
     { value: "3", keywords: ["3 angles", "trois angles"] },
+    // Une gouttière sur le pourtour d'un toit à quatre pans (banc du calcul, C11) : écrit au devis, jamais redemandé.
+    { value: "4", keywords: ["4 angles", "quatre angles"] },
+    { value: "5", keywords: ["5 angles", "cinq angles"] },
+    { value: "6", keywords: ["6 angles", "six angles"] },
   ],
 };
 /**
@@ -1283,7 +1287,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-63",
+  version: "roofing-2026.11.21-64",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1542,7 +1546,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       keywords: ["crochet de gouttiere"],
     },
     { code: "gutter_outlet", label: "Naissance", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["naissance"] },
-    { code: "downpipe", label: "Tube de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["descente", "tuyau de descente"] },
+    { code: "downpipe", label: "Tube de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["descente", "tuyau de descente", "dep", "desc ep", "descente ep"] }, // « DEP », « desc. EP » : les abréviations des couvreurs (banc du calcul, C07, C15)
     { code: "downpipe_shoe", label: "Dauphin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["dauphin", "dauphins"] },
     { code: "downpipe_elbow", label: "Coude de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["coude"] },
     {
@@ -4302,7 +4306,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true, forSlots: ["tube"], textCount: ["descente"] },
         DIAMETRE_DESCENTE_PARAM,
         // « hauteur 4 m », et « 2 descentes de 3 m » (D-2026-020) ; « descente 100 mm » n'est pas une hauteur (textRange).
-        { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur", "descente"], textRange: { min: "1", max: "30" } },
+        { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur", "descente", "ht", "haut"], textRange: { min: "1", max: "30" } },
         {
           key: "longueur_tube",
           label: "Longueur des tubes",

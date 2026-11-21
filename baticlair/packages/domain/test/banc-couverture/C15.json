@@ -318,6 +318,13 @@
   },
   "fiche:modele_tuile": {
    "valeur": "Terreal Volnay PV rouge vieilli"
+  },
+  "param:hauteur_descente": {
+   "valeur": "4",
+   "unite": "m"
+  },
+  "param:developpe_gouttiere": {
+   "bouton": "25"
   }
  },
  "attendu": [

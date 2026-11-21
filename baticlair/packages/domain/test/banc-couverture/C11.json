@@ -387,6 +387,13 @@
   "param:longueur_crochet": {
    "valeur": "11",
    "unite": "cm"
+  },
+  "param:qualite_ardoise": {
+   "bouton": "Espagne 1er choix"
+  },
+  "param:developpe": {
+   "valeur": "330",
+   "unite": "mm"
   }
  },
  "attendu": [
