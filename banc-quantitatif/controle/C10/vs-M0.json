@@ -1,0 +1,12 @@
+{
+  "juste": 5,
+  "quantite_fausse": 3,
+  "manquante": 0,
+  "en_trop": 1,
+  "detail": [
+    {"article": "Liteaux sapin traité classe 2, 18×40", "classe": "quantite_fausse", "attendu": "770 ml", "obtenu": "100 ml"},
+    {"article": "Ardoises fibres-ciment 40×24 noires", "classe": "quantite_fausse", "attendu": "3131 ardoises (pièces)", "obtenu": "à chiffrer (quantité et unité nulles)"},
+    {"article": "Faîtières fibres-ciment noires à emboîtement", "classe": "quantite_fausse", "attendu": "à chiffrer", "obtenu": "30 pièces"},
+    {"article": "Chapeau de sortie de toit (Ø100)", "classe": "en_trop", "attendu": "aucune ligne : la sortie de toit est un article unique (1 pièce), déjà couvert par la ligne embase", "obtenu": "1 pièce"}
+  ]
+}

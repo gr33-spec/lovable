@@ -1,0 +1,32 @@
+{
+  "juste": 4,
+  "quantite_fausse": 4,
+  "manquante": 0,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Liteaux sapin traité classe 2, 18×40, longueurs de 4 m",
+      "classe": "quantite_fausse",
+      "attendu": "988 ml (247 liteaux de 4 m)",
+      "obtenu": "à chiffrer"
+    },
+    {
+      "article": "Ardoise naturelle d'Espagne 1er choix 32×22",
+      "classe": "quantite_fausse",
+      "attendu": "4330 pièces",
+      "obtenu": "à chiffrer"
+    },
+    {
+      "article": "Crochets d'ardoise inox Ø 2,7 mm, longueur 10 cm, tige droite, à agrafe pour liteau de 18",
+      "classe": "quantite_fausse",
+      "attendu": "9 boîtes de 500",
+      "obtenu": "à chiffrer"
+    },
+    {
+      "article": "Gouttière demi-ronde zinc de 25, 0,65 mm, longueur 4 m",
+      "classe": "quantite_fausse",
+      "attendu": "5 longueurs de 4 m",
+      "obtenu": "4 longueurs de 4 m"
+    }
+  ]
+}

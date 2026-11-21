@@ -1,0 +1,20 @@
+{
+  "juste": 3,
+  "quantite_fausse": 1,
+  "manquante": 0,
+  "en_trop": 1,
+  "detail": [
+    {
+      "article": "Bobine zinc anthracite 0,65 mm, largeur 650 mm (bacs à tasseaux)",
+      "classe": "quantite_fausse",
+      "attendu": "47,5 ml",
+      "obtenu": "48 ml"
+    },
+    {
+      "article": "Tasseaux bois trapézoïdaux de 50 mm",
+      "classe": "en_trop",
+      "attendu": "non attendu",
+      "obtenu": "49 ml"
+    }
+  ]
+}
