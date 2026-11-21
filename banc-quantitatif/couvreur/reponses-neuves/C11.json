@@ -1,0 +1,7 @@
+[
+ {"id": "param:nb_angles ¦ Combien d'angles sur cette gouttière ?", "bouton": "", "valeur": "4", "unite": "u", "ne_sait_pas": false, "dit": "4 angles extérieurs à 90°."},
+ {"id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "bouton": "Je façonne (feuilles ou bobineau)", "valeur": "", "unite": "u", "ne_sait_pas": false, "dit": "Je plie moi-même."},
+ {"id": "param:nb_descentes ¦ Combien de descentes ?", "bouton": "", "valeur": "4", "unite": "u", "ne_sait_pas": false, "dit": "4 descentes."},
+ {"id": "param:developpe@bandes-zinc ¦ Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m) : développé de la bande zinc ?", "bouton": "330 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "330 mm."},
+ {"id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?", "bouton": "330 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "330 mm."}
+]

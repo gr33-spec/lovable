@@ -1,0 +1,18 @@
+[
+ {
+  "id": "param:feutre_bac ¦ Bac acier : avec ou sans feutre anti-condensation ?",
+  "bouton": "Sans feutre",
+  "valeur": "",
+  "unite": "u",
+  "ne_sait_pas": false,
+  "dit": "Sans feutre."
+ },
+ {
+  "id": "param:developpe_gouttiere@gouttiere-pvc-alu__6 ¦ Gouttière : gouttière de 25, de 28, de 33 ou de 40 ?",
+  "bouton": "De 25",
+  "valeur": "",
+  "unite": "cm",
+  "ne_sait_pas": false,
+  "dit": "De 25."
+ }
+]
