@@ -1,0 +1,23 @@
+[
+  {
+    "article": "Bande de rive zinc naturel 0,65 mm, façonnée, développé 250 mm",
+    "bonne_valeur": "8 bandes de 2 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche (« zinc en bandes » : « ml + recouvrement à chaque jonction, arrondi à la longueur de 2 m ; avec 5 cm de recouvrement : +2,5 % ») donne pour « 2 x 7 ml » : 7 × 1,025 = 7,18 ml → 4 bandes par rive, soit 8 (14 × 1,025 = 14,35 ml → 8 aussi, et 8 encore à +5 %). La référence fait 14 ÷ 2 = 7 sans aucun recouvrement, comme la fiche vérité (« 7 bandes »), qui contredit donc elle aussi la règle de la fiche (règle encore « a_confirmer »)."
+  },
+  {
+    "article": "Naissance zinc pour gouttière demi-ronde de 25, sortie Ø80",
+    "bonne_valeur": "1 pièce",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "La fiche vérité exige « 1 naissance Ø80 de 25 : non écrite au devis, accessoire indissociable de la gouttière (§49.1 point 3), que le code doit sortir d'office », et la fiche « naissance / moignon » donne bien dév. 250 → Ø80. Défaut de la fiche à signaler : nulle part elle ne dit la naissance indissociable de la gouttière, donc le moteur, qui la suit, ne la sort pas."
+  },
+  {
+    "article": "Abergement de cheminée zinc naturel 0,65 mm, façonné",
+    "bonne_valeur": "à chiffrer",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche « abergement de souche (métal façonné) » compose l'abergement de bavette (« largeur de la souche + 2 × 10 à 12 cm »), 2 rives à noquets, besace et porte-solin sur le pourtour : tout dépend des cotes de la souche. Le couvreur a répondu « je ne sais pas » au périmètre (souche non mesurée, fiche vérité) et commande façonné, donc rien n'est commandable tel quel ; la référence sort pourtant « 1 pièce »."
+  }
+]

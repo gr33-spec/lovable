@@ -1,0 +1,178 @@
+{
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+    {"donnee": "ouvrage", "valeur": "couverture zinc à tasseaux d'un appentis accolé à la maison", "origine": "lue", "regle": "", "preuve": "objet et ligne 1 : « couverture en zinc à tasseaux sur le voligeage de l'appentis »"},
+    {"donnee": "état", "valeur": "neuf", "origine": "lue", "regle": "", "preuve": "objet : « l'appentis neuf accolé à la maison »"},
+    {"donnee": "nombre de pans", "valeur": "1", "origine": "deduite", "regle": "un appentis accolé à la maison est un toit à un seul pan", "preuve": ""},
+    {"donnee": "matériau", "valeur": "zinc anthracite (Anthra-Zinc) 0,65 mm", "origine": "lue", "regle": "", "preuve": "ligne 1 : « en zinc anthracite épaisseur 0,65 mm »"},
+    {"donnee": "surface", "valeur": "28 m²", "origine": "lue", "regle": "", "preuve": "ligne 1 : « pour une surface de 28 m² »"},
+    {"donnee": "longueur des bacs (rampant)", "valeur": "3,50 m", "origine": "lue", "regle": "", "preuve": "ligne 1 : « en bacs de 3,50 m »"},
+    {"donnee": "largeur de bobine", "valeur": "650 mm", "origine": "lue", "regle": "", "preuve": "ligne 1 : « pris dans de la bobine de largeur 650 mm »"},
+    {"donnee": "rives", "valeur": "rives sur tasseau des 2 côtés", "origine": "lue", "regle": "", "preuve": "ligne 1 : « rives sur tasseau des 2 côtés »"},
+    {"donnee": "tête de couverture", "valeur": "relevé en tête contre le mur de la maison", "origine": "lue", "regle": "", "preuve": "ligne 1 : « relevé en tête contre le mur de la maison »"},
+    {"donnee": "voligeage", "valeur": "non compris", "origine": "lue", "regle": "", "preuve": "ligne 1 : « (voligeage non compris) »"},
+    {"donnee": "chéneau", "valeur": "chéneau encaissé en zinc anthracite 0,65 mm, en bas de pente, dans l'encaissement bois existant", "origine": "lue", "regle": "", "preuve": "ligne 2 : « en bas de pente d'un chéneau encaissé en zinc anthracite épaisseur 0,65 mm »"},
+    {"donnee": "longueur de chéneau", "valeur": "8 m", "origine": "lue", "regle": "", "preuve": "ligne 2 : « sur une longueur de 8 m »"},
+    {"donnee": "soudures du chéneau", "valeur": "toutes soudures comprises", "origine": "lue", "regle": "", "preuve": "ligne 2 : « toutes soudures comprises »"},
+    {"donnee": "développé du chéneau", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "nombre de descentes", "valeur": "1", "origine": "lue", "regle": "", "preuve": "ligne 3 : « d'1 descente d'eaux pluviales »"},
+    {"donnee": "matière des descentes", "valeur": "zinc anthracite", "origine": "lue", "regle": "", "preuve": "ligne 3 : « en zinc anthracite Ø80 »"},
+    {"donnee": "diamètre des descentes", "valeur": "Ø80", "origine": "lue", "regle": "", "preuve": "ligne 3 : « Ø80 »"},
+    {"donnee": "hauteur d'une descente", "valeur": "3 m", "origine": "lue", "regle": "", "preuve": "ligne 3 : « hauteur 3 m »"},
+    {"donnee": "pied de descente", "valeur": "raccordée sur le regard existant en pied de mur", "origine": "lue", "regle": "", "preuve": "ligne 3 : « raccordée sur le regard existant en pied de mur »"},
+    {"donnee": "dauphin", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "solin", "valeur": "bande de solin en zinc anthracite, contre le mur de la maison, engravée dans l'enduit", "origine": "lue", "regle": "", "preuve": "ligne 4 : « une bande de solin en zinc anthracite sur 8 m, contre le mur de la maison en haut de l'appentis, engravée dans l'enduit »"},
+    {"donnee": "longueur de solin", "valeur": "8 m", "origine": "lue", "regle": "", "preuve": "ligne 4 : « sur 8 m »"},
+    {"donnee": "développé de la bande de solin", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "façonnage", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "consommables de pose", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""}
+  ],
+  "bref": [
+    "Couverture zinc à tasseaux d'un appentis neuf accolé à la maison, 28 m², sur un voligeage non compris au devis.",
+    "28 m² de zinc anthracite 0,65 mm, en bobine de largeur 650 mm, en bacs de 3,50 m, rives sur tasseau des 2 côtés, relevé en tête contre le mur de la maison.",
+    "Tasseaux pour la couverture zinc.",
+    "Chéneau encaissé 8 m en zinc anthracite 0,65 mm, en bas de pente, dans l'encaissement bois existant, soudé sur place.",
+    "1 descente d'eaux pluviales en zinc anthracite Ø80, hauteur 3 m, raccordée sur le regard existant.",
+    "Bande de solin 8 m en zinc anthracite, contre le mur de la maison, engravée dans l'enduit.",
+    "Pas de voliges à fournir : le voligeage n'est pas compris."
+  ],
+  "questions": [
+    {"cle": "developpe_cheneau", "texte": "Ton chéneau fait quel développé ?", "boutons": [{"label": "Jusqu'à 50 cm", "valeur": "500"}, {"label": "Jusqu'à 65 cm", "valeur": "650"}, {"label": "Jusqu'à 1 m", "valeur": "1000"}], "unite": "", "donnee": "développé du chéneau", "ligne": "2"},
+    {"cle": "developpe", "texte": "Ta bande de solin, elle fait quel développé ?", "boutons": [{"label": "100 mm", "valeur": "100"}, {"label": "200 mm", "valeur": "200"}, {"label": "250 mm", "valeur": "250"}, {"label": "330 mm", "valeur": "330"}, {"label": "400 mm", "valeur": "400"}], "unite": "", "donnee": "développé de la bande de solin", "ligne": "4"},
+    {"cle": "dauphin", "texte": "Tu mets un dauphin en pied de descente, avant le regard ?", "boutons": [{"label": "Oui", "valeur": "1"}, {"label": "Non", "valeur": "0"}], "unite": "", "donnee": "dauphin", "ligne": "3"},
+    {"cle": "faconnage", "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "boutons": [{"label": "Je façonne (feuilles ou bobineau)", "valeur": "1"}, {"label": "Je commande façonné", "valeur": "2"}], "unite": "", "donnee": "façonnage", "ligne": ""},
+    {"cle": "consommables", "texte": "Je t'ajoute les consommables de pose (étain et décapant pour les soudures, silicone pour le solin) ?", "boutons": [{"label": "Oui", "valeur": "1"}, {"label": "Non", "valeur": "0"}], "unite": "", "donnee": "consommables de pose", "ligne": ""}
+  ],
+  "lignes": [
+    {
+      "ref": "1",
+      "designation": "Couverture de l'appentis : fourniture et pose d'une couverture en zinc à tasseaux sur le voligeage de l'appentis (voligeage non compris), en zinc anthracite épaisseur 0,65 mm, pour une surface de 28 m², en bacs de 3,50 m pris dans de la bobine de largeur 650 mm, rives sur tasseau des 2 côtés, relevé en tête contre le mur de la maison.",
+      "quantite": "28",
+      "unite": "m²",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Zinc anthracite 0,65 mm en bobine largeur 650 mm",
+          "quantite": "28",
+          "unite": "m²",
+          "ouvrage": "couverture-zinc-tasseaux",
+          "emplacement": "bobine",
+          "donnees": [
+            {"cle": "surface", "valeur": "28"},
+            {"cle": "epaisseur_zinc", "valeur": "0.65"},
+            {"cle": "aspect_zinc", "valeur": "3"},
+            {"cle": "longueur_rampant", "valeur": "3.5"},
+            {"cle": "largeur_bobine_tasseaux", "valeur": "650"},
+            {"cle": "nb_rives_tasseau", "valeur": "2"}
+          ],
+          "attend": [],
+          "a_preciser": [],
+          "precision": "Couverture zinc à tasseaux en bacs de 3,50 m, rives sur tasseau des 2 côtés, relevé en tête contre le mur."
+        },
+        {
+          "nom": "Tasseaux pour couverture zinc à tasseaux",
+          "quantite": "",
+          "unite": "",
+          "ouvrage": "couverture-zinc-tasseaux",
+          "emplacement": "tasseau",
+          "donnees": [
+            {"cle": "longueur_rampant", "valeur": "3.5"},
+            {"cle": "nb_rives_tasseau", "valeur": "2"}
+          ],
+          "attend": [],
+          "a_preciser": ["section"],
+          "precision": "Rives sur tasseau des 2 côtés."
+        }
+      ]
+    },
+    {
+      "ref": "2",
+      "designation": "Chéneau : fourniture et pose en bas de pente d'un chéneau encaissé en zinc anthracite épaisseur 0,65 mm, sur une longueur de 8 m, dans l'encaissement bois laissé par le charpentier, toutes soudures comprises.",
+      "quantite": "8",
+      "unite": "m",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Chéneau encaissé zinc anthracite 0,65 mm",
+          "quantite": "8",
+          "unite": "ml",
+          "ouvrage": "cheneau-encaisse",
+          "emplacement": "bobineau",
+          "donnees": [
+            {"cle": "longueur_cheneau", "valeur": "8"},
+            {"cle": "epaisseur_zinc", "valeur": "0.65"},
+            {"cle": "aspect_zinc", "valeur": "3"}
+          ],
+          "attend": ["developpe_cheneau"],
+          "a_preciser": [],
+          "precision": "Dans l'encaissement bois existant, toutes soudures comprises."
+        }
+      ]
+    },
+    {
+      "ref": "3",
+      "designation": "Descente : fourniture et pose d'1 descente d'eaux pluviales en zinc anthracite Ø80, hauteur 3 m, raccordée sur le regard existant en pied de mur.",
+      "quantite": "1",
+      "unite": "",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Descente d'eaux pluviales zinc anthracite Ø80",
+          "quantite": "1",
+          "unite": "u",
+          "ouvrage": "descente",
+          "emplacement": "tube",
+          "donnees": [
+            {"cle": "nb_descentes", "valeur": "1"},
+            {"cle": "diametre_descente", "valeur": "80"},
+            {"cle": "hauteur_descente", "valeur": "3"}
+          ],
+          "attend": ["dauphin"],
+          "a_preciser": [],
+          "precision": "Hauteur 3 m, raccordée sur le regard existant en pied de mur."
+        }
+      ]
+    },
+    {
+      "ref": "4",
+      "designation": "Solin : fourniture et pose d'une bande de solin en zinc anthracite sur 8 m, contre le mur de la maison en haut de l'appentis, engravée dans l'enduit.",
+      "quantite": "8",
+      "unite": "m",
+      "role": "fourniture_et_pose",
+      "fournitures": [
+        {
+          "nom": "Bande de solin zinc anthracite",
+          "quantite": "8",
+          "unite": "ml",
+          "ouvrage": "bandes-zinc",
+          "emplacement": "bande",
+          "donnees": [
+            {"cle": "longueur_bande", "valeur": "8"},
+            {"cle": "aspect_zinc", "valeur": "3"}
+          ],
+          "attend": ["developpe", "faconnage"],
+          "a_preciser": ["épaisseur"],
+          "precision": "Contre le mur de la maison en haut de l'appentis, engravée dans l'enduit."
+        }
+      ]
+    }
+  ],
+  "contexte": [
+    {"cle": "client", "valeur": "Mme Anne Kerleau"},
+    {"cle": "adresse", "valeur": "23 rue de la Pie"},
+    {"cle": "code postal", "valeur": "35400"},
+    {"cle": "ville", "valeur": "Saint-Malo"},
+    {"cle": "numéro du devis", "valeur": "D-2026-0457"},
+    {"cle": "date", "valeur": "16 novembre 2026"},
+    {"cle": "validité", "valeur": "2 mois"},
+    {"cle": "neuf ou rénovation", "valeur": "neuf (appentis neuf accolé à la maison)"},
+    {"cle": "délai d'intervention", "valeur": "5 semaines après accord, sous réserve des intempéries"},
+    {"cle": "échafaudage", "valeur": "compris dans les prix"},
+    {"cle": "évacuation des déchets", "valeur": "comprise dans les prix"}
+  ],
+  "notes": [
+    "Le voligeage de l'appentis n'est pas compris au devis : pas de voliges à acheter.",
+    "Le chéneau se pose dans l'encaissement bois laissé par le charpentier : pas de bois à prévoir pour lui."
+  ]
+}

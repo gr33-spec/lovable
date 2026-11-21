@@ -1,0 +1,9 @@
+[
+  {
+    "article": "Bobine zinc anthracite 0,65 mm, largeur 650 mm (bacs à tasseaux)",
+    "bonne_valeur": "47,5 ml (13 bacs × 3,65 m = 47,45 m)",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Le devis donne « bacs de 3,50 m pris dans de la bobine de largeur 650 mm » et la fiche vérité « 13 bacs (13 × 3,65 m ≈ 47,5 m de bobine) » : 47,45 m arrondis à 47,5 ml, alors que la référence arrondit au mètre entier (48 ml) sans règle qui le justifie. DÉFAUT DE LA FICHE À SIGNALER : elle n'a aucun ouvrage « couverture zinc à tasseaux » (ni entraxe 620, ni longueur de bac = rampant + 15 cm) et sa seule rubrique « bobine de zinc joint debout » ne dit ni que la bobine se vend au mètre ni à quel pas arrondir, d'où deux arrondis différents du même calcul."
+  }
+]

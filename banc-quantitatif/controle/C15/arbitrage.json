@@ -1,0 +1,23 @@
+[
+  {
+    "article": "Tuile terre cuite à emboîtement grand moule",
+    "bonne_valeur": "945 pièces (Terreal Volnay PV rouge vieilli : 90 m² × 10 u/m² = 900, + 5 % = 945 ; 927 avec le bas de la fourchette à 3 %)",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche donne le nombre au m² par modèle (« Terreal Volnay PV : tuiles_par_m2 10 u/m2 », pureau 340-408, et 6 m ÷ 15 rangs = 400 mm tombe dans la plage) : le moteur aurait dû demander au couvreur le modèle, qu'il connaît, au lieu de laisser « 90 m² au devis » sans quantité. Défaut de la fiche à signaler : la perte « tuiles à emboîtement » est une fourchette « 3 à 5 % » marquée a_confirmer (et la FDES CTMNC donne 1 %), donc le 5 % du contrôleur est un choix et non une règle de la fiche."
+  },
+  {
+    "article": "Gouttière pendante demi-ronde aluminium anthracite, développé 25, longueur 4 m",
+    "bonne_valeur": "8 longueurs de 4 m",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Le devis écrit « 2 x 9 m + 1 x 6 m » : chaque ligne s'arrondit à part (9 m → 3, 9 m → 3, 6 m → 2 = 8), comme le fait le couvreur, alors que la référence divise le total 24 ML ÷ 4 = 6, ce qui suppose de rabouter les chutes de 1, 1 et 2 m. Défaut de la fiche à signaler : la section « gouttière aluminium » ne donne ni longueur vendue ni méthode, et la seule méthode (« gouttières zinc : … arrondi aux longueurs de 4 m ») ne dit pas si l'arrondi se fait par ligne ou sur le total."
+  },
+  {
+    "article": "Tuyau de descente aluminium anthracite Ø80, sans dauphin",
+    "bonne_valeur": "6 tubes de 2 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La ligne 7 du devis (« DEP alu … Ø80, sans dauphin — 3 U ») compte des descentes, pas des tubes : le moteur l'a recopiée en « 3 pièces » sans demander la hauteur (4 m) ni la longueur de tube (2 m), alors que la fiche raisonne en longueurs vendues (« longueurs_vendues_en_bretagne : tuyau_descente 2 m ») ; 3 × 4 m ÷ 2 m = 6 tubes. Défaut de la fiche à signaler : les longueurs vendues ne sont données que pour le zinc et le PVC, rien pour l'aluminium."
+  }
+]
