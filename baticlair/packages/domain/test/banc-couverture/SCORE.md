@@ -1,8 +1,8 @@
 # Banc du calcul de la couverture
 
-- Entraînement (10 chantiers) : 59/64 (92.2 %), 0 en trop, 0 « à chiffrer » sans question
+- Entraînement (10 chantiers) : 61/64 (95.3 %), 0 en trop, 0 « à chiffrer » sans question
 - Examen (5 chantiers) : 35/35 (100 %), 0 en trop, 0 « à chiffrer » sans question
-- Ensemble : 94/99 (94.9 %), 0 en trop, 0 « à chiffrer » sans question
+- Ensemble : 96/99 (97 %), 0 en trop, 0 « à chiffrer » sans question
 
 | Chantier | Justes | Lignes fausses | En trop |
 |---|---|---|---|
@@ -15,7 +15,7 @@
 | C07 | 6/6 | aucune | aucune |
 | C08 | 4/4 | aucune | aucune |
 | C09 | 6/6 | aucune | aucune |
-| C10 | 5/8 | Liteaux 18×40 : 770 ml attendu, Liteaux 18×40 : 701 ml ; Ardoises fibres-ciment 40×24 : 3131 n attendu, Ardoises fibres-ciment noir 40×24 : 2 919 pièces ; Faîtières fibres-ciment : à chiffrer attendu, Faîtières : 30 pièces | aucune |
+| C10 | 7/8 | Faîtières fibres-ciment : à chiffrer attendu, Faîtières : 30 pièces | aucune |
 | C11 | 8/8 | Crochets à pointe : 2 bt attendu, absent (incertain) | aucune |
 | C12 | 13/13 | aucune | aucune |
 | C13 | 6/6 | aucune | aucune |

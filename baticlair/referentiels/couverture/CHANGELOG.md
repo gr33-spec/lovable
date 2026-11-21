@@ -1,5 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-73 — Ardoise fibres-ciment 40×24 : 27,1 au m² ; deux lignes qui ne disent pas la même surface (2026-11-22)
+
+Le banc du calcul passe de 94 à 96 lignes justes sur 99 (97 %).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Ardoises fibres-ciment 40×24 au m² (recouvrement 100 mm, au crochet) | 27,8 | 27,1 | Cedral, manuel de pose du 15 avril 2026 ; Cembrit, documentation de septembre 2016 : même tableau (`recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`) |
+| Exemple : 100 m² | 2 919 ardoises | 2 846 ardoises | 100 × 27,1 × 1,05 |
+| Deux lignes d'un même ouvrage qui n'écrivent pas la même mesure (liteaux 100 m², ardoises 110 m²) | la première mesure prise partout, sans question | la question se pose (« Surface du toit ? ») | Greg, 21 novembre 2026 : « en cas de doute, on demande au couvreur » |
+
 ## roofing-2026.11.21-72 — Suggestion « Sortie de ventilation » sur toute couverture (Greg, 2026-11-21 au soir)
 
 Le banc du calcul ne bouge pas : 94 sur 99.

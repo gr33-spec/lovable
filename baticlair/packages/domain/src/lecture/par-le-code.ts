@@ -21,7 +21,7 @@ import type { LectureDevis, LectureFourniture, LectureLigne } from "./lecture.js
 export function lectureParLeCode(ref: Referential, lecture: LectureDevis): LectureDevis {
   if (ref.workItems.length === 0) return lecture;
   const lues = lecture.lignes.map((l) => motsJamaisDemandes(ref, sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes))));
-  const lignes = donneesDesAutresOuvrages(ref, lues);
+  const lignes = sansRediteDeLaQuantite(ref, donneesDesAutresOuvrages(ref, lues));
   return { ...lecture, lignes };
 }
 
@@ -124,6 +124,49 @@ const PIECES = /^(?:u|unite|piece|pce|pc|ens|tole|plaque)?$/;
  * sur la couverture bac acier, D-2022-071) : ce n'est pas la mesure de l'ouvrage, c'est l'article tel qu'écrit. Il part
  * tel quel, sans « Surface du toit ? » derrière (§49.2).
  */
+/**
+ * DEUX LIGNES D'UN MÊME OUVRAGE QUI NE DISENT PAS LA MÊME MESURE (« Liteaux, 100 m² » et « Ardoises, 110 m² ») : la lecture
+ * recopie la quantité de chaque ligne dans ses données, et la première recopiée passait devant les autres : 100 m² partout,
+ * sans rien demander (banc du calcul, C10, 22 novembre 2026). Dans ce cas seulement, la redite est retirée : il reste les
+ * quantités des lignes, qui ne concordent pas, et la question se pose (« en cas de doute, on demande », Greg). Une seule
+ * ligne, ou des lignes d'accord : rien ne change.
+ */
+function sansRediteDeLaQuantite(ref: Referential, lignes: readonly LectureLigne[]): LectureLigne[] {
+  const nombre = (x: string | null | undefined) => (x ? Number(x.replace(/\s/g, "").replace(",", ".")) : NaN);
+  // Par ouvrage et par donnée : les mesures que les lignes redisent.
+  const redites = new Map<string, Set<number>>();
+  const redite = (l: LectureLigne, f: LectureLigne["fournitures"][number], cle: string) => {
+    const q = nombre(f.quantite ?? l.quantite);
+    return Number.isFinite(q) && f.donnees[cle] !== undefined && nombre(f.donnees[cle]) === q ? q : null;
+  };
+  for (const l of lignes) for (const f of l.fournitures) {
+    const w = ref.workItems.find((x) => x.id === f.ouvrage);
+    for (const p of w?.params ?? []) {
+      const q = p.fromLineQuantity ? redite(l, f, p.key) : null;
+      if (q === null) continue;
+      const k = `${w!.id}/${p.key}`;
+      redites.set(k, (redites.get(k) ?? new Set()).add(q));
+    }
+  }
+  return lignes.map((l) => {
+    let change = false;
+    const fournitures = l.fournitures.map((f) => {
+      const w = ref.workItems.find((x) => x.id === f.ouvrage);
+      if (!w) return f;
+      const donnees = { ...f.donnees };
+      let ici = false;
+      for (const p of w.params) {
+        if (!p.fromLineQuantity || (redites.get(`${w.id}/${p.key}`)?.size ?? 0) < 2 || redite(l, f, p.key) === null) continue;
+        delete donnees[p.key];
+        ici = true;
+      }
+      if (!ici) return f;
+      change = true;
+      return { ...f, donnees };
+    });
+    return change ? { ...l, fournitures } : l;
+  });
+}
 /**
  * Une donnée qui se lit sur les AUTRES ouvrages du devis (`fromWorks` : la couverture autour d'une sortie de toit) est posée
  * par le code, d'après les ouvrages rangés : une seule valeur possible, elle est prise (elle passe avant ce que la lecture a

@@ -73,7 +73,18 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## DERNIER ÉTAT (22 novembre, tôt) : fiche -72 poussée sur ma branche
+## DERNIER ÉTAT (22 novembre) : fiche `roofing-2026.11.22-73` poussée sur ma branche
+- **Banc : 96 sur 99 (97 %)** : entraînement 61/64 (95,3 %), examen 35/35. Objectif de 95 % atteint (une ligne « incertaine »
+  hors compte : crochets à pointe de C11). Moteur 1312 verts.
+- Fiche -73 : fibres-ciment 40×24 à 27,1 au m² (Cedral + Cembrit) ; deux lignes d'un même ouvrage qui n'écrivent pas la même
+  mesure → la question se pose (`sansRediteDeLaQuantite` dans `par-le-code.ts`).
+- Serveur : 921 verts sur la -72 (pas rejoué sur la -73 ; `dist` PAS reconstruit tant que les parcours tournent).
+- Parcours Playwright lancés sur la -72 : résultat à lire, tests d'ardoise à adapter sûrement.
+- Les 3 lignes encore fausses : liteaux C01 (+ 10 % d'aboutage ?), feuilles de zinc de l'abergement C05 (3 contre 4),
+  faîtières fibres-ciment C10 (le devis ne dit pas laquelle : question « Quelle faîtière ? » à proposer à Greg).
+- Demande de Greg du 22 novembre : l'AJOUT 2 devient une flèche qui déroule le détail (voir plus bas).
+
+## État précédent (22 novembre, tôt) : fiche -72
 - Fiche -72 : suggestion « Sortie de ventilation » sur les 7 couvertures (`avecSortieDeVentilation` dans `roofing.ts`,
   `suggested.unlessWorks`), test permanent `packages/domain/test/reponses-greg-21-novembre-soir.test.ts`. Moteur 1312 verts,
   banc 94 sur 99.

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-72",
+  "version": "roofing-2026.11.22-73",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -3351,7 +3351,7 @@
         },
         "ardoises_par_m2": {
           "kind": "manufacturer_spec",
-          "value": "27.8",
+          "value": "27.1",
           "unit": "u/m2",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {

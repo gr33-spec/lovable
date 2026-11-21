@@ -26,7 +26,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises fibres-ciment bleu-noir 40×24 | 2 919 pièces |  | chiffrable |
+| Ardoises fibres-ciment bleu-noir 40×24 | 2 846 pièces |  | chiffrable |
 
 ## Ardoises fibro-ciment sans format ni teinte
 
@@ -44,13 +44,13 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises fibres-ciment 40×24 | 2 336 pièces | Teinte à préciser |
+| Ardoises fibres-ciment 40×24 | 2 277 pièces | Teinte à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises fibres-ciment noir 40×24 | 2 336 pièces |  | chiffrable |
+| Ardoises fibres-ciment noir 40×24 | 2 277 pièces |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 

@@ -1392,7 +1392,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-72",
+  version: "roofing-2026.11.22-73",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2086,7 +2086,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     }),
     // §4 : formats, recouvrement courant 100 mm, ardoises et liteaux au m² du référentiel du fondateur.
     ...([
-      [40, 24, "27.8", "6.67"],
+      // Banc du calcul (C10, 22 novembre 2026) : 27,10 au m² à recouvrement 100 mm, pose au crochet (Cedral, manuel de pose
+      // du 15 avril 2026 ; Cembrit, documentation de septembre 2016 : même tableau). Avant 27,8 (ancien relevé).
+      [40, 24, "27.1", "6.67"],
       [40, 27, "24.7", "6.67"],
       [60, 30, "13.3", "4"],
       [60, 40, "10", "4"],

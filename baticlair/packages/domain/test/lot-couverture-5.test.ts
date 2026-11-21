@@ -41,13 +41,13 @@ describeLot({
 });
 
 describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous et ses antivents", () => {
-  it("100 m² de 40 × 24 : 2 919 ardoises (27,8/m² + 5 %), 6 130 clous (× 2,1), 3 065 antivents (× 1,05), 701 ml de liteaux (6,67/m² + 5 %)", () => {
+  it("100 m² de 40 × 24 : 2 846 ardoises (27,1/m² + 5 % ; Cedral et Cembrit, avant 27,8 : 2 919), 5 977 clous (× 2,1), 2 989 antivents (× 1,05), 701 ml de liteaux (6,67/m² + 5 %)", () => {
     const v = readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises fibres-ciment 40x24 bleu-noir", quantity: "100", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]))).toMatchObject({
-      "Ardoises fibres-ciment bleu-noir 40×24": "2 919 pièces",
-      "Clous inox d'ardoise": "6 130 pièces",
-      "Crochets d'antivent": "3 065 pièces",
+      "Ardoises fibres-ciment bleu-noir 40×24": "2 846 pièces",
+      "Clous inox d'ardoise": "5 977 pièces",
+      "Crochets d'antivent": "2 989 pièces",
       "Liteaux 18×40": "701 ml",
     });
   });
