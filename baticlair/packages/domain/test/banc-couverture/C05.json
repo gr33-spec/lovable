@@ -509,6 +509,16 @@
   },
   "param:qualite_ardoise@couverture-ardoises-crochet__4": {
    "bouton": "Espagne 1er choix"
+  },
+  "param:egout_compris@couverture-ardoises-crochet__4": {
+   "bouton": "Non"
+  },
+  "param:egout_a_ajouter@couverture-ardoises-crochet__4": {
+   "valeur": "20",
+   "unite": "m"
+  },
+  "param:egout_compris@couverture-ardoises-crochet__5": {
+   "bouton": "Oui"
   }
  },
  "attendu": [
@@ -518,7 +528,7 @@
     "ardoise",
     "!crochet"
    ],
-   "quantite": 7846,
+   "quantite": 7771,
    "unite": "n"
   },
   {
@@ -526,7 +536,7 @@
    "mots": [
     "crochet"
    ],
-   "quantite": 12,
+   "quantite": 16,
    "unite": "bt"
   },
   {

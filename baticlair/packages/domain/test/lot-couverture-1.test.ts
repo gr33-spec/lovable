@@ -34,8 +34,12 @@ const CAS: Metier[] = [
       { ref: "3", designation: "Noue encaissée zinc", quantity: "4", unit: "ml" },
     ],
     // Dans l'ordre du calcul (Greg, 20 novembre 2026 : les questions sont décidées par le code).
-    questions: ["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
-    couleurs: { vert: 0, orange: 3, gris: 1 },
+    // Règle changée (Greg, 21 novembre 2026) : avant, deux questions → l'égout se demande quand aucune gouttière n'est écrite.
+    // Tant qu'elle attend, les ardoises n'ont pas de chiffre et la ligne des crochets (un par ardoise) n'est pas encore là :
+    // 2 lignes orange au lieu de 3. Répondu « Oui » : 150 m² + 10 m d'arêtier × 0,66 + 4 m de noue × 0,50 = 158,6 m² ;
+    // × 42,5 = 6 740,5 ; + 5 % = 7 077,5 → 7 078 ardoises (avant 6 694).
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
+    couleurs: { vert: 0, orange: 2, gris: 1 },
   },
 ];
 

@@ -1,5 +1,19 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-71 — Ardoises : ouvrages au mètre, question de l'égout, remaniage (Greg, 2026-11-21 au soir)
+
+Le banc du calcul passe de 88 sur 100 à 94 sur 99 (une ligne « incertaine » : les crochets à pointe).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Ardoises au crochet | surface × ardoises au m², + 5 % | (surface + 0,66 m² par mètre d'arêtier + 0,50 m² par mètre de noue) × ardoises au m², + un rang au faîtage et à l'égout (longueur ÷ largeur de l'ardoise), puis 5 % | Greg, 21 novembre 2026 ; manuel du CAP couvreur (`recherche/ardoise-ouvrages-au-metre.md`) |
+| Exemple : D-2026-020 (48 m², 32×22, faîtage 8 m, gouttière 10 m) | 2 122 ardoises | 2 208 ardoises | 48 × 42,09 + 18 ÷ 0,22, × 1,05 |
+| Égout | jamais compté | la longueur de la gouttière écrite ; sinon la question « Tes m² d'ardoise comprennent déjà l'égout et les coupes ? » (Oui : rien ; Non : « Quelle longueur d'égout ? ») | Greg, 21 novembre 2026 |
+| Remaniage d'ardoises | la surface remaniée comptée en ardoises neuves (12 m² : 489) | aucune ardoise d'office ; question « Tu vas remanier. Je te prévois des ardoises ? Si oui, combien ? » ; le nombre dit, sans marge | Greg, 21 novembre 2026 |
+
+- Règle changée : deux questions demandent maintenant un nombre (la longueur d'égout après « Non », les ardoises d'un remaniage). Avant : jamais de quantité demandée. C'est la demande de Greg.
+- Pas encore fait : les rives d'ardoise (0,16 m² par mètre) ; l'arêtier en bande zinc est compté comme l'arêtier fermé (0,66), à confirmer.
+
 ## roofing-2026.11.21-70 — Réponses de Greg du 21 novembre au soir : bac acier, faîtière HP 10, mortier, sortie de toit (2026-11-21)
 
 Le banc du calcul passe de 83 à 88 lignes justes sur 100.

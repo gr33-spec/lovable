@@ -3,8 +3,8 @@
   "lignes": {
    "Écran HPV": "juste",
    "Liteaux 18×40": "quantite",
-   "Ardoises 32×22": "quantite",
-   "Crochets d'ardoise": "quantite",
+   "Ardoises 32×22": "juste",
+   "Crochets d'ardoise": "juste",
    "Feuilles de zinc (faîtage)": "juste",
    "Gouttière de 25": "juste",
    "Tubes de descente Ø80": "juste",
@@ -47,8 +47,8 @@
  },
  "C05": {
   "lignes": {
-   "Ardoises 30×20": "quantite",
-   "Crochets d'ardoise": "quantite",
+   "Ardoises 30×20": "juste",
+   "Crochets d'ardoise": "juste",
    "Feuilles de zinc": "quantite",
    "Fenêtres GGL MK04": "juste",
    "Raccords MK04": "juste",
@@ -83,7 +83,7 @@
  "C08": {
   "lignes": {
    "Feuilles de zinc (noue)": "juste",
-   "Ardoises 32×22": "quantite",
+   "Ardoises 32×22": "juste",
    "Mortier pour solin": "juste",
    "Tubes de descente Ø80": "juste"
   },
@@ -115,9 +115,9 @@
  },
  "C11": {
   "lignes": {
-   "Ardoises 35×25": "quantite",
+   "Ardoises 35×25": "juste",
    "Crochets à agrafe": "juste",
-   "Crochets à pointe": "manquante",
+   "Crochets à pointe": "incertain",
    "Feuilles de zinc (arêtiers)": "juste",
    "Feuilles de zinc (faîtage)": "juste",
    "Feuilles de zinc (noues)": "juste",

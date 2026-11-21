@@ -243,6 +243,9 @@
   },
   "param:qualite_ardoise": {
    "bouton": "Espagne 1er choix"
+  },
+  "param:ardoises_a_prevoir": {
+   "valeur": "170"
   }
  },
  "attendu": [
@@ -261,7 +264,7 @@
     "ardoise",
     "!crochet"
    ],
-   "quantite": 168,
+   "quantite": 170,
    "unite": "n"
   },
   {

@@ -16,6 +16,13 @@ export interface QuoteLineInput {
  */
 export const SUGGESTIONS_DU_BANC = "gouttiere/naissance,gouttiere-pvc-alu/naissance";
 
+/**
+ * Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite au devis, l'égout des ardoises se demande (« Tes m² d'ardoise
+ * comprennent déjà l'égout et les coupes ? »). La réponse « Oui » : rien n'est ajouté pour l'égout, les quantités d'avant
+ * restent. Un banc qui mesure autre chose la donne explicitement ; la question elle-même a ses tests.
+ */
+export const EGOUT_COMPRIS_OUI: Record<string, EngineAnswer> = { "param:egout_compris": { value: "1", unit: "u" } };
+
 /** Tout le parcours d'un devis de couvreur jusqu'à la liste, comme l'API (§51.5) : la lecture enregistrée du devis, puis le calcul. */
 export function readQuote(
   bench: readonly QuoteLineInput[],

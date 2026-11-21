@@ -113,7 +113,9 @@ describe("« Je ne sais pas » à la longueur des bacs ne bloque pas un autre ou
   it("les ardoises reprennent leur rampant courant (il ne règle que leur recouvrement) et sont chiffrées ; les bacs restent à préciser", () => {
     const e = voir({ "param:longueur_rampant": null });
     // D-2026-020, crochet 11 : pureau (320 − 110) ÷ 2 + 2,5 mm = 10,75 cm (fiche couverture ; avant 11 cm, 2 052).
-    expect(ardoises(e)?.quantity).toBe("2 122 pièces");
+    // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises au faîtage (8 m écrits) et à l'égout (10 m de gouttière écrits),
+    // avant 2 122 → 2 208 : 48 m² × 42,09 = 2 020,4 ; + (8 + 10) m ÷ 0,22 m = 81,8 ; 2 102,2 + 5 % = 2 207,4 → 2 208.
+    expect(ardoises(e)?.quantity).toBe("2 208 pièces");
     expect((ardoises(e)?.waitsOn ?? []).join(" ")).not.toMatch(/rampant/);
     expect(e.purchase.toBuy.filter((b) => /^Bobine/.test(b.label) && b.quantity)).toEqual([]);
   });

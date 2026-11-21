@@ -881,17 +881,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Liteaux 27×40",
@@ -923,6 +916,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
@@ -950,7 +944,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "1 956 pièces",
+    "quantite": "2 018 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -1137,20 +1131,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1161,20 +1149,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "1 830 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 8 cm",
-    "quantite": "4 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1352,17 +1334,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "7 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Embase plomb de sortie de toit",
@@ -1387,6 +1362,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1405,6 +1381,7 @@
   ],
   "questions": [
    "param:pente",
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1495,17 +1472,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "7 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Embase plomb de sortie de toit",
@@ -1530,6 +1500,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1614,20 +1585,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "1 830 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 8 cm",
-    "quantite": "4 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1710,17 +1675,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Liteaux 18×40",
@@ -1752,6 +1710,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
@@ -1926,20 +1885,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "8 148 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "17 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2017,20 +1970,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2080,20 +2027,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2104,13 +2045,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "1 956 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Épaisseur, qualité à préciser"
+    "raison": "Épaisseur à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise",
    "fiche:epaisseur_des_crochets"
   ],
@@ -2157,17 +2099,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Liteaux 18×40",
@@ -2199,6 +2134,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
@@ -2211,7 +2147,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Marque, qualité à préciser"
@@ -2303,7 +2239,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2457,20 +2393,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2534,20 +2464,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "2 678 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "6 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2558,13 +2482,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2638,20 +2563,21 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "5 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "designation": "Crochets d'ardoise inox standard",
+    "quantite": "1 lot",
+    "unite": "lot",
+    "etat": "ok",
+    "raison": null
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2692,20 +2618,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2716,14 +2636,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
+    "quantite": "9 040 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
+    "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "ok",
     "raison": null
@@ -2752,17 +2672,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "7 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Sortie de toit Poujoulat",
@@ -2787,6 +2700,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:diametre_sortie",
    "param:usage_sortie",
    "param:qualite_ardoise"
@@ -2799,7 +2713,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2908,7 +2822,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -2999,17 +2913,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "7 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Embase plomb de sortie de toit",
@@ -3034,6 +2941,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3313,20 +3221,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "8 148 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "17 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3354,14 +3256,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "8 925 pièces",
+    "quantite": "9 040 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
+    "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3588,6 +3490,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:surface",
    "param:qualite_ardoise"
   ],
@@ -3715,14 +3618,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "8 925 pièces",
+    "quantite": "9 040 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
    },
    {
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
+    "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -3754,6 +3657,7 @@
   ],
   "questions": [
    "param:pente",
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3821,17 +3725,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Tubes de descente zinc Ø80, longueur 2 m",
@@ -3842,6 +3739,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3970,20 +3868,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 261 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "19 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4137,20 +4029,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4301,17 +4187,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Tuiles HP10",
@@ -4322,6 +4201,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "product:tuile",
    "param:qualite_ardoise"
   ],
@@ -4544,15 +4424,8 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "6 694 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "14 boîtes de 500",
-    "unite": "boîtes de 500",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -4565,6 +4438,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise",
    "fiche:fenetre_de_toit_quelle_taille"
   ],
@@ -4591,17 +4465,10 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "3 260 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "7 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    },
    {
     "designation": "Sortie de toit Poujoulat",
@@ -4626,6 +4493,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:diametre_sortie",
    "param:usage_sortie",
    "param:qualite_ardoise"
@@ -4740,6 +4608,7 @@
   ],
   "questions": [
    "param:pente",
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4768,7 +4637,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4890,7 +4759,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -4981,20 +4850,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 32×22",
-    "quantite": "1 956 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "4 boîtes de 500",
-    "unite": "boîtes de 500",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Qualité à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5047,7 +4910,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5138,20 +5001,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 32×22",
-    "quantite": "2 122 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "5 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5162,7 +5019,7 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 32×22",
-    "quantite": "2 122 pièces",
+    "quantite": "2 208 pièces",
     "unite": "pièces",
     "etat": "check",
     "raison": "Qualité à préciser"
@@ -5378,20 +5235,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "8 925 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "18 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5417,20 +5268,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles Espagne 1er choix 30×22",
-    "quantite": "9 797 pièces",
-    "unite": "pièces",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 11 cm",
-    "quantite": "20 boîtes de 500",
-    "unite": "boîtes de 500",
-    "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Égout et coupes à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5459,15 +5304,8 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "6 694 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "14 boîtes de 500",
-    "unite": "boîtes de 500",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Qualité à préciser"
    },
@@ -5487,6 +5325,7 @@
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -5515,20 +5354,14 @@
   "lignes": [
    {
     "designation": "Ardoises naturelles 30×22",
-    "quantite": "9 261 pièces",
-    "unite": "pièces",
-    "etat": "check",
-    "raison": "Qualité à préciser"
-   },
-   {
-    "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
-    "quantite": "19 boîtes de 500",
-    "unite": "boîtes de 500",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Qualité à préciser"
    }
   ],
   "questions": [
+   "param:egout_compris",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []

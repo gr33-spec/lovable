@@ -57,6 +57,11 @@ const COMPTOIR: Record<string, string> = {
   dauphin: "« un dauphin en pied ? » (réponse du fondateur, 2026-10-05)",
   longueur_plomb: "les mètres de bande de plomb",
   developpe_cuivre: "« ta bande cuivre, en quel développé ? »",
+  // Greg, 21 novembre 2026 (soir) : l'égout des ardoises et le remaniage.
+  egout_compris: "« tes m² d'ardoise comprennent déjà l'égout et les coupes ? » quand aucune gouttière n'est écrite",
+  egout_a_ajouter: "« quelle longueur d'égout ? », seulement après « Non » à la question d'avant",
+  ardoises_a_prevoir: "« tu vas remanier : je te prévois des ardoises ? combien ? » (ça dépend de l'état de la toiture)",
+  surface_remaniee: "la surface du remaniage, celle de sa ligne (lue, jamais demandée : elle n'entre dans aucune quantité)",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

@@ -10,7 +10,7 @@ import { REFERENTIEL_COMPLET } from "./support/complet.js";
  * posée que si rien ne permet de calculer et que la réponse change la commande.
  */
 const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
-const ARDOISE: WorkItemInput = {
+const ARDOISE_SANS_REPONSE: WorkItemInput = {
   workItemId: "couverture-ardoises-crochet",
   // La qualité d'ardoise (question du comptoir, §47.8) est une habitude de l'entreprise, pas une hypothèse.
   params: {
@@ -20,15 +20,28 @@ const ARDOISE: WorkItemInput = {
   products: { ardoise: { productId: "ardoise-30x22", origin: "devis" } },
   mentioned: ["ardoise", "liteau"],
 };
+// Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
+// Répondu « Oui » (les m² comprennent déjà l'égout et les coupes) : rien n'est ajouté, les quantités d'avant restent.
+const ARDOISE: WorkItemInput = { ...ARDOISE_SANS_REPONSE, params: { ...ARDOISE_SANS_REPONSE.params, egout_compris: { value: "1", unit: "u", origin: "artisan" } } };
 
 describe("hypothèses par défaut : utilisées sans question, dites, modifiables", () => {
   it("pente 45°, zone littorale, rampant ≤ 5,5 m, entraxe 60 cm : le devis ne dit rien, tout se calcule quand même", () => {
+    // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
+    const ouverture = computeWorkItem(REFERENTIEL_COMPLET, ARDOISE_SANS_REPONSE);
+    expect(ouverture.nextQuestion).toMatchObject({ key: "param:egout_compris", text: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", options: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }] });
+    // La seule question : tout ce qui attend, attend elle.
+    expect([...new Set(ouverture.needs.filter((n) => n.status !== "calculated").map((n) => n.question?.key))]).toEqual(["param:egout_compris"]);
+    // « Oui » : tout se calcule comme avant.
     const r = computeWorkItem(REFERENTIEL_COMPLET, ARDOISE);
     expect(r.nextQuestion).toBeNull();
     for (const n of r.needs) expect(n.status).toBe("calculated");
     // Chaque hypothèse est tracée comme telle, jamais confondue avec une donnée lue ou répondue.
     const ardoises = need(r, "ardoises");
     expect(ardoises.trace.filter((t) => t.origin === "assumption").map((t) => [t.label, t.value, t.unit])).toEqual([
+      // Greg, 21 novembre 2026 : les ouvrages au mètre (arêtier, noue, faîtage, gouttière) se lisent au devis ; il n'en
+      // parle pas : zéro, dit.
+      ["Longueur d'arêtier", "0", "m"],
+      ["Longueur de noue", "0", "m"],
       ["Pente du toit", "45", "°"],
       // Pour l'ardoise, la région ardoise (DTU 40.11), pas la zone climatique des tuiles.
       ["Région ardoise", "3", "u"],
@@ -40,9 +53,11 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
       ["Pureau", "10,55", "cm"],
       // Formule Cupa (§34) : crochet courant 1 mm sans département littoral connu.
       ["Diamètre du crochet", "1", "mm"],
+      ["Longueur du faîtage", "0", "m"],
+      ["Longueur de gouttière", "0", "m"],
     ]);
     expect(ardoises.trace.find((t) => t.label === "Région ardoise")).toMatchObject({ value: "3", shown: "III" });
-    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:pente", "param:zone", "param:longueur_rampant", "param:situation", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
+    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_aretier", "param:longueur_noue", "param:pente", "param:zone", "param:longueur_rampant", "param:situation", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "param:longueur_faitage", "param:longueur_gouttiere"]);
     // Les hypothèses à boutons gardent leurs réponses proposées (l'artisan ne tape rien).
     expect(ardoises.assumptions.find((a) => a.key === "param:pente")?.choices?.map((c) => c.label)).toEqual(["30°", "35°", "45°"]);
     expect(need(r, "contre-liteaux-ardoise").assumptions.map((a) => a.key)).toEqual(["product:contre_liteau", "param:entraxe_supports"]);
@@ -54,7 +69,7 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     // Pente 100 % (une ancienne réponse en %) = 45°, zone 1 : recouvrement 73 mm (NF DTU 40.11), dans la table Cupa :
     // 39,5/m² × 200 = 7 900 + 5 % = 8 295 (avant, ancien tableau : 80 mm, 8 547).
     expect(ardoises.quantity).toEqual({ value: "8295", unit: "u" });
-    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_rampant", "param:situation", "derived:recouvrement", "param:pureau", "param:diametre_crochet"]);
+    expect(ardoises.assumptions.map((a) => a.key)).toEqual(["param:longueur_aretier", "param:longueur_noue", "param:longueur_rampant", "param:situation", "derived:recouvrement", "param:pureau", "param:diametre_crochet", "param:longueur_faitage", "param:longueur_gouttiere"]);
     expect(ardoises.trace.find((t) => t.label === "Pente du toit")).toMatchObject({ origin: "project", value: "45", unit: "°" });
   });
 
@@ -112,7 +127,10 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
 
   it("sans ces hypothèses, le moteur redemande : la règle produit tient aux données, pas à un contournement", () => {
     const bare = sansHypotheses(REFERENTIEL_COMPLET);
-    const r = computeWorkItem(bare, ARDOISE);
+    // Les longueurs des ouvrages au mètre (Greg, 21 novembre 2026) se lisent au devis, zéro quand il n'en parle pas : ce devis
+    // n'en écrit aucun. Ce ne sont pas des hypothèses de calcul ; celle qui manque ici est le pureau.
+    const aucun = { value: "0", unit: "m", origin: "devis" as const };
+    const r = computeWorkItem(bare, { ...ARDOISE, params: { ...ARDOISE.params, longueur_aretier: aucun, longueur_noue: aucun, longueur_faitage: aucun, longueur_gouttiere: aucun } });
     expect(need(r, "ardoises").status).toBe("question");
     expect(r.nextQuestion?.key).toBe("param:pureau");
   });

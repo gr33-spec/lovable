@@ -806,6 +806,50 @@ const TUILE_HP10_PARAM: ParamDef = {
   textValues: [{ value: "1", keywords: ["hp10", "hp 10"] }],
   default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "pas une HP 10" },
 };
+/**
+ * ARDOISES : LES OUVRAGES AU MÈTRE (Greg, 21 novembre 2026, soir). « Surface × ardoises au m², PLUS ce que consomment les
+ * ouvrages au mètre écrits au devis, puis la perte. » Leurs longueurs sont celles de leurs propres lignes (arêtier, noue,
+ * faîtage, gouttière), lues sur le même devis ; jamais demandées, zéro quand le devis n'en parle pas.
+ * Chiffres : manuel du CAP couvreur (`referentiels/couverture/recherche/ardoise-ouvrages-au-metre.md`), tranchés par Greg :
+ * arêtier 0,66 m² par mètre (26 ardoises 32×22), noue 0,50 m² par mètre, faîtage et égout un rang d'ardoises.
+ */
+const longueurLue = (key: string, label: string): ParamDef => ({
+  key,
+  label,
+  unit: "m",
+  kind: "site_data",
+  question: `${label} ?`,
+  neverAsk: true,
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "le devis n'en parle pas" },
+});
+const OUVRAGES_AU_METRE_ARDOISE: ParamDef[] = [
+  longueurLue("longueur_aretier", "Longueur d'arêtier"),
+  longueurLue("longueur_noue", "Longueur de noue"),
+  longueurLue("longueur_faitage", "Longueur du faîtage"),
+  longueurLue("longueur_gouttiere", "Longueur de gouttière"),
+  {
+    // Greg, 21 novembre 2026 (soir) : l'égout fait la longueur de la gouttière si elle est écrite ; sinon une seule question.
+    key: "egout_compris",
+    label: "Égout et coupes compris dans les m²",
+    unit: "u",
+    kind: "site_data",
+    question: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?",
+    choices: [
+      { label: "Oui", value: "1" },
+      { label: "Non", value: "2" },
+    ],
+    display: { "1": "oui", "2": "non" },
+  },
+  {
+    // Règle changée (Greg, 21 novembre 2026) : cette longueur se demande, seulement après « Non » à la question d'avant.
+    key: "egout_a_ajouter",
+    label: "Égout à ajouter",
+    unit: "m",
+    kind: "site_data",
+    question: "Quelle longueur d'égout ?",
+    askOnlyAfter: { param: "egout_compris", value: "2" },
+  },
+];
 const ARETIER_PARAM: ParamDef = {
   key: "aretier_matiere",
   label: "Arêtier",
@@ -1302,7 +1346,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-70",
+  version: "roofing-2026.11.21-71",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1649,6 +1693,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       keyAttributes: ["largeur", "longueur"],
       keywords: ["ardoise"],
     },
+    // Greg, 21 novembre 2026 (soir) : « Remaniage : aucune ardoise d'office. » Les ardoises d'un remaniage sont celles que
+    // l'artisan dit ; aucune marge (ce qu'il dit est ce qu'il commande).
+    { code: "roof_slate_rework", label: "Ardoises de remaniage", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["remaniage", "remaniage ardoise", "remaniage ardoises", "remaniage d'ardoise", "remaniage d'ardoises", "remaniement"] },
     // §4 : l'ardoise fibres-ciment précise « ardoise » ; même calcul, ses formats, ses clous et ses crochets d'antivent.
     {
       code: "roof_slate_fc",
@@ -2011,6 +2058,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
       sellingUnits: BY_PIECE,
     })),
+    generic("ardoise-remaniage", "roof_slate_rework", "Ardoises identiques à l'existant, pour remaniage", "Ardoises pour remaniage"),
     generic("clou-ardoise-fc", "slate_nail", "Clou inox pour ardoise fibres-ciment", "Clous inox d'ardoise"),
     generic("antivent-ardoise-fc", "slate_wind_hook", "Crochet d'antivent inox pour ardoise fibres-ciment", "Crochets d'antivent"),
     // Greg, 21 novembre 2026 : « Crochets d'ardoise : en boîtes, avec le nombre de pièces écrit sur la ligne. » Boîte de 500
@@ -2413,6 +2461,35 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       ],
     },
     {
+      // Greg, 21 novembre 2026 (soir) : « Remaniage : aucune ardoise d'office. Question : Tu vas remanier. Je te prévois des
+      // ardoises ? Si oui, combien ? Ça dépend de l'état de la toiture. » Avant : la surface remaniée comptée en ardoises
+      // neuves (12 m² : 489 ardoises). La surface écrite est celle du travail, jamais une quantité d'ardoises.
+      id: "remaniage-ardoises",
+      trade: "roofing",
+      section: "principal",
+      label: "Remaniage d'ardoises",
+      triggers: ["roof_slate_rework"],
+      params: [
+        { key: "surface_remaniee", label: "Surface remaniée", unit: "m2", kind: "site_data", question: "Surface remaniée ?", fromLineQuantity: true, neverAsk: true },
+        { key: "ardoises_a_prevoir", label: "Ardoises à prévoir", unit: "u", kind: "site_data", question: "Tu vas remanier. Je te prévois des ardoises ? Si oui, combien ?", hint: "Ça dépend de l'état de la toiture. Zéro si tu n'en veux pas." },
+      ],
+      slots: [{ key: "ardoise", family: "roof_slate_rework", label: "Ardoises pour remaniage", usual: { text: "Ardoises identiques à l'existant.", source: F, productId: "ardoise-remaniage" } }],
+      constants: {},
+      needs: [
+        {
+          id: "ardoises-remaniage",
+          slot: "ardoise",
+          formula: "ardoises_a_prevoir",
+          unit: "u",
+          core: true,
+          exclusions: "Le nombre d'ardoises dit par l'artisan ; aucune marge, aucun crochet d'office.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
       id: "couverture-ardoises-crochet",
       trade: "roofing",
       section: "principal",
@@ -2470,6 +2547,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         SITUATION_PARAM,
         DIAMETRE_CROCHET_PARAM,
         QUALITE_ARDOISE_PARAM,
+        ...OUVRAGES_AU_METRE_ARDOISE,
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -2509,9 +2587,15 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         seuil_rampant_2: deFiche("ardoise.seuil_projection_2"),
         marge_crochet: deFiche("ardoise.marge_choix_crochet"),
         jeu_tete_crochet: deFiche("ardoise.jeu_de_tete_crochet"),
+        // Greg, 21 novembre 2026 (soir), d'après le manuel du CAP couvreur : arêtier fermé 0,66 m² par mètre, les deux côtés
+        // (26 ardoises 32×22 : « seulement le surplus ») ; noue zinc 0,50 m² par mètre (deux tranchis biais).
+        sans_gouttiere: condition("0", "m", "definition", { status: "verified", verifiedAt: "2026-11-21", verifiedBy: "Mobiiz (définition)" }, "Aucune gouttière écrite au devis."),
+        aretier_m2_par_ml: condition("0.66", "m2/m", F, FOUNDER_DOC, "Arêtier : 0,66 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
+        noue_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Noue : 0,50 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
         pas_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."),
       },
       points: { ardoises_m2: CUPA_ARDOISES_M2 },
+      // (constantes des ouvrages au mètre : voir OUVRAGES_AU_METRE_ARDOISE)
       tables: {
         // NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck : une table par bande de projection horizontale du
         // rampant, lue dans la fiche couverture (2026-11-19). Le rampant tient lieu de projection (prudent : il est plus long).
@@ -2559,14 +2643,14 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "ardoises",
           slot: "ardoise",
           // Table Cupa (§34) : elle fait foi ; la formule Cupa ne calcule que hors table.
-          formula: "surface * points.ardoises_m2",
+          formula: "(surface + regle.aretier_m2_par_ml * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
           unit: "u",
           core: true,
-          exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
+          exclusions: "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
           // Le comptoir ne chiffre pas une ardoise sans sa qualité (§47.8) ; le format suit l'ardoise du devis.
           designation: "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
           // §49.3.4 : la phrase d'hypothèse, la marge du tiroir écrite (§49.2.4).
-          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) + {marge} de marge",
+          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) ; arêtier {longueur_aretier|ml} × 0,66 m² ; noue {longueur_noue|ml} × 0,50 m² ; faîtage {longueur_faitage|ml} et égout : un rang ; + {marge} de marge",
           precisionRequires: ["qualite_ardoise"],
           source: "cupa-pureau-ardoises-m2",
           verification: FOUNDER_DOC,

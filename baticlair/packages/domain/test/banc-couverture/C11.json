@@ -403,7 +403,7 @@
     "ardoise",
     "!crochet"
    ],
-   "quantite": 6494,
+   "quantite": 6294,
    "unite": "n"
   },
   {
@@ -413,7 +413,7 @@
     "!pointe",
     "!gouttiere"
    ],
-   "quantite": 11,
+   "quantite": 13,
    "unite": "bt"
   },
   {
@@ -423,7 +423,8 @@
     "pointe"
    ],
    "quantite": 2,
-   "unite": "bt"
+   "unite": "bt",
+   "incertain": "agrafe ou pointe : question pas encore tranchée par Greg (fiche : 20 % de crochets à pointe, boîtes de 700)"
   },
   {
    "article": "Feuilles de zinc (arêtiers)",

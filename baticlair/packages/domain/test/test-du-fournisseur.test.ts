@@ -4,7 +4,7 @@ import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 
 /** Le banc des devis réels : D-2026-015 (tuiles HP10 confirmées, faîtières ventilées refusées : « aucun de ces modèles »). */
 const REAL_QUOTES = [{ id: "D-2026-015", lines: D2026_015_LINES, answers: { "product:tuile": "edilians-hp10-huguenot", "product:faitiere": null } as Record<string, string | null> }];
-import { readQuote } from "./support/read-quote.js";
+import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * LE TEST DU FOURNISSEUR (référentiel §40, verrou moteur §41.3) : le quantitatif est lu par le gars du
@@ -105,7 +105,8 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
 
 describe("§ 41.4 : les mots de l'artisan passent devant ceux de BatiClair", () => {
   it("libellé et quantité réécrits sur une ligne calculée ; les autres lignes ne bougent pas", () => {
-    const v = readQuote([{ ref: "a", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]);
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande ; ici répondu « Oui », la ligne est calculée.
+    const v = readQuote([{ ref: "a", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }], EGOUT_COMPRIS_OUI);
     const key = "product:Ardoises naturelles Espagne 1er choix 30×22";
     const out = applyPurchaseOverrides(v, { [`libelle:${key}`]: "Ardoises Cupa 30×22", [`quantite:${key}`]: { value: "9000", unit: "pièces" } });
     const edited = out.toBuy.find((b) => b.key === key)!;

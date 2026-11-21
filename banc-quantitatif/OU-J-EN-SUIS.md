@@ -65,6 +65,26 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
+## En cours (fiche -71, PAS encore enregistrée ni poussée) — 21 novembre, nuit
+- Banc : **94 sur 99** (entraînement 59/64, examen 35/35). Une ligne mise « incertaine » : crochets à pointe de C11.
+- Fait dans `roofing.ts` : ardoises = (surface + 0,66 m²/m d'arêtier + 0,50 m²/m de noue) × ardoises au m² + un rang au
+  faîtage et à l'égout, puis 5 % ; égout = gouttière écrite, sinon question `egout_compris` (Oui/Non) puis `egout_a_ajouter`
+  (champ `askOnlyAfter`, nouveau dans `model.ts`/`schema.ts`, filtré dans `lecture.ts`) ; `si()` ne lit que la branche
+  retenue (`expression.ts`) ; ouvrage `remaniage-ardoises` (question `ardoises_a_prevoir`, aucune marge).
+- Référence du contrôleur mise à jour dans `outils/exporter-banc.mjs` (C01 4107, C05 7771 et 16 boîtes, C08 170, C11 6294 et
+  13 boîtes). ATTENTION : ces nombres sont ceux du moteur avec les règles de Greg, vérifiés à la main pour C01 seulement.
+- 56 tests du moteur à adapter (la question de l'égout apparaît sur tout devis d'ardoise sans gouttière) : confiés à un
+  agent ; à sa fin, relire son rapport, bump version -71, CHANGELOG, snapshot, build, commit, push.
+- Lignes encore fausses : liteaux C01 (988 contre 893 : le contrôleur ajoute 10 % de chute d'aboutage, la fiche ne tranche
+  pas) ; feuilles de zinc de l'abergement C05 (4 contre 3, débit absent de la fiche) ; C10 fibres-ciment (liteaux : le devis
+  écrit 100 m² sur une ligne et 110 sur les autres ; ardoises selon le recouvrement ; faîtières).
+- À DIRE À GREG : (1) arêtier en bande ZINC : j'ai pris 0,66 m²/m comme le fermé (sa réponse ne parlait que du 3 biaises ; le
+  manuel donnerait 0,50) ; (2) rives d'ardoise 0,16 m²/m PAS encore branchées (le moteur ne connaît pas la longueur des
+  rives d'un toit d'ardoise) ; (3) crochets : boîtes de 500 partout, la fiche dit 700 pour le crochet à pointe → question
+  « agrafe ou pointe ? » ; (4) liteaux : + 10 % de chute d'aboutage en plus des 5 % ? ; (5) la question de l'égout se pose
+  aussi sur des jouées de lucarne en ardoise ; (6) sortie de ventilation ÉCRITE sur tuile = tuile à douille + lanterne ;
+  (7) 30 mm par jonction : 20 ml tout rond = 6 longueurs.
+
 ## Reste (après la fiche -70)
 - Réponses 1 à 4 (ardoise : arêtier 26/m, faîtage 1 rang, rive 0,16 m²/m, noue 0,50 m²/m, question de l'égout) : le plus gros.
 - Réponse 9 (remaniage : aucune ardoise d'office, question). AJOUT 1 (suggestion sortie de ventilation).

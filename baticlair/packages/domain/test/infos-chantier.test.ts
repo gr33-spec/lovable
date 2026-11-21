@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL, type SiteFact } from "../src/index.js";
 import { planOf } from "./support/plan-of.js";
-import { readQuote } from "./support/read-quote.js";
+import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * INFOS CHANTIER FACULTATIVES (docs/infos-chantier-facultatives.md) : la note tapée par l'artisan au dépôt ou dans le
@@ -40,7 +40,8 @@ describe("deux documents qui se contredisent : une question avec les deux valeur
     expect(q.question).toMatchObject({ text: "Pente du toit : 40° (devis : « pente »), ou 30° (en-tête du devis : « Pente : 30° ») ?", options: [{ value: "40" }, { value: "30" }] });
     expect(v.questions[0]!.question?.key).toBe("param:pente");
     expect(v.toBuy.some((b) => b.needIds.includes("ardoises"))).toBe(false);
-    const answered = readQuote([line], { "param:pente": { value: "30", unit: "°" } }, [{ key: "pente", value: "30", unit: "°", evidence: "Devis, en-tête", origin: "devis" }]);
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout des ardoises se demande aussi ; ici répondu « Oui ».
+    const answered = readQuote([line], { ...EGOUT_COMPRIS_OUI, "param:pente": { value: "30", unit: "°" } }, [{ key: "pente", value: "30", unit: "°", evidence: "Devis, en-tête", origin: "devis" }]);
     expect(answered.questions.map((d) => d.question?.key)).not.toContain("param:pente");
     expect(answered.toBuy.some((b) => b.needIds.includes("ardoises"))).toBe(true);
   });

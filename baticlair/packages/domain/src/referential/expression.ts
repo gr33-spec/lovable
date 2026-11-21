@@ -349,11 +349,14 @@ export function evaluateInterval(expr: Expr, valueOf: (name: string) => Interval
     case "call": {
       if (expr.fn === "si") {
         const cond = evaluateInterval(expr.args[0]!, valueOf);
+        // Condition tranchée : seule la branche retenue est lue. Une donnée de l'autre branche n'est alors ni manquante ni
+        // demandée (« Tes m² comprennent déjà l'égout ? » Oui : la longueur d'égout ne se demande pas). Les dimensions des
+        // deux branches sont contrôlées au chargement du référentiel (inferDim).
+        if (cond.lo.equals(1)) return evaluateInterval(expr.args[1]!, valueOf);
+        if (cond.hi.equals(0)) return evaluateInterval(expr.args[2]!, valueOf);
         const yes = evaluateInterval(expr.args[1]!, valueOf);
         const no = evaluateInterval(expr.args[2]!, valueOf);
         callDim("si", [cond.dim, yes.dim, no.dim]);
-        if (cond.lo.equals(1)) return yes;
-        if (cond.hi.equals(0)) return no;
         // Condition indécidable : les deux branches restent possibles.
         return { lo: Decimal.min(yes.lo, no.lo), hi: Decimal.max(yes.hi, no.hi), dim: yes.dim };
       }

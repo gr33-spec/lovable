@@ -273,6 +273,11 @@ export interface ParamDef {
    * zinc ; ardoises ou tuiles → embase plomb). Deux valeurs possibles dans le même devis : rien n'est déduit, on demande.
    */
   fromWorks?: { value: string; workItems: string[] }[];
+  /**
+   * La question ne se pose qu'une fois une autre donnée répondue avec cette valeur (« Quelle longueur d'égout ? » seulement
+   * après « Non » à « Tes m² comprennent déjà l'égout ? ») : jamais avant, jamais dans une liste de questions d'avance.
+   */
+  askOnlyAfter?: { param: string; value: string };
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
   /** Jamais prêtée par un autre ouvrage : ce que le devis écrit pour une pièce ne vaut pas pour sa voisine (§48.6). */

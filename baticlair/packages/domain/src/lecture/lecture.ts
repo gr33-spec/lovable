@@ -939,7 +939,18 @@ export function ecranDeLecture(input: {
     const m = n.status === "question" && !n.consumable ? /^param:([a-z0-9_]+)(?:@.+)?$/.exec(n.question?.key ?? "") : null;
     if (m) precisionWaits.set(`${n.workItemId}/${n.needId}`, m[1]!);
   }
-  const fallback: Question[] = [...engine.questions, ...strict.questions.filter((q) => !engine.questions.some((x) => x.key === q.key))];
+  // Une question qui ne se pose qu'après une autre (`askOnlyAfter` : la longueur d'égout après « Non ») n'est jamais listée
+  // d'avance : elle arrive quand la réponse qui l'ouvre est donnée.
+  const ouverteMaintenant = (q: Question) => {
+    const s = scopedParam(q.key);
+    const name = s?.name ?? (q.key.startsWith("param:") ? q.key.slice("param:".length) : null);
+    if (!name) return true;
+    const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === name && p.askOnlyAfter);
+    if (!def?.askOnlyAfter) return true;
+    const dit = (s ? answers[scopedKey(def.askOnlyAfter.param, s.workItemId)] : undefined) ?? answers[`param:${def.askOnlyAfter.param}`];
+    return !!dit && typeof dit !== "string" && dit.value === def.askOnlyAfter.value;
+  };
+  const fallback: Question[] = [...engine.questions, ...strict.questions.filter((q) => !engine.questions.some((x) => x.key === q.key))].filter(ouverteMaintenant);
   for (const n of [...engine.needs, ...(engine.unknowns ?? [])]) {
     // Une estimation (des feuilles d'après un développé supposé) ne demande rien : elle s'ajuste (fondateur, 2026-10-10 :
     // « on s'en fout du développé, l'utilisateur veut juste un nombre de feuilles »). Et « développé ? » ne s'écrit plus

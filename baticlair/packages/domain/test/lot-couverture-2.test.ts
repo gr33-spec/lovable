@@ -30,8 +30,11 @@ const CAS: Metier[] = [
       { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "150", unit: "m²" },
       { ref: "2", designation: "Fourniture et pose fenêtre de toit", quantity: "1", unit: "u" },
     ],
-    questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
-    couleurs: { vert: 0, orange: 3, gris: 0 },
+    // Règle changée (Greg, 21 novembre 2026) : avant, deux questions → l'égout se demande quand aucune gouttière n'est écrite.
+    // Tant qu'elle attend, les ardoises n'ont pas de chiffre et la ligne des crochets (un par ardoise) n'est pas encore là :
+    // 2 lignes orange au lieu de 3. Répondu « Oui » : 6 694 ardoises, comme avant.
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
+    couleurs: { vert: 0, orange: 2, gris: 0 },
   },
   {
     nom: "Une fenêtre de toit seule, sur tuiles plates",
