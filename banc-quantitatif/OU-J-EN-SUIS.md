@@ -65,7 +65,21 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## En cours (fiche -71, PAS encore enregistrée ni poussée) — 21 novembre, nuit
+## État au 21 novembre, nuit : fiche -71 ENREGISTRÉE ET POUSSÉE sur ma branche
+- Moteur 1305 verts, banc 94 sur 99. Serveur : vert sur la fiche -70 (921) ; relancé sur la -71 (résultat à lire : des tests
+  d'ardoise du serveur vont sûrement demander la réponse « Oui » à `param:egout_compris`, comme ceux du moteur). Parcours
+  Playwright : PAS rejoués depuis la fiche -68.
+- Ajouts au cœur : `askOnlyAfter` et `silentDefault` sur une donnée (`model.ts`, `schema.ts`), `si()` paresseux
+  (`expression.ts`), `fromWorks` lu par le code et mots jamais demandés lus sur les lignes de fourniture (`par-le-code.ts`).
+- Défauts connus, pas corrigés (d'avant, mais plus fréquents) : tant que la question de l'égout attend, la ligne des crochets
+  cités n'est pas dans la liste, et une ligne « crochets, 1 lot » à part sort telle qu'écrite. Tout revient après la réponse.
+- Rapport des « 10 réponses » rendu à Greg le 21 novembre, nuit. PAS prêt pour le site de test tant que serveur et parcours
+  ne sont pas verts sur la -71.
+- PROCHAINES ÉTAPES : (a) lire le résultat du serveur, adapter ses tests (réponse « Oui ») ; (b) rejouer les parcours ;
+  (c) AJOUT 1, suggestion « Sortie de ventilation » sur chaque couverture (emplacement `suggested`, pas si une sortie de toit
+  est écrite) ; (d) rives d'ardoise 0,16 m²/m ; (e) lot « ? » et bulle ; (f) étape 3.
+
+## Détail de la fiche -71 (historique)
 - Banc : **94 sur 99** (entraînement 59/64, examen 35/35). Une ligne mise « incertaine » : crochets à pointe de C11.
 - Fait dans `roofing.ts` : ardoises = (surface + 0,66 m²/m d'arêtier + 0,50 m²/m de noue) × ardoises au m² + un rang au
   faîtage et à l'égout, puis 5 % ; égout = gouttière écrite, sinon question `egout_compris` (Oui/Non) puis `egout_a_ajouter`
