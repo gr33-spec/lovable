@@ -1,0 +1,280 @@
+{
+ "id": "C06",
+ "jeu": "entrainement",
+ "commune": "Les Sables-d'Olonne",
+ "code_postal": "85100",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "réfection d'une toiture en tuiles canal, rénovation",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « refection toiture tuilles canal »"
+   },
+   {
+    "donnee": "matériau",
+    "valeur": "tuiles canal terre cuite, courants et couverts",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « tuilles canal terre cuite, courants et couverts »"
+   },
+   {
+    "donnee": "surface",
+    "valeur": "85 m2",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « sur 85m2 »"
+   },
+   {
+    "donnee": "liteaux",
+    "valeur": "liteaux neufs sur toute la toiture, 85 m2",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « Liteaux neufs sur toute la toiture 85m2 »"
+   },
+   {
+    "donnee": "longueur des rives",
+    "valeur": "12 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « rives 2 x 6ml soit 12ml »"
+   },
+   {
+    "donnee": "longueur du faîtage",
+    "valeur": "9 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « Faitage 9ml »"
+   },
+   {
+    "donnee": "pose du faîtage",
+    "valeur": "scellé au mortier",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « scellé au mortier »"
+   },
+   {
+    "donnee": "dépose",
+    "valeur": "anciennes tuiles et vieux liteaux, évacuation en déchetterie",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 1 : « Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie »"
+   },
+   {
+    "donnee": "recouvrement des tuiles canal",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Réfection d'une toiture en tuiles canal sur une maison existante.",
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation en déchetterie : rien à acheter.",
+   "85 m2 de tuiles canal terre cuite, courants et couverts.",
+   "Liteaux neufs sur toute la toiture, 85 m2.",
+   "12 ml de rives (2 x 6 ml).",
+   "9 ml de faîtage scellé au mortier.",
+   "Le recouvrement des tuiles canal n'est pas écrit.",
+   "Divers et imprévus : rien à acheter."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+    "quantite": null,
+    "unite": null,
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "2",
+    "designation": "Fourniturre et pose de tuilles canal terre cuite, courants et couverts, sur 85m2",
+    "quantite": "85",
+    "unite": "m2",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Tuiles canal terre cuite, courants et couverts",
+      "quantite": "85",
+      "unite": "m2",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "tuile",
+      "donnees": {
+       "surface": "85"
+      },
+      "attend": [
+       "recouvrement_canal"
+      ],
+      "aPreciser": [
+       "modèle",
+       "teinte"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Liteaux neufs sur toute la toiture 85m2",
+    "quantite": "85",
+    "unite": "m2",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Liteaux",
+      "quantite": "85",
+      "unite": "m2",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "liteau",
+      "donnees": {
+       "surface": "85"
+      },
+      "attend": [
+       "recouvrement_canal"
+      ],
+      "aPreciser": [
+       "section"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Les rives 2 x 6ml soit 12ml",
+    "quantite": "12",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Rives",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "rive",
+      "donnees": {
+       "longueur_rives": "12"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "2 x 6 ml"
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Faitage 9ml scellé au mortier",
+    "quantite": "9",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Faîtage",
+      "quantite": "9",
+      "unite": "ml",
+      "ouvrage": "faitage",
+      "emplacement": "faitiere",
+      "donnees": {
+       "longueur_faitage": "9"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "scellé au mortier"
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Divers et imprevus",
+    "quantite": null,
+    "unite": null,
+    "role": "hors_quantitatif",
+    "fournitures": []
+   }
+  ],
+  "contexte": {
+   "entreprise": "Guilbaud Couverture",
+   "client": "Mme Raffin",
+   "adresse": "23 rue des Sauniers",
+   "ville": "Les Sables-d'Olonne",
+   "code postal": "85100",
+   "numéro du devis": "2026-094",
+   "date": "16/11/2026",
+   "neuf ou rénovation": "rénovation"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:recouvrement_canal": {
+   "bouton": "150 mm"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Tuiles canal, courants",
+   "mots": [
+    "courant",
+    "!couvert"
+   ],
+   "quantite": 991,
+   "unite": "n"
+  },
+  {
+   "article": "Tuiles canal, couverts",
+   "mots": [
+    "couvert",
+    "!courant"
+   ],
+   "quantite": null,
+   "unite": ""
+  },
+  {
+   "article": "Liteaux 27×40",
+   "mots": [
+    "liteau"
+   ],
+   "quantite": 256,
+   "unite": "ml"
+  },
+  {
+   "article": "Bardelis gauches",
+   "mots": [
+    "rive|bardelis",
+    "gauche"
+   ],
+   "quantite": 17,
+   "unite": "n"
+  },
+  {
+   "article": "Bardelis droits",
+   "mots": [
+    "rive|bardelis",
+    "droit|droite"
+   ],
+   "quantite": 17,
+   "unite": "n"
+  },
+  {
+   "article": "Faîtières canal",
+   "mots": [
+    "faitiere"
+   ],
+   "quantite": 28,
+   "unite": "n"
+  },
+  {
+   "article": "Mortier de faîtage",
+   "mots": [
+    "mortier"
+   ],
+   "quantite": null,
+   "unite": ""
+  }
+ ],
+ "suggestions": []
+}

@@ -1,0 +1,383 @@
+{
+ "id": "C13",
+ "jeu": "examen",
+ "commune": "Lannion",
+ "code_postal": "22300",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "zinguerie seule sur le pan nord, sans reprise de couverture",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « zinguerie seule, pan nord (pas de reprise de couv.) »"
+   },
+   {
+    "donnee": "neuf ou rénovation",
+    "valeur": "rénovation",
+    "origine": "deduite",
+    "regle": "TVA 10 % (maison + de 2 ans) : maison existante",
+    "preuve": ""
+   },
+   {
+    "donnee": "bandes de rive",
+    "valeur": "zinc, 2 × 7 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 1 : « bdes de rive zn, 2 x 7 ml »"
+   },
+   {
+    "donnee": "longueur de bandes de rive",
+    "valeur": "14 ml",
+    "origine": "deduite",
+    "regle": "2 × 7 ml = 14 ml",
+    "preuve": ""
+   },
+   {
+    "donnee": "bandes porte-solin",
+    "valeur": "2 bandes de 3 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « 2 bdes porte-solin de 3 m »"
+   },
+   {
+    "donnee": "longueur de porte-solin",
+    "valeur": "6 m",
+    "origine": "deduite",
+    "regle": "2 × 3 m = 6 m",
+    "preuve": ""
+   },
+   {
+    "donnee": "gouttière",
+    "valeur": "demi-ronde zinc de 25",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « gouttière 1/2 rde zn de 25 »"
+   },
+   {
+    "donnee": "longueur de gouttière",
+    "valeur": "14 m",
+    "origine": "deduite",
+    "regle": "une gouttière se mesure en mètres",
+    "preuve": "ligne 3 : « 14 »"
+   },
+   {
+    "donnee": "nombre de descentes",
+    "valeur": "1",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « 1 DEP Ø80 »"
+   },
+   {
+    "donnee": "diamètre de la descente",
+    "valeur": "Ø80",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « Ø80 »"
+   },
+   {
+    "donnee": "hauteur de la descente",
+    "valeur": "5 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « haut. 5 m »"
+   },
+   {
+    "donnee": "dauphin",
+    "valeur": "1",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « 1 dauphin »"
+   },
+   {
+    "donnee": "abergement de cheminée",
+    "valeur": "1 cheminée, zinc",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 6 : « 1 abergt cheminée zn »"
+   },
+   {
+    "donnee": "développé des bandes de rive",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "périmètre de la cheminée",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "développé des bandes porte-solin",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "façonnage",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Zinguerie seule sur le pan nord d'une maison existante, pas de couverture neuve.",
+   "14 ml de bandes de rive zinc (2 × 7 ml).",
+   "2 bandes porte-solin de 3 m.",
+   "14 m de gouttière demi-ronde zinc de 25.",
+   "1 descente Ø80, hauteur 5 m.",
+   "1 dauphin.",
+   "Abergement zinc d'une cheminée.",
+   "Le développé des bandes de rive et des porte-solin, le périmètre de la cheminée et le façonnage ne sont pas écrits."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "F. et P. bdes de rive zn, 2 x 7 ml",
+    "quantite": "2 x 7",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Bandes de rive zinc",
+      "quantite": "14",
+      "unite": "ml",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "longueur_bande": "14"
+      },
+      "attend": [
+       "developpe",
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "2 bdes porte-solin de 3 m, posées",
+    "quantite": "2",
+    "unite": null,
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Bandes porte-solin de 3 m",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "bande-porte-solin",
+      "emplacement": "porte_solin",
+      "donnees": {
+       "longueur_bande": "6"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "gouttière 1/2 rde zn de 25   14",
+    "quantite": "14",
+    "unite": null,
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Gouttière demi-ronde zinc de 25",
+      "quantite": "14",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "longueur_gouttiere": "14",
+       "developpe_gouttiere": "25",
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "1 DEP Ø80 haut. 5 m",
+    "quantite": "1",
+    "unite": null,
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Descente Ø80",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "nb_descentes": "1",
+       "diametre_descente": "80",
+       "hauteur_descente": "5"
+      },
+      "attend": [],
+      "aPreciser": [
+       "matière"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "1 dauphin",
+    "quantite": "1",
+    "unite": null,
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Dauphin",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "dauphin",
+      "donnees": {
+       "dauphin": "1",
+       "nb_descentes": "1",
+       "diametre_descente": "80"
+      },
+      "attend": [],
+      "aPreciser": [
+       "matière"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "1 abergt cheminée zn",
+    "quantite": "1",
+    "unite": null,
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Abergement de cheminée zinc",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "abergement-cheminee",
+      "emplacement": "abergement",
+      "donnees": {
+       "nb_cheminees": "1"
+      },
+      "attend": [
+       "perimetre_cheminee",
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": {
+   "entreprise": "LE BIHAN Yann, Couverture - Zinguerie - Ramonage",
+   "client": "Mme GUEGAN Annick",
+   "adresse": "8 venelle des Lavoirs",
+   "ville": "Lannion",
+   "code postal": "22300",
+   "numéro du devis": "2026-094",
+   "date": "16/11/2026",
+   "neuf ou rénovation": "rénovation"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:perimetre_cheminee": {
+   "ne_sait_pas": true
+  },
+  "param:faconnage@pieces-pliees": {
+   "bouton": "Je commande façonné"
+  },
+  "param:developpe@bande-porte-solin": {
+   "bouton": "100 mm (solin, couvre-joint)"
+  },
+  "param:developpe@bandes-zinc": {
+   "bouton": "250 mm"
+  },
+  "param:longueur_bande": {
+   "valeur": "14",
+   "unite": "ml"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Bandes de rive zinc",
+   "mots": [
+    "rive"
+   ],
+   "quantite": 8,
+   "unite": "n"
+  },
+  {
+   "article": "Bandes porte-solin",
+   "mots": [
+    "solin"
+   ],
+   "quantite": 2,
+   "unite": "n"
+  },
+  {
+   "article": "Gouttière de 25",
+   "mots": [
+    "gouttiere",
+    "!crochet",
+    "!naissance",
+    "!talon"
+   ],
+   "quantite": 4,
+   "unite": "n"
+  },
+  {
+   "article": "Tubes de descente Ø80",
+   "mots": [
+    "tube|tuyau|descente",
+    "!dauphin",
+    "!coude",
+    "!collier"
+   ],
+   "quantite": 3,
+   "unite": "n"
+  },
+  {
+   "article": "Dauphin fonte",
+   "mots": [
+    "dauphin"
+   ],
+   "quantite": 1,
+   "unite": "n"
+  },
+  {
+   "article": "Abergement de cheminée",
+   "mots": [
+    "abergement"
+   ],
+   "quantite": null,
+   "unite": ""
+  }
+ ],
+ "suggestions": [
+  "naissance"
+ ]
+}

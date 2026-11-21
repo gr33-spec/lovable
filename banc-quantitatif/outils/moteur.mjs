@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 const ICI = path.dirname(fileURLToPath(import.meta.url));
-export const d = await import(path.join(ICI, "../.moteur/baticlair/packages/domain/dist/index.js"));
+export const d = await import(path.join(ICI, "../../baticlair/packages/domain/dist/index.js"));
 export const ref = d.ROOFING_REFERENTIAL;
 
 /** Une question, réduite à ce que voit l'artisan. */

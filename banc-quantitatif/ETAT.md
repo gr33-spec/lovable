@@ -3,15 +3,22 @@
 Branche : `claude/quantitatif-benchmark-methodes-pymtqy`. Dossier : `banc-quantitatif/`. Rien n'est modifié dans l'appli.
 Moteur de calcul : copie de la branche de test (`outils/prepare.sh`, commit 9d79748e, fiche roofing-2026.11.20-62). Aucune clé Anthropic utilisée.
 
-## Étapes
-- [x] 0. Méthode 0 comprise, moteur branché, prompt réel extrait.
-- [x] 1. 15 chantiers fabriqués + 5 devis réels.
-- [x] 2. Contrôleur et arbitre sur les 15 chantiers fabriqués (`controle/`, `DEFAUTS.md`).
-- [x] 3. Tour 1 : méthodes 0 à 10 sur C01–C10.
-- [x] 4. Tour 2 : méthodes 4, 6, 11 (5 lectures) et 0 (3 lectures). La méthode 10 n'a pas été rejouée (quota).
-- [x] 5. Examen final sur C11–C15 et devis réels R01–R05 (méthodes 0, 4, 6, 10, 11, 12).
-- [x] 6. Compte rendu : `COMPTE-RENDU.md`. Tableaux : `resultats/tableaux.md`.
+## Phase 2 (depuis le 21 novembre 2026) : la correction dans l'appli
 
-Rien n'est adopté dans l'appli. Reste à décider avec Greg (voir la fin du compte rendu).
+Décisions de Greg : le calcul d'abord ; le « chantier en bref » refait par le code ; essai avec la vraie clé seulement
+après la correction du calcul, coût annoncé avant. On ne garde que la méthode 11 (gagnante) et la 0 (secours et référence) ;
+les méthodes 1 à 10 sont dans `archives/`. La branche de test est fusionnée dans celle-ci (à refaire souvent).
 
-Pour tout renoter sans aucun appel : `node outils/suite.mjs noter $(cat tout.txt)`, puis `node outils/resume.mjs`.
+Objectif : 95 % de lignes justes contre la liste du contrôleur, sur les 15 chantiers et sur l'examen.
+
+- [x] Étape 1. Banc du calcul, sans IA : `baticlair/packages/domain/test/banc-couverture.test.ts` (15 chantiers dans
+      `test/banc-couverture/`, tableau dans `SCORE.md`). Départ : 49/98 (50 %).
+      Rejouer : `cd baticlair/packages/domain && npx vitest run test/banc-couverture.test.ts` ;
+      après une correction : `BANC_MAJ=1 npx vitest run test/banc-couverture.test.ts` (refusé si une ligne baisse).
+      La liste juste se régénère par `node outils/exporter-banc.mjs` (dans `banc-quantitatif/`).
+- [ ] Étape 2. Corriger : a) les erreurs de la lecture de référence ; b) le moteur qui ne suit pas la fiche ; c) la fiche.
+- [ ] Étape 3. La lecture : questions par le code, noms et bref par le code, méthode 11, examen.
+
+Règles de Greg qui passent avant la fiche et le contrôleur : un article non dit va en Suggestions (la naissance aussi) ;
+ne jamais demander le pureau ; « je plie » une fois pour tout le devis ; zinc naturel par défaut ; lucarnes et raccords :
+on demande ; toute ligne « à chiffrer » a sa question ; rien de propre à la couverture dans le cœur.

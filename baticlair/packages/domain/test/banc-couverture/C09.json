@@ -1,0 +1,369 @@
+{
+ "id": "C09",
+ "jeu": "entrainement",
+ "commune": "Perros-Guirec",
+ "code_postal": "22700",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "couverture zinc à joint debout, maison individuelle neuve",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « Couverture zinc à joint debout d'une maison individuelle neuve »"
+   },
+   {
+    "donnee": "matériau",
+    "valeur": "zinc naturel, épaisseur 0,70 mm",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « zinc naturel, épaisseur 0,70 mm »"
+   },
+   {
+    "donnee": "surface",
+    "valeur": "60 m²",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : quantité 60,00 m²"
+   },
+   {
+    "donnee": "nombre de pans",
+    "valeur": "2",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « 2 pans »"
+   },
+   {
+    "donnee": "rampant",
+    "valeur": "5,00 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « rampant 5,00 m »"
+   },
+   {
+    "donnee": "support",
+    "valeur": "voligeage jointif en voliges sapin, 60 m²",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « Voligeage jointif en voliges sapin », quantité 60,00 m²"
+   },
+   {
+    "donnee": "bande d'égout",
+    "valeur": "zinc naturel, 12 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « Bande d'égout en zinc naturel », quantité 12,00 ml"
+   },
+   {
+    "donnee": "longueur de faîtage",
+    "valeur": "6 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : quantité 6,00 ml"
+   },
+   {
+    "donnee": "faîtage",
+    "valeur": "bande de faîtage en zinc naturel",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « Faîtage en zinc naturel (bande de faîtage) »"
+   },
+   {
+    "donnee": "gouttière",
+    "valeur": "zinc demi-ronde de 33",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 6 : « Gouttière zinc demi-ronde de 33 »"
+   },
+   {
+    "donnee": "longueur de gouttière",
+    "valeur": "12 m (2 × 6,00 m)",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 6 : « 2 longueurs de 6,00 m », quantité 12,00 ml"
+   },
+   {
+    "donnee": "nombre de descentes",
+    "valeur": "2",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : quantité 2 u"
+   },
+   {
+    "donnee": "diamètre des descentes",
+    "valeur": "Ø 100",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « Descente d'eaux pluviales zinc Ø 100 »"
+   },
+   {
+    "donnee": "hauteur d'une descente",
+    "valeur": "5,00 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « hauteur 5,00 m »"
+   },
+   {
+    "donnee": "façonnage des bacs",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Couverture neuve en zinc à joint debout, maison individuelle.",
+   "60 m² de voligeage jointif en voliges sapin.",
+   "60 m² de couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m.",
+   "12 ml de bande d'égout en zinc naturel.",
+   "6 ml de faîtage en zinc naturel (bande de faîtage).",
+   "12 ml de gouttière zinc demi-ronde de 33, en 2 longueurs de 6,00 m.",
+   "2 descentes d'eaux pluviales zinc Ø 100, hauteur 5,00 m.",
+   "Échafaudage : rien à acheter."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Installation de chantier : échafaudage de pied, montage, location et démontage",
+    "quantite": "1",
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "2",
+    "designation": "Voligeage jointif en voliges sapin, fourniture et pose",
+    "quantite": "60,00",
+    "unite": "m²",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Voliges sapin",
+      "quantite": "60",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "volige",
+      "donnees": {
+       "surface": "60"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "voligeage jointif"
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m, fourniture et pose",
+    "quantite": "60,00",
+    "unite": "m²",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm",
+      "quantite": "60",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "couverture",
+      "donnees": {
+       "surface": "60",
+       "epaisseur_zinc": "0.7",
+       "aspect_zinc": "1",
+       "longueur_rampant": "5"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "2 pans, rampant 5,00 m"
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Bande d'égout en zinc naturel, fourniture et pose",
+    "quantite": "12,00",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Bande d'égout en zinc naturel",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "egout",
+      "donnees": {
+       "aspect_zinc": "1"
+      },
+      "attend": [],
+      "aPreciser": [
+       "développé"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Faîtage en zinc naturel (bande de faîtage), fourniture et pose",
+    "quantite": "6,00",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Faîtage en zinc naturel (bande de faîtage)",
+      "quantite": "6",
+      "unite": "ml",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "faitage",
+      "donnees": {
+       "aspect_zinc": "1"
+      },
+      "attend": [],
+      "aPreciser": [
+       "développé"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, fourniture et pose",
+    "quantite": "12,00",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde de 33",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "longueur_gouttiere": "12",
+       "developpe_gouttiere": "33",
+       "nb_descentes": "2",
+       "diametre_descente": "100"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "2 longueurs de 6,00 m"
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "designation": "Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, fourniture et pose",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Descente d'eaux pluviales zinc Ø 100",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "nb_descentes": "2",
+       "diametre_descente": "100",
+       "hauteur_descente": "5"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "hauteur 5,00 m"
+     }
+    ]
+   }
+  ],
+  "contexte": {
+   "client": "M. et Mme Erwan Le Goff",
+   "adresse": "Lot n° 4, chemin de Pors Rolland",
+   "ville": "Perros-Guirec",
+   "code postal": "22700",
+   "numéro du devis": "DV-2026-118",
+   "date": "03/11/2026",
+   "neuf ou rénovation": "neuf"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:faconnage@couverture-zinc-joint-debout": {
+   "bouton": "Je commande façonné (bacs)"
+  },
+  "param:faconnage@pieces-pliees": {
+   "bouton": "Je commande façonné"
+  },
+  "param:developpe@bandes-zinc": {
+   "bouton": "330 mm"
+  },
+  "param:developpe@faitage-zinc": {
+   "bouton": "330 mm"
+  },
+  "param:dauphin": {
+   "bouton": "Non"
+  },
+  "param:epaisseur_zinc": {
+   "bouton": "0,70 mm"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Voliges",
+   "mots": [
+    "volige"
+   ],
+   "quantite": 63,
+   "unite": "m2"
+  },
+  {
+   "article": "Bacs joint debout",
+   "mots": [
+    "bac"
+   ],
+   "quantite": 28,
+   "unite": "n"
+  },
+  {
+   "article": "Bande d'égout",
+   "mots": [
+    "egout"
+   ],
+   "quantite": 7,
+   "unite": "n"
+  },
+  {
+   "article": "Faîtage zinc",
+   "mots": [
+    "faitage"
+   ],
+   "quantite": 4,
+   "unite": "n"
+  },
+  {
+   "article": "Gouttière de 33",
+   "mots": [
+    "gouttiere",
+    "!crochet",
+    "!naissance",
+    "!talon"
+   ],
+   "quantite": 4,
+   "unite": "n"
+  },
+  {
+   "article": "Tubes de descente Ø100",
+   "mots": [
+    "tube|tuyau|descente",
+    "!dauphin",
+    "!coude",
+    "!collier"
+   ],
+   "quantite": 6,
+   "unite": "n"
+  }
+ ],
+ "suggestions": []
+}

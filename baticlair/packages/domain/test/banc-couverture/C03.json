@@ -1,0 +1,260 @@
+{
+ "id": "C03",
+ "jeu": "entrainement",
+ "commune": "Paimpol",
+ "code_postal": "22500",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "zinguerie seule : remplacement des gouttières et des descentes, rénovation",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « Remplact gout. + DEP - zinguerie seule »"
+   },
+   {
+    "donnee": "gouttière",
+    "valeur": "demi-ronde zinc naturel, développé 33",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « gout. 1/2 rde zn nat. dév. 33 »"
+   },
+   {
+    "donnee": "longueur de gouttière",
+    "valeur": "28 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « 28 ml »"
+   },
+   {
+    "donnee": "façades",
+    "valeur": "3",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « sur 3 façades »"
+   },
+   {
+    "donnee": "angles de gouttière",
+    "valeur": "2",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 2 : « y c. 2 angles »"
+   },
+   {
+    "donnee": "nombre de descentes",
+    "valeur": "3",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « DEP zn Ø100 : 3 u »"
+   },
+   {
+    "donnee": "diamètre des descentes",
+    "valeur": "Ø100",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « DEP zn Ø100 »"
+   },
+   {
+    "donnee": "dauphins",
+    "valeur": "3 dauphins fonte, un en pied de chaque descente",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « dauphins fonte en pied de DEP : 3 u »"
+   },
+   {
+    "donnee": "dépose",
+    "valeur": "anciennes gouttières et descentes, évacuation en déchetterie",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 1 : « Dépose anc. gout. + DEP, évac. déchetterie »"
+   },
+   {
+    "donnee": "hauteur d'une descente",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Zinguerie seule sur une maison existante : remplacement des gouttières et des descentes, pas de couverture neuve.",
+   "Dépose des anciennes gouttières et descentes, évacuation en déchetterie : rien à acheter.",
+   "28 ml de gouttière demi-ronde zinc naturel développé 33, sur 3 façades, avec 2 angles.",
+   "3 descentes zinc Ø100.",
+   "3 dauphins fonte en pied de descente.",
+   "La hauteur des descentes n'est pas écrite."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Dépose anc. gout. + DEP, évac. déchetterie",
+    "quantite": null,
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "2",
+    "designation": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles",
+    "quantite": "28",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Gouttière demi-ronde zinc naturel dév. 33",
+      "quantite": "28",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "longueur_gouttiere": "28",
+       "developpe_gouttiere": "33",
+       "nb_angles": "2",
+       "nb_descentes": "3",
+       "diametre_descente": "100"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "sur 3 façades"
+     },
+     {
+      "nom": "Angles de gouttière demi-ronde zinc naturel dév. 33",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "gouttiere",
+      "emplacement": "angle",
+      "donnees": {
+       "nb_angles": "2",
+       "developpe_gouttiere": "33"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "F et P DEP zn Ø100",
+    "quantite": "3",
+    "unite": "u",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Descente zinc Ø100",
+      "quantite": "3",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "nb_descentes": "3",
+       "diametre_descente": "100"
+      },
+      "attend": [
+       "hauteur_descente"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "F et P dauphins fonte en pied de DEP",
+    "quantite": "3",
+    "unite": "u",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Dauphins fonte Ø100",
+      "quantite": "3",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "dauphin",
+      "donnees": {
+       "dauphin": "1",
+       "nb_descentes": "3",
+       "diametre_descente": "100"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Echaf. roulant + protections, mise en place et repli",
+    "quantite": null,
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   }
+  ],
+  "contexte": {
+   "entreprise": "Couverture Zinguerie Le Goff",
+   "client": "M. et Mme Kerbrat",
+   "adresse": "14 rue de Kernoa",
+   "ville": "Paimpol",
+   "code postal": "22500",
+   "numéro du devis": "D-2026-117",
+   "date": "12/11/2026",
+   "neuf ou rénovation": "rénovation"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:hauteur_descente": {
+   "valeur": "6",
+   "unite": "m"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Gouttière de 33",
+   "mots": [
+    "gouttiere",
+    "!crochet",
+    "!naissance",
+    "!talon",
+    "!angle",
+    "!equerre"
+   ],
+   "quantite": 7,
+   "unite": "n"
+  },
+  {
+   "article": "Angles de gouttière",
+   "mots": [
+    "angle|equerre"
+   ],
+   "quantite": 2,
+   "unite": "n"
+  },
+  {
+   "article": "Tubes de descente Ø100",
+   "mots": [
+    "tube|tuyau|descente",
+    "!dauphin",
+    "!coude",
+    "!collier"
+   ],
+   "quantite": 9,
+   "unite": "n"
+  },
+  {
+   "article": "Dauphins fonte",
+   "mots": [
+    "dauphin"
+   ],
+   "quantite": 3,
+   "unite": "n"
+  }
+ ],
+ "suggestions": [
+  "naissance"
+ ]
+}
