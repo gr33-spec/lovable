@@ -1,0 +1,76 @@
+{
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+    {"donnee": "ouvrage", "valeur": "Couverture zinc à joint debout d'une maison individuelle", "origine": "lue", "regle": "", "preuve": "objet : « Couverture zinc à joint debout d'une maison individuelle neuve » ; ligne 3"},
+    {"donnee": "neuf ou rénovation", "valeur": "construction neuve", "origine": "lue", "regle": "", "preuve": "en-tête : « Construction neuve — maison individuelle »"},
+    {"donnee": "accès", "valeur": "échafaudage de pied", "origine": "lue", "regle": "", "preuve": "ligne 1 : « échafaudage de pied, montage, location et démontage »"},
+    {"donnee": "support", "valeur": "voligeage jointif en voliges sapin, 60,00 m²", "origine": "lue", "regle": "", "preuve": "ligne 2 : « Voligeage jointif en voliges sapin » 60,00 m²"},
+    {"donnee": "matériau", "valeur": "zinc naturel", "origine": "lue", "regle": "", "preuve": "ligne 3 : « zinc naturel »"},
+    {"donnee": "épaisseur du zinc de couverture", "valeur": "0,70 mm", "origine": "lue", "regle": "", "preuve": "ligne 3 : « épaisseur 0,70 mm »"},
+    {"donnee": "surface", "valeur": "60,00 m²", "origine": "lue", "regle": "", "preuve": "ligne 3 : 60,00 m²"},
+    {"donnee": "nombre de pans", "valeur": "2", "origine": "lue", "regle": "", "preuve": "ligne 3 : « 2 pans »"},
+    {"donnee": "rampant", "valeur": "5,00 m", "origine": "lue", "regle": "", "preuve": "ligne 3 : « rampant 5,00 m »"},
+    {"donnee": "largeur d'un pan", "valeur": "6,00 m", "origine": "deduite", "regle": "surface / (nombre de pans × rampant) = 60,00 / (2 × 5,00) ; cohérent avec le faîtage de 6,00 ml et l'égout de 12,00 ml (2 × 6,00 m)", "preuve": ""},
+    {"donnee": "façonnage des bacs", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "bande d'égout", "valeur": "12,00 ml, zinc naturel", "origine": "lue", "regle": "", "preuve": "ligne 4 : « Bande d'égout en zinc naturel » 12,00 ml"},
+    {"donnee": "faîtage", "valeur": "6,00 ml, bande de faîtage zinc naturel", "origine": "lue", "regle": "", "preuve": "ligne 5 : « Faîtage en zinc naturel (bande de faîtage) » 6,00 ml"},
+    {"donnee": "gouttière", "valeur": "zinc demi-ronde, 12,00 ml", "origine": "lue", "regle": "", "preuve": "ligne 6 : « Gouttière zinc demi-ronde » 12,00 ml"},
+    {"donnee": "développé de gouttière", "valeur": "33 cm", "origine": "lue", "regle": "", "preuve": "ligne 6 : « demi-ronde de 33 »"},
+    {"donnee": "lignes de gouttière", "valeur": "2 longueurs de 6,00 m", "origine": "lue", "regle": "", "preuve": "ligne 6 : « 2 longueurs de 6,00 m »"},
+    {"donnee": "nombre de descentes", "valeur": "2", "origine": "lue", "regle": "", "preuve": "ligne 7 : « Descente d'eaux pluviales » 2 u"},
+    {"donnee": "diamètre des descentes", "valeur": "Ø 100 mm", "origine": "lue", "regle": "", "preuve": "ligne 7 : « zinc Ø 100 »"},
+    {"donnee": "hauteur d'une descente", "valeur": "5,00 m", "origine": "lue", "regle": "", "preuve": "ligne 7 : « hauteur 5,00 m »"},
+    {"donnee": "matière des descentes", "valeur": "zinc", "origine": "lue", "regle": "", "preuve": "ligne 7 : « Descente d'eaux pluviales zinc »"},
+    {"donnee": "naissances", "valeur": "2", "origine": "deduite", "regle": "une naissance par descente (48.7)", "preuve": ""}
+  ],
+  "bref": [
+    "Couverture zinc à joint debout d'une maison individuelle neuve, 2 pans, rampant 5,00 m.",
+    "Accès par échafaudage de pied.",
+    "Voliges sapin 60,00 m², en voligeage jointif.",
+    "Zinc naturel 0,70 mm pour couverture à joint debout 60,00 m².",
+    "Bande d'égout zinc naturel 12,00 ml.",
+    "Bande de faîtage zinc naturel 6,00 ml.",
+    "Gouttière zinc demi-ronde de 33 12,00 ml, en 2 longueurs de 6,00 m.",
+    "2 descentes d'eaux pluviales zinc Ø 100, hauteur 5,00 m chacune.",
+    "Largeur d'un pan 6,00 m (60,00 m² sur 2 pans de 5,00 m de rampant).",
+    "2 naissances Ø 100 sur la gouttière, une par descente."
+  ],
+  "questions": [
+    {"cle": "faconnage", "texte": "Tes bacs de joint debout : tu les façonnes toi-même, ou tu les commandes façonnés ?", "boutons": [{"label": "Je façonne (bobines)", "valeur": "1"}, {"label": "Je commande façonné (bacs)", "valeur": "2"}], "unite": "", "donnee": "façonnage des bacs", "ligne": "3"}
+  ],
+  "lignes": [
+    {"ref": "1", "designation": "Installation de chantier : échafaudage de pied, montage, location et démontage", "quantite": "1", "unite": "forfait", "role": "hors_quantitatif", "fournitures": []},
+    {"ref": "2", "designation": "Voligeage jointif en voliges sapin, fourniture et pose", "quantite": "60,00", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Voliges sapin", "quantite": "60,00", "unite": "m²", "ouvrage": "voligeage", "emplacement": "volige", "donnees": [{"cle": "surface", "valeur": "60"}], "attend": [], "a_preciser": ["épaisseur"], "precision": "voligeage jointif"}
+    ]},
+    {"ref": "3", "designation": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m, fourniture et pose", "quantite": "60,00", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Zinc naturel 0,70 mm pour couverture à joint debout", "quantite": "60,00", "unite": "m²", "ouvrage": "couverture-zinc-joint-debout", "emplacement": "couverture", "donnees": [{"cle": "surface", "valeur": "60"}, {"cle": "aspect_zinc", "valeur": "1"}, {"cle": "epaisseur_zinc", "valeur": "0.7"}, {"cle": "longueur_rampant", "valeur": "5"}], "attend": ["faconnage"], "a_preciser": [], "precision": "2 pans, rampant 5,00 m"}
+    ]},
+    {"ref": "4", "designation": "Bande d'égout en zinc naturel, fourniture et pose", "quantite": "12,00", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Bande d'égout zinc naturel", "quantite": "12,00", "unite": "ml", "ouvrage": "couverture-zinc-joint-debout", "emplacement": "egout", "donnees": [{"cle": "aspect_zinc", "valeur": "1"}], "attend": [], "a_preciser": ["épaisseur", "développé"], "precision": "12,00 ml écrits au devis (2 pans de 6,00 m)"}
+    ]},
+    {"ref": "5", "designation": "Faîtage en zinc naturel (bande de faîtage), fourniture et pose", "quantite": "6,00", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Bande de faîtage zinc naturel", "quantite": "6,00", "unite": "ml", "ouvrage": "couverture-zinc-joint-debout", "emplacement": "faitage", "donnees": [{"cle": "aspect_zinc", "valeur": "1"}], "attend": [], "a_preciser": ["épaisseur", "développé"], "precision": ""}
+    ]},
+    {"ref": "6", "designation": "Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, fourniture et pose", "quantite": "12,00", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Gouttière zinc demi-ronde de 33", "quantite": "12,00", "unite": "ml", "ouvrage": "gouttiere", "emplacement": "profil", "donnees": [{"cle": "longueur_gouttiere", "valeur": "12"}, {"cle": "developpe_gouttiere", "valeur": "33"}], "attend": [], "a_preciser": [], "precision": "2 longueurs de 6,00 m"}
+    ]},
+    {"ref": "7", "designation": "Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, fourniture et pose", "quantite": "2", "unite": "u", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Descente d'eaux pluviales zinc Ø 100", "quantite": "2", "unite": "u", "ouvrage": "descente", "emplacement": "tube", "donnees": [{"cle": "nb_descentes", "valeur": "2"}, {"cle": "diametre_descente", "valeur": "100"}, {"cle": "hauteur_descente", "valeur": "5"}], "attend": [], "a_preciser": [], "precision": "hauteur 5,00 m par descente"}
+    ]}
+  ],
+  "contexte": [
+    {"cle": "client", "valeur": "M. et Mme Erwan Le Goff"},
+    {"cle": "adresse", "valeur": "Lot n° 4, chemin de Pors Rolland"},
+    {"cle": "ville", "valeur": "Perros-Guirec"},
+    {"cle": "code postal", "valeur": "22700"},
+    {"cle": "numéro du devis", "valeur": "DV-2026-118"},
+    {"cle": "date", "valeur": "03/11/2026"},
+    {"cle": "validité", "valeur": "2 mois"},
+    {"cle": "neuf ou rénovation", "valeur": "construction neuve"},
+    {"cle": "type de bâtiment", "valeur": "maison individuelle"},
+    {"cle": "délai d'intervention", "valeur": "6 semaines après réception du devis signé, hors intempéries"}
+  ],
+  "notes": []
+}
