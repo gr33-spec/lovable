@@ -104,3 +104,26 @@ export function lienAutres(autres: readonly ActionCandidate[]): string | null {
   const mot = brouillons ? (n > 1 ? "autres brouillons" : "autre brouillon") : n > 1 ? "autres actions" : "autre action";
   return `Voir ${n} ${mot}`;
 }
+
+/** Une carte de « Mon activité » : un DOSSIER (une liste, une demande, un besoin groupé), ce qui s'y passe, l'action. */
+export interface CarteActivite extends ActionCandidate {
+  /** Le dossier : la même liste vue par deux sources (« À faire » et « Mes demandes ») n'a qu'une carte. */
+  dossier: string;
+  type: "Demande de prix" | "Achat groupé" | "Liste";
+  titre: string;
+  /** Une ligne, jamais deux fois la même information (« 3 réponses reçues », pas « · 3 réponses sur 3 »). */
+  info: string;
+  action: string;
+  href: string;
+}
+
+/**
+ * « MON ACTIVITÉ » : la fusion de « À faire maintenant » et « Mes demandes en cours ». Un dossier n'apparaît jamais deux
+ * fois : de ses cartes, on garde la plus pressante (la règle de priorité de l'accueil : une réponse attendue d'abord, puis
+ * l'échéance, puis le plus récent) ; puis les dossiers se rangent par la même règle.
+ */
+export function monActivite<T extends CarteActivite>(cartes: readonly T[]): T[] {
+  const parDossier = new Map<string, T>();
+  for (const c of [...cartes].sort(comparerActions)) if (!parDossier.has(c.dossier)) parDossier.set(c.dossier, c);
+  return [...parDossier.values()].sort(comparerActions);
+}

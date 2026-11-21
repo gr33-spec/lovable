@@ -1,33 +1,8 @@
-import { comparerActions, type ActionCandidate } from "./accueil.js";
-
 /**
  * L'ACCUEIL PREMIUM (Greg, 20 novembre 2026 : « un écran magnifique, premium, évident ») : trois zones, « Nouveau
  * quantitatif », « Mon activité », « Achats groupés ». Ce module ne fait que trier et nommer ce que l'API dit déjà : aucune
- * donnée inventée, aucun chiffre deviné. Il ne connaît ni l'écran ni le réseau.
+ * donnée inventée, aucun chiffre deviné. Il ne connaît ni l'écran ni le réseau. « Mon activité » (`monActivite`) est dans `accueil.ts`, à côté de la règle de priorité.
  */
-
-/** Une carte de « Mon activité » : un DOSSIER (une liste, une demande, un besoin groupé), ce qui s'y passe, l'action. */
-export interface CarteActivite extends ActionCandidate {
-  /** Le dossier : la même liste vue par deux sources (« À faire » et « Mes demandes ») n'a qu'une carte. */
-  dossier: string;
-  type: "Demande de prix" | "Achat groupé" | "Liste";
-  titre: string;
-  /** Une ligne, jamais deux fois la même information (« 3 réponses reçues », pas « · 3 réponses sur 3 »). */
-  info: string;
-  action: string;
-  href: string;
-}
-
-/**
- * « MON ACTIVITÉ » : la fusion de « À faire maintenant » et « Mes demandes en cours ». Un dossier n'apparaît jamais deux
- * fois : de ses cartes, on garde la plus pressante (la règle de priorité de l'accueil : une réponse attendue d'abord, puis
- * l'échéance, puis le plus récent) ; puis les dossiers se rangent par la même règle.
- */
-export function monActivite<T extends CarteActivite>(cartes: readonly T[]): T[] {
-  const parDossier = new Map<string, T>();
-  for (const c of [...cartes].sort(comparerActions)) if (!parDossier.has(c.dossier)) parDossier.set(c.dossier, c);
-  return [...parDossier.values()].sort(comparerActions);
-}
 
 /** Ce que l'API dit d'un achat groupé (`AchatV1.resume`) : la règle des 3 est déjà tenue par le serveur. */
 export interface ResumeGroupe {

@@ -93,7 +93,9 @@ test("Achats groupés de l'accueil : « Rejoindre », la règle des 3, le chrono
   await b.page.clock.runFor(3000);
   await expect(chrono).not.toHaveText(avant!);
   // Il va jusqu'à zéro : « Clôturé », plus de « Rejoindre ».
-  await b.page.clock.runFor(24 * 3600 * 1000 + 5000);
+  // Un saut d'horloge (sans rejouer chaque seconde), puis une seconde qui s'écoule.
+  await b.page.clock.fastForward(24 * 3600 * 1000);
+  await b.page.clock.runFor(5000);
   await expect(groupes.getByText("Clôturé", { exact: true })).toBeVisible();
   await expect(groupes.getByRole("link", { name: "Rejoindre" })).toHaveCount(0);
   // Il ne redémarre jamais : l'accueil rouvert, toujours « Clôturé » (le serveur, lui, peut ne plus le rendre).

@@ -157,17 +157,17 @@ test("Mon activité : une demande envoyée se suit, la réponse reçue passe en 
   await page.goto("/");
   // Accueil premium (20 novembre 2026) : la demande partie se suit dans « Mon activité », sans action pressante.
   const afaire = page.getByRole("region", { name: "Mon activité", exact: true });
-  await expect(afaire.getByRole("link").first()).toContainText("Envoyée à 1 négoce, en attente");
+  await expect(afaire.getByRole("listitem").first().getByRole("link")).toContainText("Envoyée à 1 négoce, en attente");
 
   await reponseRecue(page, recipientId);
   await page.goto("/");
-  await expect(afaire.getByRole("link").first()).toContainText("1 réponse reçue");
-  await expect(afaire.getByRole("link").first()).toContainText("Maison Dupont");
+  await expect(afaire.getByRole("listitem").first().getByRole("link")).toContainText("1 réponse reçue");
+  await expect(afaire.getByRole("listitem").first().getByRole("link")).toContainText("Maison Dupont");
   // Un dossier, une carte : jamais la même demande deux fois.
   await expect(afaire.getByText("Maison Dupont")).toHaveCount(1);
   // Ouvrir l'accueil ne déclenche aucun envoi : la demande est la même qu'avant.
   expect(JSON.stringify((await demandes()).map((d) => ({ ...d, recipients: d.recipients.length })))).toBe(JSON.stringify(JSON.parse(avant).map((d: { recipients: unknown[] }) => ({ ...d, recipients: d.recipients.length }))));
-  await afaire.getByRole("link").first().click();
+  await afaire.getByRole("listitem").first().getByRole("link").click();
   await expect(page).toHaveURL(new RegExp(`/chantiers/${projectId}`));
 });
 

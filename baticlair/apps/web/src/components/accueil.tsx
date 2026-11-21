@@ -3,7 +3,8 @@
 import { Camera, Check, ChevronRight, FileText, Mic, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { accompagnement, artisansDuMetier, compteARebours, deDepartement, monActivite, phraseGroupe, type CarteActivite } from "../../../../packages/domain/src/accueil/mon-activite";
+import { monActivite, type CarteActivite } from "../../../../packages/domain/src/accueil/accueil";
+import { accompagnement, artisansDuMetier, compteARebours, deDepartement, phraseGroupe } from "../../../../packages/domain/src/accueil/mon-activite";
 import { InstallHint } from "@/components/install-hint";
 import { BandeauReprises } from "@/components/reprises";
 import { useGroupeActif } from "@/components/app-nav";
@@ -269,7 +270,7 @@ function EnTeteZone({ id, titre, href, lien, label }: { id: string; titre: strin
         {titre}
       </h2>
       {href ? (
-        <Link href={href} aria-label={label} className="flex min-h-11 shrink-0 items-center gap-1 text-[14px] font-extrabold text-accent-text">
+        <Link href={href} aria-label={label} className="flex min-h-12 shrink-0 items-center gap-1 text-[14px] font-extrabold text-accent-text">
           {lien}
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
@@ -307,7 +308,7 @@ function ZoneActivite({ cartes }: { cartes: Carte[] }) {
                 <span className="text-[14px] leading-snug text-muted">{c.info}</span>
               </span>
               {/* Une seule action forte par zone : la première carte, la plus pressante. */}
-              <span className={`flex min-h-11 shrink-0 items-center rounded-full px-4 text-[14px] font-extrabold ${i === 0 ? "bg-accent text-on-accent" : "border border-ink/25 text-ink"}`}>{c.action}</span>
+              <span className={`flex min-h-12 shrink-0 items-center rounded-full px-4 text-[14px] font-extrabold ${i === 0 ? "bg-accent text-on-accent" : "border border-ink/25 text-ink"}`}>{c.action}</span>
             </Link>
           </li>
         ))}
@@ -350,7 +351,7 @@ function ZoneGroupes({ ouverts, metiers }: { ouverts: { zone: { code: string; no
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <p className="text-[17px] leading-tight font-extrabold text-balance">Sois le premier dans ton département</p>
             <p className="text-[14px] leading-snug text-muted">{titre} : publie ton besoin, ils pourront le rejoindre.</p>
-            <Link href="/achats-groupes/publier" onClick={vu} className="pressable flex min-h-11 items-center self-start rounded-full bg-accent px-4 text-[14px] font-extrabold text-on-accent">
+            <Link href="/achats-groupes/publier" onClick={vu} className="pressable flex min-h-12 items-center self-start rounded-full bg-accent px-4 text-[14px] font-extrabold text-on-accent">
               Publier un besoin groupé
             </Link>
           </div>
@@ -392,7 +393,7 @@ function ZoneGroupes({ ouverts, metiers }: { ouverts: { zone: { code: string; no
             )}
           </div>
           {clos ? null : (
-            <Link href={achat.monBesoinId ? `/achats-groupes/besoins/${achat.monBesoinId}` : lienAchat(achat)} onClick={vu} className="pressable relative z-10 flex min-h-11 shrink-0 items-center rounded-full bg-accent px-5 text-[15px] font-extrabold text-on-accent">
+            <Link href={achat.monBesoinId ? `/achats-groupes/besoins/${achat.monBesoinId}` : lienAchat(achat)} onClick={vu} className="pressable relative z-10 flex min-h-12 shrink-0 items-center rounded-full bg-accent px-5 text-[15px] font-extrabold text-on-accent">
               {achat.monBesoinId ? "Voir" : "Rejoindre"}
             </Link>
           )}
@@ -441,7 +442,7 @@ function Accompagnement({ listes, demandes, besoinsGroupes, groupe }: { listes: 
       <ol className="mt-1 flex flex-col gap-1 sm:flex-row sm:gap-2">
         {etapes.map((e) => (
           <li key={e.id} className="sm:flex-1">
-            <Link href={e.href} onClick={e.id === "groupes" ? () => ecrire(CLE_GROUPES_VUS, "1") : undefined} aria-label={`${e.titre}${e.faite ? " (fait)" : ""}`} className="pressable flex min-h-11 items-center gap-3 rounded-2xl px-1 text-[15px] font-bold">
+            <Link href={e.href} onClick={e.id === "groupes" ? () => ecrire(CLE_GROUPES_VUS, "1") : undefined} aria-label={`${e.titre}${e.faite ? " (fait)" : ""}`} className="pressable flex min-h-12 items-center gap-3 rounded-2xl px-1 text-[15px] font-bold">
               <span aria-hidden="true" className={`grid size-6 shrink-0 place-items-center rounded-full ${e.faite ? "bg-ok text-white" : "border-2 border-ink/30"}`}>
                 {e.faite ? <Check size={14} strokeWidth={3} /> : null}
               </span>
