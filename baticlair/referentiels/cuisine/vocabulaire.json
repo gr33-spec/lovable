@@ -1,0 +1,112 @@
+{
+ "metier": "cuisine",
+ "ouvrages": {
+  "cuisine_depose": {
+   "expressions": [
+    "dépose",
+    "démontage",
+    "évacuation ancienne cuisine"
+   ]
+  },
+  "cuisine_meubles_bas": {
+   "expressions": [
+    "bas 60",
+    "be 60",
+    "b1p",
+    "b2t",
+    "casserolier"
+   ]
+  },
+  "cuisine_meubles_hauts": {
+   "expressions": [
+    "haut 60",
+    "h72",
+    "élément haut",
+    "haut hotte"
+   ]
+  },
+  "cuisine_colonnes": {
+   "expressions": [
+    "colonne four",
+    "colonne frigo",
+    "armoire",
+    "réfrigérateur intégrable"
+   ]
+  },
+  "cuisine_plan_stratifie": {
+   "expressions": [
+    "pdt",
+    "plan de travail",
+    "plan stratifié 38",
+    "post-formé",
+    "chant droit"
+   ]
+  },
+  "cuisine_plan_sur_mesure": {
+   "expressions": [
+    "quartz",
+    "silestone",
+    "granit",
+    "dekton",
+    "céramique",
+    "compact",
+    "marbre"
+   ]
+  },
+  "cuisine_credence": {
+   "expressions": [
+    "crédence",
+    "fond de hotte",
+    "dosseret",
+    "remontée"
+   ]
+  },
+  "cuisine_finitions": {
+   "expressions": [
+    "fileur",
+    "joue",
+    "habillage",
+    "corniche",
+    "cache-lumière",
+    "plinthe"
+   ]
+  },
+  "cuisine_evier_robinetterie": {
+   "expressions": [
+    "évier",
+    "sous-plan",
+    "à encastrer",
+    "1 cuve égouttoir"
+   ]
+  },
+  "cuisine_electromenager": {
+   "expressions": [
+    "hotte",
+    "groupe filtrant",
+    "hotte îlot",
+    "évacuation extérieure",
+    "recyclage"
+   ]
+  },
+  "cuisine_eclairage": {
+   "expressions": [
+    "éclairage sous meuble",
+    "réglette led",
+    "spots cuisine"
+   ]
+  },
+  "cuisine_ilot": {
+   "expressions": [
+    "îlot central",
+    "îlot",
+    "bar"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de cuisine.md (expressions entre guillemets du document).",
+ "renvois": {
+  "électricité, prises plan de travail": "electricite",
+  "raccordement eau, évacuation": "plomberie",
+  "faïence de crédence": "carrelage"
+ }
+}

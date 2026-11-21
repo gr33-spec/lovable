@@ -16,7 +16,8 @@ import { AddMenu } from "@/components/quick-add";
 import { OrgChart } from "@/components/org-chart";
 import { ProjectsList } from "@/components/projects/list";
 import { WorksList } from "@/components/works-list";
-import { Avatar, Card, Empty, Page, PageHeader, Pill, RoundButton, Segmented, cx, Button } from "@/components/ui";
+import { Avatar, Card, Empty, Page, PageHeader, Pill, Segmented, cx, Button } from "@/components/ui";
+import { leasedUnits } from "@/lib/engine/snapshot";
 
 export default function PatrimoinePage() {
   return (
@@ -81,7 +82,7 @@ function Patrimoine() {
   };
 
   const renderBuilding = (b: Building, depth: number) => {
-    const units = sortedUnits(data.units.filter((u) => u.buildingId === b.id));
+    const units = sortedUnits(leasedUnits(data).filter((u) => u.buildingId === b.id));
     const isOpen = !!open[b.id];
     return (
       <div key={b.id}>
@@ -124,7 +125,7 @@ function Patrimoine() {
 
   return (
     <>
-      <PageHeader title="Patrimoine" subtitle="Patrimoine net · cash-flow par mois" action={<RoundButton label="Ajouter" onClick={() => setAdding(true)}><Plus size={22} /></RoundButton>} />
+      <PageHeader title="Patrimoine" subtitle="Patrimoine net · cash-flow par mois" />
       <Page>
         <Segmented
           value={view}

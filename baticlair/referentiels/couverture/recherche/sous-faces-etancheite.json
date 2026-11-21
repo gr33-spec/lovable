@@ -1,0 +1,1046 @@
+{
+  "famille": "sous_face_etancheite",
+  "generated": "2026-11-20",
+  "perimetre": "Sous-faces et habillages de débord (PVC, alu, bois), planches de rive ; complément étanchéité toiture-terrasse (rouleaux SBS, recouvrements, EPDM et colles, PIR, EEP). Ne reprend pas ce qui est déjà dans ecrans-etancheite.json (galon 6 cm, EIF 0,25 l/m², relevé 15 cm, équerre 25 cm, Elastophène 7 m).",
+  "note_format": "famille « sous_face » (nouvelle) et « etancheite » (même code que ecrans-etancheite.json) : à brancher dans FAMILLES de construire_fiche.py par le responsable de la fiche.",
+  "entrees": [
+    {
+      "id": "sf_pvc_lame_largeurs",
+      "famille": "sous_face",
+      "sous_famille": "lambris PVC de sous-face",
+      "marque": "",
+      "modele": "",
+      "attribut": "largeurs de lame",
+      "valeur": "100 et 250",
+      "unite": "mm",
+      "condition": "lame 10 mm d'épaisseur ; 250 mm (frisette, planche) le plus courant ; Deceuninck de 100 à 250",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
+          "type": "fabricant",
+          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
+          "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
+          "type": "negoce",
+          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_pvc_longueurs",
+      "famille": "sous_face",
+      "sous_famille": "lambris PVC de sous-face",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueurs vendues",
+      "valeur": "4 m (3, 4,5 et 6 m existent)",
+      "unite": "m",
+      "condition": "pro : 4 m (M.E.P, Atout Pro), 6 m (Atout Pro, Deceuninck) ; grande surface de bricolage : 3 m",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
+          "type": "fabricant",
+          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Atout Pro (marque du groupe Samse), lambris PVC d'habillage de sous-faces (11 juillet 2025)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1868643.pdf",
+          "type": "negoce",
+          "extrait": "LONGUEUR 4M / 6M ; CONDITIONNEMENT PAQUET DE 10",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
+          "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
+          "type": "negoce",
+          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Atout Pro vend au paquet de 10 lames."
+    },
+    {
+      "id": "sf_mep_lambris",
+      "famille": "sous_face",
+      "sous_famille": "lambris PVC de sous-face",
+      "marque": "M.E.P",
+      "modele": "SE254 / SER254 / ST254 / SL254 / SME254 / SB104",
+      "attribut": "format et coloris",
+      "valeur": {
+        "format": "250 mm × 4 m × 10 mm (SB104 : 100 mm)",
+        "coloris_unis": [
+          "Blanc",
+          "Sable",
+          "Gris ABF",
+          "Noir",
+          "Anthracite"
+        ],
+        "plaxes": [
+          "Chêne doré",
+          "Chêne liège",
+          "Acajou"
+        ]
+      },
+      "unite": "",
+      "condition": "longueurs spéciales sur tarif ; SER254 sous avis technique",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_pvc_fixation",
+      "famille": "sous_face",
+      "sous_famille": "lambris PVC de sous-face",
+      "marque": "M.E.P",
+      "modele": "",
+      "attribut": "fixation des lames",
+      "valeur": "1 clip inox tous les 60 cm au plus",
+      "unite": "",
+      "condition": "entraxe des tasseaux ≤ 60 cm ; à réduire selon coloris et exposition (notice de pose)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_lame_air",
+      "famille": "sous_face",
+      "sous_famille": "lambris PVC de sous-face",
+      "marque": "M.E.P",
+      "modele": "",
+      "attribut": "lame d'air derrière les lames",
+      "valeur": 20,
+      "unite": "mm",
+      "condition": "minimum, entre montants bois ; ventilation selon le DTU de couverture",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
+          "url": "https://chausson.fr/media/article-document/273852",
+          "type": "fabricant",
+          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_mep_profils",
+      "famille": "sous_face",
+      "sous_famille": "profils de finition et de ventilation",
+      "marque": "M.E.P",
+      "modele": "",
+      "attribut": "accessoires de sous-face",
+      "valeur": {
+        "finition": [
+          "SFP24 petite finition",
+          "SFA34 finition murale",
+          "SFPC4 finition clipable",
+          "SDC204 / SAJ254 finition double"
+        ],
+        "ventilation": [
+          "grilles SV4 / SV7 (4 et 7 cm)",
+          "SV237 / SV238 / SV404",
+          "SVD404 profilé de ventilation dissimulé"
+        ],
+        "fixation": "clip inox SB3A"
+      },
+      "unite": "",
+      "condition": "longueurs des profils non publiées dans le catalogue ; 3 m en grande surface (Tecnoprofils)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
+          "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
+          "type": "negoce",
+          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_planche_rive_pvc",
+      "famille": "sous_face",
+      "sous_famille": "planche de rive / bandeau PVC cellulaire",
+      "marque": "",
+      "modele": "",
+      "attribut": "largeurs et longueurs",
+      "valeur": {
+        "largeurs_mm": "150 à 400",
+        "longueurs_m": [
+          5,
+          6
+        ],
+        "epaisseur_mm": "9 à 25"
+      },
+      "unite": "",
+      "condition": "Deceuninck 150-400 × 9 mm en 6 m (et 5-6 m selon gamme) ; Plastivan 150 à 404 × 18 mm en 5 m",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
+          "type": "fabricant",
+          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, planche de rive PVC cellulaire Plastivan réf. 515200-5.00",
+          "url": "https://www.batiproduits.com/fiche/produits/planche-de-rive-cellulaire-ref-515200-5-00-en-p496078144.html",
+          "type": "fabricant",
+          "extrait": "largeurs 150, 175, 200, 225, 250 et 404 mm ; épaisseur 18 mm ; longueur 5 000 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_planche_rive_fixation",
+      "famille": "sous_face",
+      "sous_famille": "planche de rive / bandeau PVC cellulaire",
+      "marque": "M.E.P",
+      "modele": "Rivecel L9",
+      "attribut": "fixation",
+      "valeur": {
+        "par_point": "2 pointes inox superposées 40 ou 50 mm",
+        "points_par_largeur": "3 points pour les planches de 280 mm et plus",
+        "contre_bandeau": "bois extérieur 16 mm mini"
+      },
+      "unite": "",
+      "condition": "entraxe des points le long de la planche : non trouvé",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
+          "url": "https://chausson.fr/media/article-document/273852",
+          "type": "fabricant",
+          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_alu_longueur",
+      "famille": "sous_face",
+      "sous_famille": "sous-face aluminium",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur standard des lames",
+      "valeur": 3,
+      "unite": "m",
+      "condition": "DAL'ALU SF77 / SF129 (largeur utile 280-290 mm, ≈ 2 kg/m²) ; GutterFrance 310 mm utiles, 0,7 mm",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
+          "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "GutterFrance, fiche sous-face aluminium (distriartisan.fr), lue dans l'aperçu du moteur de recherche (403 en accès direct)",
+          "url": "https://distriartisan.fr///media/wysiwyg/documents/FK_Gouttieres/fiche_technique_sous_face.pdf",
+          "type": "fabricant",
+          "extrait": "3000 mm de long, 310 mm de largeur utile, 0,7 mm d'épaisseur, version perforée",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "La fiche GutterFrance n'a pas pu être ouverte (403) : seule DAL'ALU est lue en entier."
+    },
+    {
+      "id": "sf_alu_ventilation",
+      "famille": "sous_face",
+      "sous_famille": "sous-face aluminium",
+      "marque": "DAL'ALU",
+      "modele": "SF77 / SF129 perforées",
+      "attribut": "surface ventilée",
+      "valeur": {
+        "SF77": 174,
+        "SF129": 168
+      },
+      "unite": "cm²/m²",
+      "condition": "version perforée",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
+          "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "sf_bois",
+      "famille": "sous_face",
+      "sous_famille": "lambris bois de sous-face",
+      "marque": "",
+      "modele": "",
+      "attribut": "format standard",
+      "valeur": null,
+      "unite": "",
+      "condition": "sapin, pin, douglas ; classe d'emploi 3 (ou 2 sous abri)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
+          "url": "https://chausson.fr/media/article-document/273852",
+          "type": "fabricant",
+          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Aucun format de lambris bois de sous-face publié par un fabricant ou un négoce breton n'a été trouvé (longueurs de 2 à 5 m selon l'essence) : demander à l'artisan la lame et la longueur."
+    },
+    {
+      "id": "etanch2_sopralene180",
+      "famille": "etancheite",
+      "sous_famille": "1re couche (sous-couche) SBS",
+      "marque": "Soprema",
+      "modele": "Sopralène Flam 180",
+      "attribut": "format de rouleau",
+      "valeur": {
+        "rouleau": "6 × 1 m, ≈ 25 kg",
+        "epaisseur_mm": 2.9,
+        "galon_mm": "≥ 60"
+      },
+      "unite": "",
+      "condition": "1re couche d'un bicouche (ou 2e sous protection rapportée)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Soprema, fiche Sopralène Flam 180 WPBFR229/b, diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3434550072618-zP63bE2VlR.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
+          "type": "fabricant",
+          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Deux documents Soprema (une source). La fiche comptoir citait 8 m : c'est la longueur export (voir ecrans-etancheite.json)."
+    },
+    {
+      "id": "etanch2_rouleau_10m",
+      "famille": "etancheite",
+      "sous_famille": "1re couche SBS",
+      "marque": "",
+      "modele": "",
+      "attribut": "rouleau de 1 × 10 m : existe-t-il ?",
+      "valeur": "oui, hors 1re couche soudée courante",
+      "unite": "",
+      "condition": "1 × 10 m : Siplast Paracier (bac acier, fixé mécaniquement), Soprema Belgique Soprarock SBS P3 TF (36 kg) ; en France la sous-couche soudée courante fait 6 à 7,5 m",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema Belgique, fiche Soprarock SBS P3 TF, diffusée par Gobert",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOPREMA%20FT%20SOPRAROCK%20SBS%20P3%20TF.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau (m) 10 x 1 ; Poids du rouleau (kg) 36",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, fiche Sopralène Flam 180 WPBFR229/b, diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3434550072618-zP63bE2VlR.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Siplast Paracier : voir ecrans-etancheite.json (une source)."
+    },
+    {
+      "id": "etanch2_rouleau_8m",
+      "famille": "etancheite",
+      "sous_famille": "2e couche autoprotégée SBS",
+      "marque": "",
+      "modele": "",
+      "attribut": "rouleau de 1 × 8 m en France",
+      "valeur": null,
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Soprema, fiche Sopralène Flam 180 AR WPBFR230/1/d, diffusée par Envain Matériaux",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles//ficheTechnique/FT_WPBFR230.1.d.FR_SOPRALENE%20FLAM%20180%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau 6mx1m ; d'autres longueurs sont réalisables à la demande",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Aucun rouleau de 8 m trouvé au catalogue français (Soprema : 6 × 1 m, autres longueurs à la demande)."
+    },
+    {
+      "id": "etanch2_about_soude",
+      "famille": "etancheite",
+      "sous_famille": "membrane bitume SBS soudée",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement en about (transversal)",
+      "valeur": "10 à 15",
+      "unite": "cm",
+      "condition": "Soprema (guide) 10 cm mini en bord et en bout de lé ; IKO 15 cm transversal (8 cm longitudinal)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
+          "type": "fabricant",
+          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "IKO Summa, recouvrements (lu dans l'aperçu du moteur de recherche)",
+          "url": "https://eu.iko.com/wp-content/uploads/2023/10/IKOSumma_FR.pdf",
+          "type": "fabricant",
+          "extrait": "recouvrement de 8 cm longitudinalement et 15 cm transversalement",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "La fiche produit Soprema donne un galon longitudinal ≥ 60 mm (confirmé dans ecrans-etancheite.json) ; le guide grand public met 10 cm partout. L'about n'était pas trouvé à la première passe."
+    },
+    {
+      "id": "etanch2_decalage_couches",
+      "famille": "etancheite",
+      "sous_famille": "bicouche SBS",
+      "marque": "",
+      "modele": "",
+      "attribut": "décalage des joints de la 2e couche",
+      "valeur": "demi-largeur de lé",
+      "unite": "",
+      "condition": "joints décalés dans les deux sens (quinconce)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "IKO, mise en œuvre IKO Summa (bicouche soudé)",
+          "url": "https://eu.iko.com/wp-content/uploads/2023/10/IKOSumma_FR.pdf",
+          "type": "fabricant",
+          "extrait": "Le recouvrement de la couche de finition ressort de préférence d'une demi-largeur de bande par rapport au recouvrement dans la sous-couche",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
+          "type": "fabricant",
+          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "etanch2_majoration_rouleaux",
+      "famille": "etancheite",
+      "sous_famille": "bicouche SBS",
+      "marque": "Soprema",
+      "modele": "",
+      "attribut": "majoration pertes et recouvrements",
+      "valeur": 1.15,
+      "unite": "× surface",
+      "condition": "rouleaux, hors relevés comptés à part",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Soprema, guide de pose toiture-terrasse (Sopralène Flam 180), diffusé par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/c62673cc-f7ba-46c1-81fc-8c3286eeb23e/ficheproduitcaractristiquesgnrales-788211.pdf",
+          "type": "fabricant",
+          "extrait": "prévoir 15 % de produit en plus pour compenser les pertes et recouvrements ; recouvrement minimum de 10 cm en bordure de lés et en bout de lés",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Recouvrements seuls : × 1,08 (ecrans-etancheite.json) ; le tiroir utilise × 1,12."
+    },
+    {
+      "id": "etanch2_epdm_firestone",
+      "famille": "etancheite",
+      "sous_famille": "membrane EPDM",
+      "marque": "Firestone",
+      "modele": "RubberCover",
+      "attribut": "formats de nappe",
+      "valeur": {
+        "1,1 mm (1,41 kg/m²)": [
+          "3,05 × 7,62 = 23,24 m²",
+          "4,57 × 7,62 = 34,82 m²",
+          "6,10 × 7,62 = 46,48 m²",
+          "3,05 × 30,50 = 93,03 m²",
+          "4,57 / 5,08 / 6,10 / 7,62 / 9,15 × 30,50"
+        ],
+        "1,5 mm (1,84 kg/m²)": "mêmes largeurs",
+        "releves": "ajouter 150 mm à la hauteur des relevés"
+      },
+      "unite": "",
+      "condition": "toitures résidentielles ≤ 150 m² ; nappe d'un seul tenant choisie pour couvrir la terrasse + relevés",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
+          "type": "fabricant",
+          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "3,05 × 7,62 = 23,24 ; 6,10 × 30,50 = 186,05 (catalogue : 186,05)"
+    },
+    {
+      "id": "etanch2_epdm_colle_contact",
+      "famille": "etancheite",
+      "sous_famille": "colle EPDM",
+      "marque": "",
+      "modele": "",
+      "attribut": "consommation de colle de contact (solvant)",
+      "valeur": "0,35 à 0,45",
+      "unite": "l/m²",
+      "condition": "Firestone BA 2012 : 2,35 à 2,75 m²/l (bidons 5 l = 10-12,5 m², 10 l = 20-25 m²) ; BA-2016 projetée : canister 22 l = 50-60 m² ; Elevate BA-2012 : ≈ 3 m²/l",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
+          "type": "fabricant",
+          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Permaroof Store (négoce UK), Elevate Bonding Adhesive BA-2012 10 L (lu dans l'aperçu du moteur de recherche)",
+          "url": "https://www.permaroofstore.co.uk/adhesives/bonding-adhesive-10l-ba-2012.html",
+          "type": "negoce",
+          "extrait": "approx. 3m² per litre (application method dependent)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Colle acrylique à l'eau (Flexirub) : 0,25 l/m², seaux de 8 l et pots de 2 l. Colles américaines LVOC : 1,1 à 1,5 m²/l (autre produit).",
+      "controle": "1 ÷ 2,75 = 0,36 l/m² ; 1 ÷ 2,35 = 0,43 l/m² ; 1 ÷ 3 = 0,33 l/m²"
+    },
+    {
+      "id": "etanch2_epdm_colle_acrylique",
+      "famille": "etancheite",
+      "sous_famille": "colle EPDM",
+      "marque": "Flexirub",
+      "modele": "colle membrane EPDM bois / béton",
+      "attribut": "consommation",
+      "valeur": 0.25,
+      "unite": "l/m²",
+      "condition": "seau de 8 l ou pot de 2 l",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Chausson, fiche colle pour membrane EPDM Flexirub sur bois / béton",
+          "url": "https://www.chausson.fr/media/article-document/256531",
+          "type": "negoce",
+          "extrait": "Consommation L/m² 0,25 ; Disponible en seau de 8 litres ou en pot de 2 litres",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "etanch2_pir_format",
+      "famille": "etancheite",
+      "sous_famille": "isolant PIR sous étanchéité",
+      "marque": "",
+      "modele": "",
+      "attribut": "format de panneau courant",
+      "valeur": "1200 × 600 (0,72 m²)",
+      "unite": "mm",
+      "condition": "Utherm Roof L, IKO enertherm ALU, Recticel PowerDeck F ; existent aussi 1200 × 1000 (Knauf Thane OpTTI), 1200 × 2400 (IKO XL), 600 × 600 (Efigreen Alu+)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Batiproduits, Utherm Roof L (Unilin)",
+          "url": "https://www.batiproduits.com/fiche/produits/plaque-isolante-pir-pour-toitures-terrasses-uthe-p480752395.html",
+          "type": "fabricant",
+          "extrait": "1200 mm de longueur pour 600 mm de largeur, épaisseur entre 30 mm et 160 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, IKO enertherm ALU XL",
+          "url": "https://www.batiproduits.com/fiche/produits/panneau-isolant-en-mousse-rigide-pour-toiture-terr-p381379720.html",
+          "type": "fabricant",
+          "extrait": "formats de 1200 x 600 mm et 1200 x 2400 mm, épaisseurs de 30 à 200 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Jewson (négoce UK), Recticel PowerDeck F 1200 x 600",
+          "url": "https://jewson.co.uk/p/recticel-powerdeck-f-flat-roof-board-1200-x-600-x-80mm-IRPDF080",
+          "type": "negoce",
+          "extrait": "Recticel PowerDeck F Flat Roof Board 1.2m x 600 x 80mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Knauf, Knauf Thane OpTTI (knauf.com)",
+          "url": "https://knauf.com/fr-FR/p/produit/knauf-thane-optti-29945_4091",
+          "type": "fabricant",
+          "extrait": "panneaux Knauf Thane OpTTI de format 1200 x 1000 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "etanch2_eep_regles",
+      "famille": "etancheite",
+      "sous_famille": "entrée d'eaux pluviales (EEP)",
+      "marque": "",
+      "modele": "",
+      "attribut": "règle de dimensionnement et trop-plein",
+      "valeur": null,
+      "unite": "",
+      "condition": "NF DTU 60.11 P3 (2013) tableau 5 : diamètre selon la surface collectée par EEP, majoré selon les NF DTU 43 ; trop-plein obligatoire avec une seule EEP (NF DTU 43.1 §8.6.1, cité par un forum)",
+      "regions": [
+        "France",
+        "Bretagne"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "FFB, dossier dimensionnement des évacuations d'eaux pluviales (31/01/2020)",
+          "url": "https://www.ffbatiment.fr/techniques-batiment/equipements-techniques/plomberie-sanitaire/dossier/le-dimensionnement-des-evacuations-des-eaux-pluviales",
+          "type": "guide",
+          "extrait": "NF DTU 60.11 P3 tableau 5 : diamètres des EEP et descentes selon la surface collectée par EEP et la majoration liée aux NF DTU série 43",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Forum Construire (forum de professionnels et particuliers) : trop-plein et 1 cm² par m²",
+          "url": "https://www.forumconstruire.com/construire/topic-241784.php",
+          "type": "autre",
+          "extrait": "1 évacuation = 1 trop-plein obligatoire, 2 évacuations ou plus = 1 trop-plein si le GO dit qu'il faut en mettre",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Tableau 5 et §8.6.1 non lus (textes AFNOR, dossier FFB réservé aux adhérents) ; la règle « 1 cm² par m² » ne vient que d'un forum."
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Sous-face de débord : m² = ml × largeur de débord × 1,10 ; profils ml × 1,05 ; grille 1 pour 4 ml",
+      "origine": "referentiel-couverture.md §17 (ligne 461)",
+      "valeur_actuelle": "× 1,10 ; × 1,05 ; 1/4 ml",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "compter en lames de 4 m (PVC 250 mm : 1 m² par lame) ; perte : aucune source ; grilles : selon la section de ventilation du DTU (alu perforé 168-174 cm²/m²)",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
+          "type": "fabricant",
+          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
+          "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Les fabricants donnent les formats, pas de taux de perte ni de nombre de grilles au ml."
+    },
+    {
+      "ratio": "Planche de rive / bandeau PVC : profils 2 à 6 m ; vis inox 4/ml",
+      "origine": "referentiel-couverture.md §17 (ligne 460)",
+      "valeur_actuelle": "2 à 6 m ; 4 vis/ml",
+      "verdict": "corrige",
+      "bonne_valeur": "PVC cellulaire en 5 ou 6 m (pas de 2 m chez les fabricants pros) ; fixation par points de 2 pointes inox, 3 points en largeur ≥ 280 mm ; nombre au ml : non trouvé",
+      "sources": [
+        {
+          "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
+          "type": "fabricant",
+          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, planche de rive PVC cellulaire Plastivan réf. 515200-5.00",
+          "url": "https://www.batiproduits.com/fiche/produits/planche-de-rive-cellulaire-ref-515200-5-00-en-p496078144.html",
+          "type": "fabricant",
+          "extrait": "largeurs 150, 175, 200, 225, 250 et 404 mm ; épaisseur 18 mm ; longueur 5 000 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "M.E.P, Avant-toit PVC et planches de rive Rivecel (notice), diffusée par Chausson",
+          "url": "https://chausson.fr/media/article-document/273852",
+          "type": "fabricant",
+          "extrait": "une lame d'air d'au moins 20mm ; 3 points de fixation sont nécessaires pour les planches de 280mm et plus",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Longueurs corrigées ; les 4 vis/ml restent sans source."
+    },
+    {
+      "ratio": "Bicouche 1re couche rouleau 1 × 10 m ; 2e couche autoprotégée rouleau 1 × 8 m, recouvrement 8 cm",
+      "origine": "referentiel-couverture.md §9 (lignes 291-292)",
+      "valeur_actuelle": "10 m ; 8 m ; 8 cm",
+      "verdict": "corrige",
+      "bonne_valeur": "1re couche soudée 6 m (Sopralène Flam 180), 7 m (Elastophène Flam 25), 7,5 m (Siplast) ; 1 × 10 m seulement en 1re couche fixée mécaniquement ou en Belgique ; autoprotégée 6 m ; galon ≥ 6 cm, about 10 à 15 cm",
+      "sources": [
+        {
+          "titre": "Soprema, fiche Sopralène Flam 180 WPBFR229/b, diffusée par BigMat",
+          "url": "https://medias.bigmat.fr/data_medias/medias_finaux/documents/3434550072618-zP63bE2VlR.pdf",
+          "type": "fabricant",
+          "extrait": "Largeur du galon de recouvrement ≥ 60 mm ; Dimensions du rouleau 6mx1m ; Poids du rouleau Environ 25 kg",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema, fiche Sopralène Flam 180 AR WPBFR230/1/d, diffusée par Envain Matériaux",
+          "url": "https://www.envain-materiaux.fr/ressources/images/articles//ficheTechnique/FT_WPBFR230.1.d.FR_SOPRALENE%20FLAM%20180%20AR.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau 6mx1m ; d'autres longueurs sont réalisables à la demande",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Soprema Belgique, fiche Soprarock SBS P3 TF, diffusée par Gobert",
+          "url": "https://gobert.groupegobert.com/ressources/images/articles/Fiches_techniques/SOPREMA%20FT%20SOPRAROCK%20SBS%20P3%20TF.pdf",
+          "type": "fabricant",
+          "extrait": "Dimensions du rouleau (m) 10 x 1 ; Poids du rouleau (kg) 36",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "IKO Summa, recouvrements (lu dans l'aperçu du moteur de recherche)",
+          "url": "https://eu.iko.com/wp-content/uploads/2023/10/IKOSumma_FR.pdf",
+          "type": "fabricant",
+          "extrait": "recouvrement de 8 cm longitudinalement et 15 cm transversalement",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Confirme et complète ecrans-etancheite.json (deuxième fichier, mêmes conclusions) ; aucun 1 × 8 m au catalogue français."
+    },
+    {
+      "ratio": "EPDM : m² × 1,10 ; colle de surface 0,3 à 0,4 kg/m² ; colle de joint 0,05 kg/ml",
+      "origine": "referentiel-couverture.md §9 (ligne 293)",
+      "valeur_actuelle": "0,3-0,4 kg/m²",
+      "verdict": "corrige",
+      "bonne_valeur": "colle de contact 0,35 à 0,45 l/m² (en litres, bidons 5 / 10 l) ; colle acrylique 0,25 l/m² ; joints : bandes QuickSeam + QuickPrime (≈ 15 ml de joint par litre)",
+      "sources": [
+        {
+          "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
+          "type": "fabricant",
+          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Permaroof Store (négoce UK), Elevate Bonding Adhesive BA-2012 10 L (lu dans l'aperçu du moteur de recherche)",
+          "url": "https://www.permaroofstore.co.uk/adhesives/bonding-adhesive-10l-ba-2012.html",
+          "type": "negoce",
+          "extrait": "approx. 3m² per litre (application method dependent)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson, fiche colle pour membrane EPDM Flexirub sur bois / béton",
+          "url": "https://www.chausson.fr/media/article-document/256531",
+          "type": "negoce",
+          "extrait": "Consommation L/m² 0,25 ; Disponible en seau de 8 litres ou en pot de 2 litres",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "L'ordre de grandeur est juste mais l'unité de vente est le litre ; Firestone vend des nappes d'un seul tenant (pas de joint jusqu'à 9,15 × 30,50 m) et demande + 150 mm sur les relevés."
+    },
+    {
+      "ratio": "Tiroir étanchéité : PIR 1 200 × 1 000 (1,2 m²)",
+      "origine": "tiroir etancheite.ts (voir ecrans-etancheite.json)",
+      "valeur_actuelle": "1,2 m²",
+      "verdict": "corrige",
+      "bonne_valeur": "format courant 1200 × 600 = 0,72 m² ; 1200 × 1000 existe (Knauf OpTTI, laine de roche Rockacier)",
+      "sources": [
+        {
+          "titre": "Batiproduits, Utherm Roof L (Unilin)",
+          "url": "https://www.batiproduits.com/fiche/produits/plaque-isolante-pir-pour-toitures-terrasses-uthe-p480752395.html",
+          "type": "fabricant",
+          "extrait": "1200 mm de longueur pour 600 mm de largeur, épaisseur entre 30 mm et 160 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, IKO enertherm ALU XL",
+          "url": "https://www.batiproduits.com/fiche/produits/panneau-isolant-en-mousse-rigide-pour-toiture-terr-p381379720.html",
+          "type": "fabricant",
+          "extrait": "formats de 1200 x 600 mm et 1200 x 2400 mm, épaisseurs de 30 à 200 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Jewson (négoce UK), Recticel PowerDeck F 1200 x 600",
+          "url": "https://jewson.co.uk/p/recticel-powerdeck-f-flat-roof-board-1200-x-600-x-80mm-IRPDF080",
+          "type": "negoce",
+          "extrait": "Recticel PowerDeck F Flat Roof Board 1.2m x 600 x 80mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Knauf, Knauf Thane OpTTI (knauf.com)",
+          "url": "https://knauf.com/fr-FR/p/produit/knauf-thane-optti-29945_4091",
+          "type": "fabricant",
+          "extrait": "panneaux Knauf Thane OpTTI de format 1200 x 1000 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le format est à demander : avec 1,2 m² au lieu de 0,72, on commande 40 % de panneaux en moins."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Lambris PVC de sous-face",
+      "ce_que_le_vendeur_demande": [
+        "largeur de lame (100 ou 250 mm)",
+        "aspect (frisette, planche)",
+        "coloris",
+        "longueur (4 m)",
+        "nombre de lames ou de paquets"
+      ],
+      "unite_de_vente": "lame ou paquet de 10",
+      "conditionnement": "4 m (6 m existe)",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Atout Pro (marque du groupe Samse), lambris PVC d'habillage de sous-faces (11 juillet 2025)",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_1868643.pdf",
+          "type": "negoce",
+          "extrait": "LONGUEUR 4M / 6M ; CONDITIONNEMENT PAQUET DE 10",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sous_face"
+    },
+    {
+      "article": "Profils de finition et grilles de sous-face",
+      "ce_que_le_vendeur_demande": [
+        "profil de départ, finition murale, finition double, angle",
+        "grille de ventilation (4 ou 7 cm)",
+        "coloris",
+        "longueur"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "3 m en grande surface ; longueur pro sur tarif",
+      "sources": [
+        {
+          "titre": "M.E.P (Villeron), catalogue lambris de sous-face PVC, diffusé par Chausson",
+          "url": "https://www.chausson.fr/media/article-document/209262",
+          "type": "fabricant",
+          "extrait": "Frisette 25cm 4m 10mm ; SB104 10cm ; clips de fixation Inox (SB3A) au minimum tous les 60cm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Bricomarché, lambris PVC sous-face 4 frises Tecnoprofils, 3 m",
+          "url": "https://www.bricomarche.com/p/sous-face-pvc-4-frises-blanc/3590328024811",
+          "type": "negoce",
+          "extrait": "Lambris PVC sous-face toiture 4 frises - Blanc - 3 m",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sous_face"
+    },
+    {
+      "article": "Planche de rive / bandeau PVC cellulaire",
+      "ce_que_le_vendeur_demande": [
+        "largeur (150 à 400 mm)",
+        "épaisseur",
+        "coloris",
+        "longueur 5 ou 6 m",
+        "angles et jonctions",
+        "pointes inox"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "5 ou 6 m",
+      "sources": [
+        {
+          "titre": "Deceuninck, fiche gamme profilés de toiture (planches de rive, sous-face), diffusée par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_343318.pdf",
+          "type": "fabricant",
+          "extrait": "sous-face de 100 à 250 mm, épaisseur 10 mm, Longueurs: 3 - 4,50 - 6 m ; rive 150 à 400 mm, 6 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, planche de rive PVC cellulaire Plastivan réf. 515200-5.00",
+          "url": "https://www.batiproduits.com/fiche/produits/planche-de-rive-cellulaire-ref-515200-5-00-en-p496078144.html",
+          "type": "fabricant",
+          "extrait": "largeurs 150, 175, 200, 225, 250 et 404 mm ; épaisseur 18 mm ; longueur 5 000 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sous_face"
+    },
+    {
+      "article": "Sous-face aluminium",
+      "ce_que_le_vendeur_demande": [
+        "modèle (lame étroite ou large)",
+        "pleine ou perforée",
+        "coloris RAL",
+        "longueur 3 m"
+      ],
+      "unite_de_vente": "lame ou m²",
+      "conditionnement": "3 m",
+      "sources": [
+        {
+          "titre": "DAL'ALU, fiche Sous-face aluminium SF77 / SF129 (dalalu.com, 2026)",
+          "url": "https://www.dalalu.com/wp-content/uploads/2026/07/Fiche-SOUS-FACE.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur standard 3 m ; SF77 2,1 kg/m2 ; SF129 2 kg/m2 ; perforée 174 cm2/m2 et 168 cm2/m2",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "sous_face"
+    },
+    {
+      "article": "Membrane EPDM",
+      "ce_que_le_vendeur_demande": [
+        "épaisseur 1,1 ou 1,5 mm",
+        "dimensions de la nappe (largeur × longueur)",
+        "colle (type, litres)",
+        "bandes et angles QuickSeam"
+      ],
+      "unite_de_vente": "nappe + bidons de colle",
+      "conditionnement": "nappes 3,05 à 9,15 m × 7,62 ou 30,50 m ; colle 5 / 10 / 22 l",
+      "sources": [
+        {
+          "titre": "Firestone, catalogue RubberCover (édition janvier 2021), diffusé par Samse",
+          "url": "https://medias.groupe-samse.fr/Fiche_technique/Fiche_technique_991147.pdf",
+          "type": "fabricant",
+          "extrait": "BA 2012 : Entre 2,35 et 2,75 m2 de surface de toiture par litre ; Epaisseur 1,1 mm - 1,41 kg/m² ; 3,05 x 7,62",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "famille": "etancheite"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+ "devis": [
+  {
+   "ref": "8",
+   "designation": "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)",
+   "quantity": "2",
+   "unit": "unités"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "2",
+     "origine": "devis",
+     "preuve": "Devis, 8"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "hauteur_descente",
+    "texte": "Hauteur d'une descente ?",
+    "boutons": [],
+    "unite": "m",
+    "donnee": "hauteur d'une descente",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "8",
+    "designation": "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)",
+    "quantite": "2",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Descente d'eau pluviale",
+      "quantite": "2",
+      "unite": "unités",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "80 mm"
+      },
+      "attend": [
+       "hauteur_descente"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Coudes de descente PVC Ø80",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "descente",
+      "emplacement": "coude",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Colliers",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "descente",
+      "emplacement": "collier",
+      "donnees": {},
+      "attend": [
+       "hauteur_descente"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

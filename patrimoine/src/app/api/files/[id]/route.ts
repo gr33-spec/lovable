@@ -49,7 +49,7 @@ export async function GET(request: Request, ctx: Ctx) {
   const denied = await guardApi(request, BOTH);
   if (denied) return denied;
   const { id } = await ctx.params;
-  const file = await readFile(id).catch(() => undefined);
+  const file = await readFile(id, { includeDeleted: false }).catch(() => undefined);
   if (!file) return NextResponse.json({ error: "Fichier introuvable" }, { status: 404 });
   // L'espace gestion ne consulte que les pièces de son périmètre, jamais les bilans ni les pièces du patrimoine.
   if ((await currentSession())?.role === "gestion" && !(await gestionMayUse(id))) return NextResponse.json({ error: "Accès non autorisé" }, { status: 403 });

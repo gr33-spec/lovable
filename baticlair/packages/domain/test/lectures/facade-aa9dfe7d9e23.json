@@ -1,0 +1,71 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Enduit monocouche gratté, teinte ton pierre",
+   "quantity": "95",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Isolation thermique par l'extérieur sous enduit, laine de roche 140 mm",
+   "quantity": "120",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Enduit monocouche gratté, teinte ton pierre",
+    "quantite": "95",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Enduit monocouche gratté, teinte ton pierre",
+      "quantite": "95",
+      "unite": "m²",
+      "ouvrage": "enduit-monocouche",
+      "emplacement": "facade",
+      "donnees": {
+       "finition": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Isolation thermique par l'extérieur sous enduit, laine de roche 140 mm",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Isolation thermique par l'extérieur sous enduit, laine de roche 140 mm",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "ite",
+      "emplacement": "facade",
+      "donnees": {
+       "epaisseur_isolant": "140 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

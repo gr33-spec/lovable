@@ -1,0 +1,206 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture zinc à joint debout prépatiné gris quartz 0,65 mm, monopente, rampant 7 m, largeur 13 m",
+   "quantity": "91",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Voligeage en sapin traité 18×200 mm",
+   "quantity": "91",
+   "unit": "m²"
+  },
+  {
+   "ref": "4",
+   "designation": "Gouttière zinc demi-ronde",
+   "quantity": "13",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
+    "boutons": [
+     {
+      "label": "Je façonne (bobines)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné (bacs)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "developpe_gouttiere",
+    "texte": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+    "boutons": [
+     {
+      "label": "De 25",
+      "valeur": "25"
+     },
+     {
+      "label": "De 28",
+      "valeur": "28"
+     },
+     {
+      "label": "De 33",
+      "valeur": "33"
+     },
+     {
+      "label": "De 40",
+      "valeur": "40"
+     }
+    ],
+    "unite": "cm",
+    "donnee": "développé de la gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture zinc à joint debout prépatiné gris quartz 0,65 mm, monopente, rampant 7 m, largeur 13 m",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture zinc à joint debout gris",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "couverture",
+      "donnees": {
+       "aspect_zinc": "2",
+       "longueur_rampant": "7 m"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Voligeage en sapin traité 18×200 mm",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Voliges sapin 18×200 mm traité",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "volige",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "13",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde",
+      "quantite": "13",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {},
+      "attend": [
+       "developpe_gouttiere"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

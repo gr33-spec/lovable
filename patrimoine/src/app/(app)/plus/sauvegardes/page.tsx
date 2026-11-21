@@ -165,7 +165,7 @@ export default function SauvegardesPage() {
                       {new Date(s.createdAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}
                     </div>
                     <div className="truncate text-xs text-muted">
-                      {REASONS[s.reason] ?? s.reason} · {s.counts.companies} sociétés, {s.counts.buildings} immeubles, {s.counts.loans} crédits
+                      {REASONS[s.reason] ?? s.reason} · {s.counts.companies} sociétés, {s.counts.buildings} biens, {s.counts.loans} crédits
                     </div>
                   </div>
                   <button onClick={() => setConfirm(s)} className="flex items-center gap-1 rounded-full bg-soft px-3 py-2 text-sm font-semibold text-brand">
@@ -190,7 +190,7 @@ export default function SauvegardesPage() {
       </Sheet>
       <Sheet open={!!pendingImport} onClose={() => setPendingImport(null)} title="Importer cette sauvegarde ?">
         <p className="text-[15px] text-ink-2">
-          {pendingImport && `${pendingImport.companies?.length ?? 0} sociétés, ${pendingImport.buildings?.length ?? 0} immeubles, ${pendingImport.loans?.length ?? 0} crédits. `}
+          {pendingImport && `${pendingImport.companies?.length ?? 0} sociétés, ${pendingImport.buildings?.length ?? 0} biens, ${pendingImport.loans?.length ?? 0} crédits. `}
           Les données actuelles seront remplacées (et sauvegardées avant).
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2 pb-2">

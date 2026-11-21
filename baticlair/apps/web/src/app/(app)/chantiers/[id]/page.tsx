@@ -1,0 +1,303 @@
+"use client";
+
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { MapPin, MoreHorizontal } from "lucide-react";
+import { Suspense, useCallback, useRef, useState } from "react";
+import { ProjectDocuments } from "@/components/project-documents";
+import { DemandesLaterales } from "@/components/demandes-laterales";
+import { BarreOnglets, OngletDocuments, OngletOffres, ongletDossier, SuiviDemande, type OngletDossier } from "@/components/dossier-demande";
+import { ProjectProgressProvider } from "@/components/project-progress";
+import { SuiviChantier } from "@/components/suivi-chantier";
+import { Badge, BackButton, Button, ErrorNotice, Field, Skeleton } from "@/components/ui";
+import { api, ApiError, type Project, type ProjectDocument } from "@/lib/api";
+import { ActionsChantierProvider, useActionsChantier } from "@/lib/actions-chantier";
+import { openDocument } from "@/lib/open-document";
+import { fr } from "@/lib/fr";
+import { useResource } from "@/lib/use-resource";
+
+export default function ChantierPage() {
+  const { id } = useParams<{ id: string }>();
+  // Ordinateur (6 novembre 2026) : la liste des demandes à gauche, le détail à droite ; téléphone : inchangé.
+  // Revue UX (8 novembre 2026) : à 1280 px, trois colonnes écrasaient la liste (boutons coupés) ; la colonne des demandes
+  // n'apparaît qu'à partir de 1536 px.
+  return (
+    <div className="contents 2xl:grid 2xl:grid-cols-[13rem_minmax(0,1fr)] 2xl:items-start 2xl:gap-6">
+      <DemandesLaterales courant={id} />
+      <div className="contents 2xl:flex 2xl:min-w-0 2xl:flex-col 2xl:gap-6">
+        <Suspense fallback={<Skeleton card="h-12" lines={3} label="Chargement du chantier…" />}>
+          <Chantier />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+/** L'onglet du dossier (Greg, 1er novembre 2026), dans l'adresse (`?onglet=`) : un retour ramène au même onglet. */
+function useOnglet(): [OngletDossier, (o: OngletDossier) => void] {
+  const params = useSearchParams();
+  const router = useRouter();
+  const chemin = usePathname();
+  const brut = params.get("onglet");
+  const onglet: OngletDossier = ongletDossier(brut);
+  const choisir = (o: OngletDossier) => {
+    const suite = new URLSearchParams(params.toString());
+    if (o === "suivi") suite.delete("onglet");
+    else suite.set("onglet", o);
+    const q = suite.toString();
+    router.replace(q ? `${chemin}?${q}` : chemin, { scroll: false });
+  };
+  return [onglet, choisir];
+}
+
+function Chantier() {
+  const { id } = useParams<{ id: string }>();
+  const [onglet, choisirOnglet] = useOnglet();
+  const routeur = useRouter();
+  // « Commander » depuis l'onglet Offres : la confirmation de commande du suivi (le même parcours), Annuler ramène ici.
+  const commanderDepuisOffres = (recipientId: string) =>
+    routeur.replace(`/chantiers/${encodeURIComponent(id)}?commander=${encodeURIComponent(recipientId)}&t=${Date.now()}`, { scroll: false });
+  const fetchProject = useCallback((signal: AbortSignal) => api<Project>(`/v1/projects/${encodeURIComponent(id)}`, { signal }), [id]);
+  const { data: project, setData: setProject, error, reload } = useResource(fetchProject);
+  const [editing, setEditing] = useState(false);
+  // §50.4 : le devis déposé se rouvre depuis le titre du chantier (plus de carte « Ouvrir / Retirer »).
+  const [quote, setQuote] = useState<ProjectDocument | null>(null);
+  // Un devis retiré depuis le menu : les documents du chantier se relisent (retour au dépôt).
+  const [docsKey, setDocsKey] = useState(0);
+
+  if (error && !project) {
+    return (
+      <>
+        <BackButton fallback="/chantiers?vue=suivi" />
+        <ErrorNotice error={error} onRetry={reload} />
+      </>
+    );
+  }
+  if (!project) return <Skeleton card="h-12" lines={3} label="Chargement du chantier…" />;
+
+  return (
+    <ActionsChantierProvider>
+      {editing ? (
+        <EditForm project={project} onDone={(p) => { if (p) setProject(p); setEditing(false); }} />
+      ) : (
+        <Header
+          project={project}
+          quote={quote}
+          onEdit={() => setEditing(true)}
+          onChange={setProject}
+          onQuoteRemoved={() => {
+            setQuote(null);
+            setDocsKey((k) => k + 1);
+          }}
+        />
+      )}
+      <BarreOnglets projectId={project.id} onglet={onglet} onChoisir={choisirOnglet} />
+      {onglet !== "suivi" ? (
+        <div role="tabpanel" aria-label={onglet === "offres" ? "Offres" : "Documents"} className="flex flex-col gap-3">
+          {onglet === "offres" ? <OngletOffres projectId={project.id} onComparer={() => choisirOnglet("suivi")} onCommander={commanderDepuisOffres} /> : <OngletDocuments projectId={project.id} />}
+        </div>
+      ) : null}
+      {/* Le résumé reste monté (liste, envoi, lecture en cours) : changer d'onglet ne perd rien. */}
+      <div role="tabpanel" aria-label="Suivi" hidden={onglet !== "suivi"} className={onglet === "suivi" ? "contents" : "hidden"}>
+      {/* Suivi (6 novembre 2026) : où en est chaque négoce et chaque ligne, une fois la demande partie. */}
+      <SuiviDemande projectId={project.id} />
+      <ProjectProgressProvider projectId={project.id} archived={project.status === "archived"} bar={false}>
+        {/* Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place ») : la liste et ses actions à gauche, le suivi façon
+            colis à droite, qui reste à l'écran pendant qu'on descend. Téléphone : l'ordre d'avant (suivi, puis la liste). */}
+        <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_19rem] xl:gap-6">
+          {/* Nouveau cap (22 octobre) : le suivi façon colis, en haut du chantier ; relu à chaque changement signalé. */}
+          <div className="contents lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1 lg:flex lg:flex-col lg:gap-4">
+            <SuiviChantier projectId={project.id} />
+          </div>
+          {/* La lecture donne son nom au chantier (« Chantier Dupont ») : l'en-tête se relit quand elle finit. */}
+          <div className="contents lg:col-start-1 lg:row-start-1 lg:flex lg:min-w-0 lg:flex-col lg:gap-4">
+            <ProjectDocuments key={docsKey} projectId={project.id} archived={project.status === "archived"} onProjectChanged={reload} onQuote={setQuote} />
+          </div>
+        </div>
+      </ProjectProgressProvider>
+      </div>
+    </ActionsChantierProvider>
+  );
+}
+
+function Header({
+  project,
+  quote,
+  onEdit,
+  onChange,
+  onQuoteRemoved,
+}: {
+  project: Project;
+  quote: ProjectDocument | null;
+  onEdit: () => void;
+  onChange: (p: Project) => void;
+  onQuoteRemoved: () => void;
+}) {
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const mapsUrl = project.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.address)}` : null;
+  const [menu, setMenu] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  const busy = useRef(false);
+  const done = project.status === "archived";
+  // Point 8 (Greg, 28 octobre 2026) : les actions secondaires de l'étape (ajouter un négoce, renvoyer, modifier ma liste…).
+  const etape = useActionsChantier();
+
+  async function toggleStatus() {
+    if (busy.current) return;
+    busy.current = true;
+    setMenu(false);
+    setPending(true);
+    setError(null);
+    try {
+      onChange(await api<Project>(`/v1/projects/${project.id}`, { method: "PATCH", body: { status: done ? "active" : "archived" } }));
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
+  }
+
+  // Un devis déposé par erreur se retire d'ici (§50.4 : plus de carte du PDF sous la liste), avec confirmation.
+  async function removeQuote() {
+    if (!quote || busy.current) return;
+    busy.current = true;
+    setPending(true);
+    setError(null);
+    try {
+      await api<null>(`/v1/documents/${encodeURIComponent(quote.id)}`, { method: "DELETE" });
+      setConfirmRemove(false);
+      setMenu(false);
+      onQuoteRemoved();
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
+  }
+
+  const item = "flex min-h-13 w-full items-center text-left text-[16px] font-semibold";
+  return (
+    // En-tête d'une conversation : retour, nom du chantier, menu ; le client et l'adresse en petit dessous.
+    <header className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <BackButton fallback="/chantiers?vue=suivi" compact />
+        {/* Le nom lu dans le devis ; un tap rouvre le devis (§50.4). Il se renomme par « Modifier le chantier ». */}
+        <h1 className="flex min-w-0 grow text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
+          {quote ? (
+            <button type="button" onClick={() => void openDocument(quote.id, quote.name, quote.name)} aria-label={`Ouvrir le devis : ${project.name}`} className="min-h-11 min-w-0 truncate text-left">
+              {project.name}
+            </button>
+          ) : (
+            <span className="flex min-h-11 min-w-0 items-center truncate">{project.name}</span>
+          )}
+        </h1>
+        <button
+          type="button"
+          onClick={() => setMenu(!menu)}
+          aria-expanded={menu}
+          aria-label="Plus d'actions sur le chantier"
+          disabled={pending}
+          className="pressable bouton-nuit flex size-11 shrink-0 items-center justify-center rounded-full disabled:opacity-60"
+        >
+          <MoreHorizontal size={20} aria-hidden="true" />
+        </button>
+      </div>
+      {menu ? (
+        <ul role="menu" aria-label="Actions sur le chantier" className="animate-rise flex flex-col divide-y divide-line rounded-xl border border-line bg-surface px-4 shadow-card">
+          {etape.map((a) => (
+            <li key={a.id} role="none">
+              <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); a.run(); }}>
+                {a.label}
+              </button>
+            </li>
+          ))}
+          <li role="none">
+            <button type="button" role="menuitem" className={item} onClick={() => { setMenu(false); onEdit(); }}>
+              Modifier le chantier
+            </button>
+          </li>
+          {quote && !done ? (
+            <li role="none">
+              {confirmRemove ? (
+                <span className="flex min-h-11 items-center justify-between gap-2 text-sm font-bold">
+                  Retirer le devis ?
+                  <span className="flex gap-2">
+                    <button type="button" className="min-h-11 px-2 text-muted" onClick={() => setConfirmRemove(false)}>
+                      Non
+                    </button>
+                    <button type="button" className="min-h-11 px-2 text-danger" onClick={() => void removeQuote()}>
+                      Oui, retirer
+                    </button>
+                  </span>
+                </span>
+              ) : (
+                <button type="button" role="menuitem" className={item} onClick={() => setConfirmRemove(true)}>
+                  Retirer le devis
+                </button>
+              )}
+            </li>
+          ) : null}
+          <li role="none">
+            <button type="button" role="menuitem" className={item} onClick={() => void toggleStatus()}>
+              {done ? "Reprendre le chantier" : "Marquer terminé"}
+            </button>
+          </li>
+        </ul>
+      ) : null}
+      {error ? <ErrorNotice error={error} /> : null}
+      <div className="flex flex-wrap items-center gap-x-3 pl-13 text-[14px] text-muted">
+        {done ? <Badge tone="ok">{fr.status.archived}</Badge> : null}
+        {project.clientName ? <span>{project.clientName}</span> : null}
+        {mapsUrl ? (
+          <a href={mapsUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 min-w-0 items-center gap-1 font-semibold text-accent-text">
+            <MapPin size={14} aria-hidden="true" className="shrink-0" />
+            <span className="truncate">{project.address}</span>
+          </a>
+        ) : null}
+      </div>
+    </header>
+  );
+}
+
+function EditForm({ project, onDone }: { project: Project; onDone: (p: Project | null) => void }) {
+  const [values, setValues] = useState({ name: project.name, clientName: project.clientName ?? "", address: project.address ?? "" });
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError(null);
+    try {
+      onDone(
+        await api<Project>(`/v1/projects/${project.id}`, {
+          method: "PATCH",
+          body: { name: values.name, clientName: values.clientName || null, address: values.address || null },
+        }),
+      );
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      setPending(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-4">
+      <BackButton fallback="/chantiers?vue=suivi" />
+      {error ? <ErrorNotice error={error} /> : null}
+      <Field id="name" label="Nom du chantier" value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} required autoFocus />
+      <Field id="clientName" label="Client" value={values.clientName} onChange={(e) => setValues({ ...values, clientName: e.target.value })} />
+      <Field id="address" label="Adresse du chantier" value={values.address} onChange={(e) => setValues({ ...values, address: e.target.value })} />
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="secondary" onClick={() => onDone(null)} disabled={pending}>
+          {fr.actions.cancel}
+        </Button>
+        <Button type="submit" pending={pending}>
+          {fr.actions.save}
+        </Button>
+      </div>
+    </form>
+  );
+}

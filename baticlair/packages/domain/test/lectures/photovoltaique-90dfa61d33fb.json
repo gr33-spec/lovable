@@ -1,0 +1,43 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Panneaux photovoltaïques 425 Wc full black en surimposition sur tuiles",
+   "quantity": "10",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Panneaux photovoltaïques 425 Wc full black en surimposition sur tuiles",
+    "quantite": "10",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Panneaux photovoltaïques 425 Wc full black en surimposition sur tuiles",
+      "quantite": "10",
+      "unite": "u",
+      "ouvrage": "pv-surimposition",
+      "emplacement": "modules",
+      "donnees": {
+       "support": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

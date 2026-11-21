@@ -1,0 +1,197 @@
+"use client";
+
+import { Check } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useId, useState } from "react";
+import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
+import { api, ApiError, type BillingPlan, type BillingStatus } from "@/lib/api";
+import { useResource } from "@/lib/use-resource";
+import { NOM_APP } from "@/lib/nom";
+
+const asError = (e: unknown) => (e instanceof ApiError ? e : new ApiError("internal_error", 500));
+
+export function useBilling() {
+  const fetchBilling = useCallback((signal: AbortSignal) => api<BillingStatus>("/v1/billing", { signal }), []);
+  return useResource(fetchBilling);
+}
+
+const limitText = (p: BillingPlan) =>
+  p.projectLimit === null ? "Chantiers illimités" : `Jusqu'à ${p.projectLimit} chantiers${p.period === "month" ? " / mois" : ""}`;
+
+/**
+ * Les formules, en mots d'artisan : un prix, un nombre de chantiers. Sans
+ * paiement en ligne pour l'instant : « Choisir cette formule » nous prévient,
+ * et un code d'activation (tests, premiers clients) l'active tout de suite.
+ */
+export function Paywall({ status, onChange }: { status: BillingStatus; onChange: (s: BillingStatus) => void }) {
+  const [pending, setPending] = useState<string | null>(null);
+  const [error, setError] = useState<ApiError | null>(null);
+  const [showCode, setShowCode] = useState(false);
+  const [code, setCode] = useState("");
+  const codeId = useId();
+  const blocked = status.limitReached;
+  const requested = status.offers.find((o) => o.key === status.requestedPlan) ?? null;
+
+  async function run(key: string, action: () => Promise<BillingStatus>) {
+    setPending(key);
+    setError(null);
+    try {
+      onChange(await action());
+    } catch (e) {
+      setError(asError(e));
+    } finally {
+      setPending(null);
+    }
+  }
+  const choose = (plan: string) => run(plan, () => api<BillingStatus>("/v1/billing/request", { method: "POST", body: { plan } }));
+  const activate = () => run("code", () => api<BillingStatus>("/v1/billing/activate", { method: "POST", body: { code } }));
+
+  return (
+    <section aria-labelledby="paywall-title" className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <h1 id="paywall-title" className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">
+          {blocked ? (status.plan.key === "trial" ? "Ton essai est terminé" : "Limite de ta formule atteinte") : "Nos formules"}
+        </h1>
+        <p className="text-[15px] text-muted">Continue à utiliser {NOM_APP} pour lire tes devis et comparer tes fournisseurs.</p>
+        {blocked ? <p className="text-sm text-muted">Tes chantiers en cours restent accessibles.</p> : null}
+      </div>
+
+      {error ? <ErrorNotice error={error} /> : null}
+      {requested ? (
+        <p role="status" className="rounded-2xl bg-ok-bg p-3 text-sm font-semibold text-ok">
+          Merci ! On te contacte très vite pour activer la formule {requested.label}.
+        </p>
+      ) : null}
+
+      <ul className="flex flex-col gap-3" aria-label="Formules">
+        {status.offers.map((plan) => {
+          const current = plan.key === status.plan.key;
+          return (
+            <li key={plan.key}>
+              <Card className="flex flex-col gap-3 p-5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-[20px] font-extrabold">{plan.label}</span>
+                  {plan.priceEurMonth !== null ? (
+                    <span className="text-[20px] font-extrabold">
+                      {plan.priceEurMonth} €<span className="text-sm font-bold text-muted"> HT/mois</span>
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-[15px]">{limitText(plan)}</p>
+                {current ? (
+                  <p className="inline-flex items-center gap-1.5 text-sm font-extrabold text-ok">
+                    <Check size={16} aria-hidden="true" />
+                    Ta formule actuelle
+                  </p>
+                ) : status.requestedPlan === plan.key ? (
+                  <p className="text-sm font-extrabold text-ok">✓ Demande envoyée</p>
+                ) : (
+                  <Button pending={pending === plan.key} disabled={pending !== null} onClick={() => void choose(plan.key)}>
+                    Choisir cette formule
+                  </Button>
+                )}
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
+
+      {status.activationEnabled ? (
+        showCode ? (
+          <form
+            className="flex flex-col gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (code.trim()) void activate();
+            }}
+          >
+            <label htmlFor={codeId} className="text-sm font-bold">
+              Code d&apos;activation
+            </label>
+            <input
+              id={codeId}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoComplete="off"
+              className="min-h-12 rounded-2xl border border-line bg-surface px-3 text-[16px] outline-none focus-visible:border-accent"
+            />
+            <Button type="submit" variant="secondary" pending={pending === "code"}>
+              Activer
+            </Button>
+          </form>
+        ) : (
+          <button type="button" onClick={() => setShowCode(true)} className="inline-flex min-h-11 items-center self-center text-sm font-bold text-muted">
+            J&apos;ai un code d&apos;activation
+          </button>
+        )
+      ) : null}
+    </section>
+  );
+}
+
+/** Page « Formules » : la formule actuelle et les offres. */
+export function PlansScreen() {
+  const { data, setData, error, reload } = useBilling();
+  if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
+  if (!data) return <Spinner />;
+  // L'abonnement (24 octobre 2026) a sa propre carte (`ResumeAbonnement`) : « Gratuit pour l'artisan » n'est plus vrai.
+  if (data.payant === false && !CARTE_GRATUITE) return null;
+  if (data.payant === false) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h1 className="font-display text-[30px] leading-[1.05] font-extrabold tracking-[-0.03em]">Gratuit pour l&apos;artisan</h1>
+        <p className="text-[15px] leading-relaxed text-muted">
+          Aujourd&apos;hui, {NOM_APP} est gratuit pour l&apos;artisan : aucune limite de chantiers, rien à payer.
+        </p>
+      </section>
+    );
+  }
+  return <Paywall status={data} onChange={setData} />;
+}
+
+/** L'ancienne carte « Gratuit pour l'artisan » (paywall éteint), gardée mais plus montrée depuis l'abonnement. */
+const CARTE_GRATUITE = false;
+
+/** Compte : la formule en une ligne, et le lien vers les formules (seulement quand l'ancien paywall `PAYWALL=on` est allumé). */
+export function PlanSummary() {
+  const { data } = useBilling();
+  if (!data) {
+    // Lighthouse (CLS) : la carte prend sa place avant la réponse, le reste de l'écran ne descend pas d'un coup.
+    return (
+      <Card className="flex flex-col gap-1.5 p-4" aria-busy="true">
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
+        <span className="text-[17px] font-extrabold">&nbsp;</span>
+        <span className="text-sm text-muted">&nbsp;</span>
+        <span className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">Voir les formules</span>
+      </Card>
+    );
+  }
+  const { plan, usage } = data;
+  // Plan « finition », bloc 4 : paywall éteint, aucune formule à l'écran. Greg, 29 octobre 2026 (capture Profil : « Gratuit
+  // pour l'artisan, rien à payer » sous la carte de l'abonnement) : la carte « Abonnement » dit seule le gratuit et le payant.
+  if (data.payant === false && !CARTE_GRATUITE) return null;
+  if (data.payant === false) {
+    return (
+      <Card className="flex flex-col gap-1.5 p-4">
+        <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
+        <span className="text-[17px] font-extrabold">Gratuit pour l&apos;artisan</span>
+        <span className="text-sm text-muted">Aucune limite de chantiers, rien à payer.</span>
+      </Card>
+    );
+  }
+  return (
+    <Card className="flex flex-col gap-1.5 p-4">
+      <span className="text-[12px] font-semibold tracking-[0.06em] text-muted uppercase">FORMULE</span>
+      <span className="text-[17px] font-extrabold">{plan.label}</span>
+      {usage.limit !== null ? (
+        <span className={`text-sm ${data.limitReached ? "font-semibold text-warn" : "text-muted"}`}>
+          {usage.projects} chantier{usage.projects > 1 ? "s" : ""} sur {usage.limit}
+          {plan.period === "month" ? " ce mois-ci" : ""}
+        </span>
+      ) : null}
+      <Link href="/abonnement" className="inline-flex min-h-11 items-center self-start text-[15px] font-semibold text-accent-text">
+        Voir les formules
+      </Link>
+    </Card>
+  );
+}

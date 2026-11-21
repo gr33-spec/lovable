@@ -1,0 +1,44 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Fourniture et pose ardoises 30x22 sur 200 m2",
+   "quantity": "1",
+   "unit": "ens"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Fourniture et pose ardoises 30x22 sur 200 m2",
+    "quantite": "1",
+    "unite": "ens",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 30×22",
+      "quantite": "1",
+      "unite": "ens",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "surface": "200 m²",
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

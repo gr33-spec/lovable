@@ -1,0 +1,111 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bloc-porte isoplane 83x204 huisserie 72, poussant droit",
+   "quantity": "5",
+   "unit": "u"
+  },
+  {
+   "ref": "2",
+   "designation": "Plinthes MDF blanches collées",
+   "quantity": "48",
+   "unit": "ml"
+  },
+  {
+   "ref": "3",
+   "designation": "Lambris sapin plafond chambre",
+   "quantity": "14",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bloc-porte isoplane 83x204 huisserie 72, poussant droit",
+    "quantite": "5",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bloc-porte isoplane 83x204 huisserie 72, poussant droit",
+      "quantite": "5",
+      "unite": "u",
+      "ouvrage": "blocs-portes",
+      "emplacement": "portes",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Plinthes MDF blanches collées",
+    "quantite": "48",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Plinthes MDF blanches collées",
+      "quantite": "48",
+      "unite": "ml",
+      "ouvrage": "plinthes",
+      "emplacement": "plinthes",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Lambris sapin plafond chambre",
+    "quantite": "14",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Lambris sapin plafond chambre",
+      "quantite": "14",
+      "unite": "m²",
+      "ouvrage": "lambris",
+      "emplacement": "lambris",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

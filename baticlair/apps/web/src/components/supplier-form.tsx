@@ -1,0 +1,161 @@
+"use client";
+
+import { LIBELLES_SPECIALITES, SPECIALITES } from "../../../../packages/domain/src/groupe/specialites";
+import { useId, useRef, useState } from "react";
+import { Button, ErrorNotice, Field } from "@/components/ui";
+import { api, ApiError, newActionKey, type Supplier } from "@/lib/api";
+import { fr } from "@/lib/fr";
+import { PHRASE_ADRESSE_GENERIQUE, PHRASE_EMAIL_COMMERCIAL, estAdresseGenerique } from "../../../../packages/domain/src/groupe/contact-negoce";
+import { cocherSpecialite } from "../../../../packages/domain/src/groupe/specialites";
+
+const FIELD_ERRORS: Record<string, string> = {
+  name: "Indique le nom de la société.",
+  email: "Cette adresse e-mail n'est pas valide.",
+};
+
+/**
+ * Fiche fournisseur : seuls la société et l'e-mail sont obligatoires.
+ * Sert au carnet de fournisseurs et à l'ajout rapide depuis un chantier.
+ */
+/** « Point.P  Vannes » et « point.p vannes » : même fournisseur probable. */
+function sameName(a: string, b: string): boolean {
+  const n = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  return n(a).length > 0 && n(a) === n(b);
+}
+
+export function SupplierForm({
+  supplier,
+  onDone,
+  submitLabel = fr.actions.save,
+  others = [],
+}: {
+  supplier?: Supplier;
+  onDone: (s: Supplier | null) => void;
+  submitLabel?: string;
+  /** Fournisseurs déjà connus : signale un doublon probable (même nom), sans bloquer. */
+  others?: Supplier[];
+}) {
+  const id = useId();
+  const [values, setValues] = useState({
+    name: supplier?.name ?? "",
+    email: supplier?.email ?? "",
+    contactName: supplier?.contactName ?? "",
+    phone: supplier?.phone ?? "",
+    notes: supplier?.notes ?? "",
+  });
+  // Greg, 1er novembre 2026 : les spécialités du négoce, déclarées par l'artisan, corrigeables à tout moment.
+  const [specialites, setSpecialites] = useState<string[]>(supplier?.specialites ?? []);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  // Une clé par formulaire : double appui = un seul fournisseur.
+  const key = useRef(newActionKey());
+
+  const twin = others.find((o) => o.id !== supplier?.id && sameName(o.name, values.name));
+  // Une erreur d'un champ disparaît dès qu'on le corrige (sinon « pas valide » restait sous une adresse devenue bonne
+  // et cachait le conseil « adresse générale ») ; l'envoi suivant repart de zéro.
+  const [corriges, setCorriges] = useState<ReadonlySet<string>>(new Set());
+  const fieldError = (path: string) =>
+    !corriges.has(path) && error?.details?.some((d) => d.path === path) ? (FIELD_ERRORS[path] ?? "Texte trop long.") : undefined;
+  const set = (field: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setValues({ ...values, [field]: e.target.value });
+    if (!corriges.has(field)) setCorriges(new Set([...corriges, field]));
+  };
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError(null);
+    setCorriges(new Set());
+    const body = {
+      name: values.name,
+      email: values.email,
+      contactName: values.contactName || null,
+      phone: values.phone || null,
+      notes: values.notes || null,
+      specialites,
+    };
+    try {
+      onDone(
+        supplier
+          ? await api<Supplier>(`/v1/suppliers/${supplier.id}`, { method: "PATCH", body })
+          : await api<Supplier>("/v1/suppliers", { method: "POST", body, idempotencyKey: key.current }),
+      );
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+      setPending(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
+      {error && !error.details ? <ErrorNotice error={error} /> : null}
+      <Field id={`${id}-name`} label="Société" placeholder="ex. Point.P Vannes" value={values.name} onChange={set("name")} error={fieldError("name")} autoFocus />
+      {twin ? (
+        <p role="status" className="-mt-2 text-sm font-semibold text-warn">
+          Déjà dans ton carnet : {twin.name} ({twin.email}). Vérifie que ce n&apos;est pas le même.
+        </p>
+      ) : null}
+      <Field
+        id={`${id}-email`}
+        label="E-mail de ton commercial"
+        type="email"
+        inputMode="email"
+        autoComplete="off"
+        placeholder="ex. paul.le-goff@negoce.fr"
+        value={values.email}
+        onChange={set("email")}
+        error={fieldError("email")}
+        hint={PHRASE_EMAIL_COMMERCIAL}
+      />
+      {/* Lot final, point 2 : une adresse générale se signale gentiment, sans bloquer. */}
+      {!fieldError("email") && estAdresseGenerique(values.email) ? (
+        <p role="status" className="-mt-2 text-sm font-semibold text-warn">
+          {PHRASE_ADRESSE_GENERIQUE}
+        </p>
+      ) : null}
+      <Field id={`${id}-contact`} label="Son prénom (si tu le connais)" placeholder="ex. Paul" value={values.contactName} onChange={set("contactName")} error={fieldError("contactName")} />
+      <Field id={`${id}-phone`} label="Son téléphone (si tu le connais)" type="tel" value={values.phone} onChange={set("phone")} error={fieldError("phone")} />
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-1 text-sm font-bold">Ses spécialités</legend>
+        <div className="flex flex-wrap gap-2">
+          {SPECIALITES.map((sp) => {
+            const choisie = specialites.includes(sp);
+            return (
+              <button
+                key={sp}
+                type="button"
+                aria-pressed={choisie}
+                onClick={() => setSpecialites((l) => cocherSpecialite(l, sp, !choisie))}
+                className={`pressable min-h-11 rounded-full px-3.5 text-[14px] font-semibold ${choisie ? "bg-accent text-on-accent shadow-card" : "border border-line bg-transparent text-ink active:bg-ground"}`}
+              >
+                {LIBELLES_SPECIALITES[sp]}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[13px] text-muted">Ce que tu sais de lui : tu pourras le corriger. Un généraliste peut recevoir plusieurs lots.</p>
+      </fieldset>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor={`${id}-notes`} className="text-sm font-bold">
+          Notes (facultatif)
+        </label>
+        <textarea
+          id={`${id}-notes`}
+          rows={2}
+          placeholder="ex. Tuiles, zinc, livraison le mardi"
+          value={values.notes}
+          onChange={set("notes")}
+          className="rounded-2xl border border-line bg-surface p-4 text-[16px] outline-none placeholder:text-muted focus-visible:border-accent"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Button variant="secondary" onClick={() => onDone(null)} disabled={pending}>
+          {fr.actions.cancel}
+        </Button>
+        <Button type="submit" pending={pending}>
+          {submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}

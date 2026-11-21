@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { ChevronRight, FileText, Pencil, Search, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { AppDocument, DocCategory } from "@/lib/types";
-import { DOC_CATEGORIES, DOC_SHORTCUTS, categoryLabel, documentIndex, documentsOf, searchText, type DocEntry, type DocScope } from "@/lib/documents";
+import { DOC_CATEGORIES, DOC_SHORTCUTS, categoryLabel, documentIndex, documentsOf, searchKey, searchText, type DocEntry, type DocScope } from "@/lib/documents";
 import { usePageState } from "@/lib/nav";
 import { sortedUnits } from "@/lib/lots";
 import { dateFr } from "@/lib/format";
@@ -45,7 +45,7 @@ export function DocumentsLibrary() {
   const importer = useDocumentImport();
 
   const index = documentIndex(data);
-  const needle = q.trim().toLowerCase();
+  const needle = searchKey(q.trim());
   const sc = DOC_SHORTCUTS.find((s) => s.id === shortcut);
   const list = documentsOf(index, { companyId, buildingId, unitId, loanId: params.get("credit") ?? undefined }).filter(
     (e) => (!sc || sc.categories.includes(e.category)) && (!category || e.category === category) && (!year || (e.date ?? "").startsWith(year)) && (!needle || needle.split(/\s+/).every((w) => searchText(e, data).includes(w))),
@@ -72,6 +72,7 @@ export function DocumentsLibrary() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Immeuble, locataire, SCI, banque, contenu…"
+                data-search
                 className="w-full rounded-2xl border border-line bg-card py-3 pl-11 pr-4 text-[16px] outline-none focus:border-series-1"
               />
             </div>

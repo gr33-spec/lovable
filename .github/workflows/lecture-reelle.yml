@@ -1,0 +1,99 @@
+name: Vraie lecture (Opus)
+
+# Directive du fondateur (2026-10-12) : « Le double de test ne remplace pas le modèle. » Avant de fusionner un changement
+# de lecture, la vraie lecture tourne sur DE00000071 et 7954 ; le bref et les questions sont imprimés mot pour mot dans le
+# journal, puis contrôlés contre le résultat attendu.
+#
+# DÉCISION DE GREG (25 octobre 2026, 20 $ partis en CI le 24) : aucun test automatique n'appelle l'API réelle. Ce workflow
+# ne part QUE si Greg le lance lui-même, à la main (onglet Actions, « Run workflow »), jamais sur une étiquette, un push
+# ou une PR. Coût d'un passage complet : environ 2,30 $ (DE00000071 0,35 $, 7954 1,91 $, D.2026.105 0,06 $).
+#
+# Les PDF réels ne sont jamais dans le dépôt :
+# - DE00000071, D.2026.105 et 7954 : les devis anonymisés de test/support, régénérés à la volée (désignations,
+#   quantités et unités du devis réel ; ni nom, ni adresse, ni prix).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: baticlair
+
+jobs:
+  lecture:
+    name: Vraie lecture DE00000071, 7954 et D.2026.105
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BATICLAIR_ANTHROPIC_KEY: ${{ secrets.BATICLAIR_ANTHROPIC_KEY }}
+      # `prisma generate` (postinstall) lit la config ; aucune connexion n'est ouverte.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/inutilisee
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: baticlair/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: baticlair/.nvmrc
+          cache: pnpm
+          cache-dependency-path: baticlair/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @baticlair/domain build
+      - name: La clé est-elle là ?
+        run: |
+          if [ -z "$BATICLAIR_ANTHROPIC_KEY" ]; then echo "::error::Secret BATICLAIR_ANTHROPIC_KEY absent"; exit 1; fi
+          echo "Secret BATICLAIR_ANTHROPIC_KEY présent (valeur jamais affichée)."
+      - name: DE00000071
+        id: de00000071
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: pnpm exec tsx scripts/lecture-reelle.ts fixture:DE00000071 DE00000071
+      # Décision du fondateur (2026-10-13) : 7954 anonymisé comme D.2026.105 (transcription du dépôt, prix fictifs),
+      # régénéré à la volée ; le PDF du client ne passe jamais par le dépôt ni par la CI.
+      - name: "7954"
+        id: l7954
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: mkdir -p lectures && pnpm exec tsx scripts/lecture-reelle.ts fixture:7954 7954 lectures/7954.json
+      # Retour du fondateur (2026-10-12) : D.2026.105 lu sans question, la tuile verte sans modèle ni teinte. Le devis
+      # anonymisé de test/support, régénéré à la volée (aucune donnée du client).
+      - name: D.2026.105
+        id: l105
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: pnpm exec tsx scripts/lecture-reelle.ts fixture:D.2026.105 D.2026.105
+      # §52 (mission du 2026-10-19) : la fiche métier ajoutée ou changée par la PR, lue sur le devis de sa section 6
+      # (au plus une vraie lecture par métier et par jour : seulement les fiches que la PR touche).
+      - name: Fiches métier de la PR
+        id: fiches
+        continue-on-error: true
+        working-directory: baticlair/apps/api
+        run: |
+          git fetch --no-tags --depth=1 origin "${{ github.event.pull_request.base.ref || 'main' }}"
+          codes=$(git diff --name-only FETCH_HEAD HEAD -- ../referentiels/metiers/ | sed -n 's#.*/metiers/\([^_/][^/]*\)\.md$#\1#p')
+          if [ -z "$codes" ]; then echo "Aucune fiche métier dans la PR."; exit 0; fi
+          rc=0
+          for c in $codes; do
+            if grep -q '^moteur: fiche' "../../referentiels/metiers/$c.md"; then
+              echo "=== Fiche $c ==="
+              pnpm exec tsx scripts/lecture-reelle.ts "fixture:fiche:$c" "fiche:$c" || rc=1
+            fi
+          done
+          exit $rc
+      # La lecture rendue (devis anonymisé, aucune donnée client) gardée 7 jours : un écart se diagnostique sans relancer.
+      - name: Lecture rendue
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lectures
+          path: baticlair/apps/api/lectures/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Bilan
+        if: always()
+        run: |
+          echo "DE00000071 : ${{ steps.de00000071.outcome }} ; 7954 : ${{ steps.l7954.outcome }} ; D.2026.105 : ${{ steps.l105.outcome }} ; fiches : ${{ steps.fiches.outcome }}"
+          if [ "${{ steps.de00000071.outcome }}" != "success" ] || [ "${{ steps.l7954.outcome }}" != "success" ] || [ "${{ steps.l105.outcome }}" != "success" ] || [ "${{ steps.fiches.outcome }}" != "success" ]; then exit 1; fi

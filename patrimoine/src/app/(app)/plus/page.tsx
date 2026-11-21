@@ -7,8 +7,7 @@ import { useState } from "react";
 import { FolderOpen, Building2, KeyRound, CalendarRange, FlaskConical, Scale, ScanFace, Share2, LineChart as LineIcon, FileSpreadsheet, Gauge, CalendarClock, CircleAlert, FileText, HandCoins, History, LogOut, Palette, Percent, Smartphone, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { demoData, hasDemo, withoutDemo } from "@/lib/demo";
-import { qualityIssues } from "@/lib/engine/quality";
-import { unitMissing } from "@/lib/missing";
+import { issueCounts, qualityIssues } from "@/lib/engine/quality";
 import { themeDef } from "@/lib/theme";
 import { Button, Card, Divided, Page, PageHeader, Row, SectionTitle, Sheet } from "@/components/ui";
 
@@ -17,9 +16,8 @@ export default function PlusPage() {
   const [demoSheet, setDemoSheet] = useState(false);
   const [homeSheet, setHomeSheet] = useState(false);
   const [busy, setBusy] = useState(false);
-  const issues = qualityIssues(data, projection.snapshot);
-  const dossiers = data.units.filter((u) => unitMissing(data, u).length > 0).length;
-  const toComplete = issues.length + dossiers;
+  const counts = issueCounts(qualityIssues(data, projection.snapshot));
+  const toComplete = counts.important + counts.utile + counts.optionnel;
   const docCount = documentIndex(data).length;
   const demo = hasDemo(data);
 
@@ -60,7 +58,7 @@ export default function PlusPage() {
           <>
             <SectionTitle>À traiter</SectionTitle>
             <Card className="py-1">
-              <Row href="/plus/a-completer" icon={<CircleAlert size={18} />} title="Données à compléter" subtitle={[dossiers ? `${dossiers} dossier${dossiers > 1 ? "s" : ""} de locataire` : "", issues.length ? `${issues.length} chiffre${issues.length > 1 ? "s" : ""} manquant${issues.length > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ")} />
+              <Row href="/plus/a-completer" icon={<CircleAlert size={18} />} title="Données à compléter" subtitle={`${counts.important} important${counts.important > 1 ? "s" : ""} · ${counts.utile} utile${counts.utile > 1 ? "s" : ""} · ${counts.optionnel} optionnel${counts.optionnel > 1 ? "s" : ""}`} />
             </Card>
           </>
         )}

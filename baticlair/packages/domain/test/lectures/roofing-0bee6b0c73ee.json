@@ -1,0 +1,147 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Crochets de sécurité inox NF EN 517 type B",
+   "quantity": "4",
+   "unit": "u"
+  },
+  {
+   "ref": "2",
+   "designation": "Échelle de toit aluminium",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "3",
+   "designation": "Ligne de vie câble inox",
+   "quantity": "12",
+   "unit": "ml"
+  },
+  {
+   "ref": "4",
+   "designation": "Désamiantage plaques fibres-ciment amiantées, évacuation en ISDD",
+   "quantity": "80",
+   "unit": "m²"
+  },
+  {
+   "ref": "5",
+   "designation": "Crochets de service pour échelle",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Crochets de sécurité inox NF EN 517 type B",
+    "quantite": "4",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Crochets de sécurité inox NF EN 517 type B",
+      "quantite": "4",
+      "unite": "u",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Échelle de toit aluminium",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Échelle de toit aluminium",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Ligne de vie câble inox",
+    "quantite": "12",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ligne de vie câble inox",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Désamiantage plaques fibres-ciment amiantées, évacuation en ISDD",
+    "quantite": "80",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Désamiantage plaques fibres-ciment amiantées, évacuation en ISDD",
+      "quantite": "80",
+      "unite": "m²",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Crochets de service pour échelle",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Crochets de service pour échelle",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": [
+   "Amiante : le retrait se fait par une entreprise certifiée (SS3), après un repérage avant travaux et un plan de retrait déclaré un mois avant le chantier. BatiClair ne compte aucun matériau pour ce poste : il part tel qu'écrit (§18)."
+  ]
+ }
+}

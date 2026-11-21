@@ -1,0 +1,54 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+   "quantity": "200",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

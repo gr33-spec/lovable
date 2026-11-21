@@ -1,0 +1,109 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+   "quantity": "200",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Descente d'eau pluviale zinc Ø80 hauteur 4 m",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "2",
+     "origine": "devis",
+     "preuve": "Devis, 2"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "dauphin",
+    "texte": "Un dauphin en pied de chaque descente ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "dauphin",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Descente d'eau pluviale zinc Ø80 hauteur 4 m",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente zinc Ø80",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "80 mm",
+       "hauteur_descente": "4 m"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

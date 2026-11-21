@@ -1,5 +1,7 @@
 "use client";
 
+import { PROPERTY_KINDS, PROPERTY_USAGES } from "@/lib/assets";
+import { reliableInitial } from "@/lib/schedule";
 import { sortedUnits } from "@/lib/lots";
 import { useStore } from "@/lib/store";
 import type { Building, Company, Loan, Unit, Work } from "@/lib/types";
@@ -77,6 +79,10 @@ export function BuildingForm({ building }: { building: Building }) {
   return (
     <Stack>
       <TextField label="Nom" value={building.name} onChange={(v) => set({ name: v ?? "" })} />
+      <Grid2>
+        <SelectField label="Type de bien" value={building.kind} options={PROPERTY_KINDS.map((k) => ({ value: k.value, label: k.label }))} onChange={(v) => set({ kind: v })} emptyLabel="À préciser" />
+        <SelectField label="Usage" value={building.usage} options={PROPERTY_USAGES} onChange={(v) => set({ usage: v })} emptyLabel="À préciser" />
+      </Grid2>
       <SelectField label="Société propriétaire" value={building.companyId ?? undefined} options={companies} onChange={(v) => set({ companyId: v ?? null })} emptyLabel="Aucune / en direct" />
       <div>
         <div className="mb-1 px-1 text-[13px] font-medium text-ink-2">Valeur estimée</div>
@@ -119,8 +125,8 @@ export function BuildingForm({ building }: { building: Building }) {
       <Details title="Adresse et acquisition">
         <TextField label="Adresse" value={building.address} onChange={(v) => set({ address: v })} />
         <TextField label="Commune" value={building.city} onChange={(v) => set({ city: v })} />
-        <DateField label="Date d'acquisition" value={building.acquisitionDate} onChange={(v) => set({ acquisitionDate: v })} />
-        <NumberField label="Prix d'acquisition" value={building.acquisitionPrice} onChange={(v) => set({ acquisitionPrice: v })} />
+        <DateField label="Date d'achat (signature de l'acte)" value={building.acquisitionDate} onChange={(v) => set({ acquisitionDate: v })} />
+        <NumberField label="Prix d'achat" value={building.acquisitionPrice} onChange={(v) => set({ acquisitionPrice: v })} hint="Hors frais de notaire." />
         {mode === "manual" && (
           <Grid2>
             <NumberField label="Surface totale" suffix="m²" value={building.surface} onChange={(v) => set({ surface: v })} />
@@ -189,15 +195,32 @@ export function UnitForm({ unit }: { unit: Unit }) {
 }
 
 export function LoanForm({ loan }: { loan: Loan }) {
-  const { upsert } = useStore();
+  const { upsert, projection } = useStore();
   const set = (patch: Partial<Loan>) => upsert("loans", { ...loan, ...patch });
+  // Avec un tableau, le restant dû est celui du tableau à ce jour (jamais saisi).
+  const fromSchedule = loan.schedule && loan.schedule.rows.length >= 2 ? (projection.snapshot.byLoan.get(loan.id)?.balance ?? 0) : undefined;
   const buildings = useBuildingOptions();
   const companies = useCompanyOptions();
+  const partialFrom = reliableInitial(loan).partialFrom;
   return (
     <Stack>
       <Grid2>
         <TextField label="Nom" value={loan.name} placeholder="Ex. Prêt Paimpol" onChange={(v) => set({ name: v })} />
         <TextField label="Banque" value={loan.bank} onChange={(v) => set({ bank: v })} />
+      </Grid2>
+      <Grid2>
+        <TextField label="N° de prêt (banque)" value={loan.reference} placeholder="Sur l'offre ou le tableau" onChange={(v) => set({ reference: v })} />
+        <div>
+          <div className="mb-1 px-1 text-[13px] font-medium text-ink-2">Taux</div>
+          <Segmented
+            value={loan.rateType ?? "fixe"}
+            onChange={(v) => set({ rateType: v })}
+            options={[
+              { value: "fixe", label: "Fixe" },
+              { value: "variable", label: "Variable" },
+            ]}
+          />
+        </div>
       </Grid2>
       <SelectField label="Immeuble financé" value={loan.buildingId ?? undefined} options={buildings} onChange={(v) => set({ buildingId: v ?? null })} emptyLabel="Aucun en particulier" />
       {!loan.buildingId && (
@@ -214,19 +237,31 @@ export function LoanForm({ loan }: { loan: Loan }) {
       <div className="rounded-2xl bg-soft px-4 py-3 text-[13px] text-ink-2">
         L&apos;essentiel : <b>capital restant dû</b>, <b>mensualité</b> et <b>date de fin</b>. Le reste affine la projection.
       </div>
-      <NumberField label="Capital restant dû" value={loan.remaining} onChange={(v) => set({ remaining: v })} />
-      {loan.remaining !== undefined && (
+      {fromSchedule !== undefined ? (
+        <div className="flex items-baseline justify-between gap-3 rounded-2xl bg-card px-4 py-3 shadow-sm">
+          <span className="text-[13.5px] text-ink-2">Capital restant dû (d&apos;après le tableau)</span>
+          <span className="tabular text-[15px] font-semibold text-ink">{eur(fromSchedule)}</span>
+        </div>
+      ) : (
+        <NumberField label="Capital restant dû" value={loan.remaining} onChange={(v) => set({ remaining: v })} />
+      )}
+      {fromSchedule === undefined && loan.remaining !== undefined && (
         <DateField label="…connu à la date du" value={loan.remainingDate} onChange={(v) => set({ remainingDate: v })} hint="Vide = aujourd'hui." />
       )}
       <NumberField label="Mensualité hors assurance" value={loan.monthlyPayment} onChange={(v) => set({ monthlyPayment: v })} />
       <DateField label="Date de fin" value={loan.endDate} onChange={(v) => set({ endDate: v })} />
       <Details title="Détails du prêt">
-        <NumberField label="Montant initial" value={loan.initialAmount} onChange={(v) => set({ initialAmount: v })} />
+        <NumberField
+          label="Montant initial"
+          value={loan.initialAmount}
+          onChange={(v) => set({ initialAmount: v })}
+          hint={partialFrom ? "Le tableau d'amortissement commence en cours de prêt : indiquez le montant de l'offre de prêt (la valeur actuelle n'est que le capital au début du tableau)." : undefined}
+        />
         <Grid2>
           <NumberField label="Taux" suffix="%" value={loan.ratePct} onChange={(v) => set({ ratePct: v })} />
           <NumberField label="Assurance / mois" value={loan.insuranceMonthly} onChange={(v) => set({ insuranceMonthly: v })} />
         </Grid2>
-        <DateField label="Date de début" value={loan.startDate} onChange={(v) => set({ startDate: v })} />
+        <DateField label="Date de déblocage des fonds" value={loan.startDate} onChange={(v) => set({ startDate: v })} hint="La première échéance tombe en général le mois suivant." />
         <NumberField label="Durée" suffix="mois" integer value={loan.durationMonths} onChange={(v) => set({ durationMonths: v })} />
       </Details>
       <TextField label="Notes" value={loan.notes} multiline onChange={(v) => set({ notes: v })} />

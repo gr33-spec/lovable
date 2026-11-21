@@ -1,0 +1,135 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture ardoises naturelles 32×22 au crochet",
+   "quantity": "80",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Sortie de toit Poujoulat",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "diametre_sortie",
+    "texte": "Sortie de toit : quel diamètre ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 125",
+      "valeur": "125"
+     },
+     {
+      "label": "Ø 150",
+      "valeur": "150"
+     },
+     {
+      "label": "Ø 180",
+      "valeur": "180"
+     },
+     {
+      "label": "VMC",
+      "valeur": "0"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre du conduit",
+    "ligne": null
+   },
+   {
+    "cle": "usage_sortie",
+    "texte": "Sortie de toit : conduit de fumée ou ventilation ?",
+    "boutons": [
+     {
+      "label": "Conduit de fumée",
+      "valeur": "1"
+     },
+     {
+      "label": "Ventilation",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "usage du conduit",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture ardoises naturelles 32×22 au crochet",
+    "quantite": "80",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 32×22",
+      "quantite": "80",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-32x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Sortie de toit Poujoulat",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit Poujoulat",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "sortie-de-toit",
+      "emplacement": "sortie",
+      "donnees": {
+       "support_sortie": "1"
+      },
+      "attend": [
+       "diametre_sortie"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

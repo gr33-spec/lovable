@@ -1,0 +1,183 @@
+{
+ "note": "Constantes de calcul que le code lit dans la fiche (bascule par étapes, décision du fondateur du 19/11/2026). Chacune renvoie aux chiffres de la recherche qui la prouvent (`preuves` : id de chiffre de la fiche). Écrites à la main, jamais sans preuve confirmée.",
+ "constantes": [
+  {
+   "cle": "ardoise.jeu_de_tete_crochet",
+   "famille": "ardoise",
+   "libelle": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm",
+   "valeur": "5",
+   "unite": "mm",
+   "regle": "pureau = (longueur de l'ardoise − crochet) ÷ 2 + 2,5 mm",
+   "decision": "Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa.",
+   "preuves": [
+    "ardoise_crochet_recouvrement_depuis_longueur"
+   ],
+   "avant": "10 mm (« crochet − 1 cm », roofing.ts marge_crochet)"
+  },
+  {
+   "cle": "ardoise.marge_choix_crochet",
+   "famille": "ardoise",
+   "libelle": "Crochet par défaut = recouvrement + 3 mm, arrondi au centimètre supérieur",
+   "valeur": "3",
+   "unite": "mm",
+   "regle": "longueur de crochet = arrondi au cm supérieur (recouvrement + 3 mm)",
+   "decision": "Recherche du 19/11/2026 : Cupa, Frénéhard (fabricant de crochets), NF DTU 40.11 (2020) cité par un guide. Sert seulement quand le devis ne dit pas le crochet.",
+   "preuves": [
+    "ardoise_crochet_longueur_depuis_recouvrement"
+   ],
+   "avant": "10 mm (« recouvrement + 1 cm »)"
+  },
+  {
+   "cle": "ardoise.perte_crochets",
+   "famille": "ardoise",
+   "libelle": "Un crochet par ardoise commandée, sans perte en plus",
+   "valeur": "0",
+   "unite": "%",
+   "regle": "crochets = ardoises commandées (pertes comprises) × 1",
+   "decision": "Règle du fondateur (« 1 crochet par ardoise, partout »), confirmée par la recherche du 19/11/2026 : Cupa, Rathscheck, NF DTU 40.11 via guides.",
+   "preuves": [
+    "ardoise_crochet_par_ardoise"
+   ],
+   "avant": "2 % (« crochets = ardoises × 1,02 »)"
+  },
+  {
+   "cle": "zinguerie.longueur_faitage_aretier_faconne",
+   "famille": "zinguerie",
+   "libelle": "Faîtage et arêtier zinc commandés façonnés : longueurs de 2 m",
+   "valeur": "2",
+   "unite": "m",
+   "regle": "bandes de faîtage et d'arêtier = ml ÷ 2 m, arrondi au-dessus",
+   "decision": "Règle du fondateur (« zinc façonné en longueurs de 2 m », 18/11/2026), confirmée par la recherche du 19/11/2026 : VMZinc, Rheinzink, trois négoces bretons (Quéguiner, Tanguy, Bretagne Matériaux) ; aucune pièce de 3 m vue en faîtage.",
+   "preuves": [
+    "faitage_zinc_longueur",
+    "zinguerie_longueurs_bretagne"
+   ],
+   "avant": "3 m (« longueurs 3 m », §3)"
+  },
+  {
+   "cle": "ardoise.seuil_projection_1",
+   "famille": "ardoise",
+   "libelle": "Ardoise : au-delà de 5,50 m de projection horizontale du rampant, table de recouvrement suivante",
+   "valeur": "5.5",
+   "unite": "m",
+   "decision": "NF DTU 40.11 (2020), annexe B : colonnes ≤ 5,50 m, 5,50 à 11 m, 11 à 16,50 m (relu chez Cupa et Rathscheck).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj5.5-11_pente40",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj5.5-11_pente40",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj5.5-11_pente40"
+   ],
+   "avant": "5,5 m, + 10 mm de recouvrement"
+  },
+  {
+   "cle": "ardoise.seuil_projection_2",
+   "famille": "ardoise",
+   "libelle": "Ardoise : au-delà de 11 m de projection horizontale du rampant, dernière table de recouvrement",
+   "valeur": "11",
+   "unite": "m",
+   "decision": "NF DTU 40.11 (2020), annexe B (relu chez Cupa et Rathscheck).",
+   "preuves": [
+    "ardoise_naturelle_recouvrement_crochet_zone1_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone2_proj11-16.50_pente45",
+    "ardoise_naturelle_recouvrement_crochet_zone3_proj11-16.50_pente45"
+   ],
+   "avant": "aucun"
+  },
+  {
+   "cle": "faitage.faitieres_par_ml_sans_modele",
+   "famille": "points_singuliers",
+   "libelle": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml",
+   "valeur": "3",
+   "unite": "u/m",
+   "regle": "faîtières = ml de faîtage × 3, arrondi au-dessus",
+   "decision": "Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre.",
+   "preuves": [
+    "faitiere_tc_sans_emboitement_40_pieces_ml"
+   ],
+   "avant": "2,9 au ml (« ml ÷ 0,35 »)"
+  },
+  {
+   "cle": "evacuation.longueur_tube_descente",
+   "famille": "zinguerie",
+   "libelle": "Tube de descente : longueurs de 2 m par défaut",
+   "valeur": "2",
+   "unite": "m",
+   "regle": "tubes = descentes × arrondi au-dessus (hauteur ÷ 2 m)",
+   "decision": "Règle du fondateur (« descente en longueurs de 2 m », 18/11/2026). Recherche du 19/11/2026 : le tube de 2 m existe en zinc (VMZinc, Rheinzink, NedZink ; 2 m standard en Bretagne) et en PVC (Nicoll, First Plast : 4, 3, 2, 1 m). Le 4 m reste au choix (PVC, zinc Ø 100).",
+   "preuves": [
+    "descente_zinc_longueur",
+    "descente_pvc_longueur",
+    "zinguerie_longueurs_bretagne"
+   ],
+   "avant": "4 m"
+  },
+  {
+   "cle": "ecran.coef_pente_forte",
+   "famille": "ecran",
+   "libelle": "Écran sous toiture, pente au-dessus de 30 % : surface + 10 %",
+   "valeur": "1.10",
+   "unite": "u",
+   "regle": "m² d'écran = surface × 1,10 (lés recouverts de 10 cm, abouts et faîtage compris)",
+   "decision": "Règle du fondateur (« surface + 10 % », 18/11/2026), confirmée par la recherche du 19/11/2026 au-dessus de 30 % de pente : recouvrement des lés 10 cm et des abouts 10 cm (NF DTU 40.29 via Edilians, Siplast, Dörken), consommation Siplast 1,10 m²/m².",
+   "preuves": [
+    "ecran_recouvrement_lés_pente_sup30",
+    "ecran_recouvrement_abouts",
+    "ecran_seuil_pente"
+   ],
+   "avant": "surface × 1,5 ÷ (1,5 − 0,10) = × 1,071 (recouvrement des lés seul)"
+  },
+  {
+   "cle": "ecran.coef_pente_faible",
+   "famille": "ecran",
+   "libelle": "Écran sous toiture, pente de 30 % ou moins : surface + 20 %",
+   "valeur": "1.20",
+   "unite": "u",
+   "regle": "m² d'écran = surface × 1,20 (lés recouverts de 20 cm, abouts et faîtage compris)",
+   "decision": "Recherche du 19/11/2026 : à 30 % et moins, les lés se recouvrent de 20 cm (NF DTU 40.29 via Edilians, Siplast, Dörken) : le lé de 1,50 m ne couvre que 1,30 m (× 1,154), plus les abouts et le faîtage ; Siplast compte 1,20 m²/m². Le + 10 % du fondateur y serait trop court : signalé au fondateur.",
+   "preuves": [
+    "ecran_recouvrement_lés_pente_inf30",
+    "ecran_recouvrement_abouts",
+    "ecran_seuil_pente"
+   ],
+   "avant": "surface × 1,5 ÷ (1,5 − 0,20) = × 1,154"
+  },
+  {
+   "cle": "tuile.perte_canal",
+   "famille": "tuile_canal",
+   "libelle": "Tuile canal (couverts et courants) : 3 % de casse et de coupe, comme les autres tuiles",
+   "valeur": "3",
+   "unite": "%",
+   "regle": "tuiles canal commandées = besoin × 1,03",
+   "decision": "Recherche du 20/11/2026 : la casse à la pose d'une tuile terre cuite n'est jamais nulle (1 % dans les fiches environnementales collectives CTMNC 2014, 2020, 2022), les coupes s'y ajoutent ; la formation CAP compte 5 %. On applique à la canal la marge des tuiles du référentiel du fondateur (3 %), modifiable par l'entreprise. Avant : aucune marge (0 %).",
+   "preuves": [
+    "tuile_terre_cuite_casse_pose_fdes"
+   ],
+   "avant": "0 % (aucune règle de perte pour la tuile canal)"
+  },
+  {
+   "cle": "ardoise.supplement_expose",
+   "famille": "ardoise",
+   "libelle": "Ardoise en situation exposée, région III : recouvrement + 10 mm au moins",
+   "valeur": "10",
+   "unite": "mm",
+   "regle": "recouvrement exposé = max(R + 10 mm, R × 1,10)",
+   "decision": "NF DTU 40.11 (2020) §5.1.1.2 (+ 10 mm, via Progineer et une copie du texte) et Cupa / Rathscheck (+ 10 %) : on retient la plus forte des deux (écart de moins de 3 mm). Recherche du 20/11/2026.",
+   "preuves": [
+    "ardoise_situation_exposee_zone3"
+   ],
+   "avant": "aucune majoration"
+  },
+  {
+   "cle": "ardoise.coef_expose",
+   "famille": "ardoise",
+   "libelle": "Ardoise en situation exposée, région III : recouvrement × 1,10 au moins",
+   "valeur": "1.10",
+   "unite": "u",
+   "regle": "recouvrement exposé = max(R + 10 mm, R × 1,10)",
+   "decision": "Cupa et Rathscheck (+ 10 %), NF DTU 40.11 (+ 10 mm) : la plus forte des deux. Recherche du 20/11/2026.",
+   "preuves": [
+    "ardoise_situation_exposee_zone3"
+   ],
+   "avant": "aucune majoration"
+  }
+ ]
+}

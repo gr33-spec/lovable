@@ -1,0 +1,15 @@
+{
+  "metier": "bardage",
+  "ouvrages": {
+    "bardage_bois_jointif": { "expressions": ["bardage bois", "bardage douglas", "bardage mélèze", "rainure-languette", "bardage à clin", "élégie", "lames de bardage"] },
+    "bardage_bois_claire_voie": { "expressions": ["claire-voie", "bardage ajouré", "joint ouvert", "tasseaux verticaux en façade"] },
+    "bardage_fibres_ciment_clin": { "expressions": ["fibres-ciment", "cedral", "clin fibres-ciment", "eternit"] },
+    "bardage_panneau": { "expressions": ["panneaux hpl", "trespa", "equitone", "panneau grand format", "cassette"] },
+    "bardage_pvc_composite": { "expressions": ["bardage pvc", "bardage composite", "bois-polymère"] },
+    "bardage_metallique": { "expressions": ["bardage métallique", "bardage acier", "tôle nervurée", "double peau", "plateaux"], "exclusions": ["couverture bac acier"] },
+    "ite_sous_bardage": { "expressions": ["ite sous bardage", "isolation sous bardage", "isolant entre montants", "équerres de bardage", "pare-pluie"] },
+    "depose_bardage": { "expressions": ["dépose bardage", "dépose de l'existant"] }
+  },
+  "renvois": { "ite sous enduit": "facade", "bac acier de toiture, couvertine": "couverture", "ossature bois porteuse": "charpentier" },
+  "note": "Un seul document bardage reçu (poseur-de-bardage.md, qui s'arrête au chapitre 5) : pas de fusion possible."
+}

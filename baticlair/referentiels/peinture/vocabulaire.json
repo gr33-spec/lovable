@@ -1,0 +1,17 @@
+{
+  "metier": "peinture",
+  "ouvrages": {
+    "PREP_LESSIVAGE": { "expressions": ["lessivage", "lessiver"] },
+    "PREP_DECOLLAGE": { "expressions": ["décollage papier", "décoller"] },
+    "PREP_REBOUCHAGE": { "expressions": ["rebouchage", "traitement des fissures", "calicot"] },
+    "PREP_ENDUIT_LISSAGE": { "expressions": ["ratissage", "lissage", "enduit repassé", "enduisage", "révision des fonds"] },
+    "PREP_ENDUIT_GARNISSANT": { "expressions": ["enduit garnissant", "garnissage"] },
+    "PEINT_INT_MUR_PLAFOND": { "expressions": ["peinture murs", "peinture plafond", "peinture acrylique", "mat", "velours", "satin", "impression", "sous-couche", "2 couches"] },
+    "PEINT_BOISERIE": { "expressions": ["boiseries", "huisseries", "chambranles", "plinthes bois", "portes isoplanes", "laque", "glycéro"] },
+    "PEINT_METAL": { "expressions": ["radiateur", "garde-corps", "rampe", "grille", "antirouille"] },
+    "REV_TOILE_VERRE": { "expressions": ["toile de verre", "fibre de verre", "voile de verre", "intissé à peindre"] },
+    "REV_PAPIER_PEINT": { "expressions": ["papier peint", "tapisserie", "lés"] },
+    "FACADE_D2": { "expressions": ["peinture façade", "ravalement peinture", "d2", "pliolite", "siloxane", "film mince"] },
+    "FACADE_IMPER": { "expressions": ["imperméabilité", "i1", "i2", "i3", "i4", "rsi", "revêtement souple"] }
+  }
+}

@@ -1,0 +1,168 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
+import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
+import type { ReadAttempt } from "../src/platform/ai/document-reader.js";
+import type { LectureDevis } from "@baticlair/domain";
+import { loadConfig, type AppConfig } from "../src/platform/config/config.js";
+import type { Alerter, AlertKind } from "../src/platform/alerts/alerter.js";
+import { ALERTER, CONFIG } from "../src/platform/tokens.js";
+import { makePdf } from "./support/pdf-fixtures.js";
+import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
+
+/**
+ * AUDIT DE LANCEMENT, B3 : la lecture d'un gros devis (scanné, 30 pages) ne tient pas dans une
+ * requête. Au-delà du délai de réponse, BatiClair répond « lecture en cours » (202) et continue ;
+ * l'écran suit l'état. Une lecture en cours n'est jamais relancée (rien n'est payé deux fois).
+ */
+class GatedReader implements LectureReader {
+  readonly provider = "fake";
+  calls = 0;
+  fail = false;
+  /** Audit du 2026-10-07 : le premier appel dure 171 s (horloge avancée) et finit en « timeout ». */
+  slowTimeout = false;
+  private inner = new FakeLectureReader();
+  private release!: () => void;
+  private gate = new Promise<void>((r) => (this.release = r));
+  open() {
+    this.release();
+  }
+  reset() {
+    this.calls = 0;
+    this.fail = false;
+    this.slowTimeout = false;
+    this.gate = new Promise<void>((r) => (this.release = r));
+  }
+  async lire(request: LectureRequest): Promise<ReadAttempt<LectureDevis> | null> {
+    this.calls++;
+    await this.gate;
+    if (this.fail) throw new Error("panne du service d'IA");
+    if (this.slowTimeout && this.calls === 1) {
+      vi.setSystemTime(new Date(Date.now() + 171_000));
+      return { provider: "fake", model: "fake", usage: { inputTokens: 0, outputTokens: 0 }, status: "timeout", output: null, errorCode: "timeout", durationMs: 171_000 };
+    }
+    return this.inner.lire(request);
+  }
+}
+
+const extractor = new GatedReader();
+const alerts: { kind: AlertKind; message: string }[] = [];
+const alerter: Alerter = { enabled: true, alert: (kind, message) => alerts.push({ kind, message }) };
+let ctx: TestContext;
+beforeAll(async () => {
+  const config: AppConfig = { ...loadConfig(), ai: { ...loadConfig().ai, answerWithinMs: 50 } };
+  ctx = await createTestApp((b) => b.overrideProvider(CONFIG).useValue(config).overrideProvider(LECTURE_READER).useValue(extractor).overrideProvider(ALERTER).useValue(alerter));
+});
+afterAll(async () => {
+  await ctx.app.close();
+});
+beforeEach(async () => {
+  await resetDatabase(ctx.prisma);
+  extractor.reset();
+});
+
+async function clientQuote(agent: Agent) {
+  const project = await agent.post("/v1/projects").send({ name: "Toiture Dupont" });
+  const doc = await agent
+    .post(`/v1/projects/${project.body.id}/documents`)
+    .field("purpose", "client_quote")
+    .attach("file", Buffer.from(await makePdf(["devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+  return { projectId: project.body.id as string, documentId: doc.body.id as string };
+}
+
+async function until<T>(read: () => Promise<T>, done: (v: T) => boolean): Promise<T> {
+  for (let i = 0; i < 100; i++) {
+    const v = await read();
+    if (done(v)) return v;
+    await new Promise((r) => setTimeout(r, 30));
+  }
+  throw new Error("délai dépassé");
+}
+
+describe("lecture longue : elle continue après la réponse", () => {
+  it("répond « lecture en cours » (202), ne relance rien, puis la liste apparaît", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const { projectId, documentId } = await clientQuote(agent);
+
+    const first = await agent.post(`/v1/documents/${documentId}/takeoff`);
+    expect(first.status).toBe(202);
+    expect(first.body).toEqual({ reading: { status: "reading", reason: null } });
+
+    // Double appui, rechargement : la lecture en cours n'est pas relancée.
+    expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBe(202);
+    // La lecture part en arrière-plan : sur une machine chargée, elle n'a pas toujours atteint le lecteur à cet instant.
+    // On attend qu'elle y soit, puis on vérifie qu'il n'y a eu qu'UN appel (ici et à la fin du test).
+    await vi.waitFor(() => expect(extractor.calls).toBeGreaterThanOrEqual(1), { timeout: 5_000 });
+    expect(extractor.calls).toBe(1);
+    const during = await agent.get(`/v1/projects/${projectId}/takeoff`);
+    expect(during.body).toMatchObject({ takeoff: null, reading: { status: "reading" } });
+
+    extractor.open();
+    const after = await until(
+      () => agent.get(`/v1/projects/${projectId}/takeoff`),
+      (r) => r.body.takeoff !== null,
+    );
+    expect(after.body.reading).toBeNull();
+    expect(after.body.takeoff.lines).toHaveLength(6);
+    expect(extractor.calls).toBe(1);
+  });
+
+  it("une panne pendant la lecture : l'écran le sait, et peut relancer", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Martin");
+    const { projectId, documentId } = await clientQuote(agent);
+    extractor.fail = true;
+    expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBe(202);
+    extractor.open();
+    const failed = await until(
+      () => agent.get(`/v1/projects/${projectId}/takeoff`),
+      (r) => r.body.reading?.status === "failed",
+    );
+    expect(failed.body.takeoff).toBeNull();
+    // L'équipe est prévenue (B5), sans aucune donnée du devis dans le message.
+    expect(alerts).toEqual([{ kind: "ai_reading_failed", message: "raison : unexpected_error." }]);
+
+    // Relance : nouvelle tentative, cette fois réussie (en un temps court : réponse directe).
+    extractor.reset();
+    extractor.open();
+    const retry = await agent.post(`/v1/documents/${documentId}/takeoff`);
+    expect([201, 202]).toContain(retry.status);
+    const ok = await until(
+      () => agent.get(`/v1/projects/${projectId}/takeoff`),
+      (r) => r.body.takeoff !== null,
+    );
+    expect(ok.body.takeoff.lines).toHaveLength(6);
+  });
+
+  it("un appel qui ne finirait pas avant la limite de la fonction (300 s) ne part pas : la lecture échoue proprement", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const { agent } = await signUpWithCompany(ctx.app, "d@example.fr", "Toitures Martin");
+      const project = await agent.post("/v1/projects").send({ name: "Toiture Dupont" });
+      const doc = await agent
+        .post(`/v1/projects/${project.body.id}/documents`)
+        .field("purpose", "client_quote")
+        .attach("file", Buffer.from(await makePdf(["devis", "devis"])), { filename: "devis.pdf", contentType: "application/pdf" });
+      extractor.slowTimeout = true;
+      extractor.open();
+      await agent.post(`/v1/documents/${doc.body.id}/takeoff`);
+      const failed = await until(
+        () => agent.get(`/v1/projects/${project.body.id}/takeoff`),
+        (r) => r.body.reading?.status === "failed",
+      );
+      // Après 171 s, les deux moitiés (170 s chacune au plus) dépasseraient la limite : aucune ne part.
+      expect(failed.body.takeoff).toBeNull();
+      expect(extractor.calls).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("une lecture « en cours » depuis plus de 5 minutes a été interrompue : elle compte comme échouée", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "c@example.fr", "Toitures Martin");
+    const { projectId, documentId } = await clientQuote(agent);
+    expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBe(202);
+    await ctx.prisma.aiAnalysis.updateMany({ where: { documentId }, data: { startedAt: new Date(Date.now() - 6 * 60 * 1000) } });
+    const res = await agent.get(`/v1/projects/${projectId}/takeoff`);
+    expect(res.body.reading).toEqual({ status: "failed", reason: "interrupted" });
+    extractor.open();
+  });
+});

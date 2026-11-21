@@ -58,7 +58,7 @@ export function placementPath(data: AppData, p: Pick<Placement, "companyId" | "b
 }
 
 export function useDocumentImport(defaults?: DocScope) {
-  const { data, upsertMany, removeMany, nowMonth, role } = useStore();
+  const { data, upsertMany, removeMany, role } = useStore();
   const [items, setItems] = useState<ImportItem[]>([]);
   // Données les plus récentes pour les rangements successifs d'un même lot de fichiers.
   const dataRef = useRef(data);
@@ -88,7 +88,6 @@ export function useDocumentImport(defaults?: DocScope) {
         tenancyId: placement.tenancyId || undefined,
         loanId: placement.loanId || undefined,
       },
-      nowMonth,
     );
     // Pour annuler : état d'avant des éléments modifiés, éléments créés, pièces reprises.
     const find = (coll: FilingOp["coll"], id: string) => (d[coll] as { id: string }[]).find((x) => x.id === id);
@@ -187,7 +186,7 @@ export function DropZone({ onFiles, compact, label }: { onFiles: (f: FileList) =
         setOver(false);
         if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
       }}
-      className={cx(compact ? "" : "rounded-[24px] border-2 border-dashed p-5 text-center transition", !compact && (over ? "border-series-1 bg-series-1/5" : "border-line bg-card"))}
+      className={cx("write-action", compact ? "" : "rounded-[24px] border-2 border-dashed p-5 text-center transition", !compact && (over ? "border-series-1 bg-series-1/5" : "border-line bg-card"))}
     >
       {!compact && (
         <>

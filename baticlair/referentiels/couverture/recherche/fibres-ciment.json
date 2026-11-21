@@ -1,0 +1,1340 @@
+{
+  "famille": "fibres_ciment",
+  "generated": "2026-11-20",
+  "perimetre": "Plaques ondulées fibres-ciment (profil 177 × 51, 5 et 6 ondes, NF DTU 40.37) et compléments pour les ardoises fibres-ciment. Les nombres d'ardoises au m², recouvrements, crochets et palettes des ardoises fibres-ciment sont déjà dans ardoise.json (sous-famille « ardoise fibres-ciment ») : non recopiés ici.",
+  "entrees": [
+    {
+      "id": "po_profil_onde",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "profil_onde",
+      "valeur": "177 × 51 (pas × hauteur d'onde), épaisseur 6,5",
+      "unite": "mm",
+      "condition": "profil unique des plaques ondulées vendues en France (Eternit, Plakfort, ELOS)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les plaques ondulées 177 x 51 FR existent en deux profils : 5 et 6 ondes.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "5 ONDES … 6,5 … 918 … 873 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+          "type": "dtu",
+          "extrait": "« Couverture en plaques ondulées en fibres-ciment » (référence de pose citée par les deux fabricants)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po5_largeurs",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "Eternit, Edilfibro, ELOS",
+      "modele": "5 ondes",
+      "attribut": "largeur_totale_et_utile",
+      "valeur": "918 (utile 873)",
+      "unite": "mm",
+      "condition": "plaque 5 ondes (PO5) ; la largeur utile sert au calcul",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "largeur totale lt = 918 mm (largeur utile lu = 873 mm)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "918 … 873 mm (5 ondes)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "PLAQUE PO5 ELOS 152/92 GRIS 152 X 92",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po6_largeurs",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "Eternit, Edilfibro",
+      "modele": "6 ondes",
+      "attribut": "largeur_totale_et_utile",
+      "valeur": "1095 (utile 1050)",
+      "unite": "mm",
+      "condition": "plaque 6 ondes (PO6), la plus courante en neuf (coins coupés d'usine)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "largeur totale lt = 1095 mm (largeur utile lu = 1050 mm)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "1095 … 1050 mm (6 ondes)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_5_6_incompatibles",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "Eternit",
+      "modele": "",
+      "attribut": "compatibilite",
+      "valeur": "accessoires 5 ondes et 6 ondes non interchangeables",
+      "unite": "",
+      "condition": "demander le nombre d'ondes avant toute faîtière, closoir ou plaque de remplacement",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "la gamme des plaques et accessoires 5 ondes et la gamme des plaques et accessoires 6 ondes sont incompatibles.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_8_ondes",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "existence_au_catalogue",
+      "valeur": "pas de plaque 8 ondes dans les gammes France relevées (5 et 6 ondes seulement)",
+      "unite": "",
+      "condition": "un devis qui écrit « 8 ondes » vise un ancien profil ou un autre matériau : demander à l'artisan",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les plaques ondulées 177 x 51 FR existent en deux profils : 5 et 6 ondes.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "gamme PLAKFORT 5 et 6 ONDES",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po5_longueurs",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "5 ondes",
+      "attribut": "longueurs_vendues",
+      "valeur": "1,25 ; 1,52 ; 1,58 ; 1,75 ; 2,00 ; 2,50 ; 3,05",
+      "unite": "m",
+      "condition": "5 ondes ; 3,05 m hors marque NF et hors Avis technique, posée sur 3 pannes",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 1 m 25 1 m 52 1 m 58 1 m 75 2 m 00 2 m 50 3 m 05",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Longueur m 1,25 1,525 1,585 1,75 2,00 2,50 3,05 *",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "1m52 (152/92) - 1m75 (175/92) - 2m00 (200/92) - 2m50 (250/92)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Eternit écrit 1,52 / 1,58, Edilfibro 1,525 / 1,585 : même plaque. ELOS (Chausson) n'a que 1,52 à 2,50."
+    },
+    {
+      "id": "po6_longueurs",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "6 ondes",
+      "attribut": "longueurs_vendues",
+      "valeur": "1,25 ; 1,58 ; 1,75 ; 2,00 ; 2,50",
+      "unite": "m",
+      "condition": "6 ondes (pas de 1,52 ni de 3,05)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Poids en kg … 6 ondes 19,2 - 24,3 26,8 30,7 38,3 - (1,25 / 1,52 / 1,58 / 1,75 / 2,00 / 2,50 / 3,05)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "6 Ondes 18,3 22,6 23,5 26,0 29,7 37,1 -",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Edilfibro donne aussi un poids pour 1,525 m en 6 ondes ; Eternit non : 1,52 m en 6 ondes chez Edilfibro seulement."
+    },
+    {
+      "id": "po_305_hors_nf",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_3_05",
+      "valeur": "hors marque NF et hors Avis technique ; pose et fixation sur 3 pannes",
+      "unite": "",
+      "condition": "5 ondes 3,05 m",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Plaques ondulées Plakfort 5 ondes en longueur 3,05 m hors NF: pose et fixations sur 3 pannes.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Batiproduits, fiche Eternit « Plaques ondulées en fibres-ciment pour couverture | PO5 & PO6 Teinte Naturelle »",
+          "url": "https://www.batiproduits.com/fiche/produits/les-plaques-ondulees-en-fibres-ciment-en-teinte-n-p434461548.html",
+          "type": "fabricant",
+          "extrait": "les plaques ondulées en longueur 3,05 m ne bénéficient ni de l'Avis Technique, ni d'un certificat de marque NF",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_poids_m2",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "poids_au_m2",
+      "valeur": "≈ 14",
+      "unite": "kg/m²",
+      "condition": "plaque seule ; ex. Eternit 5 ondes 2,00 m : 25,7 kg ; Edilfibro : 24,8 kg",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Batiproduits, fiche Eternit « Plaques ondulées en fibres-ciment pour couverture | PO5 & PO6 Teinte Naturelle »",
+          "url": "https://www.batiproduits.com/fiche/produits/les-plaques-ondulees-en-fibres-ciment-en-teinte-n-p434461548.html",
+          "type": "fabricant",
+          "extrait": "Poids : 14 kg/m²",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Léger (13,5 kg/m2 environ)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "13,5 (Edilfibro) à 14 kg/m² (Eternit)."
+    },
+    {
+      "id": "po_pente_minimale",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "pente_minimale",
+      "valeur": 9,
+      "unite": "%",
+      "condition": "toutes zones, avec complément d'étanchéité transversal en dessous de 16 % (voir rampant maxi)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Pente mini. : 9 %",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "9 ≤ p < 10 … 15 … t (tableau des pentes et des recouvrements)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+          "type": "dtu",
+          "extrait": "tableau pentes / recouvrements cité par Eternit et Edilfibro",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_altitude_max",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "altitude_maximale",
+      "valeur": 900,
+      "unite": "m",
+      "condition": "au-delà, étude particulière",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Altitude maxi. : 900 m",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "L'emploi au-delà de 900 m d'altitude",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_recouvrement_transversal",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement_transversal",
+      "valeur": 200,
+      "unite": "mm",
+      "condition": "pente < 31 % ; 140 mm admis à partir de 31 % (plaques non prédécoupées) ; maximum 230 mm (coins coupés d'usine) ou 260 mm (coins coupés sur chantier)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Recouvrement transversal minimum de 200 mm pour les pentes inférieures à 31 % et de 140 mm pour les pentes supérieures ou égales à 31 %.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Pour les pentes supérieures ou égales à 31% le recouvrement transversal minimal peut être réduit à 140 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+          "type": "dtu",
+          "extrait": "tableau des pentes et des recouvrements (NF DTU 40.37) repris par Edilfibro : 200 mm",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_recouvrement_transversal_max",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement_transversal_max",
+      "valeur": "230 (coins coupés d'usine) / 260 (coupe sur chantier)",
+      "unite": "mm",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Recouvrement transversal maximum de 230 mm pour les Coloronde FR 6 ondes coins coupés et de 260 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Dans le cas des plaques livrées avec coins coupés, cette valeur est ramenée à 230 mm.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_recouvrement_longitudinal",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "recouvrement_longitudinal",
+      "valeur": 45,
+      "unite": "mm",
+      "condition": "≈ 1/4 d'onde, réglé au gabarit : c'est l'écart largeur totale − largeur utile (918 − 873 ; 1095 − 1050)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Rl : recouvrement longitudinal … Rl = 45 environ",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "918 … 873 mm ; 1095 … 1050 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Le texte Eternit dit « environ 1/2 onde », son dessin coté et les largeurs donnent 45 mm (1/4 d'onde de 177) : on retient 45 mm, cohérent avec la largeur utile."
+    },
+    {
+      "id": "po_entraxe_pannes",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "entraxe_max_pannes",
+      "valeur": 1.385,
+      "unite": "m",
+      "condition": "quelle que soit la longueur de plaque ; Lu = L − recouvrement (1,585 − 0,200 = 1,385)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les règles de l'art imposent un entraxe maximum de 1,385 m, quelle que soit la longueur des plaques.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Acier 1385 … Bois 1385 (écartement maxi entre axes, mm)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "ELOS (Chausson) annonce 1,32 m pour ses plaques de 1,52 m (1,52 − 0,20) et 0,90 / 1,15 m en pose sur 3 appuis pour 2,00 / 2,50 m : même règle, appliquée à la longueur."
+    },
+    {
+      "id": "po_largeur_pannes",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "largeur_mini_pannes",
+      "valeur": "bois 65 / métal 40",
+      "unite": "mm",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "pannes bois : largeur mini. 65 mm … pannes métal : largeur mini. 40 mm.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Acier 1385 40 ; Bois 1385 65 (largeur mini, mm)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_longueur_utile_courante",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_utile",
+      "valeur": "1,585 m → 1,385 ; 1,75 → 1,55 (égout avec débord) ; 2,50 → 2,30 (3 appuis)",
+      "unite": "m",
+      "condition": "Lu = L − 200 mm ; en partie courante Eternit conseille 1,585 m (6 ondes) pour l'entraxe optimal, 1,25 ou 1,585 au faîtage, 1,75 à l'égout avec débord",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "en partie courante, plaques de 1,585 m pour un entraxe optimisé de 1,385 m … à l'égout, plaques de 1,75 m (avec débord)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "Les plaques PO5 ELOS de longueur 1,75 m sont utilisées en égout lorsque d'un débord de plaques est nécessaire.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_calage_3_appuis",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "calage_panne_intermediaire",
+      "valeur": 4,
+      "unite": "mm",
+      "condition": "plaque posée sur 3 appuis (longueur > 1,58 m) ; perçage +3 mm sur la panne intermédiaire",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "un calage est obligatoire en cas d'écart de planitude ≥4 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "La pose sur 3 appuis nécessite une cale de 4mm sur la panne intermédiaire.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_porte_a_faux_egout",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "porte_a_faux_max_egout",
+      "valeur": "350 sans gouttière / 200 avec gouttière",
+      "unite": "mm",
+      "condition": "mesuré depuis l'axe de la fixation ; gouttière jamais fixée sur les plaques",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Égout avec closoir ondulé … 350 maxi … 200 maxi (sur gouttière)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "ne doit pas excéder 0,35 m, lorsque la toiture ne comporte pas de gouttière et 0,20 m lorsqu'elle en comporte une",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_rampant_max_zone_I",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_maxi_rampant",
+      "valeur": "9–9,9 % : 15 m ; 10–12,9 % : 20 ; 13–15,9 % : 25 ; 16–20,9 % : 30 ; 21–25,9 % : 35 ; ≥ 26 % : 40",
+      "unite": "m",
+      "condition": "zone I du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "ZONE I … longueur maxi. du rampant (m) … 9 à 9,9 … 26 et plus",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Zone I … Longueur maximale du rampant (m) … 9 ≤ p < 10 … 26 ≤ p",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+          "type": "dtu",
+          "extrait": "tableau pentes / longueur de rampant repris à l'identique par Eternit (2015) et Edilfibro (2016)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_rampant_max_zone_II",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_maxi_rampant",
+      "valeur": "9–9,9 % : 12 m ; 10–12,9 % : 15 ; 13–15,9 % : 20 ; 16–20,9 % : 25 ; 21–25,9 % : 30 ; ≥ 26 % : 35",
+      "unite": "m",
+      "condition": "zone II du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "ZONE II … longueur maxi. du rampant (m) … 9 à 9,9 … 26 et plus",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Zone II … Longueur maximale du rampant (m) … 9 ≤ p < 10 … 26 ≤ p",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+          "type": "dtu",
+          "extrait": "tableau pentes / longueur de rampant repris à l'identique par Eternit (2015) et Edilfibro (2016)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_rampant_max_zone_III",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "longueur_maxi_rampant",
+      "valeur": "9–9,9 % : 10 m ; 10–12,9 % : 12 ; 13–15,9 % : 15 ; 16–20,9 % : 20 ; 21–25,9 % : 25 ; ≥ 26 % : 30",
+      "unite": "m",
+      "condition": "zone III du NF DTU 40.37 (vent / pluie), recouvrement 200 mm ; au-delà, étude particulière",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "ZONE III … longueur maxi. du rampant (m) … 9 à 9,9 … 26 et plus",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Zone III … Longueur maximale du rampant (m) … 9 ≤ p < 10 … 26 ≤ p",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "AFNOR, NF DTU 40.37 « Couverture en plaques ondulées en fibres-ciment » (septembre 2011) : texte non lu, valeurs lues dans les guides Eternit et Edilfibro qui le citent",
+          "url": "https://www.boutique.afnor.org/fr-fr/norme/nf-dtu-4037/travaux-de-batiment-couverture-en-plaques-ondulees-en-fibresciment-partie-1/fa175360/37885",
+          "type": "dtu",
+          "extrait": "tableau pentes / longueur de rampant repris à l'identique par Eternit (2015) et Edilfibro (2016)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_complement_etancheite",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "complement_d_etancheite",
+      "valeur": "zone I : T sous 16 % ; zone II : T sous 21 % (protégée ou normale), T+L sous 16 % puis T jusqu'à 25,9 % (exposée) ; zone III : T sous 26 % (protégée ou normale), T+L sous 16 % puis T jusqu'à 25,9 % (exposée) ; rien au-delà de 26 %",
+      "unite": "",
+      "condition": "T = mastic transversal, L = longitudinal (mastic préformé Ø 9 ou 10, NF P 30-303) ; T+L partout si étanchéité à la neige poudreuse demandée",
+      "regions": [
+        "Bretagne",
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "complément d'étanchéité : T= transversal L= longitudinal ; Mastic préformé Ø 9 ou 10 (NF P 30 303)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "b) T: complément d'étanchéité transversal - L: complément d'étanchéité longitudinal.",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_zones_bretagne",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "zone_climatique_bretagne",
+      "valeur": "zone III : côtes de la Manche et de l'Atlantique jusqu'à Lorient, sur 20 km ; zone II : côte atlantique de Lorient à l'Espagne sur 20 km, transition de 20 km en Bretagne, altitudes 200–500 m ; zone I : intérieur < 200 m",
+      "unite": "",
+      "condition": "zones propres au NF DTU 40.37 (plaques), différentes des zones ardoise et tuile",
+      "regions": [
+        "Bretagne"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Zone III : côtes de la mer du Nord, de la Manche et de l'Atlantique jusqu'à Lorient, sur une profondeur de 20 km.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Edilfibro montre la carte sans la décrire : une seule description écrite (Eternit)."
+    },
+    {
+      "id": "po_fixations_par_plaque",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "fixations_par_plaque_et_par_panne",
+      "valeur": 2,
+      "unite": "u",
+      "condition": "en sommet des 2e et 5e ondes, à 50 mm du bord haut de la plaque recouverte ; perçage Ø fixation + 1 mm (+ 3 mm sur panne intermédiaire)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les fixations sont toujours au nombre de 2 par plaque et par panne d'appui. Elles sont situées en 2e et 5e onde.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Les fixations sont au nombre de deux par plaque et par panne d'appui",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "La fixation est assurée par tirefonds en 2 points (sur la 2ème et 5ème onde)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_fixations_au_m2",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "fixations_au_m2",
+      "valeur": "6 ondes : 1,38 ; 5 ondes : 1,65 (+ 2 par plaque sur la panne d'égout)",
+      "unite": "u/m²",
+      "condition": "calcul : 2 ÷ (largeur utile × entraxe 1,385) ; 2 ÷ (1,050 × 1,385) = 1,38 ; 2 ÷ (0,873 × 1,385) = 1,65 ; plus si plaques sur 3 appuis (2 par panne)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "2 par plaque et par panne d'appui … entraxe maximum de 1,385 m … largeur utile lu = 1050 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "deux par plaque et par panne d'appui … Ecartement maxi entre axes 1385 … 873 mm",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "calcul fait sur deux règles confirmées (2 fixations par plaque et par panne, entraxe 1,385 m) et les largeurs utiles confirmées"
+    },
+    {
+      "id": "po_plaques_au_m2",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "plaques_au_m2",
+      "valeur": "6 ondes 1,585 m : 0,688 ; 5 ondes 1,585 m : 0,827 ; 5 ondes 2,50 m (3 appuis) : 0,498",
+      "unite": "u/m²",
+      "condition": "calcul : 1 ÷ (largeur utile × (longueur − 0,200)) en partie courante ; ajouter les rangs d'égout et de faîtage",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "E = Lu = L - Rt (toujours inférieur à 1,385 m) … largeur utile lu = 1050 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "873 mm … 1050 mm … RECOUVREMENT: 200 à 230 mm.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "1/(1,050 × 1,385) = 0,688 ; 1/(0,873 × 1,385) = 0,827 ; 1/(0,873 × 2,30) = 0,498"
+    },
+    {
+      "id": "po_fixation_nature",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "Edilfibro",
+      "modele": "",
+      "attribut": "type_de_fixation",
+      "valeur": "tirefond galvanisé Ø 8 (ancrage ≥ 50 mm dans le bois) ou vis autoperceuse Ø ≥ 6,3 (panne métal), rondelle d'étanchéité Ø 20 + plaquette",
+      "unite": "mm",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "galvanisé à chaud Ø 8 profondeur d'ancrage: au moins 50 mm … Ø ≥ 6,3 mm pannes métal",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_faitiere_charniere",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "faitiere",
+      "valeur": "faîtière à charnière à bords ondulés (2 éléments G et P), une par largeur de plaque, pente 10 à 100 %",
+      "unite": "",
+      "condition": "aussi faîtière rigide 148° (pente 30 %, plaques des deux versants alignées), faîtière d'aération, faîtière pare-vent",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière à charnière à bords ondulés complète … Pente : 10 à 100 %",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "FAITIERE CHARNIERE PO5 ELOS GRIS 70 X 92",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "Faîtière ELOS 70 × 92 cm (5 ondes) ; Eternit en 5 et 6 ondes."
+    },
+    {
+      "id": "po_closoirs",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "Eternit",
+      "modele": "",
+      "attribut": "closoir",
+      "valeur": "closoir dentelé : longueur utile 870 (5 ondes) / 1047 (6 ondes) ; closoir de ventilation polypropylène : longueur utile 1000, lot de 50",
+      "unite": "mm",
+      "condition": "à l'égout et au faîtage ; nombre = longueur ÷ longueur utile",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Closoir dentelé 6 ondes : Lu = 1047 mm … 5 ondes : Lu = 870 mm … Closoir de ventilation en polypropylène Lu = 1000 mm 50 éléments",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_bande_rive",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "ELOS (Chausson)",
+      "modele": "",
+      "attribut": "bande_de_rive",
+      "valeur": "150 × 20 cm (ELOS 5 ondes, gris ou rouge tuile)",
+      "unite": "cm",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "BANDE DE RIVE PO5 ELOS GRIS 150 X 20",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_feuillards",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "securite",
+      "valeur": "feuillards de retenue en polypropylène dans les plaques ; plaques non circulables : planches de répartition",
+      "unite": "",
+      "condition": "",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "équipées de feuillards en polypropylène au niveau de chaque flanc d'onde",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "plaques fibres-ciment sans amiante, équipées de feuillards en polypropylène … incorporés au niveau de chaque onde",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "po_conditionnement",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "plaques_par_palette",
+      "valeur": null,
+      "unite": "u",
+      "condition": "« livrées conditionnées par lots » ; gerbage 2 palettes maxi",
+      "regions": [
+        "France"
+      ],
+      "statut": "a_confirmer",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les plaques ondulées 177 x 51 FR sont livrées conditionnées par lots. • Gerbage : 2 palettes maxi.",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "raison": "Nombre de plaques par lot ou palette non publié dans les documents lus ; à demander au négoce breton."
+    },
+    {
+      "id": "po_amiante",
+      "famille": "fibres_ciment",
+      "sous_famille": "plaques ondulées fibres-ciment",
+      "marque": "",
+      "modele": "",
+      "attribut": "plaques_anciennes",
+      "valeur": "plaque d'avant 1997 = amiante probable : désamiantage, jamais un remplacement simple",
+      "unite": "",
+      "condition": "règle déjà dans le moteur (famille « amiante » prioritaire)",
+      "regions": [
+        "France"
+      ],
+      "statut": "une_source",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les plaques ondulées 177 x 51 FR sont des plaques fibres-ciment sans amiante, équipées de feuillards en polypropylène",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "ecart": "La date de 1997 (interdiction de l'amiante en France) n'est pas dans les sources lues ici."
+    },
+    {
+      "id": "ardoise_fc_pente_minimale",
+      "famille": "fibres_ciment",
+      "sous_famille": "ardoises fibres-ciment (complément à ardoise.json)",
+      "marque": "Cedral, Cembrit",
+      "modele": "",
+      "attribut": "pente_minimale",
+      "valeur": 25,
+      "unite": "%",
+      "condition": "14° ; zone I normale ou protégée, rampant en projection ≤ 15 m ; plus forte en zones II-III et en exposé",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Cedral (Etex France), Manuel de pose ardoises fibres-ciment Cedral (PDF du 15/04/2026)",
+          "url": "https://media.cedral.world/doc_1140309_fr/original/-293360529/cedral-ardoises-manuel-de-pose-pt.pdf?brand=cedral&market=fr",
+          "type": "fabricant",
+          "extrait": "La pente ne sera jamais inférieure à 0,25 m par mètre (25 % ou 14°), pente minimale pour les ardoises fibres-ciment",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Cembrit, documentation technique ardoises fibres-ciment Dolmen et Bravan (2016), hébergée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/5d3645ae-4526-43cd-bc4b-7702d4d39619/sfr-dolmen-bravan-20dt-fr-2016-1.pdf",
+          "type": "fabricant",
+          "extrait": "tableau de recouvrement : première ligne de pente 25 à 27 % (ardoises rectangulaires)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ardoise_fc_teintes",
+      "famille": "fibres_ciment",
+      "sous_famille": "ardoises fibres-ciment (complément à ardoise.json)",
+      "marque": "",
+      "modele": "",
+      "attribut": "teintes",
+      "valeur": "Cedral : anthracite (Kergoat), anthracite ou brun (Orléane), brun flammé (Pommay), gris / brun / rouge (Tecta) ; Cembrit : noir, brun",
+      "unite": "",
+      "condition": "le comptoir demande la gamme et la teinte",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Cedral (Etex France), Manuel de pose ardoises fibres-ciment Cedral (PDF du 15/04/2026)",
+          "url": "https://media.cedral.world/doc_1140309_fr/original/-293360529/cedral-ardoises-manuel-de-pose-pt.pdf?brand=cedral&market=fr",
+          "type": "fabricant",
+          "extrait": "Kergoat … Anthracite … Pommay … Flammé brun",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Cembrit, documentation technique ardoises fibres-ciment Dolmen et Bravan (2016), hébergée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/5d3645ae-4526-43cd-bc4b-7702d4d39619/sfr-dolmen-bravan-20dt-fr-2016-1.pdf",
+          "type": "fabricant",
+          "extrait": "Noir … Brun (coloris des ardoises Dolmen et Bravan)",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "id": "ardoise_fc_liteaux",
+      "famille": "fibres_ciment",
+      "sous_famille": "ardoises fibres-ciment (complément à ardoise.json)",
+      "marque": "",
+      "modele": "",
+      "attribut": "liteaux_ml_par_m2",
+      "valeur": "40×24 : 6,67 ; 60×30 : 4,00 ; 33×23 : 8,70 ; 45×30 : 5,71",
+      "unite": "ml/m²",
+      "condition": "recouvrement 100 mm : pureau = (longueur − 100) ÷ 2 ; liteaux = 1 ÷ pureau (une file par pureau)",
+      "regions": [
+        "France"
+      ],
+      "statut": "confirme",
+      "sources": [
+        {
+          "titre": "Cedral (Etex France), Manuel de pose ardoises fibres-ciment Cedral (PDF du 15/04/2026)",
+          "url": "https://media.cedral.world/doc_1140309_fr/original/-293360529/cedral-ardoises-manuel-de-pose-pt.pdf?brand=cedral&market=fr",
+          "type": "fabricant",
+          "extrait": "L'écartement des liteaux dépend du recouvrement choisi … E=P (entraxe des liteaux = pureau)",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Cembrit, documentation technique ardoises fibres-ciment Dolmen et Bravan (2016), hébergée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/5d3645ae-4526-43cd-bc4b-7702d4d39619/sfr-dolmen-bravan-20dt-fr-2016-1.pdf",
+          "type": "fabricant",
+          "extrait": "Pureau … Recouvrement … Faux pureau (schéma de pose au crochet)",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "controle": "40×24 : (400−100)/2 = 150 → 6,67 ; 60×30 : 250 → 4,00 ; 33×23 : 115 → 8,70 ; 45×30 : 175 → 5,71"
+    }
+  ],
+  "verdict_ratios": [
+    {
+      "ratio": "Ardoise fibres-ciment : 40×24, 40×27, 60×30, 60×40 ; liteaux 6,67 / 6,67 / 4 / 4 ml/m² (recouvrement 100 mm)",
+      "origine": "baticlair/packages/domain/src/referential/data/roofing.ts (~l. 1790, ardoise-fc)",
+      "valeur_actuelle": "liteaux 6,67 et 4",
+      "verdict": "confirme",
+      "bonne_valeur": "liteaux 6,67 (40×24) et 4,00 (60×30) justes ; 40×27 et 60×40 hors gamme France (voir ardoise.json) ; ajouter 33×23 (8,70) et 45×30 (5,71)",
+      "sources": [
+        {
+          "titre": "Cedral (Etex France), Manuel de pose ardoises fibres-ciment Cedral (PDF du 15/04/2026)",
+          "url": "https://media.cedral.world/doc_1140309_fr/original/-293360529/cedral-ardoises-manuel-de-pose-pt.pdf?brand=cedral&market=fr",
+          "type": "fabricant",
+          "extrait": "E=P (entraxe des liteaux = pureau) ; formats 33 x 23, 40 x 24, 45 x 30, 60 x 30",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Cembrit, documentation technique ardoises fibres-ciment Dolmen et Bravan (2016), hébergée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/5d3645ae-4526-43cd-bc4b-7702d4d39619/sfr-dolmen-bravan-20dt-fr-2016-1.pdf",
+          "type": "fabricant",
+          "extrait": "Pureau … Recouvrement",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "1 ÷ pureau ; les nombres d'ardoises au m² sont déjà corrigés dans ardoise.json."
+    },
+    {
+      "ratio": "Question « Ardoises fibres-ciment : bleu-noir, noir ou brun ? »",
+      "origine": "roofing.ts (TEINTE_FC_PARAM, ~l. 955)",
+      "valeur_actuelle": "bleu-noir / noir / brun",
+      "verdict": "corrige",
+      "bonne_valeur": "noir ou anthracite, brun (et gris, rouge en Tecta) ; « bleu-noir » n'apparaît chez aucun des deux fabricants",
+      "sources": [
+        {
+          "titre": "Cedral (Etex France), Manuel de pose ardoises fibres-ciment Cedral (PDF du 15/04/2026)",
+          "url": "https://media.cedral.world/doc_1140309_fr/original/-293360529/cedral-ardoises-manuel-de-pose-pt.pdf?brand=cedral&market=fr",
+          "type": "fabricant",
+          "extrait": "Kergoat … Anthracite ; Pommay Flammé brun",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Cembrit, documentation technique ardoises fibres-ciment Dolmen et Bravan (2016), hébergée par Chausson",
+          "url": "https://cdn.chausson.fr/catalog-document/5d3645ae-4526-43cd-bc4b-7702d4d39619/sfr-dolmen-bravan-20dt-fr-2016-1.pdf",
+          "type": "fabricant",
+          "extrait": "Noir … Brun",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Boutons : « anthracite / noir », « brun », « autre (gamme à préciser) »."
+    },
+    {
+      "ratio": "Famille plaques ondulées (« fibrociment », « plaque ondulee ») rangée avec le bac acier : plaque à la longueur, vis par boîte de 100",
+      "origine": "baticlair/packages/domain/src/trades/roofing.ts:225 et referential/data/roofing.ts (plaque-bac-acier, vis-bac-acier)",
+      "valeur_actuelle": "pas de règle fibres-ciment",
+      "verdict": "a_confirmer",
+      "bonne_valeur": "plaques fibres-ciment : longueurs fixes (1,25 à 2,50 m), largeur utile 873 / 1050 mm, 2 fixations par plaque et par panne (≈ 1,38 / m² en 6 ondes), entraxe ≤ 1,385 m, recouvrement 200 mm",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Les fixations sont toujours au nombre de 2 par plaque et par panne d'appui.",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "Ecartement maxi entre axes, mm 1385",
+          "consulte": "2026-11-20"
+        }
+      ],
+      "explication": "Le fibres-ciment ne se vend pas « à la longueur du rampant » comme le bac acier : décision du fondateur à prendre (famille séparée ?)."
+    }
+  ],
+  "commande_comptoir": [
+    {
+      "article": "Plaque ondulée fibres-ciment",
+      "ce_que_le_vendeur_demande": [
+        "5 ou 6 ondes (accessoires non interchangeables)",
+        "longueur (1,25 / 1,52 / 1,58 / 1,75 / 2,00 / 2,50 ; 3,05 en 5 ondes hors NF)",
+        "teinte : naturelle (grise), Coloronde (peinte), Coloragri ; coins coupés ou non",
+        "nombre de plaques"
+      ],
+      "unite_de_vente": "plaque",
+      "conditionnement": "par lots / palettes (nombre non publié : à confirmer)",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Longueur 1 m 25 … 3 m 05 ; 5 et 6 ondes",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "PLAQUE PO5 ELOS 152/92 GRIS",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Fixations de plaques ondulées",
+      "ce_que_le_vendeur_demande": [
+        "support : panne bois (tirefond Ø 8) ou métal (vis autoperceuse Ø ≥ 6,3)",
+        "longueur de la fixation (hauteur d'onde 51 + support)",
+        "nombre (2 par plaque et par panne)",
+        "rondelles d'étanchéité et plaquettes"
+      ],
+      "unite_de_vente": "boîte ou pièce",
+      "conditionnement": "à confirmer au négoce",
+      "sources": [
+        {
+          "titre": "Edilfibro, « Plaques ondulées en fibres-ciment gamme Plakfort 5 et 6 ondes, principes de base pour réussir la pose » (E 04f, 02-2016), hébergé par Chausson ; tableau tiré du NF DTU 40.37",
+          "url": "https://www.chausson.fr/media/article-document/234766",
+          "type": "fabricant",
+          "extrait": "galvanisé à chaud Ø 8 profondeur d'ancrage: au moins 50 mm",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "2 par plaque et par panne d'appui",
+          "consulte": "2026-11-20"
+        }
+      ]
+    },
+    {
+      "article": "Faîtières, closoirs, bandes de rive fibres-ciment",
+      "ce_que_le_vendeur_demande": [
+        "5 ou 6 ondes",
+        "type de faîtière : à charnière (pente 10–100 %), rigide 148°, d'aération",
+        "teinte",
+        "longueur de faîtage (une faîtière par largeur de plaque)"
+      ],
+      "unite_de_vente": "pièce",
+      "conditionnement": "closoir de ventilation par 50",
+      "sources": [
+        {
+          "titre": "Eternit (Etex France), « Plaques ondulées 177 x 51 FR – Coloronde, Coloragri, Plaque ondulée TN, documentation technique » (avril 2015), hébergée par Union Matériaux",
+          "url": "https://api-pro.union-materiaux.fr/api/product-notice/406590_1_1_po_dt_01.pdf",
+          "type": "fabricant",
+          "extrait": "Faîtière à charnière à bords ondulés complète … Closoir de ventilation … 50 éléments",
+          "consulte": "2026-11-20"
+        },
+        {
+          "titre": "Chausson Matériaux, fiche technique « Plaques PO5 ELOS » (FT ELOS 20181105), marque propre du négoce",
+          "url": "https://www.chausson.fr/media/article-document/260791",
+          "type": "negoce",
+          "extrait": "FAITIERE CHARNIERE PO5 ELOS GRIS 70 X 92",
+          "consulte": "2026-11-20"
+        }
+      ]
+    }
+  ]
+}

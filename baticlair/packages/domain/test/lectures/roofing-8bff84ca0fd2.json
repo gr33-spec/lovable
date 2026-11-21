@@ -1,0 +1,164 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Gouttière PVC de 25",
+   "quantity": "8",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "teinte_gouttiere",
+    "texte": "Gouttière : grise, blanche, sable, brune ou anthracite ?",
+    "boutons": [
+     {
+      "label": "Grise",
+      "valeur": "1"
+     },
+     {
+      "label": "Blanche",
+      "valeur": "2"
+     },
+     {
+      "label": "Sable",
+      "valeur": "3"
+     },
+     {
+      "label": "Brune",
+      "valeur": "4"
+     },
+     {
+      "label": "Anthracite",
+      "valeur": "5"
+     }
+    ],
+    "unite": "u",
+    "donnee": "teinte de la gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "fixation_crochet",
+    "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+    "boutons": [
+     {
+      "label": "Sur les chevrons",
+      "valeur": "1"
+     },
+     {
+      "label": "En façade (bandeau)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "pose des crochets de gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "nb_angles",
+    "texte": "Combien d'angles sur cette gouttière ?",
+    "boutons": [
+     {
+      "label": "Aucun",
+      "valeur": "0"
+     },
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "angles de la gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Gouttière PVC de 25",
+    "quantite": "8",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière PVC de 25",
+      "quantite": "8",
+      "unite": "ml",
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "profil",
+      "donnees": {
+       "matiere_gouttiere": "1",
+       "developpe_gouttiere": "25 cm"
+      },
+      "attend": [
+       "teinte_gouttiere"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,9 +1,10 @@
+import { reliableInitial, reliableStart } from "../schedule";
 import "server-only";
 import ExcelJS from "exceljs";
 import type { AppData } from "../types";
 import { currentMonth, monthLabel, yearOf } from "../engine/dates";
 import { project } from "../engine/projection";
-import { buildingValue, cashflowMonthly, netWorth } from "../engine/snapshot";
+import { buildingValue, cashflowMonthly, leasedUnits, rentalCharges, rentalPayments, netWorth } from "../engine/snapshot";
 import { latentGain } from "../engine/history";
 import { leaseInfo, outstanding, todayIso } from "../engine/leases";
 import { statementRatios } from "../engine/indicators";
@@ -62,12 +63,13 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     ["Capital restant dû", t.debt, EUR],
     ["Patrimoine net", nw === undefined ? "Données insuffisantes" : nw, EUR],
     ["Loyers mensuels", t.rentMonthly, EUR],
-    ["Mensualités de crédit", t.paymentsMonthly, EUR],
-    ["Charges annuelles", t.chargesAnnual, EUR],
-    ["Cash-flow mensuel", cashflowMonthly(t), EUR],
+    ["Mensualités des crédits locatifs", rentalPayments(t), EUR],
+    ["Mensualités des crédits personnels (résidence principale)", t.personalPaymentsMonthly, EUR],
+    ["Charges annuelles (biens locatifs)", rentalCharges(t), EUR],
+    ["Cash-flow locatif mensuel", cashflowMonthly(t), EUR],
     ["Trésorerie des sociétés", t.cash, EUR],
     ["Comptes courants d'associés", t.partnerAccounts, EUR],
-    ["Immeubles", t.buildings],
+    ["Biens", t.buildings],
     ["Lots", t.units],
     ["Lots vacants", t.vacantUnits],
     ["Crédits", t.loans],
@@ -78,7 +80,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
   }
   if (t.unvalued || t.unknownDebt || t.unknownPayment) {
     syn.addRow([]);
-    syn.addRow([`À compléter : ${t.unvalued} immeuble(s) sans valeur, ${t.unknownDebt} crédit(s) sans capital restant dû, ${t.unknownPayment} crédit(s) sans mensualité connue.`]).font = { italic: true, color: { argb: "FFB45309" } };
+    syn.addRow([`À compléter : ${t.unvalued} bien(s) sans valeur, ${t.unknownDebt} crédit(s) sans capital restant dû, ${t.unknownPayment} crédit(s) sans mensualité connue.`]).font = { italic: true, color: { argb: "FFB45309" } };
   }
 
   sheet(
@@ -123,7 +125,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     wb,
     "Immeubles",
     [
-      { header: "Immeuble", key: "name", width: 24 },
+      { header: "Bien", key: "name", width: 24 },
       { header: "Société", key: "company", width: 22 },
       { header: "Adresse", key: "address", width: 28 },
       { header: "Commune", key: "city" },
@@ -174,7 +176,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     wb,
     "Logements",
     [
-      { header: "Immeuble", key: "building", width: 22 },
+      { header: "Bien", key: "building", width: 22 },
       { header: "Logement", key: "name", width: 16 },
       { header: "Type", key: "type" },
       { header: "Surface m²", key: "surface" },
@@ -189,7 +191,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
       { header: "Indice de référence", key: "index", width: 18 },
       { header: "Impayé cumulé", key: "unpaid", fmt: EUR2 },
     ],
-    data.units.map((u) => {
+    leasedUnits(data).map((u) => {
       const info = leaseInfo(u, today);
       return {
         building: buildingName(u.buildingId),
@@ -216,7 +218,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     [
       { header: "Crédit", key: "name", width: 24 },
       { header: "Banque", key: "bank", width: 16 },
-      { header: "Immeuble", key: "building", width: 20 },
+      { header: "Bien", key: "building", width: 20 },
       { header: "Société", key: "company", width: 20 },
       { header: "Type", key: "kind" },
       { header: "Montant initial", key: "initial", fmt: EUR },
@@ -238,9 +240,9 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
         building: b?.name,
         company: companyName(b?.companyId ?? l.companyId),
         kind: l.kind === "in_fine" ? "In fine" : "Amortissable",
-        initial: l.initialAmount,
+        initial: reliableInitial(l).value,
         rate: l.ratePct ?? r?.impliedRatePct,
-        start: l.startDate,
+        start: reliableStart(l),
         end: r?.endMonth !== undefined ? monthLabel(r.endMonth) : l.endDate,
         balance: snap.byLoan.get(l.id)?.balance,
         payment: r?.payment,
@@ -278,7 +280,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
       { header: "Année", key: "year" },
       { header: "Montant", key: "amount", fmt: EUR },
       { header: "État", key: "status" },
-      { header: "Immeuble", key: "building", width: 20 },
+      { header: "Bien", key: "building", width: 20 },
       { header: "Société", key: "company", width: 20 },
       { header: "Notes", key: "notes", width: 30 },
     ],
@@ -365,7 +367,7 @@ export async function buildWorkbook(data: AppData): Promise<Buffer> {
     "Encaissements",
     [
       { header: "Mois", key: "month" },
-      { header: "Immeuble", key: "building", width: 20 },
+      { header: "Bien", key: "building", width: 20 },
       { header: "Logement", key: "unit", width: 14 },
       { header: "Locataire", key: "tenant", width: 22 },
       { header: "Statut", key: "status" },

@@ -1,0 +1,86 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Gouttière PVC 33 blanche, 1 descente, 1 angle",
+   "quantity": "26",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "fixation_crochet",
+    "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+    "boutons": [
+     {
+      "label": "Sur les chevrons",
+      "valeur": "1"
+     },
+     {
+      "label": "En façade (bandeau)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "pose des crochets de gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Gouttière PVC 33 blanche, 1 descente, 1 angle",
+    "quantite": "26",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière PVC blanche de 33",
+      "quantite": "26",
+      "unite": "ml",
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "profil",
+      "donnees": {
+       "nb_descentes": "1",
+       "matiere_gouttiere": "1",
+       "teinte_gouttiere": "2",
+       "nb_angles": "1",
+       "developpe_gouttiere": "33 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,0 +1,55 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Pose de tuiles",
+   "quantity": "100",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "produit_tuile",
+    "texte": "Quel produit pour : tuiles ?",
+    "boutons": [
+     {
+      "label": "Tuiles HP10",
+      "valeur": "edilians-hp10-huguenot"
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Pose de tuiles",
+    "quantite": "100",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tuiles HP10",
+      "quantite": "100",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "tuile",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,0 +1,177 @@
+{
+ "devis": [
+  {
+   "ref": "z1",
+   "designation": "Couverture zinc joint debout",
+   "quantity": "91",
+   "unit": "m²"
+  },
+  {
+   "ref": "z4",
+   "designation": "Gouttière zinc demi-ronde",
+   "quantity": "13",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
+    "boutons": [
+     {
+      "label": "Je façonne (bobines)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné (bacs)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "developpe_gouttiere",
+    "texte": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+    "boutons": [
+     {
+      "label": "De 25",
+      "valeur": "25"
+     },
+     {
+      "label": "De 28",
+      "valeur": "28"
+     },
+     {
+      "label": "De 33",
+      "valeur": "33"
+     },
+     {
+      "label": "De 40",
+      "valeur": "40"
+     }
+    ],
+    "unite": "cm",
+    "donnee": "développé de la gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "fixation_crochet",
+    "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+    "boutons": [
+     {
+      "label": "Sur les chevrons",
+      "valeur": "1"
+     },
+     {
+      "label": "En façade (bandeau)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "pose des crochets de gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "z1",
+    "designation": "Couverture zinc joint debout",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture zinc à joint debout",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "couverture",
+      "donnees": {},
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "z4",
+    "designation": "Gouttière zinc demi-ronde",
+    "quantite": "13",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde",
+      "quantite": "13",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {},
+      "attend": [
+       "developpe_gouttiere"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Dépose de l'ancien carrelage",
+   "quantity": "20",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Dépose de l'ancien carrelage",
+    "quantite": "20",
+    "unite": "m²",
+    "role": "pose",
+    "fournitures": []
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

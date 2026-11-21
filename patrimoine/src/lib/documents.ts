@@ -1,5 +1,4 @@
 import type { AppData, AppDocument, DocCategory, Loan, LoanScheduleRow, ScheduleMeta, Tenancy } from "./types";
-import type { MonthIndex } from "./engine/dates";
 import { loanFieldsFromSchedule } from "./schedule";
 import { describeLoan, newLoanName, type LoanPlan } from "./loan-match";
 
@@ -158,7 +157,12 @@ export function documentsOf(index: DocEntry[], scope: DocScope): DocEntry[] {
 export function searchText(e: DocEntry, data: AppData): string {
   const b = e.buildingId ? data.buildings.find((x) => x.id === e.buildingId) : undefined;
   const c = e.companyId ? data.companies.find((x) => x.id === e.companyId) : undefined;
-  return [e.title, e.name, categoryLabel(e.category), e.place.label, e.summary, b?.name, b?.city, b?.address, c?.name].filter(Boolean).join(" ").toLowerCase();
+  return searchKey([e.title, e.name, categoryLabel(e.category), e.place.label, e.summary, b?.name, b?.city, b?.address, c?.name].filter(Boolean).join(" "));
+}
+
+/** Forme de recherche : sans accents ni majuscules (« Goëlo » = « GOELO » = « goelo »). */
+export function searchKey(s: string): string {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 // ——— Pré-remplissage d'après le nom du fichier (sans IA) ———
@@ -261,7 +265,7 @@ const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? cry
  * reprise : elle quitte la liste des pièces libres, le fichier est le même.
  * Renvoie les modifications, les retraits et une phrase « rangé dans… ».
  */
-export function fileDocument(data: AppData, input: FilingInput, nowMonth: MonthIndex): { ops: FilingOp[]; removes: FilingRemove[]; placed: string; loanId?: string } {
+export function fileDocument(data: AppData, input: FilingInput): { ops: FilingOp[]; removes: FilingRemove[]; placed: string; loanId?: string } {
   const ref = { fileId: input.fileId, name: input.name, uploadedAt: today() };
   const tenancy = input.tenancyId ? data.tenancies.find((t) => t.id === input.tenancyId) : undefined;
   const loose = (data.documents ?? []).filter((d) => d.fileId === input.fileId).map((d) => ({ coll: "documents" as const, id: d.id }));
@@ -283,7 +287,7 @@ export function fileDocument(data: AppData, input: FilingInput, nowMonth: MonthI
   const rows = input.scheduleRows;
   if (input.category === "tableau_amortissement" && input.loanPlan && rows && rows.length >= 2) {
     const meta = input.scheduleMeta;
-    const fields = loanFieldsFromSchedule(rows, nowMonth, meta);
+    const fields = loanFieldsFromSchedule(rows, undefined, meta);
     const schedule = { rows, fileId: input.fileId, fileName: input.name, importedAt: today(), source: "ia" as const, ...(meta && Object.keys(meta).length ? { meta } : {}) };
     const plan = input.loanPlan;
     const existing = plan.kind === "existing" ? data.loans.find((l) => l.id === plan.loanId) : undefined;

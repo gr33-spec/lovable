@@ -1,0 +1,475 @@
+{
+ "devis": [
+  {
+   "ref": "ligne 1",
+   "designation": "Écran de sous-toiture respirant (Fourniture & Pose) - Fourniture et pose d'un écran de sous-toiture HPV (Hautement Perméable à la Vapeur) respirant, posé sur fermettes d'entraxe 90 cm (Surface : 120 m²)",
+   "quantity": "120",
+   "unit": "m²",
+   "truth": "C",
+   "note": "Écran : m² couverts → rouleaux (recouvrements)."
+  },
+  {
+   "ref": "ligne 2",
+   "designation": "Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourniture et pose de contre-lattes en liteaux de section 27x40 mm pour la création de la lame d'air (Surface : 120 m²)",
+   "quantity": "120",
+   "unit": "m²",
+   "truth": "C"
+  },
+  {
+   "ref": "ligne 3",
+   "designation": "Lattage en liteaux 27x40 pour tuiles HP10 (Fourniture & Pose) - Fourniture et pose de liteaux de section 27x40 mm avec pureau adapté pour tuiles de type HP10 (Surface : 120 m²)",
+   "quantity": "120",
+   "unit": "m²",
+   "truth": "C"
+  },
+  {
+   "ref": "ligne 4",
+   "designation": "Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose) - Fourniture et pose de tuiles en terre cuite grand moule type HP10 de coloris rouge (Surface : 120 m²)",
+   "quantity": "120",
+   "unit": "m²",
+   "truth": "C"
+  },
+  {
+   "ref": "ligne 5",
+   "designation": "Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la finition des rives latérales (4 rives de 6 m)",
+   "quantity": "24",
+   "unit": "m",
+   "truth": "C",
+   "note": "24 m de rives → tuiles de rive gauche/droite."
+  },
+  {
+   "ref": "ligne 6",
+   "designation": "Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec closoir ventilé et accessoires de fixation (Longueur : 10 m)",
+   "quantity": "10",
+   "unit": "m",
+   "truth": "C",
+   "note": "Faîtières + closoir + fixations."
+  },
+  {
+   "ref": "ligne 7",
+   "designation": "Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières demi-ronde de 25 en PVC de coloris sable, crochets et naissances compris (Longueur : 2 x 10 m)",
+   "quantity": "20",
+   "unit": "m",
+   "truth": "P",
+   "note": "Profil + crochets + naissances."
+  },
+  {
+   "ref": "ligne 8",
+   "designation": "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et pose d'un ensemble de descente d'eau pluviale en PVC Ø80 coloris sable, hauteur 4m, comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)",
+   "quantity": "2",
+   "unit": "unités",
+   "truth": "C",
+   "note": "Tubes + coudes + colliers."
+  },
+  {
+   "ref": "ligne 9",
+   "designation": "Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de tuiles chatières de ventilation adaptées au modèle HP10 (5 de chaque côté)",
+   "quantity": "10",
+   "unit": "unités",
+   "truth": "D",
+   "note": "Modèle exact de chatière HP10 à confirmer."
+  },
+  {
+   "ref": "ligne 10",
+   "designation": "Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie de toit complète de marque Poujoulat avec solin d'étanchéité adapté à la tuile HP10",
+   "quantity": "1",
+   "unit": "unité",
+   "truth": "C",
+   "note": "Modèle et diamètre Poujoulat non écrits ; une sortie de toit se décompose en embase, chapeau et, pour la fumée, collerette."
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "2",
+     "origine": "devis",
+     "preuve": "Devis, ligne 8"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "diametre_sortie",
+    "texte": "Sortie de toit : quel diamètre ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 125",
+      "valeur": "125"
+     },
+     {
+      "label": "Ø 150",
+      "valeur": "150"
+     },
+     {
+      "label": "Ø 180",
+      "valeur": "180"
+     },
+     {
+      "label": "VMC",
+      "valeur": "0"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre du conduit",
+    "ligne": null
+   },
+   {
+    "cle": "fixation_crochet",
+    "texte": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+    "boutons": [
+     {
+      "label": "Sur les chevrons",
+      "valeur": "1"
+     },
+     {
+      "label": "En façade (bandeau)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "pose des crochets de gouttière",
+    "ligne": null
+   },
+   {
+    "cle": "usage_sortie",
+    "texte": "Sortie de toit : conduit de fumée ou ventilation ?",
+    "boutons": [
+     {
+      "label": "Conduit de fumée",
+      "valeur": "1"
+     },
+     {
+      "label": "Ventilation",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "usage du conduit",
+    "ligne": null
+   },
+   {
+    "cle": "produit_tuile",
+    "texte": "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "edilians-hp10-huguenot"
+     },
+     {
+      "label": "Modifier",
+      "valeur": ""
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "ligne 1",
+    "designation": "Écran de sous-toiture respirant (Fourniture & Pose) - Fourniture et pose d'un écran de sous-toiture HPV (Hautement Perméable à la Vapeur) respirant, posé sur fermettes d'entraxe 90 cm (Surface : 120 m²)",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Écran HPV, rouleau 1,50 × 50 m",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "ecran",
+      "donnees": {
+       "entraxe_supports": "90 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 2",
+    "designation": "Contre-lattage en liteaux 27x40 (Fourniture & Pose) - Fourniture et pose de contre-lattes en liteaux de section 27x40 mm pour la création de la lame d'air (Surface : 120 m²)",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Liteaux 27×40",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "contre_liteau",
+      "donnees": {
+       "produit": "liteau-sapin-27x40"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 3",
+    "designation": "Lattage en liteaux 27x40 pour tuiles HP10 (Fourniture & Pose) - Fourniture et pose de liteaux de section 27x40 mm avec pureau adapté pour tuiles de type HP10 (Surface : 120 m²)",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Liteaux 27×40",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "liteau",
+      "donnees": {
+       "produit": "liteau-sapin-27x40"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 4",
+    "designation": "Couverture en tuiles terre cuite HP10 rouge (Fourniture & Pose) - Fourniture et pose de tuiles en terre cuite grand moule type HP10 de coloris rouge (Surface : 120 m²)",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tuiles HP10 rouge",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "tuile",
+      "donnees": {
+       "produit": "edilians-hp10-huguenot"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 5",
+    "designation": "Rives de toit (Fourniture & Pose) - Fourniture et pose de tuiles de rive pour la finition des rives latérales (4 rives de 6 m)",
+    "quantite": "24",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tuiles de rive",
+      "quantite": "24",
+      "unite": "m",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "rive",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 6",
+    "designation": "Faîtage (Fourniture & Pose) - Fourniture et pose de faîtières ventilées avec closoir ventilé et accessoires de fixation (Longueur : 10 m)",
+    "quantite": "10",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Faîtières",
+      "quantite": "10",
+      "unite": "m",
+      "ouvrage": "faitage",
+      "emplacement": "faitiere",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Closoir",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "faitage",
+      "emplacement": "closoir",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets de faîtière",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "faitage",
+      "emplacement": "fixation_faitiere",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 7",
+    "designation": "Gouttière PVC de 25 sable (Fourniture & Pose) - Fourniture et pose de gouttières demi-ronde de 25 en PVC de coloris sable, crochets et naissances compris (Longueur : 2 x 10 m)",
+    "quantite": "20",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière PVC demi-ronde sable de 25",
+      "quantite": "20",
+      "unite": "m",
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "profil",
+      "donnees": {
+       "nb_descentes": "2",
+       "matiere_gouttiere": "1",
+       "teinte_gouttiere": "3",
+       "nb_lignes": "2",
+       "developpe_gouttiere": "25 cm",
+       "diametre_descente": "80 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets de gouttière PVC de 25",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "fixation_crochet"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Naissances PVC demi-ronde sable de 25 Ø80",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "naissance",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 8",
+    "designation": "Descente d'eau pluviale PVC Ø80 avec coudes (Fourniture & Pose) - Fourniture et pose d'un ensemble de descente d'eau pluviale en PVC Ø80 coloris sable, hauteur 4m, comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total)",
+    "quantite": "2",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente PVC sable Ø80",
+      "quantite": "2",
+      "unite": "unités",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "80 mm",
+       "hauteur_descente": "4 m"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Coudes de descente PVC sable Ø80",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "descente",
+      "emplacement": "coude",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Colliers de descente Ø80",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "descente",
+      "emplacement": "collier",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 9",
+    "designation": "Chatières de ventilation (Fourniture & Pose) - Fourniture et pose de tuiles chatières de ventilation adaptées au modèle HP10 (5 de chaque côté)",
+    "quantite": "10",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Chatières de ventilation",
+      "quantite": "10",
+      "unite": "unités",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "ligne 10",
+    "designation": "Sortie de toit Poujoulat (Fourniture & Pose) - Fourniture et pose d'une sortie de toit complète de marque Poujoulat avec solin d'étanchéité adapté à la tuile HP10",
+    "quantite": "1",
+    "unite": "unité",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit Poujoulat",
+      "quantite": "1",
+      "unite": "unité",
+      "ouvrage": "sortie-de-toit",
+      "emplacement": "sortie",
+      "donnees": {
+       "support_sortie": "1"
+      },
+      "attend": [
+       "diametre_sortie"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

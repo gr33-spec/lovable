@@ -1,0 +1,73 @@
+{
+ "devis": [
+  {
+   "ref": "5",
+   "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
+   "quantity": "6",
+   "unit": "ml"
+  },
+  {
+   "ref": "6",
+   "designation": "Tubes de descente (Coude zinc diam. 80mm) - 4 unités, soit 2 jeux de 2 coudes",
+   "quantity": "4",
+   "unit": "unités"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "5",
+    "designation": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
+    "quantite": "6",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tuyau de descente zinc diam. 80mm, 2 descentes de 3 m",
+      "quantite": "6",
+      "unite": "ml",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "nb_descentes": "2",
+       "diametre_descente": "80 mm",
+       "hauteur_descente": "3 m"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Tubes de descente (Coude zinc diam. 80mm) - 4 unités, soit 2 jeux de 2 coudes",
+    "quantite": "4",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente (Coude zinc diam. 80mm)",
+      "quantite": "4",
+      "unite": "unités",
+      "ouvrage": "descente",
+      "emplacement": "coude",
+      "donnees": {
+       "diametre_descente": "80 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

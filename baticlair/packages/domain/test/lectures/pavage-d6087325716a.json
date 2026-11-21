@@ -1,0 +1,71 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Allée de garage en pavés béton gris sur lit de sable",
+   "quantity": "45",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Bordures béton T2",
+   "quantity": "28",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Allée de garage en pavés béton gris sur lit de sable",
+    "quantite": "45",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Allée de garage en pavés béton gris sur lit de sable",
+      "quantite": "45",
+      "unite": "m²",
+      "ouvrage": "pavage",
+      "emplacement": "allee",
+      "donnees": {
+       "epaisseur_paves": "8 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Bordures béton T2",
+    "quantite": "28",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bordures béton T2",
+      "quantite": "28",
+      "unite": "ml",
+      "ouvrage": "bordures",
+      "emplacement": "bordures",
+      "donnees": {
+       "type_bordure": "2"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

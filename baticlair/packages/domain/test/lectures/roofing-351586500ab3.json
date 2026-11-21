@@ -1,0 +1,158 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Tuiles (Fourniture et pose de tuiles canal sablées (avec liteaunage))",
+   "quantity": "100",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Liteaux 27x40 (Fourniture et pose de tuiles canal sablées (avec liteaunage))",
+   "quantity": "100",
+   "unit": "m²"
+  },
+  {
+   "ref": "3",
+   "designation": "Tuiles de rive (Rives scellées au ciment)",
+   "quantity": "20",
+   "unit": "m"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "recouvrement_canal",
+    "texte": "Recouvrement des tuiles canal ?",
+    "boutons": [
+     {
+      "label": "140 mm",
+      "valeur": "140"
+     },
+     {
+      "label": "150 mm",
+      "valeur": "150"
+     },
+     {
+      "label": "160 mm",
+      "valeur": "160"
+     },
+     {
+      "label": "170 mm",
+      "valeur": "170"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "recouvrement des tuiles canal",
+    "ligne": null
+   },
+   {
+    "cle": "produit_tuile",
+    "texte": "Quel produit pour : tuiles canal ?",
+    "boutons": [
+     {
+      "label": "Tuiles canal 50",
+      "valeur": "edilians-canal-50"
+     },
+     {
+      "label": "Tuiles Canal Gironde 50",
+      "valeur": "edilians-canal-gironde-50"
+     },
+     {
+      "label": "Tuiles Canal Gironde à blocage",
+      "valeur": "edilians-canal-gironde-blocage"
+     },
+     {
+      "label": "Tuiles Canal Lyonnaise 40",
+      "valeur": "edilians-canal-lyonnaise-40"
+     },
+     {
+      "label": "Tuiles Canal Charentaise",
+      "valeur": "edilians-canal-charentaise"
+     },
+     {
+      "label": "Tuiles Canal Charentaise à blocage",
+      "valeur": "edilians-canal-charentaise-blocage"
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Tuiles (Fourniture et pose de tuiles canal sablées (avec liteaunage))",
+    "quantite": "100",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture en tuiles canal sable",
+      "quantite": "100",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "tuile",
+      "donnees": {},
+      "attend": [
+       "recouvrement_canal"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Liteaux 27x40 (Fourniture et pose de tuiles canal sablées (avec liteaunage))",
+    "quantite": "100",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Liteaux sable",
+      "quantite": "100",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "liteau",
+      "donnees": {
+       "produit": "liteau-sapin-27x40"
+      },
+      "attend": [
+       "recouvrement_canal"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Tuiles de rive (Rives scellées au ciment)",
+    "quantite": "20",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bardelis",
+      "quantite": "20",
+      "unite": "m",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "rive",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

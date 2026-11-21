@@ -1,0 +1,59 @@
+/**
+ * Textes courts pour l'écran : l'artisan lit « Isolation plafond 300 mm »,
+ * pas « Fourniture isolation plafond 300mm - Fourniture de rouleaux ou
+ * flocons… ». Le texte complet du devis reste stocké et consultable.
+ */
+
+const SUPPLY_PREFIX = /^\s*(?:fourniture\s+et\s+pose|fourniture\s*&\s*pose|f\.?\s*(?:et|&)\s*p\.?|fourniture|pose)\s+(?:(?:de\s+la|du|des|de)\s+|(?:de\s+l|d)['’]\s*)?/i;
+
+export function shortName(designation: string): string {
+  // « Faîtage (Fourniture & Pose) » : la mention du devis client n'apprend rien à l'artisan.
+  let text = designation.replace(/\s*\((?:fourniture\s*(?:&|et)\s*pose|f\.?\s*(?:&|et)\s*p\.?|fourniture\s+seule|fourniture)\)/gi, "").trim();
+  const stripped = text.replace(SUPPLY_PREFIX, "");
+  if (stripped.length >= 3) text = stripped;
+  // « Isolation plafond 300mm - Fourniture de rouleaux… » : la partie avant le tiret suffit.
+  const dash = text.search(/\s[-–—]\s/);
+  if (dash >= 8) text = text.slice(0, dash);
+  // « Façonnage sortie d'extraction zinc (Ø 100 mm) Façonnage et raccordement… » : le titre et sa description collés ;
+  // le titre s'arrête à la parenthèse suivie d'une nouvelle phrase.
+  // « Tuiles chatières de ventilation Fourniture et pose de tuiles chatières… » : la mention du devis client au milieu.
+  const pose = /\s(?:fourniture\s*(?:&|et)\s*pose|fourniture\s+de|pose\s+de)\b/i.exec(text);
+  if (pose && pose.index >= 8) text = text.slice(0, pose.index);
+  const glued = text.length > 50 ? /\)\s+(?=\p{Lu})/u.exec(text) : null;
+  if (glued && glued.index >= 8) text = text.slice(0, glued.index + 1);
+  // Une parenthèse jamais refermée (cellule du devis coupée à la ligne) ne se montre pas à moitié.
+  text = text.replace(/\s*\(réf\.?[^)]*\)/gi, "").replace(/\s*\([^)]*$/, "").replace(/\s+/g, " ").trim();
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** Le doute de l'IA, sans l'étiquette « L'IA hésite : » (la carte dit déjà que c'est une question). */
+export function doubtText(message: string): string {
+  const text = message.replace(/^L['’]IA hésite\s*:\s*/i, "").trim();
+  // Le jargon de la lecture (« référentiel chargé », « aucun ouvrage ne correspond ») n'est pas pour l'artisan.
+  if (/r[ée]f[ée]rentiel|aucun ouvrage|ouvrage ne correspond/i.test(text)) return "Je ne sais pas encore calculer cet article : vérifie la ligne, elle partira telle quelle.";
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/** « 9 200 pièces » → { quantity: "9 200", unit: "pièces" } ; « 6 longueurs de 4 m » → { "6", "longueurs de 4 m" }. */
+export function parseQuantity(text: string): { quantity: string; unit: string } | null {
+  // Le nombre entier, séparateurs compris (« 30,000 », « 9 200 ») : il finit par un chiffre.
+  const m = /^(\d(?:[\d\s.,]*\d)?)\s*(.*)$/.exec(text.trim());
+  if (!m) return null;
+  return { quantity: m[1]!.trim(), unit: (m[2] ?? "").trim() };
+}
+
+/**
+ * Retour du fondateur (2026-10-12) : « 222 ml : écris 222 m ». À l'écran, un mètre linéaire se dit « m » (« 13 m à
+ * couvrir »). Seul l'affichage change ; la quantité enregistrée et le calcul gardent leur unité.
+ */
+export function enMetres(text: string): string {
+  return milliers(text.replace(/(\d)\s*ml\b/g, "$1 m").replace(/^ml$/, "m"));
+}
+
+/**
+ * Plan « finition », bloc 4 : « 1250 pièces » s'affiche « 1 250 pièces », comme tous les montants de l'app (espace fine
+ * insécable). Seul un entier écrit d'un bloc en tête est touché ; la quantité enregistrée ne change pas.
+ */
+export function milliers(text: string): string {
+  return text.replace(/^(\d{4,})(?=(?:[.,]\d+)?(?:\s|$))/, (n) => n.replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f"));
+}

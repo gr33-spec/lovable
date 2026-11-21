@@ -1,0 +1,84 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Ardoises 30×22 crochets compris",
+   "quantity": "1",
+   "unit": "forfait"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "surface",
+    "texte": "Surface du toit ?",
+    "boutons": [
+     {
+      "label": "50 m²",
+      "valeur": "50"
+     },
+     {
+      "label": "100 m²",
+      "valeur": "100"
+     },
+     {
+      "label": "150 m²",
+      "valeur": "150"
+     },
+     {
+      "label": "200 m²",
+      "valeur": "200"
+     }
+    ],
+    "unite": "m2",
+    "donnee": "surface de toiture",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Ardoises 30×22 crochets compris",
+    "quantite": "1",
+    "unite": "forfait",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture en ardoises au crochet",
+      "quantite": "1",
+      "unite": "forfait",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [
+       "surface"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "surface"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

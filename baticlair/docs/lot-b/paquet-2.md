@@ -1,0 +1,153 @@
+# Lot B, paquet 2 : électricité, plomberie, menuiserie, chauffage-ventilation
+
+Écrit par `packages/domain/test/lot-b-paquet-2.test.ts` : ce fichier change seulement si le calcul change.
+
+Pour chaque métier : le devis de test, l'écran à l'ouverture (lignes vertes, orange, grises, questions du comptoir),
+puis le PDF que lit le vendeur une fois les questions répondues (premier bouton) et chaque « C'est bon » donné.
+
+| Métier | Vertes | Orange | Grises | Questions |
+| --- | --- | --- | --- | --- |
+| Électricité | 7 | 1 | 0 | 1 |
+| Plomberie | 0 | 3 | 0 | 0 |
+| Menuiserie | 2 | 2 | 0 | 0 |
+| Chauffage, ventilation | 1 | 1 | 0 | 1 |
+
+## Électricité
+
+Devis de test :
+
+| Ligne | Désignation | Quantité |
+| --- | --- | --- |
+| 1 | Prise de courant 16A 2P+T | 18 u |
+| 2 | Point lumineux simple allumage | 9 u |
+| 3 | Point lumineux va-et-vient | 3 u |
+| 4 | Tableau électrique 3 rangées | 1 u |
+
+**À l'ouverture : 7 vertes · 1 orange · 0 grise.**
+
+Questions du comptoir :
+- Appareillage : quelle gamme (Céliane, Odace, Dooxie…) ? (Legrand Dooxie / Legrand Céliane / Schneider Odace)
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Prise 2P+T 16 A | 18 pièces | Gamme d'appareillage à préciser |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Prise 2P+T 16 A | 18 pièces | 18, ligne 1 du devis ; Gamme d'appareillage : Legrand Dooxie | chiffrable |
+| Boîte d'encastrement Ø67 prof. 40 | 30 pièces | 18 + 9 + 3, lignes 1, 2 et 3 du devis | chiffrable |
+| Câble rigide 3G2,5 | 2 couronnes de 100 m (144 m à poser) | 144 m, ligne 1 du devis | chiffrable |
+| Gaine ICTA Ø20 | 3 couronnes de 100 m (264 m à poser) | 144 + 90 + 30 m, lignes 1, 2 et 3 du devis | chiffrable |
+| Interrupteur simple allumage | 12 pièces | 9 + 3, lignes 2 et 3 du devis | chiffrable |
+| Boîte DCL plafond avec douille | 12 pièces | 9 + 3, lignes 2 et 3 du devis | chiffrable |
+| Câble rigide 3G1,5 | 2 couronnes de 100 m (120 m à poser) | 90 + 30 m, lignes 2 et 3 du devis | chiffrable |
+| Tableau électrique 3 rangées de 13 modules, nu | 1 pièce |  | chiffrable |
+
+## Plomberie
+
+Devis de test :
+
+| Ligne | Désignation | Quantité |
+| --- | --- | --- |
+| 1 | Alimentation EF/EC en multicouche depuis nourrices, salle de bains et cuisine | 6 u |
+| 2 | Évacuations PVC Ø40 des appareils | 5 u |
+| 3 | Plancher chauffant hydraulique rez-de-chaussée | 85 m² |
+
+**À l'ouverture : 0 verte · 3 orange · 0 grise.**
+
+Questions du comptoir : aucune.
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Multicouche 16×2, barre 4 m | 19 barres de 4 m | Valeur par défaut à confirmer |
+| Tube d'alimentation PVC évacuation Ø40, barre 4 m | 5 barres de 4 m | Valeur par défaut à confirmer |
+| PER-BAO 16×2, couronne 240 m | 3 couronnes de 240 m | Quantité à confirmer |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Multicouche 16×2, barre 4 m | 19 barres de 4 m (75,6 m à couvrir) |  | chiffrable |
+| Tube d'alimentation PVC évacuation Ø40, barre 4 m | 5 barres de 4 m (19,25 m à couvrir) |  | chiffrable |
+| PER-BAO 16×2, couronne 240 m | 3 couronnes de 240 m (569,5 m à couvrir) |  | chiffrable |
+
+## Menuiserie
+
+Devis de test :
+
+| Ligne | Désignation | Quantité |
+| --- | --- | --- |
+| 1 | Fenêtre PVC 2 vantaux 120x125 blanc, pose en rénovation | 4 u |
+| 2 | Porte-fenêtre PVC 2 vantaux 215x140 oscillo-battante | 1 u |
+| 3 | Parquet flottant stratifié chêne naturel | 38 m² |
+| 4 | Plinthes MDF blanches | 32 ml |
+
+**À l'ouverture : 2 vertes · 2 orange · 0 grise.**
+
+Questions du comptoir : aucune.
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Stratifié, paquet 1,914 m² | 22 paquets de 1,914 m² | Quantité à confirmer |
+| Plinthes MDF 10×70, barre 2,40 m | 15 barres | Quantité à confirmer |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Fenêtre PVC 2 vantaux 120x125 blanc, pose en rénovation | 4 pièces |  | chiffrable |
+| Porte-fenêtre PVC 2 vantaux 215x140 oscillo-battante | 1 pièce |  | chiffrable |
+| Stratifié, paquet 1,914 m² | 22 paquets de 1,914 m² | paquets entiers, même lot | chiffrable |
+| Plinthes MDF 10×70, barre 2,40 m | 15 barres |  | chiffrable |
+
+## Chauffage, ventilation
+
+Devis de test :
+
+| Ligne | Désignation | Quantité |
+| --- | --- | --- |
+| 1 | VMC simple flux hygroréglable, cuisine + 2 sanitaires | 1 u |
+| 2 | Climatiseur mural monosplit 3,5 kW Daikin Perfera | 2 u |
+
+**À l'ouverture : 1 verte · 1 orange · 0 grise.**
+
+Questions du comptoir :
+- VMC : autoréglable, hygro A ou hygro B ? (Hygro B / Hygro A / Autoréglable)
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Kit VMC simple flux cuisine + 2 sanitaires | 1 pièce | Vmc à préciser |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Kit VMC simple flux hygroréglable B, cuisine + 2 sanitaires | 1 pièce |  | chiffrable |
+| Climatiseur mural monosplit 3,5 kW Daikin Perfera | 2 pièces |  | chiffrable |
+
+## Le tableau de Brest (couverture), inchangé
+
+**À l'ouverture : 1 verte · 3 orange · 0 grise.**
+
+Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
+- Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
+- Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
+| Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
+

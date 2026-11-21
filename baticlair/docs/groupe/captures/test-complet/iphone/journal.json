@@ -1,0 +1,326 @@
+{
+  "appareil": "iphone",
+  "date": "2026-10-21T13:35:13.440Z",
+  "etapes": [
+    {
+      "n": 1,
+      "etape": "Landing déconnecté, premier lancement",
+      "statut": "ok",
+      "detail": "Tes devis deviennent tes bons de commande.",
+      "capture": "01-landing-deconnecte-premier-lancement.jpg",
+      "ms": 575
+    },
+    {
+      "n": 2,
+      "etape": "Démo guidée : écran 1",
+      "statut": "ok",
+      "detail": "",
+      "capture": "02-demo-guidee-ecran-1.jpg",
+      "ms": 89
+    },
+    {
+      "n": 3,
+      "etape": "Démo guidée : écran 2",
+      "statut": "ok",
+      "detail": "",
+      "capture": "03-demo-guidee-ecran-2.jpg",
+      "ms": 170
+    },
+    {
+      "n": 4,
+      "etape": "Démo guidée : écran 3, puis Passer",
+      "statut": "ok",
+      "detail": "",
+      "capture": "04-demo-guidee-ecran-3-puis-passer.jpg",
+      "ms": 433
+    },
+    {
+      "n": 5,
+      "etape": "Landing : sections, liens, pied de page",
+      "statut": "ok",
+      "detail": "",
+      "capture": "05-landing-sections-liens-pied-de-page.jpg",
+      "ms": 510
+    },
+    {
+      "n": 6,
+      "etape": "Pages légales depuis la landing",
+      "statut": "ok",
+      "detail": "Mentions légales, CGU, Conditions négoce, Confidentialité",
+      "capture": "06-pages-legales-depuis-la-landing.jpg",
+      "ms": 1288
+    },
+    {
+      "n": 7,
+      "etape": "Créer un compte : formulaire, 19 autres métiers, CGU obligatoire",
+      "statut": "ok",
+      "detail": "",
+      "capture": "07-creer-un-compte-formulaire-19-autres-met.jpg",
+      "ms": 2213
+    },
+    {
+      "n": 8,
+      "etape": "Accueil après inscription",
+      "statut": "ok",
+      "detail": "",
+      "capture": "08-accueil-apres-inscription.jpg",
+      "ms": 82
+    },
+    {
+      "n": 9,
+      "etape": "PWA : manifeste, icônes, « Ajouter à l'écran d'accueil »",
+      "statut": "ok",
+      "detail": "aide d'installation vue puis fermée",
+      "capture": "09-pwa-manifeste-icones-ajouter-a-l-ecran-d.jpg",
+      "ms": 269
+    },
+    {
+      "n": 10,
+      "etape": "Compte : adresse et SIRET enregistrés",
+      "statut": "ok",
+      "detail": "",
+      "capture": "10-compte-adresse-et-siret-enregistres.jpg",
+      "ms": 536
+    },
+    {
+      "n": 11,
+      "etape": "Groupé : « Vérifier mon SIRET »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "11-groupe-verifier-mon-siret.jpg",
+      "ms": 983
+    },
+    {
+      "n": 12,
+      "etape": "Nouveau chantier depuis le + : dépôt du devis (lecture rejouée)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "12-nouveau-chantier-depuis-le-depot-du-devi.jpg",
+      "ms": 1896
+    },
+    {
+      "n": 13,
+      "etape": "Questions de comptoir",
+      "statut": "ok",
+      "detail": "3 question(s) posée(s)",
+      "capture": "13-questions-de-comptoir.jpg",
+      "ms": 2321
+    },
+    {
+      "n": 14,
+      "etape": "Ton chantier : la liste, lignes orange réglées",
+      "statut": "ok",
+      "detail": "2 ligne(s) orange réglée(s)",
+      "capture": "14-ton-chantier-la-liste-lignes-orange-regl.jpg",
+      "ms": 1505
+    },
+    {
+      "n": 15,
+      "etape": "Aide « ? » sur Ton chantier",
+      "statut": "ok",
+      "detail": "",
+      "capture": "15-aide-sur-ton-chantier.jpg",
+      "ms": 227
+    },
+    {
+      "n": 16,
+      "etape": "Envoi aux négoces : « À qui j'envoie ? », ajout d'un fournisseur",
+      "statut": "ok",
+      "detail": "e-mail : « Demande de devis · Couverture Le Goff », pièces : demande-de-devis-nouveau-chantier.pdf",
+      "capture": "16-envoi-aux-negoces-a-qui-j-envoie-ajout-d.jpg",
+      "ms": 834
+    },
+    {
+      "n": 17,
+      "etape": "Proposer au groupé (chantier signé)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "17-proposer-au-groupe-chantier-signe.jpg",
+      "ms": 1050
+    },
+    {
+      "n": 18,
+      "etape": "Second chantier : proposer en « devis en attente »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "18-second-chantier-proposer-en-devis-en-att.jpg",
+      "ms": 3986
+    },
+    {
+      "n": 19,
+      "etape": "Mes négoces : ajout par suggestion Sirene, favori",
+      "statut": "ok",
+      "detail": "POINT P PAIMPOL Compte C-12 ardoises@example.com · 22 · Couverture Retirer de ma liste",
+      "capture": "19-mes-negoces-ajout-par-suggestion-sirene-.jpg",
+      "ms": 1007
+    },
+    {
+      "n": 20,
+      "etape": "Mes négoces : second négoce (généraliste), message type",
+      "statut": "ok",
+      "detail": "",
+      "capture": "20-mes-negoces-second-negoce-generaliste-me.jpg",
+      "ms": 1038
+    },
+    {
+      "n": 21,
+      "etape": "Aide « ? » sur Tes négoces, Le groupé, Ton compte, Tes chantiers",
+      "statut": "ok",
+      "detail": "",
+      "capture": "21-aide-sur-tes-negoces-le-groupe-ton-compt.jpg",
+      "ms": 1628
+    },
+    {
+      "n": 22,
+      "etape": "Groupé : les trois étapes cochées, « Mes lots »",
+      "statut": "ok",
+      "detail": "Tuile romane canal rouge 12,5 u/m² 1 250 pièces Nouveau chantier Lot n° 76 · Lot ouvert, en attente d'autres artisans · devis en attente, sans engagement Tuile romane canal rouge 12,5 u/m² 1 250 pièces Nouveau chantier Lot n° 76 · Lot ouver",
+      "capture": "22-groupe-les-trois-etapes-cochees-mes-lots.jpg",
+      "ms": 332
+    },
+    {
+      "n": 23,
+      "etape": "Artisan B : compte, SIRET, devis, proposition signée",
+      "statut": "ok",
+      "detail": "",
+      "capture": "23-artisan-b-compte-siret-devis-proposition.jpg",
+      "ms": 5551
+    },
+    {
+      "n": 24,
+      "etape": "Formation du lot : e-mail « Regroupement artisans » aux deux négoces",
+      "statut": "ok",
+      "detail": "objet : Regroupement artisans : demande de prix, Tuile romane canal rouge 12,5 u/m² (22) ; pièces : demande-de-prix-regroupement-artisans.pdf",
+      "capture": "24-formation-du-lot-e-mail-regroupement-art.jpg",
+      "ms": 324
+    },
+    {
+      "n": 25,
+      "etape": "Notification artisan : « lot parti »",
+      "statut": "ok",
+      "detail": "Groupé : Le groupé est parti chez 2 négoces. Réponses attendues sous 7 jours. : Le groupé est parti chez 2 négoces. Réponses attendues sous 7 jours.\n\nBatiClair",
+      "capture": "25-notification-artisan-lot-parti.jpg",
+      "ms": 82
+    },
+    {
+      "n": 26,
+      "etape": "Négoce 1 : réponse par e-mail, lien, page de dépôt, case 2 %, offre",
+      "statut": "ok",
+      "detail": "3 chantiers à livrer sur la page",
+      "capture": "26-negoce-1-reponse-par-e-mail-lien-page-de.jpg",
+      "ms": 841
+    },
+    {
+      "n": 27,
+      "etape": "Négoce 2 : seconde offre",
+      "statut": "ok",
+      "detail": "3 chantiers à livrer sur la page",
+      "capture": "27-negoce-2-seconde-offre.jpg",
+      "ms": 772
+    },
+    {
+      "n": 28,
+      "etape": "Négoce retenu, offre de A",
+      "statut": "ok",
+      "detail": "Tuile romane canal rouge 12,5 u/m² 1 250 pièces Nouveau chantier En attente du prochain lot · devis en attente, sans engagement Tuile romane canal rouge 12,5 u/m² 1 250 pièces Nouveau chantier Lot n° 76 · Négoce retenu 1,02 € HT l'unité che",
+      "capture": "28-negoce-retenu-offre-de-a.jpg",
+      "ms": 367
+    },
+    {
+      "n": 29,
+      "etape": "Bons de commande et facture chez le négoce retenu, copie à l'artisan",
+      "statut": "ok",
+      "detail": "bon : « Tarif groupé lot n° 76 : 2 bons de commande » (3 PDF) ; facture : « Facture n° 34, commission d'apporteur d'affaires, lot n° 76 » ; artisan : « Ton bon de commande, tarif groupé lot n° 76 »",
+      "capture": "29-bons-de-commande-et-facture-chez-le-nego.jpg",
+      "ms": 100
+    },
+    {
+      "n": 30,
+      "etape": "Sur le chantier : « Mon offre », prix habituel, « Voir mon économie », « Problème »",
+      "statut": "ok",
+      "detail": " Ton prix habituel chez ton négoce (€ HT l'unité) Voir mon économie Problème",
+      "capture": "30-sur-le-chantier-mon-offre-prix-habituel-.jpg",
+      "ms": 1121
+    },
+    {
+      "n": 31,
+      "etape": "Mes lots : « Livré »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "31-mes-lots-livre.jpg",
+      "ms": 503
+    },
+    {
+      "n": 32,
+      "etape": "Artisan B : désistement (premier : avertissement)",
+      "statut": "ok",
+      "detail": "négoce prévenu : « Tarif groupé lot n° 76 : 2 bons de commande » ; artisan averti : « Groupé : désistement enregistré, avertissement »",
+      "capture": "32-artisan-b-desistement-premier-avertissem.jpg",
+      "ms": 745
+    },
+    {
+      "n": 33,
+      "etape": "Compte : « Économisé grâce au groupé »",
+      "statut": "ok",
+      "detail": "Économisé grâce au groupé 100,00 € 1 commande groupée",
+      "capture": "33-compte-economise-grace-au-groupe.jpg",
+      "ms": 429
+    },
+    {
+      "n": 34,
+      "etape": "Admin : compte Greg, lien « Admin groupé », lots et journal",
+      "statut": "ok",
+      "detail": "Chargement…",
+      "capture": "34-admin-compte-greg-lien-admin-groupe-lots.jpg",
+      "ms": 1718
+    },
+    {
+      "n": 35,
+      "etape": "Admin : rubrique Négoces",
+      "statut": "ok",
+      "detail": "Admin groupé Départements ouverts : tous · 22 : 1 lot, 100,00 € économisés · devis négoces sur 30 jours : 2 lus, 0 à vérifier, 0 en échec Lots Négoces Accords Factures Exclusions Négoce Généraliste · ",
+      "capture": "35-admin-rubrique-negoces.jpg",
+      "ms": 735
+    },
+    {
+      "n": 36,
+      "etape": "Admin : rubrique Accords",
+      "statut": "ok",
+      "detail": "Admin groupé Départements ouverts : tous · 22 : 1 lot, 100,00 € économisés · devis négoces sur 30 jours : 2 lus, 0 à vérifier, 0 en échec Lots Négoces Accords Factures Exclusions Lot n° 76 · Négoce Gé",
+      "capture": "36-admin-rubrique-accords.jpg",
+      "ms": 729
+    },
+    {
+      "n": 37,
+      "etape": "Admin : rubrique Factures",
+      "statut": "ok",
+      "detail": "2 ligne(s) de facture",
+      "capture": "37-admin-rubrique-factures.jpg",
+      "ms": 783
+    },
+    {
+      "n": 38,
+      "etape": "Admin : rubrique Exclusions",
+      "statut": "ok",
+      "detail": "Admin groupé Départements ouverts : tous · 22 : 1 lot, 100,00 € économisés · devis négoces sur 30 jours : 2 lus, 0 à vérifier, 0 en échec Lots Négoces Accords Factures Exclusions 2026-10-21 · Toitures",
+      "capture": "38-admin-rubrique-exclusions.jpg",
+      "ms": 727
+    },
+    {
+      "n": 39,
+      "etape": "Rapport mensuel du 1er : e-mail à l'artisan",
+      "statut": "ok",
+      "detail": "Ton mois d'octobre 2026 avec BatiClair : 2 chantiers lus, 100 € économisés, 1 lot",
+      "capture": "39-rapport-mensuel-du-1er-e-mail-a-l-artisa.jpg",
+      "ms": 97
+    },
+    {
+      "n": 40,
+      "etape": "Déconnexion puis reconnexion",
+      "statut": "ok",
+      "detail": "",
+      "capture": "40-deconnexion-puis-reconnexion.jpg",
+      "ms": 842
+    }
+  ]
+}

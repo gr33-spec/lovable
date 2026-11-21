@@ -1,0 +1,44 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bande de plomb largeur 50 cm ép. 2 mm",
+   "quantity": "12",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bande de plomb largeur 50 cm ép. 2 mm",
+    "quantite": "12",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Plomb laminé 2 mm, rouleau largeur 50 cm × 6 m",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": "bandes-plomb",
+      "emplacement": "plomb",
+      "donnees": {
+       "largeur_plomb": "50 cm",
+       "epaisseur_plomb": "2 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

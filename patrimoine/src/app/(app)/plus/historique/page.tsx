@@ -32,7 +32,7 @@ export default function HistoriquePage() {
               {gains.known > 0 && (
                 <div className="mt-1 text-[13px] text-white/60">
                   {gains.gainPct !== undefined && `${gains.gainPct >= 0 ? "+" : ""}${pct(gains.gainPct)} sur ${eurCompact(gains.purchase)} d'achat`}
-                  {gains.missing > 0 && ` · ${gains.missing} immeuble(s) non comptés (prix d'achat ou valeur manquant)`}
+                  {gains.missing > 0 && ` · ${gains.missing} bien(s) non comptés (prix d'achat ou valeur manquant)`}
                 </div>
               )}
             </div>

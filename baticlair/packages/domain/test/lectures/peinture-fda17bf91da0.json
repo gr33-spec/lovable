@@ -1,0 +1,67 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Peinture murs séjour, 2 couches",
+   "quantity": "85",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "aspect",
+    "texte": "Quelle finition : mat, velours ou satin ?",
+    "boutons": [
+     {
+      "label": "Mat",
+      "valeur": "1"
+     },
+     {
+      "label": "Velours",
+      "valeur": "2"
+     },
+     {
+      "label": "Satin",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "finition",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Peinture murs séjour, 2 couches",
+    "quantite": "85",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Peinture murs et plafonds",
+      "quantite": "85",
+      "unite": "m²",
+      "ouvrage": "peinture-murs-plafonds",
+      "emplacement": "murs",
+      "donnees": {
+       "couches": "2"
+      },
+      "attend": [
+       "aspect"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

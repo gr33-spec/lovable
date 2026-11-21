@@ -1,0 +1,331 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture zinc joint debout gris quartz",
+   "quantity": "91",
+   "unit": "m2"
+  },
+  {
+   "ref": "2",
+   "designation": "Voliges sapin 18 mm traité",
+   "quantity": "96",
+   "unit": "m2"
+  },
+  {
+   "ref": "3",
+   "designation": "Gouttière zinc demi-ronde dév. 25",
+   "quantity": "13",
+   "unit": "ml"
+  },
+  {
+   "ref": "4",
+   "designation": "Bande de ventilation en Z en zinc quartz",
+   "quantity": "13",
+   "unit": "ml"
+  },
+  {
+   "ref": "5",
+   "designation": "Bande de rive zinc quartz dév. 200",
+   "quantity": "14",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "surface",
+    "texte": "Surface du toit ?",
+    "boutons": [
+     {
+      "label": "50 m²",
+      "valeur": "50"
+     },
+     {
+      "label": "100 m²",
+      "valeur": "100"
+     },
+     {
+      "label": "150 m²",
+      "valeur": "150"
+     },
+     {
+      "label": "200 m²",
+      "valeur": "200"
+     }
+    ],
+    "unite": "m2",
+    "donnee": "surface de toiture",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Bande de ventilation en Z en zinc quartz : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "4"
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Bande de rive zinc quartz dév. 200 : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "5"
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Couverture zinc à joint debout : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (bobines)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné (bacs)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": "1"
+   },
+   {
+    "cle": "developpe",
+    "texte": "Bande de ventilation en Z en zinc quartz : développé de la bande zinc ?",
+    "boutons": [
+     {
+      "label": "100 mm (solin, couvre-joint)",
+      "valeur": "100"
+     },
+     {
+      "label": "200 mm",
+      "valeur": "200"
+     },
+     {
+      "label": "250 mm",
+      "valeur": "250"
+     },
+     {
+      "label": "330 mm",
+      "valeur": "330"
+     },
+     {
+      "label": "400 mm",
+      "valeur": "400"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "développé de la bande",
+    "ligne": "4"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture zinc joint debout gris quartz",
+    "quantite": "91",
+    "unite": "m2",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture zinc à joint debout gris",
+      "quantite": "91",
+      "unite": "m2",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "couverture",
+      "donnees": {
+       "aspect_zinc": "2"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Voliges sapin 18 mm traité",
+    "quantite": "96",
+    "unite": "m2",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Voliges sapin traité",
+      "quantite": "96",
+      "unite": "m2",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "volige",
+      "donnees": {},
+      "attend": [
+       "surface"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Gouttière zinc demi-ronde dév. 25",
+    "quantite": "13",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde dév. 25",
+      "quantite": "13",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "developpe_gouttiere": "25 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Bande de ventilation en Z en zinc quartz",
+    "quantite": "13",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande de ventilation en Z en zinc quartz",
+      "quantite": "13",
+      "unite": "ml",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "aspect_zinc": "2"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Bande de rive zinc quartz dév. 200",
+    "quantite": "14",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande de rive zinc quartz dév. 200",
+      "quantite": "14",
+      "unite": "ml",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "developpe": "200 mm",
+       "aspect_zinc": "2"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

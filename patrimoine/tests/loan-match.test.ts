@@ -45,7 +45,7 @@ const C = { rows: table(210_000, 2023, 10, 3.9, 300), meta: { borrower: "S.C.I. 
 /** Import comme le fait l'écran : rapprochement puis rangement. */
 function importTable(d: AppData, facts: typeof A, fileId: string) {
   const m = matchLoan(d, facts, {}, NOW);
-  const r = fileDocument(d, { fileId, name: `${fileId}.pdf`, category: "tableau_amortissement", companyId: m.companyId, buildingId: m.buildingId, scheduleRows: facts.rows, scheduleMeta: facts.meta, loanPlan: m.plan }, NOW);
+  const r = fileDocument(d, { fileId, name: `${fileId}.pdf`, category: "tableau_amortissement", companyId: m.companyId, buildingId: m.buildingId, scheduleRows: facts.rows, scheduleMeta: facts.meta, loanPlan: m.plan });
   const next = applyOps(d, [...r.ops.map((o) => ({ op: "upsert" as const, coll: o.coll, item: o.item as never })), ...r.removes.map((x) => ({ op: "delete" as const, coll: x.coll, id: x.id }))]);
   return { m, r, next };
 }
@@ -153,7 +153,7 @@ test("remplacement d'un tableau : l'ancien reste une pièce du prêt, une pièce
   const d = base();
   d.loans = [{ id: "x", buildingId: "paimpol", schedule: { rows: table(145_000, 2021, 3, 1.7, 240), fileId: "old", fileName: "ancien.pdf", importedAt: "2024-01-01", source: "ia" } }];
   d.documents = [{ id: "loose", fileId: "new", name: "nouveau.pdf", category: "tableau_amortissement", companyId: "tregor", addedAt: "2026-09-01", source: "ia" }];
-  const r = fileDocument(d, { fileId: "new", name: "nouveau.pdf", category: "tableau_amortissement", scheduleRows: A.rows, scheduleMeta: A.meta, loanPlan: { kind: "existing", loanId: "x" } }, NOW);
+  const r = fileDocument(d, { fileId: "new", name: "nouveau.pdf", category: "tableau_amortissement", scheduleRows: A.rows, scheduleMeta: A.meta, loanPlan: { kind: "existing", loanId: "x" } });
   const loan = r.ops.find((o) => o.coll === "loans")!.item as AppData["loans"][number];
   assert.equal(loan.schedule!.fileId, "new");
   const archive = r.ops.find((o) => o.coll === "documents")!.item as AppData["documents"][number];

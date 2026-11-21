@@ -1,0 +1,2012 @@
+/*
+ * MA PAGE MOBIIZ (refonte du 16 novembre 2026) : le site vitrine d'une page d'un artisan. Les jetons de la landing de
+ * Mobiiz (`app/(public)/decouvrir/premium.css`) : ivoire #FBF8F3, encre #15120E, jaune #FED206, titres très gras et serrés,
+ * boutons en pilule de 56 à 64 px. Fond clair seulement. Rayons : pilule pour ce qui se touche, 20 px pour les photos,
+ * 14 px pour les champs. Ni cadre, ni carte, ni bordure autour des rubriques : de l'espace et de vraies photos.
+ * Mise en page par requêtes de CONTENEUR (`@container pe`) : l'aperçu de l'éditeur se dessine comme le vrai écran.
+ */
+.pe {
+  --ivoire: #fbf8f3;
+  --os: #efeae2;
+  --encre: #15120e;
+  --doux: #5e554a;
+  --clair: #c4bdb4;
+  --jaune: #fed206;
+  --jaune2: #ffe151;
+  --trait: rgba(21, 18, 14, 0.12);
+  --entete: 68px;
+  container: pe / inline-size;
+  position: relative;
+  min-height: 100%;
+  background: var(--ivoire);
+  color: var(--encre);
+  font: 400 17px/1.6 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+.pe *,
+.pe *::before,
+.pe *::after {
+  box-sizing: border-box;
+}
+.pe a {
+  color: inherit;
+  text-decoration: none;
+}
+.pe h1,
+.pe h2,
+.pe h3,
+.pe p,
+.pe ul,
+.pe figure {
+  margin: 0;
+}
+.pe ul {
+  padding: 0;
+  list-style: none;
+}
+.pe img {
+  display: block;
+  max-width: 100%;
+}
+.pe :focus-visible {
+  outline: 3px solid var(--jaune);
+  outline-offset: 3px;
+}
+.pe section[id] {
+  scroll-margin-top: var(--entete);
+}
+.pe-cadre {
+  width: min(1180px, calc(100% - 40px));
+  margin-inline: auto;
+}
+.pe h2 {
+  font-size: clamp(34px, 7cqi, 58px);
+  font-weight: 870;
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+  margin-bottom: 36px;
+}
+
+/* ------------------------------------------------------------------------------------------------ Boutons */
+.pe-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  font-size: 16px;
+  font-weight: 850;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.pe-btn:hover {
+  transform: translateY(-2px);
+}
+.pe-btn:active {
+  transform: scale(0.98);
+}
+.pe-btn-appel {
+  background: var(--jaune);
+  color: var(--encre) !important;
+  box-shadow: 0 12px 30px rgba(254, 210, 6, 0.24);
+}
+.pe-btn-appel:hover {
+  background: var(--jaune2);
+}
+.pe-btn-second {
+  border-color: var(--encre);
+  color: var(--encre);
+}
+.pe-btn-grand {
+  min-height: 64px;
+  padding: 0 32px;
+  font-size: 19px;
+}
+.pe-btn[disabled] {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------------------------------------ Barre du haut */
+.pe-entete {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(251, 248, 243, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--trait);
+}
+.pe-entete-ligne {
+  height: var(--entete);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pe-marque {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.pe-logo,
+.pe-initiales {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 11px;
+}
+.pe-logo {
+  object-fit: contain;
+  background: #fff;
+}
+.pe-initiales {
+  display: grid;
+  place-items: center;
+  background: var(--pe-teinte);
+  color: #fff;
+  font-weight: 850;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+.pe-marque-nom {
+  font-weight: 850;
+  font-size: 17px;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pe-nav {
+  display: none;
+}
+.pe-entete-appel {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 15px;
+  gap: 8px;
+  box-shadow: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.pe-entete-appel-long {
+  display: none;
+}
+.pe[data-defile] .pe-entete-appel {
+  opacity: 0;
+  pointer-events: none;
+}
+.pe-menu-bouton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--trait);
+  background: transparent;
+  color: var(--encre);
+  cursor: pointer;
+}
+.pe-menu-tel {
+  display: grid;
+  padding: 8px 20px 20px;
+  background: var(--ivoire);
+  border-bottom: 1px solid var(--trait);
+}
+.pe-menu-tel a {
+  padding: 14px 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* ------------------------------------------------------------------------------------------------ Accueil */
+.pe-accueil {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  padding: 72px 0 48px;
+}
+.pe-avec-photo .pe-accueil {
+  min-height: max(560px, min(calc(100svh - var(--entete)), 880px));
+  color: #fff;
+}
+.pe-accueil-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #2a2520;
+}
+.pe-accueil-photo picture,
+.pe-accueil-photo img {
+  width: 100%;
+  height: 100%;
+}
+.pe-accueil-photo img {
+  object-fit: cover;
+}
+.pe-accueil-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12, 10, 8, 0.82) 0%, rgba(12, 10, 8, 0.45) 42%, rgba(12, 10, 8, 0.08) 78%);
+}
+.pe-accueil h1 {
+  font-size: clamp(44px, 13cqi, 104px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+  max-width: 13ch;
+  text-wrap: balance;
+}
+.pe-accueil-nom {
+  margin-top: 16px;
+  font-size: clamp(20px, 3.4cqi, 26px);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+.pe-preuves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.pe-preuves li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.pe-preuves svg {
+  color: var(--jaune);
+}
+.pe:not(.pe-avec-photo) .pe-preuves svg {
+  color: var(--pe-teinte);
+}
+.pe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+.pe-avec-photo .pe-accueil .pe-btn-second {
+  border-color: rgba(255, 255, 255, 0.85);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+/* ------------------------------------------------------------------------------------------------ Rubriques */
+.pe-section {
+  padding: 80px 0;
+}
+.pe-section-os {
+  background: var(--os);
+}
+.pe-prestations {
+  display: grid;
+  gap: 36px 48px;
+}
+.pe-prestations li::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pe-teinte);
+  margin-bottom: 18px;
+}
+.pe-prestations h3 {
+  font-size: 23px;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+}
+.pe-prestations p {
+  margin-top: 10px;
+  color: var(--doux);
+  max-width: 38ch;
+}
+
+.pe-chantiers {
+  display: grid;
+  gap: 20px;
+}
+.pe-chantier {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #2a2520;
+  cursor: zoom-in;
+  text-align: left;
+  font: inherit;
+  color: #fff;
+}
+.pe-chantier img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pe-chantier:hover img {
+  transform: scale(1.03);
+}
+.pe-chantier-legende {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 72px 22px 20px;
+  background: linear-gradient(to top, rgba(12, 10, 8, 0.78), rgba(12, 10, 8, 0));
+}
+.pe-chantier-titre {
+  font-size: clamp(20px, 3.6cqi, 26px);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.pe-chantier-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 750;
+  opacity: 0.92;
+}
+
+.pe-apropos {
+  display: grid;
+  gap: 36px;
+}
+.pe-apropos-image img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  border-radius: 20px;
+}
+.pe-apropos-texte {
+  max-width: 680px;
+}
+.pe-chapeau {
+  font-size: clamp(22px, 3.6cqi, 28px);
+  font-weight: 750;
+  line-height: 1.3;
+  letter-spacing: -0.03em;
+  margin-bottom: 18px !important;
+}
+.pe-texte {
+  color: var(--doux);
+  font-size: 18px;
+  line-height: 1.7;
+}
+.pe-texte + .pe-texte {
+  margin-top: 14px;
+}
+.pe-qualifs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 26px;
+  margin-top: 28px;
+  font-weight: 750;
+}
+.pe-qualifs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.pe-qualifs svg {
+  color: var(--pe-teinte);
+}
+.pe-note {
+  margin-top: 14px !important;
+  font-size: 14px;
+  color: var(--doux);
+}
+
+.pe-zone {
+  padding-top: 0;
+}
+.pe-zone h2 {
+  margin-bottom: 20px;
+}
+.pe-zone-ville {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: clamp(24px, 4.4cqi, 34px);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+}
+.pe-zone-ville svg {
+  flex-shrink: 0;
+  color: var(--pe-teinte);
+}
+.pe-zone .pe-texte {
+  margin-top: 10px;
+}
+
+/* ------------------------------------------------------------------------------------------------ Contact */
+.pe-contact {
+  background: var(--encre);
+  color: var(--ivoire);
+  padding: 80px 0;
+}
+.pe-contact-grille {
+  display: grid;
+  gap: 44px;
+}
+.pe-contact h2 {
+  color: var(--ivoire);
+  margin-bottom: 16px;
+}
+.pe-contact-intro {
+  color: var(--clair);
+  font-size: 19px;
+  margin-bottom: 28px !important;
+}
+.pe-contact-ligne {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 22px !important;
+  color: var(--clair);
+}
+.pe-contact-ligne svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--jaune);
+}
+.pe-contact-ligne a {
+  color: var(--jaune);
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pe-form {
+  display: grid;
+  gap: 16px;
+}
+.pe-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 750;
+}
+.pe-form input,
+.pe-form textarea,
+.pe-signaler textarea {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+  background: var(--ivoire);
+  color: var(--encre);
+  font: inherit;
+  font-size: 16px;
+}
+.pe-form input:focus,
+.pe-form textarea:focus {
+  outline: none;
+  border-color: var(--jaune);
+  box-shadow: 0 0 0 3px rgba(254, 210, 6, 0.35);
+}
+.pe-form textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+.pe-form-deux {
+  display: grid;
+  gap: 16px;
+}
+.pe-form .pe-btn {
+  justify-self: start;
+  background: var(--ivoire);
+  color: var(--encre) !important;
+}
+.pe-form .pe-note {
+  color: var(--clair);
+}
+.pe-form .pe-note a {
+  text-decoration: underline;
+}
+.pe-erreur {
+  color: #ffb4a8;
+  font-weight: 700;
+}
+.pe-merci {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--jaune);
+}
+
+/* ------------------------------------------------------------------------------------------------ Pied de page */
+.pe-pied {
+  padding: 48px 0 calc(48px + 76px);
+  font-size: 15px;
+  color: var(--doux);
+}
+.pe-pied-grille {
+  display: grid;
+  gap: 24px;
+}
+.pe-pied-nom {
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: var(--encre);
+  margin-bottom: 4px !important;
+}
+.pe-pied-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-weight: 750;
+  color: var(--encre);
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+.pe-pied-droite {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.pe-mentions summary,
+.pe-signaler summary {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  font-weight: 700;
+}
+.pe-mentions p {
+  max-width: 560px;
+  margin-top: 8px !important;
+  font-size: 14px;
+}
+.pe-mentions a {
+  text-decoration: underline;
+}
+.pe-signaler form {
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+  margin-top: 10px;
+  color: var(--encre);
+}
+.pe-signaler fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.pe-signaler textarea {
+  border-color: var(--trait);
+  background: #fff;
+}
+.pe-signaler .pe-btn {
+  justify-self: start;
+  min-height: 46px;
+  border-color: var(--encre);
+}
+.pe-signaler .pe-erreur {
+  color: #b42318;
+}
+.pe-radio {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.pe-mobiiz {
+  font-size: 13px;
+  color: var(--doux);
+}
+
+/* Le bouton « Appeler » collé en bas sur téléphone, une fois l'accueil passé ; caché tant que l'accueil est à l'écran.
+   RÈGLE CHANGÉE (Greg, 18 novembre 2026 : dans l'aperçu, la barre flottait au milieu de la page) : avant, `position:
+   fixed`, qui suivait le défilement dans le cadre du téléphone de l'aperçu ; maintenant `sticky` en bas du cadre qui
+   défile (l'écran sur la vraie page, le téléphone dans l'aperçu). Dernier élément de la page, elle garde sa place en bas
+   du pied de page, qu'elle ne recouvre jamais. */
+.pe-barre-appel {
+  position: sticky;
+  bottom: 0;
+  z-index: 25;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: rgba(251, 248, 243, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--trait);
+  transform: translateY(110%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Éditeur sur téléphone, un réglage ouvert : le petit aperçu montre la partie réglée, pas la barre d'appel. */
+[data-reglage] .pe-barre-appel {
+  display: none !important;
+}
+.pe[data-defile] .pe-barre-appel {
+  transform: none;
+}
+.pe-barre-appel .pe-btn {
+  width: 100%;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------------------------------------ Visionneuse */
+.pe-visionneuse {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(12, 10, 8, 0.97);
+  color: #fff;
+}
+.pe-visionneuse-haut,
+.pe-visionneuse-bas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+}
+.pe-visionneuse-haut p {
+  font-weight: 800;
+  font-size: 18px;
+}
+.pe-visionneuse-bas {
+  justify-content: center;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.pe-visionneuse-bande {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.pe-visionneuse-bande figure {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 0 12px;
+}
+.pe-visionneuse-bande picture,
+.pe-visionneuse-bande img {
+  max-height: calc(100dvh - 170px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.pe-visionneuse-bande figcaption {
+  color: var(--clair);
+  font-size: 15px;
+}
+.pe-rond {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------------------------------------ Tablette et ordinateur */
+@container pe (min-width: 640px) {
+  .pe-prestations {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pe-form-deux {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@container pe (min-width: 760px) {
+  .pe-chantiers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+  .pe-pied-grille {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+  .pe-pied-droite {
+    justify-items: end;
+    text-align: right;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe {
+    --entete: 76px;
+  }
+  .pe-cadre {
+    width: min(1180px, calc(100% - 96px));
+  }
+  .pe-nav {
+    display: flex;
+    gap: 30px;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pe-nav a:hover {
+    color: var(--doux);
+  }
+  .pe-entete-ligne {
+    gap: 30px;
+  }
+  .pe-menu-bouton,
+  .pe-menu-tel {
+    display: none;
+  }
+  .pe-entete-appel {
+    min-height: 46px;
+    padding: 0 20px;
+  }
+  .pe-entete-appel-court {
+    display: none;
+  }
+  .pe-entete-appel-long {
+    display: inline;
+  }
+  .pe[data-defile] .pe-entete-appel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .pe-barre-appel {
+    display: none;
+  }
+  .pe-accueil {
+    padding: 96px 0 80px;
+  }
+  .pe-section {
+    padding: 112px 0;
+  }
+  .pe-zone {
+    padding-top: 0;
+  }
+  .pe-prestations {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 56px 64px;
+  }
+  .pe-apropos-photo {
+    grid-template-columns: 5fr 6fr;
+    gap: 72px;
+    align-items: center;
+  }
+  .pe-apropos-image img {
+    aspect-ratio: 4 / 5;
+  }
+  .pe-contact {
+    padding: 112px 0;
+  }
+  .pe-contact-grille {
+    grid-template-columns: 5fr 6fr;
+    gap: 80px;
+  }
+  .pe-pied {
+    padding-bottom: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pe,
+  .pe * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+/* La zone suit d'ordinaire « À propos » (même fond) ; après les réalisations (fond os), elle reprend son espace. */
+.pe-section-os + .pe-zone {
+  padding-top: 80px;
+}
+@container pe (min-width: 960px) {
+  .pe-section-os + .pe-zone {
+    padding-top: 112px;
+  }
+}
+
+/* La page publique est toujours claire : le thème sombre de l'application ne déborde jamais autour d'elle. */
+html:has(.pe:not(.pe-apercu)),
+body:has(.pe:not(.pe-apercu)) {
+  background: #fbf8f3;
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------------------------------------ Retouches (relecture des captures) */
+.pe-accueil h1 {
+  letter-spacing: -0.045em;
+  word-spacing: 0.06em;
+}
+.pe h2 {
+  letter-spacing: -0.045em;
+  word-spacing: 0.05em;
+}
+/* Le nom de l'entreprise sur deux lignes au plus, jamais coupé par « … » au milieu d'un mot. */
+.pe-marque-nom {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.15;
+  font-size: 16px;
+}
+/* Téléphone : les deux boutons de l'accueil pleine largeur, l'un sous l'autre. */
+.pe-accueil .pe-actions .pe-btn {
+  flex: 1 1 100%;
+}
+@container pe (min-width: 560px) {
+  .pe-accueil .pe-actions .pe-btn {
+    flex: 0 0 auto;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe-marque-nom {
+    font-size: 17px;
+  }
+  /* Quatre prestations : deux colonnes (jamais une orpheline sous trois). */
+  .pe-prestations:has(> li:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 920px;
+  }
+  /* « À propos » sans photo : le titre et le chapeau à gauche, le texte et les garanties à droite. */
+  .pe-apropos:not(.pe-apropos-photo) {
+    grid-template-columns: 5fr 7fr;
+    gap: 72px;
+    align-items: start;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-texte {
+    display: contents;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-tete {
+    grid-column: 1;
+  }
+  .pe-apropos:not(.pe-apropos-photo) .pe-apropos-corps {
+    grid-column: 2;
+  }
+}
+/* Un nombre impair de chantiers : le premier en grand sur toute la largeur. */
+@container pe (min-width: 760px) {
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) {
+    grid-column: 1 / -1;
+  }
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
+    aspect-ratio: 16 / 8;
+  }
+}
+/* Barre du haut et visionneuse opaques : rien ne transparaît dessous. */
+.pe-entete {
+  background: var(--ivoire);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pe-visionneuse {
+  background: #0c0a08;
+}
+
+/* ------------------------------------------------------------------------------------------------ Entre pros */
+/* Greg, 16 novembre 2026 : le niveau « pros » du site, seulement pour une entreprise connectée (îlot client). */
+.pe-entre-pros {
+  padding: 48px 0 8px;
+}
+.pe-ep-carte {
+  border: 2px solid var(--encre);
+  border-radius: 20px;
+  background: #fff;
+  padding: 24px 20px;
+  display: grid;
+  gap: 14px;
+}
+.pe-ep-etiquette {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--jaune);
+  color: var(--encre);
+  padding: 4px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.pe .pe-entre-pros h2 {
+  font-size: 26px;
+  margin: 0;
+}
+.pe-ep-note {
+  color: var(--doux);
+  font-size: 15px;
+}
+.pe-ep-grille {
+  display: grid;
+  gap: 18px;
+}
+.pe-ep-grille h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.pe-ep-competences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+.pe-ep-competences li {
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.pe-ep-services {
+  margin-top: 8px;
+  white-space: pre-line;
+}
+.pe-ep-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+@container pe (min-width: 760px) {
+  .pe-ep-carte {
+    padding: 32px;
+  }
+  .pe-ep-grille {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+/* ================================================================================================================
+ * MODÈLE PRO (Greg, 17 novembre 2026 : « pars sur ce genre de modèle, je veux quelque chose de pro », deux maquettes).
+ * RÈGLE CHANGÉE : avant, barre noire, accueil sombre, prestations en grandes cartes, trois chantiers. Maintenant : barre
+ * blanche (logo, menu souligné, « Appeler » de la couleur des boutons, « Demander un devis » noir), grande photo d'accueil
+ * avec un voile sombre et un bord arrondi, le petit trait et le nom en capitales espacées, la ville de la couleur des
+ * boutons, un bandeau vitré de garanties ; prestations en petites cartes à icône, carte « À propos » ; une barre de
+ * confiance (zone, horaires, certifications) ; quatre chantiers sur une ligne. LA COULEUR DES BOUTONS est réglable
+ * (`--jaune` = la couleur choisie, `--sur-jaune` = son texte, `--jaune-sombre` = sa version lisible sur la photo).
+ * Ni avis ni note (règle gardée), aucun texte inventé : tout vient de ce que l'artisan a écrit ou déclaré.
+ * ============================================================================================================== */
+.pe {
+  --nuit: color-mix(in srgb, var(--pe-teinte) 45%, #0a0a0b);
+  --blanc: #ffffff;
+  --carte-ombre: 0 1px 2px rgba(21, 18, 14, 0.05), 0 10px 30px -14px rgba(21, 18, 14, 0.16);
+  font-family: var(--font-jakarta), Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.pe h2 {
+  font-size: clamp(30px, 5.4cqi, 44px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin-bottom: 28px;
+}
+.pe-section h2::before,
+.pe-contact h2::before {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 5px;
+  margin-bottom: 18px;
+  border-radius: 5px;
+  background: var(--jaune);
+}
+.pe-btn-appel {
+  background: var(--jaune);
+  color: var(--sur-jaune) !important;
+  box-shadow: 0 12px 28px -12px color-mix(in srgb, var(--jaune) 80%, transparent);
+}
+.pe-btn-appel:hover {
+  background: var(--jaune2);
+}
+.pe :focus-visible {
+  outline-color: var(--jaune);
+}
+
+/* --------------------------------------------------------------------- Barre du haut : blanche, nette */
+.pe-entete {
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid rgba(21, 18, 14, 0.06);
+  box-shadow: 0 6px 24px -18px rgba(21, 18, 14, 0.35);
+}
+.pe-marque-texte {
+  display: grid;
+  min-width: 0;
+}
+.pe-marque-nom {
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.15;
+}
+.pe-marque-activite {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--doux);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pe-entete .pe-initiales {
+  background: var(--nuit);
+  color: var(--jaune-sombre);
+  border-radius: 12px;
+}
+.pe-entete-appel {
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 15.5px;
+  box-shadow: none;
+}
+.pe-entete-devis {
+  display: none;
+}
+.pe-menu-bouton {
+  border: 1px solid rgba(21, 18, 14, 0.1);
+  background: #fff;
+  box-shadow: 0 4px 14px -8px rgba(21, 18, 14, 0.3);
+}
+.pe-menu-tel {
+  background: #fff;
+}
+
+/* --------------------------------------------------------------------- Accueil : la photo, un voile, un bord arrondi */
+.pe-accueil {
+  overflow: clip;
+  align-items: center;
+  min-height: 0;
+  padding: 56px 0 84px;
+  color: #fff;
+  background:
+    radial-gradient(100% 70% at 100% 0%, color-mix(in srgb, var(--pe-teinte) 70%, transparent) 0%, transparent 65%),
+    var(--nuit);
+}
+.pe-avec-photo .pe-accueil {
+  min-height: max(600px, min(calc(100svh - var(--entete)), 760px));
+}
+.pe-accueil::after {
+  /* Le bord bas arrondi de l'accueil (maquette de Greg). */
+  content: "";
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  bottom: -1px;
+  height: 42px;
+  background: var(--ivoire);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  z-index: 1;
+}
+.pe-accueil-texte {
+  position: relative;
+  z-index: 2;
+}
+.pe-accueil-photo {
+  background: var(--nuit);
+}
+.pe-accueil-photo::after {
+  --voile: color-mix(in srgb, var(--nuit) 60%, #000);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--voile) 35%, transparent) 0%, color-mix(in srgb, var(--voile) 72%, transparent) 55%, color-mix(in srgb, var(--voile) 92%, transparent) 100%);
+}
+.pe .pe-accueil-nom {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+.pe-accueil-nom::before {
+  content: "";
+  flex-shrink: 0;
+  width: 44px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--jaune);
+}
+.pe-accueil h1 {
+  font-size: clamp(40px, 11cqi, 84px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  max-width: 14ch;
+  overflow-wrap: break-word;
+}
+.pe-accueil-ville {
+  color: var(--jaune-sombre);
+}
+.pe .pe-accueil-accroche {
+  margin-top: 16px;
+  max-width: 34ch;
+  font-size: clamp(18px, 2.6cqi, 23px);
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.94);
+}
+.pe-accueil .pe-actions {
+  margin-top: 26px;
+}
+.pe-accueil .pe-btn {
+  min-height: 56px;
+  padding: 0 26px;
+}
+.pe-accueil .pe-btn-second,
+.pe-avec-photo .pe-accueil .pe-btn-second {
+  border-color: rgba(255, 255, 255, 0.75);
+  color: #fff;
+  background: rgba(10, 10, 11, 0.28);
+  backdrop-filter: blur(6px);
+}
+/* Le bandeau vitré des garanties */
+.pe .pe-preuves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 26px;
+  padding: 12px 6px;
+  border-radius: 20px;
+  background: rgba(16, 16, 18, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.pe .pe-preuves li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  min-width: 0;
+}
+.pe .pe-preuves li + li {
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+.pe-preuve-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--jaune) 18%, transparent);
+  color: var(--jaune-sombre);
+}
+.pe .pe-preuves svg {
+  color: var(--jaune-sombre);
+}
+
+/* --------------------------------------------------------------------- Prestations : petites cartes, carte « À propos » */
+.pe-section {
+  padding: 56px 0;
+}
+.pe-section-prestations {
+  position: relative;
+  padding-top: 40px;
+}
+.pe-prestations-grille {
+  display: grid;
+  gap: 18px;
+}
+.pe-prestations-tete h2 {
+  margin-bottom: 8px;
+}
+.pe-sous-titre {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--doux);
+  max-width: 34ch;
+}
+.pe-prestations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
+}
+.pe-prestations li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 84px;
+  padding: 14px;
+  background: var(--blanc);
+  border-radius: 18px;
+  box-shadow: var(--carte-ombre);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.pe-prestations li::before {
+  content: none;
+}
+.pe-prestations li:hover {
+  transform: translateY(-2px);
+}
+.pe-prestation-icone {
+  flex-shrink: 0;
+  color: var(--encre);
+}
+.pe-prestation-icone :is(path, rect, circle, line, polyline):nth-child(2) {
+  color: var(--jaune);
+  stroke: color-mix(in srgb, var(--jaune) 85%, var(--encre));
+}
+.pe-prestations h3 {
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.pe-prestation-texte {
+  display: none;
+}
+/* La carte « À propos » : la photo, le nom, la première phrase de l'artisan */
+.pe-carte-apropos {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  border-radius: 22px;
+  min-height: 180px;
+  background: color-mix(in srgb, var(--jaune) 16%, #fff);
+  color: var(--encre);
+  box-shadow: var(--carte-ombre);
+}
+.pe-carte-apropos-image {
+  position: absolute;
+  inset: 0;
+}
+.pe-carte-apropos-image picture,
+.pe-carte-apropos-image img {
+  width: 100%;
+  height: 100%;
+}
+.pe-carte-apropos-image img {
+  object-fit: cover;
+}
+.pe-carte-apropos-photo {
+  color: #fff;
+  background: var(--nuit);
+}
+.pe-carte-apropos-photo .pe-carte-apropos-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, rgba(10, 10, 11, 0.86) 0%, rgba(10, 10, 11, 0.55) 55%, rgba(10, 10, 11, 0.15) 100%);
+}
+.pe-carte-apropos-texte {
+  position: relative;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 24px;
+}
+.pe-carte-apropos-texte::before {
+  content: "";
+  width: 44px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--jaune);
+}
+.pe-carte-apropos-titre {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.pe-carte-apropos-phrase {
+  max-width: 36ch;
+  font-size: 15px;
+  line-height: 1.45;
+  opacity: 0.9;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pe-carte-apropos-lien {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--jaune);
+  font-size: 14px;
+  font-weight: 800;
+}
+/* La barre de confiance */
+.pe-confiance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 22px;
+  padding: 8px;
+  border-radius: 20px;
+  background: var(--blanc);
+  box-shadow: var(--carte-ombre);
+  scroll-margin-top: calc(var(--entete) + 16px);
+}
+.pe-confiance li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  min-width: 0;
+}
+.pe-confiance svg {
+  flex-shrink: 0;
+  color: var(--encre);
+}
+.pe-confiance-etiquette {
+  display: block;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--doux);
+}
+.pe-confiance-valeur {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 750;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------------- Réalisations : quatre sur une ligne */
+.pe-section-realisations {
+  padding-top: 24px;
+}
+.pe-section-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 20px;
+  margin-bottom: 20px;
+}
+.pe .pe-section-tete h2 {
+  margin: 0;
+}
+.pe-voir-plus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(21, 18, 14, 0.18);
+  background: var(--blanc);
+  color: var(--encre);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pe-voir-plus:hover {
+  border-color: var(--encre);
+}
+.pe-chantiers {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  grid-template-columns: none;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin-inline: -20px;
+  padding: 4px 20px 12px;
+}
+.pe-chantiers::-webkit-scrollbar {
+  display: none;
+}
+.pe-chantiers > li {
+  scroll-snap-align: start;
+}
+.pe-chantier {
+  border-radius: 18px;
+  box-shadow: 0 14px 30px -18px rgba(21, 18, 14, 0.5);
+}
+.pe-chantier img {
+  aspect-ratio: 4 / 3;
+}
+.pe-chantier-legende {
+  padding: 48px 16px 14px;
+}
+.pe-chantier-titre {
+  font-size: 16.5px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+/* --------------------------------------------------------------------- À propos, contact, pied */
+.pe-qualifs svg,
+.pe-zone-ville svg {
+  color: var(--encre);
+}
+.pe-apropos-image img {
+  border-radius: 22px;
+}
+.pe-contact {
+  background:
+    radial-gradient(80% 100% at 100% 0%, color-mix(in srgb, var(--pe-teinte) 55%, transparent) 0%, transparent 70%),
+    var(--nuit);
+}
+.pe-pied {
+  padding-top: 28px;
+  font-size: 14px;
+}
+.pe-pied-grille {
+  gap: 20px;
+}
+.pe-pied-marque {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.pe-pied .pe-initiales {
+  background: var(--nuit);
+  color: var(--jaune-sombre);
+}
+.pe-pied-nom {
+  font-size: 16px;
+  font-weight: 800;
+}
+.pe-pied-activite {
+  font-size: 13px;
+  color: var(--doux);
+}
+.pe-pied-liens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.pe-pied-liens > details[open] {
+  flex-basis: 100%;
+}
+.pe-pied-lien {
+  font-weight: 700;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.pe-pied-sep {
+  color: var(--doux);
+  opacity: 0.6;
+}
+.pe-mobiiz {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+.pe-mobiiz strong {
+  font-weight: 850;
+}
+.pe-coeur {
+  color: var(--jaune);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pe-prestations li {
+    transition: none;
+  }
+  .pe-prestations li:hover {
+    transform: none;
+  }
+}
+
+@container pe (min-width: 640px) {
+  .pe-prestations {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .pe-confiance {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    padding: 10px 6px;
+  }
+  .pe-confiance li + li {
+    border-left: 1px solid rgba(21, 18, 14, 0.1);
+  }
+  .pe-chantiers {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: auto;
+    overflow: visible;
+    margin-inline: 0;
+    padding: 0;
+  }
+  .pe .pe-preuves {
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: auto;
+    grid-template-columns: none;
+    padding: 10px 8px;
+    font-size: 14.5px;
+  }
+  .pe .pe-preuves li {
+    padding: 4px 18px;
+  }
+}
+
+@container pe (min-width: 960px) {
+  .pe-entete-ligne {
+    gap: 18px;
+  }
+  .pe-entete-devis {
+    display: inline-flex;
+    min-height: 46px;
+    padding: 0 20px;
+    font-size: 14.5px;
+    gap: 8px;
+    background: var(--encre);
+    color: #fff !important;
+    box-shadow: none;
+  }
+  .pe-entete-devis:hover {
+    background: #000;
+  }
+  .pe-nav {
+    font-weight: 650;
+  }
+  .pe-nav a {
+    position: relative;
+  }
+  .pe-nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--jaune);
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+  }
+  .pe-nav a:hover::after {
+    transform: scaleX(1);
+  }
+  .pe-accueil {
+    padding: 96px 0 120px;
+  }
+  .pe-avec-photo .pe-accueil {
+    min-height: 640px;
+  }
+  .pe-accueil::after {
+    height: 64px;
+  }
+  .pe-accueil-photo::after {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--voile) 92%, transparent) 0%, color-mix(in srgb, var(--voile) 72%, transparent) 38%, color-mix(in srgb, var(--voile) 20%, transparent) 66%, transparent 100%);
+  }
+  .pe-section {
+    padding: 72px 0;
+  }
+  .pe-section-prestations {
+    padding-top: 48px;
+  }
+  .pe-prestations-grille {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 2fr) minmax(0, 0.95fr);
+    align-items: start;
+    gap: 22px;
+  }
+  .pe-prestations {
+    margin-top: 0;
+    gap: 14px;
+  }
+  .pe-prestations li {
+    align-items: flex-start;
+    min-height: 0;
+    padding: 18px;
+  }
+  .pe-prestation-texte {
+    display: -webkit-box;
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--doux);
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pe-carte-apropos {
+    min-height: 100%;
+  }
+  .pe-chantiers {
+    grid-template-columns: 1.5fr 1fr 1.2fr 1fr;
+    gap: 14px;
+  }
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) {
+    grid-column: auto;
+  }
+  .pe-chantier img,
+  .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
+    aspect-ratio: auto;
+    height: 260px;
+  }
+  /* Les traits jaunes du coin (maquette de Greg), sur grand écran seulement. */
+  .pe-section-prestations::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, transparent 0 46%, var(--jaune) 46% 58%, transparent 58% 66%, var(--jaune) 66% 100%);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .pe-pied {
+    padding: 24px 0;
+  }
+  .pe-pied-grille {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 32px;
+  }
+  .pe-pied-liens {
+    justify-content: center;
+  }
+}
+
+/* Le retour vers « Mon site » quand l'artisan ouvre sa page depuis l'app */
+/* Spécialiste UI/UX (19 novembre 2026) : le bouton recouvrait le nom de l'entreprise en haut de l'accueil ; l'accueil
+   lui laisse sa place. */
+.pe:has(.pe-retour-app) .pe-accueil-texte {
+  padding-top: 64px;
+}
+.pe-retour-app {
+  position: fixed;
+  left: 12px;
+  top: calc(var(--entete) + 12px);
+  z-index: 35;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #141414;
+  font-weight: 800;
+  font-size: 15px;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.45);
+  text-decoration: none;
+}
+
+/* Réglages après la première capture du modèle pro (17 novembre 2026). */
+.pe .pe-marque-nom {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pe-avec-photo .pe-accueil {
+  align-items: flex-end;
+  min-height: max(560px, min(calc(100svh - var(--entete) - 40px), 720px));
+}
+/* Téléphone : chaque garantie en colonne, l'icône au-dessus, rien ne se chevauche. Spécialiste UI/UX (19 novembre 2026) :
+   avec cinq garanties sur 320 px, « Intervention » et « Décennale » se touchaient ; trois colonnes au plus, sur deux
+   lignes s'il le faut, et un mot trop long se coupe proprement. */
+.pe .pe-preuves {
+  grid-template-columns: repeat(var(--pe-preuves, 3), minmax(0, 1fr));
+  row-gap: 10px;
+}
+.pe .pe-preuves li {
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 4px 6px;
+  text-align: center;
+  font-size: 12.5px;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.pe .pe-preuves li:nth-child(3n + 1) {
+  border-left: 0;
+}
+.pe .pe-carte-apropos-photo {
+  color: #fff;
+}
+.pe-carte-apropos-photo .pe-carte-apropos-image::after {
+  background: linear-gradient(180deg, rgba(10, 10, 11, 0.55) 0%, rgba(10, 10, 11, 0.88) 100%);
+}
+.pe-carte-apropos-photo .pe-carte-apropos-lien {
+  color: #fff;
+}
+@container pe (min-width: 640px) {
+  .pe .pe-preuves {
+    grid-template-columns: none;
+    row-gap: 0;
+  }
+  .pe .pe-preuves li:nth-child(3n + 1):not(:first-child) {
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  .pe .pe-preuves li {
+    flex-direction: row;
+    text-align: left;
+    gap: 10px;
+    padding: 4px 18px;
+    font-size: 14.5px;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe-avec-photo .pe-accueil {
+    align-items: center;
+    min-height: 640px;
+  }
+  .pe-chantiers:has(> li:nth-child(3):last-child) {
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+  }
+  .pe-chantiers:has(> li:nth-child(2):last-child) {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pe-chantiers:has(> li:only-child) {
+    grid-template-columns: minmax(0, 720px);
+  }
+  .pe-carte-apropos-photo .pe-carte-apropos-image::after {
+    background: linear-gradient(180deg, rgba(10, 10, 11, 0.45) 0%, rgba(10, 10, 11, 0.9) 100%);
+  }
+  .pe-carte-apropos-texte {
+    align-content: end;
+  }
+}
+/* `.pe ul { margin: 0 }` l'emporterait sans le préfixe : la barre de confiance garde son air. */
+.pe .pe-confiance {
+  margin-top: 22px;
+}
+@container pe (min-width: 960px) {
+  .pe .pe-confiance {
+    margin-top: 26px;
+  }
+  .pe-carte-apropos-photo .pe-carte-apropos-image::after {
+    background: linear-gradient(180deg, rgba(10, 10, 11, 0.1) 0%, rgba(10, 10, 11, 0.55) 45%, rgba(10, 10, 11, 0.92) 100%);
+  }
+}
+
+/* =====================================================================================================================
+ * FINITIONS TÉLÉPHONE (Greg, 17 novembre 2026, vues sur son iPhone ; points 10 à 16). Dernier bloc : il l'emporte.
+ * ================================================================================================================== */
+/* 10. Barre du haut blanche et OPAQUE (rien ne transparaît) ; le nom et le métier en entier, sur deux lignes s'il le faut. */
+.pe .pe-entete {
+  background: #fff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.pe .pe-entete-ligne {
+  height: auto;
+  min-height: var(--entete);
+  padding-top: 8px;
+  padding-bottom: 8px;
+  gap: 10px;
+}
+.pe .pe-marque {
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: center;
+}
+.pe .pe-marque-nom {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: normal;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.pe .pe-marque-activite {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 12px;
+  line-height: 1.25;
+}
+/* Sur téléphone, « Appeler » devient un rond (le numéro est dans l'accueil et la barre du bas) : la place va au nom.
+   RÈGLE CHANGÉE (Greg, 18 novembre 2026 : « jamais trois boutons d'appel visibles en même temps ») : avant, le rond de la
+   barre du haut restait dans l'accueil, à côté de « Demander un devis » et du numéro ; maintenant, sur téléphone, il
+   n'apparaît plus quand la page a sa barre « Appeler » du bas (l'accueil a ses deux boutons, puis la barre du bas). */
+@container pe (max-width: 639px) {
+  .pe:has(.pe-barre-appel) .pe-entete-appel {
+    display: none;
+  }
+  .pe .pe-entete-appel {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: 999px;
+  }
+  .pe .pe-entete-appel-court,
+  .pe .pe-entete-appel-long {
+    display: none;
+  }
+  .pe .pe-menu-bouton {
+    flex-shrink: 0;
+  }
+}
+/* Le nom en capitales espacées de l'accueil : moins espacé sur téléphone, jamais coupé dans un mot. */
+.pe .pe-accueil-nom {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@container pe (max-width: 639px) {
+  .pe .pe-accueil-nom {
+    letter-spacing: 0.16em;
+  }
+}
+
+/* 12. Cartes de prestations : une par ligne sur téléphone, aucun texte ne déborde ; icônes toutes de la même couleur. */
+.pe .pe-prestations h3 {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: manual;
+}
+.pe .pe-prestations li > div {
+  min-width: 0;
+}
+.pe .pe-prestation-icone,
+.pe .pe-prestation-icone :is(path, rect, circle, line, polyline, ellipse, polygon) {
+  color: var(--encre);
+  stroke: currentColor;
+}
+@container pe (max-width: 479px) {
+  .pe .pe-prestations {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .pe .pe-prestations li {
+    min-height: 0;
+    align-items: flex-start;
+    padding: 14px 16px;
+  }
+  .pe .pe-prestation-texte {
+    display: block;
+    margin-top: 2px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--doux);
+  }
+}
+
+/* 13. Barre de confiance : une ligne par information sur téléphone, toute la largeur, jamais un mot coupé. */
+.pe .pe-confiance-valeur {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+@container pe (max-width: 479px) {
+  .pe .pe-confiance {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 4px 6px;
+  }
+  .pe .pe-confiance li {
+    padding: 12px 10px;
+  }
+  .pe .pe-confiance li + li {
+    border-top: 1px solid rgba(21, 18, 14, 0.08);
+  }
+}
+/* Moins de vide entre les sections sur téléphone (« supprime le grand vide »). */
+@container pe (max-width: 639px) {
+  .pe .pe-section {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+  .pe .pe-section-prestations {
+    padding-top: 28px;
+    padding-bottom: 12px;
+  }
+  .pe .pe-section-realisations {
+    padding-top: 24px;
+    padding-bottom: 12px;
+  }
+}
+
+/* 16. Pied de page : sur téléphone, les liens l'un sous l'autre, sans barres verticales orphelines. */
+@container pe (max-width: 639px) {
+  .pe .pe-pied-sep {
+    display: none;
+  }
+  .pe .pe-pied-liens {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  /* En colonne, « flex-basis: 100% » voudrait dire toute la HAUTEUR : le formulaire ouvert recouvrirait les liens. */
+  .pe .pe-pied-liens > details,
+  .pe .pe-pied-liens > details[open] {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+/* Crédit d'une photo par défaut, quand sa licence le demande : discret, en bas. */
+.pe .pe-credit-photo {
+  font-size: 12px;
+  color: var(--doux);
+}
+/* Rien n'est coupé par « … » : le nom de l'entreprise, la phrase de la carte « À propos » et les phrases des prestations
+   s'affichent en entier (Greg, 17 novembre 2026). */
+.pe .pe-marque-nom,
+.pe .pe-carte-apropos-phrase {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+.pe .pe-prestation-texte {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* « Voir nos avis Google » (Greg, 18 novembre 2026) : un lien sobre sous les boutons, vers la fiche de l'artisan. */
+.pe .pe-lien-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+}
+.pe .pe-lien-google svg {
+  color: var(--jaune-sombre);
+}
+.pe .pe-lien-google:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+
+/* Spécialiste UI/UX (19 novembre 2026) : sur ordinateur, les liens du menu faisaient 24 px de haut ; 44 px au doigt. */
+.pe .pe-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.pe .pe-nav a::after {
+  bottom: 6px;
+}

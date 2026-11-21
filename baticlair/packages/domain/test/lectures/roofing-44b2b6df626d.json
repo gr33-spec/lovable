@@ -1,0 +1,146 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Tuiles canal Charentaise sable avec liteaunage",
+   "quantity": "100",
+   "unit": "m2"
+  },
+  {
+   "ref": "2",
+   "designation": "Tuiles de rive",
+   "quantity": "20",
+   "unit": "m"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "recouvrement_canal",
+    "texte": "Recouvrement des tuiles canal ?",
+    "boutons": [
+     {
+      "label": "140 mm",
+      "valeur": "140"
+     },
+     {
+      "label": "150 mm",
+      "valeur": "150"
+     },
+     {
+      "label": "160 mm",
+      "valeur": "160"
+     },
+     {
+      "label": "170 mm",
+      "valeur": "170"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "recouvrement des tuiles canal",
+    "ligne": null
+   },
+   {
+    "cle": "produit_tuile",
+    "texte": "J'ai identifié : Tuiles Canal Charentaise. C'est bien ce modèle ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "edilians-canal-charentaise"
+     },
+     {
+      "label": "Modifier",
+      "valeur": ""
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   },
+   {
+    "cle": "date_de_livraison",
+    "texte": "Date de livraison ?",
+    "boutons": [
+     {
+      "label": "lundi",
+      "valeur": "lundi"
+     },
+     {
+      "label": "mardi",
+      "valeur": "mardi"
+     }
+    ],
+    "unite": null,
+    "donnee": "date de livraison",
+    "ligne": "1"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Tuiles canal Charentaise sable avec liteaunage",
+    "quantite": "100",
+    "unite": "m2",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture en tuiles canal sable",
+      "quantite": "100",
+      "unite": "m2",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "tuile",
+      "donnees": {
+       "produit": "edilians-canal-charentaise"
+      },
+      "attend": [
+       "recouvrement_canal",
+       "date_de_livraison"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Liteaux",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "liteau",
+      "donnees": {},
+      "attend": [
+       "recouvrement_canal",
+       "date_de_livraison"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Tuiles de rive",
+    "quantite": "20",
+    "unite": "m",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bardelis",
+      "quantite": "20",
+      "unite": "m",
+      "ouvrage": "couverture-tuiles-canal",
+      "emplacement": "rive",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

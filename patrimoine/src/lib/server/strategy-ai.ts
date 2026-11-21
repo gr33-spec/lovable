@@ -221,7 +221,7 @@ function mock(facts: Facts, question?: string): z.infer<typeof schema> {
   const b = facts.immeubles[0];
   const loan = facts.credits[0];
   return {
-    synthese: `Analyse de démonstration du périmètre « ${facts.perimetre.nom} » : ${facts.totaux.lots} lots, cash-flow mensuel ${facts.totaux.cashflowMensuel ?? "inconnu"} €.`,
+    synthese: `Analyse de démonstration du périmètre « ${facts.perimetre.nom} » : ${facts.totaux.lots} lots, cash-flow mensuel ${facts.totaux.cashflowLocatifMensuel ?? "inconnu"} €.`,
     sante: { niveau: "correct", explication: `Dette bancaire ${facts.totaux.detteBancaire ?? "inconnue"} €.` },
     forces: ["Données issues du moteur de l'application."],
     risques: [{ titre: "Données à compléter", detail: `${facts.donneesManquantes.length} élément(s) manquant(s).`, gravite: "moyenne", cible: { type: "global", id: "" } }],

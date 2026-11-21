@@ -1,0 +1,44 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Ardoises fibres-ciment 60x40 noires",
+   "quantity": "50",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Ardoises fibres-ciment 60x40 noires",
+    "quantite": "50",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises fibres-ciment noir 60×40",
+      "quantite": "50",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-fibres-ciment",
+      "emplacement": "ardoise",
+      "donnees": {
+       "teinte_fc": "2",
+       "produit": "ardoise-fc-60x40"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

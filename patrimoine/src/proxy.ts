@@ -7,6 +7,7 @@ import { SESSION_COOKIE, readSessionToken } from "./lib/server/session";
 const PUBLIC_PATHS = ["/connexion", "/api/login", "/api/passkey/login", "/partage"];
 
 const GESTION_PAGES = ["/gestion", "/patrimoine/logement", "/plus/securite"];
+const LECTURE_CLOSED = ["/plus/securite", "/plus/sauvegardes", "/plus/partage", "/plus/acces-gestion", "/bienvenue"];
 const GESTION_API = ["/api/data", "/api/ops", "/api/documents", "/api/files", "/api/passkey", "/api/logout", "/api/irl"];
 
 export function proxy(request: NextRequest) {
@@ -26,7 +27,9 @@ export function proxy(request: NextRequest) {
   }
   if (session?.role === "lecture") {
     // Consultation via un lien de partage : tout se consulte ; chaque route d'API
-    // refuse les écritures et vérifie que le lien est toujours valable.
+    // refuse les écritures et vérifie que le lien est toujours valable. Les écrans
+    // d'administration (sécurité, sauvegardes, partages, accès gestion) restent fermés.
+    if (LECTURE_CLOSED.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return NextResponse.redirect(new URL("/", request.url));
     return NextResponse.next();
   }
   if (session?.role === "gestion") {

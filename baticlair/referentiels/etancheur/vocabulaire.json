@@ -1,0 +1,88 @@
+{
+ "metier": "etancheur",
+ "ouvrages": {
+  "etanch_bitume_bicouche_autoprotege": {
+   "expressions": [
+    "bicouche",
+    "bitume sbs",
+    "autoprotégé",
+    "paillettes",
+    "sopralène",
+    "étanchéité toiture terrasse"
+   ]
+  },
+  "etanch_bitume_bicouche_gravillons": {
+   "expressions": [
+    "protection gravillons",
+    "protection lourde",
+    "gravillons roulés"
+   ]
+  },
+  "etanch_bitume_bicouche_dalles_plots": {
+   "expressions": [
+    "terrasse accessible",
+    "dalles sur plots",
+    "accessible piétons"
+   ]
+  },
+  "etanch_bitume_monocouche": {
+   "expressions": [
+    "monocouche",
+    "soprastar",
+    "sur bac acier"
+   ]
+  },
+  "etanch_pvc_fixe_meca": {
+   "expressions": [
+    "membrane pvc",
+    "pvc-p",
+    "fixation mécanique"
+   ]
+  },
+  "etanch_tpo_fpo": {
+   "expressions": [
+    "tpo",
+    "fpo",
+    "soudure air chaud"
+   ]
+  },
+  "etanch_epdm": {
+   "expressions": [
+    "epdm",
+    "rubbercover",
+    "membrane caoutchouc"
+   ]
+  },
+  "etanch_sel_resine": {
+   "expressions": [
+    "sel",
+    "étanchéité liquide",
+    "résine",
+    "balcon",
+    "loggia"
+   ]
+  },
+  "etanch_vegetalisee": {
+   "expressions": [
+    "toiture végétalisée",
+    "végétalisation",
+    "sedum",
+    "substrat"
+   ]
+  },
+  "reprise_releves_points_singuliers": {
+   "expressions": [
+    "relevés",
+    "reprise d'étanchéité",
+    "acrotère",
+    "eep",
+    "entrée d'eau pluviale"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de etancheur.md (expressions entre guillemets du document).",
+ "renvois": {
+  "zinguerie, couvertines, gouttières": "couverture",
+  "dalles sur plots en pierre": "pavage-dallage-exterieur"
+ }
+}

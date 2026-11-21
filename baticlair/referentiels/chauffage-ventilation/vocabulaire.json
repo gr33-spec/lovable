@@ -1,0 +1,26 @@
+{
+  "metier": "chauffage-ventilation",
+  "ouvrages": {
+    "pac_air_eau": { "expressions": ["pac air/eau", "pompe à chaleur air/eau", "pac bibloc", "pac monobloc", "module hydraulique"] },
+    "pac_air_air_split": { "expressions": ["climatisation", "clim réversible", "split", "multisplit", "pac air/air", "unité murale", "liaison frigorifique"] },
+    "pac_air_air_gainable": { "expressions": ["gainable", "clim gainable", "plénum", "bouches de soufflage"] },
+    "plancher_chauffant_hydraulique": { "expressions": ["plancher chauffant", "pcbt", "plancher rafraîchissant"], "renvoi": "plomberie", "note": "aussi dans plomberie (plombier-chauffagiste) : rattacher à chauffage-ventilation seulement si la PAC est sur le même devis" },
+    "reseau_radiateurs": { "expressions": ["réseau radiateurs", "radiateur acier", "robinet thermostatique", "désembouage"], "renvoi": "plomberie" },
+    "chaudiere_gaz_condensation": { "expressions": ["chaudière gaz", "chaudière à condensation"], "renvoi": "plomberie" },
+    "chauffe_eau_thermo": { "expressions": ["chauffe-eau thermodynamique", "cet", "ballon thermodynamique"] },
+    "poele_granules_fumisterie": { "expressions": ["poêle à granulés", "poêle à bois", "conduit isolé", "tubage", "sortie de toit poêle", "concentrique"] },
+    "vmc_sf_auto": { "expressions": ["vmc autoréglable", "vmc simple flux", "vmc sf"] },
+    "vmc_sf_hygro_a": { "expressions": ["hygro a", "hygroréglable a", "vmc hygro a"] },
+    "vmc_sf_hygro_b": { "expressions": ["hygro b", "hygroréglable b", "vmc hygro b", "hygrocosy"] },
+    "vmc_df": { "expressions": ["double flux", "vmc df", "échangeur", "insufflation"] },
+    "vmc_remplacement": { "expressions": ["remplacement caisson vmc", "remplacement moteur vmc"] },
+    "ventil_ponctuelle": { "expressions": ["aérateur", "extracteur", "ventilateur de salle de bain"] },
+    "entrees_air_seules": { "expressions": ["entrées d'air", "grille d'aération", "mortaise"] }
+  },
+  "renvois": {
+    "alimentation électrique, disjoncteur vmc ou pac": "electricite",
+    "réseau sanitaire, chauffe-eau électrique": "plomberie",
+    "sortie de toit, chatière, tuile à douille": "couverture"
+  },
+  "note": "Fusion de chauffage-pac-ventilation.md (codes vmc_simple_flux et vmc_double_flux) et de ventilation-vmc.md (codes plus fins retenus : vmc_sf_auto, vmc_sf_hygro_a/b, vmc_df). Les ouvrages radiateurs, chaudière et plancher chauffant existent aussi dans plomberie : ligne ambiguë → métier de l'entreprise."
+}

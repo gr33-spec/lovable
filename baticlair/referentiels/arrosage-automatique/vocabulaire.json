@@ -1,0 +1,57 @@
+{
+ "metier": "arrosage-automatique",
+ "ouvrages": {
+  "branchement": {
+   "expressions": [
+    "raccordement sur existant"
+   ]
+  },
+  "primaire": {
+   "expressions": [
+    "réseau primaire",
+    "conduite principale",
+    "alimentation électrovannes",
+    "pe 32 pn 16"
+   ]
+  },
+  "secteur_aspersion": {
+   "expressions": [
+    "tuyère 10 cm"
+   ]
+  },
+  "secteur_goutte": {
+   "expressions": [
+    "3 haies de 20 m"
+   ]
+  },
+  "regard": {
+   "expressions": [
+    "regard",
+    "boîte à vannes",
+    "jumbo",
+    "regard rond 6\""
+   ]
+  },
+  "pilotage": {
+   "expressions": [
+    "programmateur",
+    "horloge",
+    "contrôleur",
+    "module wi-fi",
+    "sonde de pluie",
+    "capteur d'humidité",
+    "débitmètre"
+   ]
+  },
+  "tranchee": {
+   "expressions": [
+    "sol caillouteux"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de arrosage-automatique.md (expressions entre guillemets du document).",
+ "renvois": {
+  "tranchées": "terrassier",
+  "alimentation électrique du programmateur": "electricite"
+ }
+}

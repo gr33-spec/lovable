@@ -1,0 +1,104 @@
+{
+ "devis": [
+  {
+   "ref": "z1",
+   "designation": "Couverture zinc joint debout",
+   "quantity": "91",
+   "unit": "m²"
+  },
+  {
+   "ref": "z3",
+   "designation": "Voligeage en sapin traité 18×200 mm",
+   "quantity": "91",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
+    "boutons": [
+     {
+      "label": "Je façonne (bobines)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné (bacs)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "z1",
+    "designation": "Couverture zinc joint debout",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couverture zinc à joint debout",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "couverture",
+      "donnees": {},
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "z3",
+    "designation": "Voligeage en sapin traité 18×200 mm",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Voliges sapin 18×200 mm traité",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "couverture-zinc-joint-debout",
+      "emplacement": "volige",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

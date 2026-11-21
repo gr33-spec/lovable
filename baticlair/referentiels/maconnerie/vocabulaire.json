@@ -1,0 +1,21 @@
+{
+  "metier": "maconnerie",
+  "ouvrages": {
+    "fouille_terrassement": { "expressions": ["fouilles en rigole", "fouille", "décapage terre végétale"], "renvoi": "terrassier" },
+    "beton_proprete": { "expressions": ["béton de propreté", "béton maigre"] },
+    "semelle_filante": { "expressions": ["semelle filante", "semelle isolée", "fondations ba", "rigole bétonnée", "fondations"] },
+    "soubassement": { "expressions": ["soubassement", "vide sanitaire", "bloc à bancher", "blocs à bancher"] },
+    "mur_blocs_beton": { "expressions": ["parpaing", "parpaings", "agglo", "agglos", "bloc creux", "blocs béton", "bloc béton", "élévation"] },
+    "mur_brique": { "expressions": ["brique", "briques", "monomur", "porotherm", "bio'bric", "brique rectifiée", "brique pleine"], "exclusions": ["brique de parement", "plâtrière"] },
+    "mur_beton_cellulaire": { "expressions": ["béton cellulaire", "siporex", "ytong", "cellumat"] },
+    "mur_pierre": { "expressions": ["moellons", "pierres de pays", "maçonnerie pierre", "rejointoiement"] },
+    "chainage": { "expressions": ["chaînage", "chainage", "ceinture béton", "raidisseur", "poteau ba"] },
+    "linteau": { "expressions": ["linteau", "linteaux", "ipn", "reprise en sous-œuvre", "création d'ouverture"] },
+    "plancher_poutrelles": { "expressions": ["plancher hourdis", "hourdis", "poutrelles", "entrevous", "dalle de compression", "rectolight", "kp1"] },
+    "dalle_dallage": { "expressions": ["dallage", "dalle béton", "dalle de garage", "hérisson", "dalle armée", "st25"] },
+    "chape": { "expressions": ["chape ciment", "chape"], "exclusions": ["chape fluide", "chape anhydrite", "chape liquide"] },
+    "enduit_facade": { "expressions": ["enduit monocouche", "enduit gratté", "crépi", "gobetis", "enduit à la chaux"], "renvoi_possible": "facade" },
+    "muret_cloture": { "expressions": ["muret", "mur de clôture", "pilier", "couvertine", "chaperon", "mur de soutènement"] }
+  },
+  "hors_materiaux": ["échafaudage", "étaiement", "location toupie pompe", "mini-pelle", "benne", "nettoyage de chantier"]
+}

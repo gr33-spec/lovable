@@ -1,0 +1,1708 @@
+{
+ "famille": "fenetres_toit",
+ "generated": "2026-11-20",
+ "perimetre": "Fenêtres de toit (Velux surtout ; Fakro, Roto), raccords d'étanchéité, accessoires d'installation, ce que le comptoir demande. Velux.fr était hors ligne le 20/11/2026 (incident de sécurité) : les données Velux viennent du tarif France 2024 et des fiches de contenthub.velux.com.",
+ "regle_confirmation": "Données propres à un modèle Velux : confirme_fabricant quand deux documents Velux distincts concordent (aucun calcul au m² possible, le contrôle se limite à la concordance) ; confirme quand un fabricant tiers (Kingspan, Fakro, Roto) ou un négoce les recoupe.",
+ "entrees": [
+  {
+   "id": "velux_ck01_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "CK01",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "55 × 70",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.39 m² (à retirer de la surface couverte) ; taille courte, absente des tables Kingspan et Fakro relevées",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … CK01 … 55x70 (fenêtres Tout Confort)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_ck02_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "CK02",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "55 × 78",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.43 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … CK02 … 55x78",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "CK02 | 01 … Dimensions fenêtre de toiture l x h en mm 550 x 780",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 55x78 … Code dimensionnel 01",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_ck04_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "CK04",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "55 × 98",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.54 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … CK04 … 55x98",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "CK04 | 02 … Dimensions fenêtre de toiture l x h en mm 550 x 980",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 55x98 … Code dimensionnel 02",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_fk06_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "FK06",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "66 × 118",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.78 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "FK06 FK08 MK06 (codes des fenêtres d'une verrière 2en1)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "FK06 | 04 … Dimensions fenêtre de toiture l x h en mm 660 x 1180",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 66x118 … Code dimensionnel 04",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "FK06 et MK10 ne sont pas dans le tableau de prix GGL France 2024 (seulement dans les tableaux d'accessoires) : taille à vérifier en stock en Bretagne."
+  },
+  {
+   "id": "velux_mk04_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "MK04",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "78 × 98",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.76 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … MK04 … 78x98",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "MK04 | 05 … Dimensions fenêtre de toiture l x h en mm 780 x 980",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x98 … Code dimensionnel 05",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_mk06_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "MK06",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "78 × 118",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 0.92 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … MK06 … 78x118",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "MK06 | 06 … Dimensions fenêtre de toiture l x h en mm 780 x 1180",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x118 … Code dimensionnel 06",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_mk08_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "MK08",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "78 × 140",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.09 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … MK08 … 78x140",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "MK08 | 07 … Dimensions fenêtre de toiture l x h en mm 780 x 1400",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x140 … Code dimensionnel 07",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_mk10_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "MK10",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "78 × 160",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.25 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Codes dimensionnels des stores MK10 M04 PK10 P04 SK10 S04",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "MK10 | 13 … Dimensions fenêtre de toiture l x h en mm 780 x 1600",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 78x160 … Code dimensionnel 13",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "FK06 et MK10 ne sont pas dans le tableau de prix GGL France 2024 (seulement dans les tableaux d'accessoires) : taille à vérifier en stock en Bretagne."
+  },
+  {
+   "id": "velux_pk06_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "PK06",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "94 × 118",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.11 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … PK06 … 94x118",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "PK06 | 08 … Dimensions fenêtre de toiture l x h en mm 940 x 1180",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 94x118 … Code dimensionnel 08",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_pk08_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "PK08",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "94 × 140",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.32 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … PK08 … 94x140",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "PK08 | 09 … Dimensions fenêtre de toiture l x h en mm 940 x 1400",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 94x140 … Code dimensionnel 09",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_pk10_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "PK10",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "94 × 160",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.50 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … PK10 … 94x160",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "PK10 | - … Dimensions fenêtre de toiture l x h en mm 940 x 1600",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_sk06_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "SK06",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "114 × 118",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.34 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … SK06 … 114x118",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "SK06 | 10 … Dimensions fenêtre de toiture l x h en mm 1140 x 1180",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 114x118 … Code dimensionnel 10",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_sk08_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "SK08",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "114 × 140",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.60 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … SK08 … 114x140",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "SK08 | 11 … Dimensions fenêtre de toiture l x h en mm 1140 x 1400",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 114x140 … Code dimensionnel 11",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_uk04_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "UK04",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "134 × 98",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.31 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … UK04 … 134x98",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "UK04 | 12 … Dimensions fenêtre de toiture l x h en mm 1340 x 980",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 134x98 … Code dimensionnel 12",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_uk08_dimensions",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "UK08",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "134 × 140",
+   "unite": "cm",
+   "condition": "largeur × hauteur, cotes hors tout du dormant arrondies au cm ; surface hors tout 1.88 m² (à retirer de la surface couverte)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm … UK08 … 134x140",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "UK08 | 17 … Dimensions fenêtre de toiture l x h en mm 1340 x 1400",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures [cm] 134x140 … Code dimensionnel 17",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_code_taille_lecture",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "lecture_du_code_taille",
+   "valeur": "lettre = largeur : C 55, F 66, M 78, P 94, S 114, U 134 cm ; chiffre = hauteur : 01 70, 02 78, 04 98, 06 118, 08 140, 10 160 cm ; « K » = génération après 2001",
+   "unite": "cm",
+   "condition": "codes Velux actuels (CK02, MK04…) ; les anciens codes 102, 104, 304, 306, 308, 606, 608, 804, 808 correspondent à C02, C04, M04, M06, M08, S06, S08, U04, U08",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Correspondance codes dimensionnels des fenêtres à remplacer 102 6/104 1/304 14/306 2/308 4/606 10/608 7/804 8/808",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, Size guide (Royaume-Uni, PDF du 20/04/2026), cotes extérieures du dormant en mm",
+     "url": "https://contenthub.velux.com/api/public/content/1550c-d6210-07441_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "External frame sizes (w×h)mm 472 550 660 780 942 1140 1340 … 778 978 1178 1398 1600 1800",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "CK02 | 01 550 x 780 … MK04 | 05 780 x 980 … UK08 | 17 1340 x 1400",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_cotes_dormant_mm",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "cotes_exactes_dormant",
+   "valeur": "largeurs 550 / 660 / 780 / 942 / 1140 / 1340 mm ; hauteurs 778 / 978 / 1178 / 1398 / 1600 / 1800 mm",
+   "unite": "mm",
+   "condition": "cotes extérieures exactes du dormant ; la cote « cm » du comptoir en est l'arrondi (94 = 942 mm, 140 = 1398 mm)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX, Size guide (Royaume-Uni, PDF du 20/04/2026), cotes extérieures du dormant en mm",
+     "url": "https://contenthub.velux.com/api/public/content/1550c-d6210-07441_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "Roof windows External frame sizes (w×h)mm 472 550 660 780 942 1140 1340",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm 55x78 … 94x140 … 134x140",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Kingspan écrit 940 x 1180 / 940 x 1400 pour PK06 / PK08 (cote arrondie) ; Velux donne 942 mm.",
+   "controle": "pas de calcul au m² possible ; deux documents Velux (guide 2026, tarif France 2024) concordants, arrondi au cm vérifié pour les 6 largeurs et 6 hauteurs",
+   "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026)."
+  },
+  {
+   "id": "velux_ggl_ggu_pente",
+   "famille": "fenetres_toit",
+   "sous_famille": "pentes admises",
+   "marque": "Velux",
+   "modele": "GGL / GGU",
+   "attribut": "pente_admise",
+   "valeur": "15 à 90",
+   "unite": "°",
+   "condition": "fenêtre à rotation GGL (bois) / GGU (polyuréthane) ; pente minimale 15°",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Fenêtre à rotation GGL 2057 WhiteFinish … Pente de toit : 15° - 90°",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "15°–90° pente de toit (raccord EDW, pose standard)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "pente de toiture admise: 15°- 90° (Fakro FTP-V, rotation, même règle chez un autre fabricant)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Roto, « Designo R6 – fiche technique » (FR), hébergée par benz24.fr",
+     "url": "https://benz24.fr/media/documents/05/05f33e6a8cd9be667318bccaa85c50d0/3fddda9268951922e73e50842c1e0670.pdf",
+     "type": "fabricant",
+     "extrait": "Pentes de toit admissibles: de 15° à 90° (Roto Designo R6)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_gpl_gpu_pente",
+   "famille": "fenetres_toit",
+   "sous_famille": "pentes admises",
+   "marque": "Velux",
+   "modele": "GPL / GPU",
+   "attribut": "pente_admise",
+   "valeur": "15 à 55",
+   "unite": "°",
+   "condition": "fenêtre à projection GPL / GPU : au-delà de 55° prendre une rotation",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Fenêtre à projection … Pente de toit : 15° - 55°",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "pente de toiture admise: 15°-55° (fenêtre Fakro à projection, même fiche)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_raccord_edw",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "EDW",
+   "attribut": "couverture_admise",
+   "valeur": "tuiles (profilées) jusqu'à 120 mm de relief",
+   "unite": "mm",
+   "condition": "pose standard (traditionnelle), pente ≥ 15° ; aussi adaptable sur bac acier (Velux : « privilégier l'EDW »)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "EDW 0000* Tuiles ≤ 120 mm relief … Pente de toit 15°",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "Pour matériel de couverture profilé jusqu'à 120 mm de hauteur de profil.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": "pas de calcul possible ; tarif France 2024 et fiche technique 06/24 (contenthub.velux.com) concordants",
+   "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026)."
+  },
+  {
+   "id": "velux_raccord_edl",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "EDL",
+   "attribut": "couverture_admise",
+   "valeur": "ardoises et matériaux plats ≤ 8 mm (16 mm en double épaisseur, 2 × 8)",
+   "unite": "mm",
+   "condition": "pose standard, pente ≥ 15° ; ardoise naturelle ou fibres-ciment",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "EDL 0000 Ardoises < 8 mm … Pente de toit 15°",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "Pour matériel de couverture plat jusqu'à 16 mm de hauteur totale (2 × 8 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX France, descriptif « Raccord EDL pour ardoises, pose traditionnelle » (VF 6126-1212), hébergé par Envain Matériaux",
+     "url": "https://www.envain-materiaux.fr/ressources/images/articles/ficheTechnique/raccord-ardoises-edl-VELUX.pdf",
+     "type": "fabricant",
+     "extrait": "matériaux de couverture plats d'épaisseur inférieure ou égale à 8 mm (ardoises, bardeaux, plaques asphaltées…)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "« < 8 mm » (tarif) et « ≤ 8 mm » (descriptif) : même limite ; 16 mm = deux épaisseurs au recouvrement.",
+   "controle": "pas de calcul possible ; trois documents Velux concordants",
+   "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026)."
+  },
+  {
+   "id": "velux_raccord_edp",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "EDP",
+   "attribut": "couverture_admise",
+   "valeur": "tuiles plates de largeur < 300 mm",
+   "unite": "mm",
+   "condition": "pose standard, pente ≥ 25° (et non 15°)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "EDP 0000 Tuiles plates l.< 300 mm … Pente de toit 15° (sauf EDP 25°)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "En Suisse, Velux vend un EDB « pour couverture double avec petites tuiles plates jusqu'à 2x 19 mm », 25°–90° : même pente mini, autre référence."
+  },
+  {
+   "id": "velux_raccord_edj",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "EDJ",
+   "attribut": "couverture_admise",
+   "valeur": "tuiles (profilées) jusqu'à 90 mm de relief",
+   "unite": "mm",
+   "condition": "pose encastrée (abaissée), pente ≥ 20°",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Raccords en création d'ouverture - Pose encastrée … Pente de toit 20° … EDJ 0000* Tuiles ≤ 90 mm relief",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDJ / EDN, montage abaissé (réf. 1-F-06/24, 2-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/2af6a-8b782-79452_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "EDJ … 20°–90° pente de toit … profilé jusqu'à 90 mm de hauteur de profil",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": "pas de calcul possible ; tarif France 2024 et fiche 06/24 concordants",
+   "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026)."
+  },
+  {
+   "id": "velux_raccord_edn",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "EDN",
+   "attribut": "couverture_admise",
+   "valeur": "ardoises et matériaux plats < 8 mm (16 mm en double épaisseur)",
+   "unite": "mm",
+   "condition": "pose encastrée, pente ≥ 20°",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "EDN 0000 Ardoises < 8 mm (pose encastrée, Pente de toit 20°)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDJ / EDN, montage abaissé (réf. 1-F-06/24, 2-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/2af6a-8b782-79452_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "EDN … 20°–90° pente de toit … plat jusqu'à 16 mm de hauteur totale",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": "pas de calcul possible ; deux documents Velux concordants",
+   "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026)."
+  },
+  {
+   "id": "velux_raccord_eds",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "EDS",
+   "attribut": "couverture_admise",
+   "valeur": "matériaux plats ≤ 2 × 8 mm, conçu pour le raccord au photovoltaïque",
+   "unite": "mm",
+   "condition": "pose standard, 15°–90° ; absent du tarif France 2024 (fiche suisse)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "EDS … Pour matériel de couverture plat jusqu'à 16 mm de hauteur totale (2 × 8 mm) • Idéal pour le raccordement aux systèmes PV",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_raccord_pente_mini_encastre",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "",
+   "modele": "",
+   "attribut": "pente_minimale",
+   "valeur": 20,
+   "unite": "°",
+   "condition": "toute pose encastrée (EDJ, EDN chez Velux ; ELJ chez Fakro) ; pose standard : 15°",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Raccords en création d'ouverture - Pose encastrée … Pente de toit 20°",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "FAKRO, fiche technique raccord ELJ (FR), hébergée par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6408/02FR_Fakro_ELJ_fiche_techn.pdf",
+     "type": "fabricant",
+     "extrait": "pose par recouvrement et plus encastrée. Épaisseur maximale 10 mm (2x5mm). Pentes de toiture admissibles: 20-90°",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_raccord_coloris",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "coloris_et_suffixe",
+   "valeur": "0000 gris (aluminium laqué) ; 0700C1 ocre-jaune ; 0700C2 rouge-brun (EDW, EDJ, EW)",
+   "unite": "",
+   "condition": "le coloris se lit dans la fin de la référence : EDW MK04 0000 = gris",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Autres coloris disponibles : Ocre-jaune : EDW/EW 0700C1 Rouge-brun : EDJ/EDW/EW 0700C2",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Castorama, « Raccord fenêtre de toit simple sur tuiles Velux EDW CK02 ocre »",
+     "url": "https://www.castorama.fr/raccord-fenetre-de-toit-simple-sur-tuiles-velux-edw-ck02-ocre/5702326706349_CAFR.prd",
+     "type": "negoce",
+     "extrait": "Raccord fenêtre de toit simple sur tuiles Velux EDW CK02 ocre",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_raccord_remplacement",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "raccord_de_remplacement",
+   "valeur": "EW (tuiles) / EL (ardoises), avec isolant : EW 6000 / EL 6000",
+   "unite": "",
+   "condition": "seulement pour les anciennes fenêtres Velux d'avant 2001 (codes 102, 104, 304…) ; pour C02, C04, M04… prendre les raccords classiques EDW, EDL, EDJ, EDN",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Les raccords remplacement s'utilisent pour les anciens modèles de fenêtres VELUX (avant 2001) sauf FV et TTP.",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_zwc",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Velux",
+   "modele": "ZWC",
+   "attribut": "nature_article",
+   "valeur": "kit de profilés pour fenêtre installée sans raccord (pose standard), même prix toutes tailles",
+   "unite": "",
+   "condition": "ZWC n'est pas un raccord d'étanchéité de couverture ; sur bac acier Velux conseille l'EDW",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Réf. ZWC Kits profilés pour fenêtres installées sans raccords. Pose standard uniquement (57 € HT** toutes tailles)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_bdx_un_par_fenetre",
+   "famille": "fenetres_toit",
+   "sous_famille": "accessoires d'installation",
+   "marque": "Velux",
+   "modele": "BDX",
+   "attribut": "quantite_par_fenetre",
+   "valeur": 1,
+   "unite": "u",
+   "condition": "bloc isolant BDX (mousse sur précadre) : BDX 0000 pose traditionnelle, BDX 0000F pose encastrée ; un par fenêtre, même en combinaison ; incompatible avec les raccords EW/EL",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Pour les combinaisons de fenêtres, commander un BDX par fenêtre … Incompatibles avec les raccords EW/EL.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "2... = raccordement Profiset pour montage individuel (BDX et BFX inclus)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": "pas de calcul ; deux documents Velux",
+   "raison": "Deux documents du même fabricant (Velux), sans contrôle par le calcul : une seule source (règle du 19/11/2026)."
+  },
+  {
+   "id": "velux_bfx_un_par_fenetre",
+   "famille": "fenetres_toit",
+   "sous_famille": "accessoires d'installation",
+   "marque": "Velux",
+   "modele": "BFX",
+   "attribut": "quantite_par_fenetre",
+   "valeur": 1,
+   "unite": "u",
+   "condition": "collerette d'étanchéité à l'écran de sous-toiture BFX 1000 (traditionnelle) / 1000F (encastrée), avec renvoi d'eau ; un par fenêtre",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Collerette d'étanchéité pour écran de sous-toiture BFX 1000F Pose encastrée … BFX 1000 Pose traditionnelle",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "En Suisse (fiches 06/24) les raccords « 1… » incluent le BFX ; en France le tarif 2024 vend le BFX à part (et dans le Pack PRO+). Vérifier au comptoir si le raccord pris l'inclut."
+  },
+  {
+   "id": "velux_bbx_un_par_fenetre",
+   "famille": "fenetres_toit",
+   "sous_famille": "accessoires d'installation",
+   "marque": "Velux",
+   "modele": "BBX",
+   "attribut": "quantite_par_fenetre",
+   "valeur": 1,
+   "unite": "u",
+   "condition": "collerette pare-vapeur BBX 0000 (film polyéthylène de 50 cm soudé aux angles) ; un par fenêtre ; incluse dans l'habillage LSB / LSC",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Collerette pare-vapeur BBX … Film polyéthylène de 50 cm soudé dans les 4 angles … commander un BBX par fenêtre",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_habillage_epaisseur",
+   "famille": "fenetres_toit",
+   "sous_famille": "accessoires d'installation",
+   "marque": "Velux",
+   "modele": "LSB / LSC",
+   "attribut": "epaisseur_de_toit_max",
+   "valeur": "LSB 300 / LSC 400",
+   "unite": "mm",
+   "condition": "habillage intérieur PVC blanc prêt à poser ; au-delà, nous consulter",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Habillage en PVC blanc pour une épaisseur de toit jusqu'à 300 mm (réf. LSB) ou jusqu'à 400 mm (réf. LSC).",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_pack_pro_plus",
+   "famille": "fenetres_toit",
+   "sous_famille": "accessoires d'installation",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "contenu",
+   "valeur": "raccord + BDX + BFX + gouttière centrale ajustable 100 à 160 mm",
+   "unite": "",
+   "condition": "fenêtres en combinaison (côte à côte, superposées) ; la gouttière centrale s'ajuste à la largeur du chevron",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Pack PRO+ contenant le bloc isolant BDX, la collerette d'étanchéité BFX et une gouttière centrale ajustable … entre 100 - 160 mm",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "fenetre_toit_unite_de_vente",
+   "famille": "fenetres_toit",
+   "sous_famille": "conditionnement",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "unite_de_vente",
+   "valeur": "fenêtre à la pièce ; raccord à la pièce, à la taille de la fenêtre ; BDX, BFX, BBX à la pièce, à la taille",
+   "unite": "u",
+   "condition": "un raccord par fenêtre seule ; combinaisons : raccord de combinaison (EK…) ou Pack PRO+",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Prix € HT par taille : GGL 2057 … EDW 0000 … BDX 0000 … BBX 0000 (une ligne de prix par taille)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Brico Dépôt, « Raccord d'étanchéité EDW SK06 gris pour fenêtre de toit haut. 118 x larg. 114 cm »",
+     "url": "https://www.bricodepot.fr/p/5702326243905/raccord-d-etancheite-edw-sk06-gris-pour-fenetre-de-toit-haut-118-x-larg-114-cm",
+     "type": "negoce",
+     "extrait": "115€00 TTC/La pièce (raccord EDW SK06)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_finitions",
+   "famille": "fenetres_toit",
+   "sous_famille": "modèles, finitions, manœuvre",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "finitions",
+   "valeur": "WhiteFinish = bois peint blanc (GGL / GPL) ; EverFinish = polyuréthane blanc (GGU / GPU) ; ClearFinish = bois verni (GGL 3054…)",
+   "unite": "",
+   "condition": "le premier groupe de lettres dit la matière : GGL bois, GGU polyuréthane ; L = bois, U = PU",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "GGL 2057 WhiteFinish … GGU 0057 EverFinish … ClearFinish Bois vernis durable et résistant.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Castorama, « Fenêtre de toit à rotation VELUX Tout Confort Everfinish - polyuréthane L. 78 x H. 98 cm (GGU 0057 MK04) »",
+     "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-tout-confort-everfinish-polyurethane-l-78-x-h-98-cm-ggu-0057-mk04-/5702327001092_CAFR.prd",
+     "type": "negoce",
+     "extrait": "VELUX Tout Confort Everfinish - polyuréthane … (GGU 0057 MK04)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Castorama, « Fenêtre de toit à rotation VELUX Confort Whitefinish - bois peint en blanc L. 78 x H. 98 cm (GGL 2076 MK04) »",
+     "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-confort-whitefinish-bois-peint-en-blanc-l-78-x-h-98-cm-ggl-2076-mk04-/5702328300033_CAFR.prd",
+     "type": "negoce",
+     "extrait": "VELUX Confort Whitefinish - bois peint en blanc … (GGL 2076 MK04)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_ouvertures",
+   "famille": "fenetres_toit",
+   "sous_famille": "modèles, finitions, manœuvre",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "ouverture",
+   "valeur": "GGL / GGU = rotation (axe central) ; GPL / GPU = projection (ouverture par le bas, 15° à 55°)",
+   "unite": "",
+   "condition": "le comptoir demande rotation ou projection",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Fenêtre à projection GPL 2057 … Fenêtre à rotation GGL 2057",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Castorama, « Fenêtre de toit à rotation VELUX Tout Confort Everfinish - polyuréthane L. 78 x H. 98 cm (GGU 0057 MK04) »",
+     "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-tout-confort-everfinish-polyurethane-l-78-x-h-98-cm-ggu-0057-mk04-/5702327001092_CAFR.prd",
+     "type": "negoce",
+     "extrait": "Fenêtre de toit à rotation VELUX … (GGU 0057 MK04)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "velux_gammes_vitrage",
+   "famille": "fenetres_toit",
+   "sous_famille": "modèles, finitions, manœuvre",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "gamme_vitrage",
+   "valeur": "suffixe 2076 / 0076 = Confort ; 2057 / 0057 = Tout Confort ; 2062 = triple vitrage ; 3054 = gamme bois verni ClearFinish",
+   "unite": "",
+   "condition": "le suffixe à 4 chiffres suit le modèle (GGL MK04 2076) ; il fixe le vitrage et le prix",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Fenêtres Confort GGL 2076 … Fenêtres Tout Confort Fenêtre à rotation GGL 2057 … GGL 2062 WhiteFinish",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Castorama, « Fenêtre de toit à rotation VELUX Confort Whitefinish - bois peint en blanc L. 78 x H. 98 cm (GGL 2076 MK04) »",
+     "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-confort-whitefinish-bois-peint-en-blanc-l-78-x-h-98-cm-ggl-2076-mk04-/5702328300033_CAFR.prd",
+     "type": "negoce",
+     "extrait": "Fenêtre de toit à rotation VELUX Confort Whitefinish … (GGL 2076 MK04)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "« 2062 triple vitrage » lu sur une seule ligne du tarif (fenêtre patrimoine) : à recouper."
+  },
+  {
+   "id": "velux_manoeuvre",
+   "famille": "fenetres_toit",
+   "sous_famille": "modèles, finitions, manœuvre",
+   "marque": "Velux",
+   "modele": "",
+   "attribut": "manoeuvre",
+   "valeur": "manuelle (barre de manœuvre) ; électrique INTEGRA : suffixe …21 (GGU 007621) ; solaire : suffixe …30 (GGU 005730)",
+   "unite": "",
+   "condition": "électrique et solaire livrés avec clavier mural (tarif 2024) ; la GPU motorisée n'accepte pas certains accessoires",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "GGU 005730 Tout Confort - EverFinish - Solaire … GGU 007621 (motorisée)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "MKM (négoce, Royaume-Uni), fiche « VELUX 660mm x 1180mm Integra electric … GGU FK06 007021U »",
+     "url": "https://checkout.mkm.com/content/products/pdf/12019/velux-660mm-x-1180mm-integra-electric-white-poly-finish-centre-pivot-roof-window-70-pane-ggu-fk06-007021u-t003753_TechData_1.pdf",
+     "type": "negoce",
+     "extrait": "VELUX … Integra electric white poly finish centre pivot roof window … GGU FK06 007021U",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "fakro_codes_taille",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Fakro",
+   "modele": "",
+   "attribut": "equivalence_code_taille",
+   "valeur": "01 = 55×78 ; 02 = 55×98 ; 03 = 66×98 ; 04 = 66×118 ; 05 = 78×98 ; 06 = 78×118 ; 07 = 78×140 ; 13 = 78×160 ; 08 = 94×118 ; 09 = 94×140 ; 10 = 114×118 ; 11 = 114×140 ; 12 = 134×98 ; 17 = 134×140",
+   "unite": "cm",
+   "condition": "Fakro FTP-V (bois), FTU-V (PU) : mêmes cotes commerciales que Velux, dormant exact 547 × 781, 777 × 981… (3 mm de moins)",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions commerciales/côtes extérieures[cm] 55x78 … 134x140 ; Code dimensionnel 01 02 03 04 05 06 07 13 08 09 10 11 12 17",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "Type de produit (no. de type Velux | Fakro) CK02 | 01 … MK04 | 05 … SK06 | 10 … UK08 | 17",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "fakro_raccord_ezv",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Fakro",
+   "modele": "EZV-F",
+   "attribut": "couverture_admise",
+   "valeur": "tuiles plates à emboîtement, épaisseur 18 à 45 mm",
+   "unite": "mm",
+   "condition": "pose standard, 15°–90°",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "FAKRO, fiche technique raccord EZV-F (FR), hébergée par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6412/02FR_Fakro_EZV_F_fiche_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Raccord destiné à la pose avec des tuiles plates à emboîtement. Épaisseur de tuile admissible : 18 mm à 45 mm",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "fakro_raccord_ehv",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Fakro",
+   "modele": "EHV-P",
+   "attribut": "couverture_admise",
+   "valeur": "couvertures ondulées / profilées, onde ≤ 90 mm",
+   "unite": "mm",
+   "condition": "pose standard, 15°–90° (équivalent EDW, relief maxi plus faible : 90 contre 120)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "FAKRO, fiche technique raccord EHV-P (FR), hébergée par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6402/02FR_Fakro_EHV_P_fiche_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Hauteur maximale d'onde pour matériau de couverture : 90 mm. Pentes de toiture admissibles: 15-90°",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "fakro_raccord_elv",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Fakro",
+   "modele": "ELV",
+   "attribut": "couverture_admise",
+   "valeur": "ardoises et matériaux plats, pose par recouvrement",
+   "unite": "",
+   "condition": "pose standard, 15°–90° (équivalent EDL)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "FAKRO, fiche technique raccord ELV (FR), hébergée par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6410/02FR_Fakro_ELV_fiche_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Raccord destiné aux matériaux de couverture plates (ardoises) - pose par recouvrement. Pentes de toiture admissibles: 15-90°",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "fakro_raccord_elj",
+   "famille": "fenetres_toit",
+   "sous_famille": "raccords d'étanchéité",
+   "marque": "Fakro",
+   "modele": "ELJ",
+   "attribut": "couverture_admise",
+   "valeur": "ardoises, pose encastrée, épaisseur ≤ 10 mm (2 × 5 mm)",
+   "unite": "mm",
+   "condition": "20°–90° (équivalent EDN, épaisseur plus faible : 2×5 contre 2×8)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "FAKRO, fiche technique raccord ELJ (FR), hébergée par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6408/02FR_Fakro_ELJ_fiche_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Épaisseur maximale 10 mm (2x5mm). Pentes de toiture admissibles: 20-90°",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "id": "roto_tailles",
+   "famille": "fenetres_toit",
+   "sous_famille": "tailles de fenêtre",
+   "marque": "Roto",
+   "modele": "",
+   "attribut": "dimensions_hors_tout",
+   "valeur": "5/7 = 54×78 ; 5/9 = 54×98 ; 7/9 = 74×98 ; 7/11 = 74×118 ; 7/14 = 74×140 ; 9/11 = 94×118 ; 9/14 = 94×140 ; 11/11 = 114×118 ; 11/14 = 114×140 ; 13/9 = 134×98 ; 13/14 = 134×140",
+   "unite": "cm",
+   "condition": "Roto Designo : largeurs 54 et 74 (et non 55 et 78 comme Velux) : une Roto 7/9 ne remplace pas une MK04 sans reprise de chevêtre ; raccords Roto propres à la marque",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Roto, « Designo R6 – fiche technique » (FR), hébergée par benz24.fr",
+     "url": "https://benz24.fr/media/documents/05/05f33e6a8cd9be667318bccaa85c50d0/3fddda9268951922e73e50842c1e0670.pdf",
+     "type": "fabricant",
+     "extrait": "Dimension hors tout in mm (B x H) 5/7 540/780 … 7/9 740/980 … 11/11 1140/1180 … 13/9 1340/980",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "La Centrale Éco (négoce), fiche « Fenêtre de toit PVC Roto Designo R4 », tailles proposées",
+     "url": "https://lacentrale-eco.com/en/fenetre-et-porte/fenetre-pvc-et-bois/fenetre-de-toit-pvc-roto-designo-r4.html",
+     "type": "negoce",
+     "extrait": "11/11 - 114 x 118 cm, 11/14 - 114 x 140 cm, 13/9 - 134 x 98 cm, 5/7 - 54 x 78 cm … 7/9 - 74 x 98 cm",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "La Centrale Éco liste les tailles du Designo R4 ; la fiche Roto est celle du R6 : mêmes codes, mêmes cotes pour les tailles communes."
+  }
+ ],
+ "verdict_ratios": [
+  {
+   "ratio": "FENETRES : CK02 55×78, CK04 55×98, FK06 66×118, MK04 78×98, MK06 78×118, MK08 78×140, PK06 94×118, PK08 94×140, SK06 114×118, SK08 114×140, UK04 134×98",
+   "origine": "baticlair/packages/domain/src/referential/data/roofing.ts (const FENETRES, ~l. 781)",
+   "valeur_actuelle": "11 tailles",
+   "verdict": "confirme",
+   "bonne_valeur": "les 11 tailles sont justes ; manquent PK10 94×160, UK08 134×140 (tarif France 2024), MK10 78×160 et CK01 55×70",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout … CK02 CK04 MK04 MK06 MK08 PK06 PK08 PK10 SK06 SK08 UK04 UK08",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "CK02 | 01 550 x 780 … UK08 | 17 1340 x 1400",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Cotes hors tout Velux, recoupées par Kingspan et Fakro (mêmes cotes commerciales)."
+  },
+  {
+   "ratio": "Raccord : « Pour tuiles (mécaniques, canal) » / « Pour ardoises » / « Pour tuiles plates »",
+   "origine": "roofing.ts (choix du raccord, ~l. 760)",
+   "valeur_actuelle": "3 choix",
+   "verdict": "confirme",
+   "bonne_valeur": "tuiles → EDW (relief ≤ 120 mm, 15°) ; ardoises → EDL (≤ 8 mm, 15°) ; tuiles plates (largeur < 300 mm) → EDP (pente ≥ 25°) ; pose encastrée → EDJ / EDN (20°) ; bac acier → EDW",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "EDW 0000* Tuiles ≤ 120 mm relief … EDP 0000 Tuiles plates l.< 300 mm … EDL 0000 Ardoises < 8 mm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "Pour matériel de couverture profilé jusqu'à 120 mm de hauteur de profil.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Les trois choix existent tels quels ; ajouter la pose (standard / encastrée) et le bac acier si le devis le dit."
+  },
+  {
+   "ratio": "Raccord d'étanchéité : d'office avec le Velux, choisi selon la couverture",
+   "origine": "regles-metier SKILL.md § Velux",
+   "valeur_actuelle": "1 raccord par fenêtre",
+   "verdict": "confirme",
+   "bonne_valeur": "1 raccord par fenêtre seule, à la taille de la fenêtre ; combinaison : raccord de combinaison ou Pack PRO+",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Raccords en création d'ouverture - Pose standard … EDW 0000* … EDL 0000 (une ligne par taille de fenêtre)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Brico Dépôt, « Raccord d'étanchéité EDW SK06 gris pour fenêtre de toit haut. 118 x larg. 114 cm »",
+     "url": "https://www.bricodepot.fr/p/5702326243905/raccord-d-etancheite-edw-sk06-gris-pour-fenetre-de-toit-haut-118-x-larg-114-cm",
+     "type": "negoce",
+     "extrait": "Raccord d'étanchéité EDW SK06 … 115€00 TTC/La pièce",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Le raccord se vend à la pièce, par taille de fenêtre."
+  },
+  {
+   "ratio": "En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur",
+   "origine": "regles-metier SKILL.md § Velux et § Suggestions",
+   "valeur_actuelle": "BDX, BBX, volet, store, habillage",
+   "verdict": "confirme",
+   "bonne_valeur": "même liste + collerette d'écran BFX (vendue à part en France) ; 1 de chaque par fenêtre, à la taille de la fenêtre",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Pour les combinaisons de fenêtres, commander un BFX 1000 par fenêtre … commander un BBX par fenêtre",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "Inclus raccord de sous-toiture BFX avec tôle de renvoi d'eau (version suisse)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "BFX manque à la liste des Suggestions ; en France il n'est pas dans le raccord EDW 0000 d'après le tarif 2024 (à vérifier au comptoir)."
+  },
+  {
+   "ratio": "On retire toujours la surface du Velux de la surface d'ardoise ou de tuile",
+   "origine": "regles-metier SKILL.md § Velux",
+   "valeur_actuelle": "surface de la fenêtre",
+   "verdict": "confirme",
+   "bonne_valeur": "surface hors tout : CK02 0,43 ; MK04 0,76 ; MK06 0,92 ; MK08 1,09 ; PK08 1,32 ; SK06 1,35 ; UK04 1,31 m²",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Cotes hors tout largeur x hauteur en cm 55x78 … 78x98 … 114x118",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Kingspan Unidek, fiche produit « Aero chambranle de fenêtre » (Belgique, FR) : table des tailles Velux / Fakro",
+     "url": "https://www.kingspan.com/content/dam/kingspan/unidek/products/belgium/unidek-aero-dakraamkozijn/fr/kingspan-unidek-aero-chambranle-de-fenetre-product-data-sheet-fr-be.pdf",
+     "type": "fabricant",
+     "extrait": "Dimensions fenêtre de toiture l x h en mm 550 x 780 … 780 x 980",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Largeur × hauteur hors tout ; les coupes autour restent dans la perte du toit."
+  },
+  {
+   "ratio": "Raccord des Velux : ZWC (ligne fourniture) ou Pratikal (ligne pose)",
+   "origine": "lecture/exemples/de00000071.ts et lecture/controles.ts:122",
+   "valeur_actuelle": "ZWC traité comme un raccord",
+   "verdict": "a_confirmer",
+   "bonne_valeur": "ZWC = kit de profilés pour fenêtre posée sans raccord (pose standard, toutes tailles), pas un raccord de couverture ; sur bac acier, Velux conseille l'EDW",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Réf. ZWC Kits profilés pour fenêtres installées sans raccords. Pose standard uniquement … Installation sur bac acier : privilégier l'EDW.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "La question posée à l'artisan reste bonne (le devis dit deux choses) ; le libellé « raccord ZWC » est à revoir avec le fondateur."
+  }
+ ],
+ "commande_comptoir": [
+  {
+   "article": "Fenêtre de toit Velux",
+   "ce_que_le_vendeur_demande": [
+    "taille (code : CK02, MK04, MK06, MK08, PK08, SK06, UK04…) ou cotes hors tout en cm",
+    "ouverture : rotation (GGL / GGU) ou projection (GPL / GPU, pente ≤ 55°)",
+    "finition : bois peint blanc WhiteFinish, polyuréthane EverFinish, ou bois verni ClearFinish",
+    "gamme vitrage : Confort (2076 / 0076) ou Tout Confort (2057 / 0057)",
+    "manœuvre : manuelle, électrique INTEGRA, solaire",
+    "nombre"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "1 fenêtre par carton",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "GGL 2057 WhiteFinish … GGU 0057 EverFinish … Pente de toit : 15° - 90°",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Castorama, « Fenêtre de toit à rotation VELUX Tout Confort Everfinish - polyuréthane L. 78 x H. 98 cm (GGU 0057 MK04) »",
+     "url": "https://www.castorama.fr/fenetre-de-toit-a-rotation-velux-tout-confort-everfinish-polyurethane-l-78-x-h-98-cm-ggu-0057-mk04-/5702327001092_CAFR.prd",
+     "type": "negoce",
+     "extrait": "(GGU 0057 MK04)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Raccord d'étanchéité Velux",
+   "ce_que_le_vendeur_demande": [
+    "couverture : tuiles ≤ 120 mm (EDW), ardoises ≤ 8 mm (EDL), tuiles plates < 300 mm (EDP, pente ≥ 25°)",
+    "pose standard ou encastrée (EDJ / EDN, pente ≥ 20°)",
+    "taille = celle de la fenêtre",
+    "coloris : gris 0000, ocre 0700C1, rouge-brun 0700C2",
+    "fenêtre seule ou combinaison"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "1 raccord (BFX à part en France d'après le tarif 2024)",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "EDW 0000* Tuiles ≤ 120 mm relief … EDJ 0000* Tuiles ≤ 90 mm relief … EDN 0000 Ardoises < 8 mm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Brico Dépôt, « Raccord d'étanchéité EDW SK06 gris pour fenêtre de toit haut. 118 x larg. 114 cm »",
+     "url": "https://www.bricodepot.fr/p/5702326243905/raccord-d-etancheite-edw-sk06-gris-pour-fenetre-de-toit-haut-118-x-larg-114-cm",
+     "type": "negoce",
+     "extrait": "115€00 TTC/La pièce",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Accessoires d'installation Velux (BDX, BFX, BBX, LSB / LSC)",
+   "ce_que_le_vendeur_demande": [
+    "taille de la fenêtre",
+    "pose standard ou encastrée (BDX 0000 / 0000F, BFX 1000 / 1000F)",
+    "épaisseur de toit pour l'habillage (≤ 300 LSB, ≤ 400 LSC)"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "1 par fenêtre ; Pack PRO+ (raccord + BDX + BFX + gouttière centrale) pour les combinaisons",
+   "sources": [
+    {
+     "titre": "VELUX France, tarif-catalogue 2024 (janvier 2024), copie hébergée par la CAPEB",
+     "url": "https://www.capeb.fr/www/capeb/media/document/cata-velux-france-2024-prix-bd.pdf",
+     "type": "fabricant",
+     "extrait": "Pour les combinaisons de fenêtres, commander un BDX par fenêtre",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VELUX, fiches techniques raccords EDW / EDL / EDS / EDB (réf. 1-F-06/24 à 4-F-06/24), contenthub.velux.com",
+     "url": "https://contenthub.velux.com/api/public/content/5d8d0-5729c-8b463_downloadOriginal",
+     "type": "fabricant",
+     "extrait": "2... = raccordement Profiset pour montage individuel (BDX et BFX inclus)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Fenêtre de toit Fakro ou Roto",
+   "ce_que_le_vendeur_demande": [
+    "marque (les raccords ne sont pas interchangeables)",
+    "taille : Fakro = cotes Velux (code 05 = 78×98) ; Roto = 54 / 74 / 94 / 114 / 134 de large (7/9 = 74×98)",
+    "raccord Fakro : EZV (tuiles plates 18–45 mm), EHV (ondulé ≤ 90 mm), ELV (ardoise), ELJ (ardoise encastrée)"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "1 fenêtre, 1 raccord",
+   "sources": [
+    {
+     "titre": "FAKRO, caractéristiques techniques FTP-V / FTW-V / FTU-V, fenêtre bois rotation (FR, 2019-2022), hébergé par Eurabo",
+     "url": "https://www.eurabo.be/files/attachments/.6769/02FR_Fakro_Fenetres_rotation_fiches_techn.pdf",
+     "type": "fabricant",
+     "extrait": "Code dimensionnel 01 … 17",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Roto, « Designo R6 – fiche technique » (FR), hébergée par benz24.fr",
+     "url": "https://benz24.fr/media/documents/05/05f33e6a8cd9be667318bccaa85c50d0/3fddda9268951922e73e50842c1e0670.pdf",
+     "type": "fabricant",
+     "extrait": "5/7 540/780 … 7/9 740/980",
+     "consulte": "2026-11-20"
+    }
+   ]
+  }
+ ]
+}

@@ -3,7 +3,6 @@
 import { removalPlan, removalSummary } from "@/lib/removal";
 import { useUndoableRemove } from "@/components/swipe";
 import { DocumentsCard } from "@/components/documents/library";
-import { AnalysisEntry } from "@/components/analysis/entry";
 import { companyCrumbs } from "@/lib/crumbs";
 import { goBack } from "@/lib/nav";
 import Link from "next/link";
@@ -11,7 +10,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Building2, Landmark, Pencil, Plus } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { cashflowMonthly, ltv, netWorth } from "@/lib/engine/snapshot";
+import { cashflowMonthly, ltv, netWorth, rentalPayments } from "@/lib/engine/snapshot";
 import { monthLabel } from "@/lib/engine/dates";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 import { labelOf, COMPANY_KINDS } from "@/lib/labels";
@@ -70,13 +69,13 @@ export function CompanyDetail({ id }: { id: string }) {
       />
       <Page>
         <Card>
-          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : <MissingData action={f.unvalued ? `Estimer ${f.unvalued} immeuble${f.unvalued > 1 ? "s" : ""}` : undefined} href="/plus/a-completer" />} big />
+          <Kpi label={hasChildren ? "Patrimoine net consolidé" : "Patrimoine net"} value={netWorth(f) !== undefined && (f.value || f.debt) ? eur(netWorth(f)) : <MissingData action={f.unvalued ? `Estimer ${f.unvalued} bien${f.unvalued > 1 ? "s" : ""}` : undefined} href="/plus/a-completer" />} big />
           <div className="mt-4 grid grid-cols-2 gap-4">
             <Kpi label="Valeur immobilière" value={f.unvalued ? "—" : eurCompact(f.value)} hint={f.unvalued ? `${f.unvalued} bien(s) sans valeur` : undefined} />
-            <Kpi label="Dette totale" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
+            <Kpi label="Capital restant dû" value={eurCompact(f.debt)} hint={ratio !== undefined ? `LTV ${pct(ratio)}` : undefined} />
             <Kpi label="Loyers / mois" value={eurCompact(f.rentMonthly)} />
-            <Kpi label="Mensualités / mois" value={eurCompact(f.paymentsMonthly)} />
-            <Kpi label="Cash-flow / mois" value={eurSigned(cf)} tone={cf >= 0 ? "pos" : "neg"} />
+            <Kpi label="Mensualités / mois" value={eurCompact(rentalPayments(f))} hint={f.personalPaymentsMonthly > 0 ? `+ ${eurCompact(f.personalPaymentsMonthly)} crédit personnel` : undefined} />
+            <Kpi label="Cash-flow locatif / mois" value={eurSigned(cf)} tone={cf >= 0 ? "pos" : "neg"} />
             <Kpi label="Trésorerie" value={eurCompact(f.cash)} />
           </div>
           {(own?.partnerAccounts ?? 0) > 0 && (
@@ -129,10 +128,10 @@ export function CompanyDetail({ id }: { id: string }) {
           </>
         )}
 
-        <SectionTitle action={<AddLink onClick={() => setSheet("building")} />}>Immeubles</SectionTitle>
+        <SectionTitle action={<AddLink onClick={() => setSheet("building")} />}>Biens</SectionTitle>
         <Card className="py-1">
           {buildings.length === 0 ? (
-            <div className="py-3 text-sm text-muted">Aucun immeuble détenu directement.</div>
+            <div className="py-3 text-sm text-muted">Aucun bien détenu directement.</div>
           ) : (
             <Divided>
               {buildings.map((b) => {
@@ -205,8 +204,6 @@ export function CompanyDetail({ id }: { id: string }) {
           <>
             <DocumentsCard scope={{ companyId: company.id }} href={`/documents?societe=${company.id}`} />
 
-            <AnalysisEntry scope={{ type: "company", id: company.id }} title="Analyse IA de cette société" />
-
             <SectionTitle>Informations</SectionTitle>
             <Card className="space-y-2 text-[15px]">
               {company.partners?.map((p, i) => (
@@ -253,7 +250,7 @@ export function CompanyDetail({ id }: { id: string }) {
 
 export function AddLink({ onClick, label = "Ajouter" }: { onClick: () => void; label?: string }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-1 text-sm font-semibold text-series-1">
+    <button onClick={onClick} className="write-action flex items-center gap-1 text-sm font-semibold text-series-1">
       <Plus size={16} /> {label}
     </button>
   );

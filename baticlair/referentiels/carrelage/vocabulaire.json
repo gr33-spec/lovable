@@ -1,0 +1,18 @@
+{
+  "metier": "carrelage",
+  "ouvrages": {
+    "sol_colle_int": { "expressions": ["carrelage sol", "grès cérame", "carrelage pièce de vie", "pose droite", "pose décalée", "pose en diagonale", "carrelage"] },
+    "mur_colle_int": { "expressions": ["faïence", "faïence murale", "crédence", "carrelage mural", "toute hauteur"] },
+    "douche_italienne": { "expressions": ["douche à l'italienne", "receveur à carreler", "caniveau de douche", "siphon de sol", "douche de plain-pied"] },
+    "sol_ext": { "expressions": ["carrelage extérieur", "dalle 2 cm", "dalles 20 mm", "ingélif", "r11", "plage de piscine"] },
+    "plinthes": { "expressions": ["plinthes carrelage", "plinthes assorties", "plinthes à talon"] },
+    "escalier": { "expressions": ["habillage escalier", "nez de marche", "marches carrelées"] },
+    "prep_ragreage": { "expressions": ["ragréage", "autolissant", "mise à niveau"] },
+    "prep_primaire": { "expressions": ["primaire d'accrochage"] },
+    "spec": { "expressions": ["spec", "sel", "étanchéité sous carrelage", "sys protec", "mapelastic", "kerdi"] },
+    "desolidarisation": { "expressions": ["natte ditra", "désolidarisation", "natte de désolidarisation"] },
+    "scelle": { "expressions": ["pose scellée", "chape de pose", "tomettes"] },
+    "depose": { "expressions": ["dépose carrelage", "piquage"] },
+    "joints_silicone": { "expressions": ["joint silicone", "joint mastic"] }
+  }
+}

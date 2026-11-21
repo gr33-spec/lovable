@@ -1,0 +1,107 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Bande zinc de rive",
+   "quantity": "35",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Bande zinc de rive : tu façonnes toi-même ou tu commandes façonné ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "developpe",
+    "texte": "Développé de la bande zinc ?",
+    "boutons": [
+     {
+      "label": "100 mm (solin, couvre-joint)",
+      "valeur": "100"
+     },
+     {
+      "label": "200 mm",
+      "valeur": "200"
+     },
+     {
+      "label": "250 mm",
+      "valeur": "250"
+     },
+     {
+      "label": "330 mm",
+      "valeur": "330"
+     },
+     {
+      "label": "400 mm",
+      "valeur": "400"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "développé de la bande",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Bande zinc de rive",
+    "quantite": "35",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bande zinc de rive",
+      "quantite": "35",
+      "unite": "ml",
+      "ouvrage": "bandes-zinc",
+      "emplacement": "bande",
+      "donnees": {},
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

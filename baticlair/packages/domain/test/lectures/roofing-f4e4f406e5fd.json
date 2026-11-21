@@ -1,0 +1,152 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+   "quantity": "150",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Arêtier zinc dév. 33",
+   "quantity": "10",
+   "unit": "ml"
+  },
+  {
+   "ref": "3",
+   "designation": "Noue encaissée zinc",
+   "quantity": "4",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "qualite_ardoise",
+    "texte": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+    "boutons": [
+     {
+      "label": "Espagne 1er choix",
+      "valeur": "1"
+     },
+     {
+      "label": "Ardoise NF (type Cupa)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "qualité de l'ardoise",
+    "ligne": null
+   },
+   {
+    "cle": "faconnage",
+    "texte": "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+    "quantite": "150",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles 30×22",
+      "quantite": "150",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Arêtier zinc dév. 33",
+    "quantite": "10",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Arêtier zinc dév. 33",
+      "quantite": "10",
+      "unite": "ml",
+      "ouvrage": "aretier",
+      "emplacement": "aretiere",
+      "donnees": {
+       "aretier_matiere": "2",
+       "developpe_aretier": "330 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Noue encaissée zinc",
+    "quantite": "4",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Noue zinc",
+      "quantite": "4",
+      "unite": "ml",
+      "ouvrage": "noue",
+      "emplacement": "noue",
+      "donnees": {
+       "developpe_noue": "660 mm"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

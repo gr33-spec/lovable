@@ -1,0 +1,471 @@
+{
+  "appareil": "se",
+  "base": "https://test.mobiiz.fr",
+  "date": "2026-10-27T10:50:04.995Z",
+  "etapes": [
+    {
+      "n": 1,
+      "etape": "Visiteur : landing",
+      "statut": "ok",
+      "detail": "",
+      "capture": "01-visiteur-landing.jpg",
+      "ms": 7337
+    },
+    {
+      "n": 2,
+      "etape": "Visiteur : tarifs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "02-visiteur-tarifs.jpg",
+      "ms": 2046
+    },
+    {
+      "n": 3,
+      "etape": "Visiteur : inscription",
+      "statut": "ok",
+      "detail": "",
+      "capture": "03-visiteur-inscription.jpg",
+      "ms": 1943
+    },
+    {
+      "n": 4,
+      "etape": "Visiteur : connexion",
+      "statut": "ok",
+      "detail": "",
+      "capture": "04-visiteur-connexion.jpg",
+      "ms": 2803
+    },
+    {
+      "n": 5,
+      "etape": "Visiteur : mot de passe oublié",
+      "statut": "ok",
+      "detail": "",
+      "capture": "05-visiteur-mot-de-passe-oublie.jpg",
+      "ms": 2480
+    },
+    {
+      "n": 6,
+      "etape": "Visiteur : CGU",
+      "statut": "ok",
+      "detail": "",
+      "capture": "06-visiteur-cgu.jpg",
+      "ms": 2216
+    },
+    {
+      "n": 7,
+      "etape": "Visiteur : mentions légales",
+      "statut": "ok",
+      "detail": "",
+      "capture": "07-visiteur-mentions-legales.jpg",
+      "ms": 1886
+    },
+    {
+      "n": 8,
+      "etape": "Visiteur : confidentialité",
+      "statut": "ok",
+      "detail": "",
+      "capture": "08-visiteur-confidentialite.jpg",
+      "ms": 1899
+    },
+    {
+      "n": 9,
+      "etape": "Visiteur : conditions négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "09-visiteur-conditions-negoce.jpg",
+      "ms": 2011
+    },
+    {
+      "n": 10,
+      "etape": "Visiteur : connexion négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "10-visiteur-connexion-negoce.jpg",
+      "ms": 1993
+    },
+    {
+      "n": 11,
+      "etape": "Visiteur : adresse inconnue",
+      "statut": "ok",
+      "detail": "« Page introuvable »",
+      "capture": "11-visiteur-adresse-inconnue.jpg",
+      "ms": 1404
+    },
+    {
+      "n": 12,
+      "etape": "Landing : accroche, prix, inscription, aucune démo d'office",
+      "statut": "ok",
+      "detail": "",
+      "capture": "12-landing-accroche-prix-inscription-aucune-demo-d-.jpg",
+      "ms": 1843
+    },
+    {
+      "n": 13,
+      "etape": "Landing : « Voir comment ça marche (30 s) », trois métiers, Passer",
+      "statut": "ok",
+      "detail": "",
+      "capture": "13-landing-voir-comment-ca-marche-30-s-trois-metier.jpg",
+      "ms": 583
+    },
+    {
+      "n": 14,
+      "etape": "Inscription artisan",
+      "statut": "ok",
+      "detail": "delivered+admin-recette@resend.dev ; adresse toitures-recette-se@mobiiz.fr",
+      "capture": "14-inscription-artisan.jpg",
+      "ms": 4427
+    },
+    {
+      "n": 15,
+      "etape": "Guide : trois écrans, « Déposer mon premier devis »",
+      "statut": "ok",
+      "detail": "sans clôture (mode humain)",
+      "capture": "15-guide-trois-ecrans-deposer-mon-premier-devis.jpg",
+      "ms": 841
+    },
+    {
+      "n": 16,
+      "etape": "Guide : ne revient pas ; « Revoir le guide » dans le menu",
+      "statut": "ok",
+      "detail": "",
+      "capture": "16-guide-ne-revient-pas-revoir-le-guide-dans-le-men.jpg",
+      "ms": 6580
+    },
+    {
+      "n": 17,
+      "etape": "E-mail réel : confirmer l'adresse",
+      "statut": "ok",
+      "detail": "19 e-mail(s) : « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail »",
+      "capture": "17-e-mail-reel-confirmer-l-adresse.jpg",
+      "ms": 8331
+    },
+    {
+      "n": 18,
+      "etape": "Regroupement : SIRET et adresse",
+      "statut": "ok",
+      "detail": "",
+      "capture": "18-regroupement-siret-et-adresse.jpg",
+      "ms": 8450
+    },
+    {
+      "n": 19,
+      "etape": "Dépôt d'une liste (photo manuscrite), vraie lecture",
+      "statut": "bug",
+      "detail": "page.waitForURL: Timeout 120000ms exceeded. =========================== logs =========================== waiting for navigation until \"load\" ============================================================",
+      "capture": "19-depot-d-une-liste-photo-manuscrite-vraie-lecture.jpg",
+      "ms": 123079
+    },
+    {
+      "n": 20,
+      "etape": "Liste : ajouter au regroupement",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Regroupement d/ }).first() to be visible\u001b[22m ",
+      "capture": "20-liste-ajouter-au-regroupement-bug.jpg",
+      "ms": 20089
+    },
+    {
+      "n": 21,
+      "etape": "Dépôt d'un devis (PDF), vraie lecture, questions, liste",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 240000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /Page des fournitures|Liste des fournitures/ }).or(getByRole('region', { name: 'Les questions' })).first() to be visible\u001b[22m ",
+      "capture": "21-depot-d-un-devis-pdf-vraie-lecture-questions-lis.jpg",
+      "ms": 245446
+    },
+    {
+      "n": 22,
+      "etape": "Ton chantier : aperçu du PDF fournisseur",
+      "statut": "ok",
+      "detail": "pas d'aperçu sur cet écran",
+      "capture": "22-ton-chantier-apercu-du-pdf-fournisseur.jpg",
+      "ms": 62
+    },
+    {
+      "n": 23,
+      "etape": "Accueil : mettre son négoce dans la boucle",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Mets ton négoce dans la boucle' }).first() to be visible\u001b[22m ",
+      "capture": "23-accueil-mettre-son-negoce-dans-la-boucle-bug.jpg",
+      "ms": 24662
+    },
+    {
+      "n": 24,
+      "etape": "E-mail réel : invitation du négoce",
+      "statut": "bug",
+      "detail": "pas d'invitation (reçus : )",
+      "capture": "24-e-mail-reel-invitation-du-negoce-bug.jpg",
+      "ms": 94275
+    },
+    {
+      "n": 25,
+      "etape": "Négoce : créer son accès depuis l'invitation",
+      "statut": "bug",
+      "detail": "pas de lien",
+      "capture": "25-negoce-creer-son-acces-depuis-l-invitation-bug.jpg",
+      "ms": 43
+    },
+    {
+      "n": 26,
+      "etape": "Négoce : son espace (prochaine clôture, aucun nom d'artisan)",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Prochaine clôture' }).first() to be visible\u001b[22m ",
+      "capture": "26-negoce-son-espace-prochaine-cloture-aucun-nom-d-.jpg",
+      "ms": 23320
+    },
+    {
+      "n": 27,
+      "etape": "Admin : tableau de bord, code reçu par e-mail",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Ouvrir le tableau de bord' })\u001b[22m ",
+      "capture": "27-admin-tableau-de-bord-code-recu-par-e-mail-bug.jpg",
+      "ms": 35401
+    },
+    {
+      "n": 28,
+      "etape": "Admin : jeu de test (5 faux artisans, 3 faux négoces)",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Tout effacer' })\u001b[22m ",
+      "capture": "28-admin-jeu-de-test-5-faux-artisans-3-faux-negoces.jpg",
+      "ms": 30065
+    },
+    {
+      "n": 29,
+      "etape": "Admin : clôturer maintenant (grilles envoyées aux négoces)",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Clôturer maintenant' })\u001b[22m ",
+      "capture": "29-admin-cloturer-maintenant-grilles-envoyees-aux-n.jpg",
+      "ms": 30067
+    },
+    {
+      "n": 30,
+      "etape": "Admin : faire répondre les négoces",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Faire répondre les négoces' })\u001b[22m ",
+      "capture": "30-admin-faire-repondre-les-negoces-bug.jpg",
+      "ms": 30067
+    },
+    {
+      "n": 31,
+      "etape": "Admin : publier les résultats",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Publier les résultats' })\u001b[22m ",
+      "capture": "31-admin-publier-les-resultats-bug.jpg",
+      "ms": 30065
+    },
+    {
+      "n": 32,
+      "etape": "Résultats : e-mail réel et prix classés dans l'app",
+      "statut": "bug",
+      "detail": "pas d'e-mail de résultats (reçus : Confirme ton adresse e-mail / Ton code d'accès au pilotage Mobiiz / Confirme ton adresse e-mail / Ton code d'accès au pilotage Mobiiz / Confirme ton adresse e-mail / Ton code d'accès au pilotage Mobiiz / Confirme ton adresse e-mail / Ton code d'accès au pilotage Mobiiz / Connexion à ton espace admin Mobiiz / Confirme ton adresse e-mail / Ton code d'accès au pilot",
+      "capture": "32-resultats-e-mail-reel-et-prix-classes-dans-l-app.jpg",
+      "ms": 93947
+    },
+    {
+      "n": 33,
+      "etape": "Commande : la meilleure combinaison, chaque négoce reçoit sa part",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Tes prix' }).getByRole('radio', { name: /^Tout chez / }).first().first() to be visible\u001b[22m ",
+      "capture": "33-commande-la-meilleure-combinaison-chaque-negoce-.jpg",
+      "ms": 30059
+    },
+    {
+      "n": 34,
+      "etape": "Recommande : au prix garanti 30 jours",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Prix garantis jusqu'au/ }).first().first() to be visible\u001b[22m ",
+      "capture": "34-recommande-au-prix-garanti-30-jours-bug.jpg",
+      "ms": 35369
+    },
+    {
+      "n": 35,
+      "etape": "Admin : finir l'essai, puis le paywall au dépôt",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Finir l\\'essai' })\u001b[22m ",
+      "capture": "35-admin-finir-l-essai-puis-le-paywall-au-depot-bug.jpg",
+      "ms": 33978
+    },
+    {
+      "n": 36,
+      "etape": "Abonnement : essai et deux formules",
+      "statut": "ok",
+      "detail": "",
+      "capture": "36-abonnement-essai-et-deux-formules.jpg",
+      "ms": 3568
+    },
+    {
+      "n": 37,
+      "etape": "Stripe : carte refusée (4000 0000 0000 0002)",
+      "statut": "ok",
+      "detail": "Stripe dit le refus ; rien n'est payé",
+      "capture": "37-stripe-carte-refusee-4000-0000-0000-0002.jpg",
+      "ms": 14675
+    },
+    {
+      "n": 38,
+      "etape": "Stripe : carte acceptée (4242), retour « Abonné au mois »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "38-stripe-carte-acceptee-4242-retour-abonne-au-mois.jpg",
+      "ms": 15792
+    },
+    {
+      "n": 39,
+      "etape": "Factures : la facture du mois, téléchargeable",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('list', { name: 'Mes factures' }).getByRole('listitem').first() to be visible\u001b[22m ",
+      "capture": "39-factures-la-facture-du-mois-telechargeable-bug.jpg",
+      "ms": 30137
+    },
+    {
+      "n": 40,
+      "etape": "Passage à l'annuel au prorata",
+      "statut": "ok",
+      "detail": "",
+      "capture": "40-passage-a-l-annuel-au-prorata.jpg",
+      "ms": 8504
+    },
+    {
+      "n": 41,
+      "etape": "Admin : simuler un échec de paiement (grâce de 7 jours)",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Simuler un échec de paiement' })\u001b[22m ",
+      "capture": "41-admin-simuler-un-echec-de-paiement-grace-de-7-jo.jpg",
+      "ms": 32973
+    },
+    {
+      "n": 42,
+      "etape": "Résiliation en deux clics",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Résilier' })\u001b[22m ",
+      "capture": "42-resiliation-en-deux-clics-bug.jpg",
+      "ms": 30067
+    },
+    {
+      "n": 43,
+      "etape": "E-mails réels de l'abonnement",
+      "statut": "ok",
+      "detail": "« Ton code d'accès au pilotage Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Connexion à ton espace admin Mobiiz », « Confirme ton adresse e-mail », « Ton code d'accès au pilotage Mobiiz », « Ton abonnement Mobiiz est actif », « Ton abonnement Mobiiz est actif », « Tu es passé à l'abonnement annuel Mobiiz »",
+      "capture": "43-e-mails-reels-de-l-abonnement.jpg",
+      "ms": 61260
+    },
+    {
+      "n": 44,
+      "etape": "Menu : « Essayer avec un chantier fictif »",
+      "statut": "ok",
+      "detail": "",
+      "capture": "44-menu-essayer-avec-un-chantier-fictif.jpg",
+      "ms": 7014
+    },
+    {
+      "n": 45,
+      "etape": "Écran : mes chantiers",
+      "statut": "ok",
+      "detail": "",
+      "capture": "45-ecran-mes-chantiers.jpg",
+      "ms": 3803
+    },
+    {
+      "n": 46,
+      "etape": "Écran : fournisseurs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "46-ecran-fournisseurs.jpg",
+      "ms": 2782
+    },
+    {
+      "n": 47,
+      "etape": "Écran : formules",
+      "statut": "ok",
+      "detail": "",
+      "capture": "47-ecran-formules.jpg",
+      "ms": 2866
+    },
+    {
+      "n": 48,
+      "etape": "Écran : compte",
+      "statut": "ok",
+      "detail": "",
+      "capture": "48-ecran-compte.jpg",
+      "ms": 3217
+    },
+    {
+      "n": 49,
+      "etape": "Compte : export JSON et PDF",
+      "statut": "ok",
+      "detail": "mobiiz-mes-donnees-2026-10-27.json",
+      "capture": "49-compte-export-json-et-pdf.jpg",
+      "ms": 3799
+    },
+    {
+      "n": 50,
+      "etape": "Admin : tout effacer (faux comptes)",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Démo' }).getByRole('button', { name: 'Tout effacer' })\u001b[22m ",
+      "capture": "50-admin-tout-effacer-faux-comptes-bug.jpg",
+      "ms": 33198
+    },
+    {
+      "n": 51,
+      "etape": "Compte : suppression (en tapant SUPPRIMER)",
+      "statut": "ok",
+      "detail": "",
+      "capture": "51-compte-suppression-en-tapant-supprimer.jpg",
+      "ms": 8202
+    }
+  ],
+  "anomalies": [
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/nulle-part",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "http 502",
+      "texte": "POST /v1/projects/01a17ce9-e9d5-7094-99f2-d361ddd7463f/liste?ecran=1"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "corps 502",
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this list\",\"supportId\":\"B5A6-2567\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\",\"motif\":\"http_400: invalid_request_error, Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade "
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a17cec-1bdd-723d-a8e9-7a933ab6aa63",
+      "type": "http 502",
+      "texte": "POST /v1/quantitatifs?ecran=1"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a17cec-1bdd-723d-a8e9-7a933ab6aa63",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 502 (Bad Gateway)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/01a17cec-1bdd-723d-a8e9-7a933ab6aa63",
+      "type": "corps 502",
+      "texte": "{\"error\":{\"code\":\"analysis_failed\",\"message\":\"The AI could not read this quote\",\"supportId\":\"C6FF-6243\",\"retryable\":false,\"details\":{\"reason\":\"provider_error\",\"essaiAuto\":false}}}"
+    },
+    {
+      "qui": "negoce-se",
+      "url": "https://test.mobiiz.fr/negoce",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ]
+}

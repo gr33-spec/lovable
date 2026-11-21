@@ -10,6 +10,8 @@ export interface ImpactSide {
   debt: number;
   value?: number;
   ltvPct?: number;
+  /** Capacité de remboursement du groupe : (loyers − charges) ÷ mensualités (même règle que le DSCR). */
+  dscr?: number;
 }
 
 export interface ProjectImpact {
@@ -24,6 +26,7 @@ function side(row: YearRow, valued: boolean): ImpactSide {
     debt: row.debt,
     value: valued ? row.value : undefined,
     ltvPct: valued && row.value > 0 ? (row.debt / row.value) * 100 : undefined,
+    dscr: row.payments > 0 && row.rent > 0 ? (row.rent - row.charges) / row.payments : undefined,
   };
 }
 

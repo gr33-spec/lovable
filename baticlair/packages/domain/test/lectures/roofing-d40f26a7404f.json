@@ -1,0 +1,61 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Noue zinc",
+   "quantity": "4",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Noue zinc",
+    "quantite": "4",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Noue zinc",
+      "quantite": "4",
+      "unite": "ml",
+      "ouvrage": "noue",
+      "emplacement": "noue",
+      "donnees": {},
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

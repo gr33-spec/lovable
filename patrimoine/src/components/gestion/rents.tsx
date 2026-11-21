@@ -3,7 +3,8 @@
 import { sortedUnits } from "@/lib/lots";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, RotateCcw, X } from "lucide-react";
+import { Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, CircleDashed, Coins, FileUp, RotateCcw, X } from "lucide-react";
+import Link from "next/link";
 import { SwipeRow, toast, useUndoableUpdate } from "@/components/swipe";
 import { settleUnpaid } from "@/lib/revision";
 import { useStore } from "@/lib/store";
@@ -126,6 +127,17 @@ export function RentsView() {
             </div>
           </div>
         </div>
+
+        <Link href="/gestion/releve" className="soft-card mt-4 flex items-center gap-3 rounded-[22px] px-4 py-3.5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-navy text-gold">
+            <FileUp size={18} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold text-ink">Importer un relevé bancaire</span>
+            <span className="block text-[13px] text-muted">Les virements des locataires sont reconnus et pointés en une fois</span>
+          </span>
+          <ChevronRight size={17} className="shrink-0 text-muted" />
+        </Link>
 
         {backlog.months > 0 && (
           <button onClick={() => setInitializing(true)} className="soft-card mt-4 flex w-full items-center gap-3 rounded-[22px] px-4 py-3.5 text-left">

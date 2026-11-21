@@ -1,9 +1,10 @@
+import { kindLabel, usageLabel } from "../assets";
 import type { AppData, Building } from "../types";
 import type { MonthIndex } from "../engine/dates";
 import { yearOf } from "../engine/dates";
 import { project } from "../engine/projection";
-import { cashflowMonthly, ltv, netWorth, NO_COMPANY, type Figures } from "../engine/snapshot";
-import { formatIndicator, latestStatements, portfolioIndicators, statementRatios } from "../engine/indicators";
+import { cashflowMonthly, grossYield, rentalPayments, ltv, netWorth, NO_COMPANY, type Figures } from "../engine/snapshot";
+import { formatIndicator, latestStatements, portfolioIndicators, keyIndicators, KEY_INDICATORS, statementRatios } from "../engine/indicators";
 import { qualityIssues } from "../engine/quality";
 import { companySubset } from "../engine/subset";
 import { unpaidByUnit } from "../engine/leases";
@@ -29,11 +30,12 @@ function figures(f: Figures) {
     loyersMensuels: r0(f.rentMonthly),
     loyersPotentielsMensuels: r0(f.potentialRentMonthly),
     chargesAnnuelles: r0(f.chargesAnnual),
-    mensualitesCredits: r0(f.paymentsMonthly),
+    mensualitesCreditsLocatifs: r0(rentalPayments(f)),
+    mensualitesCreditsPersonnels: f.personalPaymentsMonthly ? r0(f.personalPaymentsMonthly) : null,
     creditsMensualiteInconnue: f.unknownPayment,
-    cashflowMensuel: r0(cashflowMonthly(f)),
+    cashflowLocatifMensuel: r0(cashflowMonthly(f)),
     ltvPct: r1(l),
-    rendementBrutPct: f.value > 0 && !f.unvalued ? r1(((f.rentMonthly * 12) / f.value) * 100) : null,
+    rendementBrutPct: r1(grossYield(f)),
     lots: f.units,
     lotsVacants: f.vacantUnits,
   };
@@ -86,6 +88,8 @@ export function buildFacts(all: AppData, nowMonth: MonthIndex, scope: AnalysisSc
     return {
       id: b.id,
       nom: b.name,
+      nature: kindLabel(b.kind) ?? "non précisée",
+      usage: usageLabel(b.usage) ?? null,
       societe: companyName(b.companyId),
       ville: b.city ?? null,
       prixAchat: r0(b.acquisitionPrice),
@@ -140,7 +144,7 @@ export function buildFacts(all: AppData, nowMonth: MonthIndex, scope: AnalysisSc
       hausseChargesPct: data.settings.chargesGrowthPct ?? null,
     },
     totaux: figures(snap.total),
-    indicateurs: portfolioIndicators(data, p).map((i) => ({ nom: i.label, valeur: i.value === undefined ? "données insuffisantes" : formatIndicator(i), niveau: i.level, explication: i.explain })),
+    indicateurs: keyIndicators(portfolioIndicators(data, p), KEY_INDICATORS).map((i) => ({ nom: i.label, valeur: i.value === undefined ? "données insuffisantes" : formatIndicator(i), niveau: i.level, explication: i.explain })),
     societes: data.companies.map((c) => {
       const f = snap.ownByCompany.get(c.id);
       const { last } = latestStatements(data, c.id);

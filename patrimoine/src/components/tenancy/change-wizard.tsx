@@ -123,7 +123,8 @@ function Wizard({ unitId }: { unitId: string }) {
   const idx = Math.min(stepIndex ?? (requestedIdx >= 0 ? requestedIdx : firstOpen()), steps.length - 1);
   // L'étape affichée à l'ouverture est figée : compléter un champ ne doit pas
   // faire sauter l'écran à l'étape suivante.
-  if (stepIndex === null) queueMicrotask(() => setStepIndex((cur) => cur ?? idx));
+  // (Mise à jour pendant le rendu, prévue par React pour un état dérivé : un seul nouveau rendu.)
+  if (stepIndex === null) setStepIndex(idx);
   const step = steps[idx];
   // L'étape est gardée dans l'adresse : un retour sur l'assistant la retrouve.
   const goTo = (i: number) => {

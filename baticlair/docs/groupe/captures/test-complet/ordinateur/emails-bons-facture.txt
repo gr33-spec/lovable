@@ -1,0 +1,37 @@
+À : general@example.com
+Objet : Tarif groupé lot n° 77 : 2 bons de commande
+Pièces : recapitulatif-lot-77.pdf, bon-de-commande-lot-77-1.pdf, bon-de-commande-lot-77-2.pdf
+
+Bonjour,
+
+Votre offre a été retenue pour le lot n° 77. Vous trouverez ci-joint le bon de commande de chaque artisan (nom, numéro de compte ou ouverture de compte demandée, adresse du chantier, quantités, fenêtre de livraison) et le récapitulatif de vos livraisons.
+
+Chaque chantier se livre comme une commande normale, sur le compte du client ; facturation et paiement comme d'habitude. La facture de commission de BatiClair suit dans un e-mail à part.
+
+Regroupement artisans, par BatiClair
+
+=====
+
+À : general@example.com
+Objet : Facture n° 35, commission d'apporteur d'affaires, lot n° 77
+Pièces : facture-35.pdf
+
+Bonjour,
+
+Conformément à l'accord accepté lors de votre réponse (version 2026-10-20), vous trouverez ci-joint la facture de commission de 51,00 € HT, soit 61,20 € TTC (2 % de 2 550,00 € HT, TVA 20 %), payable à 30 jours, soit le 2026-11-20.
+
+BatiClair
+
+=====
+
+À : yann-1792589723200@example.fr
+Objet : Ton bon de commande, tarif groupé lot n° 77
+Pièces : bon-de-commande-lot-77.pdf
+
+Bonjour,
+
+Tes 1 250 pièces de tuile romane canal rouge 12,5 u/m² : 1,02 € chez Négoce Généraliste. Bon de commande transmis, livraison le 28 oct.
+
+Tu commandes sur ton compte, tu es livré sur ton chantier, tu paies comme d'habitude. Le jour prévu, dis-nous d'un tap si tout est arrivé.
+
+BatiClair

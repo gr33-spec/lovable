@@ -1,0 +1,193 @@
+"use client";
+
+import { Plus, Send } from "lucide-react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
+import { Button, ErrorNotice } from "@/components/ui";
+import { api, ApiError, newActionKey, type PriceRequest, type Supplier } from "@/lib/api";
+import { useResource } from "@/lib/use-resource";
+
+/**
+ * §48.5 « ENVOYER UNE SÉLECTION À UN AUTRE FOURNISSEUR » (usage occasionnel : devis multi-lots ou multi-métiers). Rien ne
+ * change à l'écran tant que l'artisan ne touche pas le petit bouton ; les lignes déjà envoyées à part restent dans la
+ * liste, en gris « Envoyé · fournisseur ». L'envoi normal, lui, part toujours d'un coup au fournisseur habituel.
+ */
+export interface SelectionSend {
+  /** Clé de l'article (« quote:<clé> » pour une ligne à faire chiffrer) → fournisseur(s) qui l'ont reçue à part. */
+  sent: ReadonlyMap<string, string>;
+  send: (articles: string[], supplierIds: string[]) => Promise<void>;
+  /**
+   * Retour du fondateur (2026-10-10) : « un devis peut contenir des matériaux qui se trouvent chez plusieurs fournisseurs ».
+   * La commande répartie : chaque fournisseur qui a reçu une part, et combien de lignes.
+   */
+  parts: readonly { supplierId: string; name: string; lines: number }[];
+}
+
+export function useSelectionSend(projectId: string, onSent?: () => void): SelectionSend {
+  const fetchRequests = useCallback((signal: AbortSignal) => api<{ items: PriceRequest[] }>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, { signal }), [projectId]);
+  const requests = useResource(fetchRequests);
+  const fetchSettings = useCallback((signal: AbortSignal) => api<{ deliversEmail: boolean }>("/v1/price-requests/settings", { signal }), []);
+  const deliversEmail = useResource(fetchSettings).data?.deliversEmail ?? false;
+  const sent = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of requests.data?.items ?? []) {
+      const names = r.recipients.map((x) => x.supplier.name).join(", ");
+      for (const key of r.articles ?? []) map.set(key, map.has(key) ? `${map.get(key)}, ${names}` : names);
+    }
+    return map;
+  }, [requests.data]);
+  const parts = useMemo(() => {
+    const bySupplier = new Map<string, { supplierId: string; name: string; keys: Set<string> }>();
+    for (const r of requests.data?.items ?? []) {
+      if (!r.articles?.length) continue;
+      for (const x of r.recipients) {
+        const part = bySupplier.get(x.supplier.id) ?? { supplierId: x.supplier.id, name: x.supplier.name, keys: new Set<string>() };
+        for (const key of r.articles) part.keys.add(key);
+        bySupplier.set(x.supplier.id, part);
+      }
+    }
+    return [...bySupplier.values()].map((p) => ({ supplierId: p.supplierId, name: p.name, lines: p.keys.size }));
+  }, [requests.data]);
+  const send = async (articles: string[], supplierIds: string[]) => {
+    let request = await api<PriceRequest>(`/v1/projects/${encodeURIComponent(projectId)}/price-requests`, {
+      method: "POST",
+      body: { supplierIds, articles },
+      idempotencyKey: newActionKey(),
+    });
+    // Le serveur envoie les mails : la sélection part tout de suite ; sinon elle attend dans « Fournisseurs », à envoyer.
+    if (deliversEmail) for (const r of request.recipients) request = await api<PriceRequest>(`/v1/price-request-recipients/${r.id}/send`, { method: "POST" });
+    requests.reload();
+    onSent?.();
+  };
+  return { sent, send, parts };
+}
+
+/**
+ * La barre du bas en mode sélection : combien de lignes, à quels fournisseurs, « Envoyer », « Annuler ». Retour du fondateur
+ * (2026-10-10) : « les fournisseurs cochés par défaut, avec possibilité d'en ajouter un de plus facilement ».
+ */
+export function SelectionBar({
+  count,
+  onSend,
+  onCancel,
+  alreadyServed = [],
+}: {
+  count: number;
+  onSend: (supplierIds: string[]) => Promise<void>;
+  onCancel: () => void;
+  /** Les fournisseurs qui ont déjà reçu une part : la suite va « à un autre fournisseur », ils partent décochés. */
+  alreadyServed?: readonly string[];
+}) {
+  const id = useId();
+  const fetchSuppliers = useCallback((signal: AbortSignal) => api<{ items: Supplier[] }>("/v1/suppliers", { signal }), []);
+  const supplierList = useResource(fetchSuppliers);
+  const suppliers = supplierList.data?.items ?? null;
+  // Tout le carnet coché d'office (un fournisseur ajouté ici aussi), sauf ceux qui ont déjà leur part : on retient seulement
+  // ce qui est décoché.
+  const [unchecked, setUnchecked] = useState<Set<string>>(() => new Set(alreadyServed));
+  const picked = new Set((suppliers ?? []).map((s) => s.id).filter((sid) => !unchecked.has(sid)));
+  const toggle = (supplierId: string, on: boolean) =>
+    setUnchecked((prev) => {
+      const next = new Set(prev);
+      if (on) next.delete(supplierId);
+      else next.add(supplierId);
+      return next;
+    });
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState({ name: "", email: "" });
+  const addKey = useRef(newActionKey());
+  const add = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      const created = await api<Supplier>("/v1/suppliers", { method: "POST", body: { name: draft.name.trim(), email: draft.email.trim() }, idempotencyKey: addKey.current });
+      addKey.current = newActionKey();
+      supplierList.reload();
+      toggle(created.id, true);
+      setAdding(false);
+      setDraft({ name: "", email: "" });
+    } catch (e) {
+      setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+    } finally {
+      setPending(false);
+    }
+  };
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<ApiError | null>(null);
+  return (
+    <section aria-label="Envoyer la sélection" className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
+      <p className="text-[14px] font-extrabold">
+        {count === 0 ? "Coche les lignes à envoyer" : `${count} ligne${count > 1 ? "s" : ""} cochée${count > 1 ? "s" : ""}`}
+      </p>
+      {adding || (suppliers && suppliers.length === 0) ? (
+        <form
+          className="flex flex-col gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void add();
+          }}
+        >
+          <label htmlFor={`${id}-nom`} className="sr-only">
+            Nom du fournisseur
+          </label>
+          <input id={`${id}-nom`} autoFocus required maxLength={120} placeholder="Nom du fournisseur" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink" />
+          <label htmlFor={`${id}-mail`} className="sr-only">
+            E-mail du fournisseur
+          </label>
+          <input id={`${id}-mail`} required type="email" inputMode="email" maxLength={200} placeholder="E-mail du fournisseur" value={draft.email} onChange={(e) => setDraft({ ...draft, email: e.target.value })} className="min-h-12 rounded-2xl bg-ground px-3 text-[15px] font-bold text-ink" />
+          <div className="flex gap-2">
+            {suppliers && suppliers.length > 0 ? (
+              <Button className="grow" variant="secondary" disabled={pending} onClick={() => setAdding(false)}>
+                Retour
+              </Button>
+            ) : null}
+            <Button type="submit" className="grow" variant="secondary" pending={pending} disabled={!draft.name.trim() || !draft.email.trim()}>
+              Ajouter
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <>
+          <ul aria-label="Fournisseurs" className="flex max-h-56 flex-col gap-1.5 overflow-y-auto">
+            {(suppliers ?? []).map((s) => (
+              <li key={s.id}>
+                <label className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl bg-ground px-3">
+                  <input type="checkbox" aria-label={`Fournisseur : ${s.name}`} checked={picked.has(s.id)} onChange={(e) => toggle(s.id, e.target.checked)} className="size-5 shrink-0 accent-accent" />
+                  <span className="min-w-0 truncate text-[15px] font-bold">{s.name}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => setAdding(true)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-accent/40 text-[15px] font-bold text-accent-text">
+            <Plus size={18} aria-hidden="true" />
+            Ajouter un fournisseur
+          </button>
+        </>
+      )}
+      {error ? <ErrorNotice error={error} /> : null}
+      <div className="flex gap-2">
+        <Button className="grow" variant="secondary" onClick={onCancel} disabled={pending}>
+          Annuler
+        </Button>
+        <Button
+          className="grow"
+          pending={pending}
+          disabled={count === 0 || picked.size === 0}
+          onClick={async () => {
+            setPending(true);
+            setError(null);
+            try {
+              await onSend([...picked]);
+            } catch (e) {
+              setError(e instanceof ApiError ? e : new ApiError("internal_error", 500));
+            } finally {
+              setPending(false);
+            }
+          }}
+        >
+          <Send size={18} aria-hidden="true" />
+          Envoyer
+        </Button>
+      </div>
+    </section>
+  );
+}

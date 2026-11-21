@@ -1,0 +1,112 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "VMC simple flux hygroréglable, cuisine + 2 sanitaires",
+   "quantity": "1",
+   "unit": "u"
+  },
+  {
+   "ref": "2",
+   "designation": "Climatiseur mural monosplit 3,5 kW Daikin Perfera",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "type_vmc",
+    "texte": "VMC : autoréglable, hygro A ou hygro B ?",
+    "boutons": [
+     {
+      "label": "Hygro B",
+      "valeur": "1"
+     },
+     {
+      "label": "Hygro A",
+      "valeur": "2"
+     },
+     {
+      "label": "Autoréglable",
+      "valeur": "3"
+     }
+    ],
+    "unite": "u",
+    "donnee": "type de vmc",
+    "ligne": null
+   },
+   {
+    "cle": "consommables",
+    "texte": "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "1"
+     },
+     {
+      "label": "Non",
+      "valeur": "0"
+     }
+    ],
+    "unite": "u",
+    "donnee": "consommables",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "VMC simple flux hygroréglable, cuisine + 2 sanitaires",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "VMC simple flux hygroréglable, cuisine + 2 sanitaires",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "vmc",
+      "emplacement": "vmcs",
+      "donnees": {
+       "sanitaires": "2"
+      },
+      "attend": [
+       "type_vmc"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Climatiseur mural monosplit 3,5 kW Daikin Perfera",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Climatiseur mural monosplit 3,5 kW Daikin Perfera",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "climatisation",
+      "emplacement": "splits",
+      "donnees": {
+       "liaison": "1"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

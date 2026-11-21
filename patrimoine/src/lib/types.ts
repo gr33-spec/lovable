@@ -48,9 +48,16 @@ export interface Company {
 
 export type Condition = "neuf" | "bon" | "correct" | "a_renover";
 
+export type PropertyKind = "immeuble" | "maison" | "appartement" | "local" | "hangar" | "terrain" | "parking" | "autre";
+export type PropertyUsage = "location" | "residence_principale" | "residence_secondaire" | "professionnel" | "vacant";
+
 export interface Building {
   id: Id;
   name: string;
+  /** Nature du bien (voir lib/assets.ts) : jamais devinée, choisie par le propriétaire. */
+  kind?: PropertyKind;
+  /** Usage : location, résidence principale… */
+  usage?: PropertyUsage;
   companyId?: Id | null;
   address?: string;
   city?: string;
@@ -388,6 +395,8 @@ export interface Loan {
   durationMonths?: number;
   /** Numéro ou référence du prêt chez la banque. */
   reference?: string;
+  /** Taux fixe (par défaut) ou variable. */
+  rateType?: "fixe" | "variable";
   notes?: string;
   /** Tableau d'amortissement de la banque : quand il est présent, il fait foi pour tous les calculs. */
   schedule?: LoanSchedule;
@@ -799,6 +808,28 @@ export interface Settings {
   analyses?: SavedAnalysis[];
   /** Couleur principale de l'application (voir lib/theme.ts), teal par défaut. */
   theme?: string;
+  /** Présentation des dossiers PDF (voir lib/pdf/prefs.ts). */
+  pdf?: PdfPrefs;
+}
+
+export type PdfSection = "structure" | "patrimoine" | "credits" | "capacite" | "trajectoire" | "remuneration" | "comptes" | "pieces";
+/** Modèle du dossier : les trois premiers ne changent que la couverture, les suivants tout le document. */
+export type PdfCover = "immersive" | "bandeau" | "epure" | "editorial" | "bento" | "suisse";
+
+/** Personnalisation des dossiers PDF : rien n'y change les chiffres. */
+export interface PdfPrefs {
+  /** "app" (couleur de l'application, par défaut) ou l'identifiant d'un thème. */
+  color?: string;
+  cover?: PdfCover;
+  /** Titre et sous-titre de couverture (sinon nom du groupe et du dirigeant). */
+  title?: string;
+  subtitle?: string;
+  /** « À l'attention de » : banque, conseiller… */
+  recipient?: string;
+  /** Mot d'introduction affiché en tête de la synthèse. */
+  message?: string;
+  /** Parties retirées du dossier. */
+  hide?: PdfSection[];
 }
 
 export interface AppData {

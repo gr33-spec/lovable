@@ -1,0 +1,371 @@
+{
+  "appareil": "se",
+  "base": "https://test.mobiiz.fr",
+  "date": "2026-10-26T19:34:42.709Z",
+  "etapes": [
+    {
+      "n": 1,
+      "etape": "Visiteur : landing",
+      "statut": "ok",
+      "detail": "",
+      "capture": "01-visiteur-landing.jpg",
+      "ms": 7329
+    },
+    {
+      "n": 2,
+      "etape": "Visiteur : tarifs",
+      "statut": "ok",
+      "detail": "",
+      "capture": "02-visiteur-tarifs.jpg",
+      "ms": 2115
+    },
+    {
+      "n": 3,
+      "etape": "Visiteur : inscription",
+      "statut": "ok",
+      "detail": "",
+      "capture": "03-visiteur-inscription.jpg",
+      "ms": 2029
+    },
+    {
+      "n": 4,
+      "etape": "Visiteur : connexion",
+      "statut": "ok",
+      "detail": "",
+      "capture": "04-visiteur-connexion.jpg",
+      "ms": 3151
+    },
+    {
+      "n": 5,
+      "etape": "Visiteur : mot de passe oublié",
+      "statut": "ok",
+      "detail": "",
+      "capture": "05-visiteur-mot-de-passe-oublie.jpg",
+      "ms": 2533
+    },
+    {
+      "n": 6,
+      "etape": "Visiteur : CGU",
+      "statut": "ok",
+      "detail": "",
+      "capture": "06-visiteur-cgu.jpg",
+      "ms": 2434
+    },
+    {
+      "n": 7,
+      "etape": "Visiteur : mentions légales",
+      "statut": "ok",
+      "detail": "",
+      "capture": "07-visiteur-mentions-legales.jpg",
+      "ms": 2385
+    },
+    {
+      "n": 8,
+      "etape": "Visiteur : confidentialité",
+      "statut": "ok",
+      "detail": "",
+      "capture": "08-visiteur-confidentialite.jpg",
+      "ms": 2246
+    },
+    {
+      "n": 9,
+      "etape": "Visiteur : conditions négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "09-visiteur-conditions-negoce.jpg",
+      "ms": 2352
+    },
+    {
+      "n": 10,
+      "etape": "Visiteur : connexion négoce",
+      "statut": "ok",
+      "detail": "",
+      "capture": "10-visiteur-connexion-negoce.jpg",
+      "ms": 2098
+    },
+    {
+      "n": 11,
+      "etape": "Visiteur : adresse inconnue",
+      "statut": "ok",
+      "detail": "« Page introuvable »",
+      "capture": "11-visiteur-adresse-inconnue.jpg",
+      "ms": 1515
+    },
+    {
+      "n": 12,
+      "etape": "Landing : accroche, prix, inscription, aucune démo d'office",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('link', { name: 'Je rejoins le mouvement' }).first() to be visible\u001b[22m ",
+      "capture": "12-landing-accroche-prix-inscription-aucune-demo-d-.jpg",
+      "ms": 21988
+    },
+    {
+      "n": 13,
+      "etape": "Landing : « Voir comment ça marche (30 s) », trois métiers, Passer",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('dialog', { name: 'Démo' }).getByRole('link', { name: 'Je rejoins le mouvement' }).first() to be visible\u001b[22m ",
+      "capture": "13-landing-voir-comment-ca-marche-30-s-trois-metier.jpg",
+      "ms": 20348
+    },
+    {
+      "n": 14,
+      "etape": "Inscription artisan",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('link', { name: 'Je rejoins le mouvement' }).first()\u001b[22m ",
+      "capture": "14-inscription-artisan-bug.jpg",
+      "ms": 30050
+    },
+    {
+      "n": 15,
+      "etape": "Guide : trois écrans, prochaine clôture, « Déposer ma première liste »",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('dialog', { name: 'Guide' }).getByRole('heading', { name: 'Dépose ta liste ou ton devis' }).first() to be visible\u001b[22m ",
+      "capture": "15-guide-trois-ecrans-prochaine-cloture-deposer-ma-.jpg",
+      "ms": 20056
+    },
+    {
+      "n": 16,
+      "etape": "Guide : ne revient pas ; « Revoir le guide » dans le menu",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Mon menu' })\u001b[22m ",
+      "capture": "16-guide-ne-revient-pas-revoir-le-guide-dans-le-men.jpg",
+      "ms": 33974
+    },
+    {
+      "n": 17,
+      "etape": "E-mail réel : confirmer l'adresse",
+      "statut": "bug",
+      "detail": "aucun e-mail reçu",
+      "capture": "17-e-mail-reel-confirmer-l-adresse-bug.jpg",
+      "ms": 90163
+    },
+    {
+      "n": 18,
+      "etape": "Regroupement : SIRET et adresse",
+      "statut": "bug",
+      "detail": "profil 401",
+      "capture": "18-regroupement-siret-et-adresse-bug.jpg",
+      "ms": 3996
+    },
+    {
+      "n": 19,
+      "etape": "Dépôt d'une liste (photo manuscrite), vraie lecture",
+      "statut": "bug",
+      "detail": "locator.setInputFiles: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByLabel('Déposer ma liste')\u001b[22m ",
+      "capture": "19-depot-d-une-liste-photo-manuscrite-vraie-lecture.jpg",
+      "ms": 32584
+    },
+    {
+      "n": 20,
+      "etape": "Liste : ajouter au regroupement",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: /^Regroupement d/ }).first() to be visible\u001b[22m ",
+      "capture": "20-liste-ajouter-au-regroupement-bug.jpg",
+      "ms": 20046
+    },
+    {
+      "n": 21,
+      "etape": "Dépôt d'un devis (PDF), vraie lecture, questions, liste",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByText('Je n\\'ai qu\\'un devis', { exact: true }).first() to be visible\u001b[22m ",
+      "capture": "21-depot-d-un-devis-pdf-vraie-lecture-questions-lis.jpg",
+      "ms": 23550
+    },
+    {
+      "n": 22,
+      "etape": "Ton chantier : aperçu du PDF fournisseur",
+      "statut": "ok",
+      "detail": "pas d'aperçu sur cet écran",
+      "capture": "22-ton-chantier-apercu-du-pdf-fournisseur.jpg",
+      "ms": 53
+    },
+    {
+      "n": 23,
+      "etape": "Accueil : mettre son négoce dans la boucle",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Mets ton négoce dans la boucle' }).first() to be visible\u001b[22m ",
+      "capture": "23-accueil-mettre-son-negoce-dans-la-boucle-bug.jpg",
+      "ms": 22333
+    },
+    {
+      "n": 24,
+      "etape": "E-mail réel : invitation du négoce",
+      "statut": "bug",
+      "detail": "pas d'invitation (reçus : )",
+      "capture": "24-e-mail-reel-invitation-du-negoce-bug.jpg",
+      "ms": 93197
+    },
+    {
+      "n": 25,
+      "etape": "Négoce : créer son accès depuis l'invitation",
+      "statut": "bug",
+      "detail": "pas de lien",
+      "capture": "25-negoce-creer-son-acces-depuis-l-invitation-bug.jpg",
+      "ms": 39
+    },
+    {
+      "n": 26,
+      "etape": "Négoce : son espace (prochaine clôture, aucun nom d'artisan)",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('region', { name: 'Prochaine clôture' }).first() to be visible\u001b[22m ",
+      "capture": "26-negoce-son-espace-prochaine-cloture-aucun-nom-d-.jpg",
+      "ms": 22640
+    },
+    {
+      "n": 27,
+      "etape": "Abonnement : essai et deux formules",
+      "statut": "bug",
+      "detail": "locator.waitFor: Timeout 20000ms exceeded. Call log: \u001b[2m  - waiting for getByText('Essai gratuit', { exact: true }).or(getByText(/essai est terminé/i)).first() to be visible\u001b[22m ",
+      "capture": "27-abonnement-essai-et-deux-formules-bug.jpg",
+      "ms": 23165
+    },
+    {
+      "n": 28,
+      "etape": "Stripe : carte refusée (4000 0000 0000 0002)",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('button', { name: /^(M'abonner dès maintenant|Je continue)$/ }).first()\u001b[22m ",
+      "capture": "28-stripe-carte-refusee-4000-0000-0000-0002-bug.jpg",
+      "ms": 30047
+    },
+    {
+      "n": 29,
+      "etape": "Stripe : carte acceptée (4242), retour « Abonné au mois »",
+      "statut": "bug",
+      "detail": "locator.fill: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for locator('#cardNumber')\u001b[22m ",
+      "capture": "29-stripe-carte-acceptee-4242-retour-abonne-au-mois.jpg",
+      "ms": 30051
+    },
+    {
+      "n": 30,
+      "etape": "Factures : la facture du mois, téléchargeable",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('tab', { name: 'Mes factures' })\u001b[22m ",
+      "capture": "30-factures-la-facture-du-mois-telechargeable-bug.jpg",
+      "ms": 30046
+    },
+    {
+      "n": 31,
+      "etape": "Passage à l'annuel au prorata",
+      "statut": "bug",
+      "detail": "locator.click: Timeout 30000ms exceeded. Call log: \u001b[2m  - waiting for getByRole('tab', { name: 'Mon abonnement' })\u001b[22m ",
+      "capture": "31-passage-a-l-annuel-au-prorata-bug.jpg",
+      "ms": 30049
+    },
+    {
+      "n": 32,
+      "etape": "Résiliation en deux clics",
+      "statut": "bug",
+      "detail": "locator.click: Target page, context or browser has been closed Call log: \u001b[2m  - waiting for getByRole('button', { name: 'Résilier' })\u001b[22m ",
+      "capture": null,
+      "ms": 13238
+    },
+    {
+      "n": 33,
+      "etape": "E-mails réels de l'abonnement",
+      "statut": "ok",
+      "detail": "",
+      "capture": null,
+      "ms": 64116
+    },
+    {
+      "n": 34,
+      "etape": "Menu : « Essayer avec un chantier fictif »",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 1
+    },
+    {
+      "n": 35,
+      "etape": "Écran : mes chantiers",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 1
+    },
+    {
+      "n": 36,
+      "etape": "Écran : fournisseurs",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 0
+    },
+    {
+      "n": 37,
+      "etape": "Écran : formules",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 0
+    },
+    {
+      "n": 38,
+      "etape": "Écran : compte",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 1
+    },
+    {
+      "n": 39,
+      "etape": "Compte : export JSON et PDF",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 1
+    },
+    {
+      "n": 40,
+      "etape": "Compte : suppression (en tapant SUPPRIMER)",
+      "statut": "bug",
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "capture": null,
+      "ms": 1
+    }
+  ],
+  "anomalies": [
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/nulle-part",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/groupe",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/connexion?retour=%2Fgroupe",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/chantiers/nouveau",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "negoce-se",
+      "url": "https://test.mobiiz.fr/negoce",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    },
+    {
+      "qui": "artisan-se",
+      "url": "https://test.mobiiz.fr/abonnement",
+      "type": "console",
+      "texte": "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+    }
+  ]
+}

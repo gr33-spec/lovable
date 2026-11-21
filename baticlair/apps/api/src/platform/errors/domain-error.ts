@@ -1,0 +1,45 @@
+/**
+ * Erreur métier ou applicative, indépendante du transport (HTTP, job…).
+ * Le filtre HTTP traduit le code en statut ; l'interface traduit le code en
+ * message pour l'utilisateur (i18n). Le `message` est destiné aux
+ * développeurs.
+ */
+export type ErrorCode =
+  | "validation_failed"
+  | "unauthenticated"
+  | "forbidden"
+  | "not_found"
+  | "conflict"
+  | "request_in_progress"
+  | "payload_too_large"
+  | "too_many_requests"
+  | "unreadable_document"
+  /** Le métier n'a pas de référentiel (pas de tiroir ouvert, §22) : rien n'est calculé avec les règles d'un autre métier. */
+  | "no_referential"
+  | "analysis_quota_reached"
+  | "plan_limit_reached"
+  /** L'essai est fini et l'abonnement n'est pas actif : l'action payante attend « Je continue » (24 octobre 2026). */
+  | "abonnement_requis"
+  | "ai_unavailable"
+  | "analysis_failed"
+  /** Le prestataire d'e-mail a refusé ou n'a pas répondu : la demande au fournisseur n'est pas partie. */
+  | "email_not_sent"
+  | "onboarding_required"
+  | "company_selection_required"
+  | "internal_error";
+
+export class DomainError extends Error {
+  constructor(
+    readonly code: ErrorCode,
+    message: string,
+    readonly details?: unknown,
+  ) {
+    super(message);
+    this.name = "DomainError";
+  }
+}
+
+export const notFound = (what: string) => new DomainError("not_found", `${what} not found`);
+export const forbidden = (message: string) => new DomainError("forbidden", message);
+export const validationFailed = (message: string, details?: unknown) =>
+  new DomainError("validation_failed", message, details);

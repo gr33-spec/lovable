@@ -1,0 +1,97 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet",
+   "quantity": "200",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Gouttière demi-ronde zinc développé 33, crochets bandeau, 2 descentes Ø80",
+   "quantity": "24",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "qualite_ardoise": "1",
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Gouttière demi-ronde zinc développé 33, crochets bandeau, 2 descentes Ø80",
+    "quantite": "24",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde dév. 33",
+      "quantite": "24",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "nb_descentes": "2",
+       "developpe_gouttiere": "33 cm",
+       "fixation_crochet": "2",
+       "diametre_descente": "80 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets de gouttière bandeau dév. 33",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "gouttiere",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

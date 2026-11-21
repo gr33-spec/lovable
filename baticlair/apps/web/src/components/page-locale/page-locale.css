@@ -1,0 +1,634 @@
+/*
+ * LES PAGES LOCALES (Greg, 19 novembre 2026) : la direction artistique de la landing (`premium.css`, classes `.mzp` et
+ * `.mz2-*`), plus ce qui est propre au lieu : la carte, les regroupements, la toiture typique, la petite histoire,
+ * l'ambiance. Tout est borné à `.mzr`. Sombre par défaut (comme la landing) ; le thème clair de l'appareil
+ * (`html[data-theme="clair"]`, posé avant le premier affichage) passe la page en ivoire.
+ */
+.mzr {
+  --mzr-fond: #0c0a08;
+  --mzr-texte: #fbf8f3;
+  --mzr-doux: #c4bdb4;
+  --mzr-carte-fond: #171411;
+  --mzr-dep: #2b241c;
+  --mzr-dep-survol: #3a3126;
+  --mzr-dep-trait: rgba(251, 248, 243, 0.55);
+  --mzr-dep-texte: #fbf8f3;
+  --mzr-france: #6f655a;
+  --mzr-bloc: rgba(255, 255, 255, 0.045);
+  --mzr-bloc-trait: rgba(255, 255, 255, 0.12);
+  --mzr-section: #120f0c;
+  --mzr-section-texte: #fbf8f3;
+  --mzr-section-doux: #c4bdb4;
+}
+html[data-theme="clair"] .mzr {
+  --mzr-fond: #fbf8f3;
+  --mzr-texte: #15120e;
+  --mzr-doux: #514a40;
+  --mzr-carte-fond: #ffffff;
+  --mzr-dep: #efeae2;
+  --mzr-dep-survol: #e4ddd2;
+  --mzr-dep-trait: rgba(21, 18, 14, 0.55);
+  --mzr-dep-texte: #15120e;
+  --mzr-france: #b9b0a4;
+  --mzr-bloc: #ffffff;
+  --mzr-bloc-trait: #e2dbd0;
+  --mzr-section: #efeae2;
+  --mzr-section-texte: #15120e;
+  --mzr-section-doux: #514a40;
+}
+
+/* Le fond, l'en-tête et le pied suivent le thème. */
+.mzr {
+  background: var(--mzr-fond);
+  color: var(--mzr-texte);
+}
+html[data-theme="clair"] .mzr .site-header {
+  background: rgba(251, 248, 243, 0.92);
+  border-bottom-color: #e2dbd0;
+}
+html[data-theme="clair"] .mzr .nav-links a,
+html[data-theme="clair"] .mzr .nav-right > a:first-child {
+  color: #2a241d;
+}
+html[data-theme="clair"] .mzr .menu-toggle {
+  background: #fff;
+  color: #15120e;
+  border-color: #e2dbd0;
+}
+@media (max-width: 900px) {
+  html[data-theme="clair"] .mzr .nav-links.open {
+    background: #fbf8f3;
+  }
+}
+/* Le logo : lettres blanches en sombre, lettres noires en clair (jamais un logo recoloré). */
+.mzr .brand .mzr-logo-clair,
+html[data-theme="clair"] .mzr .brand .mzr-logo-sombre {
+  display: none;
+}
+html[data-theme="clair"] .mzr .brand .mzr-logo-clair {
+  display: block;
+}
+html[data-theme="clair"] .mzr .mzr-hero h1 span:not(.l1) {
+  color: #15120e;
+  background: linear-gradient(transparent 60%, var(--yellow) 60%, var(--yellow) 92%, transparent 92%);
+  display: inline;
+}
+html[data-theme="clair"] .mzr .site-footer {
+  background: #efeae2;
+  color: #2a241d;
+  border-top: 1px solid #e2dbd0;
+}
+html[data-theme="clair"] .mzr .site-footer a,
+html[data-theme="clair"] .mzr .footer-bottom {
+  color: #514a40;
+}
+html[data-theme="clair"] .mzr .mz2-nappes {
+  opacity: 0.35;
+}
+html[data-theme="clair"] .mzr .sticky-cta {
+  background: none;
+}
+
+/* L'accroche : le titre, la carte, puis le texte et le bouton. Sur ordinateur, la carte à droite. */
+.mzr .mzr-hero {
+  padding-bottom: 110px;
+}
+.mzr .mzr-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  grid-template-areas: "haut carte" "bas carte";
+  column-gap: 48px;
+  align-items: start;
+}
+.mzr .mzr-hero-haut {
+  grid-area: haut;
+  align-self: end;
+}
+.mzr .mzr-hero-bas {
+  grid-area: bas;
+}
+.mzr .mzr-carte {
+  grid-area: carte;
+  align-self: center;
+}
+.mzr .mzr-hero h1 {
+  color: var(--mzr-texte);
+}
+.mzr .mzr-hero h1 .l1 {
+  color: inherit;
+}
+.mzr .mzr-hero .mz2-lead {
+  color: var(--mzr-doux);
+}
+html[data-theme="clair"] .mzr .text-link {
+  color: #2a241d;
+}
+html[data-theme="clair"] .mzr .text-link .circle-down {
+  border-color: rgba(21, 18, 14, 0.3);
+}
+html[data-theme="clair"] .mzr .under-cta {
+  color: #6e665b;
+}
+html[data-theme="clair"] .mzr .mz2-kicker {
+  color: #15120e;
+}
+.mzr .mzr-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.mzr .mzr-drapeau {
+  width: 24px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* La carte. */
+.mzr .mzr-carte-cadre {
+  position: relative;
+  border-radius: 28px;
+  background: radial-gradient(ellipse at 40% 55%, rgba(254, 210, 6, 0.07), transparent 65%), var(--mzr-carte-fond);
+  border: 1px solid var(--mzr-bloc-trait);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+html[data-theme="clair"] .mzr .mzr-carte-cadre {
+  box-shadow: 0 24px 60px rgba(37, 22, 7, 0.1);
+}
+.mzr .mzr-carte-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: var(--mzr-ratio);
+  touch-action: manipulation;
+}
+.mzr .mzr-france {
+  fill: var(--mzr-france);
+  opacity: 0.7;
+}
+/* La région nette, posée sur le flou : une ombre douce qui la détache. */
+.mzr .mzr-carte-svg .mzr-dep path {
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+html[data-theme="clair"] .mzr .mzr-carte-svg .mzr-dep path {
+  filter: drop-shadow(0 6px 10px rgba(37, 22, 7, 0.12));
+}
+.mzr .mzr-dep {
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mzr .mzr-dep path {
+  fill: var(--mzr-dep);
+  stroke: var(--mzr-dep-trait);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+  transition: fill 0.25s ease;
+}
+.mzr .mzr-dep:hover path {
+  fill: var(--mzr-dep-survol);
+}
+.mzr .mzr-dep:focus-visible path {
+  stroke: var(--yellow);
+  stroke-width: 2.4;
+}
+.mzr .mzr-dep.on path {
+  fill: var(--yellow);
+  stroke: #15120e;
+}
+.mzr .mzr-dep text {
+  pointer-events: none;
+  fill: var(--mzr-dep-texte);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.mzr .mzr-dep.on text {
+  fill: #15120e;
+}
+.mzr .mzr-dep-nom {
+  font-size: 10.5px;
+}
+.mzr .mzr-dep-code {
+  font-size: 9px;
+  opacity: 0.7;
+}
+.mzr .mzr-carte-invite {
+  margin: 16px 0 10px;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--mzr-texte);
+  min-height: 26px;
+}
+.mzr .mzr-coche {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #15120e;
+  font-size: 14px;
+  margin-right: 4px;
+}
+.mzr .mzr-pastilles {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: start;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mzr .mzr-pastilles button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--mzr-bloc-trait);
+  background: var(--mzr-bloc);
+  color: var(--mzr-texte);
+  font-weight: 750;
+  font-size: 14px;
+}
+.mzr .mzr-pastilles button span {
+  opacity: 0.6;
+  margin-left: 4px;
+}
+.mzr .mzr-pastilles button[aria-pressed="true"] {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #15120e;
+}
+
+/* Les regroupements du département. */
+.mzr .mzr-regroupements {
+  margin-top: 16px;
+  border-radius: 22px;
+  padding: 20px 22px;
+  background: var(--mzr-bloc);
+  border: 1px solid var(--mzr-bloc-trait);
+}
+.mzr .mzr-regroupements-vide p {
+  margin: 0;
+  color: var(--mzr-doux);
+  font-size: 15px;
+}
+.mzr .mzr-regroupements-titre {
+  margin: 0 0 10px;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  font-weight: 850;
+}
+.mzr .mzr-premier {
+  margin: 0 0 14px;
+  font-size: 16px;
+  color: var(--mzr-doux);
+}
+.mzr .mzr-chargement {
+  margin: 0;
+  color: var(--mzr-doux);
+}
+.mzr .mzr-achats {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.mzr .mzr-achats li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--mzr-bloc-trait);
+}
+.mzr .mzr-achat-nom {
+  font-weight: 750;
+}
+.mzr .mzr-achat-fin {
+  color: var(--mzr-doux);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.mzr .mzr-achats-plus {
+  margin: -6px 0 12px;
+  font-size: 13px;
+  color: var(--mzr-doux);
+}
+.mzr .mzr-btn {
+  min-height: 50px;
+  padding: 12px 22px;
+}
+
+/* Le collectif : trois temps, sans aucun chiffre. */
+.mzr .mzr-chemin {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.mzr .mzr-chemin li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 800;
+}
+.mzr .mzr-chemin li.dernier {
+  background: var(--yellow);
+  color: #15120e;
+  border-color: var(--yellow);
+}
+.mzr .mzr-chemin svg {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+/* La toiture typique. */
+.mzr .mzr-toiture {
+  background: var(--ivory);
+  color: var(--ink);
+  padding: 96px 0;
+}
+.mzr .mzr-toiture-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.mzr .mzr-toiture h2,
+.mzr .mzr-histoire h2 {
+  font-size: clamp(30px, 3.4vw, 46px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  font-weight: 900;
+  margin: 14px 0 18px;
+}
+.mzr .mzr-toiture p {
+  color: #4a4339;
+  font-size: 17px;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+.mzr .mzr-toiture .label {
+  color: #15120e;
+}
+.mzr .mzr-points {
+  list-style: none;
+  padding: 0;
+  margin: 22px 0 0;
+  display: grid;
+  gap: 14px;
+}
+.mzr .mzr-points li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.mzr .mzr-points svg {
+  width: 22px;
+  height: 22px;
+  margin-top: 3px;
+  flex-shrink: 0;
+  color: #15120e;
+  background: var(--yellow);
+  border-radius: 50%;
+  padding: 3px;
+}
+.mzr .mzr-points h3 {
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-weight: 850;
+}
+.mzr .mzr-points p {
+  margin: 0;
+  font-size: 15px;
+}
+.mzr .mzr-photo {
+  margin: 0;
+  position: relative;
+}
+.mzr .mzr-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+  object-fit: cover;
+}
+.mzr .mzr-toiture-photo img {
+  aspect-ratio: 4 / 5;
+  box-shadow: 0 30px 70px rgba(37, 22, 7, 0.18);
+}
+.mzr .mzr-photo figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6e665b;
+}
+.mzr .mzr-photo figcaption a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* La petite histoire. */
+.mzr .mzr-histoire {
+  background: var(--mzr-section);
+  color: var(--mzr-section-texte);
+  padding: 96px 0;
+}
+.mzr .mzr-histoire h2 {
+  max-width: 820px;
+}
+.mzr .mzr-chapitres {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 12px;
+}
+.mzr .mzr-chapitre {
+  border-radius: 26px;
+  padding: 30px 30px 18px;
+  background: var(--mzr-bloc);
+  border: 1px solid var(--mzr-bloc-trait);
+}
+.mzr .mzr-chapitre h3 {
+  margin: 0 0 14px;
+  font-size: 21px;
+  letter-spacing: -0.03em;
+  font-weight: 850;
+}
+.mzr .mzr-chapitre p {
+  margin: 0 0 14px;
+  color: var(--mzr-section-doux);
+  font-size: 16px;
+  line-height: 1.62;
+}
+.mzr .mzr-chapitre sup a {
+  color: var(--yellow);
+  font-weight: 800;
+  font-size: 11px;
+  margin-left: 2px;
+}
+html[data-theme="clair"] .mzr .mzr-chapitre sup a {
+  color: #8a6d00;
+}
+.mzr .mzr-sources {
+  margin-top: 26px;
+  font-size: 13px;
+  color: var(--mzr-section-doux);
+}
+.mzr .mzr-sources summary {
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.mzr .mzr-sources ol {
+  margin: 6px 0 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 6px;
+}
+.mzr .mzr-sources a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* L'ambiance du coin. */
+.mzr .mzr-ambiance {
+  background: var(--ivory);
+  color: var(--ink);
+  padding: 80px 0 90px;
+}
+.mzr .mzr-ambiance-titre {
+  font-size: clamp(26px, 2.8vw, 36px);
+  letter-spacing: -0.04em;
+  font-weight: 900;
+  margin: 0 0 24px;
+}
+.mzr .mzr-galerie {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.mzr .mzr-galerie img {
+  aspect-ratio: 4 / 3;
+}
+
+/* Le mot local : la section « bridge » de la landing, en clair sur fond os. */
+html[data-theme="clair"] .mzr .mzr-local {
+  background: #efeae2;
+  color: #15120e;
+}
+html[data-theme="clair"] .mzr .mzr-local .histoire p {
+  color: #4a4339;
+}
+html[data-theme="clair"] .mzr .mzr-local .histoire-signature {
+  color: #8a6d00;
+}
+.mzr .mzr-local:before,
+.mzr .mzr-local:after {
+  display: none;
+}
+.mzr .mzr-local h2 {
+  font-size: clamp(30px, 3.6vw, 50px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  font-weight: 900;
+  margin: 16px 0 18px;
+}
+.mzr .mzr-local {
+  padding: 96px 0;
+}
+
+@media (max-width: 900px) {
+  .mzr .mzr-carte-svg {
+    aspect-ratio: var(--mzr-ratio-tel);
+  }
+  .mzr .mzr-dep-nom {
+    font-size: 12px;
+  }
+  .mzr .mzr-dep-code {
+    font-size: 10px;
+  }
+  .mzr .mzr-pastilles button span {
+    display: none;
+  }
+  .mzr .mzr-pastilles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mzr .mzr-pastilles button {
+    width: 100%;
+  }
+  .mzr .mzr-hero {
+    padding-bottom: 92px;
+  }
+  .mzr .mzr-hero-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: "haut" "carte" "bas";
+  }
+  .mzr .mzr-hero-haut h1 {
+    margin-bottom: 12px;
+  }
+  .mzr .mzr-carte {
+    margin: 4px 0 26px;
+  }
+  .mzr .mzr-carte-cadre {
+    border-radius: 22px;
+  }
+  .mzr .mzr-carte-invite {
+    font-size: 16px;
+    margin-top: 12px;
+  }
+  .mzr .mzr-regroupements {
+    padding: 16px 16px;
+    border-radius: 18px;
+  }
+  .mzr .mzr-toiture,
+  .mzr .mzr-histoire,
+  .mzr .mzr-local {
+    padding: 64px 0;
+  }
+  .mzr .mzr-toiture-grid,
+  .mzr .mzr-chapitres {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .mzr .mzr-toiture-photo img {
+    aspect-ratio: 4 / 3;
+  }
+  .mzr .mzr-chapitre {
+    padding: 22px 20px 8px;
+    border-radius: 20px;
+  }
+  .mzr .mzr-galerie {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 80%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+    gap: 14px;
+  }
+  .mzr .mzr-galerie > * {
+    scroll-snap-align: start;
+  }
+  .mzr .mzr-ambiance {
+    padding: 56px 0 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mzr .mzr-dep path {
+    transition: none;
+  }
+}

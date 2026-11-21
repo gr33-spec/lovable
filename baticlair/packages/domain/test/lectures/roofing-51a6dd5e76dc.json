@@ -1,0 +1,63 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 32x22",
+   "quantity": "48",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "epaisseur_des_crochets",
+    "texte": "Épaisseur des crochets ?",
+    "boutons": [
+     {
+      "label": "2,7 mm",
+      "valeur": "2,7 mm"
+     },
+     {
+      "label": "3,0 mm",
+      "valeur": "3,0 mm"
+     }
+    ],
+    "unite": null,
+    "donnee": "épaisseur des crochets",
+    "ligne": "1"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 32x22",
+    "quantite": "48",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 32×22",
+      "quantite": "48",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-32x22"
+      },
+      "attend": [
+       "epaisseur_des_crochets"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -1,0 +1,65 @@
+import { describe, expect, it } from "vitest";
+import { computeWithAnswers, QUESTION_THRESHOLD, ROOFING_REFERENTIAL, type Referential } from "../src/index.js";
+import { planOf } from "./support/plan-of.js";
+import { readQuote } from "./support/read-quote.js";
+import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
+
+/**
+ * § 41 : une question ne se pose que si sa réponse change une quantité commandée de plus de 3 %, une unité ou un
+ * matériau ; les autres se posent dans l'ordre du levier le plus gros. Le moteur rejoue le calcul avec chaque réponse.
+ */
+const ZINC = [
+  { ref: "z1", designation: "Couverture zinc joint debout", quantity: "91", unit: "m²" },
+  { ref: "z4", designation: "Gouttière zinc demi-ronde", quantity: "13", unit: "ml" },
+];
+
+describe("tri des questions par levier", () => {
+  it("le façonnage (change l'unité : kg ou pièces) passe avant le nombre de descentes (quelques naissances)", () => {
+    const v = readQuoteComplet(ZINC);
+    // Le façonnage (une unité) d'abord, puis ce qui change l'ARTICLE au comptoir (développé, pose des crochets,
+    // diamètre des descentes, §47.8), enfin le nombre de descentes (quelques naissances). Plus d'« égout et faîtage ? ».
+    // Greg, 20 novembre 2026 : les questions sont celles du calcul, dès l'ouverture et dans son ordre (le levier le plus
+    // gros d'abord) ; la fiche complète compte aussi les angles, et le rampant du joint debout n'est plus supposé.
+    const cles = v.questions.map((q) => q.question?.key ?? q.key);
+    expect(cles[0]).toBe("param:faconnage");
+    expect([...cles].sort()).toEqual(["param:developpe_gouttiere", "param:diametre_descente", "param:faconnage", "param:fixation_crochet", "param:longueur_rampant", "param:nb_angles", "param:nb_descentes"]);
+    expect(QUESTION_THRESHOLD).toBe(0.03);
+  });
+});
+
+describe("une question dont toutes les réponses donnent la même commande (à 3 % près) n'est pas posée", () => {
+  /** Un ouvrage d'essai : la gouttière, avec un coefficient à boutons qui ne change les crochets que de 1 %. */
+  const gouttiere = REFERENTIEL_COMPLET.workItems.find((w) => w.id === "gouttiere")!;
+  const REF: Referential = {
+    ...REFERENTIEL_COMPLET,
+    workItems: REFERENTIEL_COMPLET.workItems.map((w) =>
+      w.id !== "gouttiere"
+        ? w
+        : {
+            ...w,
+            params: [
+              ...w.params,
+              { key: "serrage", label: "Serrage des crochets", unit: "u", kind: "artisan_preference", question: "Serrage des crochets ?", choices: [{ label: "Normal", value: "1" }, { label: "Un peu plus serré", value: "1.01" }] },
+            ],
+            needs: w.needs.map((n) => (n.id === "crochets" ? { ...n, formula: `(${n.formula}) * serrage` } : n)),
+          },
+    ),
+  };
+  // Développé, pose des crochets et diamètre lus au devis : seules restent les questions de quantité.
+  const lines = [{ ref: "g", designation: "Gouttière zinc demi-ronde dév. 33 sur bandeau, descentes Ø80", quantity: "13", unit: "ml" }];
+
+  it("« serrage » (1 % d'écart) : pas de question, la première réponse vaut hypothèse dite ; « descentes » (naissances 1 à 4) : question", () => {
+    const plan = planOf(REF, lines);
+    // La fiche complète (tous les articles) compte aussi les angles de la gouttière (étape « Suggestions », 18 novembre 2026) : aucun ici.
+    const r = computeWithAnswers(REF, plan, { "param:nb_descentes": { value: "2", unit: "u" }, "param:nb_angles": { value: "0", unit: "u" } });
+    expect(r.questions).toEqual([]);
+    const crochets = r.needs.find((n) => n.needId === "crochets")!;
+    expect(crochets.status).toBe("calculated");
+    expect(crochets.assumptions).toContainEqual(expect.objectContaining({ key: "param:serrage", label: "Serrage des crochets", value: "Normal" }));
+    // Sans la réponse « descentes » : une seule question, celle qui change vraiment la commande.
+    const open = computeWithAnswers(REF, plan, {});
+    // (La fiche complète demande aussi les angles : un par angle, §15.)
+    expect(open.questions.map((q) => q.key).filter((k) => k !== "param:nb_angles")).toEqual(["param:nb_descentes"]);
+    expect(gouttiere.params.some((p) => p.key === "serrage")).toBe(false);
+  });
+});

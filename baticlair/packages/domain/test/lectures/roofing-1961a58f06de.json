@@ -1,0 +1,63 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couvertine cuivre dév. 40",
+   "quantity": "4",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobine)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couvertine cuivre dév. 40",
+    "quantite": "4",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Bandes cuivre",
+      "quantite": "4",
+      "unite": "ml",
+      "ouvrage": "bandes-cuivre",
+      "emplacement": "bande",
+      "donnees": {
+       "developpe_cuivre": "400 mm"
+      },
+      "attend": [
+       "faconnage"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

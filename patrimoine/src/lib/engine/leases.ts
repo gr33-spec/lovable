@@ -67,6 +67,12 @@ export function shiftMonthKey(key: string, delta: number): string {
 
 const MONTHS_LONG = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 
+/** « de mars », « d'octobre » : complément de nom d'un mois. */
+export function deMonth(key: string): string {
+  const label = monthKeyLabel(key);
+  return /^[aeiouy]/i.test(label) ? `d'${label}` : `de ${label}`;
+}
+
 export function monthKeyLabel(key: string): string {
   const [y, m] = key.split("-").map(Number);
   return `${MONTHS_LONG[m - 1]} ${y}`;

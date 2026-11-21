@@ -1,0 +1,90 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture tuiles HP10 terre cuite",
+   "quantity": "120",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Arêtiers, 2 arêtiers",
+   "quantity": "12",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "produit_tuile",
+    "texte": "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?",
+    "boutons": [
+     {
+      "label": "Oui",
+      "valeur": "edilians-hp10-huguenot"
+     },
+     {
+      "label": "Modifier",
+      "valeur": ""
+     }
+    ],
+    "unite": null,
+    "donnee": "modèle : tuile",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture tuiles HP10 terre cuite",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tuiles HP10",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "tuile",
+      "donnees": {
+       "produit": "edilians-hp10-huguenot"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Arêtiers, 2 arêtiers",
+    "quantite": "12",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Arêtiers",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": "aretier",
+      "emplacement": "aretiere",
+      "donnees": {
+       "aretier_matiere": "1",
+       "nb_aretiers": "2"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

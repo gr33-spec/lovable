@@ -1,0 +1,99 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Arêtier",
+   "quantity": "9",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "aretier_matiere",
+    "texte": "Arêtier en tuiles (arêtières) ou en bande zinc ?",
+    "boutons": [
+     {
+      "label": "En tuiles (arêtières)",
+      "valeur": "1"
+     },
+     {
+      "label": "En bande zinc",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "arêtier",
+    "ligne": null
+   },
+   {
+    "cle": "developpe_aretier",
+    "texte": "Arêtier zinc : bande de 25 ou de 33 ?",
+    "boutons": [
+     {
+      "label": "De 25",
+      "valeur": "250"
+     },
+     {
+      "label": "De 33",
+      "valeur": "330"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "développé de l'arêtier zinc",
+    "ligne": null
+   },
+   {
+    "cle": "nb_aretiers",
+    "texte": "Combien d'arêtiers sur ce toit ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre d'arêtiers",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Arêtier",
+    "quantite": "9",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Arêtier",
+      "quantite": "9",
+      "unite": "ml",
+      "ouvrage": "aretier",
+      "emplacement": "aretiere",
+      "donnees": {},
+      "attend": [
+       "aretier_matiere"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

@@ -139,7 +139,7 @@ export function removalSummary(plan: RemovalPlan): string {
     });
   const gone = parts.length ? `Seront aussi supprimés : ${parts.join(", ")}.` : "";
   const kept = plan.keptDocuments ? ` ${plan.keptDocuments} document${plan.keptDocuments > 1 ? "s restent" : " reste"} dans Documents.` : "";
-  return `${gone}${kept} Une sauvegarde automatique permet de revenir en arrière.`.trim();
+  return `${gone}${kept} Vous pourrez annuler juste après la suppression.`.trim();
 }
 
 /** État d'origine des éléments touchés, pour annuler (remise en place). */

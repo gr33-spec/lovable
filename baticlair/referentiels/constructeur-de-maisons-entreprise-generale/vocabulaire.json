@@ -1,0 +1,19 @@
+{
+ "metier": "constructeur-de-maisons-entreprise-generale",
+ "ouvrages": {},
+ "renvois": {
+  "terrassement": "terrassier",
+  "fondations, élévation, dalle": "maconnerie",
+  "charpente": "charpentier",
+  "couverture": "couverture",
+  "menuiseries": "menuiserie",
+  "plâtrerie, isolation": "platrerie-isolation",
+  "électricité": "electricite",
+  "plomberie, chauffage": "plomberie",
+  "ventilation": "chauffage-ventilation",
+  "carrelage": "carrelage",
+  "peinture": "peinture",
+  "façade": "facade"
+ },
+ "note": "Le constructeur n'a pas d'ouvrage propre : chaque ligne est routée vers le tiroir du lot (chapitre 3 du document). C'est le cas d'usage type du « tiroir par ligne » (mission 2)."
+}

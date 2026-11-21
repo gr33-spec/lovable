@@ -6,7 +6,7 @@ import { loadDocument } from "@/lib/server/db";
 import { resolveShare } from "@/lib/server/shares";
 import { currentMonth, monthLabel, yearOf } from "@/lib/engine/dates";
 import { project } from "@/lib/engine/projection";
-import { cashflowMonthly, companyTree, ltv, netWorth } from "@/lib/engine/snapshot";
+import { cashflowMonthly, rentalPayments, companyTree, ltv, netWorth } from "@/lib/engine/snapshot";
 import { latentGains } from "@/lib/engine/history";
 import { eur, eurCompact, eurSigned, pct } from "@/lib/format";
 
@@ -91,9 +91,9 @@ export default async function SharePage({ params, searchParams }: { params: Prom
 
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Tile label="Loyers / mois" value={eurCompact(t.rentMonthly)} />
-          <Tile label="Mensualités / mois" value={eurCompact(t.paymentsMonthly)} />
-          <Tile label="Cash-flow / mois" value={eurSigned(cashflowMonthly(t))} />
-          <Tile label="Immeubles · lots" value={`${t.buildings} · ${t.units}`} />
+          <Tile label="Mensualités / mois" value={eurCompact(rentalPayments(t))} />
+          <Tile label="Cash-flow locatif / mois" value={eurSigned(cashflowMonthly(t))} />
+          <Tile label="Biens · lots" value={`${t.buildings} · ${t.units}`} />
         </div>
 
         <a
@@ -153,7 +153,7 @@ export default async function SharePage({ params, searchParams }: { params: Prom
         {horizons.length > 0 && (
           <Section title="Projection">
             <Table
-              head={["Année", "Dette restante", "Patrimoine net", "Cash-flow annuel"]}
+              head={["Année", "Capital restant dû", "Patrimoine net", "Cash-flow annuel"]}
               rows={horizons.map((r) => [String(r.year), eurCompact(r.debt), t.unvalued ? "—" : eurCompact(r.net), eurSigned(r.cashflow)])}
             />
             <p className="mt-2 text-xs text-muted">

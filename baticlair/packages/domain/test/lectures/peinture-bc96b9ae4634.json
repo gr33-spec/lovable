@@ -1,0 +1,179 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Peinture murs séjour, 2 couches",
+   "quantity": "85",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Peinture plafonds mate, impression + 2 couches",
+   "quantity": "40",
+   "unit": "m²"
+  },
+  {
+   "ref": "3",
+   "designation": "Enduit de lissage, ratissage murs",
+   "quantity": "85",
+   "unit": "m²"
+  },
+  {
+   "ref": "4",
+   "designation": "Toile de verre à peindre, chambre",
+   "quantity": "30",
+   "unit": "m²"
+  },
+  {
+   "ref": "5",
+   "designation": "Papier peint intissé chambre",
+   "quantity": "25",
+   "unit": "m²"
+  },
+  {
+   "ref": "6",
+   "designation": "Ravalement façade peinture D2 Pliolite",
+   "quantity": "120",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Peinture murs séjour, 2 couches",
+    "quantite": "85",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Peinture murs séjour, 2 couches",
+      "quantite": "85",
+      "unite": "m²",
+      "ouvrage": "peinture-murs-plafonds",
+      "emplacement": "murs",
+      "donnees": {
+       "aspect": "1",
+       "impression": "1",
+       "couches": "2"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Peinture plafonds mate, impression + 2 couches",
+    "quantite": "40",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Peinture plafonds mate, impression + 2 couches",
+      "quantite": "40",
+      "unite": "m²",
+      "ouvrage": "peinture-murs-plafonds",
+      "emplacement": "murs",
+      "donnees": {
+       "aspect": "1",
+       "impression": "1",
+       "couches": "2"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Enduit de lissage, ratissage murs",
+    "quantite": "85",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Enduit de lissage, ratissage murs",
+      "quantite": "85",
+      "unite": "m²",
+      "ouvrage": "enduit-lissage",
+      "emplacement": "enduit_murs",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Toile de verre à peindre, chambre",
+    "quantite": "30",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Toile de verre à peindre, chambre",
+      "quantite": "30",
+      "unite": "m²",
+      "ouvrage": "toile-de-verre",
+      "emplacement": "toile_murs",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Papier peint intissé chambre",
+    "quantite": "25",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Papier peint intissé chambre",
+      "quantite": "25",
+      "unite": "m²",
+      "ouvrage": "papier-peint",
+      "emplacement": "murs_papier",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Ravalement façade peinture D2 Pliolite",
+    "quantite": "120",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ravalement façade peinture D2 Pliolite",
+      "quantite": "120",
+      "unite": "m²",
+      "ouvrage": "facade-d2",
+      "emplacement": "facade",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

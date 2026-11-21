@@ -1,0 +1,219 @@
+{
+ "devis": [
+  {
+   "ref": "a1",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+   "quantity": "200",
+   "unit": "m²"
+  },
+  {
+   "ref": "a2",
+   "designation": "Liteaux sapin 27x40 pour ardoises",
+   "quantity": "200",
+   "unit": "m²"
+  },
+  {
+   "ref": "a3",
+   "designation": "Ardoises pour jouées de lucarnes",
+   "quantity": "6",
+   "unit": "unités"
+  },
+  {
+   "ref": "a4",
+   "designation": "Entourage de cheminée zinc et solin",
+   "quantity": "2",
+   "unit": "unités"
+  },
+  {
+   "ref": "a5",
+   "designation": "Chatières de ventilation",
+   "quantity": "12",
+   "unit": "unités"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "faconnage",
+    "texte": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
+    "boutons": [
+     {
+      "label": "Je façonne (feuilles ou bobineau)",
+      "valeur": "1"
+     },
+     {
+      "label": "Je commande façonné",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "façonnage",
+    "ligne": null
+   },
+   {
+    "cle": "perimetre_cheminee",
+    "texte": "Périmètre d'une cheminée (les 4 côtés) ?",
+    "boutons": [
+     {
+      "label": "2 m",
+      "valeur": "2"
+     },
+     {
+      "label": "3 m",
+      "valeur": "3"
+     },
+     {
+      "label": "4 m",
+      "valeur": "4"
+     },
+     {
+      "label": "5 m",
+      "valeur": "5"
+     }
+    ],
+    "unite": "m",
+    "donnee": "périmètre d'une cheminée",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "a1",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles Espagne 1er choix 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "a2",
+    "designation": "Liteaux sapin 27x40 pour ardoises",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Liteaux 27×40 sapin",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "liteau",
+      "donnees": {
+       "produit": "liteau-sapin-27x40"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "a3",
+    "designation": "Ardoises pour jouées de lucarnes",
+    "quantite": "6",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises pour jouées de lucarnes",
+      "quantite": "6",
+      "unite": "unités",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "a4",
+    "designation": "Entourage de cheminée zinc et solin",
+    "quantite": "2",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Abergement de cheminée zinc",
+      "quantite": "2",
+      "unite": "unités",
+      "ouvrage": "abergement-cheminee",
+      "emplacement": "abergement",
+      "donnees": {},
+      "attend": [
+       "faconnage",
+       "perimetre_cheminee"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Bandes porte-solin",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "abergement-cheminee",
+      "emplacement": "porte_solin",
+      "donnees": {},
+      "attend": [
+       "perimetre_cheminee"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "a5",
+    "designation": "Chatières de ventilation",
+    "quantite": "12",
+    "unite": "unités",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Chatières de ventilation",
+      "quantite": "12",
+      "unite": "unités",
+      "ouvrage": null,
+      "emplacement": null,
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

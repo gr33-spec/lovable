@@ -1,0 +1,9 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/referentiels/metiers/**"] },
+    "typecheck": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/referentiels/metiers/**"] },
+    "test": { "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/referentiels/metiers/**"] }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "metier": "menuiserie-interieure-agencement",
+  "ouvrages": {
+    "MI-BP": { "expressions": ["bloc-porte", "bp", "porte de distribution", "porte intérieure", "porte isoplane", "porte postformée", "huisserie"] },
+    "MI-PS": { "expressions": ["porte seule", "rénovation de porte", "changement de porte"] },
+    "MI-BPR": { "expressions": ["bloc-porte rénovation", "huisserie de recouvrement"] },
+    "MI-BPT": { "expressions": ["porte coupe-feu", "ei 30", "porte palière", "porte acoustique", "porte isotherme"] },
+    "MI-PC": { "expressions": ["porte à galandage", "châssis eclisse", "porte coulissante"] },
+    "MI-PL": { "expressions": ["plinthes", "plinthe bois", "plinthe mdf", "plinthe médium"] },
+    "MI-HA": { "expressions": ["chambranles", "couvre-joints", "champlats", "baguettes d'angle", "quart-de-rond", "moulures", "cimaise"] },
+    "MI-PQ": { "expressions": ["parquet", "parquet flottant", "contrecollé", "stratifié", "point de hongrie", "bâtons rompus"] },
+    "MI-LA": { "expressions": ["lambris", "frisette", "lambris pvc", "habillage bois", "lames murales"] },
+    "MI-PD": { "expressions": ["façade de placard", "placard", "dressing", "penderie"] },
+    "MI-AG": { "expressions": ["meuble sur mesure", "bibliothèque", "banquette", "bureau intégré", "meuble tv", "caissons"] },
+    "MI-DV": { "expressions": ["trappe de visite", "tablette de fenêtre", "cache-radiateur", "habillage de gaine"] }
+  }
+}

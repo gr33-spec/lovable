@@ -1,0 +1,81 @@
+# Lot couverture, point 8 : plomb et cuivre (§12)
+
+Écrit par `packages/domain/test/lot-couverture-8.test.ts` : ce fichier change seulement si le calcul change.
+
+Pour chaque devis : les lignes, l'écran à l'ouverture (lignes vertes, orange, grises, questions du comptoir),
+puis le PDF que lit le vendeur une fois les questions répondues (premier bouton) et chaque « C'est bon » donné.
+
+| Devis de test | Vertes | Orange | Grises | Questions |
+| --- | --- | --- | --- | --- |
+| Bavette de plomb de 40 cm | 0 | 1 | 0 | 0 |
+| Bande cuivre de 33 | 0 | 1 | 0 | 1 |
+
+## Bavette de plomb de 40 cm
+
+Devis de test :
+
+| Ligne | Désignation | Quantité |
+| --- | --- | --- |
+| 1 | Bavette plomb largeur 40 cm | 8 ml |
+
+**À l'ouverture : 0 verte · 1 orange · 0 grise.**
+
+Questions du comptoir : aucune.
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Plomb laminé 1,5 mm, rouleau largeur 40 cm × 5 m | 2 rouleaux | Valeur par défaut à confirmer |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Plomb laminé 1,5 mm, rouleau largeur 40 cm × 5 m | 2 rouleaux | 8 ml de bande | chiffrable |
+
+## Bande cuivre de 33
+
+Devis de test :
+
+| Ligne | Désignation | Quantité |
+| --- | --- | --- |
+| 1 | Bande cuivre dév. 33 | 12 ml |
+
+**À l'ouverture : 0 verte · 1 orange · 0 grise.**
+
+Questions du comptoir :
+- Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ? (Je façonne (feuilles ou bobine) / Je commande façonné)
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Bandes cuivre, dév. 330 mm | 12 ml | Façonnage à préciser |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Cuivre en bobine largeur 500 mm, 0,6 mm | 14 ml | pour façonner 12 ml de bande | chiffrable |
+
+## Le tableau de Brest (couverture), inchangé
+
+**À l'ouverture : 1 verte · 3 orange · 0 grise.**
+
+Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
+- Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
+- Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
+
+| Ligne orange | Chiffre | Sous-ligne |
+| --- | --- | --- |
+| Ardoises naturelles 30×22 | 8 925 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | Qualité à préciser |
+| Naissances | — | Descentes à préciser |
+
+Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
+
+| Désignation | Quantité | Précision | Le vendeur |
+| --- | --- | --- | --- |
+| Ardoises naturelles Espagne 1er choix 30×22 | 8 925 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox standard, longueur 10 cm | 8 925 pièces | un par ardoise commandée | chiffrable |
+| Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
+| Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
+

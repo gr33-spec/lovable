@@ -1,11 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { documentIndex, documentsOf, fileDocument, searchText } from "../src/lib/documents";
-import { monthIndex } from "../src/lib/engine/dates";
 import { emptyData } from "../src/lib/types";
 import type { LoanScheduleRow } from "../src/lib/types";
 
-const NOW = monthIndex(2026, 10);
 
 function fixture() {
   const d = emptyData();
@@ -32,32 +30,32 @@ function table(): LoanScheduleRow[] {
 
 test("bail rangé dans le dossier du locataire, sans jamais écraser", () => {
   const d = fixture();
-  const r = fileDocument(d, { fileId: "f1", name: "bail.pdf", category: "bail", tenancyId: "t" }, NOW);
+  const r = fileDocument(d, { fileId: "f1", name: "bail.pdf", category: "bail", tenancyId: "t" });
   assert.equal(r.ops[0].coll, "tenancies");
   const t = r.ops[0].item as (typeof d.tenancies)[number];
   assert.equal(t.signedLease?.fileId, "f1");
   d.tenancies = [t];
   // Un second bail pour le même locataire ne remplace pas le premier : il devient une pièce rattachée.
-  const r2 = fileDocument(d, { fileId: "f2", name: "bail2.pdf", category: "bail", tenancyId: "t" }, NOW);
+  const r2 = fileDocument(d, { fileId: "f2", name: "bail2.pdf", category: "bail", tenancyId: "t" });
   assert.equal(r2.ops[0].coll, "documents");
   assert.equal((r2.ops[0].item as { tenancyId?: string }).tenancyId, "t");
 });
 
 test("caution, courrier, tableau d'amortissement, pièce libre", () => {
   const d = fixture();
-  const c = fileDocument(d, { fileId: "f3", name: "caution.pdf", category: "caution", tenancyId: "t" }, NOW);
+  const c = fileDocument(d, { fileId: "f3", name: "caution.pdf", category: "caution", tenancyId: "t" });
   assert.equal((c.ops[0].item as (typeof d.tenancies)[number]).guarantors?.[0].signedFile?.fileId, "f3");
-  const l = fileDocument(d, { fileId: "f4", name: "courrier.pdf", category: "courrier", title: "Révision 2026", tenancyId: "t" }, NOW);
+  const l = fileDocument(d, { fileId: "f4", name: "courrier.pdf", category: "courrier", title: "Révision 2026", tenancyId: "t" });
   assert.equal((l.ops[0].item as (typeof d.tenancies)[number]).letters?.[0].label, "Révision 2026");
-  const tab = fileDocument(d, { fileId: "f5", name: "tableau.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: table(), loanPlan: { kind: "existing", loanId: "l" } }, NOW);
+  const tab = fileDocument(d, { fileId: "f5", name: "tableau.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: table(), loanPlan: { kind: "existing", loanId: "l" } });
   const loan = tab.ops[0].item as (typeof d.loans)[number];
   assert.equal(tab.ops[0].coll, "loans");
   assert.equal(loan.schedule?.fileId, "f5");
   assert.equal(loan.initialAmount, 12_000);
   const bad = table().map((r, i) => (i === 5 ? { ...r, balance: r.balance + 500 } : r));
   // Sans financement désigné, un tableau reste une pièce rattachée au prêt (jamais perdue).
-  assert.equal(fileDocument(d, { fileId: "f6", name: "t.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: bad }, NOW).ops[0].coll, "documents");
-  const ins = fileDocument(d, { fileId: "f7", name: "pno.pdf", category: "assurance", title: "Assurance PNO", buildingId: "b" }, NOW);
+  assert.equal(fileDocument(d, { fileId: "f6", name: "t.pdf", category: "tableau_amortissement", loanId: "l", scheduleRows: bad }).ops[0].coll, "documents");
+  const ins = fileDocument(d, { fileId: "f7", name: "pno.pdf", category: "assurance", title: "Assurance PNO", buildingId: "b" });
   assert.equal(ins.ops[0].coll, "documents");
 });
 

@@ -1,0 +1,940 @@
+import { errorMessage } from "./fr";
+
+/**
+ * Accès à l'API. Toutes les requêtes passent par /v1 sur la même adresse
+ * que le site (relais configuré dans next.config.ts).
+ */
+export class ApiError extends Error {
+  constructor(
+    readonly code: string,
+    readonly status: number,
+    readonly supportId?: string,
+    readonly details?: { path: string; message: string }[],
+    /** Motif précis, quand l'API en donne un (ex. document illisible : « encrypted »). */
+    readonly reason?: string,
+    /** La phrase en français que l'API donne pour ce refus (« Les regroupements arrivent bientôt… »), affichée telle quelle. */
+    readonly phrase?: string,
+  ) {
+    super(errorMessage(code, reason));
+    this.name = "ApiError";
+  }
+
+  /** Les fautes de saisie nommées par le serveur (champ et phrase), quand il en donne. */
+  fautes?: { champ: string; message: string }[];
+
+  /** Le champ refusé, quand le serveur le nomme (`field`, ou le premier chemin d'une faute de format). */
+  champ?: string;
+
+  get retryable(): boolean {
+    return this.code === "network" || this.status >= 500 || this.code === "request_in_progress";
+  }
+}
+
+const COMPANY_KEY = "baticlair.companyId";
+/** L'événement du navigateur lancé quand l'API répond `abonnement_requis` (le paywall l'écoute). */
+export const EVENEMENT_ABONNEMENT_REQUIS = "mobiiz:abonnement-requis";
+
+export function getActiveCompanyId(): string | null {
+  try {
+    return localStorage.getItem(COMPANY_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setActiveCompanyId(id: string | null): void {
+  try {
+    if (id) localStorage.setItem(COMPANY_KEY, id);
+    else localStorage.removeItem(COMPANY_KEY);
+  } catch {
+    /* navigation privée : on se passe de mémorisation */
+  }
+}
+
+export interface RequestOptions {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  /** Objet envoyé en JSON, ou formulaire (envoi de fichier). */
+  body?: unknown;
+  /**
+   * Clé de l'action utilisateur : un double appui ou une nouvelle tentative
+   * avec la même clé ne crée jamais deux fois la même chose.
+   */
+  idempotencyKey?: string;
+  signal?: AbortSignal;
+  /** Le jeton du défi Turnstile (`components/turnstile.tsx`), envoyé en `x-captcha-response`. */
+  captcha?: string | null;
+  /** La requête survit à la page qu'on quitte (brouillon écrit au départ de l'écran). */
+  keepalive?: boolean;
+}
+
+export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const headers: Record<string, string> = { accept: "application/json" };
+  const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (options.body !== undefined && !isForm) headers["content-type"] = "application/json";
+  if (options.idempotencyKey) headers["idempotency-key"] = options.idempotencyKey;
+  if (options.captcha) headers["x-captcha-response"] = options.captcha;
+  const companyId = getActiveCompanyId();
+  if (companyId && !path.startsWith("/v1/auth")) headers["x-company-id"] = companyId;
+
+  let res: Response;
+  try {
+    res = await fetch(path, {
+      method: options.method ?? "GET",
+      headers,
+      credentials: "same-origin",
+      ...(options.body !== undefined ? { body: isForm ? (options.body as FormData) : JSON.stringify(options.body) } : {}),
+      ...(options.signal ? { signal: options.signal } : {}),
+      ...(options.keepalive ? { keepalive: true } : {}),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    throw new ApiError("network", 0);
+  }
+
+  const text = await res.text();
+  const data = text ? safeJson(text) : null;
+  if (res.ok) return data as T;
+
+  // Deux formats : l'API métier ({ error: { code } }) et l'authentification ({ code }).
+  const body = (data ?? {}) as { error?: { code?: string; supportId?: string; details?: unknown }; code?: string };
+  const code = body.error?.code ?? body.code ?? (res.status >= 500 ? "internal_error" : "validation_failed");
+  const details = body.error?.details;
+  const fieldErrors = Array.isArray(details) ? (details as { path: string; message: string }[]) : undefined;
+  const reason = details && typeof details === "object" && "reason" in details ? String(details.reason) : undefined;
+  // Le paywall de l'abonnement (24 octobre 2026) : une action payante refusée ouvre l'écran « Ton essai est terminé ».
+  // Recentrage (25 octobre 2026) : la phrase du geste refusé (« Jusqu'à 5 négoces par demande. ») suit.
+  const phrase = details && typeof details === "object" && "phrase" in details ? String(details.phrase) : details && typeof details === "object" && "message" in details ? String(details.message) : null;
+  if (code === "abonnement_requis" && typeof window !== "undefined") window.dispatchEvent(new CustomEvent(EVENEMENT_ABONNEMENT_REQUIS, { detail: { phrase } }));
+  const erreur = new ApiError(code, res.status, body.error?.supportId, fieldErrors, reason, phrase ?? undefined);
+  // Missions (10 novembre 2026) : les fautes de saisie nommées par le serveur, champ par champ.
+  if (details && typeof details === "object" && "fautes" in details && Array.isArray(details.fautes)) erreur.fautes = details.fautes as { champ: string; message: string }[];
+  const champ = details && typeof details === "object" && "field" in details ? String(details.field) : fieldErrors?.[0]?.path?.split(".")[0];
+  if (champ) erreur.champ = champ;
+  throw erreur;
+}
+
+/**
+ * LE MESSAGE D'UNE ERREUR À L'ÉCRAN, JAMAIS UNE PHRASE VAGUE (retour de Greg, 24 octobre 2026 : « Ça n'a pas marché.
+ * Réessaie dans un instant. » en ajoutant son négoce, sans dire pourquoi). Dans l'ordre : la phrase propre à l'écran pour
+ * ce motif (`precis`), sinon le motif précis de l'API ou le message de son code (`lib/fr.ts`), et toujours de quoi retrouver
+ * la panne : le code support, ou le numéro d'erreur quand le serveur n'a rien répondu de lisible. `vous` : les pages des
+ * négoces (vouvoiement) ne disent que leur propre texte et le code.
+ */
+/** Recette du 13 novembre 2026 (G24) : le nom d'un champ refusé se dit en français, jamais « siret » ou « postalCode ». */
+const CHAMPS: Record<string, string> = {
+  siret: "le SIRET (14 chiffres)",
+  email: "l'adresse e-mail",
+  phone: "le numéro de téléphone",
+  telephone: "le numéro de téléphone",
+  portable: "le numéro de portable",
+  postalCode: "le code postal",
+  codePostal: "le code postal",
+  city: "la ville",
+  ville: "la ville",
+  name: "le nom",
+  nom: "le nom",
+  prenom: "le prénom",
+  password: "le mot de passe",
+  quantity: "la quantité",
+  quantite: "la quantité",
+};
+const nomDuChamp = (chemin: string) => CHAMPS[chemin.split(".").pop() ?? chemin] ?? chemin;
+
+/**
+ * UN APPEL EN DIRECT (Greg, 14 novembre 2026, étapes de l'assistant) : le serveur écrit une ligne JSON par événement ;
+ * chacune est rendue dès qu'elle arrive. Rend le dernier événement, ou null si la réponse n'est pas un flux lisible.
+ */
+export async function apiEnDirect<T>(path: string, body: unknown, surEvenement: (e: T) => void): Promise<T | null> {
+  const headers: Record<string, string> = { accept: "application/x-ndjson", "content-type": "application/json" };
+  const companyId = getActiveCompanyId();
+  if (companyId) headers["x-company-id"] = companyId;
+  let res: Response;
+  try {
+    res = await fetch(path, { method: "POST", headers, credentials: "same-origin", body: JSON.stringify(body) });
+  } catch {
+    throw new ApiError("network", 0);
+  }
+  if (!res.ok || !res.body) return null;
+  const lecteur = res.body.getReader();
+  const decodeur = new TextDecoder();
+  let reste = "";
+  let dernier: T | null = null;
+  const rendre = (ligne: string) => {
+    const t = ligne.trim();
+    if (!t) return;
+    try {
+      dernier = JSON.parse(t) as T;
+      surEvenement(dernier);
+    } catch {
+      // Une ligne illisible est ignorée : la réponse finale fait foi.
+    }
+  };
+  try {
+    for (;;) {
+      const { done, value } = await lecteur.read();
+      if (done) break;
+      reste += decodeur.decode(value, { stream: true });
+      const lignes = reste.split("\n");
+      reste = lignes.pop() ?? "";
+      lignes.forEach(rendre);
+    }
+  } catch {
+    throw new ApiError("network", 0);
+  }
+  rendre(reste);
+  return dernier;
+}
+
+export function messageErreur(e: unknown, precis: Record<string, string> = {}, o: { vous?: boolean } = {}): string {
+  const err = e instanceof ApiError ? e : new ApiError("internal_error", 500);
+  if (err.reason && precis[err.reason]) return precis[err.reason]!;
+  if (precis[err.code]) return precis[err.code]!;
+  // Greg, 27 octobre 2026 (capture : « Tu n'as pas le droit… (motif : zone_inactive). Code support… ») : quand l'API donne
+  // sa phrase en français, c'est elle qui s'affiche, jamais un motif technique.
+  if (err.phrase) return err.phrase;
+  const trace = err.supportId ? ` Code support : ${err.supportId}.` : err.status >= 500 ? ` Erreur ${err.status}.` : "";
+  if (o.vous) {
+    if (err.status === 0) return "Pas de connexion internet : réessayez dès que le réseau revient.";
+    if (err.status === 429) return "Trop d'essais en peu de temps : attendez quelques minutes, puis réessayez.";
+    if (err.status >= 500) return `Un problème est survenu de notre côté ; vos saisies sont gardées, réessayez dans un instant.${trace}`;
+    const champ = err.details?.[0]?.path;
+    return `Cette demande n'est pas acceptée${err.reason ? ` (motif : ${err.reason})` : champ ? ` (à vérifier : ${nomDuChamp(champ)})` : ""}.${trace}`;
+  }
+  // Un refus sans motif connu de l'écran : le message du code, et le motif brut ou le champ fautif pour savoir quoi faire.
+  const generique = ["validation_failed", "conflict", "forbidden", "not_found"].includes(err.code) && !(err.reason && err.message !== errorMessage(err.code));
+  const detail = generique ? (err.reason ? ` (motif : ${err.reason})` : err.details?.[0]?.path ? ` (à vérifier : ${nomDuChamp(err.details[0].path)})` : "") : "";
+  return `${err.message.replace(/\.$/, "")}${detail}.${trace}`;
+}
+
+function safeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+/** Nouvelle clé d'action (une par formulaire affiché). */
+export function newActionKey(): string {
+  return crypto.randomUUID();
+}
+
+// ---------------------------------------------------------------------------
+// Types renvoyés par l'API (contrats de /v1).
+// ---------------------------------------------------------------------------
+
+export interface Me {
+  user: { id: string; email: string; name: string; emailVerified: boolean };
+  companies: { id: string; name: string; role: "owner" | "admin" | "member" | "viewer"; trades: string[] }[];
+}
+
+export type ProjectStatus = "active" | "archived";
+
+/** Un croquis déposé : du chantier entier, ou d'un article de la liste (« article » : sa clé), avec la précision de l'artisan. */
+export interface ItemSketch {
+  id: string;
+  nom: string;
+  article?: string;
+  commentaire?: string | null;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  clientName: string | null;
+  address: string | null;
+  /** Infos chantier facultatives : la note de l'artisan, ou null. */
+  siteNotes: string | null;
+  /** Métier du chantier (choisi à la création), ou null : celui de l'entreprise. */
+  trade?: string | null;
+  status: ProjectStatus;
+  createdAt: string;
+  updatedAt: string;
+  lastActivityAt: string;
+  /** Avec `?resume=1` (« Mes listes », accueil ; 1er novembre 2026). */
+  resume?: ResumeListe | null;
+}
+
+/** Le résumé d'une liste : ce que montre sa carte et ce que le serveur permet (suppression définitive). */
+export interface ResumeListe {
+  lignes: number;
+  origine: "Devis" | "Photo ou document" | "Saisie" | null;
+  statut: string;
+  /** `aSuivre` : le rappel de suivi à 7 jours attend « C'est réglé » ; `regle` : l'artisan l'a dit. */
+  demande: { negoces: number; reponses: number; choisi: boolean; aSuivre?: boolean; regle?: boolean } | null;
+  achatGroupe: boolean;
+  supprimable: boolean;
+  raison: "demande" | "reponse" | "offre" | "achat_groupe" | null;
+  phrase: string | null;
+}
+
+export interface ProjectPage {
+  items: Project[];
+  nextCursor: string | null;
+}
+
+export type DocumentPurpose = "client_quote" | "supplier_quote" | "sketch";
+
+export interface ProjectDocument {
+  id: string;
+  projectId: string;
+  purpose: DocumentPurpose;
+  name: string;
+  sizeBytes: number;
+  pageCount: number | null;
+  status: "stored" | "read" | "failed";
+  createdAt: string;
+  reading: {
+    status: "processing" | "completed" | "failed";
+    errorCode: string | null;
+    pagesTotal: number;
+    pagesText: number;
+    pagesVision: number;
+    pagesSkipped: number;
+    estimatedAiCostEur: string;
+    actualAiCostEur: string;
+  } | null;
+  duplicate?: boolean;
+}
+
+/** Taille maximale d'un document (même valeur par défaut que l'API) ; au-delà de 3 Mo, il part en morceaux (`lib/upload.ts`). */
+export const MAX_DOCUMENT_BYTES = 10_000_000;
+/** Une requête vers l'API ne dépasse pas 4,5 Mo chez l'hébergeur : les photos allégées tiennent dans 4 Mo. */
+export const MAX_REQUEST_BYTES = 4_000_000;
+
+export interface Health {
+  status: "ok" | "degrade";
+  features: { email: boolean; ai: boolean; alerts?: boolean; groupe?: boolean; commandeCommune?: "mois" | "lots"; missions?: boolean; memoire?: boolean; connexions?: boolean; chantierFictif?: boolean };
+}
+
+export interface TakeoffIssue {
+  code: string;
+  severity: "blocking" | "to_verify" | "info";
+  message: string;
+}
+
+export interface TakeoffLine {
+  id: string;
+  position: number;
+  designation: string;
+  /** La marchandise seule, à montrer (sans « (Fourniture et pose) ») ; `designation` reste ce que l'on modifie. */
+  article?: string;
+  quantity: string | null;
+  unit: string | null;
+  reference: string | null;
+  sourceRefs: string[];
+  sourcePages: number[];
+  origin: "ai" | "manual" | "partner" | "liste";
+  edited: boolean;
+  /** Doute exprimé par l'IA sur la ligne. */
+  aiDoubt: string | null;
+  /** Titres du devis au-dessus de la ligne (lot, marque, logement, pièce). */
+  section?: string[];
+  /** L'artisan a vérifié la ligne et la garde telle quelle. */
+  confirmed: boolean;
+  kind: "material" | "labor" | "unknown";
+  family: string | null;
+  /** « work » : surface de l'ouvrage (liteaux 120 m²), quantité d'achat encore à calculer. */
+  basis: "purchase" | "work";
+  /** Rôle de la quantité : mesure d'un ouvrage, à commander telle quelle, ou indéterminé. */
+  role: "measure" | "purchase" | "undetermined" | null;
+  status: "certain" | "probable" | "to_verify";
+  issues: TakeoffIssue[];
+}
+
+/** Lecture du devis client encore sur le serveur (gros devis) : en cours, ou échouée (on peut relancer). */
+export interface ReadingState {
+  status: "reading" | "failed";
+  reason: string | null;
+  /** Pendant la lecture : les lignes du devis déjà lues (ses propres mots) et leur nombre. */
+  lignes?: string[];
+  total?: number;
+}
+
+/**
+ * Le quantitatif de la porte /v1/quantitatifs (§38) : le même objet pour l'appli et les partenaires.
+ * `ecran` (demandé avec `?ecran=1`) : le détail de l'écran de l'appli.
+ */
+export interface Quantitatif {
+  id: string;
+  projetId: string;
+  etat: "en_cours" | "questions" | "pret" | "erreur";
+  /** Parcours §48 : questions de comptoir (avant le calcul), calcul en cours, ou liste prête. */
+  phase?: "questions" | "calcul" | "resultat";
+  erreur?: { raison: string };
+  /** Pendant la lecture (`en_cours`) : les lignes du devis déjà lues (ses propres mots) et leur nombre. */
+  lecture?: { lignes: string[]; total: number };
+  valide?: boolean;
+  /** Infos chantier facultatives qui ont servi au calcul : la note, et les croquis déposés. */
+  infos?: { texte: string | null; croquis: ItemSketch[] };
+  ecran?: Takeoff;
+}
+
+export interface Takeoff {
+  /** Le métier du quantitatif : le lot unique de « Qui reçoit quoi » (1er novembre 2026). */
+  metier?: string | null;
+  /** Nouveau cap (22 octobre) : la phrase de la pastille orange d'une ligne vague. */
+  phrasePrecision?: string;
+  /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
+  habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  /** Les pièces d'un choix commun au devis (le pliage), chacune avec son choix : il se change pour une pièce au récapitulatif. */
+  choixPieces?: { key: string; piece: string; value: string; unit: string; options: { label: string; value: string }[] }[];
+  /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même : jamais posées, confirmées s'il les dit. */
+  dicibles?: { key: string; text: string; unit: string; options: { label: string; value: string; dit?: string[] }[] }[];
+  /** §49.9 : les lignes du devis sans fourniture (heures, forfait, accès, évacuation), repliées sous la liste. */
+  /** §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire. */
+  bref?: { cle: string; texte: string }[];
+  /** Le bref en un texte descriptif (retour du fondateur, 2026-10-11), le même que chez le fournisseur. */
+  brefTexte?: string;
+  /** Le client et l'adresse sont-ils dans le bref ? (non par défaut : un négoce n'en a pas besoin pour chiffrer). */
+  brefAvecClient?: boolean;
+  /** Assistant Mobiiz (31 octobre 2026) : l'adresse du chantier et la livraison dites par l'artisan. */
+  chantier?: { adresse: string | null; livraison: string | null };
+  /** §52 : le métier n'a pas encore été relu par un artisan, l'écran 3 porte « Ratios en cours de validation ». */
+  ratiosEnValidation?: boolean;
+  /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */
+  lots?: { metier: string; libelle: string; lignes: number }[];
+  lotsConfirmes?: string[] | null;
+  /** Étape « Suggestions » : les cases à proposer avant les questions ; vide ou absent : pas d'étape. */
+  suggestions?: { key: string; label: string }[];
+  metiersAjoutables?: { metier: string; libelle: string }[];
+  /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
+  lotsNonLus?: string[];
+  sansFourniture?: { lineId: string; label: string; measure: string | null }[];
+  /** §48.4 : ce que l'IA juge utile mais que le devis ne demande pas : bloc « Suggestions », décoché. */
+  aiSuggestions?: { key: string; label: string; quantity: string | null; unit: string | null; reason: string }[];
+  /** Les lignes ajustées par une habitude apprise (24 octobre 2026), annulables d'un clic (`habitude:<ligne>`). */
+  ajustements?: { itemKey: string; regleId: string; texte: string }[];
+  id: string;
+  projectId: string;
+  documentId: string | null;
+  status: "draft" | "validated";
+  model: string;
+  notes: string[];
+  createdAt: string;
+  validatedAt: string | null;
+  counts: { certain: number; probable: number; toVerify: number; labor: number; blocking: number };
+  issues: (TakeoffIssue & { lineIds: string[] })[];
+  lines: TakeoffLine[];
+  /** Ce que voit l'artisan : compteurs, décisions à prendre, éléments prêts et leur preuve. */
+  view: TakeoffView;
+  /** LA LISTE D'ACHATS : à acheter, à faire chiffrer, hypothèses, et si elle peut partir. */
+  purchase: TakeoffPurchase;
+  /** Le chantier rangé par logement (titres du devis) ; absent ou null sans au moins deux logements. */
+  logements?: SiteUnits | null;
+}
+
+export interface SiteUnitItem {
+  designation: string;
+  quantity: string | null;
+  unit: string | null;
+  lineIds: string[];
+}
+
+export interface SiteUnits {
+  /** Un groupe = un logement, ou plusieurs logements identiques. */
+  units: { key: string; labels: string[]; items: SiteUnitItem[] }[];
+  count: number;
+  other: SiteUnitItem[];
+}
+
+export interface PurchaseItem {
+  key: string;
+  label: string;
+  /** « 1 488 pièces », « 547 ml », « 2 rouleaux » ; null si la quantité n'est pas établie. */
+  quantity: string | null;
+  /** « ≈ 7 palettes », ou ce que la longueur couvre (« 13 ml à couvrir »). */
+  approx: string | null;
+  /** Ce qui sert au comptoir (« pour façonner 13 ml de bande, développé 33 cm »), §45.3. */
+  precision: string | null;
+  /** Consommable : en fin de « Fournitures à chiffrer » (§45.3). */
+  consumable: boolean;
+  kind: "computed" | "direct";
+  needIds: string[];
+  lineIds: string[];
+  state: "ready" | "to_confirm";
+  assumptionKeys: string[];
+  /** Réécrit par l'artisan (§41.4). */
+  edited: ("label" | "quantity" | "precision")[];
+  /** §49.8 : la donnée qui manque ou le défaut à confirmer, en boutons dans la carte (un tap règle la ligne). */
+  asks?: { key: string; text: string; unit: string | null; options: { label: string; value: string }[] }[];
+  /** §49.8 : un écart devis / calcul, « Garder 20 » / « Mettre 21 ». */
+  gap?: { written: string; computed: string; unit: string } | null;
+  /** Une quantité estimée (les feuilles de zinc) : « − / + » sur la ligne, sans l'ouvrir. */
+  estimation?: boolean;
+  /** Nouveau cap (22 octobre) : ce qui manque pour se grouper (format, origine, choix, marque), en boutons ; vide : précise. */
+  aPreciserPourGroupe?: { cle: string; question: string; options: string[] }[];
+}
+
+export interface PurchaseAssumption {
+  key: string;
+  label: string;
+  value: string;
+  unit: string;
+  note: string | null;
+  choices: { label: string; value: string }[];
+  /** Une qualité qui se nomme (l'aspect du zinc) : « Autre » laisse l'écrire. */
+  named?: boolean;
+}
+
+export interface TakeoffPurchase {
+  /** « Couverture en ardoises au crochet : 200 m² »… */
+  understood: string[];
+  toBuy: PurchaseItem[];
+  /** « À acheter » rangé par ouvrage (« Couverture en ardoises… · 200 m² »), pour la carte du quantitatif. */
+  groups: { key: string; label: string; measure: string | null; itemKeys: string[] }[];
+  toQuote: { key: string; label: string; measure: string; reason: string; lineIds: string[] }[];
+  assumptions: PurchaseAssumption[];
+  /** §45.8 « On ajoute ? » : consommables proposés, Oui / Non d'un tap, au plus huit. */
+  suggestions: PurchaseItem[];
+  canValidate: boolean;
+  /** L'écran unique « liste des fournitures » : chaque ligne vert / orange / gris, dans l'ordre des groupes. */
+  screen: SupplyScreen;
+  /** Ce que l'artisan doit savoir (l'amiante, §18) : dit en haut de la liste, jamais envoyé au fournisseur. */
+  warnings?: string[];
+}
+
+export interface ScreenRow {
+  key: string;
+  /** ok = vert, rien à faire ; check = orange, un tap ouvre sa question ; supplier = gris, à préciser avec le fournisseur. */
+  status: "ok" | "check" | "supplier";
+  itemKey?: string;
+  quoteKey?: string;
+  pending?: { label: string; quantity: string | null };
+  decisionKey?: string;
+  /** La raison d'une ligne orange (« Quantité à confirmer : colle 4 kg/m² »), sinon « À vérifier ». */
+  reason?: string;
+  lineIds: string[];
+  /** Greg, 7 novembre 2026 : la famille (le lot) de la ligne n'est pas sûre ; seule cette ligne porte un badge. */
+  familleIncertaine?: boolean;
+}
+export interface SupplyScreen {
+  groups: { key: string; label: string; measure: string | null; kind: "principal" | "singulier" | "evacuation" | "autres" | "consommables"; rows: ScreenRow[] }[];
+  total: number;
+  toCheck: number;
+}
+
+/** §45.3 : le document « Demande de devis », tel que le fournisseur le reçoit (aperçu = PDF). */
+export interface SupplyRow {
+  designation: string;
+  quantite: string;
+  precision: string | null;
+  consommable?: boolean;
+  /** Clé de l'article dans la liste : l'aperçu corrige la liste elle-même (§45.9). */
+  cle?: string;
+}
+export interface PacketDocument {
+  entete: { entreprise: string; coordonnees: string[]; titre: string; chantier: string; ville: string | null; date: string; reference: string | null; mention?: string | null };
+  destinataire: string | null;
+  blocs: ({ numero: number; titre: string; kind: "list"; lignes: string[] } | { numero: number; titre: string; kind: "table"; colonnes: [string, string, string]; lignes: SupplyRow[] })[];
+  croquis: { article: string; nom: string; commentaire: string | null }[];
+  pied: { question: string | null; mention: string };
+}
+export interface QuotePreview {
+  subject: string;
+  mail: string;
+  document: PacketDocument;
+  hasLogo: boolean;
+}
+
+/** D'où vient un élément : lu dans le devis, BatiClair (vérifié), votre entreprise, choisi pour ce chantier, hypothèse par défaut. */
+export type Origin = "devis" | "referential" | "company" | "project" | "assumption";
+
+export interface TakeoffDecision {
+  key: string;
+  state: "to_confirm" | "missing";
+  title: string;
+  text: string;
+  lineIds: string[];
+  pieceLineIds: string[];
+  primary: { action: "pieces" | "keep" | "edit" | "answer" | "remove"; label: string } | null;
+  secondary: ("pieces" | "keep" | "edit" | "answer" | "remove")[];
+  /** Ce que le comptoir propose à la place (doute de l'appel IA n° 2), ou l'article à ajouter. */
+  suggestion?: { label: string; quantity: string | null; unit: string | null } | null;
+  question: {
+    key: string;
+    kind: "confirm_product" | "choose_product" | "param" | "choose";
+    unit: string | null;
+    hint: string | null;
+    options: { label: string; value: string }[];
+    /** Ce que la réponse change (« De 1 191 à 1 445 pièces selon la réponse. »). */
+    impact: string | null;
+    /** Une qualité qui se nomme (l'ardoise, une teinte) : « Autre » laisse l'écrire. */
+    named?: boolean;
+  } | null;
+}
+
+export interface ProofCriterion {
+  key: "reading" | "work_item" | "product" | "manufacturer_data" | "rule" | "site_data" | "consistency" | "packaging";
+  status: "established" | "to_confirm" | "missing" | "no_effect" | "supplier";
+  detail: string;
+  origin: Origin | null;
+  comparisonRisk: boolean;
+}
+
+export interface TakeoffViewItem {
+  kind: "line" | "need";
+  id: string;
+  label: string;
+  quantity: string | null;
+  state: "verified" | "to_confirm" | "missing";
+  reason: string | null;
+  proof: ProofCriterion[];
+  calculation: {
+    slot: string;
+    formula: string | null;
+    exclusions: string | null;
+    productOrigin: string | null;
+    trace: { label: string; value: string; unit: string; from: string; origin: Origin | null; url: string | null }[];
+  } | null;
+}
+
+/** Une ligne du devis en trois niveaux : lu dans le devis → il faut → à commander. */
+export interface TakeoffOuvrage {
+  lineId: string;
+  designation: string;
+  role: "measure" | "purchase" | "undetermined" | null;
+  read: { quantity: string | null; unit: string | null };
+  needs: {
+    slot: string;
+    label: string;
+    origin: "explicit" | "deduced";
+    need: { value: string; unit: string } | null;
+    needRange: { min: string; max: string; unit: string } | null;
+    order: { count: string; unit: { one: string; many: string } } | null;
+    missing: string | null;
+    /** Calcul provisoire (règle en brouillon, mode validateur) : à juger, jamais ✓. */
+    provisional: boolean;
+    /** Produit d'usage quand le devis ne le précise pas (« 18×40 d'ordinaire… à confirmer »). */
+    usual: string | null;
+    state: "verified" | "to_confirm" | "missing";
+  }[];
+  direct: { quantity: string; unit: string } | null;
+  pending: string | null;
+  state: "verified" | "to_confirm" | "missing";
+}
+
+export interface TakeoffView {
+  counts: { verified: number; toConfirm: number; missing: number };
+  decisions: TakeoffDecision[];
+  measures: { lineIds: string[]; text: string } | null;
+  ouvrages: TakeoffOuvrage[];
+  items: TakeoffViewItem[];
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contactName: string | null;
+  email: string;
+  phone: string | null;
+  notes: string | null;
+  /** Spécialités déclarées (Greg, 1er novembre 2026) ; vides : non renseignées. */
+  specialites?: string[];
+  specialitesSource?: "artisan" | "negoce" | null;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RecipientStatus = "to_send" | "sent" | "received" | "declined";
+
+export interface PriceRequestRecipient {
+  id: string;
+  supplier: Pick<Supplier, "id" | "name" | "contactName" | "email" | "phone">;
+  status: RecipientStatus;
+  sentAt: string | null;
+  /** R7 : l'étiquette de réponse de la demande (adresse « Répondre » et objet). */
+  etiquette: string | null;
+  /** Lot final, point 6 : l'artisan a été prévenu que ce négoce n'a pas répondu. */
+  rappelLe?: string | null;
+  /** Recette n° 2 du 14 novembre 2026 : le bon de commande est parti à ce négoce (date). */
+  commandeLe?: string | null;
+  document: { id: string; name: string; status: string } | null;
+  /** Le parcours du négoce (6 novembre 2026) : « Je vais répondre », motif d'un refus, précision demandée. */
+  negoce?: {
+    vaRepondreLe: string | null;
+    refusMotif: string | null;
+    precision: { question: string; demandeeLe: string | null; reponse: string | null; repondueLe: string | null } | null;
+    conditions?: { livraisons: string | null; minimumCommandeHt: number | null; dechargement: string | null } | null;
+  } | null;
+  /** E-mail prêt à envoyer (texte brut). */
+  email: { subject: string; body: string } | null;
+}
+
+export interface OrderGap {
+  kind: "same" | "changed" | "removed" | "added";
+  index: number | null;
+  designation: string;
+  sent: string | null;
+  ordered: string | null;
+  unit: string | null;
+  gapPercent: number | null;
+}
+
+export interface OrderFeedback {
+  supplierId: string;
+  outcome: "as_is" | "modified";
+  source: "none" | "text" | "document";
+  documentId?: string | null;
+  pendingReading?: boolean;
+  gaps: OrderGap[];
+  at: string;
+}
+
+export interface PriceRequest {
+  id: string;
+  projectId: string;
+  /** Copie figée de la liste validée au moment de la demande. */
+  lines: { designation: string; quantity: string | null; unit: string | null; reference: string | null }[];
+  message: string | null;
+  dueDate: string | null;
+  createdAt: string;
+  /** « Classé » : l'artisan a fait son choix (fournisseurs retenus facultatifs). */
+  classifiedAt: string | null;
+  retainedSupplierIds: string[];
+  /** §48.5 : les articles de la liste envoyés à part (« Envoyer une sélection… ») ; vide = toute la liste. */
+  articles?: string[];
+  /** Les demandes parties ensemble par le tri par métier portent le même lot ; absent = demande seule. */
+  lot?: string | null;
+  /** §47.5 retour fournisseur : « commandé tel quel » ou « modifié », et les écarts avec la liste envoyée. */
+  orderFeedback?: OrderFeedback | null;
+  /** Après la commande (16 novembre 2026) : la date de livraison souhaitée, les autres négoces consultés, le choix pris. */
+  apresCommande?: { livraisonSouhaitee: string | null; autres: number; autresChoix: "oui" | "non" | null } | null;
+  /** Le rappel de suivi à 7 jours et « C'est réglé ». */
+  suivi?: { rappelLe: string | null; regleLe: string | null };
+  recipients: PriceRequestRecipient[];
+  /** §43 : les trois blocs envoyés au fournisseur (mail et PDF) ; absent pour une demande d'avant. */
+  packet: { entreprise: string; chantier: string; articles: string[]; a_chiffrer: string[]; resume: string[]; joindre_detail: boolean } | null;
+}
+
+/** Réglages des envois fournisseur (§42.2), par entreprise. */
+export interface PriceRequestSettings {
+  attachQuoteDetail: boolean;
+}
+
+export type OfferLineKind = "main" | "substitution" | "variant" | "option" | "fee" | "deposit" | "info";
+
+export interface OfferLine {
+  id: string;
+  position: number;
+  kind: OfferLineKind;
+  designation: string;
+  reference: string | null;
+  quantity: string | null;
+  unit: string | null;
+  unitPrice: string | null;
+  discountRate: string | null;
+  lineTotal: string | null;
+  /** Montant HT retenu pour la ligne (imprimé, sinon recalculé), en euros. */
+  amount: string | null;
+  /** Ligne demandée correspondante (numéro à partir de 1), ou null. */
+  requestLine: number | null;
+  matchConfidence: "sure" | "probable" | "unsure" | null;
+  matchConfirmed: boolean;
+  aiDoubt: string | null;
+  edited: boolean;
+}
+
+/** Devis fournisseur lu par l'IA ; tous les montants sont recalculés par le code. */
+export interface Offer {
+  recipientId: string;
+  id: string;
+  documentId: string;
+  notes: string[];
+  printed: { totalHT: string | null; totalVAT: string | null; totalTTC: string | null };
+  deliveryIncluded: boolean | null;
+  computedTotalHT: string | null;
+  arithmetic: { status: "consistent" | "inconsistent" | "insufficient_data"; issues: { code: string; lineId: string | null; computed: string | null; printed: string | null }[] };
+  requestedCount: number;
+  answeredCount: number;
+  lines: OfferLine[];
+}
+
+export interface ComparisonSupplier {
+  recipientId: string;
+  supplierId: string;
+  name: string;
+  computedTotalHT: string | null;
+  printedTotalHT: string | null;
+  feesHT: string | null;
+  /** Coût pour couvrir toute la liste (manquants estimés), frais compris. */
+  comparableTotalHT: string | null;
+  estimatedPartHT: string | null;
+  coveredCount: number;
+  missingCount: number;
+  uncertainCount: number;
+  /** Lignes proposées qui ne correspondent à aucun article demandé (non comptées). */
+  extrasCount: number;
+  extrasHT: string | null;
+  comparability: "complete" | "provisional" | "estimated" | "incomplete";
+  arithmetic: "consistent" | "inconsistent" | "insufficient_data";
+}
+
+export type ItemFlag = "SUBSTITUTION" | "QUANTITY_LOWER" | "QUANTITY_HIGHER" | "UNIT_NOT_COMPARABLE" | "ONLY_AS_VARIANT" | "NOT_PRICED";
+
+export interface ComparisonItem {
+  index: number;
+  designation: string;
+  quantity: string | null;
+  unit: string | null;
+  lowestSupplierId: string | null;
+  offers: {
+    supplierId: string;
+    status: "covered" | "missing";
+    confidence: "certain" | "probable" | "to_verify" | null;
+    comparableAmount: string | null;
+    effectiveUnitPrice: string | null;
+    offeredQuantity: { value: string; unit: string } | null;
+    estimatedAmount: string | null;
+    flags: ItemFlag[];
+  }[];
+}
+
+export interface Comparison {
+  engineVersion: string;
+  classifiedAt: string | null;
+  retainedSupplierIds: string[];
+  suppliers: ComparisonSupplier[];
+  items: ComparisonItem[];
+}
+
+/** Prochaine action réelle d'un chantier (accueil « À faire »). */
+export interface NextAction {
+  projectId: string;
+  projectName: string;
+  kind: "add_quote" | "prepare_list" | "validate_list" | "send_requests" | "compare" | "view_offer" | "choose_supplier";
+  label: string;
+  detail: string | null;
+  target: "devis" | "materiaux" | "fournisseurs" | "comparer";
+}
+
+/** Formule et utilisation, en nombre de chantiers. */
+export interface BillingPlan {
+  key: string;
+  label: string;
+  projectLimit: number | null;
+  period: "trial" | "month";
+  priceEurMonth: number | null;
+}
+
+export interface BillingStatus {
+  plan: BillingPlan;
+  usage: { projects: number; limit: number | null; remaining: number | null };
+  limitReached: boolean;
+  offers: BillingPlan[];
+  requestedPlan: string | null;
+  activationEnabled: boolean;
+  /** Paywall allumé ; éteint, Compte et Formules disent « Gratuit pour l'artisan ». */
+  payant?: boolean;
+}
+
+/** L'abonnement artisan (24 octobre 2026) : `GET /v1/abonnement`. */
+export interface Abonnement {
+  actif: boolean;
+  paiement: "simule" | "stripe";
+  modeTest: string | null;
+  acces: "essai" | "abonne" | "grace" | "bloque" | "gratuit";
+  /** La formule payée (Pro tant qu'il n'y en a pas). */
+  formule: Formule;
+  /** Le prix HT de la formule et sa période (« par mois », « par an »). */
+  prixHt: string;
+  prixTtc: string;
+  periode: string;
+  /** Au mois ou à l'année. */
+  periodicite?: Periodicite;
+  /** L'annuel peut-il être choisi au paiement ? (Avec Stripe : seulement si ses prix annuels sont configurés.) */
+  annuelDisponible?: boolean;
+  /** Les deux formules, Pro d'abord. */
+  offres: OffreAbonnement[];
+  /** « 19,90 € » : le prix d'entrée, par mois. */
+  prixDes: string;
+  /** Le passage de Pro à Pro Max, au prorata ; null quand il n'est pas possible. */
+  bascule: { credit: string; aPayerHt: string; aPayerTtc: string; jusquau: string } | null;
+  essaiFinLe: string | null;
+  joursEssai: number | null;
+  graceFinLe: string | null;
+  periodeFin: string | null;
+  resiliationProgrammee: boolean;
+  statut: "aucun" | "actif" | "echec" | "resilie";
+  tvaIntra: string | null;
+  bandeau: string | null;
+  bandeauRouge: boolean;
+  /** La période payée est finie et le renouvellement arrive : rien n'a été refusé (recette n° 2 du 14 novembre 2026). */
+  renouvellementEnCours?: boolean;
+  paywall: { phrase: string; economie: string | null };
+}
+
+/** Les deux formules de l'abonnement (Greg, 15 novembre 2026) : Pro 29 € HT et Pro Max 49 € HT par mois. */
+export type Formule = "pro" | "promax";
+export interface OffreAbonnement {
+  formule: Formule;
+  titre: string;
+  badge: string | null;
+  prix: string;
+  details: string[];
+  enAvant: boolean;
+  ttc?: string;
+  /** La même formule payée à l'année (dix mois facturés pour douze) : ce qui est facturé, l'équivalent par mois, l'économie. */
+  annuel?: { prix: string; equivalent: string; economie: string; details: string[]; ttc?: string };
+}
+
+/** Au mois, ou à l'année en une fois (Greg, 12 novembre 2026). */
+export type Periodicite = "mensuel" | "annuel";
+
+export interface FactureAbonnement {
+  id: string;
+  numero: string;
+  test: boolean;
+  /** Les factures d'avant le 30 octobre 2026 gardent « mensuel », « annuel », « bascule ». */
+  formule: Formule | "passage_pro" | "mensuel" | "annuel" | "bascule";
+  emiseLe: string;
+  periode: string;
+  ttc: string;
+  ht: string;
+}
+
+
+/** R7 : l'adresse Mobiiz de l'entreprise (`GET /v1/company/adresse-mobiiz`). */
+export interface EtatAdresseMobiiz {
+  adresse: string;
+  domaine: string | null;
+  email: string | null;
+  vueLe: string | null;
+  anciennes: string[];
+  modifiable: boolean;
+  /** Le nombre de demandes de prix déjà parties (le rappel ne se montre qu'au premier envoi). */
+  envois: number;
+}
+
+/** R7 : un e-mail reçu sur l'adresse Mobiiz (`GET /v1/recus`). */
+export interface EmailRecu {
+  id: string;
+  de: string;
+  expediteur: string;
+  objet: string;
+  texte: string | null;
+  recuLe: string;
+  luLe: string | null;
+  demande: { recipientId: string; projectId: string; negoce: string; chantier?: string } | null;
+  fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
+  tropLourdes: string[];
+}
+
+/** R7 : une demande partie, à laquelle rattacher un e-mail reçu (`GET /v1/recus/demandes`). */
+export interface DemandePartie {
+  recipientId: string;
+  projectId: string;
+  chantier: string;
+  negoce: string;
+  envoyeeLe: string | null;
+  recue: boolean;
+  /** « En attente de réponse » ou « Réponse déjà reçue ». */
+  etat?: string;
+}
+
+/** Les demandes récentes pour classer un e-mail, et celle que Mobiiz propose (avec sa raison), s'il y en a une. */
+export interface DemandesPourClasser {
+  items: DemandePartie[];
+  suggestion: { recipientId: string; raison: string } | null;
+}

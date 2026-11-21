@@ -1,0 +1,646 @@
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY } from "@baticlair/domain";
+import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
+import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import type { BillingService } from "../../billing/index.js";
+import type { DocumentsService } from "../../documents/index.js";
+import type { ProjectsService } from "../../projects/index.js";
+import { takeoffDto, type ReviewedTakeoff, type TakeoffService } from "../../takeoff/index.js";
+import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
+import { quantitatifView } from "./quantitatif-view.js";
+import { NOM_APP, nomDeListe } from "@baticlair/domain";
+
+export interface LigneEntree {
+  libelle: string;
+  quantite: string | null;
+  unite: string | null;
+  prix: string | null;
+  reference?: string | null;
+}
+
+export interface Contexte {
+  projetId?: string | undefined;
+  reference?: string | undefined;
+  /** Adresse ou code postal du chantier : la zone climatique en dépend (jamais demandée). */
+  adresse?: string | undefined;
+  /** Infos chantier facultatives : texte libre de l'artisan (mesures nommées, contexte). Remplace la note du chantier. */
+  infos?: string | undefined;
+  /** Métier du devis (« couverture », « platrerie ») : choisit le référentiel (§22). Absent : le métier de l'entreprise. */
+  metier?: string | undefined;
+  /** Clé API partenaire à l'origine de l'appel : le quantitatif lui est compté (quota mensuel). */
+  apiKey?: { id: string; monthlyQuota: number } | undefined;
+}
+
+/** `ecran` : l'appli reçoit en plus le détail de son écran (lignes lues, décisions, preuves). */
+export interface Rendu {
+  ecran?: boolean | undefined;
+}
+
+export type Correction =
+  | { action: "modifier"; cle: string; valeur: string; unite?: string | undefined }
+  | { action: "ajouter"; ligne: LigneEntree; depuisApercu?: boolean }
+  | { action: "modifier_ligne"; id: string; ligne: LigneEntree; depuisApercu?: boolean }
+  | { action: "retirer"; id: string }
+  | { action: "confirmer"; id: string }
+  // § 41.4 : une ligne du quantitatif (champ `lignes`) réécrite par l'artisan.
+  | { action: "renommer"; id: string; libelle: string }
+  | { action: "fixer_quantite"; id: string; quantite: string; unite: string }
+  // §45.9 : précision et croix de l'aperçu ; §45.8 : « On ajoute ? ».
+  | { action: "preciser"; id: string; precision: string }
+  | { action: "bref"; cle: string; texte: string }
+  | { action: "retirer_article"; id: string }
+  // Assistant Mobiiz (31 octobre 2026) : « Annuler » un retrait ; l'adresse du chantier et la livraison dites par l'artisan.
+  | { action: "remettre_article"; id: string }
+  | { action: "chantier"; champ: "adresse" | "livraison"; texte: string }
+  | { action: "suggestion"; id: string; reponse: "oui" | "non" };
+
+type Row = { id: string; companyId: string; projectId: string; source: string; documentId: string | null; takeoffId: string | null; reference: string | null };
+
+/**
+ * LA PORTE D'ENTRÉE (§38) : l'app et les partenaires (Rappidos d'abord) passent tous ici. Trois
+ * entrées : un PDF (lu par l'IA, en arrière-plan), un devis déjà déposé sur le chantier, ou des
+ * lignes déjà structurées (aucune IA). Une seule sortie : l'état, les questions, les lignes à
+ * commander avec leur explication (§39).
+ */
+export class QuantitatifsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly projects: ProjectsService,
+    private readonly billing: BillingService,
+    private readonly documents: DocumentsService,
+    private readonly takeoffs: TakeoffService,
+  ) {}
+
+  get iaDisponible(): boolean {
+    return this.takeoffs.aiAvailable;
+  }
+
+  get listeDisponible(): boolean {
+    return this.takeoffs.listeAvailable;
+  }
+
+  /**
+   * Quota d'une clé API partenaire : tant de quantitatifs créés par mois civil. Au-delà, 429 ; les lectures ne
+   * comptent pas. Vérifié avant toute création (chantier, document, lecture IA).
+   */
+  private async assertQuota(tenant: TenantContext, ctx: Contexte): Promise<void> {
+    if (!ctx.apiKey) return;
+    const now = new Date();
+    const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const used = await this.prisma.quantitatif.count({ where: { companyId: tenant.companyId, apiKeyId: ctx.apiKey.id, createdAt: { gte: since } } });
+    if (used >= ctx.apiKey.monthlyQuota) throw new DomainError("too_many_requests", "Partner API key monthly quota reached", { quota: ctx.apiKey.monthlyQuota, utilises: used });
+  }
+
+  /**
+   * Le métier du devis et son tiroir (§22) : celui demandé, sinon le premier métier de l'entreprise qui a un référentiel.
+   * Pas de tiroir ouvert pour ce métier : erreur claire (422 « no_referential »), jamais les règles d'un autre métier.
+   */
+  private tradeFor(tenant: TenantContext, ctx: Contexte): string {
+    const trade = ctx.metier ? tradeIdOf(ctx.metier) : (tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing");
+    if (!referentialFor(trade)) {
+      const disponibles = REFERENTIALS.map((r) => METIER_NAMES[r.trade] ?? r.trade);
+      throw new DomainError("no_referential", `No referential for trade « ${ctx.metier ?? trade} »`, {
+        metier: METIER_NAMES[trade] ?? ctx.metier ?? trade,
+        disponibles,
+        message: `${NOM_APP} ne calcule pas encore les matériaux de ce métier. Métiers disponibles : ${disponibles.join(", ")}.`,
+      });
+    }
+    return trade;
+  }
+
+  async fromPdf(tenant: TenantContext, file: { name: string; bytes: Uint8Array }, ctx: Contexte, rendu: Rendu = {}) {
+    this.tradeFor(tenant, ctx);
+    await this.assertQuota(tenant, ctx);
+    const projectId = await this.project(tenant, ctx);
+    const upload = await this.documents.upload(tenant, projectId, { purpose: "client_quote", fileName: file.name, bytes: file.bytes }).catch(async (error: unknown) => {
+      // Pas un PDF : le chantier créé pour ce devis ne doit pas rester vide.
+      if (!ctx.projetId) await this.prisma.project.deleteMany({ where: { id: projectId, companyId: tenant.companyId } });
+      throw error;
+    });
+    const { document } = upload;
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "pdf", documentId: document.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
+    });
+    // Fichier illisible (pas un devis, protégé…) : erreur tout de suite, sans dépenser une lecture.
+    const unreadable = document.status === "failed" && document.processing?.status === "failed" && document.processing.errorCode !== "read_failed";
+    if (!unreadable) await this.takeoffs.start(tenant, document.id);
+    return this.get(tenant, row.id, rendu);
+  }
+
+  /**
+   * « J'AI DÉJÀ MA LISTE » : photo ou PDF d'une liste déjà comptée (écrite à la main, bon ou devis de négoce, tableau).
+   * Les lignes sont lues telles qu'écrites, sans calcul ni question ; la liste arrive sur le même écran qu'un devis.
+   */
+  async fromListe(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, rendu: Rendu = {}) {
+    assertCanWrite(tenant);
+    if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
+    const project = await this.projects.get(tenant, projectId);
+    const trade = project.trade && referentialFor(project.trade) ? project.trade : (tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing");
+    const reviewed = await this.takeoffs.fromListe(tenant, projectId, trade, file);
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: null, apiKeyId: null },
+    });
+    return this.view(row, reviewed, rendu);
+  }
+
+  /**
+   * UN DOCUMENT DANS LA LISTE EN COURS (Greg, 12 novembre 2026) : la liste, le bon ou le devis de négoce est LU, ses lignes
+   * sont rendues à l'écran, qui les propose à part ; rien n'est créé ni gardé. Format générique (`nature`, `lignes`) : un
+   * devis client ou un plan pourront plus tard alimenter le même brouillon par la même route.
+   */
+  async lireDocument(tenant: TenantContext, file: { name: string; bytes: Uint8Array }) {
+    assertCanWrite(tenant);
+    const trade = tenant.trades.find((t) => referentialFor(t)) ?? tenant.trades[0] ?? "roofing";
+    const { lignes } = await this.takeoffs.lireListe(tenant, null, trade, file);
+    return { nature: "liste" as const, lignes: lignes.map((l) => ({ libelle: l.designation.slice(0, 160), quantite: l.quantite, unite: l.unite })) };
+  }
+
+  /** Un devis déjà déposé sur le chantier (le chat de l'appli) : même quantitatif s'il existe, lecture sinon. */
+  async fromDocument(tenant: TenantContext, documentId: string, ctx: Contexte, rendu: Rendu = {}, options: { confirmeGros?: boolean } = {}) {
+    assertCanWrite(tenant);
+    this.tradeFor(tenant, ctx);
+    await this.assertQuota(tenant, ctx);
+    if (!/^[0-9a-f-]{36}$/i.test(documentId)) throw notFound("Document");
+    const { document } = await this.documents.get(tenant, documentId);
+    if (ctx.projetId && ctx.projetId !== document.projectId) throw validationFailed("Document of another project", [{ path: "documentId", message: "not in projetId" }]);
+    const existing = await this.prisma.quantitatif.findFirst({ where: { companyId: tenant.companyId, documentId }, orderBy: { createdAt: "desc" } });
+    const row =
+      existing ??
+      (await this.prisma.quantitatif.create({
+        data: { companyId: tenant.companyId, projectId: document.projectId, source: "pdf", documentId, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
+      }));
+    // Déjà lu : rien n'est relu ni décompté. Lecture en cours : elle n'est pas relancée.
+    await this.takeoffs.start(tenant, documentId, options);
+    return this.get(tenant, row.id, rendu);
+  }
+
+  async fromLines(tenant: TenantContext, lignes: readonly LigneEntree[], ctx: Contexte, rendu: Rendu = {}) {
+    const trade = this.tradeFor(tenant, ctx);
+    await this.assertQuota(tenant, ctx);
+    const projectId = await this.project(tenant, ctx);
+    const reviewed = await this.takeoffs.fromLines(
+      tenant,
+      projectId,
+      trade,
+      lignes.map((l) => ({ designation: l.libelle, quantity: l.quantite, unit: l.unite, price: l.prix })),
+    );
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
+    });
+    return this.view(row, reviewed, rendu);
+  }
+
+  /**
+   * Le quantitatif le plus récent d'un chantier. Une liste préparée avant la porte (ou par la démo)
+   * reçoit son identifiant de quantitatif à la première lecture.
+   */
+  async forProject(tenant: TenantContext, projectId: string, rendu: Rendu = {}) {
+    if (!/^[0-9a-f-]{36}$/i.test(projectId)) throw notFound("Project");
+    await this.projects.get(tenant, projectId);
+    let row = await this.prisma.quantitatif.findFirst({ where: { companyId: tenant.companyId, projectId }, orderBy: { createdAt: "desc" } });
+    // Le devis lu a été retiré (puis un autre déposé) : sa liste n'existe plus, le chantier repart de zéro.
+    if (row && !(await this.alive(row))) row = null;
+    const latest = await this.takeoffs.forProject(tenant, projectId);
+    if (latest && (!row || (row.takeoffId !== latest.takeoff.id && row.documentId !== latest.takeoff.documentId))) {
+      row = await this.prisma.quantitatif.create({
+        data: {
+          companyId: tenant.companyId,
+          projectId,
+          source: latest.takeoff.source,
+          documentId: latest.takeoff.documentId,
+          takeoffId: latest.takeoff.id,
+          reference: null,
+        },
+      });
+    }
+    return row ? [await this.get(tenant, row.id, rendu)] : [];
+  }
+
+  async get(tenant: TenantContext, id: string, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.reviewed(tenant, row);
+    if (reviewed) return this.view(row, reviewed, rendu);
+    const base = this.base(row);
+    const document = row.documentId ? await this.documents.get(tenant, row.documentId).then((d) => d.document, () => null) : null;
+    if (document && document.status === "failed" && document.processing?.status === "failed" && document.processing.errorCode !== "read_failed") {
+      return { ...base, etat: "erreur" as const, erreur: { raison: document.processing.errorCode } };
+    }
+    const reading = row.documentId ? await this.takeoffs.readingStateOf(tenant, row.documentId) : null;
+    if (reading?.status === "failed") return { ...base, etat: "erreur" as const, erreur: { raison: reading.reason ?? "analysis_failed" } };
+    // Les lignes une par une (Greg, 17 novembre 2026) : pour l'écran de l'appli seulement, ce que la lecture a déjà lu.
+    const lues = rendu.ecran && reading?.status === "reading" && reading.total ? { lecture: { lignes: reading.lignes ?? [], total: reading.total } } : {};
+    return { ...base, etat: "en_cours" as const, ...lues };
+  }
+
+  /**
+   * Réponses : à une question (son `id`), ou une valeur du calcul réglée directement (« param:pente »,
+   * « product:ardoise », « role:<ligne> »). Une valeur, « ok » pour garder une ligne telle quelle,
+   * null pour « je ne sais pas ».
+   */
+  async answer(tenant: TenantContext, id: string, reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[], rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    let reviewed = await this.ready(tenant, row);
+    // « Tout est bon » : les lignes gardées telles qu'écrites (ou comptées à la pièce) se confirment en une fois, avec
+    // une entrée au journal par ligne, au lieu d'un recalcul par ligne.
+    const together = reponses.filter((r) => {
+      const d = reviewed.purchase.questions.find((x) => x.key === r.question);
+      return r.valeur === "ok" && d !== undefined && !d.question && !d.key.startsWith(RATIO) && ![FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO, A_PRECISER].some((p) => d.key.startsWith(p)) && (d.primary?.action === "keep" || d.primary?.action === "pieces");
+    });
+    if (together.length > 1) {
+      const decisions = together.map((r) => reviewed.purchase.questions.find((x) => x.key === r.question)!);
+      for (const action of ["keep", "pieces"] as const) {
+        const own = decisions.filter((d) => d.primary!.action === action);
+        if (own.length === 0) continue;
+        reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action, lineIds: own.flatMap((d) => d.lineIds), pieceLineIds: own.flatMap((d) => d.pieceLineIds ?? []) });
+      }
+    }
+    const done = new Set(together.length > 1 ? together.map((r) => r.question) : []);
+    for (const [i, envoyee] of reponses.entries()) {
+      let r = envoyee;
+      if (done.has(r.question)) continue;
+      // Étape « Suggestions » (Greg, 17 novembre 2026) : les cases cochées, parmi celles proposées, ou « aucune ».
+      // Jamais un article qui n'a pas été proposé ; une fois répondue, l'étape est close.
+      if (r.question === SUGGESTIONS_KEY) {
+        const proposees = new Set((reviewed.suggestions ?? []).map((o) => o.key));
+        const aucune = r.valeur === null || r.valeur.trim() === SUGGESTIONS_AUCUNE;
+        const cochees = aucune ? [] : [...new Set(r.valeur!.split(",").map((x) => x.trim()).filter(Boolean))];
+        if (proposees.size === 0 || (!aucune && cochees.length === 0) || cochees.some((c) => !proposees.has(c))) {
+          throw validationFailed("Unknown suggestion", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        }
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, SUGGESTIONS_KEY, cochees.length > 0 ? cochees.join(",") : SUGGESTIONS_AUCUNE);
+        continue;
+      }
+      const decision = reviewed.purchase.questions.find((d) => d.key === r.question);
+      const q = decision?.question;
+      // §47.3 : « C'est bon » sur une quantité calculée avec une règle « à vérifier ».
+      // Les lignes orange de la vérification (interdits du code, doutes et ajouts du quantitatif IA) : « ok » ou « non ».
+      // §48.4 : un ajout de l'IA est une suggestion (hors de la liste) : il se coche sans décision ouverte.
+      if (!decision && r.question.startsWith(AI_ADDITION)) {
+        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, r.question, r.valeur);
+        continue;
+      }
+      // §51.6 (retour du fondateur, 2026-10-12) : la question d'une ligne « à préciser » se règle dans sa fiche : un bouton,
+      // « Au choix du fournisseur » (« ok ») ou ce que l'artisan écrit sous « Autre », qui part dans la précision de la ligne.
+      const preciserKey = r.question.replace(/^engine:/, "");
+      if (preciserKey.startsWith(A_PRECISER) && /^a-preciser:[0-9a-f-]{36}$/.test(preciserKey)) {
+        const text = r.valeur?.trim() ?? null;
+        if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
+        continue;
+      }
+      // L'apprentissage (Greg, 24 octobre 2026) : « Annuler » sur une ligne « Ajusté selon tes habitudes ».
+      const habitudeKey = r.question.replace(/^engine:/, "");
+      if (/^habitude:.{1,200}$/.test(habitudeKey)) {
+        if (r.valeur !== "non") throw validationFailed("This question takes « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, habitudeKey, "non");
+        continue;
+      }
+      // Temps deux (§51.6) : l'unité d'une ligne qui n'en a pas (un bouton, ou l'unité écrite sous « Autre »).
+      const uniteKey = r.question.replace(/^engine:/, "");
+      if (uniteKey.startsWith(UNITE_KEY)) {
+        const text = r.valeur?.trim() ?? null;
+        if (text !== null && (text === "" || text.length > 20)) throw validationFailed("Unit must be 1 to 20 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, uniteKey, text);
+        continue;
+      }
+      if (decision && [FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO, A_PRECISER].some((p) => decision.key.startsWith(p))) {
+        if (r.valeur !== "ok" && r.valeur !== "non") throw validationFailed("This question takes « ok » or « non »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, r.valeur);
+        continue;
+      }
+      if (decision && decision.key.startsWith(RATIO)) {
+        if (r.valeur !== "ok") throw validationFailed("This question takes « ok »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, decision.key, "ok");
+        continue;
+      }
+      if (decision && !q) {
+        if (r.valeur !== "ok" || !decision.primary || (decision.primary.action !== "keep" && decision.primary.action !== "pieces")) {
+          throw validationFailed("This question takes « ok »", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        }
+        reviewed = await this.takeoffs.decide(tenant, reviewed.takeoff.id, { action: decision.primary.action, lineIds: decision.lineIds, pieceLineIds: decision.pieceLineIds ?? [] });
+        continue;
+      }
+      const key = q?.key ?? r.question.replace(/^engine:/, "");
+      // Un bouton envoyé par son libellé ou par le mot du modèle (« bandeau ») vaut la valeur de son option (« 2 »).
+      const option = r.valeur === null ? undefined : (q?.options ?? []).find((o) => o.value !== r.valeur && (normalizeText(o.label) === normalizeText(r.valeur!) || normalizeText(o.label).split(" ").includes(normalizeText(r.valeur!))));
+      if (option) r = { ...r, valeur: option.value };
+      if (!/^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|(?:role|precise):[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2}|fiche:[a-z0-9_]{1,60})$/.test(key)) throw validationFailed("Unknown question", [{ path: `reponses.${i}.question`, message: r.question }]);
+      // §51.2 : une réponse écrite sous « Autre » (ni un bouton, ni un nombre) n'est jamais rangée dans une case sans être
+      // relue : l'IA met la fiche à jour, règle la ou les questions qu'elle tranche, et peut en ouvrir une de plus.
+      const written = r.valeur !== null && r.valeur.trim() !== "" && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim()) && !(q?.options ?? []).some((o) => o.value === r.valeur);
+      if (written && (key.startsWith("param:") || key.startsWith("fiche:"))) {
+        if (r.valeur!.trim().length > 300) throw validationFailed("Written answer must be at most 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        const relu = await this.takeoffs.relire(tenant, reviewed.takeoff.id, key, r.valeur!.trim());
+        if (relu) {
+          reviewed = relu.reviewed;
+          // Une qualité qui se nomme (« Ardoise d'Angers ») que la relecture n'a rangée dans aucun bouton : le nom écrit.
+          const keepName = !relu.answered.includes(key) && (q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named));
+          if (!keepName) continue;
+        } else if (key.startsWith("fiche:")) {
+          reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, r.valeur!.trim());
+          continue;
+        }
+      }
+      if (key.startsWith("role:") && r.valeur !== "measure" && r.valeur !== "purchase") throw validationFailed("Role answer must be measure or purchase", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+      let value: EngineAnswer;
+      // « Autre » sur une qualité qui se nomme (« Ardoise d'Angers ») : le texte écrit, tel quel dans la désignation.
+      // Comme pour l'unité : une qualité qui se nomme (l'ardoise) dont la question n'est plus ouverte au moment où sa réponse
+      // arrive (les réponses partent d'un coup ; une autre vient de changer l'état) reste une qualité qui se nomme, d'après
+      // sa fiche. Avant (18 novembre 2026) : « Ardoise d'Angers » était refusée « Not a number » et la question reposée.
+      const named = q?.named || reviewed.purchase.assumptions.some((a) => a.key === key && a.named) || donneeDeLaFiche(reviewed.takeoff.trade, key)?.named === true;
+      if (r.valeur === null || !key.startsWith("param:")) value = r.valeur;
+      else if (named && !/^\d+(?:[.,]\d+)?$/.test(r.valeur.trim())) {
+        const text = r.valeur.trim();
+        if (text === "" || text.length > 300) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        value = text;
+      } else {
+        // Une réponse pour tout le chantier (« param:faconnage ») vaut pour chaque pièce posée à part (« …@noue ») : même unité.
+        const unit =
+          (r.unite || undefined) ??
+          q?.unit ??
+          reviewed.purchase.assumptions.find((a) => a.key === key)?.unit ??
+          reviewed.purchase.questions.find((d) => d.question?.key.startsWith(`${key}@`))?.question?.unit ??
+          // Recette en ligne du 18 novembre 2026 : l'écran envoie ses réponses d'un coup. Une donnée du métier dont la
+          // question n'est plus ouverte (déjà prise par un envoi précédent, ou réglée par une autre réponse) garde l'unité
+          // de sa fiche : la réponse est prise, jamais refusée « sans unité » puis reposée sans fin.
+          uniteDeLaFiche(reviewed.takeoff.trade, key);
+        if (!unit) throw validationFailed("Missing unit", [{ path: `reponses.${i}.unite`, message: r.question }]);
+        // Un bouton dit en mots (« bandeau ») pour une donnée à boutons de la fiche, même quand sa question n'est pas
+        // ouverte (le code ne la pose pas) : la valeur du référentiel (« 2 »), jamais un refus.
+        let lu = r.valeur.trim();
+        const def = donneeDeLaFiche(reviewed.takeoff.trade, key);
+        if (!/^\d+(?:[.,]\d+)?$/.test(lu) && def?.choices?.length) lu = valeurDuReferentiel(def, { label: lu, valeur: lu });
+        if (!/^\d+(?:[.,]\d+)?$/.test(lu)) throw validationFailed("Not a number", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        value = { value: lu.replace(",", "."), unit };
+      }
+      reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, key, value);
+    }
+    return this.view(row, reviewed, rendu);
+  }
+
+  /**
+   * PARCOURS §48 : les réponses aux questions de comptoir (toutes d'un coup) puis le calcul. Une question laissée sans
+   * réponse ne bloque rien : sa ligne sort orange ; sauf le façonnage d'une pièce de zinguerie (§49.4), obligatoire.
+   * Jamais de deuxième vague de questions après.
+   */
+  async calculate(
+    tenant: TenantContext,
+    id: string,
+    reponses: readonly { question: string; valeur: string | null; unite?: string | undefined }[],
+    rendu: Rendu = {},
+    ajouts: readonly { id: string; reponse: "oui" | "non" }[] = [],
+    retraits: readonly string[] = [],
+  ) {
+    const row = await this.row(tenant, id);
+    const obligatoires = (r: ReviewedTakeoff) => r.purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
+    const dejaPosees = new Set(reponses.length > 0 ? obligatoires(await this.ready(tenant, row)).map((d) => d.question!.key) : []);
+    if (reponses.length > 0) await this.answer(tenant, id, reponses);
+    // §49.4 : le façonnage d'une pièce de zinguerie écrite se répond à l'écran des questions, jamais clos en silence.
+    const apres = await this.ready(tenant, row);
+    const mandatory = obligatoires(apres);
+    if (mandatory.length > 0) {
+      // Recette en ligne du 16 novembre 2026 (zinc à joint debout) : une réponse tout juste donnée peut faire naître le
+      // façonnage d'une autre pièce. Ce n'est pas un refus : l'écran des questions revient avec elle, AVANT le calcul, et
+      // les réponses déjà enregistrées ne se renvoient pas. Une question obligatoire déjà posée et sautée reste refusée.
+      if (reponses.length > 0 && mandatory.every((d) => !dejaPosees.has(d.question!.key))) return this.view(row, apres, rendu);
+      throw validationFailed("Answer the forming questions first", { reason: "faconnage_required", questions: mandatory.map((d) => d.question!.key) });
+    }
+    // §51.2 : une réponse « Autre » relue qui ouvre une donnée manquante pose UNE question de plus, AVANT de calculer :
+    // l'écran des questions revient avec elle seule à régler.
+    // Une donnée manquante demandée par la lecture elle-même (§51.2) ne bloque pas : sans réponse, sa ligne sort orange avec
+    // sa question (§51.6) ; seule une question ouverte APRÈS, par une relecture, ramène à l'écran des questions.
+    const before = await this.ready(tenant, row);
+    const own = new Set((before.takeoff.lecture?.questions ?? []).map((q) => `fiche:${q.cle}`));
+    const opened = before.purchase.questions.filter((d) => d.question?.key.startsWith("fiche:") && !own.has(d.question.key));
+    if (opened.length > 0) return this.view(row, before, rendu);
+    // Temps deux (directive du fondateur, 2026-10-12) : quand tout est répondu, un deuxième appel relit la fiche avec les
+    // réponses et peut poser UNE question de plus, avant le calcul ; une seule fois par devis.
+    // Les réponses sont maintenant enregistrées au fil de la discussion : le calcul peut arriver sans en porter une seule.
+    if (reponses.some((r) => r.valeur !== null) || Object.entries(before.takeoff.answers).some(([k, v]) => v !== null && v !== undefined && /^(param|product|fiche):/.test(k))) {
+      const relu = await this.takeoffs.bilan(tenant, before.takeoff.id);
+      if (relu?.opened) return this.view(row, relu.reviewed, rendu);
+    }
+    // §49.2.5 : les valeurs annoncées dans « Je pars sur ces valeurs » et gardées telles quelles sont CONFIRMÉES en lançant
+    // le calcul (elles ne gardent plus leur ligne orange) ; celles que l'artisan a changées ont déjà leur réponse.
+    const seen = await this.ready(tenant, row);
+    const plain = (t: string) => t.toLowerCase().replace(",", ".").trim();
+    const kept = seen.purchase.assumptions.flatMap((a) => {
+      if (!a.key.startsWith("param:") || (a.choices?.length ?? 0) < 2 || a.key in seen.takeoff.answers) return [];
+      const choice = a.choices!.find((c) => plain(c.label) === plain(a.value) || plain(c.value) === plain(a.value) || plain(c.label).startsWith(`${plain(a.value)} `));
+      return choice && /^\d+(?:[.,]\d+)?$/.test(choice.value) ? [{ question: a.key, valeur: choice.value, unite: a.unit }] : [];
+    });
+    if (kept.length > 0) await this.answer(tenant, id, kept);
+    for (const a of ajouts) await this.correct(tenant, id, { action: "suggestion", id: a.id, reponse: a.reponse });
+    // §48.2 « liteaux, écran, voliges : déjà sur place ? » (dépose / repose) : l'article sort de la liste.
+    for (const itemKey of retraits) await this.correct(tenant, id, { action: "retirer_article", id: itemKey });
+    // §48.4 : PLUS AUCUNE QUESTION APRÈS LA SORTIE DE LA LISTE. Ce qui reste sans réponse est clos ici (« je ne sais pas ») :
+    // la ligne sort orange ou part au fournisseur telle quelle, jamais une deuxième vague. Seule l'ambiguïté d'une ligne
+    // du devis (« 6 : ardoises ou jouées ? ») ne se tranche pas à la place de l'artisan.
+    for (let round = 0; round < 3; round++) {
+      const open = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question && !d.question.key.startsWith("role:"));
+      if (open.length === 0) break;
+      let closed = 0;
+      for (const d of open) {
+        // Une question que le calcul ne sait pas clore reste telle quelle : elle ne bloque jamais le calcul.
+        closed += await this.answer(tenant, id, [{ question: d.key, valeur: null }]).then(() => 1, () => 0);
+      }
+      if (closed === 0) break;
+    }
+    const reviewed = await this.ready(tenant, row);
+    await this.takeoffs.calculate(tenant, reviewed.takeoff.id);
+    return this.view(row, await this.takeoffs.reviewed(tenant, reviewed.takeoff.id), rendu);
+  }
+
+  /** Corrections (§39) : changer une valeur (pente, zone, perte…), ajouter, modifier, retirer ou confirmer une ligne du devis. */
+  async correct(tenant: TenantContext, id: string, correction: Correction, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.ready(tenant, row);
+    const fields = (l: LigneEntree) => ({ designation: l.libelle, quantityRaw: l.quantite, unitRaw: l.unite, reference: l.reference ?? null });
+    const line = (lineId: string) => {
+      // Une ligne d'un autre quantitatif n'existe pas pour celui-ci.
+      if (!reviewed.takeoff.lines.some((l) => l.id === lineId)) throw notFound("Line");
+      return lineId;
+    };
+    switch (correction.action) {
+      case "ajouter":
+        return this.view(row, await this.takeoffs.addLine(tenant, reviewed.takeoff.id, fields(correction.ligne), { keepStatus: correction.depuisApercu === true }), rendu);
+      case "preciser":
+      case "retirer_article": {
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id)) throw notFound("Line");
+        const after =
+          correction.action === "preciser"
+            ? await this.takeoffs.answer(tenant, reviewed.takeoff.id, `precision:${correction.id}`, correction.precision)
+            : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, "oui");
+        return this.view(row, after, rendu);
+      }
+      case "remettre_article": {
+        // Assistant (« Annuler ») : un article retiré revient, tel que le moteur le calcule ; rien d'autre ne bouge.
+        if (reviewed.takeoff.answers[`retire:${correction.id}`] !== "oui") throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `retire:${correction.id}`, null), rendu);
+      }
+      case "chantier":
+        // Assistant (points 9 et 11) : seulement ce que l'artisan dit ; vide, la donnée est retirée. Elle part dans le PDF.
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `chantier:${correction.champ}`, correction.texte.trim() || null), rendu);
+      case "bref": {
+        // §50.7 : seule une ligne du bref montré se corrige ; vide, elle est retirée (au document comme chez le fournisseur).
+        // « avec-client » : l'artisan ajoute (« oui ») ou retire (vide) le client et l'adresse du bref.
+        if (correction.cle !== "avec-client" && !takeoffDto(reviewed).bref.some((l) => l.cle === correction.cle)) throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `bref:${correction.cle}`, correction.texte), rendu);
+      }
+      case "suggestion": {
+        if (!reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
+        return this.view(row, await this.takeoffs.answer(tenant, reviewed.takeoff.id, `ajout:${correction.id}`, correction.reponse), rendu);
+      }
+      case "modifier_ligne":
+        return this.view(row, await this.takeoffs.updateLine(tenant, line(correction.id), fields(correction.ligne), { keepStatus: correction.depuisApercu === true }), rendu);
+      case "retirer":
+        return this.view(row, await this.takeoffs.deleteLine(tenant, line(correction.id)), rendu);
+      case "confirmer":
+        return this.view(row, await this.takeoffs.confirmLine(tenant, line(correction.id)), rendu);
+      case "renommer":
+      case "fixer_quantite": {
+        // Une suggestion (§45.8) se corrige comme une ligne de la liste.
+        if (!reviewed.purchase.toBuy.some((b) => b.key === correction.id) && !reviewed.purchase.suggestions.some((s) => s.key === correction.id)) throw notFound("Line");
+        // Une ligne reprise du devis : c'est la ligne du devis qu'on corrige. Une ligne calculée : les mots de l'artisan passent devant.
+        const direct = correction.id.startsWith("line:") ? reviewed.takeoff.lines.find((l) => l.id === correction.id.slice("line:".length)) : undefined;
+        if (direct) {
+          const fields = { designation: direct.designation, quantityRaw: direct.quantityRaw, unitRaw: direct.unitRaw, reference: direct.reference };
+          const next = correction.action === "renommer" ? { ...fields, designation: correction.libelle } : { ...fields, quantityRaw: correction.quantite, unitRaw: correction.unite };
+          return this.view(row, await this.takeoffs.updateLine(tenant, direct.id, next), rendu);
+        }
+        const after =
+          correction.action === "renommer"
+            ? await this.takeoffs.answer(tenant, reviewed.takeoff.id, `libelle:${correction.id}`, correction.libelle)
+            : await this.takeoffs.answer(tenant, reviewed.takeoff.id, `quantite:${correction.id}`, { value: correction.quantite.replace(",", "."), unit: correction.unite });
+        return this.view(row, after, rendu);
+      }
+      case "modifier": {
+        // Une clé modifiable : une hypothèse en cours, ou une valeur déjà choisie (elle porte sa clé dans l'explication).
+        const hyp = reviewed.purchase.assumptions.find((a) => a.key === correction.cle);
+        const morceau = quantitatifView(this.base(row), reviewed)
+          .lignes.flatMap((l) => l.explication.morceaux)
+          .find((m) => "cle" in m && m.cle === correction.cle);
+        const unit = correction.unite ?? hyp?.unit ?? (morceau && "unite" in morceau ? morceau.unite : undefined);
+        if (!correction.cle.startsWith("param:") || (!hyp && !morceau) || !unit) throw validationFailed("Unknown value", [{ path: "cle", message: correction.cle }]);
+        const after = await this.takeoffs.answer(tenant, reviewed.takeoff.id, correction.cle, { value: correction.valeur.replace(",", "."), unit });
+        return this.view(row, after, rendu);
+      }
+    }
+  }
+
+  /** L'artisan valide la liste : elle peut partir chez les fournisseurs (demande de prix). */
+  async validate(tenant: TenantContext, id: string, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.ready(tenant, row);
+    return this.view(row, await this.takeoffs.validate(tenant, reviewed.takeoff.id), rendu);
+  }
+
+  /** Rouvrir une liste validée pour la corriger. */
+  async reopen(tenant: TenantContext, id: string, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.ready(tenant, row);
+    return this.view(row, await this.takeoffs.reopen(tenant, reviewed.takeoff.id), rendu);
+  }
+
+  private async project(tenant: TenantContext, ctx: Contexte): Promise<string> {
+    assertCanWrite(tenant);
+    const id = await this.projectId(tenant, ctx);
+    if (ctx.infos !== undefined) await this.projects.update(tenant, id, { siteNotes: ctx.infos });
+    return id;
+  }
+
+  private async projectId(tenant: TenantContext, ctx: Contexte): Promise<string> {
+    if (ctx.projetId) {
+      const project = await this.projects.get(tenant, ctx.projetId).catch(() => null);
+      if (!project) throw notFound("Project");
+      return project.id;
+    }
+    // Un quantitatif sans chantier en crée un : la formule limite les nouveaux chantiers, comme dans l'app.
+    await this.billing.assertCanCreateProject(tenant);
+    // Point 7 (28 octobre 2026) : « Liste du 28 octobre », jamais « Devis du 2026-10-28 ».
+    const project = await this.projects.create(tenant, { name: ctx.reference?.trim() || nomDeListe(new Date()), address: ctx.adresse ?? null });
+    return project.id;
+  }
+
+  private async row(tenant: TenantContext, id: string): Promise<Row> {
+    if (!/^[0-9a-f-]{36}$/i.test(id)) throw notFound("Quantitatif");
+    const row = await this.prisma.quantitatif.findFirst({ where: { id, companyId: tenant.companyId } });
+    if (!row) throw notFound("Quantitatif");
+    return row;
+  }
+
+  private async ready(tenant: TenantContext, row: Row): Promise<ReviewedTakeoff> {
+    const reviewed = await this.reviewed(tenant, row);
+    if (!reviewed) throw new DomainError("conflict", "Quantitatif not ready", { etat: "en_cours" });
+    return reviewed;
+  }
+
+  private async reviewed(tenant: TenantContext, row: Row): Promise<ReviewedTakeoff | null> {
+    if (row.takeoffId) return this.takeoffs.reviewed(tenant, row.takeoffId);
+    if (!row.documentId) return null;
+    const reviewed = await this.takeoffs.forDocument(tenant, row.documentId);
+    if (reviewed) await this.prisma.quantitatif.update({ where: { id: row.id }, data: { takeoffId: reviewed.takeoff.id } });
+    return reviewed;
+  }
+
+  private async alive(row: Row): Promise<boolean> {
+    if (row.takeoffId) return (await this.prisma.takeoff.count({ where: { id: row.takeoffId } })) > 0;
+    if (row.documentId) return (await this.prisma.document.count({ where: { id: row.documentId } })) > 0;
+    return true;
+  }
+
+  private base(row: Row) {
+    return { id: row.id, reference: row.reference, projetId: row.projectId, source: row.source === "lignes" ? ("lignes" as const) : ("pdf" as const) };
+  }
+
+  private async view(row: Row, reviewed: ReviewedTakeoff, rendu: Rendu) {
+    // Les infos chantier (note, croquis) voyagent avec le quantitatif : l'artisan voit ce qui a servi au calcul.
+    const [project, croquis] = await Promise.all([
+      this.prisma.project.findFirst({ where: { id: row.projectId, companyId: row.companyId }, select: { siteNotes: true } }),
+      this.prisma.document.findMany({ where: { projectId: row.projectId, companyId: row.companyId, purpose: "sketch" }, select: { id: true, originalName: true, itemKey: true, note: true, createdAt: true }, orderBy: { createdAt: "asc" } }),
+    ]);
+    return {
+      ...quantitatifView(this.base(row), reviewed),
+      // Parcours §48 : questions de comptoir (avant le calcul), calcul en cours (appel IA n° 2), ou liste prête.
+      phase: this.takeoffs.phaseOf(reviewed.takeoff),
+      // Un croquis du chantier, ou celui d'un article (« article » : la clé de la ligne de la liste, avec la précision de l'artisan).
+      infos: { texte: project?.siteNotes ?? null, croquis: croquis.map((c) => ({ id: c.id, nom: c.originalName, ...(c.itemKey ? { article: c.itemKey, commentaire: c.note } : {}) })) },
+      ...(rendu.ecran ? { ecran: takeoffDto(reviewed) } : {}),
+    };
+  }
+
+  /** Infos chantier facultatives : la note, remplacée telle que tapée (null pour l'effacer). */
+  async setNotes(tenant: TenantContext, projectId: string, texte: string | null) {
+    await this.projects.get(tenant, projectId);
+    await this.projects.update(tenant, projectId, { siteNotes: texte });
+  }
+
+  /**
+   * Un croquis (photo, PDF) avec son commentaire : la photo est gardée telle quelle, jamais lue par l'IA
+   * (docs/infos-chantier-facultatives.md) ; le commentaire rejoint la note, précédé de « Croquis : ».
+   */
+  async addSketch(tenant: TenantContext, projectId: string, file: { name: string; bytes: Uint8Array }, commentaire: string | undefined, article?: string) {
+    const project = await this.projects.get(tenant, projectId);
+    // Le croquis d'un article (dimensions d'une couvertine…) reste à sa ligne : sa précision ne devient jamais une
+    // mesure du chantier (« dév. 330 » sur une couvertine ne règle pas le développé de toutes les bandes).
+    if (article) {
+      const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes, itemKey: article, note: commentaire ?? null });
+      return { id: doc.id, nom: doc.originalName, article, commentaire: commentaire?.trim() || null };
+    }
+    const doc = await this.documents.storeSketch(tenant, projectId, { fileName: file.name, bytes: file.bytes });
+    const line = commentaire?.trim() ? `Croquis (${doc.originalName}) : ${commentaire.trim()}` : null;
+    if (line) await this.projects.update(tenant, projectId, { siteNotes: [project.siteNotes?.trim(), line].filter(Boolean).join("\n") });
+    return { id: doc.id, nom: doc.originalName };
+  }
+}
+
+/** L'unité qu'une donnée (« param:nb_descentes », « param:faconnage@noue ») porte dans la fiche de son métier, ou d'un autre. */
+function donneeDeLaFiche(trade: string, key: string) {
+  const name = key.replace(/^param:/, "").split("@")[0]!;
+  const own = referentialFor(trade);
+  return [...(own ? [own] : []), ...REFERENTIALS].flatMap((r) => r.workItems.flatMap((w) => w.params)).find((d) => d.key === name);
+}
+function uniteDeLaFiche(trade: string, key: string): string | undefined {
+  return donneeDeLaFiche(trade, key)?.unit || undefined;
+}

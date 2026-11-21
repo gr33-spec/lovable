@@ -205,3 +205,15 @@ a:has([data-tenant-handle]) {
     pointer-events: none;
   }
 }
+
+/* Consultation (lien de partage) : tout se lit, rien ne se modifie. Le serveur
+   refuse de toute façon les écritures ; l'écran ne laisse pas croire le contraire. */
+[data-readonly] .write-action {
+  display: none !important;
+}
+[data-readonly] input:not([type="search"]):not([data-search]),
+[data-readonly] textarea,
+[data-readonly] select {
+  pointer-events: none;
+  caret-color: transparent;
+}

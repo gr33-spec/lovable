@@ -80,9 +80,30 @@ export function StoreProvider({
   children: React.ReactNode;
 }) {
   const [data, setData] = useState(initialData);
+  // Dernier état affiché, pour noter l'état « avant modification » de chaque envoi.
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
   const [version, setVersion] = useState(initialVersion);
   const [status, setStatus] = useState<SaveStatus>("idle");
-  const [nowMonth] = useState(() => currentMonth());
+  // Mois en cours : suivi dans le temps (application restée ouverte, téléphone rouvert le mois suivant),
+  // pour que les tableaux d'amortissement avancent sans rechargement.
+  const [nowMonth, setNowMonth] = useState(() => currentMonth());
+  useEffect(() => {
+    const tick = () => setNowMonth((m) => (currentMonth() === m ? m : currentMonth()));
+    const onVisible = () => {
+      if (document.visibilityState === "visible") tick();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", tick);
+    const id = setInterval(tick, 60 * 60 * 1000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", tick);
+      clearInterval(id);
+    };
+  }, []);
 
   const pending = useRef<Op[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,6 +117,7 @@ export function StoreProvider({
     fetch("/api/ops", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ops }) });
 
   const flush = useCallback(async () => {
+    let resync = false;
     if (timer.current) {
       clearTimeout(timer.current);
       timer.current = null;
@@ -119,13 +141,20 @@ export function StoreProvider({
             // Une modification refusée ne doit pas bloquer les autres : envoi une à une,
             // seules celles que le serveur refuse sont abandonnées (et signalées).
             let refused = 0;
+            let reason: string | undefined;
             for (const op of batch) {
               res = await send([op]);
-              if (REJECTED.has(res.status)) refused++;
-              else if (!res.ok) throw new Error(String(res.status));
+              if (REJECTED.has(res.status)) {
+                refused++;
+                reason = ((await res.json().catch(() => null)) as { error?: string } | null)?.error ?? reason;
+              } else if (!res.ok) throw new Error(String(res.status));
               else setVersion((await res.json()).version);
             }
-            if (refused) toast(refused > 1 ? `${refused} modifications n'ont pas pu être enregistrées.` : "Une modification n'a pas pu être enregistrée.");
+            if (refused) {
+              toast(refused > 1 ? `${refused} modifications refusées${reason ? ` (${reason})` : ""}.` : reason ? `Non enregistré : ${reason}` : "Une modification n'a pas pu être enregistrée.");
+              // L'écran affichait la valeur refusée : on reprend l'état enregistré sur le serveur.
+              resync = true;
+            }
           } else {
             if (!res.ok) throw new Error(String(res.status));
             setVersion((await res.json()).version);
@@ -140,6 +169,14 @@ export function StoreProvider({
           retryDelay.current = Math.min(delay * 2, 30000);
           timer.current = setTimeout(() => retry.current(), delay);
           return;
+        }
+      }
+      if (resync && pending.current.length === 0) {
+        const res = await fetch("/api/data", { cache: "no-store" }).catch(() => undefined);
+        if (res?.ok && pending.current.length === 0) {
+          const json = await res.json();
+          setData(json.data);
+          setVersion(json.version);
         }
       }
       setStatus("saved");
@@ -161,12 +198,24 @@ export function StoreProvider({
         toast("Mode consultation : aucune modification n'est enregistrée.");
         return;
       }
-      for (const op of ops) {
+      for (const raw of ops) {
+        let op = raw;
         // Fusionne les modifications successives d'un même élément.
         if (op.op === "upsert") {
-          pending.current = pending.current.filter(
-            (p) => !(p.op === "upsert" && p.coll === op.coll && p.item.id === op.item.id),
-          );
+          const coll = op.coll;
+          const id = op.item.id;
+          // État de référence : celui d'avant la première modification encore en attente,
+          // sinon l'élément tel qu'affiché (dernier état connu du serveur + envois en cours).
+          const queued = pending.current.find((p) => p.op === "upsert" && p.coll === coll && p.item.id === id);
+          const base = queued?.op === "upsert" ? queued.base : (dataRef.current[coll] as { id: string }[]).find((x) => x.id === id);
+          op = base ? { ...op, base: base as { id: string } & Record<string, unknown> } : op;
+          pending.current = pending.current.filter((p) => !(p.op === "upsert" && p.coll === coll && p.item.id === id));
+        }
+        // Réglages saisis au clavier : une seule opération pour la frappe en cours.
+        const last = pending.current[pending.current.length - 1];
+        if (op.op === "settings" && last?.op === "settings") {
+          pending.current[pending.current.length - 1] = { op: "settings", patch: { ...last.patch, ...op.patch } };
+          continue;
         }
         pending.current.push(op);
       }

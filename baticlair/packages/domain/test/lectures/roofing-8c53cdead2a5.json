@@ -1,0 +1,150 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+   "quantity": "200",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Gouttière demi-ronde zinc développé 33",
+   "quantity": "24",
+   "unit": "ml"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "qualite_ardoise",
+    "texte": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+    "boutons": [
+     {
+      "label": "Espagne 1er choix",
+      "valeur": "1"
+     },
+     {
+      "label": "Ardoise NF (type Cupa)",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "qualité de l'ardoise",
+    "ligne": null
+   },
+   {
+    "cle": "diametre_descente",
+    "texte": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+    "boutons": [
+     {
+      "label": "Ø 80",
+      "valeur": "80"
+     },
+     {
+      "label": "Ø 100",
+      "valeur": "100"
+     },
+     {
+      "label": "Ø 120",
+      "valeur": "120"
+     }
+    ],
+    "unite": "mm",
+    "donnee": "diamètre des descentes",
+    "ligne": null
+   },
+   {
+    "cle": "nb_descentes",
+    "texte": "Combien de descentes pour cette gouttière ?",
+    "boutons": [
+     {
+      "label": "1",
+      "valeur": "1"
+     },
+     {
+      "label": "2",
+      "valeur": "2"
+     },
+     {
+      "label": "3",
+      "valeur": "3"
+     },
+     {
+      "label": "4",
+      "valeur": "4"
+     }
+    ],
+    "unite": "u",
+    "donnee": "nombre de descentes",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couverture en ardoises naturelles 30x22 posées au crochet",
+    "quantite": "200",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Ardoises naturelles 30×22",
+      "quantite": "200",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-30x22"
+      },
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox standard",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [
+       "qualite_ardoise"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Gouttière demi-ronde zinc développé 33",
+    "quantite": "24",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde dév. 33",
+      "quantite": "24",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "developpe_gouttiere": "33 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

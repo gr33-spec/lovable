@@ -1,0 +1,64 @@
+{
+ "devis": [
+  {
+   "ref": "2",
+   "designation": "Sortie de toit Ø 150 ventilation",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "support_sortie",
+    "texte": "Sortie de toit : sur quelle couverture ?",
+    "boutons": [
+     {
+      "label": "Ardoise ou tuile",
+      "valeur": "1"
+     },
+     {
+      "label": "Zinc",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "couverture autour de la sortie",
+    "ligne": null
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "2",
+    "designation": "Sortie de toit Ø 150 ventilation",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "sortie-de-toit",
+      "emplacement": "sortie",
+      "donnees": {
+       "diametre_sortie": "150 mm",
+       "usage_sortie": "2"
+      },
+      "attend": [
+       "support_sortie"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

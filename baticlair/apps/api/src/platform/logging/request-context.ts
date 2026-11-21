@@ -1,0 +1,42 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+
+/** Identifiants de corrélation propagés à tous les logs d'une requête. */
+export interface RequestContext {
+  requestId: string;
+  userId?: string;
+  companyId?: string;
+  /** La session de connexion (la double authentification de l'admin lui est attachée). */
+  sessionId?: string;
+  /** L'adresse IP du client (derrière le relais Vercel, `trust proxy`), pour le journal de l'admin. */
+  ip?: string;
+  /** Un visiteur de l'accès démo (Greg, 7 novembre 2026) : aucun e-mail, aucun appel IA, aucun paiement. */
+  demo?: boolean;
+}
+
+const storage = new AsyncLocalStorage<RequestContext>();
+
+export function runWithRequestContext<T>(context: RequestContext, fn: () => T): T {
+  return storage.run(context, fn);
+}
+
+export function currentRequestContext(): RequestContext | undefined {
+  return storage.getStore();
+}
+
+/** Vrai pendant une requête d'un visiteur de l'accès démo. */
+export const estRequeteDemo = (): boolean => storage.getStore()?.demo === true;
+
+/** Complète le contexte courant (ex. une fois l'utilisateur authentifié). */
+export function enrichRequestContext(values: Partial<Omit<RequestContext, "requestId">>): void {
+  const ctx = storage.getStore();
+  if (ctx) Object.assign(ctx, values);
+}
+
+/**
+ * Identifiant court à communiquer au support (« 7F3K-92QA »), dérivé du
+ * requestId : il permet de retrouver les logs sans exposer de donnée.
+ */
+export function toSupportId(requestId: string): string {
+  const compact = requestId.replace(/[^A-Za-z0-9]/g, "").toUpperCase().padEnd(8, "0");
+  return `${compact.slice(0, 4)}-${compact.slice(4, 8)}`;
+}

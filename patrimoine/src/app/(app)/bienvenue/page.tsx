@@ -26,7 +26,7 @@ export default function BienvenuePage() {
 function Onboarding() {
   const params = useSearchParams();
   const router = useRouter();
-  const { data, replaceAll, setSettings, upsert, remove } = useStore();
+  const { data, projection, replaceAll, setSettings, upsert, remove } = useStore();
   const [step, setStep] = useState(Number(params.get("etape") ?? 0));
   const [busy, setBusy] = useState(false);
   const [holdingName, setHoldingName] = useState<string | undefined>(data.companies.find((c) => c.kind === "holding")?.name ?? "SC DU GOELO");
@@ -169,7 +169,7 @@ function Onboarding() {
             <>
               <StepTitle n={3} title="Mes crédits" text="Capital restant dû, mensualité et date de fin : cela suffit pour la projection." />
               <ExistingList
-                items={data.loans.map((l) => ({ id: l.id, title: l.name || l.bank || "Crédit", right: eurCompact(l.remaining) }))}
+                items={data.loans.map((l) => ({ id: l.id, title: l.name || l.bank || "Crédit", right: eurCompact(projection.snapshot.byLoan.get(l.id)?.balance ?? l.remaining) }))}
               />
               <Card>
                 <QuickLoan key={formKey} onDone={() => setFormKey(formKey + 1)} />

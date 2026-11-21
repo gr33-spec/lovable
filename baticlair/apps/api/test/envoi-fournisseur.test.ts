@@ -1,0 +1,248 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { cocherLesNaissances } from "./support/suggestions.js";
+import { pdfPageCount } from "../src/modules/documents/index.js";
+import { packetDocument, packetDocumentLines, packetMail, packetPdf, priceLeak, type SupplierPacket } from "../src/modules/price-requests/application/supplier-packet.js";
+import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
+
+/**
+ * L'ENVOI AU FOURNISSEUR (référentiel §42, §43, §45) : une demande de devis assemblée sans IA ; un mail court et un
+ * PDF structuré, rendus d'un seul document. Aucun prix n'y apparaît, même quand le devis en contient (lignes Rappidos
+ * avec leurs prix). Le test refuse tout prix. La forme exacte du §45 : test/demande-de-devis-45.test.ts.
+ */
+let ctx: TestContext;
+beforeAll(async () => {
+  ctx = await createTestApp();
+});
+afterAll(async () => {
+  await ctx.app.close();
+});
+beforeEach(async () => {
+  await resetDatabase(ctx.prisma);
+  ctx.emails.clear();
+});
+
+/** Un devis Rappidos AVEC prix, validé jusqu'à la liste d'achats. */
+async function chantierPret(agent: Agent) {
+  const q = (
+    await agent.post("/v1/quantitatifs").send({
+      reference: "Dupont — réfection toiture",
+      adresse: "12 rue de Siam, 29200 Brest",
+      lignes: [
+        { libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantite: "200", unite: "m²", prix: "85,00" },
+        { libelle: "Gouttière zinc demi-ronde 25, crochets bandeau, descentes Ø80", quantite: 24, unite: "ml", prix: "42" },
+        { libelle: "Chatière de ventilation", quantite: "4", unite: "u", prix: "19,90" },
+      ],
+    })
+  ).body;
+  await cocherLesNaissances(agent, q.id);
+  await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:nb_descentes", valeur: "2" }] });
+  let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
+  for (let i = 0; i < 10 && current.questions.length > 0; i++) {
+    const question = current.questions[0];
+    current = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
+  }
+  expect((await agent.post(`/v1/quantitatifs/${q.id}/validation`)).status).toBe(200);
+  const supplier = (await agent.post("/v1/suppliers").send({ name: "Point.P", email: "devis@pointp.fr", contactName: "Paul" })).body;
+  return { projectId: q.projetId as string, supplierId: supplier.id as string };
+}
+
+describe("envoi fournisseur : un document, aucun prix", () => {
+  it("la demande porte les blocs du §45.3 ; le mail court n'en contient aucun prix", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const { projectId, supplierId } = await chantierPret(agent);
+    // Recette n° 2 du 14 novembre 2026 : une date de réponse déjà passée est refusée, avec une phrase ; rien n'est créé.
+    const passee = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId], dueDate: "2020-01-15" });
+    expect(passee.status).toBe(400);
+    expect(passee.body.error.details).toMatchObject({ reason: "date_passee", phrase: "La date de réponse est déjà passée. Choisis une date à venir, ou n'en mets pas." });
+    expect(await ctx.prisma.priceRequest.count()).toBe(0);
+    const res = await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId], message: "Livraison sur chantier possible ?", dueDate: "2099-10-15" });
+    expect(res.status).toBe(201);
+    const { packet } = res.body;
+    expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });
+    // Bloc 1 : les lignes prêtes à charger (ardoises, crochets, liteaux, gouttière…), jamais une mesure en m².
+    expect(packet.articles).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 383 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 9 383 pièces/), expect.stringMatching(/^Chatière de ventilation : 4 pièces/)]),
+    );
+    for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
+    // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.
+    // Retour du fondateur (2026-10-11) : un seul texte descriptif.
+    expect(packet.resume).toHaveLength(1);
+    expect(packet.resume[0]).toMatch(/\b2 descentes\b/);
+    expect(packet.resume.join(" ")).not.toMatch(/\bpente \d/);
+    expect(packet.detail[0]).toMatchObject({ libelle: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", mesure: "200 m²" });
+
+    const email = res.body.recipients[0].email;
+    expect(email.subject).toMatch(/^Toitures Martin : demande de prix( [a-zéèêçàâîôû]+)?, Brest$/);
+    // Lot final, point 4 : le message de l'artisan remplace le texte libre ; la date et la pièce jointe restent écrites.
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Bonjour, » sans prénom (avant : le prénom du commercial), e-mail court.
+    expect(email.body).toMatch(/^Bonjour,\nLivraison sur chantier possible \?\nLa liste est en pièce jointe \(6 articles\)\.\n/);
+    expect(email.body).toContain("Si possible, réponse souhaitée avant le 15 octobre.");
+    // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : ces formulations ne reviennent pas.
+    expect(email.body).not.toMatch(/plusieurs (fournisseurs|négoces)|détail du devis sans prix|achètent ensemble|rapidement/i);
+    // Sans message, le texte libre par défaut dit le chantier.
+    const sans = (await agent.post(`/v1/projects/${projectId}/price-requests/preview`).send({ message: "Je vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest." }).expect(200)).body;
+    expect(sans.mail).toMatch(/^Bonjour,\nJe vous envoie la liste des fournitures pour un chantier de couverture en ardoises au crochet à Brest/);
+    // Le test du §42.2 et du §43.5 : rien du devis chiffré ne passe (85,00 €, 42, 19,90…).
+    expect(priceLeak(email.body)).toBeNull();
+    expect(email.body).not.toMatch(/85,00|19,90/);
+  });
+
+  it("le serveur envoie le mail avec le PDF joint, puis la demande est « envoyée »", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    const { projectId, supplierId } = await chantierPret(agent);
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
+    const recipient = created.recipients[0];
+
+    const sent = await agent.post(`/v1/price-request-recipients/${recipient.id}/send`);
+    expect(sent.status).toBe(200);
+    expect(sent.body.recipients[0]).toMatchObject({ status: "sent" });
+    expect(sent.body.recipients[0].sentAt).not.toBeNull();
+
+    const mail = ctx.emails.lastTo("devis@pointp.fr")!;
+    expect(mail.subject).toBe(recipient.email.subject);
+    // Le lien de chiffrage est propre au négoce : l'aperçu le montre « …/chiffrer/… » (Greg, 28 octobre 2026, point 7).
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : plus de paragraphe sur la création d'un accès dans l'e-mail (elle se propose
+    // en bas de la page de chiffrage). Avant (15 novembre) : une ligne « Vous pouvez aussi créer votre accès négoce… ».
+    expect(mail.text).not.toMatch(/créer votre accès|negoce\/rejoindre/);
+    expect(mail.text.replace(/https?:\/\/\S+\/chiffrer\/[A-Za-z0-9_-]+/, "(votre lien personnel)").replace(/https?:\/\/\S+\/negoce\/rejoindre\/\S+/, "(son lien pour créer son accès)")).toBe(recipient.email.body);
+    expect(ctx.emails.sent.filter((m) => /créez votre accès/.test(m.subject))).toHaveLength(0);
+    // Lot final, point 5 : le texte en clair accompagne le HTML. Greg, 12 novembre 2026 : répondre à l'e-mail vient
+    // d'abord ; la saisie en ligne est un bouton secondaire (contour), plus le bouton jaune « Répondre en ligne ».
+    expect(mail.html).toContain("Chiffrer en ligne</a>");
+    expect(mail.html).not.toContain("Répondre en ligne</a>");
+    expect(mail.html!.indexOf("répondre directement à cet e-mail")).toBeLessThan(mail.html!.indexOf("Chiffrer en ligne</a>"));
+    expect(mail.html).not.toMatch(/bit\.ly|tinyurl|<img/i);
+    expect(mail.attachments).toHaveLength(1);
+    expect(mail.attachments![0]).toMatchObject({ filename: "demande-de-devis-dupont-refection-toiture.pdf", contentType: "application/pdf" });
+    const pdf = Buffer.from(mail.attachments![0]!.contentBase64, "base64");
+    expect(pdf.subarray(0, 5).toString()).toBe("%PDF-");
+    expect(await pdfPageCount(pdf)).toBeGreaterThanOrEqual(1);
+
+    // Le même PDF se télécharge depuis l'app (pour imprimer ou transmettre au magasin).
+    const download = await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`);
+    expect(download.status).toBe(200);
+    expect(download.headers["content-type"]).toMatch(/application\/pdf/);
+    expect(download.headers["content-disposition"]).toContain("demande-de-devis-dupont-refection-toiture.pdf");
+  });
+
+  it("« Exporter PDF » (§21.3) : la liste validée, avant tout envoi, rendue par le même générateur, sans prix ; refusé avant validation et pour une autre entreprise", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "export@example.fr", "Toitures Martin");
+    const { projectId, supplierId } = await chantierPret(agent);
+    const pdf = await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`).buffer(true);
+    expect(pdf.status).toBe(200);
+    expect(pdf.headers["content-type"]).toMatch(/application\/pdf/);
+    expect(pdf.headers["content-disposition"]).toContain("demande-de-devis-dupont-refection-toiture.pdf");
+    expect((pdf.body as Buffer).subarray(0, 5).toString()).toBe("%PDF-");
+    // Même contenu que le PDF joint à la demande (un seul générateur) : même taille à la date près.
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
+    const sent = await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true);
+    expect(Math.abs((sent.body as Buffer).length - (pdf.body as Buffer).length)).toBeLessThan(64);
+    // Une autre entreprise ne lit pas ce chantier.
+    const other = await signUpWithCompany(ctx.app, "intrus@example.fr", "Toitures Le Gall");
+    expect((await other.agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`)).status).not.toBe(200);
+    // Un chantier sans liste validée : refus clair, pas un PDF vide.
+    const vide = (await agent.post("/v1/projects").send({ name: "Chantier vide" })).body;
+    const refused = await agent.get(`/v1/projects/${vide.id}/demande-de-devis.pdf`);
+    expect(refused.status).toBe(400);
+    expect(JSON.stringify(refused.body)).toContain("takeoff_not_validated");
+  });
+
+  it("croquis d'un article (couvertine, habillage…) : joint à SA ligne, « croquis joint » dans la commande, en pages du PDF et en pièce jointe ; jamais dans la note du chantier", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "croquis@example.fr", "Toitures Martin");
+    const { projectId, supplierId } = await chantierPret(agent);
+    const q = (await agent.get(`/v1/quantitatifs?projetId=${projectId}&ecran=1`)).body;
+    const quantitatif = Array.isArray(q.items) ? q.items[0] : q;
+    const gouttiere = quantitatif.ecran.purchase.toBuy.find((b: { label: string }) => /^Gouttière/.test(b.label));
+    expect(gouttiere).toBeTruthy();
+    const avant = await pdfPageCount((await agent.get(`/v1/projects/${projectId}/demande-de-devis.pdf`).buffer(true)).body as Buffer);
+    // PNG minimal (1 × 1 px).
+    const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
+    const res = await agent
+      .post(`/v1/projects/${projectId}/infos/croquis`)
+      .field("article", gouttiere.key)
+      .field("commentaire", "Couvertine dév. 330, 2 plis, longueurs de 2 m")
+      .attach("file", png, { filename: "couvertine.png", contentType: "image/png" });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ nom: "couvertine.png", article: gouttiere.key, commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" });
+    // La précision reste à l'article : la note du chantier n'est pas touchée (aucune mesure de chantier n'en sort).
+    const after = (await agent.get(`/v1/quantitatifs/${quantitatif.id}`)).body;
+    expect(after.infos.texte).toBeNull();
+    expect(after.infos.croquis).toContainEqual({ id: res.body.id, nom: "couvertine.png", article: gouttiere.key, commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" });
+
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
+    expect(created.packet.croquis).toEqual([{ article: gouttiere.label, id: res.body.id, nom: "couvertine.png", commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" }]);
+    // La ligne de l'article dit « croquis joint » dans sa précision ; le document liste les croquis joints.
+    expect(created.packet.fournitures.find((f: { designation: string }) => f.designation === gouttiere.label).precision).toMatch(/croquis joint/);
+    expect(created.document.croquis).toEqual([{ article: gouttiere.label, nom: "couvertine.png", commentaire: "Couvertine dév. 330, 2 plis, longueurs de 2 m" }]);
+    expect(priceLeak(created.recipients[0].email.body)).toBeNull();
+    // Le PDF a une page de plus pour le croquis ; le mail joint le PDF et le croquis d'origine.
+    const pdf = await agent.get(`/v1/price-requests/${created.id}/demande-de-devis.pdf`).buffer(true);
+    expect(await pdfPageCount(pdf.body as Buffer)).toBe(avant + 1);
+    await agent.post(`/v1/price-request-recipients/${created.recipients[0].id}/send`).expect(200);
+    const mail = ctx.emails.lastTo("devis@pointp.fr")!;
+    expect(mail.attachments!.map((a) => [a.filename, a.contentType])).toEqual([
+      ["demande-de-devis-dupont-refection-toiture.pdf", "application/pdf"],
+      ["couvertine.png", "image/png"],
+    ]);
+  });
+
+  it("case « Joindre le détail du devis » : cochée par défaut, mémorisée par entreprise, et le bloc du détail disparaît si elle est décochée", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    expect((await agent.get("/v1/price-requests/settings")).body).toEqual({ attachQuoteDetail: true, modelePdf: "classique", couleurPdf: "mobiiz", deliversEmail: true });
+    expect((await agent.patch("/v1/price-requests/settings").send({ attachQuoteDetail: false })).body.attachQuoteDetail).toBe(false);
+    expect((await agent.get("/v1/price-requests/settings")).body.attachQuoteDetail).toBe(false);
+    const { projectId, supplierId } = await chantierPret(agent);
+    const created = (await agent.post(`/v1/projects/${projectId}/price-requests`).send({ supplierIds: [supplierId] })).body;
+    expect(created.packet.joindre_detail).toBe(false);
+    expect(created.document.blocs.map((b: { titre: string }) => b.titre)).not.toContain("Informations complémentaires sur le chantier");
+    expect(created.recipients[0].email.body).not.toMatch(/PS/);
+    // L'autre entreprise garde la valeur par défaut.
+    const other = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Le Gall");
+    expect((await other.agent.get("/v1/price-requests/settings")).body.attachQuoteDetail).toBe(true);
+  });
+
+  it("assistant (31 octobre 2026, point 12) : le modèle et la couleur du PDF se retiennent par entreprise ; une couleur hors liste est refusée", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "pdf@example.fr", "Toitures Martin");
+    const r = (await agent.patch("/v1/price-requests/settings").send({ modelePdf: "detaille", couleurPdf: "bleu" })).body;
+    expect(r).toMatchObject({ attachQuoteDetail: true, modelePdf: "detaille", couleurPdf: "bleu" });
+    expect((await agent.get("/v1/price-requests/settings")).body).toMatchObject({ modelePdf: "detaille", couleurPdf: "bleu" });
+    expect((await agent.patch("/v1/price-requests/settings").send({ couleurPdf: "#ff00ff" })).status).toBe(400);
+    expect((await agent.patch("/v1/price-requests/settings").send({ modelePdf: "luxe" })).status).toBe(400);
+    expect(priceLeak("Demande de prix — Matériaux. Merci d'indiquer vos meilleurs prix.")).toBeNull();
+    expect(priceLeak("Prix : 12 €")).not.toBeNull();
+  });
+
+  it("le générateur refuse les prix : le test du §42.2 attrape €, HT, TVA, un montant suivi d'une devise, mais pas « sans prix »", () => {
+    expect(priceLeak("DÉTAIL DU DEVIS (sans prix)\nCouverture ardoises · 200 m²")).toBeNull();
+    expect(priceLeak("Ardoises : 9 200 pièces, soit 12 palettes")).toBeNull();
+    expect(priceLeak("Ardoises 85,00 €")).toBe("€");
+    expect(priceLeak("Total HT 2 805,30")).toMatch(/HT|Total/);
+    expect(priceLeak("remise 10 %")).toBe("remise");
+    expect(priceLeak("1 400,00 EUR")).toMatch(/EUR/);
+    expect(priceLeak("prix unitaire 1,12")).toMatch(/prix/i);
+  });
+
+  it("le PDF est produit depuis le document, même avec des caractères que la police ne connaît pas", async () => {
+    const packet: SupplierPacket = {
+      entreprise: "Toitures Martin",
+      chantier: "Toiture Dupont",
+      commune: "Brest",
+      date: "2026-10-03",
+      articles: ["Ardoises 30×22 : 9 200 pièces, soit ≈ 12 palettes", "Zinc naturel en bobine 500 mm : 215 ml"],
+      a_chiffrer: [],
+      resume: ["pente du toit 45° · région ardoise III · je façonne"],
+      detail: [{ libelle: "Couverture ardoises", mesure: "200 m²", precisions: ["ardoise 30×22"] }],
+      joindre_detail: true,
+      question_lien: null,
+    };
+    // Une demande d'avant le §45 (articles en texte) se rend encore : le tableau se reconstruit.
+    expect(packetDocumentLines(packetDocument(packet))).toContain("Ardoises 30×22 | 9 200 pièces, soit ≈ 12 palettes | ");
+    expect(packetMail(packet)).toMatch(/^Bonjour,\nVoici une demande de prix pour un chantier à Brest \(liste en pièce jointe, 2 articles\)\./);
+    const pdf = await packetPdf(packet);
+    expect(Buffer.from(pdf.subarray(0, 5)).toString()).toBe("%PDF-");
+    expect(await pdfPageCount(pdf)).toBe(1);
+    // Un long contenu passe sur plusieurs pages sans erreur.
+    const long = { ...packet, articles: Array.from({ length: 120 }, (_, i) => `Article ${i + 1} : ${i + 1} pièces`) };
+    expect(await pdfPageCount(await packetPdf(long))).toBeGreaterThan(1);
+  });
+});

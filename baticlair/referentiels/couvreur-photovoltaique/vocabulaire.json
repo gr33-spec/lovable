@@ -1,0 +1,86 @@
+{
+ "metier": "couvreur-photovoltaique",
+ "ouvrages": {
+  "PV-CHAMP": {
+   "expressions": [
+    "centrale pv 6 kwc",
+    "14 panneaux 425 wc",
+    "kit solaire",
+    "modules monocristallins full black",
+    "générateur photovoltaïque",
+    "6 kwc"
+   ]
+  },
+  "PV-SURIMP-TUILE": {
+   "expressions": [
+    "surimposition",
+    "fixation k2 / renusol / esdec",
+    "crochets de toit",
+    "système de montage sur tuiles"
+   ]
+  },
+  "PV-SURIMP-ARDOISE": {
+   "expressions": [
+    "crochets ardoise",
+    "plaque d'étanchéité",
+    "fixation sur ardoise"
+   ]
+  },
+  "PV-SURIMP-BAC": {
+   "expressions": [
+    "mini-rail",
+    "fixation bac acier",
+    "vis autoperceuses",
+    "tôle ondulée"
+   ]
+  },
+  "PV-IAB": {
+   "expressions": [
+    "intégré au bâti",
+    "iab",
+    "gse in-roof",
+    "easyroof",
+    "bac d'intégration",
+    "intégration simplifiée"
+   ]
+  },
+  "PV-TOIT-PLAT": {
+   "expressions": [
+    "toit plat",
+    "châssis lesté",
+    "bacs lestés",
+    "structure inclinée 10-15°"
+   ]
+  },
+  "PV-ELEC-MICRO": {
+   "expressions": [
+    "micro-onduleurs enphase iq8",
+    "apsystems",
+    "hoymiles",
+    "1 micro par panneau"
+   ]
+  },
+  "PV-ELEC-STRING": {
+   "expressions": [
+    "onduleur huawei / solaredge / fronius 6 kw",
+    "onduleur hybride",
+    "optimiseurs"
+   ]
+  },
+  "PV-RACCO": {
+   "expressions": [
+    "coffret ac/dc",
+    "parafoudre",
+    "câblage jusqu'au tgbt",
+    "mise à la terre",
+    "consuel",
+    "passerelle de monitoring"
+   ]
+  }
+ },
+ "note": "Extrait du chapitre 3 de couvreur-photovoltaique.md (expressions entre guillemets du document).",
+ "renvois": {
+  "tuiles, ardoises, abergement hors kit": "couverture",
+  "onduleur, coffrets ac/dc, câblage": "electricite"
+ }
+}

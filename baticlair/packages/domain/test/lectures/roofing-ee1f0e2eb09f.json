@@ -1,0 +1,41 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Voligeage en sapin traité 18x200 mm",
+   "quantity": "91",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Voligeage en sapin traité 18x200 mm",
+    "quantite": "91",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Voliges sapin 18×200 mm traité",
+      "quantite": "91",
+      "unite": "m²",
+      "ouvrage": "voligeage",
+      "emplacement": "volige",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

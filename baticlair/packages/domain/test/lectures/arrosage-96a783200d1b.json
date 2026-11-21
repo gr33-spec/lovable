@@ -1,0 +1,55 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Arrosage automatique enterré de la pelouse, tuyères, 4 zones",
+   "quantity": "300",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Arrosage automatique enterré de la pelouse, tuyères, 4 zones",
+    "quantite": "300",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Arrosage automatique enterré de la pelouse, tuyères, 4 zones",
+      "quantite": "300",
+      "unite": "m²",
+      "ouvrage": "arrosage",
+      "emplacement": "pelouse",
+      "donnees": {
+       "arroseurs": "1",
+       "stations": "4"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Arroseurs tuyères escamotables",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "arrosage",
+      "emplacement": "arroseurs",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

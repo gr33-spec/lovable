@@ -1,0 +1,97 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Couche de forme GNT 0/31,5 ép 20 cm sous dallage",
+   "quantity": "60",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Film polyane sous dallage",
+   "quantity": "60",
+   "unit": "m²"
+  },
+  {
+   "ref": "3",
+   "designation": "Fosse toutes eaux, maison 5 pièces",
+   "quantity": "1",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Couche de forme GNT 0/31,5 ép 20 cm sous dallage",
+    "quantite": "60",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Couche de forme GNT 0/31,5 ép 20 cm sous dallage",
+      "quantite": "60",
+      "unite": "m²",
+      "ouvrage": "couche-de-forme",
+      "emplacement": "plateforme",
+      "donnees": {
+       "epaisseur": "20 cm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Film polyane sous dallage",
+    "quantite": "60",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Film polyane sous dallage",
+      "quantite": "60",
+      "unite": "m²",
+      "ouvrage": "film",
+      "emplacement": "film_sol",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "3",
+    "designation": "Fosse toutes eaux, maison 5 pièces",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Fosse toutes eaux, maison 5 pièces",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fosse",
+      "emplacement": "assainissement",
+      "donnees": {
+       "volume_fosse": "3 m3"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}

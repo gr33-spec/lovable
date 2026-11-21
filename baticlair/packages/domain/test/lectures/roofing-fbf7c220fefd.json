@@ -1,0 +1,82 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Gouttière demi-ronde zinc développé 33",
+   "quantity": "24",
+   "unit": "ml"
+  },
+  {
+   "ref": "2",
+   "designation": "Descente zinc diamètre 80, hauteur 4 m",
+   "quantity": "2",
+   "unit": "u"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": [
+    {
+     "cle": "nb_descentes",
+     "libelle": "Nombre de descentes",
+     "valeur": "2",
+     "origine": "devis",
+     "preuve": "Devis, 2"
+    }
+   ]
+  },
+  "bref": [],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Gouttière demi-ronde zinc développé 33",
+    "quantite": "24",
+    "unite": "ml",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Gouttière zinc demi-ronde dév. 33",
+      "quantite": "24",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "nb_descentes": "2",
+       "developpe_gouttiere": "33 cm",
+       "diametre_descente": "80 mm"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Descente zinc diamètre 80, hauteur 4 m",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Tubes de descente zinc Ø80",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "diametre_descente": "80 mm",
+       "hauteur_descente": "4 m"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}
