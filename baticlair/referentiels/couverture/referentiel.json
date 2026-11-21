@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-67",
+  "version": "roofing-2026.11.21-68",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -10971,8 +10971,10 @@
           "family": "hip_strip",
           "label": "Arêtier zinc (bande)",
           "keywords": [
-            "bande",
-            "zinc"
+            "en bande",
+            "bande d'aretier",
+            "bande aretier",
+            "aretier zinc"
           ],
           "usual": {
             "text": "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).",

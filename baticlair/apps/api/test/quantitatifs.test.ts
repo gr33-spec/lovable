@@ -83,9 +83,10 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // Un crochet par ardoise commandée (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 384), longueur recouvrement + 3 mm
     // arrondie au cm (avant + 1 cm : 11 cm).
     const crochets = ligne(res.body, "Crochets d'ardoise inox Ø 2,7, longueur 11 cm");
-    expect(crochets.quantite).toBe(9383);
-    expect(crochets.quantite!).toBeGreaterThanOrEqual(ardoises.quantite!);
-    expect(crochets.explication.phrase).toMatch(/^9 383 pièces = ardoises après marge 9 383 · marge 0 %$/);
+    // Règle changée (Greg, 21 novembre 2026) : les crochets se commandent en boîtes de 500 (avant : à la pièce).
+    expect(crochets).toMatchObject({ quantite: 19, unite: "boîtes de 500" });
+    expect(crochets.quantite! * 500).toBeGreaterThanOrEqual(ardoises.quantite!);
+    expect(crochets.explication.phrase).toMatch(/^19 boîtes de 500 = ardoises après marge 9 383 · marge 0 %$/);
     // Le prix de la ligne de devis (85 €/m² de couverture) n'est pas celui d'une ardoise.
     expect(ardoises.prix).toBeUndefined();
     expect(res.body.devis).toEqual([
@@ -173,7 +174,7 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // Les crochets suivent toujours les ardoises corrigées.
     // La longueur du crochet suit le recouvrement (Cupa : R + 1 cm) : la désignation change avec la pente.
     const crochetsDe = (b: typeof res.body) => b.lignes.find((l: { libelle: string }) => l.libelle.startsWith("Crochets d'ardoise")) as { quantite: number };
-    for (const b of [res.body, table.body, back.body]) expect(crochetsDe(b).quantite).toBeGreaterThanOrEqual(ligne(b, "Ardoises naturelles Espagne 1er choix 30×22").quantite!);
+    for (const b of [res.body, table.body, back.body]) expect(crochetsDe(b).quantite * 500).toBeGreaterThanOrEqual(ligne(b, "Ardoises naturelles Espagne 1er choix 30×22").quantite!);
     // Une valeur qui n'existe pas n'est pas modifiable.
     expect((await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:inconnu", valeur: "3" })).status).toBe(400);
   });
@@ -206,7 +207,7 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
     expect(ardoises.quantite).toBe(8547);
     expect(ardoises.explication.phrase).toMatch(/diamètre du crochet standard/);
-    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 9 cm").quantite).toBe(8547);
+    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 9 cm").quantite).toBe(18);
   });
 
   it("range le quantitatif dans un chantier existant", async () => {

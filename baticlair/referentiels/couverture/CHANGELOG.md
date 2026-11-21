@@ -1,5 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-68 — Arêtier zinc : des mots précis (2026-11-21)
+
+Le banc du calcul ne bouge pas : 81 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Mots qui nomment la bande d'un arêtier zinc | « bande », « zinc » : trop larges, une « Bande zinc d'égout » pouvait être rangée en arêtier | « en bande », « bande d'arêtier », « arêtier zinc » | test `apps/api/test/demande-de-devis-45.test.ts` (cas 3) |
+
+- Un nom en « ée » que la fiche connaît (« jouée ») n'est plus pris pour une façon ou une teinte ; « ardoisé », lui, reste une teinte.
+
 ## roofing-2026.11.21-67 — Banc du calcul, lot 4 : tuile canal en deux lignes, faîtière de bac acier (Greg, 2026-11-21)
 
 Le banc du calcul passe de 78 à 81 lignes justes sur 100.

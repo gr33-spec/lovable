@@ -1287,7 +1287,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-67",
+  version: "roofing-2026.11.21-68",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2865,7 +2865,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "closoir", family: "hip_closure", label: "Closoir d'arêtier", usual: { text: "Closoir ventilé d'arêtier, 23 cm, rouleau de 5 m (§5).", source: F, productId: "closoir-aretier-5m" } },
         { key: "crochet", family: "hip_fixing", label: "Crochets d'arêtier", keywords: ["crochet"], usual: { text: "Pose à sec : un crochet par arêtier (§5).", source: F, productId: "crochet-aretier-standard" } },
         { key: "about", family: "hip_end", label: "Abouts d'arêtier", usual: { text: "Un about par arêtier (§5).", source: F, productId: "about-aretier-standard" } },
-        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", keywords: ["bande", "zinc"], usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).", source: F, productId: "bande-aretier-zinc-standard" } },
+        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", keywords: ["en bande", "bande d'aretier", "bande aretier", "aretier zinc"], usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).", source: F, productId: "bande-aretier-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre (§3).", source: F, productId: "patte-zinc-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).", source: F, productId: "feuille-zinc-2x1" }, formOf: "bande" },
       ],

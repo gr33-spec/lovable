@@ -54,7 +54,9 @@ const motsDeFamille = (ref: Referential, code: string) => (ref.families.find((f)
 export function ouvrageNomme(ref: Referential, texte: string, lu?: string | null): WorkItemType | null {
   // Un mot qui finit par « é » dit une façon ou une teinte, jamais le nom d'un ouvrage : « tuiles HP10 ardoisé » est une
   // tuile de teinte ardoisée, pas une ardoise (banc du calcul, C12, 21 novembre 2026). Il est retiré avant de chercher.
-  const t = motsDeLaFiche(texte.replace(/[\p{L}]+é(?:e|s|es)?(?![\p{L}])/gu, " "));
+  // Un nom en « ée » que la fiche connaît (« jouée », « cheminée ») reste : c'est un ouvrage, pas une façon.
+  const connus = new Set([...ref.families.flatMap((f) => f.keywords ?? []), ...ref.workItems.flatMap((x) => x.slots.flatMap((sl) => sl.keywords ?? []))].map(motsDeLaFiche));
+  const t = motsDeLaFiche(texte.replace(/[\p{L}]+é(?:e|s|es)?(?![\p{L}])/gu, (m) => (/ées?$/u.test(m) && connus.has(motsDeLaFiche(m)) ? m : " ")));
   let best: { w: WorkItemType; n: number; len: number }[] = [];
   for (const w of ref.workItems) {
     const hits = [...new Set(w.triggers.flatMap((f) => motsDeFamille(ref, f)))].filter((k) => contient(t, k));
@@ -165,7 +167,12 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   // qu'une autre ligne fournit : elle ne fait que citer (l'étain, les colliers), la lecture reste.
   if (!ACHAT.has(l.role) || !l.unite?.trim() || GESTE.test(normalizeText(l.designation))) return l;
   const titre = titreDe(l.designation);
-  const lu = l.fournitures[0]?.ouvrage ?? null;
+  // L'ouvrage rangé par la lecture ne départage que s'il se mesure comme la ligne : des « jouées de lucarnes en zinc », 2 m²,
+  // ne sont pas une bande de zinc, qui se mesure au mètre (test de l'API `demande-de-devis-45`, 21 novembre 2026).
+  const dimension = (u: string) => (/^m ?(?:2|²)$|^m2$/.test(u) ? "m2" : /^(?:ml|m)$/.test(u) ? "m" : "u");
+  const dimLigne = dimension(motsDeLaFiche(l.unite ?? "").replace("²", "2"));
+  const ouvrageLu = ref.workItems.find((x) => x.id === l.fournitures[0]?.ouvrage);
+  const lu = ouvrageLu && (dimLigne === "u" || ouvrageLu.params.some((p) => p.fromLineQuantity && dimension(p.unit) === dimLigne)) ? ouvrageLu.id : null;
   const w = ouvrageNomme(ref, titre, lu) ?? ouvrageNomme(ref, l.designation, lu);
   if (!w || w.slots.length === 0) return l;
   const texte = motsDeLaFiche(l.designation);
