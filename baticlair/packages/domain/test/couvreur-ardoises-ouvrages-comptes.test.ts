@@ -45,10 +45,8 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     expect(crochets.need).toEqual({ value: "8925", unit: "u" });
     expect(liteaux.need).toEqual({ value: "1990.52", unit: "ml" });
     expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual([
-      // Greg, 21 novembre 2026 : les ouvrages au mètre se lisent au devis ; il n'en écrit aucun : zéro, dit.
-      "param:longueur_aretier=0", "param:longueur_noue=0",
+      // Greg, 21 novembre 2026 : les ouvrages au mètre se lisent au devis ; il n'en écrit aucun : zéro, jamais dit en hypothèse.
       "param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "param:situation=normale", "derived:recouvrement=89", "param:pureau=10,55", "param:diametre_crochet=standard",
-      "param:longueur_faitage=0", "param:longueur_gouttiere=0",
     ]);
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");

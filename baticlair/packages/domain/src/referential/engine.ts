@@ -855,8 +855,11 @@ function computeNeed(
       const value = isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`;
       const prov = provenanceLine(d, sources);
       const note = from?.note ?? d.note;
-      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+      // Une valeur par défaut qui ne dit rien (« le devis n'en parle pas » : 0 m d'arêtier) n'est ni tracée ni dite en hypothèse.
+      if (!def.silentDefault) {
+        trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
+        assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+      }
       return v;
     }
     /**

@@ -47,9 +47,7 @@ describe("jamais de quantité demandée à l'artisan", () => {
     expect(bought(v)).toEqual(/crochet/i.test(designation) ? COMPLETE : { "Ardoises naturelles Espagne 1er choix 30×22": "8 925 pièces" });
     // Hypothèses dites, en tête la pente (45°) et la zone (3).
     // Greg, 21 novembre 2026 : avant elles, les ouvrages au mètre que le devis n'écrit pas (arêtier, noue : zéro, dit).
-    expect(v.assumptions.slice(0, 4).map((a) => [a.key, a.value, a.unit])).toEqual([
-      ["param:longueur_aretier", "0", "m"],
-      ["param:longueur_noue", "0", "m"],
+    expect(v.assumptions.slice(0, 2).map((a) => [a.key, a.value, a.unit])).toEqual([
       ["param:pente", "45", "°"],
       ["param:zone", "III", "u"],
     ]);

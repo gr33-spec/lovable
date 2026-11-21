@@ -278,6 +278,8 @@ export interface ParamDef {
    * après « Non » à « Tes m² comprennent déjà l'égout ? ») : jamais avant, jamais dans une liste de questions d'avance.
    */
   askOnlyAfter?: { param: string; value: string };
+  /** La valeur par défaut ne dit rien à l'artisan (0 m d'arêtier quand le devis n'en a pas) : jamais listée en hypothèse. */
+  silentDefault?: true;
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
   /** Jamais prêtée par un autre ouvrage : ce que le devis écrit pour une pièce ne vaut pas pour sa voisine (§48.6). */

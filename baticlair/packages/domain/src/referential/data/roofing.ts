@@ -804,6 +804,7 @@ const TUILE_HP10_PARAM: ParamDef = {
   question: "La tuile posée est une HP 10 ?",
   neverAsk: true,
   textValues: [{ value: "1", keywords: ["hp10", "hp 10"] }],
+  silentDefault: true,
   default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "pas une HP 10" },
 };
 /**
@@ -820,6 +821,7 @@ const longueurLue = (key: string, label: string): ParamDef => ({
   kind: "site_data",
   question: `${label} ?`,
   neverAsk: true,
+  silentDefault: true,
   default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "le devis n'en parle pas" },
 });
 const OUVRAGES_AU_METRE_ARDOISE: ParamDef[] = [
@@ -2650,7 +2652,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           // Le comptoir ne chiffre pas une ardoise sans sa qualité (§47.8) ; le format suit l'ardoise du devis.
           designation: "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
           // §49.3.4 : la phrase d'hypothèse, la marge du tiroir écrite (§49.2.4).
-          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) ; arêtier {longueur_aretier|ml} × 0,66 m² ; noue {longueur_noue|ml} × 0,50 m² ; faîtage {longueur_faitage|ml} et égout : un rang ; + {marge} de marge",
+          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}), arêtiers, noues, faîtage et égout du devis compris, + {marge} de marge",
           precisionRequires: ["qualite_ardoise"],
           source: "cupa-pureau-ardoises-m2",
           verification: FOUNDER_DOC,

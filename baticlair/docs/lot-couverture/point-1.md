@@ -68,7 +68,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 7 078 pièces | 150 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) ; arêtier 10 ml × 0,66 m² ; noue 4 ml × 0,50 m² ; faîtage 0 ml et égout : un rang ; + 5 % de marge | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 7 078 pièces | 150 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 10 cm | 15 boîtes de 500 (7 078 pièces) | un par ardoise commandée | chiffrable |
 | Feuilles zinc naturel 2 × 1 m, 0,65 mm | 2 pièces | pour 4 ml de noue, développé 66 cm | chiffrable |
 
@@ -94,7 +94,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 040 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) ; arêtier 0 ml × 0,66 m² ; noue 0 ml × 0,50 m² ; faîtage 0 ml et égout : un rang ; + 5 % de marge | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 040 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge | chiffrable |
 | Crochets d'ardoise inox standard, longueur 10 cm | 19 boîtes de 500 (9 040 pièces) | un par ardoise commandée | chiffrable |
 | Gouttière zinc demi-ronde dév. 33 | 7 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |

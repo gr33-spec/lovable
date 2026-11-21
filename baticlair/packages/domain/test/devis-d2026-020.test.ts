@@ -131,7 +131,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
   it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = un par ardoise", () => {
     const ardoises = v.toBuy[0]!;
     // Greg, 21 novembre 2026 : la précision détaille les ouvrages au mètre (avant : « … (crochet 11 cm, pente 30°) + 5 % de marge »).
-    expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°) ; arêtier 0 ml × 0,66 m² ; noue 0 ml × 0,50 m² ; faîtage 8 ml et égout : un rang ; + 5 % de marge");
+    expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge");
     expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée");
     expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
   });

@@ -73,6 +73,7 @@ const param = z.object({
   textValues: z.array(z.object({ value: str, keywords: z.array(str).min(1) })).optional(),
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
   askOnlyAfter: z.object({ param: str, value: str }).optional(),
+  silentDefault: z.literal(true).optional(),
   onlyFromPrincipal: z.literal(true).optional(),
   ownOnly: z.literal(true).optional(),
   groupe: z.object({ id: z.string().regex(/^[a-z0-9-]+$/), question: str, hint: z.string().optional() }).optional(),

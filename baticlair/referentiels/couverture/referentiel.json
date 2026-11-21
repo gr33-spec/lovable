@@ -5988,6 +5988,7 @@
               ]
             }
           ],
+          "silentDefault": true,
           "default": {
             "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
@@ -7117,6 +7118,7 @@
           "kind": "site_data",
           "question": "Longueur d'arêtier ?",
           "neverAsk": true,
+          "silentDefault": true,
           "default": {
             "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
@@ -7137,6 +7139,7 @@
           "kind": "site_data",
           "question": "Longueur de noue ?",
           "neverAsk": true,
+          "silentDefault": true,
           "default": {
             "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
@@ -7157,6 +7160,7 @@
           "kind": "site_data",
           "question": "Longueur du faîtage ?",
           "neverAsk": true,
+          "silentDefault": true,
           "default": {
             "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
@@ -7177,6 +7181,7 @@
           "kind": "site_data",
           "question": "Longueur de gouttière ?",
           "neverAsk": true,
+          "silentDefault": true,
           "default": {
             "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
@@ -9124,7 +9129,7 @@
           "core": true,
           "exclusions": "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
           "designation": "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
-          "precision": "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) ; arêtier {longueur_aretier|ml} × 0,66 m² ; noue {longueur_noue|ml} × 0,50 m² ; faîtage {longueur_faitage|ml} et égout : un rang ; + {marge} de marge",
+          "precision": "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}), arêtiers, noues, faîtage et égout du devis compris, + {marge} de marge",
           "precisionRequires": [
             "qualite_ardoise"
           ],
@@ -9650,6 +9655,7 @@
               ]
             }
           ],
+          "silentDefault": true,
           "default": {
             "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
