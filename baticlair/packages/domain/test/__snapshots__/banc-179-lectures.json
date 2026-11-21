@@ -3445,7 +3445,7 @@
    },
    {
     "designation": "Faîtières",
-    "quantite": "30 pièces",
+    "quantite": "25 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3459,7 +3459,7 @@
    },
    {
     "designation": "Crochets de faîtière",
-    "quantite": "30 pièces",
+    "quantite": "25 pièces",
     "unite": "pièces",
     "etat": "ok",
     "raison": null
@@ -3566,13 +3566,6 @@
     "designation": "Sortie de toit, diamètre du conduit 150 mm",
     "quantite": "1 pièce",
     "unite": "pièces",
-    "etat": "check",
-    "raison": "Couverture autour à préciser"
-   },
-   {
-    "designation": "Chapeau de sortie de toit",
-    "quantite": "1 pièce",
-    "unite": "pièce",
     "etat": "check",
     "raison": "Couverture autour à préciser"
    }

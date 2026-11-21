@@ -791,6 +791,21 @@ const DEVELOPPE_NOUE_PARAM: ParamDef = {
  * Arêtier en tuiles (arêtières, la pièce de la faîtière) ou en bande zinc (§3, §5) : deux articles au comptoir. Lu dans
  * la ligne ; sur un toit de tuiles, des arêtières ; sinon on demande, avec les mots du comptoir.
  */
+/**
+ * Greg, 21 novembre 2026 (soir) : « Faîtière sur HP 10 sans modèle écrit : demi-ronde par défaut (2,5 au mètre), sans
+ * question, marquée par défaut et modifiable. » Le mot « HP 10 » se lit sur la ligne des tuiles et vaut pour le faîtage du
+ * même devis ; jamais demandé. Edilians : faîtière demi-ronde 2,5 au mètre, angulaire 3 au mètre (documentation HP 10).
+ */
+const TUILE_HP10_PARAM: ParamDef = {
+  key: "tuile_hp10",
+  label: "Tuile HP 10",
+  unit: "u",
+  kind: "site_data",
+  question: "La tuile posée est une HP 10 ?",
+  neverAsk: true,
+  textValues: [{ value: "1", keywords: ["hp10", "hp 10"] }],
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "pas une HP 10" },
+};
 const ARETIER_PARAM: ParamDef = {
   key: "aretier_matiere",
   label: "Arêtier",
@@ -1287,7 +1302,7 @@ function slate(h: number, l: number): Product {
 
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.21-69",
+  version: "roofing-2026.11.21-70",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1486,7 +1501,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       code: "ridge_tile",
       label: "Faîtière",
       needUnit: "u",
-      attributes: [{ key: "pieces_par_ml", label: "Pièces au mètre", unit: "u/m" }],
+      attributes: [{ key: "pieces_par_ml", label: "Pièces au mètre", unit: "u/m" }, { key: "pieces_par_ml_hp10", label: "Pièces au mètre sur une tuile HP 10", unit: "u/m" }],
       keyAttributes: [],
       keywords: ["faitiere", "faitage"],
     },
@@ -1534,6 +1549,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "box_gutter", label: "Chéneau encaissé", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["cheneau encaisse", "cheneau zinc", "cheneau en zinc"] },
     // Le mortier du solin (« bande porte-solin zinc et mortier ciment », D-2026-020) : jamais supprimé ; mortier d'étanchéité en sacs de 25 kg (§49.7).
     { code: "solin_mortar", label: "Mortier de solin", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["mortier"] },
+    { code: "ridge_mortar", label: "Mortier de faîtage", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["mortier de faitage"] },
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
     // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
     { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
@@ -1666,6 +1682,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
     // Sortie de toit : un ouvrage compté (réponse du fondateur, 2026-10-04) ; la ligne du devis en est la mesure.
+    { code: "outlet_tile", label: "Tuile à douille", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["tuile a douille"] },
+    { code: "outlet_lantern", label: "Lanterne", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["lanterne"] },
     { code: "roof_outlet", label: "Sortie de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de toit"] },
     { code: "outlet_base", label: "Embase de sortie de toit (plomb)", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "outlet_plate", label: "Platine zinc de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
@@ -1948,13 +1966,17 @@ export const ROOFING_REFERENTIAL: Referential = {
       manufacturer: "Edilians",
       // Appellations de CE modèle seulement : « faîtières ventilées » n'est pas une preuve que c'est lui.
       aliases: ["faitiere angulaire", "faitiere angulaire a emboitement", "faitiere 710", "ref 710"],
-      attributes: { pieces_par_ml: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024).") },
+      attributes: {
+        pieces_par_ml: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."),
+        pieces_par_ml_hp10: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."),
+      },
       sellingUnits: [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }],
     },
     // ---- Produits génériques (référentiel du fondateur) : utilisés par défaut, dits comme hypothèse.
     generic("faitiere-standard", "ridge_tile", "Faîtière 40 à 42 cm, recouvrement 5 à 7 cm (modèle à préciser)", "Faîtières", {
       // Fiche couverture (2026-11-19) : 3 au ml sans modèle connu (avant 2,9, « ml ÷ 0,35 »).
-      attributes: { pieces_par_ml: specFiche("faitage.faitieres_par_ml_sans_modele") },
+      // Sur une HP 10, sans modèle écrit : la demi-ronde, 2,5 au mètre (Greg, 21 novembre 2026 ; documentation HP 10 Edilians).
+      attributes: { pieces_par_ml: specFiche("faitage.faitieres_par_ml_sans_modele"), pieces_par_ml_hp10: spec("2.5", "u/m", "edilians-hp10", FOUNDER_CHECKED, "Faîtière demi-ronde : 2,5 au mètre (documentation HP 10).") },
     }),
     generic("closoir-standard-5m", "ridge_closure", "Closoir ventilé de faîtage, rouleau de 5 m (modèle à préciser)", "Closoir", {
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC), primary: true }],
@@ -2051,6 +2073,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("mortier-solin-25", "solin_mortar", "Mortier pour solin", "Mortier pour solin", {
       sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "« sac de 25 kg » (§49.7)."), primary: true }],
     }),
+    generic("mortier-faitage-25", "ridge_mortar", "Mortier de faîtage", "Mortier de faîtage", {
+      sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "Sac de 25 kg."), primary: true }],
+    }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
     generic("talon-gouttiere", "gutter_end", "Talon (fond) de gouttière (système de la gouttière)", "Talons de gouttière"),
     generic("angle-gouttiere", "gutter_angle", "Angle de gouttière 90° (système de la gouttière)", "Angles de gouttière"),
@@ -2085,6 +2110,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
     }),
     // §45.5 : pattes fixes et pattes coulissantes sont deux articles au comptoir, les pointes un troisième.
+    generic("tuile-a-douille", "outlet_tile", "Tuile à douille (modèle de la tuile posée), au diamètre du conduit", "Tuile à douille"),
+    generic("lanterne-sortie", "outlet_lantern", "Lanterne de ventilation pour tuile à douille", "Lanterne de sortie de toit"),
     generic("embase-plomb-sortie", "outlet_base", "Embase plomb pour sortie de toit, au diamètre du conduit", "Embase plomb de sortie de toit"),
     generic("platine-zinc-sortie", "outlet_plate", "Platine zinc soudée pour sortie de toit, au diamètre du conduit", "Platine zinc de sortie de toit"),
     generic("chapeau-sortie", "outlet_cap", "Chapeau de sortie de toit, au diamètre du conduit", "Chapeau de sortie de toit"),
@@ -2166,6 +2193,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       triggers: ["roof_tile"],
       params: [
         SURFACE_PARAM,
+        TUILE_HP10_PARAM,
         {
           key: "pureau",
           label: "Pureau",
@@ -2683,14 +2711,17 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       trade: "roofing",
       label: "Faîtage (faîtières, closoir, abouts, fixations)",
       triggers: ["ridge_tile"],
-      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }],
+      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }, TUILE_HP10_PARAM],
       slots: [
         { key: "faitiere", family: "ridge_tile", label: "Faîtières", usual: { text: "Faîtière courante (40 à 42 cm) : le modèle suit la tuile ou l'ardoise posée.", source: F, productId: "faitiere-standard" } },
         { key: "closoir", family: "ridge_closure", label: "Closoir", usual: { text: "Closoir ventilé en rouleau de 5 m.", source: F, productId: "closoir-standard-5m" } },
         { key: "fixation_faitiere", family: "ridge_fixing", label: "Crochets de faîtière", keywords: ["fixation", "crochet"], usual: { text: "Faîtage à sec : un crochet par faîtière.", source: F, productId: "crochet-faitiere-standard" } },
         { key: "about", family: "ridge_end", label: "Abouts de faîtage", usual: { text: "Un about à chaque extrémité du faîtage.", source: F, productId: "about-faitage-standard" } },
+        { key: "mortier", family: "ridge_mortar", label: "Mortier de faîtage", keywords: ["mortier"], usual: { text: "Mortier de faîtage, en sacs de 25 kg.", source: F, productId: "mortier-faitage-25" } },
       ],
       constants: {
+        // Greg, 21 novembre 2026 (soir) : « 7,5 kg au mètre par défaut, en sacs, modifiable. » Weber et VPI : 5 à 10 kg au mètre.
+        mortier_faitage_par_ml: condition("7.5", "kg/m", F, FOUNDER_DOC, "7,5 kg de mortier par mètre de faîtage scellé (Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg)."),
         abouts_par_faitage: condition("2", "u", F, FOUNDER_DOC, "Deux extrémités libres par ligne de faîtage (une seule ligne supposée)."),
       },
       needs: [
@@ -2698,7 +2729,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "faitieres",
           slot: "faitiere",
           // Le ratio « pièces au mètre » du fabricant, appliqué à la longueur : c'est sa définition.
-          formula: "longueur_faitage * faitiere.pieces_par_ml",
+          formula: "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           unit: "u",
           core: true,
           exclusions: "Hors abouts (comptés à part) et rencontres d'arêtiers.",
@@ -2720,7 +2751,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "crochets-faitiere",
           slot: "fixation_faitiere",
-          formula: "longueur_faitage * faitiere.pieces_par_ml",
+          formula: "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           unit: "u",
           core: true,
           exclusions: "Un crochet par faîtière (faîtage à sec).",
@@ -2735,6 +2766,19 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           unit: "u",
           core: true,
           exclusions: "Deux abouts pour une ligne de faîtage ; un faîtage en plusieurs lignes en demande davantage.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        // Seulement quand le devis dit le mortier (« faîtage scellé au mortier ») : jamais d'office.
+        {
+          id: "mortier-faitage",
+          slot: "mortier",
+          formula: "longueur_faitage * regle.mortier_faitage_par_ml",
+          unit: "kg",
+          core: false,
+          exclusions: "Mortier du faîtage scellé : 7,5 kg par mètre, par défaut (5 à 10 kg selon la faîtière).",
+          precision: "{longueur_faitage|ml} × {regle.mortier_faitage_par_ml|kg/m#} kg/ml, par défaut",
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -3509,18 +3553,24 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           kind: "site_data",
           question: "Sortie de toit : sur quelle couverture ?",
           textValues: [
-            { value: "1", keywords: ["ardoise", "ardoises", "tuile", "tuiles"] },
+            { value: "1", keywords: ["ardoise", "ardoises"] },
             { value: "2", keywords: ["zinc"] },
+            { value: "3", keywords: ["tuile", "tuiles"] },
           ],
+          // Greg, 21 novembre 2026 (soir) : l'article s'adapte au matériau. Sur tuile, une sortie de ventilation est une tuile
+          // à douille et sa lanterne (Edilians, gamme HP 10) ; sur ardoise, l'embase plomb ; sur zinc, la platine soudée.
+          // Avant : « ardoise ou tuile », une seule réponse, l'embase plomb pour les deux.
           fromWorks: [
             { value: "2", workItems: ["couverture-zinc-joint-debout"] },
-            { value: "1", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal", "couverture-ardoises-crochet"] },
+            { value: "1", workItems: ["couverture-ardoises-crochet"] },
+            { value: "3", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal"] },
           ],
           choices: [
-            { label: "Ardoise ou tuile", value: "1" },
+            { label: "Ardoise", value: "1" },
+            { label: "Tuile", value: "3" },
             { label: "Zinc", value: "2" },
           ],
-          display: { "1": "ardoise ou tuile", "2": "zinc" },
+          display: { "1": "ardoise", "2": "zinc", "3": "tuile" },
         },
       ],
       slots: [
@@ -3528,6 +3578,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "embase", family: "outlet_base", label: "Embase plomb", usual: { text: "Embase plomb au diamètre du conduit, pour ardoise et tuile.", source: FR_REPLY, productId: "embase-plomb-sortie" }, formOf: "sortie" },
         { key: "platine", family: "outlet_plate", label: "Platine zinc soudée", usual: { text: "Platine zinc soudée au diamètre du conduit, pour couverture zinc.", source: FR_REPLY, productId: "platine-zinc-sortie" }, formOf: "sortie" },
         { key: "chapeau", family: "outlet_cap", label: "Chapeau", usual: { text: "Un chapeau par sortie, au diamètre du conduit.", source: FR_REPLY, productId: "chapeau-sortie" }, formOf: "sortie" },
+        { key: "douille", family: "outlet_tile", label: "Tuile à douille", usual: { text: "Tuile à douille au modèle de la tuile posée, au diamètre du conduit.", source: "edilians-hp10", productId: "tuile-a-douille" }, formOf: "sortie" },
+        { key: "lanterne", family: "outlet_lantern", label: "Lanterne", usual: { text: "Une lanterne par tuile à douille.", source: "edilians-hp10", productId: "lanterne-sortie" }, formOf: "sortie" },
         { key: "collerette", family: "outlet_collar", label: "Collerette d'étanchéité", usual: { text: "Collerette d'étanchéité (solin), seulement pour un conduit de fumée.", source: FR_REPLY, productId: "collerette-sortie" }, formOf: "sortie" },
       ],
       constants: {
@@ -3538,7 +3590,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "embase-sortie",
           slot: "embase",
-          when: "support_sortie < 2",
+          // Ardoise, ou conduit de fumée sur tuile : l'embase plomb. Ventilation sur tuile : la tuile à douille (plus bas).
+          when: "si(support_sortie >= 3, si(usage_sortie >= 2, 0, 1), si(support_sortie < 2, 1, 0))",
           formula: "nb_sorties",
           unit: "u",
           core: true,
@@ -3552,7 +3605,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "platine-sortie",
           slot: "platine",
-          when: "support_sortie >= 2",
+          when: "si(support_sortie >= 2, si(support_sortie < 3, 1, 0), 0)",
           formula: "nb_sorties",
           unit: "u",
           core: true,
@@ -3566,6 +3619,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "chapeau-sortie",
           slot: "chapeau",
+          when: "si(si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0), 0, 1)",
           formula: "nb_sorties",
           unit: "u",
           core: true,
@@ -3574,6 +3628,34 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           precisionRequires: ["diametre_sortie"],
           source: FR_REPLY,
           verification: FOUNDER_REPLY,
+          version: 1,
+        },
+        {
+          id: "tuile-a-douille",
+          slot: "douille",
+          when: "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une tuile à douille par sortie de ventilation, au modèle de la tuile posée.",
+          precision: "{diametre_sortie}",
+          precisionRequires: ["diametre_sortie"],
+          source: "edilians-hp10",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "lanterne-sortie",
+          slot: "lanterne",
+          when: "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une lanterne par tuile à douille.",
+          precision: "{diametre_sortie}",
+          precisionRequires: ["diametre_sortie"],
+          source: "edilians-hp10",
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -4001,10 +4083,12 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "faitieres",
           slot: "faitiere",
           when: "nb_pans >= 2",
-          formula: "arrondi_sup(longueur_faitage / regle.faitiere) + 1",
+          // Greg, 21 novembre 2026 (soir) : « 7 pour 12,50 m, comme les fabricants. Plus de + 1. » Bacacier et Joris Ide :
+          // faîtière de 2,10 m hors tout, 2,00 m utile (le recouvrement est dans la pièce). Avant : ml ÷ 2 arrondi au-dessus, + 1.
+          formula: "arrondi_sup(longueur_faitage / regle.faitiere)",
           unit: "u",
           core: true,
-          exclusions: "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
+          exclusions: "Faîtage de la largeur d'un pan, longueurs de 2 m utiles (recouvrement compris dans la pièce).",
           designation: "Faîtières bac acier {teinte_bac}, longueur 2 m",
           precision: "{largeur_pan|ml} de faîtage",
           precisionRequires: ["teinte_bac"],

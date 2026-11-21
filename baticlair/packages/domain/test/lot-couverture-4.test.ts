@@ -40,14 +40,14 @@ describeLot({
 });
 
 describe("bac acier : des plaques à longueur, jamais des m²", () => {
-  it("120 m², rampant 6 m, deux pans : 20 plaques de 6,05 m, 912 vis, 40 closoirs, 6 faîtières", () => {
+  it("120 m², rampant 6 m, deux pans : 20 plaques de 6,05 m, 912 vis, 40 closoirs, 5 faîtières (Greg, 21 novembre 2026 : plus de « + 1 » ; avant 6)", () => {
     const v = readQuoteComplet([{ ref: "1", designation: "Couverture bac acier anti-condensation RAL 7016, rampant 6 m", quantity: "120", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(v.toBuy.map((b) => [b.label, b.quantity])).toEqual([
       ["Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m", "20 pièces"],
       ["Vis autoperceuses bac acier avec rondelle EPDM", "10 boîtes de 100"], // 120 × 7 + 2 pans × 2 rives × 6 m × 3 = 912
       ["Closoirs mousse profilés au bac acier", "40 pièces"],
-      ["Faîtières bac acier RAL 7016, longueur 2 m", "6 pièces"], // 10 ml / 2 + 1
+      ["Faîtières bac acier RAL 7016, longueur 2 m", "5 pièces"], // 10 ml / 2 + 1
     ]);
   });
 

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.21-69",
+  "version": "roofing-2026.11.21-70",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -222,6 +222,11 @@
         {
           "key": "pieces_par_ml",
           "label": "Pièces au mètre",
+          "unit": "u/m"
+        },
+        {
+          "key": "pieces_par_ml_hp10",
+          "label": "Pièces au mètre sur une tuile HP 10",
           "unit": "u/m"
         }
       ],
@@ -508,6 +513,16 @@
       "keyAttributes": [],
       "keywords": [
         "mortier"
+      ]
+    },
+    {
+      "code": "ridge_mortar",
+      "label": "Mortier de faîtage",
+      "needUnit": "kg",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "mortier de faitage"
       ]
     },
     {
@@ -948,6 +963,26 @@
         "chatiere",
         "tuile chatiere",
         "tuile de ventilation"
+      ]
+    },
+    {
+      "code": "outlet_tile",
+      "label": "Tuile à douille",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "tuile a douille"
+      ]
+    },
+    {
+      "code": "outlet_lantern",
+      "label": "Lanterne",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "lanterne"
       ]
     },
     {
@@ -2997,6 +3032,20 @@
           },
           "version": 1,
           "note": "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."
+        },
+        "pieces_par_ml_hp10": {
+          "kind": "manufacturer_spec",
+          "value": "3",
+          "unit": "u/m",
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."
         }
       },
       "sellingUnits": [
@@ -3042,6 +3091,20 @@
           },
           "version": 1,
           "note": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml. Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre."
+        },
+        "pieces_par_ml_hp10": {
+          "kind": "manufacturer_spec",
+          "value": "2.5",
+          "unit": "u/m",
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "Faîtière demi-ronde : 2,5 au mètre (documentation HP 10)."
         }
       },
       "sellingUnits": [
@@ -4223,6 +4286,39 @@
       ]
     },
     {
+      "id": "mortier-faitage-25",
+      "family": "ridge_mortar",
+      "label": "Mortier de faîtage",
+      "shortLabel": "Mortier de faîtage",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "sac",
+          "label": {
+            "one": "sac de 25 kg",
+            "many": "sacs de 25 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "25",
+            "unit": "kg",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "Sac de 25 kg."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "jonction-gouttiere",
       "family": "gutter_joint",
       "label": "Jonction de gouttière (système de la gouttière)",
@@ -4781,6 +4877,68 @@
           "label": {
             "one": "longueur de 2 m",
             "many": "longueurs de 2 m"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-a-douille",
+      "family": "outlet_tile",
+      "label": "Tuile à douille (modèle de la tuile posée), au diamètre du conduit",
+      "shortLabel": "Tuile à douille",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "lanterne-sortie",
+      "family": "outlet_lantern",
+      "label": "Lanterne de ventilation pour tuile à douille",
+      "shortLabel": "Lanterne de sortie de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
           },
           "contains": {
             "kind": "packaging",
@@ -5767,6 +5925,35 @@
               "value": "200"
             }
           ]
+        },
+        {
+          "key": "tuile_hp10",
+          "label": "Tuile HP 10",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "La tuile posée est une HP 10 ?",
+          "neverAsk": true,
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "hp10",
+                "hp 10"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pas une HP 10"
+          }
         },
         {
           "key": "pureau",
@@ -9188,6 +9375,35 @@
           "textLabels": [
             "faitage"
           ]
+        },
+        {
+          "key": "tuile_hp10",
+          "label": "Tuile HP 10",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "La tuile posée est une HP 10 ?",
+          "neverAsk": true,
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "hp10",
+                "hp 10"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pas une HP 10"
+          }
         }
       ],
       "slots": [
@@ -9234,9 +9450,36 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "about-faitage-standard"
           }
+        },
+        {
+          "key": "mortier",
+          "family": "ridge_mortar",
+          "label": "Mortier de faîtage",
+          "keywords": [
+            "mortier"
+          ],
+          "usual": {
+            "text": "Mortier de faîtage, en sacs de 25 kg.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "mortier-faitage-25"
+          }
         }
       ],
       "constants": {
+        "mortier_faitage_par_ml": {
+          "kind": "installation_condition",
+          "value": "7.5",
+          "unit": "kg/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "7,5 kg de mortier par mètre de faîtage scellé (Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg)."
+        },
         "abouts_par_faitage": {
           "kind": "installation_condition",
           "value": "2",
@@ -9256,7 +9499,7 @@
         {
           "id": "faitieres",
           "slot": "faitiere",
-          "formula": "longueur_faitage * faitiere.pieces_par_ml",
+          "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
           "exclusions": "Hors abouts (comptés à part) et rencontres d'arêtiers.",
@@ -9287,7 +9530,7 @@
         {
           "id": "crochets-faitiere",
           "slot": "fixation_faitiere",
-          "formula": "longueur_faitage * faitiere.pieces_par_ml",
+          "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
           "exclusions": "Un crochet par faîtière (faîtage à sec).",
@@ -9307,6 +9550,23 @@
           "unit": "u",
           "core": true,
           "exclusions": "Deux abouts pour une ligne de faîtage ; un faîtage en plusieurs lignes en demande davantage.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "mortier-faitage",
+          "slot": "mortier",
+          "formula": "longueur_faitage * regle.mortier_faitage_par_ml",
+          "unit": "kg",
+          "core": false,
+          "exclusions": "Mortier du faîtage scellé : 7,5 kg par mètre, par défaut (5 à 10 kg selon la faîtière).",
+          "precision": "{longueur_faitage|ml} × {regle.mortier_faitage_par_ml|kg/m#} kg/ml, par défaut",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -14782,15 +15042,20 @@
               "value": "1",
               "keywords": [
                 "ardoise",
-                "ardoises",
-                "tuile",
-                "tuiles"
+                "ardoises"
               ]
             },
             {
               "value": "2",
               "keywords": [
                 "zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "tuile",
+                "tuiles"
               ]
             }
           ],
@@ -14804,16 +15069,25 @@
             {
               "value": "1",
               "workItems": [
-                "couverture-tuiles-emboitement",
-                "couverture-tuiles-canal",
                 "couverture-ardoises-crochet"
+              ]
+            },
+            {
+              "value": "3",
+              "workItems": [
+                "couverture-tuiles-emboitement",
+                "couverture-tuiles-canal"
               ]
             }
           ],
           "choices": [
             {
-              "label": "Ardoise ou tuile",
+              "label": "Ardoise",
               "value": "1"
+            },
+            {
+              "label": "Tuile",
+              "value": "3"
             },
             {
               "label": "Zinc",
@@ -14821,8 +15095,9 @@
             }
           ],
           "display": {
-            "1": "ardoise ou tuile",
-            "2": "zinc"
+            "1": "ardoise",
+            "2": "zinc",
+            "3": "tuile"
           }
         }
       ],
@@ -14867,6 +15142,28 @@
           "formOf": "sortie"
         },
         {
+          "key": "douille",
+          "family": "outlet_tile",
+          "label": "Tuile à douille",
+          "usual": {
+            "text": "Tuile à douille au modèle de la tuile posée, au diamètre du conduit.",
+            "source": "edilians-hp10",
+            "productId": "tuile-a-douille"
+          },
+          "formOf": "sortie"
+        },
+        {
+          "key": "lanterne",
+          "family": "outlet_lantern",
+          "label": "Lanterne",
+          "usual": {
+            "text": "Une lanterne par tuile à douille.",
+            "source": "edilians-hp10",
+            "productId": "lanterne-sortie"
+          },
+          "formOf": "sortie"
+        },
+        {
           "key": "collerette",
           "family": "outlet_collar",
           "label": "Collerette d'étanchéité",
@@ -14896,7 +15193,7 @@
         {
           "id": "embase-sortie",
           "slot": "embase",
-          "when": "support_sortie < 2",
+          "when": "si(support_sortie >= 3, si(usage_sortie >= 2, 0, 1), si(support_sortie < 2, 1, 0))",
           "formula": "nb_sorties",
           "unit": "u",
           "core": true,
@@ -14916,7 +15213,7 @@
         {
           "id": "platine-sortie",
           "slot": "platine",
-          "when": "support_sortie >= 2",
+          "when": "si(support_sortie >= 2, si(support_sortie < 3, 1, 0), 0)",
           "formula": "nb_sorties",
           "unit": "u",
           "core": true,
@@ -14936,6 +15233,7 @@
         {
           "id": "chapeau-sortie",
           "slot": "chapeau",
+          "when": "si(si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0), 0, 1)",
           "formula": "nb_sorties",
           "unit": "u",
           "core": true,
@@ -14949,6 +15247,48 @@
             "status": "verified",
             "verifiedAt": "2026-10-04",
             "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "id": "tuile-a-douille",
+          "slot": "douille",
+          "when": "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          "formula": "nb_sorties",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une tuile à douille par sortie de ventilation, au modèle de la tuile posée.",
+          "precision": "{diametre_sortie}",
+          "precisionRequires": [
+            "diametre_sortie"
+          ],
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "lanterne-sortie",
+          "slot": "lanterne",
+          "when": "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          "formula": "nb_sorties",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une lanterne par tuile à douille.",
+          "precision": "{diametre_sortie}",
+          "precisionRequires": [
+            "diametre_sortie"
+          ],
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
@@ -17176,10 +17516,10 @@
           "id": "faitieres",
           "slot": "faitiere",
           "when": "nb_pans >= 2",
-          "formula": "arrondi_sup(longueur_faitage / regle.faitiere) + 1",
+          "formula": "arrondi_sup(longueur_faitage / regle.faitiere)",
           "unit": "u",
           "core": true,
-          "exclusions": "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
+          "exclusions": "Faîtage de la largeur d'un pan, longueurs de 2 m utiles (recouvrement compris dans la pièce).",
           "designation": "Faîtières bac acier {teinte_bac}, longueur 2 m",
           "precision": "{largeur_pan|ml} de faîtage",
           "precisionRequires": [

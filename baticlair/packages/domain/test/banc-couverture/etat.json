@@ -65,16 +65,16 @@
    "Bardelis gauches": "juste",
    "Bardelis droits": "juste",
    "Faîtières canal": "juste",
-   "Mortier de faîtage": "manquante"
+   "Mortier de faîtage": "juste"
   },
   "enTrop": 0
  },
  "C07": {
   "lignes": {
    "Plaques bac acier": "juste",
-   "Vis autoperceuses": "quantite",
+   "Vis autoperceuses": "juste",
    "Closoirs mousse": "juste",
-   "Faîtières bac acier": "quantite",
+   "Faîtières bac acier": "juste",
    "Gouttière PVC de 25": "juste",
    "Tubes de descente PVC Ø80": "juste"
   },
@@ -134,16 +134,16 @@
    "Tuiles HP 10": "juste",
    "Tuiles de rive gauches": "juste",
    "Tuiles de rive droites": "juste",
-   "Faîtières": "quantite",
+   "Faîtières": "juste",
    "Fenêtres GGL SK06": "juste",
    "Raccords SK06": "juste",
    "Fenêtre GGL CK02": "juste",
    "Raccord CK02": "juste",
-   "Tuile à douille": "manquante",
+   "Tuile à douille": "juste",
    "Lanterne de sortie de toit Ø125": "juste",
    "Plomb en rouleau": "juste"
   },
-  "enTrop": 1
+  "enTrop": 0
  },
  "C13": {
   "lignes": {

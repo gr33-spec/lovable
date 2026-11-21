@@ -1,5 +1,21 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.21-70 — Réponses de Greg du 21 novembre au soir : bac acier, faîtière HP 10, mortier, sortie de toit (2026-11-21)
+
+Le banc du calcul passe de 83 à 88 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Faîtière de bac acier | ml ÷ 2 arrondi au-dessus, + 1 (8 pour 12,50 m) | ml ÷ 2 arrondi au-dessus (7 pour 12,50 m) | Greg, 21 novembre 2026 ; Bacacier et Joris Ide : 2,10 m hors tout, 2,00 m utile |
+| Vis de bac acier | à trancher | inchangé : près de 8 au m², sans question | Greg, 21 novembre 2026 (« validé ») |
+| Faîtière sur tuile HP 10, sans modèle écrit | 3 au mètre | la demi-ronde, 2,5 au mètre (9 m : 23) | Greg, 21 novembre 2026 ; documentation HP 10 Edilians (demi-ronde 2,5 au mètre, angulaire 3) |
+| Mortier d'un faîtage scellé | cité, jamais sorti | 7,5 kg par mètre, en sacs de 25 kg (9 m : 3 sacs), seulement quand le devis dit le mortier | Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg par mètre |
+| Sortie de ventilation écrite, sur tuile | embase plomb et chapeau | tuile à douille et lanterne | Greg, 21 novembre 2026 (« l'article s'adapte au matériau ») ; Edilians, gamme HP 10 |
+| Couverture autour d'une sortie de toit | « ardoise ou tuile » / zinc ; notée par la lecture | ardoise / tuile / zinc ; lue par le code sur les autres ouvrages du devis, demandée s'il y en a deux | règle `fromWorks` de la fiche |
+
+- « HP 10 » se lit sur la ligne des tuiles, même en fourniture seule, et vaut pour le faîtage du même devis ; jamais demandé.
+- « Scellé au mortier », « pose au crochet » : ce qui suit « au » est un moyen cité, pas l'article de la ligne.
+
 ## roofing-2026.11.21-69 — Tuile Volnay PV au catalogue, « 1 descente » jamais « 1 pièce » (2026-11-21)
 
 Le banc du calcul passe de 81 à 83 lignes justes sur 100.

@@ -20,7 +20,8 @@ import type { LectureDevis, LectureFourniture, LectureLigne } from "./lecture.js
  */
 export function lectureParLeCode(ref: Referential, lecture: LectureDevis): LectureDevis {
   if (ref.workItems.length === 0) return lecture;
-  const lignes = lecture.lignes.map((l) => sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes)));
+  const lues = lecture.lignes.map((l) => motsJamaisDemandes(ref, sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes))));
+  const lignes = donneesDesAutresOuvrages(ref, lues);
   return { ...lecture, lignes };
 }
 
@@ -123,6 +124,61 @@ const PIECES = /^(?:u|unite|piece|pce|pc|ens|tole|plaque)?$/;
  * sur la couverture bac acier, D-2022-071) : ce n'est pas la mesure de l'ouvrage, c'est l'article tel qu'écrit. Il part
  * tel quel, sans « Surface du toit ? » derrière (§49.2).
  */
+/**
+ * Une donnée qui se lit sur les AUTRES ouvrages du devis (`fromWorks` : la couverture autour d'une sortie de toit) est posée
+ * par le code, d'après les ouvrages rangés : une seule valeur possible, elle est prise (elle passe avant ce que la lecture a
+ * noté) ; deux valeurs possibles dans le même devis, rien n'est déduit, la question se pose. Un mot de la ligne elle-même
+ * (« sur zinc ») passe avant.
+ */
+function donneesDesAutresOuvrages(ref: Referential, lignes: readonly LectureLigne[]): LectureLigne[] {
+  const presents = new Set(lignes.flatMap((l) => l.fournitures.flatMap((f) => (f.ouvrage ? [f.ouvrage] : []))));
+  return lignes.map((l) => {
+    const t = motsDeLaFiche(l.designation);
+    let change = false;
+    const fournitures = l.fournitures.map((f) => {
+      const w = ref.workItems.find((x) => x.id === f.ouvrage);
+      if (!w) return f;
+      const donnees = { ...f.donnees };
+      for (const p of w.params) {
+        if (!p.fromWorks?.length) continue;
+        if ((p.textValues ?? []).some((v) => v.keywords.some((k) => contient(t, motsDeLaFiche(k))))) continue;
+        const valeurs = [...new Set(p.fromWorks.filter((x) => x.workItems.some((id) => presents.has(id))).map((x) => x.value))];
+        if (valeurs.length === 1 && donnees[p.key] !== valeurs[0]) {
+          donnees[p.key] = valeurs[0]!;
+          change = true;
+        } else if (valeurs.length > 1 && donnees[p.key] !== undefined) {
+          delete donnees[p.key];
+          change = true;
+        }
+      }
+      return { ...f, donnees };
+    });
+    return change ? { ...l, fournitures } : l;
+  });
+}
+/**
+ * Une donnée que l'app ne demande jamais et qu'un mot du devis dit (« HP 10 » sur la ligne des tuiles) est lue par le code
+ * sur toute ligne rangée dans son ouvrage, même une ligne de fourniture seule que le code ne décompose pas : elle ne
+ * dépend pas de ce que la lecture a pensé à noter. Un seul mot trouvé, sinon rien.
+ */
+function motsJamaisDemandes(ref: Referential, l: LectureLigne): LectureLigne {
+  const t = motsDeLaFiche(l.designation);
+  let change = false;
+  const fournitures = l.fournitures.map((f) => {
+    const w = ref.workItems.find((x) => x.id === f.ouvrage);
+    if (!w) return f;
+    const donnees = { ...f.donnees };
+    for (const p of w.params) {
+      if (!p.neverAsk || !p.textValues?.length || donnees[p.key] !== undefined) continue;
+      const dits = p.textValues.filter((v) => v.keywords.some((k) => contient(t, motsDeLaFiche(k))));
+      if (dits.length !== 1) continue;
+      donnees[p.key] = dits[0]!.value;
+      change = true;
+    }
+    return change ? { ...f, donnees } : f;
+  });
+  return change ? { ...l, fournitures } : l;
+}
 function sansMesureEnPieces(ref: Referential, l: LectureLigne): LectureLigne {
   let change = false;
   const fournitures = l.fournitures.map((f) => {
@@ -183,7 +239,7 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   // Une forme d'achat (les feuilles d'une bande, les rives gauches et droites) n'est jamais l'article écrit : elle ne se nomme pas.
   // Ce qui suit « avec », « y compris » est cité, jamais mesuré par la ligne : « fenêtres de toit GGL MK04, avec raccords
   // d'étanchéité », 2 u, compte les fenêtres ; les raccords sont cités (banc du calcul, C05 et C12, 21 novembre 2026).
-  const avantAvec = (mots: string) => mots.split(/ (?:avec|y compri|y compris|compri|compris|dont|incluant|inclu|inclus) /)[0]!;
+  const avantAvec = (mots: string) => mots.split(/ (?:avec|y compri|y compris|compri|compris|dont|incluant|inclu|inclus|au|aux) /)[0]!;
   const nommeAuTitre = w.slots.filter((s) => !s.formOf && motsDEmplacement(ref, w, s).some((k) => contient(avantAvec(sansLesExclus(titreMots)), k)));
   // Une ligne qui MESURE l'ouvrage (32 m², 8 m) se range sur son emplacement mesuré, même si son titre cite un article
   // (« couverture zinc à tasseaux ») ; une ligne en pièces (« 40 crochets de gouttière ») sur l'article qu'elle nomme.

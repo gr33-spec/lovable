@@ -3,7 +3,8 @@
 Mis à jour : 21 novembre 2026, soir. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
 
 ## Score
-- Banc du calcul : **83 sur 100** (fiche `roofing-2026.11.21-69`, en cours d'enregistrement). Objectif : 95 %.
+- Banc du calcul : **88 sur 100** (fiche `roofing-2026.11.21-70`, poussée sur ma branche) : entraînement 54/64, examen 34/36,
+  0 en trop. Objectif : 95 %.
 - Rejouer : `cd baticlair/packages/domain && npx vitest run test/banc-couverture.test.ts` ; enregistrer : `BANC_MAJ=1 …` ;
   voir un chantier : `BANC_VOIR=C05 … --reporter=verbose`. La liste juste : `cd banc-quantitatif && node outils/exporter-banc.mjs`.
 - Dernière chaîne complète verte (fiche -68) : moteur 1305, serveur 921, site construit, parcours 350 (2 mis à jour).
@@ -59,7 +60,18 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
 - Fiche -68 : mots de l'arêtier zinc précis ; « jouée » reste un ouvrage. Tests serveur des crochets en boîtes.
 - Fiche -69 (en cours) : « 1 descente » jamais « 1 pièce » de tube ; tuile Terreal Volnay PV au catalogue. 83 sur 100.
 
-## Reste
+- Fiche -70 : réponses 5, 6, 7, 10 faites (bac acier sans + 1, vis 8/m², faîtière HP 10 demi-ronde 2,5/m, mortier de faîtage
+  7,5 kg/m). Réponse 8 EN PARTIE : une sortie de ventilation ÉCRITE sur tuile donne tuile à douille + lanterne (ma lecture
+  de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
+  Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
+
+## Reste (après la fiche -70)
+- Réponses 1 à 4 (ardoise : arêtier 26/m, faîtage 1 rang, rive 0,16 m²/m, noue 0,50 m²/m, question de l'égout) : le plus gros.
+- Réponse 9 (remaniage : aucune ardoise d'office, question). AJOUT 1 (suggestion sortie de ventilation).
+- « par défaut » à afficher sur la faîtière HP 10 et le mortier (aujourd'hui : dans la précision du mortier seulement).
+- Rejouer serveur (922 tests, 40 min, seul) et parcours avant de dire « prêt ».
+
+## Reste (ancienne liste)
 1. Finir -69 : deux tests de `test/referential.test.ts` échouent depuis l'ajout de la Volnay ; puis build, pousser.
 2. Lot « 10 réponses » + référence du contrôleur (`outils/exporter-banc.mjs`) + AJOUT 1.
 3. Mes lignes sans attendre : feuilles de zinc de l'abergement (C05 : 3 contre 4, la fiche ne donne pas le débit),
@@ -69,3 +81,19 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
 5. Lot « ? » et bulle (écran).
 6. Étape 3 : questions par le code, noms et bref par le code, méthode 11, examen.
 7. À signaler à Greg : 30 mm par jonction fait 6 longueurs pour 20 ml tout rond (pas encore de réponse).
+
+## Apprentissage des corrections : état vérifié le 21 novembre (lecture seule, à dire à Greg)
+Existe (depuis le 24 octobre, `docs/DECISIONS.md:109`) :
+- Pour l'artisan : nom, précision et quantité d'une ligne calculée, retenus au 2e chantier (`regle_apprise`,
+  `packages/domain/src/apprentissage/habitudes.ts`, `apps/api/.../habitudes.service.ts`), réappliqués avec « Ajusté selon tes
+  habitudes » et « Annuler ». Produit choisi et réponse d'habitude (façonnage…) gardés par la mémoire d'entreprise.
+- Pour tous : à 3 artisans, une règle « proposée » dans Admin › pilotage (« Corrections proposées par les artisans »),
+  appliquée seulement après « Oui, pour tout le monde ». Admin › « Corrections les plus fréquentes » (90 jours).
+- Tests : `apps/api/test/apprentissage.test.ts`, `habitudes.test.ts`, `learning.test.ts`, domaine `apprentissage-habitudes.test.ts`.
+Manque :
+- Pas retenu : retrait d'une ligne calculée, ajout ou correction d'une ligne reprise telle qu'écrite, changement d'unité.
+- L'écran des 90 jours ne compte pas les corrections faites d'un geste sur une ligne calculée (action `correct`).
+- Deux circuits séparés (écran 90 jours / règles proposées). Un retrait ou un ajout fréquent ne devient jamais une règle.
+- Pas d'écran où l'artisan voit et efface ses habitudes apprises (non trouvé). La règle se retrouve par le NOM de la ligne :
+  si le nom change d'un devis à l'autre, elle ne s'applique pas (à vérifier).
+- Une règle validée ne change pas la fiche du métier : elle se pose sur la ligne.
