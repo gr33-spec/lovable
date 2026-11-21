@@ -6,5 +6,7 @@
  "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?": true,
  "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?": true,
  "param:longueur_noue ¦ Longueur de noue ?": true,
- "param:nb_cheminees ¦ Combien de cheminées ?": true
+ "param:nb_cheminees ¦ Combien de cheminées ?": true,
+ "param:raccord_couverture ¦ Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?": true,
+ "param:qualite_ardoise@couverture-ardoises-crochet__4 ¦ Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": false
 }

@@ -1,0 +1,23 @@
+[
+  {
+    "article": "Bobine zinc quartz 0,70 mm, largeur 650 mm",
+    "bonne_valeur": "78 ml (15 bacs × 5,15 m = 77,25 m, arrondi au mètre)",
+    "qui_a_raison": "reference",
+    "cause": "erreur du contrôleur",
+    "explication": "La fiche vérité dit « bacs dans la bobine de 650 » et « bacs de 5 m d'une seule longueur (5,15 m coupés, relevés compris) », 15 bacs : le contrôleur a appliqué à une bobine les longueurs vendues du « bobineau de zinc » (17/21/31 m), un autre produit dans la fiche, d'où 79 ml. Défaut de la fiche à signaler quand même : elle n'a aucune section « couverture zinc à tasseaux » et ne dit pas comment se vend la bobine de 650 (seule la « bobine de zinc joint debout » existe, avec son entraxe 580 qui ne vaut pas ici)."
+  },
+  {
+    "article": "Tasseaux bois trapézoïdaux 50 mm",
+    "bonne_valeur": "75 ml",
+    "qui_a_raison": "reference",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "La fiche vérité dit « tasseaux bois trapézoïdaux de 50 mm, 15 rangs de 5 m (14 entre bacs + 1 de rive) = 75 m » et le couvreur l'a donné (« 75 m de chaque ») : les 5 % du contrôleur viennent d'une analogie avec le liteau (« perte_casse_coupes 5 % ») faute de toute règle. Défaut de la fiche : rien sur les tasseaux de couverture zinc (nombre de rangs, longueur vendue, perte), ce qui laisse chaque calcul improviser."
+  },
+  {
+    "article": "Couvre-joints zinc quartz 0,70 mm pour tasseaux de 50 mm",
+    "bonne_valeur": "75 ml",
+    "qui_a_raison": "reference",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "La fiche vérité dit « couvre-joints zinc quartz 0,70 mm pour tasseaux de 50 mm, 15 rangs de 5 m = 75 m », achetés tout faits ; le contrôleur a emprunté la « bande zinc façonnée, longueur_standard 2 m » et la méthode « zinc en bandes » (recouvrement à chaque jonction) et compté 3 longueurs par rang sans réemploi des chutes, soit 90 m. Défaut de la fiche : les couvre-joints n'y figurent pas (ni longueur vendue, ni recouvrement), il faut leur section pour savoir s'ils se commandent au ml ou en longueurs."
+  }
+]

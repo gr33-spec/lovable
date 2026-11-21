@@ -1,0 +1,34 @@
+[
+ {
+  "id": "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?",
+  "bouton": "3 m",
+  "valeur": "",
+  "unite": "m",
+  "ne_sait_pas": false,
+  "dit": "3 m."
+ },
+ {
+  "id": "param:developpe ¦ Développé de la bande zinc ?",
+  "bouton": "330 mm",
+  "valeur": "",
+  "unite": "mm",
+  "ne_sait_pas": false,
+  "dit": "330 mm, pour le faîtage."
+ },
+ {
+  "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+  "bouton": "Je façonne (feuilles ou bobineau)",
+  "valeur": "",
+  "unite": "u",
+  "ne_sait_pas": false,
+  "dit": "Je plie moi-même."
+ },
+ {
+  "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+  "bouton": "Espagne 1er choix",
+  "valeur": "",
+  "unite": "u",
+  "ne_sait_pas": false,
+  "dit": "Espagne 1er choix."
+ }
+]
