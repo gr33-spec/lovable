@@ -1,7 +1,0 @@
-[
- {"id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "bouton": "Je façonne (feuilles ou bobineau)", "valeur": "", "unite": "u", "ne_sait_pas": false, "dit": "Je plie moi-même."},
- {"id": "param:hauteur_descente ¦ Hauteur d'une descente ?", "bouton": "", "valeur": "3", "unite": "m", "ne_sait_pas": false, "dit": "3 mètres."},
- {"id": "param:developpe@bandes-zinc ¦ Habillages de rive : développé de la bande zinc ?", "bouton": "250 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "250 mm."},
- {"id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?", "bouton": "330 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "330 mm."},
- {"id": "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?", "bouton": "Jusqu'à 65 cm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "65 cm."}
-]

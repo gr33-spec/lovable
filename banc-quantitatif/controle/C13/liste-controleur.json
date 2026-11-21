@@ -1,0 +1,58 @@
+[
+  {
+    "article": "Bande de rive zinc naturel 0,65 mm, façonnée, développé 250 mm, longueur 2 m",
+    "quantite": 8,
+    "unite": "bandes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "Fiche « rive zinc » (bande de rive, longueur_piece 2 m) + « Pertes › zinc en bandes » (ml + recouvrement à chaque jonction, arrondi à la longueur de 2 m, +2,5 % avec 5 cm) : par rive 7 ml × 1,025 = 7,18 ml → 4 bandes ; 2 rives → 8 bandes (14 ml × 1,025 = 14,35 ml → 8 aussi) ; commandé façonné (façonnage 2), dév. 250 dit par le couvreur. Pattes non écrites au devis : rien.",
+    "ligne_devis": "F. et P. bdes de rive zn, 2 x 7 ml"
+  },
+  {
+    "article": "Bande porte-solin zinc naturel 0,65 mm, façonnée, développé 100 mm, longueur 3 m",
+    "quantite": 2,
+    "unite": "bandes de 3 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? « bande porte-solin » ne connaît que dév. 100 mm vendue façonnée en 2 m (« bande zinc façonnée » : 2 m standard, sur mesure jusqu'à 4 m) ; le devis écrit 2 bandes de 3 m et le couvreur les achète en 3 m : 2 × 3 m = 6 ml → 2 bandes de 3 m (en longueurs de 2 m de la fiche : 3 m × 1,025 → 2 par bande, soit 4 bandes de 2 m). Mortier et mastic de solin non écrits : rien.",
+    "ligne_devis": "2 bdes porte-solin de 3 m, posées"
+  },
+  {
+    "article": "Gouttière pendante demi-ronde zinc naturel 0,65 mm, développé 250 (« de 25 »), longueur 4 m",
+    "quantite": 4,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "Fiche « Pertes › gouttières zinc » (ml + 30 mm par jonction soudée, arrondi aux longueurs de 4 m, pas de %) et « gouttière zinc (demi-ronde…) » longueur vendue 4 m : 14 m (le « 14 » sans unité = 14 ml dit par le couvreur) + 3 jonctions × 0,03 = 14,09 m → 4 longueurs (16 m). Alerte : 14 m > 12 m sans dispositif de dilatation (« gouttière zinc ») et une sortie de dév. 250 ne dessert que 35 m² en plan (pan 14 × 7 m) ; joint de dilatation, crochets et talons non écrits : rien.",
+    "ligne_devis": "gouttière 1/2 rde zn de 25 14"
+  },
+  {
+    "article": "Naissance zinc pour gouttière demi-ronde de 25, sortie Ø80",
+    "quantite": 1,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? la fiche couverture ne dit nulle part la naissance « indissociable » (« naissance / moignon » donne seulement dév. 250 → Ø80) ; sortie d'office comme accessoire indissociable de la gouttière (§49.1 point 3, cité par la fiche vérité) : 1 descente → 1 naissance Ø80 de 25.",
+    "ligne_devis": "gouttière 1/2 rde zn de 25 14"
+  },
+  {
+    "article": "Tuyau de descente zinc naturel Ø80, longueur 2 m",
+    "quantite": 3,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune règle écrite pour compter les tubes (emboîtement, dévoiement, longueur du dauphin à déduire ou non) ; « descente EP zinc » longueurs vendues 2 / 3 m en Ø80, le couvreur prend 2 m : 5 m ÷ 2 m = 2,5 → 3 tubes (en déduisant le dauphin de 1 m : 4 m → 2 tubes sans aucune marge pour le dévoiement, donc 3 gardés). Coudes et colliers non écrits : rien.",
+    "ligne_devis": "1 DEP Ø80 haut. 5 m"
+  },
+  {
+    "article": "Dauphin fonte Ø80, droit, longueur 1 m",
+    "quantite": 1,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Fiche « dauphin » : longueur standard 1 m, fonte, Ø80 / Ø100 ; devis : 1 dauphin, Ø80 de la descente, fonte dite par le couvreur → 1 pièce.",
+    "ligne_devis": "1 dauphin"
+  },
+  {
+    "article": "Abergement de cheminée zinc naturel 0,65 mm, façonné (bavette, 2 rives à noquets, besace, bande porte-solin)",
+    "quantite": null,
+    "unite": "ensemble aux cotes de la souche",
+    "a_chiffrer": true,
+    "calcul": "Fiche « abergement de souche (métal façonné) » : bavette = largeur de souche + 2 × 10 à 12 cm, rives latérales à noquets (ardoise, 1 ÷ (2 × pureau) par ml de jouée), besace, porte-solin sur le pourtour, relevé 10 cm ; toutes les pièces dépendent des cotes de la souche, que le couvreur ne sait pas (périmètre non mesuré) → à chiffrer.",
+    "ligne_devis": "1 abergt cheminée zn"
+  }
+]

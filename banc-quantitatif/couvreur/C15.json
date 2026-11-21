@@ -1,0 +1,42 @@
+{
+ "param:feutre_bac ¦ Bac acier : avec ou sans feutre anti-condensation ?": {
+  "question": {
+   "id": "param:feutre_bac ¦ Bac acier : avec ou sans feutre anti-condensation ?",
+   "question": "Bac acier : avec ou sans feutre anti-condensation ?",
+   "boutons": [
+    "Avec feutre",
+    "Sans feutre"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Sans feutre",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Sans feutre."
+  }
+ },
+ "param:developpe_gouttiere@gouttiere-pvc-alu__6 ¦ Gouttière : gouttière de 25, de 28, de 33 ou de 40 ?": {
+  "question": {
+   "id": "param:developpe_gouttiere@gouttiere-pvc-alu__6 ¦ Gouttière : gouttière de 25, de 28, de 33 ou de 40 ?",
+   "question": "Gouttière : gouttière de 25, de 28, de 33 ou de 40 ?",
+   "boutons": [
+    "De 25",
+    "De 28",
+    "De 33",
+    "De 40"
+   ],
+   "unite": "cm",
+   "aide": "Le développé : la largeur de la feuille avant façonnage."
+  },
+  "reponse": {
+   "bouton": "De 25",
+   "valeur": "",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "De 25."
+  }
+ }
+}

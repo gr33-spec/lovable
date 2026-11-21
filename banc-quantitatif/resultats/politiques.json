@@ -1,0 +1,23 @@
+{
+ "tout": {
+  "questions": 20,
+  "hypotheses": 0,
+  "lignes": 63,
+  "lignesDifferentes": 0,
+  "nonEvalues": 0
+ },
+ "une": {
+  "questions": 20,
+  "hypotheses": 0,
+  "lignes": 63,
+  "lignesDifferentes": 0,
+  "nonEvalues": 0
+ },
+ "bloquantes": {
+  "questions": 20,
+  "hypotheses": 0,
+  "lignes": 63,
+  "lignesDifferentes": 0,
+  "nonEvalues": 0
+ }
+}

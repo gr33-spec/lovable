@@ -1,0 +1,34 @@
+[
+  {
+    "article": "Bobine zinc anthracite (Anthra-Zinc) 0,65 mm, largeur 650 mm, pour bacs à tasseaux de 3,65 m",
+    "quantite": 47.5,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune règle « couverture zinc à tasseaux » dans la fiche (ni entraxe, ni longueur de bac, ni conditionnement de bobine ; seule la bobine joint debout 650 → entraxe 580 existe, non applicable aux tasseaux) : calcul avec les données du couvreur, 13 bacs × 3,65 m (3,50 m de rampant + relevés) = 47,45 m, arrondi 47,5 ml de bobine de 650 (bobine au mètre linéaire, finition Anthra-Zinc de « gouttière zinc / finitions »)",
+    "ligne_devis": "1. Couverture de l'appentis : couverture en zinc à tasseaux, zinc anthracite 0,65 mm, 28 m², bacs de 3,50 m pris dans de la bobine de largeur 650 mm"
+  },
+  {
+    "article": "Bobineau zinc anthracite 0,65 mm, largeur 650 mm (chéneau encaissé, développé 650)",
+    "quantite": 1,
+    "unite": "bobineau de 17 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucun ouvrage « chéneau encaissé » dans la fiche, et « bobineau de zinc » donne largeurs 500/650/1000 et longueurs 17/21/31 m sans dire quelle longueur existe en 650 ni s'il se vend au mètre : besoin 8 ml d'un seul tenant (< 12 m sans dilatation, « gouttière zinc »), largeur = développé 650 → 1 bobineau de la plus petite longueur (17 m)",
+    "ligne_devis": "2. Chéneau : chéneau encaissé en zinc anthracite épaisseur 0,65 mm, longueur 8 m"
+  },
+  {
+    "article": "Tube de descente zinc anthracite Ø80, longueur 2 m",
+    "quantite": 2,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "« descente EP zinc » longueurs vendues 2/3/4 m (2 m standard, « longueurs vendues en Bretagne ») ; le couvreur prend des tubes de 2 m : hauteur 3 m ÷ 2 m = 1,5 → arrondi au-dessus, 2 tubes (coudes et colliers non écrits au devis, non sortis)",
+    "ligne_devis": "3. Descente : 1 descente d'eaux pluviales en zinc anthracite Ø80, hauteur 3 m"
+  },
+  {
+    "article": "Feuille de zinc anthracite 0,65 mm, 2000 × 1000 mm (bande de solin, développé 200)",
+    "quantite": 1,
+    "unite": "feuille",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? le tableau « bandes de 2 m tirées d'une feuille 2 × 1 m » s'arrête au dév. 250 ; appliqué sa règle arithmétique : partie entière de 1000 / 200 = 5 bandes de 2 m par feuille ; « zinc en bandes » : 8 ml + 5 % de recouvrement (10 cm) = 8,4 m → arrondi à 2 m = 10 m = 5 bandes → 5 ÷ 5 = 1 feuille 2 × 1 m (il plie lui-même ; mastic et vis inox non écrits, non sortis)",
+    "ligne_devis": "4. Solin : bande de solin en zinc anthracite sur 8 m, contre le mur de la maison, engravée dans l'enduit"
+  }
+]

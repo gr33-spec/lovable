@@ -1,7 +1,0 @@
-[
- {"id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "bouton": "Je façonne (feuilles ou bobineau)", "valeur": "", "unite": "u", "ne_sait_pas": false, "dit": "Je façonne moi-même."},
- {"id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "bouton": "Espagne 1er choix", "valeur": "", "unite": "u", "ne_sait_pas": false, "dit": "Espagne 1er choix."},
- {"id": "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?", "bouton": "De 25", "valeur": "", "unite": "cm", "ne_sait_pas": false, "dit": "Gouttière de 25."},
- {"id": "param:developpe@bande-porte-solin ¦ Bande porte-solin zinc : développé de la bande zinc ?", "bouton": "100 mm (solin, couvre-joint)", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "100 mm."},
- {"id": "param:developpe@bandes-zinc ¦ Bandes de rive zinc : développé de la bande zinc ?", "bouton": "200 mm", "valeur": "", "unite": "mm", "ne_sait_pas": false, "dit": "200 mm."}
-]

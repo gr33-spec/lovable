@@ -5,6 +5,9 @@
 import fs from "node:fs";
 import { ecran } from "./moteur.mjs";
 import { essais, dossier, norm } from "./banc.mjs";
+import { ref as REF } from "./moteur.mjs";
+/** La valeur courante d'une donnée dans la fiche (pour la politique « bloquantes seulement »). */
+const defautDe = (key) => { const k = key.replace(/^param:/, "").split("@")[0]; for (const w of REF.workItems) { const p = w.params.find((p) => p.key === k); if (p?.default && typeof p.default.value === "string") return { value: p.default.value, unit: p.unit }; } return null; };
 const lire = (p) => { try { return JSON.parse(fs.readFileSync(p, "utf8").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "")); } catch { return null; } };
 const ecrire = (p, o) => { fs.mkdirSync(p.replace(/\/[^/]+$/, ""), { recursive: true }); fs.writeFileSync(p, JSON.stringify(o, null, 1)); };
 const SPECS = lire("chantiers/SPECS.json");
@@ -29,6 +32,7 @@ export function derouler(lecture, c, politique = "tout") {
     let ouvertes = e.questions.filter((q) => !posees.some((p) => p.key === q.key));
     if (!ouvertes.length) break;
     if (politique === "une") ouvertes = ouvertes.slice(0, 1);
+    if (politique === "bloquantes") { const avec = ouvertes.filter((q) => defautDe(q.key)); if (avec.length) { for (const q of avec) { answers[q.key] = defautDe(q.key); posees.push({ key: q.key, text: q.text, options: [], reponse: "(valeur courante de la fiche)", hypothese: true }); } e = ecran(lecture, answers); continue; } }
     for (const q of ouvertes) { const r = C[qid(q)]; if (!r) manquent.push(q); posees.push({ key: q.key, text: q.text, options: q.options.map((o) => o.label), reponse: r ? (r.reponse.ne_sait_pas ? "je ne sais pas" : r.reponse.bouton || `${r.reponse.valeur} ${r.reponse.unite ?? ""}`.trim()) : null }); answers[q.key] = r ? versMoteur(q, r.reponse) : null; }
     if (manquent.length) break;
     e = ecran(lecture, answers);
@@ -114,4 +118,15 @@ if (cmd === "stabilite") {
   }
   ecrire("resultats/stabilite.json", out);
   for (const [m, o] of Object.entries(out)) console.log(m.padEnd(5), `${o.stables}/${o.chantiers} chantiers stables (${o.lectures} lectures) ; même liste ${o.memeListe}, mêmes questions ${o.memesQuestions} ; instables : ${o.instables.join(", ") || "aucun"}`);
+}
+
+// Les trois façons de poser les questions, comparées par le code sur les lectures de référence (aucun appel).
+if (cmd === "politiques") {
+  const out = {};
+  for (const pol of ["tout", "une", "bloquantes"]) { let q = 0, hyp = 0, faux = 0, lignes = 0, tours = 0, manque = 0;
+    for (const [m, c, e] of tous) { const L = lectureDe(m, c, e); if (!L) continue; const r = derouler(L, c, pol), base = derouler(L, c, "tout"); if (r.manquent.length) { manque++; continue; }
+      q += r.posees.filter((p) => !p.hypothese).length; hyp += r.posees.filter((p) => p.hypothese).length;
+      const f = (x) => ({ liste: x.liste, aChiffrer: x.aChiffrer }), k = comparer(f(base.final), f(r.final)); lignes += lignesDe(f(base.final)).length; faux += k.quantite.length + k.manquantes.length + k.inventees.length + k.douteux.length; }
+    out[pol] = { questions: q, hypotheses: hyp, lignes, lignesDifferentes: faux, nonEvalues: manque }; }
+  ecrire("resultats/politiques.json", out); console.table(out);
 }

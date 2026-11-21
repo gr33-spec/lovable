@@ -1,0 +1,83 @@
+{
+ "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?": {
+  "question": {
+   "id": "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?",
+   "question": "Périmètre d'une cheminée (les 4 côtés) ?",
+   "boutons": [
+    "2 m",
+    "3 m",
+    "4 m",
+    "5 m"
+   ],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "3 m",
+   "valeur": "",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "3 m."
+  }
+ },
+ "param:developpe ¦ Développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Développé de la bande zinc ?",
+   "question": "Développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "330 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "330 mm, pour le faîtage."
+  }
+ },
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "unite": "u",
+   "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je plie moi-même."
+  }
+ },
+ "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": {
+  "question": {
+   "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Espagne 1er choix",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Espagne 1er choix."
+  }
+ }
+}

@@ -72,6 +72,8 @@ function etapes(m, c, e) {
     case "S4": copie(`${dossier("M6", c, e)}/a.json`); break;
     case "S4b": copie(`${dossier("M6", c, e)}/b.json`); break;
     case "H4": copie(`${dossier("M5", c, e)}/a.json`); break;
+    // Méthode 11 (la onzième) : la lecture seule du modèle moyen (1re lecture de la méthode 6), plus les garde-fous du code, sans appel en plus.
+    case "M11": copie(`${dossier("M6", c, e)}/a.json`); break;
     case "M5": job("a", S("m4"), "haiku", "medium", devis);
       if (fait(a) && texteDe(c, e) && fait(`${dossier("M8", c, e)}/a.json`)) { const al = alertesM5(lire(a), c, e); ecrire(`${R}/alertes.json`, al); if (al.length) { ecrire(`${R}/premiere-lecture.json`, { lignes: lire(a).lignes }); job("b", S("relecture"), "sonnet", "medium", devis, `La première lecture à relire : \`${R}/premiere-lecture.json\`. Le contrôle par le code y a relevé ces points, à vérifier d'abord (certains peuvent être de fausses alertes) :\n${al.map((x) => `- ${x}`).join("\n")}`); } }
       break;
@@ -189,6 +191,25 @@ function fusion(a, b, texte) {
   return { lignes: out, journal };
 }
 
+/** Méthode 11 : les garde-fous du code sur une lecture seule. Rien n'est ajouté : ce qui ne tient pas est retiré, et le code le demandera. */
+function garder(lignes, texte, journal) {
+  const N = texte ? nombres(texte) : null;
+  return lignes.map((l) => ({ ...l, fournitures: (l.fournitures ?? []).map((f0) => {
+    const f = { ...f0 }, w = f.ouvrage ? W(f.ouvrage) : null;
+    if (f.ouvrage && !w) { journal.push(`ligne ${l.ref} : ouvrage « ${f.ouvrage} » inconnu de la fiche, article gardé tel qu'écrit.`); f.ouvrage = ""; f.emplacement = ""; f.donnees = []; }
+    if (w && f.emplacement && !w.slots.some((s) => s.key === f.emplacement)) { journal.push(`ligne ${l.ref} : emplacement « ${f.emplacement} » inconnu de « ${f.ouvrage} », article gardé tel qu'écrit.`); f.ouvrage = ""; f.emplacement = ""; f.donnees = []; }
+    if (N && [...nombres(f.quantite)].some((n) => !N.has(n))) { journal.push(`ligne ${l.ref} : quantité ${f.quantite} de « ${f.nom} » absente du devis, retirée (à demander).`); f.quantite = ""; f.unite = ""; f.a_preciser = [...(f.a_preciser ?? []), "quantité"]; }
+    f.donnees = (f.donnees ?? []).filter((x) => {
+      const p = W(f.ouvrage)?.params.find((p) => p.key === x.cle);
+      if (f.ouvrage && !p) { journal.push(`ligne ${l.ref} : donnée « ${x.cle} » inconnue de « ${f.ouvrage} », retirée.`); return false; }
+      const choix = p?.choices?.some((ch) => ch.value === String(x.valeur).trim());
+      if (N && [...nombres(x.valeur)].some((n) => !N.has(n) && !(choix && parseFloat(n) < 10))) { journal.push(`ligne ${l.ref} : donnée ${x.cle} = ${x.valeur} absente du devis, retirée (le code la demandera).`); return false; }
+      return true;
+    });
+    return f;
+  }) }));
+}
+
 /** Assemble la lecture d'un essai (format de l'appli) ; null tant qu'il manque une étape. */
 function assembler(m, c, e) {
   const R = dossier(m, c, e), a = lire(`${R}/a.json`), b = lire(`${R}/b.json`), texte = texteDe(c, e), journal = [];
@@ -197,6 +218,7 @@ function assembler(m, c, e) {
   switch (m) {
     case "M0": L = a; break;
     case "M4": case "S4": case "S4b": case "H4": L = lecture(a.lignes ?? []); break;
+    case "M11": L = lecture(garder(a.lignes ?? [], spec(c).support === "photo" ? null : texte, journal)); break;
     case "M1": if (!b) return null; L = { ...a, lignes: corriger(a.lignes ?? [], b) }; journal.push(`relecture : ${b.lignes_corrigees?.length ?? 0} corrigée(s), ${b.lignes_ajoutees?.length ?? 0} ajoutée(s), ${b.lignes_retirees?.length ?? 0} retirée(s)`); break;
     case "M5": L = lecture(b ? corriger(a.lignes ?? [], b) : a.lignes ?? []); journal.push(`alertes du code : ${(lire(`${R}/alertes.json`) ?? []).length}`); break;
     case "M9": if (!b) return null; L = lecture(corriger(lectureDuCode(a).lignes, b)); journal.push(`relecture : ${b.lignes_corrigees?.length ?? 0} corrigée(s), ${b.lignes_ajoutees?.length ?? 0} ajoutée(s), ${b.lignes_retirees?.length ?? 0} retirée(s)`); break;
