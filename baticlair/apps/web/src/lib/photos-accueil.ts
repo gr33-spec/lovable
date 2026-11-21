@@ -37,7 +37,7 @@ export const PHOTO_GROUPES: PhotoAccueil = {
   largeur: 950,
   hauteur: 430,
   alt: "Trois couvreurs casqués travaillent ensemble sur un toit en tuiles",
-  credit: "couvreurs à Denver, CC BY 3.0, Wikimedia Commons",
+  credit: "David Shankbone, CC BY 3.0, Wikimedia Commons",
   cadrage: "40% 50%",
 };
 

@@ -190,11 +190,11 @@ export function AccueilMaquette() {
       {/* Greg : seule retouche de l'en-tête de page, un « Bonjour » moins haut. */}
       <h1 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em] lg:text-[28px]">Bonjour {prenom}</h1>
       <BandeauReprises />
-      {charge ? <Accompagnement listes={projets.items.length} demandes={projets.items.filter((p) => p.resume?.demande).length} besoinsGroupes={besoins.aFaire.length + besoins.enCours.length} groupe={groupe} /> : null}
-
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-6">
-        <div className="lg:row-span-2">
+        <div className="flex flex-col gap-5 lg:row-span-2">
           <ZoneQuantitatif photo={photoDuQuantitatif(metiers)} analyses={features.ai} />
+          {/* L'accompagnement vient SOUS la grande carte : « Nouveau quantitatif » se voit sans défiler, même sur un petit iPhone. */}
+          {charge ? <Accompagnement listes={projets.items.length} demandes={projets.items.filter((p) => p.resume?.demande).length} besoinsGroupes={besoins.aFaire.length + besoins.enCours.length} groupe={groupe} /> : null}
         </div>
         {!charge ? (
           <ActiviteChargement />
@@ -227,20 +227,20 @@ function ZoneQuantitatif({ photo, analyses }: { photo: PhotoAccueil; analyses: b
   // La dictée dépend du navigateur : connue seulement après l'affichage (jamais un accès montré puis retiré au serveur).
   const dictee = useSyncExternalStore(sansAbonnement, dicteeDisponible, () => false);
   const acces = [
-    analyses ? { id: "devis", icone: FileText, texte: "Un devis", label: "Partir d'un devis" } : null,
-    analyses ? { id: "photo", icone: Camera, texte: "Une photo", label: "Partir d'une photo" } : null,
+    analyses ? { id: "devis", icone: FileText, texte: "Devis", label: "Partir d'un devis" } : null,
+    analyses ? { id: "photo", icone: Camera, texte: "Photo", label: "Partir d'une photo" } : null,
     dictee ? { id: "dictee", icone: Mic, texte: "Dicter", label: "Dicter ma liste" } : null,
   ].filter((a): a is NonNullable<typeof a> => a !== null);
   return (
     <section aria-labelledby="zone-quantitatif" className="accueil-apparait overflow-hidden rounded-[20px] bg-surface shadow-card lg:flex lg:h-full lg:flex-col">
       <div className="relative">
-        <Photo photo={photo} prioritaire tailles="(min-width: 1024px) 640px, 100vw" className="aspect-[16/9] w-full object-cover lg:aspect-[16/10]" />
+        <Photo photo={photo} prioritaire tailles="(min-width: 1024px) 640px, 100vw" className="aspect-[16/10] w-full object-cover" />
         <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4 lg:p-6">
           <h2 id="zone-quantitatif" className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.02em] text-white text-balance lg:text-[34px]">
             Nouveau quantitatif
           </h2>
-          <p className="text-[15px] leading-snug text-white/90 lg:text-[17px]">Ta liste de matériaux, prête pour tes négoces.</p>
+          <p className="text-[15px] leading-snug text-white/90 lg:text-[17px]">Ta liste prête pour tes négoces.</p>
         </div>
       </div>
       <div className="flex flex-col gap-3 p-4 lg:flex-1 lg:justify-end lg:p-6">
@@ -251,7 +251,7 @@ function ZoneQuantitatif({ photo, analyses }: { photo: PhotoAccueil; analyses: b
         {acces.length > 0 ? (
           <div role="group" aria-label="Autres façons de commencer" className="grid gap-2" style={{ gridTemplateColumns: `repeat(${acces.length}, minmax(0, 1fr))` }}>
             {acces.map(({ id, icone: Icone, texte, label }) => (
-              <Link key={id} href={`/chantiers/nouveau?mode=assistant&entree=${id}`} aria-label={label} className="pressable flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-line px-2 text-[14px] font-bold text-ink">
+              <Link key={id} href={`/chantiers/nouveau?mode=assistant&entree=${id}`} aria-label={label} className="pressable flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-line px-2 text-[14px] font-bold whitespace-nowrap text-ink">
                 <Icone size={18} aria-hidden="true" />
                 {texte}
               </Link>
@@ -265,7 +265,7 @@ function ZoneQuantitatif({ photo, analyses }: { photo: PhotoAccueil; analyses: b
 
 function EnTeteZone({ id, titre, href, lien, label }: { id: string; titre: string; href?: string; lien?: string; label?: string }) {
   return (
-    <div className="flex items-end justify-between gap-3">
+    <div className="flex items-center justify-between gap-3">
       <h2 id={id} className="text-[20px] leading-tight font-extrabold tracking-[-0.02em]">
         {titre}
       </h2>
@@ -373,18 +373,17 @@ function ZoneGroupes({ ouverts, metiers }: { ouverts: { zone: { code: string; no
           </Link>
         </div>
         <div className="flex items-end justify-between gap-3 p-4">
-          <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <p className="truncate text-[17px] leading-tight font-extrabold">{achat.nom}</p>
             <p className="text-[14px] leading-snug text-muted">{phraseGroupe(achat.resume)}</p>
             {chrono ? (
-              <p className="flex items-center gap-1.5 text-[14px] font-bold" aria-live="off">
+              <p className="flex items-center gap-1.5 text-[14px] font-bold whitespace-nowrap" aria-live="off">
                 {clos ? (
                   "Clôturé"
                 ) : (
                   <>
                     <span className="size-2 rounded-full bg-accent" aria-hidden="true" />
-                    <span className="sr-only">Se termine dans</span>
-                    <span aria-hidden="true">Se termine dans</span> <span className="tabular-nums">{chrono.texte}</span>
+                    Ferme dans <span className="tabular-nums">{chrono.texte}</span>
                   </>
                 )}
               </p>

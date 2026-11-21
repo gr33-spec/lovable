@@ -20,6 +20,6 @@ Greg, 20 novembre 2026. L'accueil est photographique : une photo du métier pour
 | Fichier | Ce qu'elle montre | Auteur | Licence | Source |
 |---|---|---|---|---|
 | `quantitatif-couvreur-*` | Un couvreur assis sur une planche de toit, ardoise et marteau en main, ardoises en piles. Recadrée sans le visage. | Karora | Domaine public | [Slater at work, Rothesay, Isle of Bute](https://commons.wikimedia.org/wiki/File:Slater_at_work,_Rothesay,_Isle_of_Bute.jpg) |
-| `groupes-artisans-*` | Trois couvreurs casqués travaillent ensemble sur un toit en tuiles. Recadrée sans la brouette marquée. | AUTEUR_DENVER | CC BY 3.0 | [Roofers in Denver Colorado](https://commons.wikimedia.org/wiki/File:Roofers_in_Denver_Colorado.jpg) |
+| `groupes-artisans-*` | Trois couvreurs casqués travaillent ensemble sur un toit en tuiles. Recadrée sans la brouette marquée. | David Shankbone | CC BY 3.0 | [Roofers in Denver Colorado](https://commons.wikimedia.org/wiki/File:Roofers_in_Denver_Colorado.jpg) |
 
 Candidates écartées : « The Collyweston Slater » (une enseigne de pub) ; « Roofers (50631209332) » (CC0, mais visages reconnaissables) ; « Two roofers at work, New Orleans » (vieux toit abîmé, pas en sécurité) ; « Marking off a slate » (trop petite).
