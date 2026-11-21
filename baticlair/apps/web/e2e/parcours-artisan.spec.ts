@@ -1135,8 +1135,9 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await gouttiere.getByRole("textbox").fill("Gouttière zinc demi-ronde rouge");
   await gouttiere.getByRole("button", { name: "OK" }).click();
   await expect(list.getByRole("button", { name: /^(Modifier|Fermer) : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
-  // §50.5 : la quantité reste celle du calcul, en unité commandable (20 ml → 5 longueurs de 4 m).
-  await expect(list.getByText(/^5 longueurs de 4 m$/).filter({ visible: true }).first()).toBeVisible();
+  // §50.5 : la quantité reste celle du calcul, en unité commandable. Règle changée (Greg, 21 novembre 2026) : 30 mm par
+  // jonction soudée d'une gouttière zinc ; 20 ml font 6 longueurs de 4 m (avant : 5).
+  await expect(list.getByText(/^6 longueurs de 4 m$/).filter({ visible: true }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
