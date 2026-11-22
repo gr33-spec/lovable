@@ -25,7 +25,8 @@ export class BoiteService {
     const [conversations, emails, reponses, lues, alertes, site] = await Promise.all([
       missions ? this.missions.conversations(t, "toutes").then((r) => r.items) : [],
       this.prisma.emailRecuArtisan.findMany({
-        where: { companyId: t.companyId },
+        // Les indésirables n'entrent jamais dans la boîte (Greg, 22 novembre 2026).
+        where: { companyId: t.companyId, indesirable: false },
         orderBy: { recuLe: "desc" },
         take: 150,
         select: { id: true, de: true, objet: true, texte: true, recuLe: true, luLe: true, projectId: true, fichiers: { select: { nom: true } }, recipient: { select: { supplier: { select: { name: true } }, priceRequest: { select: { project: { select: { name: true } } } } } } },

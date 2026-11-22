@@ -67,7 +67,11 @@ describe("contact@mobiiz.fr arrive chez l'admin", () => {
     expect(lus).toEqual(["em_1"]);
     const m = ctx.emails.sent.at(-1)!;
     expect(m.to).toBe("greg@example.fr");
-    expect(m.subject).toBe("[contact@mobiiz.fr] Une question sur l'abonnement");
+    // Greg, 22 novembre 2026 : un message externe n'est jamais habillé en Mobiiz : objet « [Externe] », bandeau, aucun logo.
+    expect(m.subject).toBe("[Externe] Une question sur l'abonnement");
+    expect(m.text).toContain("Message externe, non vérifié par Mobiiz");
+    expect(m.text).toContain("À : contact@mobiiz.fr");
+    expect(m.externe).toBe(true);
     expect(m.text).toContain("De : Jean Client <jean@example.org>");
     expect(m.text).toContain("combien coûte l'abonnement annuel ?");
     expect(m.replyTo).toBe("jean@example.org");
@@ -77,7 +81,7 @@ describe("contact@mobiiz.fr arrive chez l'admin", () => {
   it("l'ancienne adresse bonjour@ aussi ; une autre adresse du domaine, non", async () => {
     const bonjour = recu("bonjour@mobiiz.fr");
     expect((await request(ctx.app.getHttpServer()).post("/v1/webhooks/resend").set(signe(bonjour)).send(bonjour)).body).toEqual({ traite: true });
-    expect(ctx.emails.sent.at(-1)!.subject).toContain("[bonjour@mobiiz.fr]");
+    expect(ctx.emails.sent.at(-1)!.text).toContain("À : bonjour@mobiiz.fr");
     // Relecture du 30 octobre 2026 : une adresse de réponse de lot n'est jamais prise pour celle d'un artisan (ni mise de
     // côté) ; une autre adresse inconnue du domaine est mise de côté pour l'admin.
     const lot = recu("lot-12@mobiiz.fr");

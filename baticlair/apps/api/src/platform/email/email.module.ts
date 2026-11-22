@@ -8,6 +8,8 @@ import { ChannelAlerter } from "../alerts/alerter.js";
 import { PrismaService } from "../database/prisma.service.js";
 import { ALERTER, CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../tokens.js";
 import { EnveloppeSeule, LecteurEmailRecuDeTest, ResendLecteurEmailRecu } from "./contact-entrant.js";
+import { JournalEntrants } from "./journal-entrants.js";
+import type { Alerter } from "../alerts/alerter.js";
 import type { TransactionalEmailSender } from "./email.port.js";
 import { CapturingEmailSender } from "./capturing-email.sender.js";
 import { ConsoleEmailSender } from "./console-email.sender.js";
@@ -66,8 +68,10 @@ export const RELAIS_EMAIL = Symbol("RELAIS_EMAIL");
     { provide: ReglageMissions, useFactory: (p: PrismaService, c: AppConfig) => new ReglageMissions(p, c.missionsV1), inject: [PrismaService, CONFIG] },
     // Les plafonds cachés des abonnés (Greg, 15 novembre 2026), réglés dans l'admin.
     { provide: ReglagePlafondsIa, useFactory: (p: PrismaService) => new ReglagePlafondsIa(p), inject: [PrismaService] },
+    // Le journal des e-mails entrants (Greg, 22 novembre 2026) : verdicts, liste de l'admin, volume anormal.
+    { provide: JournalEntrants, useFactory: (p: PrismaService, a: Alerter, l: AppLogger) => new JournalEntrants(p, a, l), inject: [PrismaService, ALERTER, LOGGER] },
     { provide: AdresseAlerte, useFactory: (p: PrismaService, c: AppConfig, e: TransactionalEmailSender) => new AdresseAlerte(p, c, e), inject: [PrismaService, CONFIG, EMAIL_SENDER] },
   ],
-  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU, RELAIS_EMAIL, AdresseAlerte, ReglageMissions, ReglagePlafondsIa],
+  exports: [EMAIL_SENDER, ALERTER, EMAIL_RECU, RELAIS_EMAIL, AdresseAlerte, ReglageMissions, ReglagePlafondsIa, JournalEntrants],
 })
 export class EmailModule {}

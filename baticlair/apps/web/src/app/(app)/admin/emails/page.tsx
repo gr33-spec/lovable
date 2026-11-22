@@ -27,6 +27,7 @@ export default function AdminEmailsPage() {
       <PageTitle>E-mails mis de côté</PageTitle>
       <PorteAdmin>
         <Liste />
+        <Bloques />
       </PorteAdmin>
     </div>
   );
@@ -83,5 +84,61 @@ function Ligne({ m, onFait }: { m: MisDeCote; onFait: () => void }) {
         Rattacher
       </Button>
     </Card>
+  );
+}
+
+interface Bloque {
+  id: string;
+  adresse: string;
+  de: string;
+  objet: string;
+  raisons: string[];
+  piecesBloquees: string[];
+  spf: string | null;
+  dkim: string | null;
+  dmarc: string | null;
+  recuLe: string;
+}
+
+/**
+ * LES E-MAILS BLOQUÉS (Greg, 22 novembre 2026 : « rien n'est supprimé en silence ») : chaque message jugé suspect sur
+ * contact@ ou une adresse Mobiiz, avec sa raison et le verdict SPF, DKIM, DMARC du serveur de réception.
+ */
+function Bloques() {
+  const charger = useCallback((signal: AbortSignal) => api<{ items: Bloque[] }>("/v1/admin/emails-mis-de-cote/bloques", { signal }), []);
+  const { data, error, reload } = useResource(charger);
+  return (
+    <section aria-label="E-mails bloqués" className="mt-6 flex flex-col gap-3">
+      <h2 className="text-[20px] font-extrabold">E-mails bloqués</h2>
+      <p className="text-[14px] text-muted">Messages suspects reçus sur contact@ ou une adresse Mobiiz : jamais renvoyés, jamais rangés dans une demande.</p>
+      {error ? (
+        <ErrorNotice error={error} onRetry={reload} />
+      ) : !data ? (
+        <Spinner />
+      ) : data.items.length === 0 ? (
+        <Card className="p-5 text-[16px]">Aucun e-mail bloqué.</Card>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {data.items.map((m) => (
+            <li key={m.id}>
+              <Card className="flex flex-col gap-1.5 p-4">
+                <p className="text-[14px] text-muted">
+                  À <strong className="text-ink">{m.adresse}</strong> · de {m.de} · {new Date(m.recuLe).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}
+                </p>
+                <p className="text-[16px] font-bold">{m.objet || "Sans objet"}</p>
+                <ul className="list-disc pl-5 text-[14px] text-danger">
+                  {m.raisons.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+                <p className="text-[13px] text-muted">
+                  SPF : {m.spf ?? "inconnu"} · DKIM : {m.dkim ?? "inconnu"} · DMARC : {m.dmarc ?? "inconnu"}
+                </p>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

@@ -1,5 +1,7 @@
 import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur } from "@baticlair/domain";
-import { alertePropositionNegoce } from "@baticlair/domain";
+import { alertePropositionNegoce, BANDEAU_EXTERNE, liensDesactives, objetExterne } from "@baticlair/domain";
+import { verdictDuRecu } from "../../../platform/email/contact-entrant.js";
+import type { JournalEntrants } from "../../../platform/email/journal-entrants.js";
 import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import type { EmailRecu, LecteurEmailRecu } from "../../../platform/email/contact-entrant.js";
@@ -61,6 +63,8 @@ export class ReponsesRecuesService {
     private readonly now: () => Date = () => new Date(),
     /** Les adresses d'envoi de l'application (contact@, l'adresse de réponse) : un e-mail parti d'elles n'est jamais repris. */
     private readonly adressesInternes: readonly string[] = [],
+    /** Le journal des entrants (Greg, 22 novembre 2026) : verdict, liste de l'admin, volume anormal. */
+    private readonly journal: JournalEntrants | null = null,
   ) {}
 
   /** Le webhook : null quand l'e-mail ne vise aucune adresse Mobiiz (la suite du routage décide). */
@@ -130,11 +134,17 @@ export class ReponsesRecuesService {
       attachments: [],
       tropLourdes: [],
     };
-    const destinataire = await this.demandeVisee(companyId, cible.etiquette ?? etiquetteDansObjet(evenement.subject ?? "") ?? etiquetteDansObjet(recu.subject));
+    // LE FILTRE (Greg, 22 novembre 2026) : SPF, DKIM et DMARC du serveur de réception, pièces jointes, usurpation de
+    // Mobiiz. Suspect : en Indésirables, jamais rattaché à une demande, aucune alerte ; noté pour l'admin.
+    const verdict = verdictDuRecu(recu, this.domaine);
+    await this.journal?.noter({ adresse: `${cible.adresse}@${this.domaine}`, companyId, recu, verdict, emailId: evenement.email_id ?? null }).catch((err: unknown) => this.logger.warn({ err }, "adresse mobiiz: journal des entrants indisponible"));
+    // Une réponse de négoce ne passe pour telle que si elle se rattache à une vraie demande de CET artisan (étiquette).
+    const destinataire = verdict.suspect ? null : await this.demandeVisee(companyId, cible.etiquette ?? etiquetteDansObjet(evenement.subject ?? "") ?? etiquetteDansObjet(recu.subject));
     const fichiers: { nom: string; type: string; contenu: Uint8Array }[] = [];
     const tropLourdes = [...recu.tropLourdes];
     let total = 0;
     for (const p of recu.attachments) {
+      if (verdict.piecesBloquees.includes(p.filename)) continue;
       const contenu = new Uint8Array(Buffer.from(p.contentBase64, "base64"));
       if (total + contenu.length > RECU_MAX_OCTETS) {
         tropLourdes.push(p.filename);
@@ -154,25 +164,55 @@ export class ReponsesRecuesService {
         texte: recu.text ?? texteDuHtml(recu.html),
         recuLe: dateLisible(recu.date, this.now()),
         tropLourdes,
+        indesirable: verdict.suspect,
+        indesirablePar: verdict.suspect ? "mobiiz" : null,
+        raisons: verdict.raisons,
+        authentifie: verdict.authentifie,
+        piecesBloquees: verdict.piecesBloquees,
         fichiers: { create: fichiers.map((f) => ({ nom: f.nom, type: f.type, taille: f.contenu.length, contenu: new Uint8Array(f.contenu) })) },
       },
       include: { fichiers: { select: { id: true, nom: true, type: true } } },
     });
+    if (verdict.suspect) {
+      this.logger.warn({ adresse: cible.adresse, raisons: verdict.raisons }, "adresse mobiiz: e-mail suspect mis en indésirables");
+      return { traite: true, id: email.id, rattache: false, indesirable: true };
+    }
     let rattache = false;
     if (destinataire) rattache = await this.devisDepuisPdf(companyId, destinataire.id, email.id);
     const negoce = destinataire?.supplier.name ?? nomExpediteur(from);
     const url = destinataire ? `/chantiers/${destinataire.priceRequest.projectId}#fournisseurs` : "/recus";
-    const copie = (recu.text ?? "").trim().slice(0, 4000);
+    const copie = liensDesactives(recu.text ?? "").trim().slice(0, 4000);
     const pieces = email.fichiers.map((f) => f.nom);
     // LA CLOCHE (Greg, 10 novembre 2026) : une alerte courte, une seule par e-mail (un webhook rejoué n'en écrit pas deux).
-    await ecrireAlerte(this.prisma, companyId, alertePropositionNegoce({ emailId: email.id, negoce, chantier: null })).catch(() => false);
+    // Seule une réponse rattachée à une vraie demande se dit « réponse de négoce » ; le reste est un message reçu.
+    if (destinataire) await ecrireAlerte(this.prisma, companyId, alertePropositionNegoce({ emailId: email.id, negoce, chantier: null })).catch(() => false);
     await this.notifications
       .prevenir(
         companyId,
-        { titre: `${negoce} t'a répondu`, corps: destinataire ? "Sa réponse est sur ton chantier, dans Mobiiz." : "Son e-mail est dans tes reçus, dans Mobiiz.", url, etiquette: `recu-${email.id}` },
-        // Greg, 14 novembre 2026 : la réponse du négoce est COPIÉE sur la vraie adresse de l'artisan (son message en entier,
-        // le nom de ses pièces jointes), plus le lien. Avant : seulement « X t'a répondu » et un lien.
-        { objet: `${negoce} t'a répondu par e-mail`, texte: [`${negoce} t'a écrit à ton adresse ${NOM_APP} (objet : ${recu.subject || "sans objet"}).`, "", ...(copie ? ["Son message :", copie, ""] : []), ...(pieces.length ? [`Pièce${pieces.length > 1 ? "s" : ""} jointe${pieces.length > 1 ? "s" : ""} (à ouvrir dans ${NOM_APP}) : ${pieces.join(", ")}`, ""] : []), `${destinataire ? "Sa réponse est sur ton chantier" : "Son e-mail est dans tes reçus"} : ${this.notifications.lienVers(url)}`, "", NOM_APP].join("\n") },
+        destinataire
+          ? { titre: `${negoce} t'a répondu`, corps: "Sa réponse est sur ton chantier, dans Mobiiz.", url, etiquette: `recu-${email.id}` }
+          : { titre: "Nouveau message reçu", corps: `Un message de ${adresseNue(from)} est dans tes reçus, dans Mobiiz.`, url, etiquette: `recu-${email.id}` },
+        // Greg, 14 novembre 2026 : la réponse est COPIÉE sur la vraie adresse de l'artisan (son message, le nom de ses pièces
+        // jointes, le lien). Greg, 22 novembre 2026 : jamais habillée en Mobiiz : bandeau « Message externe », expéditeur
+        // réel, objet « [Externe] », liens non cliquables, aucun logo.
+        {
+          objet: objetExterne(destinataire ? `${negoce} t'a répondu par e-mail` : recu.subject),
+          externe: true,
+          texte: [
+            `${BANDEAU_EXTERNE}.`,
+            verdict.authentifie ? "Expéditeur authentifié par son domaine." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.",
+            "",
+            `De : ${from}`,
+            `À : ton adresse ${NOM_APP} (${cible.adresse}@${this.domaine})`,
+            `Objet : ${recu.subject || "(sans objet)"}`,
+            ...(destinataire ? [`Demande : ${destinataire.supplier.name}`] : []),
+            "",
+            ...(copie ? [copie, ""] : []),
+            ...(pieces.length ? [`Pièce${pieces.length > 1 ? "s" : ""} jointe${pieces.length > 1 ? "s" : ""} (à ouvrir dans ${NOM_APP}) : ${pieces.join(", ")}`, ""] : []),
+            ...(verdict.piecesBloquees.length ? [`Pièces jointes retenues (dangereuses) : ${verdict.piecesBloquees.join(", ")}`, ""] : []),
+            `Lire dans ${NOM_APP} : ${this.notifications.lienVers(url)}`,
+          ].join("\n"),
+        },
       )
       .catch((err: unknown) => this.logger.warn({ err }, "adresse mobiiz: artisan non prévenu"));
     this.logger.info({ adresse: cible.adresse, rattache }, "adresse mobiiz: e-mail reçu");
@@ -248,7 +288,7 @@ export class ReponsesRecuesService {
 
   async lister(tenant: TenantContext, projectId?: string): Promise<EmailRecuVue[]> {
     const liste = await this.prisma.emailRecuArtisan.findMany({
-      where: { companyId: tenant.companyId, ...(projectId ? { projectId } : {}) },
+      where: { companyId: tenant.companyId, indesirable: false, ...(projectId ? { projectId } : {}) },
       orderBy: [{ recuLe: "desc" }, { createdAt: "desc" }],
       take: 200,
       include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } } },

@@ -8,7 +8,7 @@ import { NOM_APP } from "@baticlair/domain";
  * Au plus une alerte par sorte toutes les 10 minutes (une panne ne noie pas la messagerie) ;
  * jamais de donnée de client dans le message (pas de devis, pas de nom de chantier).
  */
-export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage" | "paiement_refuse" | "negoce_a_verifier" | "conso_ia";
+export type AlertKind = "server_error" | "ai_reading_failed" | "client_error" | "commande_commune" | "reprise_echouee" | "stockage" | "paiement_refuse" | "negoce_a_verifier" | "conso_ia" | "email_entrant";
 
 export interface Alerter {
   readonly enabled: boolean;
@@ -30,6 +30,8 @@ const TITLES: Record<AlertKind, string> = {
   /** Greg, 14 novembre 2026 : un paiement d'abonnement refusé, un négoce inscrit qui attend sa vérification. */
   paiement_refuse: "Paiement refusé",
   negoce_a_verifier: "Négoce en attente de vérification",
+  /** Greg, 22 novembre 2026 : une adresse (contact@ ou une adresse Mobiiz) reçoit un volume anormal d'e-mails. */
+  email_entrant: "E-mails entrants à surveiller",
 };
 
 export const ALERT_QUIET_MS = 10 * 60 * 1000;

@@ -1,3 +1,4 @@
+import { BANDEAU_EXTERNE, liensDesactives, objetExterne, pieceDangereuse, verdictEntrant, type Authentification, type VerdictEntrant } from "@baticlair/domain";
 import type { AppLogger } from "../logging/logger.js";
 import type { TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
 
@@ -17,6 +18,13 @@ export interface EmailRecu {
   attachments: { filename: string; contentType: string; contentBase64: string }[];
   /** Pièces trop lourdes pour être renvoyées : nommées dans le texte, à lire dans Resend. */
   tropLourdes: string[];
+  /**
+   * Le verdict SPF, DKIM et DMARC du serveur de réception (Resend, `authentication`) : l'expéditeur ne peut pas l'écrire.
+   * Absent quand le message n'a pas pu être relu.
+   */
+  authentification?: Authentification | null;
+  /** Pièces jointes dangereuses, jamais téléchargées (Greg, 22 novembre 2026) : seulement leur nom. */
+  piecesRetenues?: string[];
 }
 
 export interface LecteurEmailRecu {
@@ -44,15 +52,21 @@ export class ResendLecteurEmailRecu implements LecteurEmailRecu {
       this.logger.error({ status: res.status }, "resend: e-mail reçu illisible");
       return null;
     }
-    const e = (await res.json()) as { from?: string; to?: string[]; subject?: string; created_at?: string; text?: string | null; html?: string | null };
+    const e = (await res.json()) as { from?: string; to?: string[]; subject?: string; created_at?: string; text?: string | null; html?: string | null; authentication?: Authentification | null; headers?: Record<string, string> };
     const attachments: EmailRecu["attachments"] = [];
     const tropLourdes: string[] = [];
+    const piecesRetenues: string[] = [];
     const liste = await this.fetchImpl(`https://api.resend.com/emails/receiving/${id}/attachments`, { headers: auth, signal: AbortSignal.timeout(10_000) });
     if (liste.ok) {
       const pieces = ((await liste.json()) as { data?: { filename?: string; content_type?: string; size?: number; download_url?: string }[] }).data ?? [];
       let total = 0;
       for (const p of pieces) {
         const nom = p.filename ?? "piece-jointe";
+        // Une pièce dangereuse (exécutable, archive, macro) n'est jamais téléchargée : seul son nom reste.
+        if (pieceDangereuse(nom, p.content_type ?? "")) {
+          piecesRetenues.push(nom);
+          continue;
+        }
         if (!p.download_url || total + (p.size ?? 0) > PIECES_MAX_OCTETS) {
           tropLourdes.push(nom);
           continue;
@@ -67,7 +81,9 @@ export class ResendLecteurEmailRecu implements LecteurEmailRecu {
         attachments.push({ filename: nom, contentType: p.content_type ?? "application/octet-stream", contentBase64: octets.toString("base64") });
       }
     }
-    return { from: e.from ?? "", to: e.to ?? [], subject: e.subject ?? "", date: e.created_at ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments, tropLourdes };
+    // Le nom affiché de l'expéditeur vit dans l'en-tête (le champ `from` est l'adresse nue).
+    const from = e.headers?.from ?? e.from ?? "";
+    return { from, to: e.to ?? [], subject: e.subject ?? "", date: e.created_at ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments, tropLourdes, authentification: e.authentication ?? null, piecesRetenues };
   }
 }
 
@@ -93,7 +109,10 @@ export class LecteurEmailRecuDeTest implements LecteurEmailRecu {
     const e = this.prochain;
     this.prochain = null;
     if (!e) return Promise.resolve(null);
-    return Promise.resolve({ from: e.from ?? "", to: e.to ?? [], subject: e.subject ?? "", date: e.date ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments: e.attachments ?? [], tropLourdes: e.tropLourdes ?? [] });
+    // Comme Resend : une pièce dangereuse n'est jamais « téléchargée », seul son nom reste.
+    const pieces = e.attachments ?? [];
+    const retenues = pieces.filter((p) => pieceDangereuse(p.filename, p.contentType)).map((p) => p.filename);
+    return Promise.resolve({ from: e.from ?? "", to: e.to ?? [], subject: e.subject ?? "", date: e.date ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments: pieces.filter((p) => !retenues.includes(p.filename)), tropLourdes: e.tropLourdes ?? [], authentification: e.authentification ?? null, piecesRetenues: [...(e.piecesRetenues ?? []), ...retenues] });
   }
 }
 
@@ -102,24 +121,55 @@ export function adresseNue(s: string): string {
   return (/<([^>]+)>/.exec(s)?.[1] ?? s).trim().toLowerCase();
 }
 
-const echapper = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+/** Le verdict d'un message relu (Greg, 22 novembre 2026) : authentification, pièces jointes, usurpation du domaine. */
+export function verdictDuRecu(recu: EmailRecu, domaineApp: string | null): VerdictEntrant {
+  const pieces = [...recu.attachments.map((p) => ({ nom: p.filename, type: p.contentType })), ...(recu.piecesRetenues ?? []).map((nom) => ({ nom }))];
+  return verdictEntrant({ de: recu.from, authentification: recu.authentification ?? null, pieces, domaineApp });
+}
 
-/** L'e-mail de renvoi : l'en-tête d'origine, puis le corps tel que reçu ; « Répondre » écrit à l'expéditeur. */
-export function emailDeRenvoi(recu: EmailRecu, adresse: string, vers: string): TransactionalEmail {
-  const entete = [`De : ${recu.from}`, `À : ${adresse}`, `Reçu le : ${new Date(recu.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, `Objet : ${recu.subject || "(sans objet)"}`];
+/** Le texte d'un e-mail reçu (texte, sinon le HTML dépouillé de ses balises). */
+export function texteRecu(recu: Pick<EmailRecu, "text" | "html">): string {
+  return (
+    recu.text ??
+    (recu.html
+      ? recu.html
+          .replace(/<style[\s\S]*?<\/style>/gi, "")
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<br\s*\/?>/gi, "\n")
+          .replace(/<\/p>/gi, "\n\n")
+          .replace(/<[^>]+>/g, "")
+          .replace(/&nbsp;/g, " ")
+          .trim()
+      : "(e-mail sans texte)")
+  );
+}
+
+/**
+ * Le renvoi d'un message externe (Greg, 22 novembre 2026 : « ne jamais habiller un message externe en Mobiiz ») :
+ * le bandeau « Message externe, non vérifié par Mobiiz », l'expéditeur réel, l'objet préfixé « [Externe] », le texte
+ * seul avec ses liens non cliquables, aucune page HTML de l'expéditeur, aucun logo (`externe`), seulement les pièces
+ * jointes sûres. « Répondre » écrit à l'expéditeur réel.
+ */
+export function emailDeRenvoi(recu: EmailRecu, adresse: string, vers: string, verdict: VerdictEntrant = verdictDuRecu(recu, null)): TransactionalEmail {
+  const verification = verdict.authentifie ? "Expéditeur authentifié par son domaine (DMARC)." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.";
+  const entete = [`${BANDEAU_EXTERNE}.`, verification, "", `De : ${recu.from}`, `À : ${adresse}`, `Reçu le : ${new Date(recu.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, `Objet : ${recu.subject || "(sans objet)"}`];
   const lourdes = recu.tropLourdes.length ? [`Pièces jointes trop lourdes, à lire dans Resend : ${recu.tropLourdes.join(", ")}`] : [];
-  const corps = recu.text ?? (recu.html ? recu.html.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim() : "(e-mail sans texte)");
+  const retenues = verdict.piecesBloquees.length ? [`Pièces jointes retenues (dangereuses) : ${verdict.piecesBloquees.join(", ")}`] : [];
   const expediteur = adresseNue(recu.from);
+  const sures = recu.attachments.filter((p) => !verdict.piecesBloquees.includes(p.filename));
   return {
     to: vers,
-    subject: `[${adresse}] ${recu.subject || "(sans objet)"}`,
-    text: [...entete, ...lourdes, "", corps].join("\n"),
-    ...(recu.html ? { html: `<div style="font:13px sans-serif;color:#555;border-bottom:1px solid #ddd;padding-bottom:8px;margin-bottom:12px">${[...entete, ...lourdes].map(echapper).join("<br>")}</div>${recu.html}` } : {}),
-    ...(recu.attachments.length ? { attachments: recu.attachments } : {}),
+    subject: objetExterne(recu.subject),
+    text: [...entete, ...lourdes, ...retenues, "", liensDesactives(texteRecu(recu))].join("\n"),
+    externe: true,
+    ...(sures.length ? { attachments: sures } : {}),
     ...(expediteur.includes("@") ? { replyTo: expediteur } : {}),
     mustDeliver: true,
   };
 }
+
+/** Ce qu'il faut garder d'un message reçu sur contact@ (le journal des entrants, la liste de l'admin). */
+export type JournalEntrant = (e: { adresse: string; recu: EmailRecu; verdict: VerdictEntrant; emailId: string | null }) => Promise<void>;
 
 /** Le renvoi : rien si l'e-mail ne vise aucune adresse de contact, ou s'il vient de l'adresse qui reçoit (pas de boucle). */
 export async function renvoyerContact(
@@ -128,6 +178,8 @@ export async function renvoyerContact(
   lecteur: LecteurEmailRecu,
   envoi: TransactionalEmailSender,
   logger: AppLogger,
+  domaineApp: string | null = null,
+  journal: JournalEntrant = () => Promise.resolve(),
 ): Promise<{ traite: boolean; raison?: string } | null> {
   if (!contact) return null;
   const to = (Array.isArray(evenement.to) ? evenement.to : evenement.to ? [evenement.to] : []).map(adresseNue);
@@ -145,7 +197,14 @@ export async function renvoyerContact(
     attachments: [],
     tropLourdes: [],
   };
-  await envoi.send(emailDeRenvoi(recu, adresse, contact.vers));
+  const verdict = verdictDuRecu(recu, domaineApp);
+  await journal({ adresse, recu, verdict, emailId: evenement.email_id ?? null }).catch((err: unknown) => logger.warn({ err }, "contact: journal des entrants indisponible"));
+  // Suspect : rien n'est renvoyé ; le message reste dans la liste de l'admin (Indésirables), avec sa raison.
+  if (verdict.suspect) {
+    logger.warn({ adresse, raisons: verdict.raisons }, "contact: e-mail suspect mis en indésirables");
+    return { traite: true, raison: "indesirable" };
+  }
+  await envoi.send(emailDeRenvoi(recu, adresse, contact.vers, verdict));
   logger.info({ adresse }, "contact: e-mail renvoyé à l'admin");
   return { traite: true };
 }
