@@ -210,7 +210,7 @@ describe("business model final : le regroupement négocié par un humain", { tim
     expect(obs).toHaveLength(5);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const csv = (await greg.agent.get("/v1/admin/pilotage/observatoire.csv").expect(200)).text;
-    expect(csv.split("\n")[0]).toBe("article;libelle;prix_unitaire_ht;quantite;unite;palier;departement;date;type");
+    expect(csv.split("\n")[0]).toBe("article;libelle;prix_unitaire_ht;quantite;unite;palier;departement;date;type;statut;region");
     expect(csv).not.toMatch(/Négoce|Toitures|negoce\.fr/);
   });
 

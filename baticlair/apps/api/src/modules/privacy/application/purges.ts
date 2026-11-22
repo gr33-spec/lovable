@@ -21,6 +21,9 @@ export const DUREES = {
   archivesAns: 10,
   /** Les preuves d'acceptation : 5 ans après la fin du compte. */
   preuvesAns: 5,
+  /** L'observatoire des prix (Greg, 22 novembre 2026) : l'empreinte de la source effacée 12 mois après la clôture, la ligne supprimée à 3 ans. */
+  empreintePrixMois: 12,
+  lignePrixAns: 3,
 } as const;
 
 const PAQUET = 200;
@@ -62,6 +65,8 @@ export interface BilanPurge {
   preuves: number;
   reprises: number;
   evenementsWebhook: number;
+  empreintesPrix: number;
+  lignesPrix: number;
 }
 
 export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = new Date()): Promise<BilanPurge> {
@@ -105,7 +110,15 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
   const evenements = await prisma.evenementTraite.deleteMany({ where: { recuLe: { lt: ilYa(maintenant, { jours: 90 }) } } });
   const preuves = await prisma.preuveAcceptation.deleteMany({ where: { finCompteLe: { lt: ilYa(maintenant, { ans: DUREES.preuvesAns }) } } });
 
+  // L'observatoire des prix (Greg, 22 novembre 2026, ligne 23 du registre) : la date d'une ligne est celle de la réponse
+  // ou de l'offre, qui suit la clôture. 12 mois après, l'empreinte de la source est remplacée par une valeur qui ne mène
+  // plus au dossier d'origine (la ligne reste, pseudonymisée sans retour possible) ; à 3 ans, la ligne est supprimée.
+  const lignesPrix = await prisma.observationPrix.deleteMany({ where: { le: { lt: ilYa(maintenant, { ans: DUREES.lignePrixAns }) } } });
+  const empreintesPrix = await prisma.$executeRaw`UPDATE "observations_prix" SET "source" = 'efface:' || "id" WHERE "le" < ${ilYa(maintenant, { mois: DUREES.empreintePrixMois })} AND "source" NOT LIKE 'efface:%'`;
+
   return {
+    empreintesPrix,
+    lignesPrix: lignesPrix.count,
     negocesInactifs: inactifs.length,
     invitesEffaces: invites.length,
     fichiersDevis: fichiers.count,

@@ -2035,6 +2035,10 @@ model ObservationPrix {
   /// perso | groupe
   type           String
   source         String
+  /// propose | commande (Greg, 21 novembre 2026) : un prix proposé n'est pas un prix payé.
+  statut         String   @default("propose")
+  /// La région du département (repères par région).
+  region         String?
 
   @@unique([source, article])
   @@index([article, departement, le])

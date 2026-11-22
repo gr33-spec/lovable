@@ -96,7 +96,9 @@ accord explicite. Les conflits :
 
 ### Clous (en Suggestion, jamais d'office)
 - Galva (90 % des cas).
-- 1 clou par ardoise au faîtage, 2 à l'égout, au doublis et à la rive.
+- 2 clous par ardoise au dernier rang du faîtage (DTU 40.11 ; décision du
+  fondateur du 22 novembre 2026, avant : 1 clou), 2 à l'égout, au doublis et à
+  la rive.
 - Unité de vente : on la demande à l'artisan (voir Unités de vente).
 
 ## Tuile

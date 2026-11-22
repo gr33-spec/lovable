@@ -74,6 +74,8 @@ export interface PortsAchatsV1 {
   /** L'entreprise a-t-elle un abonnement payé en cours (Pro ou Pro Max) ? Absent : tout est ouvert (abonnement éteint). */
   abonne?(companyId: string): Promise<boolean>;
   lignesDeListe(tenant: TenantContext, projectId: string): Promise<{ nom: string; lignes: { key: string; designation: string; quantite: number | null; unite: string; aRegler: boolean }[] }>;
+  /** L'observatoire des prix (Greg, 21 novembre 2026) : l'offre (prix proposé) puis la commande (prix commandé), sans nom. */
+  observatoire?: { enregistrer(e: { type: "groupe"; sourceId: string; departement: string | null; statut: "propose" | "commande"; lignes: { designation: string; unite: string; quantite: number | null; prixHt: number }[] }): Promise<number> };
 }
 
 export interface BesoinSaisi {
@@ -613,6 +615,8 @@ export class AchatsGroupesV1Service {
     // Le mail est parti : la commande est notée (une seule fois, même sur deux appuis).
     const fait = await this.prisma.besoinGroupeV1.updateMany({ where: { id: b.id, companyId: tenant.companyId, offreDecision: null }, data: { offreDecision: "commandee", offreDecideeLe: maintenant } });
     if (fait.count > 0) await this.prisma.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: tenant.companyId, type: "offre_commandee", detail: { fournisseur: o.fournisseur, totalHt: vue.calcul.ht } } });
+    // L'observatoire : le prix de l'offre devient un prix commandé (sans nom d'entreprise ni de fournisseur). Jamais bloquant.
+    if (fait.count > 0) await this.ports.observatoire?.enregistrer({ type: "groupe", sourceId: `v1:${b.achat.id}`, departement: b.achat.departement, statut: "commande", lignes: [{ designation: b.achat.nom, unite: p.unite.singulier, quantite: null, prixHt: prix }] }).catch(() => undefined);
     // La copie pour l'artisan : complémentaire, jamais bloquante.
     await this.alerter(tenant.companyId, { titre: "Commande envoyée au négoce", detail: `${b.designation} · ${o.fournisseur}`, action: "Voir ma commande", href: `/achats-groupes/besoins/${b.id}`, cle: `ag-commande:${b.id}` });
     await this.envoyer(tenant.companyId, `Ta commande groupée : ${b.designation}`, [`C'est commandé chez ${o.fournisseur} : ${nombre} ${unite}, ${euros(vue.calcul.ht)} HT.`, `Le bon de commande est parti à ${o.fournisseurEmail}.`, "La facturation et le paiement se font directement entre vous."]);
@@ -879,6 +883,10 @@ export class AchatsGroupesV1Service {
     ]);
     // Greg, 14 novembre 2026 : l'e-mail d'offre part à l'artisan DÈS qu'elle arrive (avant : au passage de la tâche horaire).
     if (complete) await this.signalerLesOffres().catch(() => undefined);
+    // L'observatoire : le prix proposé de l'offre complète, sans le fournisseur ni les entreprises. Jamais bloquant.
+    const produit = produitV1(a.type);
+    if (complete && produit && offre.prixUnitaireHt !== null)
+      await this.ports.observatoire?.enregistrer({ type: "groupe", sourceId: `v1:${a.id}`, departement: a.departement, statut: "propose", lignes: [{ designation: a.nom, unite: produit.unite.singulier, quantite: null, prixHt: Number(offre.prixUnitaireHt) }] }).catch(() => undefined);
     return { id: a.id, statut: de, complete };
   }
 

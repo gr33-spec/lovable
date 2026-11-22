@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { prixObserve, referenceStricte, OBSERVATOIRE_MOIS } from "@baticlair/domain";
+import { prixObserve, referenceStricte, regionDe, OBSERVATOIRE_MOIS } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 
 /**
@@ -26,7 +26,11 @@ export class ObservatoireService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async enregistrer(e: { type: "perso" | "groupe"; sourceId: string; departement: string | null; lignes: { designation: string; unite: string; quantite: number | null; prixHt: number }[] }): Promise<number> {
+  /**
+   * Greg, 21 novembre 2026 (prix) : chaque prix noté dit s'il est PROPOSÉ (réponse, offre) ou COMMANDÉ, et garde la région
+   * du département. Une commande sur la même source passe ses lignes à « commande » (`commande`).
+   */
+  async enregistrer(e: { type: "perso" | "groupe"; sourceId: string; departement: string | null; statut?: "propose" | "commande"; lignes: { designation: string; unite: string; quantite: number | null; prixHt: number }[] }): Promise<number> {
     if (!e.departement) return 0;
     const source = empreinteSource(e.type, e.sourceId);
     const le = this.now();
@@ -36,12 +40,18 @@ export class ObservatoireService {
       const { article, libelle } = articleNormalise(l.designation, l.unite);
       await this.prisma.observationPrix.upsert({
         where: { source_article: { source, article } },
-        create: { article, libelle, prixUnitaireHt: l.prixHt, quantite: l.quantite, unite: l.unite, departement: e.departement, le, type: e.type, source },
-        update: { prixUnitaireHt: l.prixHt, quantite: l.quantite, le },
+        create: { article, libelle, prixUnitaireHt: l.prixHt, quantite: l.quantite, unite: l.unite, departement: e.departement, region: regionDe(e.departement), le, type: e.type, source, statut: e.statut ?? "propose" },
+        update: { prixUnitaireHt: l.prixHt, quantite: l.quantite, le, ...(e.statut ? { statut: e.statut } : {}) },
       });
       n++;
     }
     return n;
+  }
+
+  /** La commande passée sur une source déjà notée (une réponse, une offre) : ses prix deviennent des prix commandés. */
+  async commande(type: "perso" | "groupe", sourceId: string): Promise<number> {
+    const r = await this.prisma.observationPrix.updateMany({ where: { source: empreinteSource(type, sourceId) }, data: { statut: "commande" } });
+    return r.count;
   }
 
   /** « Prix observé dans le 22 : environ Y € » pour un article, ou null sous les seuils. */
@@ -85,7 +95,7 @@ export class ObservatoireService {
   async csv(): Promise<string> {
     const obs = await this.prisma.observationPrix.findMany({ orderBy: [{ le: "desc" }], take: 50_000 });
     const q = (v: string) => `"${v.replace(/"/g, '""')}"`;
-    const lignes = obs.map((o) => [q(o.article), q(o.libelle), String(o.prixUnitaireHt), o.quantite === null ? "" : String(o.quantite), q(o.unite), q(o.palier ?? ""), o.departement, o.le.toISOString().slice(0, 10), o.type].join(";"));
-    return ["article;libelle;prix_unitaire_ht;quantite;unite;palier;departement;date;type", ...lignes].join("\n");
+    const lignes = obs.map((o) => [q(o.article), q(o.libelle), String(o.prixUnitaireHt), o.quantite === null ? "" : String(o.quantite), q(o.unite), q(o.palier ?? ""), o.departement, o.le.toISOString().slice(0, 10), o.type, o.statut, q(o.region ?? "")].join(";"));
+    return ["article;libelle;prix_unitaire_ht;quantite;unite;palier;departement;date;type;statut;region", ...lignes].join("\n");
   }
 }
