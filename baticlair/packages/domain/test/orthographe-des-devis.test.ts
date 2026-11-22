@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cleDeSon, corrigerTexte, devisAuPropre, parseLecture, ROOFING_REFERENTIAL as ref, vocabulaireDuMetier } from "../src/index.js";
+import { cleDeSon, corrigerTexte, devisAuPropre, ecranDeLecture, parseLecture, ROOFING_REFERENTIAL as ref, vocabulaireDuMetier } from "../src/index.js";
 import { chantiers, noter, type Chantier } from "./banc-couverture.js";
 
 /**
@@ -57,6 +57,22 @@ describe("le devis remis au propre", () => {
     // La réponse de l'artisan remplace le mot ; « Non, c'est bien … » le garde.
     expect(corrigerTexte("Bandde de rive", v, [], { Bandde: "bande" })).toBe("Bande de rive");
     expect(corrigerTexte("Bandde de rive", v, [], { Bandde: "Bandde" })).toBe("Bandde de rive");
+  });
+
+  it("« Arretier » : l'arêtier (la ligne) ou l'arêtière (la tuile) ? Une question à l'écran ; la réponse corrige la ligne", () => {
+    const c = chantiers().find((x) => x.id === "C11")!;
+    const lecture = structuredClone(c.lecture) as { lignes: { designation: string }[] };
+    const i = lecture.lignes.findIndex((l) => /^Arêtier/i.test(l.designation));
+    expect(i).toBeGreaterThanOrEqual(0);
+    lecture.lignes[i]!.designation = lecture.lignes[i]!.designation.replace(/^Arêtiers?/i, "Arretier");
+    const l = parseLecture(lecture)!;
+    const e = ecranDeLecture({ ref, lecture: l, answers: {}, preferences: {} });
+    const q = e.questions.find((x) => x.key.startsWith("orthographe:"))!;
+    expect(q.text).toMatch(/^Tu as écrit « Arretier », c'est bien /);
+    expect(q.options?.at(-1)).toEqual({ label: "Non, c'est bien « Arretier »", value: "Arretier" });
+    const apres = ecranDeLecture({ ref, lecture: l, answers: { [q.key]: "arêtier" }, preferences: {} });
+    expect(apres.questions.some((x) => x.key.startsWith("orthographe:"))).toBe(false);
+    expect(devisAuPropre(ref, l, { [q.key]: "arêtier" }).lecture.lignes[i]!.designation).toMatch(/^Arêtier/);
   });
 
   const cinq = chantiers().filter((c) => ["C01", "C02", "C04", "C05", "C06", "C11"].includes(c.id));
