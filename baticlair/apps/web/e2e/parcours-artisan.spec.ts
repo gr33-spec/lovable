@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSortieDeVentilation, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -3729,9 +3729,6 @@ interface CommandeMoisApi {
 async function listePrete(page: Page, adresse: string, lignes: { libelle: string; quantite: string; unite: string }[]): Promise<string> {
   const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
   expect(q.status).toBe(201);
-  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
-  // (VMC, extraction d'air) » ; rien de coché, la liste reste telle qu'écrite (avant : aucune étape « Suggestions » ici).
-  await continuerSansSuggestionParApi(page, q.body.id);
   expect(await apiCall(page, "PATCH", `/v1/projects/${q.body.projetId}`, { address: adresse })).toBe(200);
   return q.body.projetId;
 }
@@ -4220,9 +4217,6 @@ test("Apprentissage (24 octobre 2026) : la même correction sur 2 chantiers s'ap
   }
   const l3 = await liste();
   await page.goto(`/chantiers/${l3.projetId}`);
-  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
-  // (VMC, extraction d'air) » avant la liste ; l'artisan ne coche rien et continue (avant : la liste s'ouvrait directement).
-  await continuerSansSortieDeVentilation(page);
   const fournitures = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(fournitures.getByText("Ardoise Cupa Heavy 32×22")).toBeVisible();
   await expect(fournitures.getByText("Ajusté selon tes habitudes")).toBeVisible();
@@ -4344,9 +4338,6 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   });
   await bouton.click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
-  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
-  // (VMC, extraction d'air) » avant la liste ; l'artisan ne coche rien et continue (avant : la liste s'ouvrait directement).
-  await continuerSansSortieDeVentilation(page);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible();
   await expect(page.getByText(/Faîtière ventilée terre cuite, modèle ancien/).first()).toBeVisible();
