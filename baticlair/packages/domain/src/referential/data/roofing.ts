@@ -912,6 +912,31 @@ const ARETIER_FERME_PARAM: ParamDef = {
   textValues: [{ value: "1", keywords: ["biaise", "biaises", "ferme", "aretier ferme"] }],
   default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "arêtier en bande zinc" },
 };
+/**
+ * CROCHETS D'ARDOISE : À AGRAFE OU À POINTE (Greg, 22 novembre 2026 : « quand le devis ne le dit pas, pose Agrafe ou
+ * pointe ? En pose à agrafe, ajoute quand même quelques crochets à pointe pour ceux qui tombent sur les chevrons »). Les
+ * mots du devis : recherche `referentiels/couverture/recherche/crochets-pointe-et-agrafe-2026-11-22.md`. « Tige droite »,
+ * « tige ondulée » ne disent que la forme de la tige, pas le type.
+ */
+const TYPE_CROCHET_PARAM: ParamDef = {
+  key: "type_crochet",
+  label: "Type de crochet",
+  unit: "u",
+  kind: "site_data",
+  question: "Agrafe ou pointe ?",
+  hint: "À agrafe : le crochet s'agrafe sur le liteau. À pointe : il se plante (volige, ou au droit des chevrons).",
+  // Une seule réponse pour tout le devis (le toit et ses jouées de lucarne), comme le pliage ; elle se change par pièce.
+  groupe: { id: "crochets-ardoise", question: "Tes crochets d'ardoise : à agrafe ou à pointe ?", hint: "À agrafe : on ajoute 1 crochet à pointe sur 5, pour ceux qui tombent sur les chevrons." },
+  choices: [
+    { label: "À agrafe", value: "1" },
+    { label: "À pointe", value: "2" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["agrafe", "a agrafe", "a agrafer", "tige agrafe", "crochet agrafe", "crochets agrafe", "pression", "ressort"] },
+    { value: "2", keywords: ["a pointe", "crochet pointe", "crochets pointe", "crochet a pointe", "crochets a pointe", "a piquer", "a pic", "passe chevron", "pour volige", "crochet double"] },
+  ],
+  display: { "1": "à agrafe", "2": "à pointe" },
+};
 const ARETIER_PARAM: ParamDef = {
   key: "aretier_matiere",
   label: "Arêtier",
@@ -1845,7 +1870,9 @@ export const ROOFING_REFERENTIAL: Referential = {
         "crochet galvanise ardoise",
         "crochet teinte ardoise",
       ],
-    },
+    },    // Greg, 22 novembre 2026 : le crochet à pointe, une autre pièce au comptoir (boîtes de 700).
+    { code: "slate_hook_pointe", label: "Crochet d'ardoise à pointe", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["crochet a pointe", "crochets a pointe", "crochet pointe", "crochets pointe"] },
+
     // Familles de VOCABULAIRE seulement (aucun produit ni règle encore) : elles évitent qu'une
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
@@ -2194,6 +2221,11 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("antivent-ardoise-fc", "slate_wind_hook", "Crochet d'antivent inox pour ardoise fibres-ciment", "Crochets d'antivent"),
     // Greg, 21 novembre 2026 : « Crochets d'ardoise : en boîtes, avec le nombre de pièces écrit sur la ligne. » Boîte de 500
     // (base couverture, crochets à agrafe de 7 à 14 cm ; règles métier : « vendus en boîte de 500 »). Avant : à la pièce.
+    // Greg, 22 novembre 2026 : boîtes de 700 pour le crochet à pointe Ø 2,7 de 7 à 14 cm (Chausson, Frénéhard ; recherche du
+    // 22 novembre). Le nombre de pièces s'écrit sur la ligne.
+    generic("crochet-ardoise-pointe", "slate_hook_pointe", "Crochet d'ardoise inox à pointe", "Crochets d'ardoise à pointe", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 700", many: "boîtes de 700" }, contains: packaging("700", "u", F, FOUNDER_DOC, "Crochets à pointe en boîtes de 700 (Greg, 22 novembre 2026 ; Chausson, Frénéhard)."), primary: true }],
+    }),
     generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 500", many: "boîtes de 500" }, contains: packaging("500", "u", F, FOUNDER_DOC, "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."), primary: true }],
     }),
@@ -2715,6 +2747,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         QUALITE_ARDOISE_PARAM,
         ...OUVRAGES_AU_METRE_ARDOISE,
         ARETIER_FERME_PARAM,
+        TYPE_CROCHET_PARAM,
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -2735,6 +2768,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         // Banc du calcul (C08, « ardoises identiques à l'existant ») : sans format écrit, le comptoir demande l'ardoise.
         { key: "ardoise", family: "roof_slate", label: "Ardoises", ask: "Quelle ardoise ? Donne son format." },
         { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"], usual: { text: "Un crochet inox par ardoise.", source: F, productId: "crochet-ardoise-standard" } },
+        // Les crochets à pointe : une autre pièce au comptoir (boîtes de 700), forme d'achat des crochets écrits.
+        { key: "crochet_pointe", family: "slate_hook_pointe", label: "Crochets d'ardoise à pointe", usual: { text: "Crochets à pointe : au droit des chevrons en pose à agrafe, tous sur volige.", source: F, productId: "crochet-ardoise-pointe" }, formOf: "crochet" },
         {
           key: "liteau",
           family: "batten",
@@ -2759,6 +2794,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         jeu_tete_crochet: deFiche("ardoise.jeu_de_tete_crochet"),
         // Greg, 21 novembre 2026 (soir), d'après le manuel du CAP couvreur : arêtier fermé 0,66 m² par mètre, les deux côtés
         // (26 ardoises 32×22 : « seulement le surplus ») ; noue zinc 0,50 m² par mètre (deux tranchis biais).
+        part_crochets_pointe: condition("0.2", "u", F, FOUNDER_DOC, "Pose à agrafe : 1 crochet à pointe sur 5 (manuel du CAP couvreur, ch. 21 ; une seule source chiffrée)."),
         sans_gouttiere: condition("0", "m", "definition", { status: "verified", verifiedAt: "2026-11-21", verifiedBy: "Mobiiz (définition)" }, "Aucune gouttière écrite au devis."),
         aretier_zinc_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Arêtier en bande zinc : 0,50 m² d'ardoise par mètre, comme la noue (Greg, 22 novembre 2026 ; deux tranchis biais, manuel du CAP couvreur)."),
         aretier_m2_par_ml: condition("0.66", "m2/m", F, FOUNDER_DOC, "Arêtier : 0,66 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
@@ -2831,16 +2867,51 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "crochets-ardoise",
           slot: "crochet",
           // Un crochet par ardoise COMMANDÉE (après sa marge), sans perte en plus (règle du fondateur, confirmée le 2026-11-19 :
-          // fiche couverture, ardoise.perte_crochets).
+          // fiche couverture, ardoise.perte_crochets). En pose à agrafe (Greg, 22 novembre 2026) : 4 sur 5 à agrafe, le
+          // cinquième à pointe (ligne à part) ; en pose à pointe, tous à pointe (ligne à part), aucun ici.
+          when: "type_crochet < 2",
+          formula: "arrondi_sup(commande.ardoises * (1 - regle.part_crochets_pointe))",
+          unit: "u",
+          core: true,
+          exclusions: "Un crochet par ardoise commandée (règle du fondateur) ; en pose à agrafe, 1 sur 5 à pointe au droit des chevrons.",
+          precision: "4 ardoises sur 5 (la cinquième au crochet à pointe)",
+          // Le comptoir sert un crochet à sa longueur (recouvrement + 3 mm arrondi au cm, fiche couverture) et à son diamètre.
+          designation: "Crochets d'ardoise inox à agrafe {diametre_crochet}, longueur {longueur_crochet|cm}",
+          source: "baticlair-geometrie-ardoise",
+          verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          // Tant que « Agrafe ou pointe ? » attend sa réponse : la ligne des crochets reste, un par ardoise commandée, orange,
+          // avec sa question (une ligne écrite ne disparaît jamais) ; la réponse la partage en agrafes et pointes.
+          id: "crochets-ardoise-a-preciser",
+          slot: "crochet",
+          when: "type_crochet < 1",
           formula: "commande.ardoises",
           unit: "u",
           core: true,
-          exclusions: "Un crochet par ardoise commandée (règle du fondateur) : jamais moins de crochets que d'ardoises.",
+          exclusions: "Un crochet par ardoise commandée ; à agrafe ou à pointe selon la réponse.",
           precision: "un par ardoise commandée",
-          // Le comptoir sert un crochet à sa longueur (recouvrement + 3 mm arrondi au cm, fiche couverture) et à son diamètre.
-          designation: "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
-          source: "baticlair-geometrie-ardoise",
-          verification: FOUNDER_VALIDATED,
+          designation: "Crochets d'ardoise inox {type_crochet} {diametre_crochet}, longueur {longueur_crochet|cm}",
+          precisionRequires: ["type_crochet"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "crochets-ardoise-pointe",
+          slot: "crochet_pointe",
+          // Greg, 22 novembre 2026. Pose à agrafe : 1 crochet à pointe sur 5 ardoises (manuel du CAP couvreur, ch. 21 :
+          // « 4/5 de crochets-agrafes ; 1/5 de crochets-pointes » ; UNE source chiffrée, la base couverture redit la même).
+          // Pose à pointe : un par ardoise commandée.
+          formula: "si(type_crochet < 2, arrondi_sup(commande.ardoises * regle.part_crochets_pointe), commande.ardoises)",
+          unit: "u",
+          core: true,
+          exclusions: "Pose à agrafe : 1 ardoise sur 5, au droit des chevrons ; pose à pointe : une par ardoise commandée.",
+          precision: "au droit des chevrons (1 ardoise sur 5) en pose à agrafe ; une par ardoise en pose à pointe",
+          designation: "Crochets d'ardoise inox à pointe {diametre_crochet}, longueur {longueur_crochet|cm}",
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {

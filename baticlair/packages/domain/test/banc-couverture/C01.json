@@ -382,6 +382,9 @@
   "param:longueur_crochet": {
    "valeur": "10",
    "unite": "cm"
+  },
+  "param:type_crochet@crochets-ardoise": {
+   "bouton": "À agrafe"
   }
  },
  "attendu": [
@@ -412,12 +415,23 @@
    "unite": "n"
   },
   {
-   "article": "Crochets d'ardoise",
+   "article": "Crochets à agrafe",
    "mots": [
     "crochet",
+    "agrafe",
     "!gouttiere"
    ],
-   "quantite": 9,
+   "quantite": 7,
+   "unite": "bt"
+  },
+  {
+   "article": "Crochets à pointe",
+   "mots": [
+    "crochet",
+    "pointe",
+    "!gouttiere"
+   ],
+   "quantite": 2,
    "unite": "bt"
   },
   {

@@ -1031,7 +1031,10 @@ function computeNeed(
       // le rampant fait 5,5 m) n'est pas un manque : elle ne doit ni s'afficher « inconnue » ni devenir une question.
       const missingBefore = missing.length;
       const w = evaluateInterval(parseFormula(rule.when), valueOf);
-      if (!isPoint(w) && missing[0]) throw new Stop({ status: "question", question: missing[0].question });
+      // Sauf pour la ligne « en attente » (calcul de la quantité seule) d'un besoin dont la donnée indécise ne fait que son
+      // article (`precisionRequires`) : la ligne reste, orange, avec sa question (les crochets avant « Agrafe ou pointe ? »).
+      const articleSeul = options.quantityOnly === true && missing[0] !== undefined && (rule.precisionRequires ?? []).includes(missing[0].key);
+      if (!isPoint(w) && missing[0] && !articleSeul) throw new Stop({ status: "question", question: missing[0].question });
       missing.splice(missingBefore);
     }
     const raw = evaluateInterval(expr, valueOf);
