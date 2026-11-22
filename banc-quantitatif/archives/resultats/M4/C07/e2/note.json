@@ -1,0 +1,26 @@
+{
+ "m": "M4",
+ "c": "C07",
+ "e": 2,
+ "nRef": 6,
+ "justes": 5,
+ "quantite": 0,
+ "manquantes": 1,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 1,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Plaques bac acier simple peau RAL 7016 avec feutre anti-condensation, longueur 6,05 m (26 pièces)"
+  ],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": []
+ }
+}

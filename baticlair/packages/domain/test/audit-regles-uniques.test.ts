@@ -46,6 +46,9 @@ const SECTION_OUVRAGE: Record<string, string> = {
   "couverture-tuiles-emboitement": "§5, §35",
   "couverture-tuiles-canal": "§5",
   "couverture-ardoises-crochet": "§3, §34",
+  // Greg, 21 novembre 2026 (soir) : le remaniage ne compte plus d'ardoises d'office. Pas encore de section à lui dans le
+  // référentiel du fondateur : rangé avec l'ardoise naturelle (§3).
+  "remaniage-ardoises": "§3",
   "couverture-ardoises-fibres-ciment": "§4",
   faitage: "§5",
   "faitage-zinc": "§1, §7",

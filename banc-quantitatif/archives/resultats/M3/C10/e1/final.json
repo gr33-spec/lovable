@@ -1,0 +1,332 @@
+{
+ "posees": [
+  {
+   "key": "param:support_sortie",
+   "text": "Sortie de toit : sur quelle couverture ?",
+   "options": [
+    "Ardoise ou tuile",
+    "Zinc"
+   ],
+   "reponse": "Ardoise ou tuile"
+  },
+  {
+   "key": "param:developpe",
+   "text": "Rives. de bandes de rive en zinc, développé 250. 4 rives de 5,50 m. : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "250 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran sous-toiture HPV",
+    "quantite": "110",
+    "unite": "m²",
+    "affiche": "110 m²",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Ardoises fibres-ciment",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "110 M2 au devis",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "product:ardoise"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Rives. de bandes de rive en zinc, développé 250. 4 rives de 5,50 m.",
+    "quantite": "22",
+    "unite": "ml",
+    "affiche": "22 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sortie de toit. d'une sortie de toit Ø100 pour évent., diamètre du conduit mm",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 100",
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux sapin traité",
+    "raison": "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier Mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente."
+  ],
+  "questions": [
+   "param:support_sortie",
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran sous-toiture HPV",
+    "quantite": "110",
+    "unite": "m²",
+    "affiche": "110 m²",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Ardoises fibres-ciment",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "110 M2 au devis",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "product:ardoise"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 22 ml de bande, développé 25 cm",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 100, pour ardoise ou tuile",
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 100",
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux sapin traité",
+    "raison": "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier Mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente."
+  ],
+  "questions": []
+ }
+}

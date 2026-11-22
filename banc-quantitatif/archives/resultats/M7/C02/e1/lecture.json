@@ -1,0 +1,148 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Couverture tuiles",
+   "quantite": "120",
+   "unite": "m2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tuiles terre cuite HP10 Huguenot Fenal",
+     "quantite": "120",
+     "unite": "m2",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "entraxe_supports",
+       "valeur": "60 cm"
+      },
+      {
+       "cle": "surface",
+       "valeur": "120 m2"
+      },
+      {
+       "cle": "pente",
+       "valeur": "30°"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7,50 m"
+      },
+      {
+       "cle": "longueur_rives",
+       "valeur": "4 rives de 7,50 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Écran sous-toiture HPV",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "ecran",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Contre-liteaux sapin traité 27×40",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "contre_liteau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Liteaux sapin traité 27×40",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "liteau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Tuiles de rive HP 10 rouge",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "rive",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Faîtage à sec",
+   "quantite": "8,00",
+   "unite": "m",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Faîtières terre cuite rouge",
+     "quantite": "8,00",
+     "unite": "m",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "8,00 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Closoir ventilé",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "faitage",
+     "emplacement": "closoir",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Échafaudage",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "4",
+   "designation": "Main-d'œuvre",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

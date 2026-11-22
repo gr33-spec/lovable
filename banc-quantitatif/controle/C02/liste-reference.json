@@ -1,0 +1,45 @@
+{
+ "liste": [
+  {
+   "article": "Écran HPV, rouleau 1,50 × 50 m",
+   "quantite": "2",
+   "unite": "rouleaux",
+   "detail": null
+  },
+  {
+   "article": "Liteaux 27×40",
+   "quantite": "210",
+   "unite": "ml",
+   "detail": "contre-lattage 120 m², une file tous les 60 cm"
+  },
+  {
+   "article": "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge",
+   "quantite": null,
+   "unite": null,
+   "detail": "120 m² au devis"
+  },
+  {
+   "article": "Faîtières terre cuite rouge",
+   "quantite": "24",
+   "unite": "pièces",
+   "detail": "faîtage à sec"
+  },
+  {
+   "article": "Closoir ventilé",
+   "quantite": "2",
+   "unite": "rouleaux de 5 m",
+   "detail": "faîtage à sec"
+  },
+  {
+   "article": "Liteaux 27×40 (Contre-liteaux sapin traité 27×40)",
+   "a_chiffrer": true,
+   "raison": "Calcul impossible sans « Pureau minimal » de tuile."
+  },
+  {
+   "article": "Tuiles de rive (Tuiles de rive HP 10 rouge)",
+   "a_chiffrer": true,
+   "raison": "Calcul impossible sans « Pureau minimal » de tuile."
+  }
+ ],
+ "questions_posees_au_couvreur": []
+}

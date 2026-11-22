@@ -1,0 +1,189 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Couverture zinc à tasseaux sur voligeage existant, zinc quartz épaisseur 0,70 mm, un pan, bacs de 5 m, rive sur tasseau 1 côté (l'autre côté contre le mur de la maison)",
+   "quantite": "45",
+   "unite": "m2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Couverture zinc à tasseaux",
+     "quantite": "45",
+     "unite": "m2",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "couverture",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "45 m2"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7 mm"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "5 m"
+      },
+      {
+       "cle": "nb_rives_tasseau",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Tasseaux bois",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "tasseau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Couvre-joints zinc quartz",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "couvre_joint",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Bande de solin zinc quartz contre le mur de la maison, développé 200 mm",
+   "quantite": "5",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bande de solin zinc quartz",
+     "quantite": "5",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "5 m"
+      },
+      {
+       "cle": "developpe",
+       "valeur": "200 mm"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Chéneau encaissé zinc quartz",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "cheneau-encaisse",
+     "emplacement": "cheneau",
+     "donnees": [
+      {
+       "cle": "longueur_cheneau",
+       "valeur": "9 m"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7 mm"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Descente d'eaux pluviales zinc quartz",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "100 mm"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "3 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Installation de chantier, échafaudage de pied et protections",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "6",
+   "designation": "Nettoyage du chantier et évacuation des déchets",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

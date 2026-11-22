@@ -1,0 +1,97 @@
+{
+ "liste": [
+  {
+   "article": "Ardoises naturelles Espagne 1er choix 30×20",
+   "quantite": "161",
+   "unite": "pièces",
+   "detail": "3,2 m² × 47,8 ardoises/m² (crochet 10 cm, pente 50°) + 5 % de marge"
+  },
+  {
+   "article": "Crochets d'ardoise inox standard, longueur 10 cm",
+   "quantite": "161",
+   "unite": "pièces",
+   "detail": "un par ardoise commandée"
+  },
+  {
+   "article": "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": "pour 1,8 ml de noue, développé 50 cm ; pour façonner l'abergement de cheminée, développé 33 cm"
+  },
+  {
+   "article": "Bandes porte-solin 2 m",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Faîtières",
+   "quantite": "33",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Embase plomb de sortie de toit",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": "Ø 125, pour ardoise ou tuile"
+  },
+  {
+   "article": "Chapeau de sortie de toit",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": "Ø 125"
+  },
+  {
+   "article": "4 noues de 1,80 m.",
+   "a_chiffrer": true,
+   "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger."
+  }
+ ],
+ "questions_posees_au_couvreur": [
+  {
+   "key": "param:support_sortie",
+   "text": "Sortie de toit : sur quelle couverture ?",
+   "options": [
+    "Ardoise ou tuile",
+    "Zinc"
+   ],
+   "reponse": "Ardoise ou tuile"
+  },
+  {
+   "key": "param:surface@couverture-ardoises-crochet__5",
+   "text": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : surface du toit ?",
+   "options": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "reponse": "3.2 m2"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:qualite_ardoise@couverture-ardoises-crochet__5",
+   "text": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  }
+ ]
+}

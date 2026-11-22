@@ -1,0 +1,117 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles",
+    "quantite": "28",
+    "unite": "ml",
+    "affiche": "28 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "F et P DEP zn Ø100",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "F et P dauphins fonte en pied de DEP",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose anc. gout. + DEP, évac. déchetterie",
+   "Echaf. roulant + protections, mise en place et repli",
+   "Objet : Remplact gout. + DEP - zinguerie seule",
+   "Chantier : 14 rue de Kernoa, Paimpol",
+   "Devis valable 2 mois.",
+   "Acompte 30 % à la commande soit 1123,98, solde fin de travaux.",
+   "Délai : 3 sem. après accord, selon météo.",
+   "Travaux non prévus au devis (bois de rive abîmé etc) facturés en plus après accord du client.",
+   "TVA 10 % - logement de plus de 2 ans (formulaire à signer)"
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "F et P gout. 1/2 rde zn nat. dév. 33 sur 3 façades, y c. 2 angles",
+    "quantite": "28",
+    "unite": "ml",
+    "affiche": "28 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "F et P DEP zn Ø100",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "F et P dauphins fonte en pied de DEP",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose anc. gout. + DEP, évac. déchetterie",
+   "Echaf. roulant + protections, mise en place et repli",
+   "Objet : Remplact gout. + DEP - zinguerie seule",
+   "Chantier : 14 rue de Kernoa, Paimpol",
+   "Devis valable 2 mois.",
+   "Acompte 30 % à la commande soit 1123,98, solde fin de travaux.",
+   "Délai : 3 sem. après accord, selon météo.",
+   "Travaux non prévus au devis (bois de rive abîmé etc) facturés en plus après accord du client.",
+   "TVA 10 % - logement de plus de 2 ans (formulaire à signer)"
+  ],
+  "questions": []
+ }
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "article": "Gouttière demi-ronde zinc de 25, 0,65 mm, longueur 4 m",
+    "bonne_valeur": "5 longueurs de 4 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche (Pertes › gouttières zinc, statut confirme) dit « ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m » : deux lignes de 8 m (devis ligne 7) ne se font pas avec 2 longueurs chacune (7,97 m une fois la soudure prise), il faut 16 + 4 × 0,03 = 16,12 ml, soit 4,03 → 5 longueurs, la 5e donnant un bout à chaque ligne ; la référence a fait 16 / 4 = 4 sans les jonctions. Défaut de la fiche à signaler : elle ne dit pas si l'arrondi se fait sur le total (5) ou ligne par ligne (6)."
+  },
+  {
+    "article": "Liteaux sapin traité classe 2, 18×40, longueurs de 4 m",
+    "bonne_valeur": "988 ml (247 liteaux de 4 m)",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche donne la longueur de l'ardoise (« longueur_reelle 320 × 220 » pour « 32×22 », confirme) et le recouvrement avec un crochet de 10 cm (C − 5 = 95 mm), donc pureau (320 − 95)/2 = 112,5 mm et 1/pureau = 8,889 ml/m² × 96 = 853 ml, + 5 % (liteau « tous ») + 10 % de chute d'aboutage (4,00 m sur chevrons à 60 cm) = 985,6 → 247 liteaux = 988 ml : la référence n'aurait pas dû rester « à chiffrer ». Défauts de la fiche à signaler : elle ne dit pas si les 5 % et les 10 % se cumulent, ni combien ajouter pour les files « hors doublis et faîtage », et son écartement maximal de 53 cm pour le 18×40 contredit l'entraxe de 60 cm du chantier sans que rien ne le signale."
+  },
+  {
+    "article": "Ardoise naturelle d'Espagne 1er choix 32×22",
+    "bonne_valeur": "4330 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La « Longueur » que la référence dit manquer est écrite dans la fiche (longueur_reelle 320 mm pour « 32×22 ») : 1/[0,1125 × (0,220 + 0,003)] = 39,86 u/m², sur 96 m² + égout 1,8 + rang de doublage au faîtage 1,8 + rives tranchis droit 4 × 6 × 0,16 = 3,84 → 103,44 m² × 39,86 = 4 123, + 5 % de casse (toit simple deux pans) = 4 330 ; ce chiffre tombe dans la plage du tableau « Toutes marques 32×22 » (≈ 35 à 42 u/m²). Défaut de la fiche à signaler : le tableau des plus-values ne cite pas le rang de doublage du faîtage (rangs_supplementaires_faitage l'impose pourtant) ni le cas d'une rive « ardoise en débord »."
+  },
+  {
+    "article": "Crochets d'ardoise inox Ø 2,7 mm, longueur 10 cm",
+    "bonne_valeur": "9 boîtes de 500",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Le blocage de la référence vient seulement des ardoises non calculées ; la fiche dit 1 crochet par ardoise (pureau entier), Ø 2,7 minimum en zone de vent 3 (Côtes-d'Armor), conditionnement 500 u/boîte pour le crochet à agrafe 7 à 14 cm : 4 330 / 500 = 8,66 → 9 boîtes. Défaut de la fiche à signaler : elle donne aussi « part_crochets_pointe 0,2 » pour la pose à l'agrafe sur liteaux (une seule source) sans dire quand l'appliquer, ce qui donnerait 7 boîtes à agrafe et 2 boîtes de crochets à pointe."
+  }
+]

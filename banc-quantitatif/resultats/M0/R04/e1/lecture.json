@@ -1,0 +1,193 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "réparation de couverture",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « réparation de couverture »"
+  },
+  {
+   "donnee": "neuf ou rénovation",
+   "valeur": "existant (réparation)",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « réparation de couverture » ; conditions : « logement de plus de deux ans »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "tuile terre cuite mécanique",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Tuile terre cuite mécanique »"
+  },
+  {
+   "donnee": "tuiles à remplacer",
+   "valeur": "20 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « 20 u », « pose d'une tuile neuve identique »"
+  },
+  {
+   "donnee": "modèle et teinte de la tuile",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "repositionnement des tuiles déplacées",
+   "valeur": "1,5 h",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « Repositionnement et alignement des tuiles déplacées sur le versant » 1,5 h"
+  },
+  {
+   "donnee": "élément de rive à refixer",
+   "valeur": "1 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Refixation mécanique et consolidation de l'élément de rive de toit arraché » 1 u"
+  },
+  {
+   "donnee": "fournitures de fixation de rive",
+   "valeur": "petites fournitures de fixation",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « y compris les petites fournitures de fixation »"
+  },
+  {
+   "donnee": "évacuation des déchets",
+   "valeur": "1 fft",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Descente et évacuation des tuiles cassées et déchets de chantier » 1 fft"
+  }
+ ],
+ "bref": [
+  "Réparation d'une couverture existante en tuiles terre cuite mécaniques.",
+  "20 tuiles terre cuite mécaniques neuves, identiques à l'existant, en remplacement unitaire.",
+  "Tuiles déplacées du versant repositionnées et réalignées.",
+  "Petites fournitures de fixation pour refixer l'élément de rive arraché.",
+  "Tuiles cassées et déchets évacués vers un centre de tri.",
+  "Pas de couverture neuve."
+ ],
+ "questions": [
+  {
+   "cle": "modele_tuile",
+   "texte": "Quelle tuile ?",
+   "boutons": [],
+   "unite": "",
+   "donnee": "modèle et teinte",
+   "ligne": "1"
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Remplacement unitaire d'une tuile cassée ou défectueuse, comprenant accès toit, dépose de la tuile abîmée et pose d'une tuile neuve identique – Tuile terre cuite mécanique – Main d'œuvre couvreur",
+   "quantite": "20",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuile terre cuite mécanique neuve, identique à l'existant",
+     "quantite": "20",
+     "unite": "u",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [
+      "modele_tuile"
+     ],
+     "a_preciser": [],
+     "precision": "Remplacement unitaire à l'identique de tuiles cassées ou défectueuses"
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "quantite": "1,5",
+   "unite": "h",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "Refixation mécanique et consolidation de l'élément de rive de toit arraché, y compris les petites fournitures de fixation",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Petites fournitures de fixation",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "type de fixation",
+      "quantité"
+     ],
+     "precision": "Pour refixation mécanique de l'élément de rive de toit"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé",
+   "quantite": "1",
+   "unite": "fft",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Chauvin"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "14 rue des Tisserands"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Cholet"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "49300"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D.2026.105"
+  },
+  {
+   "cle": "date",
+   "valeur": "06/10/2026"
+  },
+  {
+   "cle": "validité",
+   "valeur": "30 jours"
+  },
+  {
+   "cle": "objet",
+   "valeur": "réparation de couverture"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation (logement de plus de deux ans)"
+  },
+  {
+   "cle": "délai d'intervention",
+   "valeur": "sous 3 semaines après accord, selon météo"
+  }
+ ],
+ "notes": []
+}

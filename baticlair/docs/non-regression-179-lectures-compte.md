@@ -22,8 +22,8 @@ Généré par `packages/domain/test/banc-179-lectures.test.ts` (`npx vitest run 
 | painting | 4 | 9 | 8 | 1 | 0 | 1 | 0 |
 | paving | 1 | 2 | 2 | 0 | 0 | 0 | 0 |
 | plumbing | 1 | 3 | 3 | 0 | 0 | 0 | 0 |
-| roofing | 153 | 485 | 218 | 258 | 9 | 261 | 9 |
+| roofing | 153 | 460 | 223 | 230 | 7 | 297 | 7 |
 | solar | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
 | tiling | 2 | 5 | 5 | 0 | 0 | 0 | 0 |
 | waterproofing | 2 | 3 | 2 | 1 | 0 | 1 | 0 |
-| **Tous** | 180 | 553 | 279 | 265 | 9 | 268 | 9 |
+| **Tous** | 180 | 528 | 284 | 237 | 7 | 304 | 7 |

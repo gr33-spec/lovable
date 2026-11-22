@@ -295,11 +295,14 @@ function produitDe(ref: Referential, slot: Slot, named: string): { id: string } 
  * produits possibles : aucun (jamais deviner). Retour de Greg, 17 novembre 2026 : « 48 m² d'ardoises 32×22 et crochets de 11
  * finissaient dans "À préciser" ».
  */
-function produitDansLeNom(ref: Referential, slot: Slot, nom: string): { id: string } | undefined {
+function produitDansLeNom(ref: Referential, slot: Slot, nom: string, references = false): { id: string } | undefined {
   // Un emplacement qui a déjà son article courant (les liteaux 18×40) garde son hypothèse, dite et modifiable.
   if (slot.usual) return undefined;
   const texte = ` ${normalizeText(nom)} `;
-  const hits = ref.products.filter((p) => p.family === slot.family && p.aliases.some((a) => /\d\s*x\s*\d/.test(normalizeText(a)) && texte.includes(` ${normalizeText(a)} `)));
+  // Un format (« 32 x 22 ») ; dans la désignation du devis seulement (`references`), aussi une référence de modèle qui porte un
+  // chiffre (« HP 10 », banc du calcul C02, 21 novembre 2026). Jamais un mot courant, qui nommerait un produit par hasard, ni
+  // le nom d'un article proposé par l'appli (« Tuiles HP10 » tant que l'artisan n'a pas choisi).
+  const hits = ref.products.filter((p) => p.family === slot.family && p.aliases.some((a) => (references ? /\d/.test(a) : /\d\s*x\s*\d/.test(normalizeText(a))) && texte.includes(` ${normalizeText(a)} `)));
   return hits.length === 1 ? hits[0] : undefined;
 }
 
@@ -395,7 +398,9 @@ export function planDeLecture(
       }
     }
     // Le produit du référentiel que la ligne nomme (« produit » : son identifiant, ou son nom tel que l'export le donne).
-    const produit = (f.donnees.produit ? produitDe(ref, slot, f.donnees.produit) : undefined) ?? produitDansLeNom(ref, slot, f.nom);
+    // Banc du calcul (C01, 21 novembre 2026) : une ligne « fourniture et pose » rangée par le code prend le nom de la fiche
+    // (« Ardoises ») ; le format écrit au devis (« 32×22 ») reste lu dans la désignation de la ligne, jamais perdu.
+    const produit = (f.donnees.produit ? produitDe(ref, slot, f.donnees.produit) : undefined) ?? produitDansLeNom(ref, slot, f.nom) ?? produitDansLeNom(ref, slot, l.ligne.designation, true);
     if (produit) input.products[slot.key] = { productId: produit.id, origin: "devis" };
     // Les données écrites sur la ligne, telles que le modèle les a lues (« taille_fenetre » : « 114x118 »).
     for (const [key, raw] of Object.entries(f.donnees)) {
@@ -710,6 +715,12 @@ export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: str
     for (const slot of work.slots) {
       const key = `${work.id}/${slot.key}`;
       if (!slot.suggested || input.mentioned.includes(slot.key) || out.some((o) => o.key === key || o.label === slot.suggested!.label)) continue;
+      // Une réfection de toiture, pas un accessoire seul : la couverture elle-même est écrite, avec sa surface (« 36 m de
+      // liteaux » dictés, ou des ardoises listées en pièces, ne proposent rien).
+      const surfaceConnue = work.params.some((p) => p.fromLineQuantity && /^m ?(?:2|²)$/.test(p.unit) && input.params[p.key] !== undefined);
+      if (slot.suggested.onlyOnMeasuredWork && !(input.mentioned.includes(work.slots[0]?.key ?? "") && surfaceConnue)) continue;
+      // Le devis en parle déjà ailleurs (une sortie de toit écrite) : rien à proposer.
+      if (slot.suggested.unlessWorks?.some((id) => plan.inputs.some((i) => baseOf(i.workItemId) === id))) continue;
       out.push({ key, label: slot.suggested.label });
     }
   }
@@ -946,7 +957,18 @@ export function ecranDeLecture(input: {
     const m = n.status === "question" && !n.consumable ? /^param:([a-z0-9_]+)(?:@.+)?$/.exec(n.question?.key ?? "") : null;
     if (m) precisionWaits.set(`${n.workItemId}/${n.needId}`, m[1]!);
   }
-  const fallback: Question[] = [...engine.questions, ...strict.questions.filter((q) => !engine.questions.some((x) => x.key === q.key))];
+  // Une question qui ne se pose qu'après une autre (`askOnlyAfter` : la longueur d'égout après « Non ») n'est jamais listée
+  // d'avance : elle arrive quand la réponse qui l'ouvre est donnée.
+  const ouverteMaintenant = (q: Question) => {
+    const s = scopedParam(q.key);
+    const name = s?.name ?? (q.key.startsWith("param:") ? q.key.slice("param:".length) : null);
+    if (!name) return true;
+    const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === name && p.askOnlyAfter);
+    if (!def?.askOnlyAfter) return true;
+    const dit = (s ? answers[scopedKey(def.askOnlyAfter.param, s.workItemId)] : undefined) ?? answers[`param:${def.askOnlyAfter.param}`];
+    return !!dit && typeof dit !== "string" && dit.value === def.askOnlyAfter.value;
+  };
+  const fallback: Question[] = [...engine.questions, ...strict.questions.filter((q) => !engine.questions.some((x) => x.key === q.key))].filter(ouverteMaintenant);
   for (const n of [...engine.needs, ...(engine.unknowns ?? [])]) {
     // Une estimation (des feuilles d'après un développé supposé) ne demande rien : elle s'ajuste (fondateur, 2026-10-10 :
     // « on s'en fout du développé, l'utilisateur veut juste un nombre de feuilles »). Et « développé ? » ne s'écrit plus
@@ -1022,7 +1044,11 @@ export function ecranDeLecture(input: {
   for (const q of fallback) {
     if (deCesOuvragesSeulement(q)) continue;
     const donnee = scopedParam(q.key)?.name ?? q.key.replace(/^param:/, "");
-    if (asked.some((a) => a.key === q.key) || !q.key.startsWith("param:")) continue;
+    // Greg, 21 novembre 2026 : « Chaque case vide que la fiche métier exige devient une question. » L'article que le calcul ne
+    // peut pas compter sans son modèle (« ardoises identiques à l'existant », banc du calcul C08) a sa question, posée par le
+    // code avec les modèles de la fiche ; avant : seulement si le modèle la posait.
+    const articleACHoisir = q.key.startsWith("product:") && q.kind === "choose_product";
+    if (asked.some((a) => a.key === q.key) || !(q.key.startsWith("param:") || articleACHoisir)) continue;
     const m = /^param:([a-z0-9_]+)(?:@([a-z0-9_-]+))?$/.exec(q.key) ?? /^product:([a-z0-9_]+)$/.exec(q.key);
     const cle = m ? (q.key.startsWith("product:") ? `produit_${m[1]!}` : m[1]!) : q.key.replace(/[^a-z0-9_]/g, "_");
     const def = ref.workItems.flatMap((w) => w.params).find((p) => p.key === cle);
@@ -1331,7 +1357,13 @@ function finishPurchase(
       // Ce que le calcul attend pour compter l'article (le nombre de descentes d'une naissance) a aussi ses boutons sur la
       // ligne : la question posée, même laissée sans réponse (« je ne sais pas »), jamais une ligne orange sans réglage.
       const duCalcul = (item.waitsOn ?? []).map((k) => asked.find((a) => a.key === k && unresolved(a))).filter((a): a is Asked => !!a);
-      const waits = [...new Set([...[...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a), ...duCalcul])];
+      // La forme d'achat d'un article écrit (les courants et les couverts de « tuiles canal », Greg, 21 novembre 2026) attend
+      // les mêmes réponses que la ligne qui l'écrit : une question laissée ouverte sur cette ligne se voit sur chacune.
+      const ecrite = item.lineIds.map((id) => byLine.get(id)).find((l): l is LigneLecture => !!l?.fourniture);
+      const emplacementEcrit = ecrite ? workOfLine(ecrite.id) : undefined;
+      const formeDeLEcrit = !!emplacementEcrit && own.some((n) => n.workItemId === emplacementEcrit.workItemId && ctx.ref.workItems.find((w) => w.id === baseOf(n.workItemId))?.slots.find((x) => x.key === n.slot)?.formOf === emplacementEcrit.slot);
+      const deLaLigne = formeDeLEcrit && ecrite && !estimated ? ecrite.fourniture!.attend.map((cle) => open(cle, ecrite.ligne.ref)).filter((a): a is Asked => !!a) : [];
+      const waits = [...new Set([...[...new Set([...unknown, ...named, ...assumed])].map((cle) => open(cle)).filter((a): a is Asked => !!a), ...duCalcul, ...deLaLigne])];
       const pending = [...new Set([...(item.waitsOn ?? []), ...waits.map((a) => a.key)])];
       if (waits.length > 0) reasons.set(item.key, raisonCourte(waits.map((a) => a.q.donnee)));
       // §51.6 : un article que le calcul tire d'une ligne (la bobine des bacs) porte aussi les réponses de cette ligne.

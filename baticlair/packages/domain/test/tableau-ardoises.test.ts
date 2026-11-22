@@ -22,6 +22,9 @@ const input = (h: number, l: number, crochet: number): WorkItemInput => ({
     surface: { value: "100", unit: "m2", origin: "devis" },
     longueur_crochet: { value: String(crochet), unit: "cm", origin: "devis" },
     qualite_ardoise: { value: "1", unit: "u", origin: "devis" },
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande. Le tableau compte la surface seule :
+    // « Oui », les m² comprennent déjà l'égout et les coupes.
+    egout_compris: { value: "1", unit: "u", origin: "artisan" },
   },
   products: { ardoise: { productId: `ardoise-${h}x${l}`, origin: "devis" } },
   mentioned: ["ardoise", "crochet", "liteau"],
@@ -33,7 +36,8 @@ function ligne(h: number, l: number, crochet: number) {
   const need = (id: string) => r.needs.find((n) => n.needId === id)!;
   const trace = (id: string, label: RegExp) => (need(id) as { trace?: { label: string; value: string; from?: string }[] }).trace?.find((t) => label.test(t.label));
   const ardoisesM2 = trace("ardoises", /^Ardoises au m²/);
-  const commande = (id: string) => Number(need(id).purchase?.order.count ?? Number.NaN);
+  // Le nombre de pièces. Les crochets se commandent en boîtes de 500 (Greg, 21 novembre 2026) : le tableau garde leur nombre de pièces.
+  const commande = (id: string) => (id === "crochets-ardoise" ? Math.ceil(Number(need(id).quantity?.value ?? Number.NaN)) : Number(need(id).purchase?.order.count ?? Number.NaN));
   return {
     format: `${h}×${l}`,
     crochet,

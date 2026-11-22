@@ -1,0 +1,148 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "je ne sais pas"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Noues zinc façonnées",
+    "quantite": "6",
+    "unite": "ml",
+    "affiche": "6 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Mortier",
+    "quantite": "3",
+    "unite": "ml",
+    "affiche": "3 ml",
+    "etat": "ready",
+    "precision": "pour reprise de solin, 3 ml",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "DEP Ø80",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Echelle de toit + évac gravats"
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:hauteur_descente"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "pour 6 ml de noue, développé 50 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Mortier",
+    "quantite": "3",
+    "unite": "ml",
+    "affiche": "3 ml",
+    "etat": "ready",
+    "precision": "pour reprise de solin, 3 ml",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "DEP Ø80",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Echelle de toit + évac gravats"
+  ],
+  "questions": []
+ }
+}

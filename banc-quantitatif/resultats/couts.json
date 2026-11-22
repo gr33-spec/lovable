@@ -1,0 +1,98 @@
+{
+ "M0": {
+  "appels": 1,
+  "jetonsLus": 26473,
+  "jetonsEcrits": 5796,
+  "secondes": 91,
+  "eur": 0.204,
+  "eurAvecCache": 0.126
+ },
+ "M1": {
+  "appels": 2,
+  "jetonsLus": 52623,
+  "jetonsEcrits": 9065,
+  "secondes": 129,
+  "eur": 0.36,
+  "eurAvecCache": 0.206
+ },
+ "M2": {
+  "appels": 0.9,
+  "jetonsLus": 6274,
+  "jetonsEcrits": 1714,
+  "secondes": 19,
+  "eur": 0.027,
+  "eurAvecCache": 0.018
+ },
+ "M3": {
+  "appels": 3.5,
+  "jetonsLus": 36204,
+  "jetonsEcrits": 4001,
+  "secondes": 23,
+  "eur": 0.09,
+  "eurAvecCache": 0.053
+ },
+ "M4": {
+  "appels": 1,
+  "jetonsLus": 24572,
+  "jetonsEcrits": 4102,
+  "secondes": 43,
+  "eur": 0.166,
+  "eurAvecCache": 0.095
+ },
+ "M5": {
+  "appels": 2.1,
+  "jetonsLus": 31273,
+  "jetonsEcrits": 2257,
+  "secondes": 58,
+  "eur": 0.009,
+  "eurAvecCache": 0.004
+ },
+ "M6": {
+  "appels": 2,
+  "jetonsLus": 49144,
+  "jetonsEcrits": 3937,
+  "secondes": 24,
+  "eur": 0.127,
+  "eurAvecCache": 0.056
+ },
+ "M7": {
+  "appels": 1,
+  "jetonsLus": 24181,
+  "jetonsEcrits": 1728,
+  "secondes": 23,
+  "eur": 0.06,
+  "eurAvecCache": 0.026
+ },
+ "M8": {
+  "appels": 1,
+  "jetonsLus": 4229,
+  "jetonsEcrits": 827,
+  "secondes": 14,
+  "eur": 0.001,
+  "eurAvecCache": 0.001
+ },
+ "M9": {
+  "appels": 2,
+  "jetonsLus": 30328,
+  "jetonsEcrits": 2619,
+  "secondes": 45,
+  "eur": 0.065,
+  "eurAvecCache": 0.027
+ },
+ "M10": {
+  "appels": 1,
+  "jetonsLus": 24740,
+  "jetonsEcrits": 2077,
+  "secondes": 27,
+  "eur": 0.065,
+  "eurAvecCache": 0.029
+ },
+ "M11": {
+  "appels": 1,
+  "jetonsLus": 24572,
+  "jetonsEcrits": 1969,
+  "secondes": 24,
+  "eur": 0.063,
+  "eurAvecCache": 0.028
+ }
+}

@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, repondreAuxQuestions, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSortieDeVentilation, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1116,7 +1116,10 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await expect(page.getByRole("dialog")).toHaveCount(0);
   // RÈGLE NUMÉRO UN : ni suggestion, ni écran, ni liteaux, ni crochets que le devis n'écrit pas.
   await expect(list.getByRole("region", { name: "Suggestions" })).toHaveCount(0);
-  await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i)).toHaveCount(0);
+  // Règle changée (Greg, 21 novembre 2026) : la précision des ardoises dit « …, arêtiers, noues, faîtage et égout du devis
+  // compris, + 5 % de marge » ; ce n'est pas un article. Avant : la précision ne nommait ni faîtage ni égout.
+  await expect(list.getByText("arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge")).toHaveCount(1);
+  await expect(list.getByText(/Écran|Liteaux|Pattes|Faîtage|égout/i).filter({ hasNotText: "arêtiers, noues, faîtage et égout du devis compris" })).toHaveCount(0);
   await expect(list.getByRole("button", { name: /Ardoises naturelles/ }).first()).toBeVisible();
   // §52 : la couverture est relue (référentiel du fondateur) : pas de « Ratios en cours de validation ».
   await expect(list.getByText("Ratios en cours de validation")).toHaveCount(0);
@@ -1135,8 +1138,9 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   await gouttiere.getByRole("textbox").fill("Gouttière zinc demi-ronde rouge");
   await gouttiere.getByRole("button", { name: "OK" }).click();
   await expect(list.getByRole("button", { name: /^(Modifier|Fermer) : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
-  // §50.5 : la quantité reste celle du calcul, en unité commandable (20 ml → 5 longueurs de 4 m).
-  await expect(list.getByText(/^5 longueurs de 4 m$/).filter({ visible: true }).first()).toBeVisible();
+  // §50.5 : la quantité reste celle du calcul, en unité commandable. Règle changée (Greg, 21 novembre 2026) : 30 mm par
+  // jonction soudée d'une gouttière zinc ; 20 ml font 6 longueurs de 4 m (avant : 5).
+  await expect(list.getByText(/^6 longueurs de 4 m$/).filter({ visible: true }).first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "Les questions" })).toHaveCount(0);
   await expect(page.getByRole("region", { name: "Liste des fournitures" }).getByRole("button", { name: /Ardoises naturelles/ })).toHaveCount(0);
@@ -1623,9 +1627,13 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
   // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; sans limite de nombre (skill du fondateur, 18/11/2026) : huit cases (pointes de liteaux et dauphins compris).
-  await expect(cases).toHaveCount(8);
+  // Greg, 21 novembre 2026 (soir) : la sortie de ventilation en plus (neuf cases ; avant : huit).
+  await expect(cases).toHaveCount(9);
   await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
-  await expect(carte.getByRole("checkbox", { name: "Vis inox 4 × 40" })).not.toBeChecked();
+  // Greg, 21 novembre 2026 (soir) : la sortie de ventilation est proposée sur toute couverture écrite avec sa surface et sans
+  // sortie de toit au devis ; plus de limite de nombre (skill du fondateur) : les vis restent proposées.
+  await expect(carte.getByRole("checkbox", { name: SORTIE_DE_VENTILATION, exact: true })).not.toBeChecked();
+  await expect(carte.getByRole("checkbox", { name: /^Vis inox/ })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Naissances de gouttière" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Talons de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
   await expect(carte.getByRole("checkbox", { name: "Angles de gouttière (si tu ne les fabriques pas)" })).not.toBeChecked();
@@ -1661,7 +1669,7 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   const liste = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(liste).toBeVisible({ timeout: 60_000 });
   await expect(liste.getByText(/^Naissances/).first()).toBeVisible();
-  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière|silicone|Vis inox|Pattes de fixation/)).toHaveCount(0);
+  await expect(liste.getByText(/Talons de gouttière|Angles de gouttière|silicone|Vis inox|Sortie de ventilation|Pattes de fixation/)).toHaveCount(0);
   // Plus jamais « développé ? » dans une ligne.
   await expect(liste.getByText(/développé \?/)).toHaveCount(0);
 });
@@ -3722,8 +3730,10 @@ interface CommandeMoisApi {
 
 /** Une liste déjà prête (lignes données à la porte `/v1/quantitatifs`), au bon chantier, à la bonne adresse. Rend son id. */
 async function listePrete(page: Page, adresse: string, lignes: { libelle: string; quantite: string; unite: string }[]): Promise<string> {
-  const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
+  const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
   expect(q.status).toBe(201);
+  // L'étape « Suggestions » (pointes de liteaux, sortie de ventilation…) : rien de coché, la liste reste telle qu'écrite.
+  await continuerSansSuggestionParApi(page, q.body.id);
   expect(await apiCall(page, "PATCH", `/v1/projects/${q.body.projetId}`, { address: adresse })).toBe(200);
   return q.body.projetId;
 }
@@ -4217,6 +4227,8 @@ test("Apprentissage (24 octobre 2026) : la même correction sur 2 chantiers s'ap
   }
   const l3 = await liste();
   await page.goto(`/chantiers/${l3.projetId}`);
+  // L'étape « Suggestions » (pointes de liteaux, sortie de ventilation…) : l'artisan ne coche rien et continue.
+  await continuerSansSortieDeVentilation(page);
   const fournitures = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(fournitures.getByText("Ardoise Cupa Heavy 32×22")).toBeVisible();
   await expect(fournitures.getByText("Ajusté selon tes habitudes")).toBeVisible();
@@ -4339,6 +4351,8 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   });
   await bouton.click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
+  // L'étape « Suggestions » (pointes de liteaux, sortie de ventilation…) : l'artisan ne coche rien et continue.
+  await continuerSansSortieDeVentilation(page);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible();
   await expect(page.getByText(/Faîtière ventilée terre cuite, modèle ancien/).first()).toBeVisible();

@@ -1,0 +1,26 @@
+{
+ "m": "S4",
+ "c": "C03",
+ "e": 3,
+ "nRef": 4,
+ "justes": 3,
+ "quantite": 0,
+ "manquantes": 1,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 1,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Angles de gouttière demi-ronde zinc naturel dév. 33 (2 pièces)"
+  ],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": []
+ }
+}

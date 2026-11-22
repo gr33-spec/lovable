@@ -1,0 +1,42 @@
+{
+ "m": "M9",
+ "c": "C05",
+ "e": 1,
+ "nRef": 9,
+ "justes": 4,
+ "quantite": 4,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 6,
+ "questionsRef": 4,
+ "questionsHorsRef": 2,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 7184 pièces lu",
+   "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu",
+   "Feuilles zinc naturel 2 × 1 m, 0,65 mm : 2 pièces attendu, 1 pièce lu",
+   "4 noues de 1,80 m. : à chiffrer  attendu, 4 pièces lu"
+  ],
+  "manquantes": [
+   "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise. (2 pièces)"
+  ],
+  "inventees": [
+   "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98 (2 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:raccord_couverture",
+    "text": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?"
+   },
+   {
+    "key": "param:qualite_ardoise@couverture-ardoises-crochet__4",
+    "text": "Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"
+   }
+  ]
+ }
+}

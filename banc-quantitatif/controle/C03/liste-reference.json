@@ -1,0 +1,36 @@
+{
+ "liste": [
+  {
+   "article": "Gouttière demi-ronde zinc naturel dév. 33",
+   "quantite": "7",
+   "unite": "longueurs de 4 m",
+   "detail": "sur 3 façades"
+  },
+  {
+   "article": "Angles de gouttière demi-ronde zinc naturel dév. 33",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Descente zinc Ø100",
+   "quantite": "9",
+   "unite": "pièces",
+   "detail": "3 descentes × 6 m"
+  },
+  {
+   "article": "Dauphins fonte Ø100",
+   "quantite": "3",
+   "unite": "pièces",
+   "detail": null
+  }
+ ],
+ "questions_posees_au_couvreur": [
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "6 m"
+  }
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "m": "M0",
+ "c": "C10",
+ "e": 2,
+ "nRef": 9,
+ "justes": 9,
+ "quantite": 0,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 6,
+ "questionsRef": 3,
+ "questionsHorsRef": 3,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:dauphin",
+    "text": "Un dauphin en pied de chaque descente ?"
+   },
+   {
+    "key": "param:developpe_gouttiere",
+    "text": "Gouttière de 25, de 28, de 33 ou de 40 ?"
+   },
+   {
+    "key": "param:fixation_crochet",
+    "text": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?"
+   }
+  ]
+ }
+}

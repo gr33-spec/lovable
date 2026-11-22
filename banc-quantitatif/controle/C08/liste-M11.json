@@ -1,0 +1,26 @@
+{
+ "liste": [
+  {
+   "article": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": "pour 6 ml de noue, développé 50 cm"
+  },
+  {
+   "article": "Mortier",
+   "quantite": "3",
+   "unite": "ml",
+   "detail": "pour reprise de solin sur 3 ml"
+  },
+  {
+   "article": "DEP Ø80",
+   "quantite": "1",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Ardoises (Ardoises)",
+   "a_chiffrer": true
+  }
+ ]
+}

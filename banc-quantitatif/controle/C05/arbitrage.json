@@ -1,0 +1,44 @@
+[
+  {
+    "article": "Ardoise naturelle 30×20, Espagne 1er choix",
+    "bonne_valeur": "7 846 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "La référence n'a rattaché l'ouvrage ardoise qu'à la ligne 5 (jouées, 3,2 m²) et a oublié la ligne 4 (140 m² en colonne). Méthode des points singuliers (140 + égout 0,10 × 20 + rives 4 × 7 × 0,16 + doublage au faîtage 2 m² + jouées 3,2 = 151,68 m²) × 1/(0,10 × 0,203) = 49,26/m² × 1,05 = 7 846. DÉFAUT DE LA FICHE : la perte se contredit (5 % « toit simple sans ouverture, après plus-values », 7 % lucarnes « sans plus-values », 10 % dès qu'il y a des noues), il n'existe pas de plus-value pour le rang de doublage du faîtage, et le tableau 30×20 (47,8 retenu par la référence) ne dit pas à quel pureau correspond chaque valeur."
+  },
+  {
+    "article": "Crochets à pointe inox Ø 2,7 laqués noir, 10 cm",
+    "bonne_valeur": "12 boîtes de 700",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Il faut 1 crochet par ardoise (crochets_par_ardoise), soit 7 846 crochets, et la fiche vend le crochet à pointe Ø 2,7 de 7 à 14 cm par boîtes de 700 : 7 846 / 700 = 11,2, donc 12 boîtes. La référence suit ses seules jouées (161), vend à la pièce et perd le Ø 2,7 et le laqué noir écrits par le couvreur."
+  },
+  {
+    "article": "Feuille de zinc naturel 0,65 mm, 2 × 1 m",
+    "bonne_valeur": "4 feuilles",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Le devis écrit « 4 noues de 1,80 m » (7,2 m) et la référence ne compte que 1,8 m : en dév. 500, il faut 2 bandes de 2 m par feuille (bandes_de_2_m_tirees_d_une_feuille), donc 2 feuilles pour les noues ; ajoutez au moins 1 feuille pour la bavette, la besace, les 8 noquets et le porte-solin de la souche 0,90 × 0,60, et 2 feuilles si on garde une marge, ce qui fait 4. DÉFAUT DE LA FICHE : elle liste les pièces d'un abergement mais ne donne ni leur développé ni leur débit dans une feuille. Selon l'imbrication, il en faut donc 3 ou 4."
+  },
+  {
+    "article": "Bandes porte-solin 2 m",
+    "bonne_valeur": "ne doit pas sortir",
+    "qui_a_raison": "controleur",
+    "cause": "réponse du couvreur mal comprise",
+    "explication": "Le couvreur a répondu « Je façonne » pour toutes ses pièces pliées, et la fiche compte le porte-solin dans l'abergement complet (pieces_d_un_abergement_complet). Il se tire donc des feuilles de zinc (3 m en dév. 100, pris dans les chutes de la feuille de l'abergement) et ne doit pas sortir comme une bande façonnée de 2 m achetée toute faite."
+  },
+  {
+    "article": "Faîtière demi-ronde terre cuite rouge de 40",
+    "bonne_valeur": "34 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Selon la fiche, on compte « ml × pièces au ml, arrondi à la pièce supérieure ; casse 1 % », à 3 pièces par mètre pour la demi-ronde de 40 : 11 × 3 = 33 × 1,01 = 33,3, donc 34, et on retrouve 34 tronçon par tronçon (30 + 2 + 2 pour les deux faîtages de 0,50 m). La référence s'arrête à 33, sans casse ni arrondi par tronçon, et sa ligne « Faîtières » perd la forme, la teinte et le format."
+  },
+  {
+    "article": "4 noues de 1,80 m",
+    "bonne_valeur": "ne doit pas sortir",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Le couvreur façonne, et le devis donne le nombre et la longueur des noues (4 × 1,80 m, dév. 500) : la fiche les convertit en feuilles (dev_500 : 2 bandes de 2 m par feuille), comptées dans la ligne zinc. L'unité « ens » de la colonne ne bloque donc rien, et une ligne « à chiffrer » en plus est un doublon."
+  }
+]

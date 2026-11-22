@@ -1,0 +1,194 @@
+{
+ "param:developpe ¦ Bande de solin en zinc anthracite : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Bande de solin en zinc anthracite : développé de la bande zinc ?",
+   "question": "Bande de solin en zinc anthracite : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 mm."
+  }
+ },
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "unite": "u",
+   "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je plie moi-même."
+  }
+ },
+ "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?": {
+  "question": {
+   "id": "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?",
+   "question": "Ton chéneau fait quel développé ?",
+   "boutons": [
+    "Jusqu'à 50 cm",
+    "Jusqu'à 65 cm",
+    "Jusqu'à 1 m"
+   ],
+   "unite": "mm",
+   "aide": "La largeur de zinc avant façonnage : elle choisit la largeur du bobineau (500, 650 ou 1 000 mm)."
+  },
+  "reponse": {
+   "bouton": "Jusqu'à 65 cm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "650 mm, bobineau de 650."
+  }
+ },
+ "param:developpe ¦ Développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Développé de la bande zinc ?",
+   "question": "Développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 mm."
+  }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, pas de dauphin."
+  }
+ },
+ "param:developpe ¦ Solin : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe ¦ Solin : développé de la bande zinc ?",
+   "question": "Solin : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 mm."
+  }
+ },
+ "param:nb_descentes ¦ Combien de descentes ?": {
+  "question": {
+   "id": "param:nb_descentes ¦ Combien de descentes ?",
+   "question": "Combien de descentes ?",
+   "boutons": [],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "1",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Une seule descente."
+  }
+ },
+ "param:longueur_bande ¦ Longueur de bande zinc ?": {
+  "question": {
+   "id": "param:longueur_bande ¦ Longueur de bande zinc ?",
+   "question": "Longueur de bande zinc ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "8",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "8 mètres."
+  }
+ },
+ "param:hauteur_descente ¦ Hauteur d'une descente ?": {
+  "question": {
+   "id": "param:hauteur_descente ¦ Hauteur d'une descente ?",
+   "question": "Hauteur d'une descente ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "3",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "3 mètres."
+  }
+ },
+ "param:diametre_descente ¦ Descentes en Ø 80, Ø 100 ou Ø 120 ?": {
+  "question": {
+   "id": "param:diametre_descente ¦ Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+   "question": "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
+   "boutons": [
+    "Ø 80",
+    "Ø 100",
+    "Ø 120"
+   ],
+   "unite": "mm",
+   "aide": "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m²."
+  },
+  "reponse": {
+   "bouton": "Ø 80",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "Ø 80."
+  }
+ }
+}

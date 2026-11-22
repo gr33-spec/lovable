@@ -1,0 +1,85 @@
+{
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+    {"donnee": "ouvrage", "valeur": "réfection de la couverture en ardoise, maison 2 pans", "origine": "lue", "regle": "", "preuve": "objet : « Réfection de la couverture en ardoise, maison 2 pans »"},
+    {"donnee": "état", "valeur": "rénovation : dépose de la couverture ardoise existante, liteaux compris", "origine": "lue", "regle": "", "preuve": "ligne 2 : « Dépose de la couverture ardoise existante, liteaux compris »"},
+    {"donnee": "nombre de pans", "valeur": "2", "origine": "lue", "regle": "", "preuve": "objet : « maison 2 pans »"},
+    {"donnee": "matériau", "valeur": "ardoise naturelle d'Espagne 1er choix", "origine": "lue", "regle": "", "preuve": "ligne 5 : « ardoise naturelle d'Espagne 1er choix »"},
+    {"donnee": "format des ardoises", "valeur": "32×22", "origine": "lue", "regle": "", "preuve": "ligne 5 : « 32×22 »"},
+    {"donnee": "pose", "valeur": "au crochet inox", "origine": "lue", "regle": "", "preuve": "ligne 5 : « pose au crochet inox »"},
+    {"donnee": "longueur de crochet", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "surface", "valeur": "96 m²", "origine": "lue", "regle": "", "preuve": "ligne 5 : « 96 m² » (idem lignes 2, 3 et 4)"},
+    {"donnee": "pente", "valeur": "45°", "origine": "lue", "regle": "", "preuve": "ligne 5 : « pente 45° »"},
+    {"donnee": "rampant", "valeur": "6 m", "origine": "lue", "regle": "", "preuve": "ligne 5 : « rampant 6 m »"},
+    {"donnee": "écran sous-toiture", "valeur": "HPV, 96 m²", "origine": "lue", "regle": "", "preuve": "ligne 3 : « écran sous-toiture HPV » 96 m²"},
+    {"donnee": "liteaux", "valeur": "sapin traité, 96 m²", "origine": "lue", "regle": "", "preuve": "ligne 4 : « liteaux sapin traité » 96 m²"},
+    {"donnee": "longueur de faîtage", "valeur": "8 m", "origine": "lue", "regle": "", "preuve": "ligne 6 : « Faîtage zinc » 8 ml"},
+    {"donnee": "développé du faîtage", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "façonnage", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "longueur de gouttière", "valeur": "16 m", "origine": "lue", "regle": "", "preuve": "ligne 7 : 16 ml"},
+    {"donnee": "développé de gouttière", "valeur": "25 cm", "origine": "lue", "regle": "", "preuve": "ligne 7 : « Gouttière demi-ronde zinc de 25 »"},
+    {"donnee": "lignes de gouttière", "valeur": "2 longueurs de 8 m", "origine": "lue", "regle": "", "preuve": "ligne 7 : « 2 longueurs de 8 m »"},
+    {"donnee": "nombre de descentes", "valeur": "2", "origine": "lue", "regle": "", "preuve": "ligne 8 : « Descente d'eau pluviale » 2 u"},
+    {"donnee": "diamètre des descentes", "valeur": "Ø80", "origine": "lue", "regle": "", "preuve": "ligne 8 : « zinc Ø80 »"},
+    {"donnee": "hauteur d'une descente", "valeur": "5,50 m", "origine": "lue", "regle": "", "preuve": "ligne 8 : « hauteur 5,50 m »"},
+    {"donnee": "dauphins", "valeur": "2, fonte Ø80", "origine": "lue", "regle": "", "preuve": "ligne 9 : « Dauphin fonte Ø80 en pied de descente » 2 u"},
+    {"donnee": "naissances", "valeur": "2, Ø80", "origine": "deduite", "regle": "une naissance par descente (48.7) : 2 descentes Ø80 écrites ligne 8", "preuve": ""}
+  ],
+  "bref": [
+    "Réfection de la couverture en ardoise d'une maison 2 pans : 96 m², pente 45°, rampant 6 m.",
+    "Dépose de la couverture ardoise existante, liteaux compris.",
+    "Écran sous-toiture HPV 96 m².",
+    "Liteaux sapin traité pour 96 m².",
+    "Ardoise naturelle d'Espagne 1er choix 32×22 : 96 m², posée au crochet inox.",
+    "Crochets inox pour les ardoises.",
+    "Faîtage zinc 8 m.",
+    "Gouttière demi-ronde zinc de 25 : 16 m, en 2 longueurs de 8 m.",
+    "2 descentes d'eau pluviale zinc Ø80, hauteur 5,50 m.",
+    "2 dauphins fonte Ø80 en pied de descente.",
+    "Donc 2 naissances Ø80 sur la gouttière."
+  ],
+  "questions": [
+    {"cle": "longueur_crochet", "texte": "Tes crochets inox pour l'ardoise 32×22, tu les prends de quelle longueur ? (en cm, ex. 11)", "boutons": [], "unite": "cm", "donnee": "longueur de crochet", "ligne": "5"},
+    {"cle": "faconnage", "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "boutons": [{"label": "Je façonne (feuilles ou bobineau)", "valeur": "1"}, {"label": "Je commande façonné", "valeur": "2"}], "unite": "", "donnee": "façonnage", "ligne": "6"},
+    {"cle": "developpe", "texte": "Ton faîtage zinc, c'est une bande de quel développé ?", "boutons": [{"label": "De 25", "valeur": "250"}, {"label": "De 33", "valeur": "330"}, {"label": "De 40", "valeur": "400"}], "unite": "", "donnee": "développé du faîtage", "ligne": "6"}
+  ],
+  "lignes": [
+    {"ref": "1", "designation": "Installation de chantier, échafaudage de pied sur les deux façades, protections", "quantite": "1", "unite": "u", "role": "hors_quantitatif", "fournitures": []},
+    {"ref": "2", "designation": "Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie", "quantite": "96", "unite": "m²", "role": "hors_quantitatif", "fournitures": []},
+    {"ref": "3", "designation": "Fourniture et pose d'un écran sous-toiture HPV", "quantite": "96", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Écran sous-toiture HPV", "quantite": "96", "unite": "m²", "ouvrage": "couverture-ardoises-crochet", "emplacement": "ecran", "donnees": [{"cle": "surface", "valeur": "96"}], "attend": [], "a_preciser": [], "precision": ""}
+    ]},
+    {"ref": "4", "designation": "Fourniture et pose de liteaux sapin traité", "quantite": "96", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Liteaux sapin traité", "quantite": "96", "unite": "m²", "ouvrage": "couverture-ardoises-crochet", "emplacement": "liteau", "donnees": [{"cle": "surface", "valeur": "96"}], "attend": [], "a_preciser": ["section"], "precision": "pour couverture ardoise au crochet"}
+    ]},
+    {"ref": "5", "designation": "Couverture en ardoise naturelle d'Espagne 1er choix 32×22 : pose au crochet inox, pente 45°, rampant 6 m", "quantite": "96", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Ardoises naturelles d'Espagne 1er choix 32×22", "quantite": "96", "unite": "m²", "ouvrage": "couverture-ardoises-crochet", "emplacement": "ardoise", "donnees": [{"cle": "surface", "valeur": "96"}, {"cle": "qualite_ardoise", "valeur": "1"}, {"cle": "pente", "valeur": "45"}, {"cle": "longueur_rampant", "valeur": "6"}], "attend": [], "a_preciser": [], "precision": ""},
+      {"nom": "Crochets d'ardoise inox", "quantite": "", "unite": "", "ouvrage": "couverture-ardoises-crochet", "emplacement": "crochet", "donnees": [], "attend": ["longueur_crochet"], "a_preciser": ["diamètre"], "precision": "pour ardoises 32×22"}
+    ]},
+    {"ref": "6", "designation": "Faîtage zinc", "quantite": "8", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Faîtage zinc", "quantite": "8", "unite": "ml", "ouvrage": "faitage-zinc", "emplacement": "bande", "donnees": [{"cle": "longueur_faitage", "valeur": "8"}], "attend": ["faconnage", "developpe"], "a_preciser": ["épaisseur", "aspect du zinc"], "precision": ""}
+    ]},
+    {"ref": "7", "designation": "Gouttière demi-ronde zinc de 25 (2 longueurs de 8 m)", "quantite": "16", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Gouttière demi-ronde zinc de 25", "quantite": "16", "unite": "ml", "ouvrage": "gouttiere", "emplacement": "profil", "donnees": [{"cle": "longueur_gouttiere", "valeur": "16"}, {"cle": "developpe_gouttiere", "valeur": "25"}], "attend": [], "a_preciser": [], "precision": "en 2 longueurs de 8 m"}
+    ]},
+    {"ref": "8", "designation": "Descente d'eau pluviale zinc Ø80, hauteur 5,50 m", "quantite": "2", "unite": "u", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Descente d'eau pluviale zinc Ø80", "quantite": "2", "unite": "u", "ouvrage": "descente", "emplacement": "tube", "donnees": [{"cle": "nb_descentes", "valeur": "2"}, {"cle": "diametre_descente", "valeur": "80"}, {"cle": "hauteur_descente", "valeur": "5.5"}], "attend": [], "a_preciser": [], "precision": "hauteur 5,50 m par descente"}
+    ]},
+    {"ref": "9", "designation": "Dauphin fonte Ø80 en pied de descente", "quantite": "2", "unite": "u", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Dauphin fonte Ø80", "quantite": "2", "unite": "u", "ouvrage": "descente", "emplacement": "dauphin", "donnees": [{"cle": "dauphin", "valeur": "1"}, {"cle": "diametre_descente", "valeur": "80"}], "attend": [], "a_preciser": [], "precision": "en pied de descente"}
+    ]},
+    {"ref": "10", "designation": "Nettoyage du chantier et repli de l'échafaudage", "quantite": "1", "unite": "u", "role": "hors_quantitatif", "fournitures": []}
+  ],
+  "contexte": [
+    {"cle": "client", "valeur": "M. et Mme Le Goff"},
+    {"cle": "adresse", "valeur": "14 rue de Kerjean"},
+    {"cle": "ville", "valeur": "Plouha"},
+    {"cle": "code postal", "valeur": "22580"},
+    {"cle": "numéro du devis", "valeur": "D-2026-0412"},
+    {"cle": "date", "valeur": "12 octobre 2026"},
+    {"cle": "neuf ou rénovation", "valeur": "rénovation (maison d'habitation de plus de 2 ans)"},
+    {"cle": "objet", "valeur": "Réfection de la couverture en ardoise, maison 2 pans"}
+  ],
+  "notes": []
+}

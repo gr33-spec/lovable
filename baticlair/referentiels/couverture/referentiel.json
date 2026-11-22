@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.20-63",
+  "version": "roofing-2026.11.22-74",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -50,6 +50,15 @@
       "url": "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf",
       "note": "Nombres au m² (couvert seul) et liteaux au m² par recouvrement, relevés par le fondateur (référentiel §35.3).",
       "retrievedAt": "2026-10-04"
+    },
+    {
+      "id": "terreal-volnay-pv",
+      "kind": "manufacturer",
+      "title": "Fiche produit Volnay PV (Terreal, Wienerberger)",
+      "publisher": "Terreal",
+      "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Volnay_PV_001.pdf",
+      "note": "Fiche de mars 2025, relevée dans la base couverture (S84) : 10 tuiles au m², pureau 340 à 408 mm, largeur utile 251 mm. Fabricant seul ; contrôlé par le calcul 1 / (largeur utile × pureau).",
+      "retrievedAt": "2026-11-19"
     },
     {
       "id": "edilians-hp10",
@@ -228,6 +237,11 @@
         {
           "key": "pieces_par_ml",
           "label": "Pièces au mètre",
+          "unit": "u/m"
+        },
+        {
+          "key": "pieces_par_ml_hp10",
+          "label": "Pièces au mètre sur une tuile HP 10",
           "unit": "u/m"
         }
       ],
@@ -517,6 +531,16 @@
       ]
     },
     {
+      "code": "ridge_mortar",
+      "label": "Mortier de faîtage",
+      "needUnit": "kg",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "mortier de faitage"
+      ]
+    },
+    {
       "code": "solin_support",
       "label": "Bande porte-solin",
       "needUnit": "u",
@@ -654,7 +678,10 @@
       "keyAttributes": [],
       "keywords": [
         "descente",
-        "tuyau de descente"
+        "tuyau de descente",
+        "dep",
+        "desc ep",
+        "descente ep"
       ]
     },
     {
@@ -721,6 +748,13 @@
       "keywords": [
         "tuile"
       ]
+    },
+    {
+      "code": "roof_tile_canal_part",
+      "label": "Tuile canal, courant ou couvert",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "roof_tile_canal",
@@ -860,6 +894,21 @@
       ]
     },
     {
+      "code": "roof_slate_rework",
+      "label": "Ardoises de remaniage",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "remaniage",
+        "remaniage ardoise",
+        "remaniage ardoises",
+        "remaniage d'ardoise",
+        "remaniage d'ardoises",
+        "remaniement"
+      ]
+    },
+    {
       "code": "roof_slate_fc",
       "label": "Ardoise fibres-ciment",
       "needUnit": "u",
@@ -944,6 +993,36 @@
         "chatiere",
         "tuile chatiere",
         "tuile de ventilation"
+      ]
+    },
+    {
+      "code": "outlet_vent",
+      "label": "Sortie de ventilation",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "sortie de ventilation"
+      ]
+    },
+    {
+      "code": "outlet_tile",
+      "label": "Tuile à douille",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "tuile a douille"
+      ]
+    },
+    {
+      "code": "outlet_lantern",
+      "label": "Lanterne",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "lanterne"
       ]
     },
     {
@@ -1085,7 +1164,9 @@
         "panneau sandwich",
         "panneaux sandwich",
         "bac sec",
-        "couverture acier"
+        "couverture acier",
+        "ba",
+        "couv ba"
       ]
     },
     {
@@ -3040,6 +3121,20 @@
           },
           "version": 1,
           "note": "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."
+        },
+        "pieces_par_ml_hp10": {
+          "kind": "manufacturer_spec",
+          "value": "3",
+          "unit": "u/m",
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."
         }
       },
       "sellingUnits": [
@@ -3085,6 +3180,20 @@
           },
           "version": 1,
           "note": "Faîtière courante sans modèle connu (40 à 42 cm) : 3 au ml. Recherche du 19/11/2026 : faîtière 1/2 ronde ou angulaire de 40-42 cm sans emboîtement = 3 au ml (Edilians, Terreal, Monier) ; 2,5 au ml seulement pour les faîtières à emboîtement grand modèle. Sans modèle, 3 au ml : jamais trop court. Le modèle écrit au devis garde son propre nombre."
+        },
+        "pieces_par_ml_hp10": {
+          "kind": "manufacturer_spec",
+          "value": "2.5",
+          "unit": "u/m",
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "Faîtière demi-ronde : 2,5 au mètre (documentation HP 10)."
         }
       },
       "sellingUnits": [
@@ -3306,7 +3415,7 @@
         },
         "ardoises_par_m2": {
           "kind": "manufacturer_spec",
-          "value": "27.8",
+          "value": "27.1",
           "unit": "u/m2",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
@@ -3633,6 +3742,37 @@
       ]
     },
     {
+      "id": "ardoise-remaniage",
+      "family": "roof_slate_rework",
+      "label": "Ardoises identiques à l'existant, pour remaniage",
+      "shortLabel": "Ardoises pour remaniage",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "clou-ardoise-fc",
       "family": "slate_nail",
       "label": "Clou inox pour ardoise fibres-ciment",
@@ -3704,6 +3844,136 @@
       "attributes": {},
       "sellingUnits": [
         {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 500",
+            "many": "boîtes de 500"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "500",
+            "unit": "u",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "terreal-volnay-pv",
+      "family": "roof_tile",
+      "label": "Tuile terre cuite Volnay PV (Terreal)",
+      "shortLabel": "Tuiles Volnay PV",
+      "manufacturer": "Terreal",
+      "aliases": [
+        "volnay",
+        "volnay pv",
+        "terreal volnay",
+        "terreal volnay pv"
+      ],
+      "attributes": {
+        "largeur_utile": {
+          "kind": "manufacturer_spec",
+          "value": "0.251",
+          "unit": "m",
+          "source": "terreal-volnay-pv",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1,
+          "note": "251 mm (fiche Terreal 03/2025)."
+        },
+        "pureau_min": {
+          "kind": "manufacturer_spec",
+          "value": "0.340",
+          "unit": "m",
+          "source": "terreal-volnay-pv",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1
+        },
+        "pureau_max": {
+          "kind": "manufacturer_spec",
+          "value": "0.408",
+          "unit": "m",
+          "source": "terreal-volnay-pv",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-01",
+            "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+            "note": "Page et version exactes à compléter à réception du PDF."
+          },
+          "version": 1
+        }
+      },
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        },
+        {
+          "id": "palette",
+          "label": {
+            "one": "palette",
+            "many": "palettes"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "240",
+            "unit": "u",
+            "source": "terreal-volnay-pv",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "Fondateur (documentation officielle du fabricant)",
+              "note": "Page et version exactes à compléter à réception du PDF."
+            },
+            "version": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "tuile-rive-standard",
+      "family": "verge_tile",
+      "label": "Tuile de rive (modèle de la tuile)",
+      "shortLabel": "Tuiles de rive",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
           "id": "piece",
           "label": {
             "one": "pièce",
@@ -3726,10 +3996,41 @@
       ]
     },
     {
-      "id": "tuile-rive-standard",
+      "id": "tuile-rive-gauche-standard",
       "family": "verge_tile",
-      "label": "Tuile de rive (modèle de la tuile)",
-      "shortLabel": "Tuiles de rive",
+      "label": "Tuile de rive gauche (modèle de la tuile)",
+      "shortLabel": "Tuiles de rive gauches",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-rive-droite-standard",
+      "family": "verge_tile",
+      "label": "Tuile de rive droite (modèle de la tuile)",
+      "shortLabel": "Tuiles de rive droites",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -4099,6 +4400,39 @@
             },
             "version": 1,
             "note": "« sac de 25 kg » (§49.7)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "mortier-faitage-25",
+      "family": "ridge_mortar",
+      "label": "Mortier de faîtage",
+      "shortLabel": "Mortier de faîtage",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "sac",
+          "label": {
+            "one": "sac de 25 kg",
+            "many": "sacs de 25 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "25",
+            "unit": "kg",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "Sac de 25 kg."
           },
           "primary": true
         }
@@ -4931,6 +5265,192 @@
       ]
     },
     {
+      "id": "sortie-ventilation-tuile",
+      "family": "outlet_vent",
+      "label": "Tuile à douille et sa lanterne (modèle de la tuile posée)",
+      "shortLabel": "Tuile à douille et lanterne (sortie de ventilation)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "sortie-ventilation-ardoise",
+      "family": "outlet_vent",
+      "label": "Sortie de ventilation pour couverture en ardoise",
+      "shortLabel": "Sortie de ventilation pour ardoise",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "sortie-ventilation-zinc",
+      "family": "outlet_vent",
+      "label": "Sortie de ventilation pour couverture zinc",
+      "shortLabel": "Sortie de ventilation pour zinc",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "sortie-ventilation-bac-acier",
+      "family": "outlet_vent",
+      "label": "Sortie de ventilation pour bac acier",
+      "shortLabel": "Sortie de ventilation pour bac acier",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-a-douille",
+      "family": "outlet_tile",
+      "label": "Tuile à douille (modèle de la tuile posée), au diamètre du conduit",
+      "shortLabel": "Tuile à douille",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "lanterne-sortie",
+      "family": "outlet_lantern",
+      "label": "Lanterne de ventilation pour tuile à douille",
+      "shortLabel": "Lanterne de sortie de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "embase-plomb-sortie",
       "family": "outlet_base",
       "label": "Embase plomb pour sortie de toit, au diamètre du conduit",
@@ -5464,10 +5984,134 @@
       ]
     },
     {
+      "id": "tuile-canal-courant",
+      "family": "roof_tile_canal_part",
+      "label": "Tuile canal, courant (modèle de la tuile posée)",
+      "shortLabel": "Tuiles canal, courants",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "tuile-canal-couvert",
+      "family": "roof_tile_canal_part",
+      "label": "Tuile canal, couvert (modèle de la tuile posée)",
+      "shortLabel": "Tuiles canal, couverts",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "bardelis-standard",
       "family": "verge_tile",
       "label": "Bardelis (tuile de rive canal), modèle de la tuile posée",
       "shortLabel": "Bardelis",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bardelis-gauche-standard",
+      "family": "verge_tile",
+      "label": "Bardelis gauche (tuile de rive canal), modèle de la tuile posée",
+      "shortLabel": "Bardelis gauches",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "bardelis-droit-standard",
+      "family": "verge_tile",
+      "label": "Bardelis droit (tuile de rive canal), modèle de la tuile posée",
+      "shortLabel": "Bardelis droits",
       "aliases": [],
       "generic": true,
       "attributes": {},
@@ -5777,6 +6421,36 @@
           ]
         },
         {
+          "key": "tuile_hp10",
+          "label": "Tuile HP 10",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "La tuile posée est une HP 10 ?",
+          "neverAsk": true,
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "hp10",
+                "hp 10"
+              ]
+            }
+          ],
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pas une HP 10"
+          }
+        },
+        {
           "key": "pureau",
           "label": "Pureau",
           "unit": "cm",
@@ -6031,6 +6705,45 @@
           "suggested": {
             "label": "Tuiles de rive"
           }
+        },
+        {
+          "key": "rive_gauche",
+          "family": "verge_tile",
+          "label": "Tuiles de rive gauches",
+          "usual": {
+            "text": "Tuile de rive gauche du modèle de tuile posé.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "tuile-rive-gauche-standard"
+          },
+          "formOf": "rive"
+        },
+        {
+          "key": "rive_droite",
+          "family": "verge_tile",
+          "label": "Tuiles de rive droites",
+          "usual": {
+            "text": "Tuile de rive droite du modèle de tuile posé.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "tuile-rive-droite-standard"
+          },
+          "formOf": "rive"
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-tuile"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
+          }
         }
       ],
       "constants": {
@@ -6186,15 +6899,50 @@
           "version": 1
         },
         {
-          "id": "tuiles-de-rive",
-          "slot": "rive",
-          "formula": "longueur_rives / pureau",
+          "id": "tuiles-de-rive-gauches",
+          "slot": "rive_gauche",
+          "formula": "longueur_rives / 2 / pureau",
           "unit": "u",
           "core": true,
           "requires": [
             "longueur_rives"
           ],
-          "exclusions": "Une tuile de rive par rang, sur la longueur totale des rives du devis (gauche et droite) ; hors abouts.",
+          "exclusions": "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
+        },
+        {
+          "id": "tuiles-de-rive-droites",
+          "slot": "rive_droite",
+          "formula": "longueur_rives / 2 / pureau",
+          "unit": "u",
+          "core": true,
+          "requires": [
+            "longueur_rives"
+          ],
+          "exclusions": "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -6289,6 +7037,28 @@
           "label": "Tuiles canal"
         },
         {
+          "key": "courant",
+          "family": "roof_tile_canal_part",
+          "label": "Tuiles canal, courants",
+          "usual": {
+            "text": "Le courant du modèle de tuile canal posé.",
+            "source": "edilians-canal",
+            "productId": "tuile-canal-courant"
+          },
+          "formOf": "tuile"
+        },
+        {
+          "key": "couvert",
+          "family": "roof_tile_canal_part",
+          "label": "Tuiles canal, couverts",
+          "usual": {
+            "text": "Le couvert du modèle de tuile canal posé.",
+            "source": "edilians-canal",
+            "productId": "tuile-canal-couvert"
+          },
+          "formOf": "tuile"
+        },
+        {
           "key": "liteau",
           "family": "batten",
           "label": "Liteaux",
@@ -6320,6 +7090,45 @@
           },
           "suggested": {
             "label": "Bardelis (tuiles de rive)"
+          }
+        },
+        {
+          "key": "rive_gauche",
+          "family": "verge_tile",
+          "label": "Bardelis gauches",
+          "usual": {
+            "text": "Bardelis gauche du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bardelis-gauche-standard"
+          },
+          "formOf": "rive"
+        },
+        {
+          "key": "rive_droite",
+          "family": "verge_tile",
+          "label": "Bardelis droits",
+          "usual": {
+            "text": "Bardelis droit du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "bardelis-droit-standard"
+          },
+          "formOf": "rive"
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-tuile"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -6394,12 +7203,12 @@
       },
       "needs": [
         {
-          "id": "tuiles-canal",
-          "slot": "tuile",
-          "formula": "surface * regle.couvert_et_courant * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          "id": "tuiles-canal-courants",
+          "slot": "courant",
+          "formula": "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
           "unit": "u",
           "core": true,
-          "exclusions": "Couvert et courant ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          "exclusions": "Les courants seuls (autant que de couverts) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
           "source": "edilians-canal",
           "verification": {
             "status": "verified",
@@ -6407,7 +7216,23 @@
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
-          "version": 1
+          "version": 2
+        },
+        {
+          "id": "tuiles-canal-couverts",
+          "slot": "couvert",
+          "formula": "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Les couverts seuls (autant que de courants) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
         },
         {
           "id": "liteaux-canal",
@@ -6426,16 +7251,110 @@
           "version": 1
         },
         {
-          "id": "bardelis",
-          "slot": "rive",
-          "formula": "longueur_rives * regle.bardelis_par_ml",
+          "id": "bardelis-gauches",
+          "slot": "rive_gauche",
+          "formula": "longueur_rives / 2 * regle.bardelis_par_ml",
           "unit": "u",
           "core": true,
           "requires": [
             "longueur_rives"
           ],
-          "exclusions": "Rives gauche et droite du devis ; mortier de scellement à part.",
+          "exclusions": "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
           "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
+        },
+        {
+          "id": "bardelis-droits",
+          "slot": "rive_droite",
+          "formula": "longueur_rives / 2 * regle.bardelis_par_ml",
+          "unit": "u",
+          "core": true,
+          "requires": [
+            "longueur_rives"
+          ],
+          "exclusions": "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
+          "source": "edilians-canal",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 2
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        }
+      ]
+    },
+    {
+      "id": "remaniage-ardoises",
+      "trade": "roofing",
+      "section": "principal",
+      "label": "Remaniage d'ardoises",
+      "triggers": [
+        "roof_slate_rework"
+      ],
+      "params": [
+        {
+          "key": "surface_remaniee",
+          "label": "Surface remaniée",
+          "unit": "m2",
+          "kind": "site_data",
+          "question": "Surface remaniée ?",
+          "fromLineQuantity": true,
+          "neverAsk": true
+        },
+        {
+          "key": "ardoises_a_prevoir",
+          "label": "Ardoises à prévoir",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Tu vas remanier. Je te prévois des ardoises ? Si oui, combien ?",
+          "hint": "Ça dépend de l'état de la toiture. Zéro si tu n'en veux pas."
+        }
+      ],
+      "slots": [
+        {
+          "key": "ardoise",
+          "family": "roof_slate_rework",
+          "label": "Ardoises pour remaniage",
+          "usual": {
+            "text": "Ardoises identiques à l'existant.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "ardoise-remaniage"
+          }
+        }
+      ],
+      "constants": {},
+      "needs": [
+        {
+          "id": "ardoises-remaniage",
+          "slot": "ardoise",
+          "formula": "ardoises_a_prevoir",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Le nombre d'ardoises dit par l'artisan ; aucune marge, aucun crochet d'office.",
+          "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
             "verifiedAt": "2026-10-03",
@@ -6755,6 +7674,122 @@
           "named": true
         },
         {
+          "key": "longueur_aretier",
+          "label": "Longueur d'arêtier",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur d'arêtier ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le devis n'en parle pas"
+          }
+        },
+        {
+          "key": "longueur_noue",
+          "label": "Longueur de noue",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de noue ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le devis n'en parle pas"
+          }
+        },
+        {
+          "key": "longueur_faitage",
+          "label": "Longueur du faîtage",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du faîtage ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le devis n'en parle pas"
+          }
+        },
+        {
+          "key": "longueur_gouttiere",
+          "label": "Longueur de gouttière",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur de gouttière ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le devis n'en parle pas"
+          }
+        },
+        {
+          "key": "egout_compris",
+          "label": "Égout et coupes compris dans les m²",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?",
+          "choices": [
+            {
+              "label": "Oui",
+              "value": "1"
+            },
+            {
+              "label": "Non",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "oui",
+            "2": "non"
+          }
+        },
+        {
+          "key": "egout_a_ajouter",
+          "label": "Égout à ajouter",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Quelle longueur d'égout ?",
+          "askOnlyAfter": {
+            "param": "egout_compris",
+            "value": "2"
+          }
+        },
+        {
           "key": "longueur_rampant",
           "label": "Longueur du rampant",
           "unit": "m",
@@ -6799,7 +7834,8 @@
         {
           "key": "ardoise",
           "family": "roof_slate",
-          "label": "Ardoises"
+          "label": "Ardoises",
+          "ask": "Quelle ardoise ? Donne son format."
         },
         {
           "key": "crochet",
@@ -6867,6 +7903,23 @@
           },
           "suggested": {
             "label": "Pointes pour liteaux"
+          }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-ardoise"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -7014,6 +8067,47 @@
           },
           "version": 1,
           "note": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm. Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa."
+        },
+        "sans_gouttiere": {
+          "kind": "installation_condition",
+          "value": "0",
+          "unit": "m",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-21",
+            "verifiedBy": "Mobiiz (définition)"
+          },
+          "version": 1,
+          "note": "Aucune gouttière écrite au devis."
+        },
+        "aretier_m2_par_ml": {
+          "kind": "installation_condition",
+          "value": "0.66",
+          "unit": "m2/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Arêtier : 0,66 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."
+        },
+        "noue_m2_par_ml": {
+          "kind": "installation_condition",
+          "value": "0.50",
+          "unit": "m2/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Noue : 0,50 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."
         },
         "pas_crochet": {
           "kind": "installation_condition",
@@ -8635,12 +9729,12 @@
         {
           "id": "ardoises",
           "slot": "ardoise",
-          "formula": "surface * points.ardoises_m2",
+          "formula": "(surface + regle.aretier_m2_par_ml * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
           "unit": "u",
           "core": true,
-          "exclusions": "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
+          "exclusions": "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
           "designation": "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
-          "precision": "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) + {marge} de marge",
+          "precision": "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}), arêtiers, noues, faîtage et égout du devis compris, + {marge} de marge",
           "precisionRequires": [
             "qualite_ardoise"
           ],
@@ -8734,6 +9828,22 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         }
@@ -8973,6 +10083,23 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "ecran-hpv-standard"
           }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-ardoise"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
+          }
         }
       ],
       "constants": {
@@ -9147,6 +10274,22 @@
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
           },
           "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -9168,6 +10311,36 @@
           "textLabels": [
             "faitage"
           ]
+        },
+        {
+          "key": "tuile_hp10",
+          "label": "Tuile HP 10",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "La tuile posée est une HP 10 ?",
+          "neverAsk": true,
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "hp10",
+                "hp 10"
+              ]
+            }
+          ],
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pas une HP 10"
+          }
         }
       ],
       "slots": [
@@ -9214,9 +10387,36 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "about-faitage-standard"
           }
+        },
+        {
+          "key": "mortier",
+          "family": "ridge_mortar",
+          "label": "Mortier de faîtage",
+          "keywords": [
+            "mortier"
+          ],
+          "usual": {
+            "text": "Mortier de faîtage, en sacs de 25 kg.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "mortier-faitage-25"
+          }
         }
       ],
       "constants": {
+        "mortier_faitage_par_ml": {
+          "kind": "installation_condition",
+          "value": "7.5",
+          "unit": "kg/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "7,5 kg de mortier par mètre de faîtage scellé (Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg)."
+        },
         "abouts_par_faitage": {
           "kind": "installation_condition",
           "value": "2",
@@ -9236,7 +10436,7 @@
         {
           "id": "faitieres",
           "slot": "faitiere",
-          "formula": "longueur_faitage * faitiere.pieces_par_ml",
+          "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
           "exclusions": "Hors abouts (comptés à part) et rencontres d'arêtiers.",
@@ -9267,7 +10467,7 @@
         {
           "id": "crochets-faitiere",
           "slot": "fixation_faitiere",
-          "formula": "longueur_faitage * faitiere.pieces_par_ml",
+          "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
           "exclusions": "Un crochet par faîtière (faîtage à sec).",
@@ -9287,6 +10487,23 @@
           "unit": "u",
           "core": true,
           "exclusions": "Deux abouts pour une ligne de faîtage ; un faîtage en plusieurs lignes en demande davantage.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "mortier-faitage",
+          "slot": "mortier",
+          "formula": "longueur_faitage * regle.mortier_faitage_par_ml",
+          "unit": "kg",
+          "core": false,
+          "exclusions": "Mortier du faîtage scellé : 7,5 kg par mètre, par défaut (5 à 10 kg selon la faîtière).",
+          "precision": "{longueur_faitage|ml} × {regle.mortier_faitage_par_ml|kg/m#} kg/ml, par défaut",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -9888,7 +11105,7 @@
           "unit": "ml",
           "core": true,
           "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
-          "precision": "{longueur_faitage|ml} de faîtage à couvrir",
+          "precision": "{longueur_faitage|ml} de faîtage à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
           "precisionRequires": [
             "developpe",
@@ -10793,6 +12010,101 @@
           ]
         },
         {
+          "key": "faconnage",
+          "ownOnly": true,
+          "label": "Façonnage",
+          "unit": "u",
+          "kind": "artisan_preference",
+          "question": "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
+          "hint": "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
+          "choices": [
+            {
+              "label": "Je façonne (feuilles ou bobineau)",
+              "value": "1",
+              "dit": [
+                "pli",
+                "plie",
+                "plis",
+                "plies",
+                "plier",
+                "pliage",
+                "je plie",
+                "je le plie",
+                "je les plie",
+                "je la plie",
+                "moi meme",
+                "je fais",
+                "je le fais",
+                "je les fais",
+                "je la fais",
+                "je faconne",
+                "je le faconne",
+                "je les faconne",
+                "je la faconne"
+              ]
+            },
+            {
+              "label": "Je commande façonné",
+              "value": "2",
+              "dit": [
+                "tout fait",
+                "tout faits",
+                "toute faite",
+                "toutes faites",
+                "tout pret",
+                "tout prets",
+                "toute prete",
+                "toutes pretes",
+                "achete",
+                "deja faconne",
+                "deja faconnes",
+                "deja faconnee",
+                "deja faconnees",
+                "commande",
+                "commandes",
+                "commandee",
+                "commandees"
+              ]
+            }
+          ],
+          "display": {
+            "1": "je façonne",
+            "2": "commandé façonné"
+          },
+          "groupe": {
+            "id": "pieces-pliees",
+            "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+            "hint": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+          },
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "faconnage et pose",
+                "faconnage des",
+                "faconnees sur place",
+                "faconne sur place",
+                "faconnage sur place",
+                "comprend le pliage",
+                "pliage sur place"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "pliee en z",
+                "pliees en z",
+                "plie en z",
+                "plies en z",
+                "prefaconnee",
+                "prefaconnees",
+                "prefaconne",
+                "prefaconnes"
+              ]
+            }
+          ]
+        },
+        {
           "key": "epaisseur_zinc",
           "label": "Épaisseur du zinc",
           "unit": "mm",
@@ -10961,6 +12273,12 @@
           "key": "bande",
           "family": "hip_strip",
           "label": "Arêtier zinc (bande)",
+          "keywords": [
+            "en bande",
+            "bande d'aretier",
+            "bande aretier",
+            "aretier zinc"
+          ],
           "usual": {
             "text": "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).",
             "source": "fondateur-referentiel-2026-10-03",
@@ -10979,9 +12297,236 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "patte-zinc-standard"
           }
+        },
+        {
+          "key": "feuille",
+          "family": "zinc_sheet",
+          "label": "Feuilles zinc 2 × 1 m",
+          "usual": {
+            "text": "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "feuille-zinc-2x1"
+          },
+          "formOf": "bande"
         }
       ],
       "constants": {
+        "poids_plat_065": {
+          "kind": "installation_condition",
+          "value": "4.7",
+          "unit": "kg/m2",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« kg ≈ m² dév. × 4,7 (ép. 0,65) » (§7)."
+        },
+        "poids_plat_070": {
+          "kind": "installation_condition",
+          "value": "5.04",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "poids_plat_080": {
+          "kind": "installation_condition",
+          "value": "5.76",
+          "unit": "kg/m2",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (7,2 kg/m² par mm, masse volumique du zinc)"
+          },
+          "version": 1
+        },
+        "seuil_070": {
+          "kind": "installation_condition",
+          "value": "0.7",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "seuil_080": {
+          "kind": "installation_condition",
+          "value": "0.8",
+          "unit": "mm",
+          "source": "definition",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "BatiClair (définition)"
+          },
+          "version": 1
+        },
+        "longueur_bande_2m": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« bande de 2 m = ml / 2 arrondi sup. » (§1)."
+        },
+        "longueur_feuille": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "largeur_feuille": {
+          "kind": "installation_condition",
+          "value": "1",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Feuille de zinc 2 × 1 m (§48.6)."
+        },
+        "marge_bandes": {
+          "kind": "installation_condition",
+          "value": "1.1",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "« Solin / abergement : ml × 1,1 » (§7) ; plomb et cuivre « ml × 1,1 » (§12)."
+        },
+        "seuil_bobineau": {
+          "kind": "installation_condition",
+          "value": "6",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "Au-delà de 6 ml de bande : bobineau au lieu de feuilles 2 × 1 m."
+        },
+        "bobineau_500": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_650": {
+          "kind": "installation_condition",
+          "value": "650",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_1000": {
+          "kind": "installation_condition",
+          "value": "1000",
+          "unit": "mm",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_17": {
+          "kind": "installation_condition",
+          "value": "17",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_21": {
+          "kind": "installation_condition",
+          "value": "21",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_31": {
+          "kind": "installation_condition",
+          "value": "31",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        "bobineau_40": {
+          "kind": "installation_condition",
+          "value": "40",
+          "unit": "m",
+          "source": "fondateur-reponses-2026-10-04",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-04",
+            "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1,
+          "note": "40 m seulement en largeur 500."
+        },
         "pattes_par_metre": {
           "kind": "installation_condition",
           "value": "3",
@@ -11066,14 +12611,37 @@
           "version": 1
         },
         {
+          "id": "feuilles-aretier-zinc",
+          "slot": "feuille",
+          "when": "si(aretier_matiere < 2, 9, faconnage) < 2",
+          "formula": "arrondi_sup(longueur_aretier / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
+          "precision": "pour {longueur_aretier|ml} d'arêtier, développé {developpe_aretier|cm}",
+          "estimate": "Estimation d'après le développé : ajuste selon ton façonnage",
+          "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          "precisionRequires": [
+            "aspect_zinc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
           "id": "bande-aretier-zinc",
           "slot": "bande",
-          "when": "aretier_matiere >= 2",
+          "when": "si(aretier_matiere < 2, 0, faconnage) >= 2",
           "formula": "longueur_aretier",
           "unit": "ml",
           "core": true,
           "exclusions": "Recouvrements des longueurs couverts par la perte de 5 %.",
-          "precision": "{longueur_aretier|ml} d'arêtier à couvrir",
+          "precision": "{longueur_aretier|ml} d'arêtier à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "Arêtier {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe_aretier|cm#}",
           "precisionRequires": [
             "developpe_aretier",
@@ -11363,6 +12931,10 @@
         {
           "key": "raccord",
           "family": "roof_window_flashing",
+          "keywords": [
+            "raccord",
+            "raccords"
+          ],
           "label": "Raccords d'étanchéité",
           "usual": {
             "text": "Un raccord par fenêtre, adapté à la couverture (§11).",
@@ -12260,7 +13832,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1) ; fixations à part.",
-          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
             "developpe",
@@ -12966,7 +14538,7 @@
           "unit": "u",
           "core": true,
           "exclusions": "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
-          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          "precision": "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           "designation": "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
           "precisionRequires": [
             "developpe",
@@ -14066,7 +15638,9 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "porte-solin-standard"
           },
-          "formOf": "abergement"
+          "suggested": {
+            "label": "Bandes porte-solin de l'abergement"
+          }
         }
       ],
       "constants": {
@@ -14579,15 +16153,20 @@
               "value": "1",
               "keywords": [
                 "ardoise",
-                "ardoises",
-                "tuile",
-                "tuiles"
+                "ardoises"
               ]
             },
             {
               "value": "2",
               "keywords": [
                 "zinc"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "tuile",
+                "tuiles"
               ]
             }
           ],
@@ -14601,16 +16180,25 @@
             {
               "value": "1",
               "workItems": [
-                "couverture-tuiles-emboitement",
-                "couverture-tuiles-canal",
                 "couverture-ardoises-crochet"
+              ]
+            },
+            {
+              "value": "3",
+              "workItems": [
+                "couverture-tuiles-emboitement",
+                "couverture-tuiles-canal"
               ]
             }
           ],
           "choices": [
             {
-              "label": "Ardoise ou tuile",
+              "label": "Ardoise",
               "value": "1"
+            },
+            {
+              "label": "Tuile",
+              "value": "3"
             },
             {
               "label": "Zinc",
@@ -14618,8 +16206,9 @@
             }
           ],
           "display": {
-            "1": "ardoise ou tuile",
-            "2": "zinc"
+            "1": "ardoise",
+            "2": "zinc",
+            "3": "tuile"
           }
         }
       ],
@@ -14664,6 +16253,28 @@
           "formOf": "sortie"
         },
         {
+          "key": "douille",
+          "family": "outlet_tile",
+          "label": "Tuile à douille",
+          "usual": {
+            "text": "Tuile à douille au modèle de la tuile posée, au diamètre du conduit.",
+            "source": "edilians-hp10",
+            "productId": "tuile-a-douille"
+          },
+          "formOf": "sortie"
+        },
+        {
+          "key": "lanterne",
+          "family": "outlet_lantern",
+          "label": "Lanterne",
+          "usual": {
+            "text": "Une lanterne par tuile à douille.",
+            "source": "edilians-hp10",
+            "productId": "lanterne-sortie"
+          },
+          "formOf": "sortie"
+        },
+        {
           "key": "collerette",
           "family": "outlet_collar",
           "label": "Collerette d'étanchéité",
@@ -14693,7 +16304,7 @@
         {
           "id": "embase-sortie",
           "slot": "embase",
-          "when": "support_sortie < 2",
+          "when": "si(support_sortie >= 3, si(usage_sortie >= 2, 0, 1), si(support_sortie < 2, 1, 0))",
           "formula": "nb_sorties",
           "unit": "u",
           "core": true,
@@ -14713,7 +16324,7 @@
         {
           "id": "platine-sortie",
           "slot": "platine",
-          "when": "support_sortie >= 2",
+          "when": "si(support_sortie >= 2, si(support_sortie < 3, 1, 0), 0)",
           "formula": "nb_sorties",
           "unit": "u",
           "core": true,
@@ -14733,6 +16344,7 @@
         {
           "id": "chapeau-sortie",
           "slot": "chapeau",
+          "when": "si(si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0), 0, 1)",
           "formula": "nb_sorties",
           "unit": "u",
           "core": true,
@@ -14746,6 +16358,48 @@
             "status": "verified",
             "verifiedAt": "2026-10-04",
             "verifiedBy": "Fondateur (couvreur)"
+          },
+          "version": 1
+        },
+        {
+          "id": "tuile-a-douille",
+          "slot": "douille",
+          "when": "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          "formula": "nb_sorties",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une tuile à douille par sortie de ventilation, au modèle de la tuile posée.",
+          "precision": "{diametre_sortie}",
+          "precisionRequires": [
+            "diametre_sortie"
+          ],
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "lanterne-sortie",
+          "slot": "lanterne",
+          "when": "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          "formula": "nb_sorties",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une lanterne par tuile à douille.",
+          "precision": "{diametre_sortie}",
+          "precisionRequires": [
+            "diametre_sortie"
+          ],
+          "source": "edilians-hp10",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
@@ -15074,6 +16728,23 @@
             "source": "vmzinc-tasseaux",
             "productId": "couvre-joint-tasseau-zinc"
           }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-zinc"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
+          }
         }
       ],
       "constants": {
@@ -15271,6 +16942,22 @@
             "note": "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau."
           },
           "version": 2
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -15686,6 +17373,23 @@
             "text": "Volige sapin 18 mm sous le zinc (§7).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "volige-sapin-standard"
+          }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-zinc"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -16420,6 +18124,22 @@
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
         }
       ]
     },
@@ -16684,6 +18404,30 @@
               ]
             }
           ]
+        },
+        {
+          "key": "longueur_faitage",
+          "label": "Longueur du faîtage",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur du faîtage ?",
+          "fromLineQuantity": true,
+          "forSlots": [
+            "faitiere"
+          ],
+          "neverAsk": true,
+          "default": {
+            "formula": "largeur_pan",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "le faîtage fait la largeur d'un pan"
+          }
         }
       ],
       "slots": [
@@ -16708,6 +18452,9 @@
           "key": "vis",
           "family": "steel_screw",
           "label": "Vis",
+          "keywords": [
+            "vis"
+          ],
           "usual": {
             "text": "Vis autoperceuses avec rondelle EPDM (§8).",
             "source": "fondateur-referentiel-2026-10-03",
@@ -16718,6 +18465,10 @@
           "key": "closoir",
           "family": "steel_closure",
           "label": "Closoirs",
+          "keywords": [
+            "closoir",
+            "closoirs"
+          ],
           "usual": {
             "text": "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).",
             "source": "fondateur-referentiel-2026-10-03",
@@ -16728,10 +18479,32 @@
           "key": "faitiere",
           "family": "steel_ridge",
           "label": "Faîtières",
+          "keywords": [
+            "faitiere",
+            "faitieres",
+            "faitage"
+          ],
           "usual": {
             "text": "Faîtière de bac en longueurs de 2 m (§8).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "faitiere-bac-acier"
+          }
+        },
+        {
+          "key": "sortie_ventilation",
+          "family": "outlet_vent",
+          "label": "Sortie de ventilation",
+          "usual": {
+            "text": "Une sortie de ventilation adaptée à la couverture.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "sortie-ventilation-bac-acier"
+          },
+          "suggested": {
+            "label": "Sortie de ventilation (VMC, extraction d'air)",
+            "unlessWorks": [
+              "sortie-de-toit"
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -16937,15 +18710,31 @@
           "id": "faitieres",
           "slot": "faitiere",
           "when": "nb_pans >= 2",
-          "formula": "arrondi_sup(largeur_pan / regle.faitiere) + 1",
+          "formula": "arrondi_sup(longueur_faitage / regle.faitiere)",
           "unit": "u",
           "core": true,
-          "exclusions": "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
+          "exclusions": "Faîtage de la largeur d'un pan, longueurs de 2 m utiles (recouvrement compris dans la pièce).",
           "designation": "Faîtières bac acier {teinte_bac}, longueur 2 m",
           "precision": "{largeur_pan|ml} de faîtage",
           "precisionRequires": [
             "teinte_bac"
           ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "sortie-ventilation",
+          "slot": "sortie_ventilation",
+          "formula": "1",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
           "source": "fondateur-referentiel-2026-10-03",
           "verification": {
             "status": "verified",
@@ -17610,6 +19399,27 @@
                 "3 angles",
                 "trois angles"
               ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 angles",
+                "quatre angles"
+              ]
+            },
+            {
+              "value": "5",
+              "keywords": [
+                "5 angles",
+                "cinq angles"
+              ]
+            },
+            {
+              "value": "6",
+              "keywords": [
+                "6 angles",
+                "six angles"
+              ]
             }
           ]
         },
@@ -17949,6 +19759,20 @@
           "version": 1,
           "note": "Gouttière zinc en longueurs de 4 m (§25.2)."
         },
+        "recouvrement_jonction": {
+          "kind": "installation_condition",
+          "value": "0.03",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Gouttière zinc : 30 mm de recouvrement par jonction soudée (base couverture, gouttières zinc)."
+        },
         "flacons_decapant": {
           "kind": "installation_condition",
           "value": "1",
@@ -18038,10 +19862,11 @@
         {
           "id": "profil",
           "slot": "profil",
-          "formula": "longueur_gouttiere",
+          "formula": "longueur_gouttiere + regle.recouvrement_jonction * (arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1)",
           "unit": "ml",
           "core": true,
-          "exclusions": "Hors recouvrements ou jonctions propres au système.",
+          "exclusions": "Recouvrement des jonctions soudées compris (30 mm par jonction).",
+          "covers": "longueur_gouttiere",
           "designation": "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
           "precisionRequires": [
             "developpe_gouttiere"
@@ -18328,7 +20153,8 @@
               "keywords": [
                 "grise",
                 "grises",
-                "gris clair"
+                "gris clair",
+                "gris"
               ]
             },
             {
@@ -18357,7 +20183,8 @@
               "value": "5",
               "keywords": [
                 "anthracite",
-                "7016"
+                "7016",
+                "gris anthracite"
               ]
             }
           ],
@@ -18473,6 +20300,27 @@
               "keywords": [
                 "3 angles",
                 "trois angles"
+              ]
+            },
+            {
+              "value": "4",
+              "keywords": [
+                "4 angles",
+                "quatre angles"
+              ]
+            },
+            {
+              "value": "5",
+              "keywords": [
+                "5 angles",
+                "cinq angles"
+              ]
+            },
+            {
+              "value": "6",
+              "keywords": [
+                "6 angles",
+                "six angles"
               ]
             }
           ]
@@ -19138,7 +20986,9 @@
           "question": "Hauteur d'une descente ?",
           "textLabels": [
             "hauteur",
-            "descente"
+            "descente",
+            "ht",
+            "haut"
           ],
           "textRange": {
             "min": "1",
@@ -19544,7 +21394,7 @@
     },
     {
       "family": "roof_tile",
-      "rate": "3",
+      "rate": "5",
       "source": "fondateur-referentiel-2026-10-03",
       "verification": {
         "status": "verified",
@@ -19552,11 +21402,23 @@
         "verifiedBy": "Fondateur (couvreur)",
         "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
       },
-      "version": 1,
-      "note": "Tuiles mécaniques."
+      "version": 2,
+      "note": "Tuiles à emboîtement : 5 % de casse (Greg, 21 novembre 2026)."
     },
     {
       "family": "roof_tile_canal",
+      "rate": "3",
+      "source": "fiche-couverture",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-11-19",
+        "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+      },
+      "version": 1,
+      "note": "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)."
+    },
+    {
+      "family": "roof_tile_canal_part",
       "rate": "3",
       "source": "fiche-couverture",
       "verification": {

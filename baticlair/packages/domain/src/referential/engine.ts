@@ -446,6 +446,9 @@ export function computeWorkItem(ref: Referential, input: WorkItemInput, options:
   const consumableOf = (rule: NeedRule) => !writtenSlot(rule.slot) && isConsumableNeed(ref, work, rule);
   const everything = options.everyArticle === true || ref.writtenOnly === false;
   const written = (rule: NeedRule): boolean => {
+    // Un article qui n'existe que comme suggestion transversale (la sortie de ventilation, proposée sur toute couverture) ne
+    // sort que coché, même sur la fiche complète : il n'est l'accessoire d'aucun article écrit.
+    if (!writtenSlot(rule.slot) && work.slots.find((x) => x.key === rule.slot)?.suggested?.unlessWorks) return false;
     if (everything || writtenSlot(rule.slot)) return true;
     if (!isConsumableNeed(ref, work, rule)) return citedSlot(rule.slot) !== undefined;
     if (consumables !== undefined && Number(consumables) < 1) return false;
@@ -738,6 +741,19 @@ function computeNeed(
         const family = ref.families.find((f) => f.code === work.slots.find((s) => s.key === head)?.family);
         const def = family?.attributes.find((a) => a.key === attr);
         const fact = p?.attributes[attr];
+        // Banc du calcul (C08, 21 novembre 2026, « ardoises identiques à l'existant ») : le produit n'est pas dit et le calcul
+        // en a besoin par une règle dérivée (le pureau) : c'est UNE question (« quelle ardoise ? »), jamais une ligne « à
+        // chiffrer » sans la question qui la débloque.
+        if (!p) {
+          const headSlot = work.slots.find((s) => s.key === head);
+          const candidates = headSlot ? ref.products.filter((x) => x.family === headSlot.family) : [];
+          if (headSlot && candidates.length > 0 && !input.declined?.includes(headSlot.key)) {
+            throw new Stop({
+              status: "question",
+              question: { key: `product:${headSlot.key}`, kind: "choose_product", text: headSlot.ask ?? `Quel produit pour : ${headSlot.label.toLowerCase()} ?`, options: candidates.map((x) => ({ label: x.shortLabel, value: x.id })) },
+            });
+          }
+        }
         if (!p || !fact) {
           throw new Stop({
             status: "unknown",
@@ -842,8 +858,11 @@ function computeNeed(
       const value = isPoint(v) ? shown(v.lo) : `${shown(v.lo)} à ${shown(v.hi)}`;
       const prov = provenanceLine(d, sources);
       const note = from?.note ?? d.note;
-      trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-      assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+      // Une valeur par défaut qui ne dit rien (« le devis n'en parle pas » : 0 m d'arêtier) n'est ni tracée ni dite en hypothèse.
+      if (!def.silentDefault) {
+        trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
+        assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+      }
       return v;
     }
     /**
@@ -1169,7 +1188,7 @@ function computeNeed(
       ...(unknownParams.length > 0 ? { unknownParams } : {}),
       status: "calculated",
       ...(exact
-        ? { quantity: { value: need.lo.toDecimalPlaces(2).toFixed(), unit: rule.unit } }
+        ? { quantity: { value: (rule.covers && input.params[rule.covers] ? new Decimal(input.params[rule.covers]!.value) : need.lo).toDecimalPlaces(2).toFixed(), unit: rule.unit } }
         : { quantityRange: { min: need.lo.toDecimalPlaces(2).toFixed(), max: need.hi.toDecimalPlaces(2).toFixed(), unit: rule.unit } }),
       ...(purchase ? { purchase: { order: { count: purchase.orderLo.toFixed(), unit: purchase.unit }, approx: purchase.approx } } : {}),
       ...(enPieces ? { purchase: enPieces } : {}),

@@ -1,0 +1,24 @@
+{
+ "m": "S4b",
+ "c": "R01",
+ "e": 1,
+ "nRef": 10,
+ "justes": 10,
+ "quantite": 0,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 5,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": []
+ }
+}

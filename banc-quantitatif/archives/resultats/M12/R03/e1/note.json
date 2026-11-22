@@ -1,0 +1,37 @@
+{
+ "m": "M12",
+ "c": "R03",
+ "e": 1,
+ "nRef": 8,
+ "justes": 5,
+ "quantite": 1,
+ "manquantes": 2,
+ "inventees": 2,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 5,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [
+   "Crochets d'ardoise inox standard, longueur 11 cm : 2122 pièces attendu, à chiffrer  lu"
+  ],
+  "manquantes": [
+   "Ardoises naturelles Espagne 1er choix 32×22 (2122 pièces)",
+   "Crochets de gouttière havraise (20 pièces)"
+  ],
+  "inventees": [
+   "Ardoises (Ardoises) (à chiffrer )",
+   "Crochets (20 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:developpe@faitage-zinc",
+    "text": "Faîtage en bande zinc : développé de la bande zinc ?"
+   }
+  ]
+ }
+}

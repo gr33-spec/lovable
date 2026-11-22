@@ -1,0 +1,89 @@
+{
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+    {"donnee": "ouvrage", "valeur": "réfection de couverture en ardoises naturelles", "origine": "lue", "regle": "", "preuve": "Objet : « réfection de la couverture » ; ligne 2 : « Ardoises naturelles 30x22 »"},
+    {"donnee": "neuf ou rénovation", "valeur": "rénovation", "origine": "lue", "regle": "", "preuve": "Conditions : « travaux de rénovation, logement achevé depuis plus de 2 ans »"},
+    {"donnee": "matériau", "valeur": "ardoises naturelles", "origine": "lue", "regle": "", "preuve": "ligne 2 : « Ardoises naturelles 30x22 »"},
+    {"donnee": "format des ardoises", "valeur": "30×22 cm", "origine": "lue", "regle": "", "preuve": "ligne 2 : « Ardoises naturelles 30x22 »"},
+    {"donnee": "qualité de l'ardoise", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "surface", "valeur": "200 m²", "origine": "lue", "regle": "", "preuve": "lignes 1 et 2 : « 200 m² »"},
+    {"donnee": "support des ardoises", "valeur": "liteaux bois", "origine": "lue", "regle": "", "preuve": "ligne 1 : « Liteaux bois pour ardoises »"},
+    {"donnee": "pente", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "rampant", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "pureau", "valeur": "", "origine": "deduite", "regle": "se déduit du format 30×22, de la pente et du rampant (DTU ardoise) ; défaut affiché, pas une question", "preuve": ""},
+    {"donnee": "gouttière", "valeur": "17 m", "origine": "lue", "regle": "", "preuve": "ligne 3 : « Gouttière de 25, bandeau en zinc 17 m »"},
+    {"donnee": "matière de la gouttière", "valeur": "zinc", "origine": "lue", "regle": "", "preuve": "ligne 3 : « bandeau en zinc »"},
+    {"donnee": "développé de gouttière", "valeur": "25 cm", "origine": "lue", "regle": "", "preuve": "ligne 3 : « Gouttière de 25 »"},
+    {"donnee": "pose des crochets de gouttière", "valeur": "en façade (bandeau)", "origine": "lue", "regle": "", "preuve": "ligne 3 : « bandeau »"},
+    {"donnee": "nombre de descentes", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "faîtage", "valeur": "17 m, zinc", "origine": "lue", "regle": "", "preuve": "ligne 4 : « Faîtage zinc 17 m »"},
+    {"donnee": "développé du faîtage", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "façonnage", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "jouées de lucarnes", "valeur": "6 u", "origine": "lue", "regle": "", "preuve": "ligne 5 : « Ardoises pour jouées de lucarnes 6 unités »"},
+    {"donnee": "surface des jouées", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "format des ardoises de jouées", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "nombre de cheminées", "valeur": "2 u", "origine": "lue", "regle": "", "preuve": "ligne 6 : « Entourage de cheminée zinc et solin 2 unités »"},
+    {"donnee": "entourage de cheminée", "valeur": "zinc et solin", "origine": "lue", "regle": "", "preuve": "ligne 6 : « Entourage de cheminée zinc et solin »"},
+    {"donnee": "périmètre d'une cheminée", "valeur": "", "origine": "manquante", "regle": "", "preuve": ""},
+    {"donnee": "chatières de ventilation", "valeur": "12 u", "origine": "lue", "regle": "", "preuve": "ligne 7 : « Chatières de ventilation 12 unités »"}
+  ],
+  "bref": [
+    "Réfection de la couverture existante en ardoises naturelles, 200 m².",
+    "Liteaux bois pour ardoises sur 200 m².",
+    "200 m² d'ardoises naturelles 30x22.",
+    "17 m de gouttière zinc de 25, posée sur bandeau.",
+    "17 m de faîtage zinc.",
+    "Ardoises pour jouées de lucarnes, 6 unités au devis.",
+    "2 entourages de cheminée en zinc, avec solin.",
+    "12 chatières de ventilation.",
+    "Une naissance par descente sur la gouttière."
+  ],
+  "questions": [
+    {"cle": "qualite_ardoise", "texte": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "boutons": [{"label": "Espagne 1er choix", "valeur": "1"}, {"label": "Ardoise NF (type Cupa)", "valeur": "2"}], "unite": "", "donnee": "qualité de l'ardoise", "ligne": "2"},
+    {"cle": "pente", "texte": "Quelle pente fait ton toit ?", "boutons": [{"label": "45°", "valeur": "45"}, {"label": "30°", "valeur": "30"}, {"label": "35°", "valeur": "35"}], "unite": "°", "donnee": "pente", "ligne": ""},
+    {"cle": "longueur_rampant", "texte": "Ton rampant fait combien, de l'égout au faîtage ?", "boutons": [{"label": "Jusqu'à 5,5 m", "valeur": "5.5"}, {"label": "5,5 à 8 m", "valeur": "8"}, {"label": "Plus de 8 m", "valeur": "10"}, {"label": "Plus de 11 m", "valeur": "12"}], "unite": "m", "donnee": "rampant", "ligne": ""},
+    {"cle": "nb_descentes", "texte": "Combien de descentes pour ta gouttière ?", "boutons": [{"label": "1", "valeur": "1"}, {"label": "2", "valeur": "2"}, {"label": "3", "valeur": "3"}, {"label": "4", "valeur": "4"}], "unite": "u", "donnee": "nombre de descentes", "ligne": "3"},
+    {"cle": "faconnage", "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "boutons": [{"label": "Je plie moi-même (feuilles ou bobineau)", "valeur": "1"}, {"label": "J'achète façonné", "valeur": "2"}], "unite": "", "donnee": "façonnage", "ligne": ""},
+    {"cle": "developpe", "texte": "Ton faîtage zinc, c'est une bande de quel développé ?", "boutons": [{"label": "Dév. 25", "valeur": "250"}, {"label": "Dév. 33", "valeur": "330"}, {"label": "Dév. 40", "valeur": "400"}, {"label": "Dév. 20", "valeur": "200"}], "unite": "mm", "donnee": "développé du faîtage", "ligne": "4"},
+    {"cle": "surface_jouees", "texte": "Tes jouées de lucarnes font combien de m² en tout (ex. 6) ?", "boutons": [], "unite": "m²", "donnee": "surface des jouées", "ligne": "5"},
+    {"cle": "format_ardoise_jouees", "texte": "Les ardoises des jouées, c'est le même format que le toit (30×22) ?", "boutons": [{"label": "Oui, 30×22", "valeur": "30x22"}, {"label": "Non, un autre format", "valeur": "autre"}], "unite": "", "donnee": "format des ardoises de jouées", "ligne": "5"},
+    {"cle": "perimetre_cheminee", "texte": "Ta cheminée fait quel périmètre, les 4 côtés ?", "boutons": [{"label": "2 m", "valeur": "2"}, {"label": "3 m", "valeur": "3"}, {"label": "4 m", "valeur": "4"}, {"label": "5 m", "valeur": "5"}], "unite": "m", "donnee": "périmètre d'une cheminée", "ligne": "6"}
+  ],
+  "lignes": [
+    {"ref": "1", "designation": "Liteaux bois pour ardoises", "quantite": "200", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Liteaux bois pour ardoises", "quantite": "", "unite": "ml", "ouvrage": "couverture-ardoises-crochet", "emplacement": "liteau", "donnees": [{"cle": "surface", "valeur": "200"}], "attend": ["pente", "longueur_rampant"], "a_preciser": ["section"], "precision": ""}
+    ]},
+    {"ref": "2", "designation": "Ardoises naturelles 30x22", "quantite": "200", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Ardoises naturelles 30x22", "quantite": "", "unite": "u", "ouvrage": "couverture-ardoises-crochet", "emplacement": "ardoise", "donnees": [{"cle": "surface", "valeur": "200"}], "attend": ["qualite_ardoise", "pente", "longueur_rampant"], "a_preciser": [], "precision": ""}
+    ]},
+    {"ref": "3", "designation": "Gouttière de 25, bandeau en zinc", "quantite": "17", "unite": "m", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Gouttière zinc de 25", "quantite": "17", "unite": "ml", "ouvrage": "gouttiere", "emplacement": "profil", "donnees": [{"cle": "longueur_gouttiere", "valeur": "17"}, {"cle": "developpe_gouttiere", "valeur": "25"}, {"cle": "fixation_crochet", "valeur": "2"}], "attend": ["nb_descentes"], "a_preciser": ["profil"], "precision": "pose sur bandeau"}
+    ]},
+    {"ref": "4", "designation": "Faîtage zinc", "quantite": "17", "unite": "m", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Faîtage zinc", "quantite": "17", "unite": "ml", "ouvrage": "faitage-zinc", "emplacement": "bande", "donnees": [{"cle": "longueur_faitage", "valeur": "17"}], "attend": ["faconnage", "developpe"], "a_preciser": ["épaisseur", "aspect du zinc"], "precision": ""}
+    ]},
+    {"ref": "5", "designation": "Ardoises pour jouées de lucarnes", "quantite": "6", "unite": "unités", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Ardoises pour jouées de lucarnes", "quantite": "", "unite": "u", "ouvrage": "", "emplacement": "", "donnees": [], "attend": ["surface_jouees", "format_ardoise_jouees"], "a_preciser": ["qualité"], "precision": "les 6 unités du devis comptent les jouées, pas les ardoises"}
+    ]},
+    {"ref": "6", "designation": "Entourage de cheminée zinc et solin", "quantite": "2", "unite": "unités", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Entourage de cheminée zinc", "quantite": "2", "unite": "u", "ouvrage": "abergement-cheminee", "emplacement": "abergement", "donnees": [{"cle": "nb_cheminees", "valeur": "2"}], "attend": ["perimetre_cheminee", "faconnage"], "a_preciser": ["épaisseur", "aspect du zinc"], "precision": ""},
+      {"nom": "Solin de cheminée", "quantite": "", "unite": "", "ouvrage": "abergement-cheminee", "emplacement": "porte_solin", "donnees": [{"cle": "nb_cheminees", "valeur": "2"}], "attend": ["perimetre_cheminee"], "a_preciser": ["matière"], "precision": "pour l'entourage de cheminée zinc"}
+    ]},
+    {"ref": "7", "designation": "Chatières de ventilation", "quantite": "12", "unite": "unités", "role": "fourniture_et_pose", "fournitures": [
+      {"nom": "Chatières de ventilation", "quantite": "12", "unite": "u", "ouvrage": "", "emplacement": "", "donnees": [], "attend": [], "a_preciser": ["modèle", "teinte"], "precision": "pour couverture en ardoises"}
+    ]}
+  ],
+  "contexte": [
+    {"cle": "client", "valeur": "M. et Mme Hervé Marchand"},
+    {"cle": "adresse", "valeur": "7, chemin de la Fontaine"},
+    {"cle": "ville", "valeur": "Vitré"},
+    {"cle": "code postal", "valeur": "35500"},
+    {"cle": "numéro du devis", "valeur": "D-2026-1184"},
+    {"cle": "date", "valeur": "28/09/2026"},
+    {"cle": "validité", "valeur": "3 mois"},
+    {"cle": "objet", "valeur": "réfection de la couverture"},
+    {"cle": "neuf ou rénovation", "valeur": "rénovation (logement achevé depuis plus de 2 ans)"}
+  ],
+  "notes": []
+}

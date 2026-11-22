@@ -87,7 +87,7 @@ describe("référentiel couverture", () => {
     }
     // 1 305,43 tuiles + 3 % de perte (référentiel du fondateur) = 1 344,59.
     const r = computeWorkItem(REFERENTIEL_COMPLET, CASE);
-    expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "1344.59" } });
+    expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: false, quantity: { value: "1370.7" } }); // 5 % de casse (Greg, 21 novembre 2026 ; avant 3 % : 1 344,59)
   });
 
   it("une règle remise en brouillon ne donne aucun chiffre à un artisan", () => {
@@ -300,7 +300,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
 
     const { tuile: _t, ...others } = ALL_PRODUCTS;
     const missing = computeWorkItem(ref, { ...CASE, products: others });
-    expect(need(missing, "tuiles").question).toMatchObject({ kind: "choose_product", options: [{ label: "Tuiles HP10" }] });
+    expect(need(missing, "tuiles").question).toMatchObject({ kind: "choose_product", options: [{ label: "Tuiles HP10" }, { label: "Tuiles Volnay PV" }] });
 
     const outside = computeWorkItem(ref, { ...CASE, params: { ...CASE.params, pureau: { value: "40", unit: "cm", origin: "artisan" } } });
     expect(need(outside, "tuiles").question).toMatchObject({ key: "param:pureau", hint: "Entre 31 et 37,6 cm." });
@@ -308,7 +308,7 @@ describe("moteur : ouvrage → besoins → achat", () => {
 
   it("marque « provisoire » un calcul fait en brouillon (écran du validateur uniquement)", () => {
     const r = computeWorkItem(drafted(REFERENTIEL_COMPLET), CASE, { acceptDraft: true });
-    expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: true, quantity: { value: "1344.59" } });
+    expect(need(r, "tuiles")).toMatchObject({ status: "calculated", provisional: true, quantity: { value: "1370.7" } }); // 5 % de casse (Greg, 21 novembre 2026 ; avant 3 % : 1 344,59)
     // La caractéristique fabricant est vérifiée ; c'est la règle de calcul qui attend sa validation.
     expect(need(r, "tuiles").trace.find((t) => t.label.startsWith("Largeur utile"))).toMatchObject({ verified: true });
     expect(need(r, "tuiles").trace.find((t) => t.label === "Besoin calculé")).toMatchObject({ verified: false });

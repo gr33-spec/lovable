@@ -1,5 +1,147 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-74 — Fusion de la branche de test (suggestions sans limite, pointes de liteaux, fixations) dans le banc du calcul (2026-11-22)
+
+- Réunit la fiche `roofing-2026.11.22-73` (banc du calcul) et la fiche `roofing-2026.11.20-63` de la branche de test : leurs
+  deux suites de changements, sans en retirer aucun. La numérotation reprend après la plus haute (73).
+
+## roofing-2026.11.22-73 — Ardoise fibres-ciment 40×24 : 27,1 au m² ; deux lignes qui ne disent pas la même surface (2026-11-22)
+
+Le banc du calcul passe de 94 à 96 lignes justes sur 99 (97 %).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Ardoises fibres-ciment 40×24 au m² (recouvrement 100 mm, au crochet) | 27,8 | 27,1 | Cedral, manuel de pose du 15 avril 2026 ; Cembrit, documentation de septembre 2016 : même tableau (`recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`) |
+| Exemple : 100 m² | 2 919 ardoises | 2 846 ardoises | 100 × 27,1 × 1,05 |
+| Deux lignes d'un même ouvrage qui n'écrivent pas la même mesure (liteaux 100 m², ardoises 110 m²) | la première mesure prise partout, sans question | la question se pose (« Surface du toit ? ») | Greg, 21 novembre 2026 : « en cas de doute, on demande au couvreur » |
+
+- Sortie de ventilation : proposée seulement quand la couverture elle-même est écrite avec sa surface. Une ligne de liteaux seule, ou des ardoises listées en pièces, ne la proposent pas (parcours « 36 mètres de liteaux », 22 novembre 2026).
+
+## roofing-2026.11.21-72 — Suggestion « Sortie de ventilation » sur toute couverture (Greg, 2026-11-21 au soir)
+
+Le banc du calcul ne bouge pas : 94 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Sortie de ventilation non écrite au devis | rien | une case de l'étape « Suggestions » : « Sortie de ventilation (VMC, extraction d'air) », sur toute couverture (tuile, ardoise, zinc, bac acier) ; cochée : une pièce, modifiable | Greg, 21 novembre 2026 |
+| Article commandé | — | tuile à douille et lanterne sur tuile ; sortie pour ardoise, pour zinc, pour bac acier | Greg, 21 novembre 2026 (« l'article s'adapte au matériau ») |
+
+- Pas proposée quand le devis écrit déjà une sortie de toit. Jamais d'office, même sur la fiche complète.
+- Les longueurs que le devis n'écrit pas (arêtier, noue, faîtage, gouttière : 0 m) ne sont plus dites en hypothèse ; la précision des ardoises dit « arêtiers, noues, faîtage et égout du devis compris ».
+
+## roofing-2026.11.21-71 — Ardoises : ouvrages au mètre, question de l'égout, remaniage (Greg, 2026-11-21 au soir)
+
+Le banc du calcul passe de 88 sur 100 à 94 sur 99 (une ligne « incertaine » : les crochets à pointe).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Ardoises au crochet | surface × ardoises au m², + 5 % | (surface + 0,66 m² par mètre d'arêtier + 0,50 m² par mètre de noue) × ardoises au m², + un rang au faîtage et à l'égout (longueur ÷ largeur de l'ardoise), puis 5 % | Greg, 21 novembre 2026 ; manuel du CAP couvreur (`recherche/ardoise-ouvrages-au-metre.md`) |
+| Exemple : D-2026-020 (48 m², 32×22, faîtage 8 m, gouttière 10 m) | 2 122 ardoises | 2 208 ardoises | 48 × 42,09 + 18 ÷ 0,22, × 1,05 |
+| Égout | jamais compté | la longueur de la gouttière écrite ; sinon la question « Tes m² d'ardoise comprennent déjà l'égout et les coupes ? » (Oui : rien ; Non : « Quelle longueur d'égout ? ») | Greg, 21 novembre 2026 |
+| Remaniage d'ardoises | la surface remaniée comptée en ardoises neuves (12 m² : 489) | aucune ardoise d'office ; question « Tu vas remanier. Je te prévois des ardoises ? Si oui, combien ? » ; le nombre dit, sans marge | Greg, 21 novembre 2026 |
+
+- Règle changée : deux questions demandent maintenant un nombre (la longueur d'égout après « Non », les ardoises d'un remaniage). Avant : jamais de quantité demandée. C'est la demande de Greg.
+- Pas encore fait : les rives d'ardoise (0,16 m² par mètre) ; l'arêtier en bande zinc est compté comme l'arêtier fermé (0,66), à confirmer.
+
+## roofing-2026.11.21-70 — Réponses de Greg du 21 novembre au soir : bac acier, faîtière HP 10, mortier, sortie de toit (2026-11-21)
+
+Le banc du calcul passe de 83 à 88 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Faîtière de bac acier | ml ÷ 2 arrondi au-dessus, + 1 (8 pour 12,50 m) | ml ÷ 2 arrondi au-dessus (7 pour 12,50 m) | Greg, 21 novembre 2026 ; Bacacier et Joris Ide : 2,10 m hors tout, 2,00 m utile |
+| Vis de bac acier | à trancher | inchangé : près de 8 au m², sans question | Greg, 21 novembre 2026 (« validé ») |
+| Faîtière sur tuile HP 10, sans modèle écrit | 3 au mètre | la demi-ronde, 2,5 au mètre (9 m : 23) | Greg, 21 novembre 2026 ; documentation HP 10 Edilians (demi-ronde 2,5 au mètre, angulaire 3) |
+| Mortier d'un faîtage scellé | cité, jamais sorti | 7,5 kg par mètre, en sacs de 25 kg (9 m : 3 sacs), seulement quand le devis dit le mortier | Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg par mètre |
+| Sortie de ventilation écrite, sur tuile | embase plomb et chapeau | tuile à douille et lanterne | Greg, 21 novembre 2026 (« l'article s'adapte au matériau ») ; Edilians, gamme HP 10 |
+| Couverture autour d'une sortie de toit | « ardoise ou tuile » / zinc ; notée par la lecture | ardoise / tuile / zinc ; lue par le code sur les autres ouvrages du devis, demandée s'il y en a deux | règle `fromWorks` de la fiche |
+
+- « HP 10 » se lit sur la ligne des tuiles, même en fourniture seule, et vaut pour le faîtage du même devis ; jamais demandé.
+- « Scellé au mortier », « pose au crochet » : ce qui suit « au » est un moyen cité, pas l'article de la ligne.
+
+## roofing-2026.11.21-69 — Tuile Volnay PV au catalogue, « 1 descente » jamais « 1 pièce » (2026-11-21)
+
+Le banc du calcul passe de 81 à 83 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Tuile Terreal Volnay PV | modèle inconnu : ligne « à chiffrer » sans question | au catalogue : largeur utile 251 mm, pureau 340 à 408 mm, palette de 240 | fiche produit Terreal (Wienerberger) de mars 2025, relevée dans la base couverture (S84) ; fabricant seul, contrôlé par le calcul |
+| Descente écrite « 1 u » sans hauteur (« je ne sais pas ») | « Tubes de descente : 1 pièce » | la ligne reste sans quantité, « 1 u au devis » en précision | le nombre écrit compte des descentes, pas des tubes |
+
+## roofing-2026.11.21-68 — Arêtier zinc : des mots précis (2026-11-21)
+
+Le banc du calcul ne bouge pas : 81 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Mots qui nomment la bande d'un arêtier zinc | « bande », « zinc » : trop larges, une « Bande zinc d'égout » pouvait être rangée en arêtier | « en bande », « bande d'arêtier », « arêtier zinc » | test `apps/api/test/demande-de-devis-45.test.ts` (cas 3) |
+
+- Un nom en « ée » que la fiche connaît (« jouée ») n'est plus pris pour une façon ou une teinte ; « ardoisé », lui, reste une teinte.
+
+## roofing-2026.11.21-67 — Banc du calcul, lot 4 : tuile canal en deux lignes, faîtière de bac acier (Greg, 2026-11-21)
+
+Le banc du calcul passe de 78 à 81 lignes justes sur 100.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Tuile canal | une ligne « tuiles canal » (couverts + courants) | **deux lignes** : « Tuiles canal, courants » et « Tuiles canal, couverts », autant de l'un que de l'autre | Greg, 21 novembre 2026 ; Edilians (Canal 50, réf. 414 et 454) et Terreal : deux articles (`recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`) |
+| Exemple : Canal Gironde 50, R 150, 100 m² | 2 617 tuiles | 1 309 courants + 1 309 couverts | |
+| Faîtière de bac acier | ligne « faîtière BA, lg 12,50 m » rangée dans le faîtage de tuile (3 au mètre : 38 pièces) | la faîtière du bac acier, en longueurs de 2 m sur la longueur écrite : 12,50 ÷ 2 arrondi au-dessus + 1 = 8 | §8 du référentiel (« ml / 2 arrondi sup., + 1 ») ; longueur utile 2,00 m confirmée (Bacacier, Joris Ide, même recherche) |
+
+- « BA », « couv. BA » sont lus comme le bac acier ; la vis et le closoir cités sur sa ligne restent cités.
+- À trancher par Greg : le « + 1 » de la faîtière de bac acier (le contrôleur et les fabricants comptent 7 pour 12,50 m) ; le nombre de vis (le référentiel en compte près de 8 au m², un fabricant 2,5).
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
+## roofing-2026.11.21-66 — « Quelle ardoise ? » posée par le code (Greg, 2026-11-21)
+
+- **Règle changée (questions par le code)** : quand le calcul ne peut pas compter un article sans son modèle (« ardoises identiques à l'existant », « tuile mécanique grand moule » sans référence), le code pose la question de l'article avec les modèles de la fiche (« Quelle ardoise ? Donne son format. »). Avant : la question n'existait que si la lecture la posait ; sinon la ligne restait « à chiffrer » sans question. Greg, 21 novembre 2026 : « Chaque case vide que la fiche métier exige devient une question. »
+- Aucune quantité ne change.
+
+## roofing-2026.11.21-65 — Banc du calcul, lot 3 : les décisions de Greg du 21 novembre 2026
+
+Le banc du calcul passe de 56 sur 98 à 78 sur 100 lignes justes (la référence du banc suit les décisions ci-dessous).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Tuiles à emboîtement, casse et coupe | 3 % | **5 %** | Greg, 21 novembre 2026 |
+| Tuiles de rive | une ligne (longueur de rive ÷ pureau) | **deux lignes**, gauches et droites : la moitié de la longueur de rive ÷ pureau, de chaque côté | Greg, 21 novembre 2026 |
+| Bardelis (rives de tuile canal) | une ligne (2,7 au ml) | **deux lignes**, gauches et droites (2,7 au ml de chaque côté) | Greg, 21 novembre 2026 ; Edilians (§35.3) |
+| Crochets d'ardoise | à la pièce | **en boîtes de 500**, le nombre de pièces écrit sur la ligne (« 8 boîtes de 500 (3 992 pièces) ») | Greg, 21 novembre 2026 ; base couverture (boîte de 500) |
+| Bande porte-solin d'un abergement de cheminée | ajoutée d'office (forme d'achat de l'abergement) | **Règle changée** : seulement si le devis l'écrit ; sinon proposée en suggestion (« Bandes porte-solin de l'abergement ») | Greg, 21 novembre 2026 (un article non dit va en suggestion) |
+| Bandes de zinc façonnées de 2 m (rive, égout, faîtage, arêtier, porte-solin) | ml ÷ 2 arrondi au-dessus | inchangé ; la ligne dit « Longueur du devis reprise telle quelle, sans recouvrement » | Greg, 21 novembre 2026 |
+
+- Rappel des décisions sans changement de calcul : faîtières, arêtières et tuiles de rive sans 1 % de casse en plus ; une équerre de gouttière ne retire rien à la longueur ; gouttière PVC ou alu en longueurs de 4 m sur le total ; contre-liteaux à 5 % de chute comme les liteaux.
+- Tout article vendu en boîtes dit aussi son nombre de pièces sur la ligne.
+- **Fenêtres de toit** : « fenêtres de toit GGL MK04, avec raccords d'étanchéité », 2 u, sort la fenêtre telle qu'écrite ET ses raccords calculés (avant : une seule ligne). Ce qui suit « avec », « y compris » dans une ligne est cité, jamais mesuré par elle. « Raccord » seul est lu comme le raccord d'étanchéité sur une ligne de fenêtre.
+- **« 1 ens » avec la mesure dans le texte** (« 4 noues de 1,80 m », « 2 rives de 6 m », « 4 ml en tout ») : la mesure écrite devient celle de la ligne. Deux mesures différentes : rien n'est choisi.
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+
+## roofing-2026.11.21-64 — Banc du calcul, lot 2 : mots des couvreurs lus par le code (Greg, 2026-11-21)
+
+Le banc du calcul passe de 52 à 56 lignes justes sur 98. Aucune quantité de la fiche ne change : ce lot ne touche que ce que le code lit dans la ligne du devis.
+
+- Descente : « DEP », « desc. EP » sont lus comme une descente ; « ht 4,00 m » comme sa hauteur.
+- « Sans dauphin », « hors crochets » : l'article écarté par le devis n'est ni nommé ni cité (avant : la ligne « DEP … sans dauphin, 3 U » sortait 3 dauphins).
+- Une ligne mesurée en mètres ne mesure jamais un article compté en pièces : « gouttière de 25 sur le pourtour, y compris 4 angles », 44 ml, mesure la gouttière ; les angles sont cités.
+- Angles de gouttière : « 4 angles », « 5 angles », « 6 angles » écrits au devis sont lus (avant : redemandés au-delà de 3).
+- Teinte de gouttière : « gris » lu comme grise ; dans « gris anthracite », le mot le plus long l'emporte (anthracite).
+- Rappel de ta règle du 19 novembre, appliquée au banc : tubes de descente de 2 m, en zinc comme en PVC.
+
+## roofing-2026.11.21-63 — Banc du calcul, lot 1 : jonctions de gouttière, arêtier zinc plié, rangement des lignes (Greg, 2026-11-21)
+
+Le banc du calcul (`packages/domain/test/banc-couverture.test.ts`, 15 chantiers rejoués sans IA contre la liste du contrôleur) passe de 49 à 52 lignes justes sur 98.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Gouttière zinc, longueurs de 4 m | ml ÷ 4, arrondi au-dessus | ml + 30 mm par jonction soudée (`recouvrement_jonction`), puis arrondi aux longueurs de 4 m | Base couverture, « gouttières zinc » (confirmé) |
+| Exemple : 2 × 8 m de gouttière | 4 longueurs | 5 longueurs | |
+| Exemple : 2 × 6 m | 3 longueurs | 4 longueurs | |
+| Arêtier en bande zinc | toujours des bandes façonnées de 2 m | **Règle changée** : suit la réponse « je plie / j'achète tout fait » donnée une fois pour le devis ; plié : feuilles 2 × 1 m d'après le développé | Greg, 17 novembre 2026 (« une seule réponse pour tout le devis ») ; liste du contrôleur, chantier C11 |
+
+- **Rangement des lignes par le code** : un mot qui finit par « é » dit une teinte ou une façon, jamais un ouvrage (« tuiles HP10 ardoisé » est une tuile). Quand les mots d'une ligne nomment autant plusieurs ouvrages (« gouttières PVC »), celui que la lecture a rangé départage, s'il est l'un d'eux.
+- La quantité d'une ligne qui mesure l'ouvrage (30 ml d'arêtier) n'est jamais remplacée par un détail du texte (« 4 arêtiers de 7,50 m »).
+- Le format ou la référence du modèle écrits dans la désignation du devis (« 32×22 », « HP 10 ») sont lus même quand le code renomme l'article.
+- Les chantiers déjà calculés gardent leur version figée : rien n'y change.
 ## roofing-2026.11.20-63 — Suggestions : sans limite de nombre
 
 - **§49.1 point 5, Règle changée** : l'étape « Suggestions » propose tous les oublis probables de la fiche et tous les

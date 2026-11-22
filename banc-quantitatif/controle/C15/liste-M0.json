@@ -1,0 +1,28 @@
+{
+ "liste": [
+  {
+   "article": "Tuiles",
+   "quantite": null,
+   "unite": null,
+   "detail": "90 m² au devis ; Modèle de tuile : Terreal Volnay PV rouge vieilli"
+  },
+  {
+   "article": "Plaques bac acier simple peau RAL 8012 sans feutre, longueur 4,05 m",
+   "quantite": "7",
+   "unite": "pièces",
+   "detail": "25 m² de toiture, largeur utile 1,00 m"
+  },
+  {
+   "article": "Gouttière alu anthracite de 25",
+   "quantite": "6",
+   "unite": "longueurs de 4 m",
+   "detail": "Développé de gouttière : 25 cm"
+  },
+  {
+   "article": "F. et P. DEP alu gris anthracite Ø80, sans dauphin",
+   "quantite": "3",
+   "unite": "pièces",
+   "detail": null
+  }
+ ]
+}

@@ -10,11 +10,20 @@ import { REFERENTIEL_COMPLET } from "./support/complet.js";
  *  - le recouvrement se lit par région ardoise (I / II / III), pas par zone climatique des tuiles.
  */
 const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
-const order = (r: ReturnType<typeof computeWorkItem>, id: string) => Number(need(r, id).purchase?.order.count);
+// Le nombre de pièces à commander. Les crochets se commandent en boîtes de 500 (Greg, 21 novembre 2026) : leur nombre de
+// pièces est celui du besoin, écrit sur la ligne.
+const order = (r: ReturnType<typeof computeWorkItem>, id: string) => (id === "crochets-ardoise" ? Math.ceil(Number(need(r, id).quantity?.value)) : Number(need(r, id).purchase?.order.count));
 const input = (params: WorkItemInput["params"] = {}, format = "ardoise-30x22", waste?: Record<string, string>): WorkItemInput => ({
   workItemId: "couverture-ardoises-crochet",
   // La qualité de l'ardoise (question du comptoir, §47.8) : habitude de l'entreprise.
-  params: { surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 1" }, qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" }, ...params },
+  // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (« Tes m² d'ardoise comprennent déjà
+  // l'égout et les coupes ? »). Ici l'artisan a répondu « Oui » : rien n'est ajouté, les quantités d'avant restent.
+  params: {
+    surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 1" },
+    qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" },
+    egout_compris: { value: "1", unit: "u", origin: "artisan" },
+    ...params,
+  },
   products: { ardoise: { productId: format, origin: "devis" } },
   mentioned: ["ardoise"],
   ...(waste ? { preferences: { waste } } : {}),

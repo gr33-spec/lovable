@@ -1,0 +1,30 @@
+{
+ "m": "M8",
+ "c": "C08",
+ "e": 1,
+ "nRef": 4,
+ "justes": 2,
+ "quantite": 1,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 2,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [
+   "Mortier pour solin : 1 sac de 25 kg attendu, 3 ml lu"
+  ],
+  "manquantes": [
+   "Descente Ø80 d'eau pluviale, diamètre descentes mm (1 pièces)"
+  ],
+  "inventees": [
+   "Remplact DEP Ø080 (1 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

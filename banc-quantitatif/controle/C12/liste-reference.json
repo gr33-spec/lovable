@@ -1,0 +1,69 @@
+{
+ "liste": [
+  {
+   "article": "Écran HPV, rouleau 1,50 × 50 m",
+   "quantite": "2",
+   "unite": "rouleaux",
+   "detail": null
+  },
+  {
+   "article": "Faîtières",
+   "quantite": "27",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "F et P fenêtre de toit Velux GGL SK06 114x118 avec raccord tuiles",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "F et P fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles",
+   "quantite": "1",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Embase plomb de sortie de toit",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "Ø 125, pour ardoise ou tuile"
+  },
+  {
+   "article": "Chapeau de sortie de toit",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "Ø 125"
+  },
+  {
+   "article": "Plomb laminé 1,5 mm, rouleau largeur 30 cm × 10 m",
+   "quantite": "1",
+   "unite": "rouleau",
+   "detail": "4 ml de bande"
+  },
+  {
+   "article": "Liteaux 27×40 (Liteaux)",
+   "a_chiffrer": true,
+   "raison": "Calcul impossible sans « Pureau minimal » de tuile."
+  },
+  {
+   "article": "Ardoises (Ardoises)",
+   "a_chiffrer": true,
+   "raison": "Calcul impossible sans « Longueur » de ardoise."
+  },
+  {
+   "article": "Ardoises (F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m)",
+   "a_chiffrer": true,
+   "raison": "Calcul impossible sans « Longueur » de ardoise."
+  }
+ ],
+ "questions_posees_au_couvreur": [
+  {
+   "key": "param:longueur_plomb",
+   "text": "Longueur de bande de plomb ?",
+   "options": [],
+   "reponse": "4 m"
+  }
+ ]
+}

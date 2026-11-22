@@ -1,0 +1,5 @@
+{
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": false,
+ "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?": false,
+ "param:epaisseur_zinc ¦ Épaisseur du zinc ?": true
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "article": "Tuile canal terre cuite courant (Edilians Canal 50, courant)",
+    "bonne_valeur": "991 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "La fiche (Tuiles canal > Edilians Canal 50) donne quatre valeurs 10,3 / 11,1 / 11,8 / 12,6 u/m² sans nommer leur recouvrement : seule l'arithmétique des liteaux (2,86 ml/m² = 1/pureau 350 mm = 500 − 150) rattache 11,1 à la réponse « 150 mm », d'où 85 × 11,1 = 943,5 × 1,05 (Pertes > tuiles canal, « au moins 1 % ; 5 % courant en formation », a_confirmer) = 991 avec « 1 courant pour 1 couvert ». DÉFAUT DE LA FICHE À SIGNALER : les valeurs Canal 50 doivent porter leur recouvrement (140/150/160/170) et la perte des tuiles canal doit être une seule valeur, sinon le moteur ne peut rien chiffrer (la référence cherche même « R 170 » alors que le couvreur a répondu 150 mm)."
+  },
+  {
+    "article": "Tuile canal terre cuite couvert (Edilians Canal 50, couvert)",
+    "bonne_valeur": "à chiffrer",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche dit « tuile canal sur liteaux : 2 articles distincts au comptoir : le couvert et le courant à tenons/talons (références, poids et palettes différents) », alors que la référence garde une seule ligne « courants et couverts ». Le couvert reste à chiffrer parce que le réemploi des anciennes tuiles en couvert n'est pas décidé (sans réemploi : 991 pièces, comme les courants)."
+  },
+  {
+    "article": "Liteau 27×40",
+    "bonne_valeur": "256 ml",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Devis « Liteaux neufs sur toute la toiture 85m2 » ; fiche Canal 50 : 2,86 ml/m² (1/pureau 0,35 m à 150 mm) et Bois de couverture > liteau, tous : perte 5 %, vente au ml, d'où 85 × 2,86 = 243,1 × 1,05 = 255,3 → 256 ml. DÉFAUT DE LA FICHE À SIGNALER : les quatre « liteaux_ml_par_m2 » du Canal 50 ne disent pas leur recouvrement, d'où le refus de la référence (« Liteaux au m² à R 170 » introuvable)."
+  },
+  {
+    "article": "Bardelis / rives (tuile de rive canal)",
+    "bonne_valeur": "34 pièces (17 bardelis gauches + 17 bardelis droits)",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche « bardelis (rive) gauche ou droit : 2,7 u/ml de rive par côté » et Pertes > tuiles de rive « arrondi à la pièce supérieure » : deux articles distincts, 6 × 2,7 = 16,2 × 1,01 → 17 par côté, alors que la référence additionne 12 ml en un seul article (32,4 → 33). À signaler aussi : ce 2,7 u/ml générique ne suit pas le pureau du Canal 50 à 150 mm (350 mm, soit 2,86 rangs/ml), à faire confirmer dans la fiche."
+  },
+  {
+    "article": "Faîtière canal terre cuite 50 cm",
+    "bonne_valeur": "28 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Devis « Faitage 9ml scellé au mortier », faîtière canal 50 cm à pureau variable Edilians « 2,5 à 3 u/ml », 3/ml retenu par le couvreur : 9 × 3 = 27, et la fiche (Pertes > faîtières, arêtiers, tuiles de rive) ajoute « casse 1 % (FDES) », arrondi à la pièce supérieure, d'où 27,27 → 28. La référence s'arrête à 27 sans la casse de 1 %."
+  },
+  {
+    "article": "Mortier de couverture (scellement du faîtage)",
+    "bonne_valeur": "à chiffrer",
+    "qui_a_raison": "aucun",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Le devis dit « Faitage 9ml scellé au mortier » : le mortier est cité, la ligne doit donc sortir, et la référence a tort de l'omettre ; mais la fiche (Faîtages > mortier de faîtage) ne donne que « 5 à 10 kg/ml », a_confirmer, pour un mortier prêt à gâcher en sacs de 25 kg, soit 2 à 4 sacs, et le 10 kg/ml du contrôleur est un choix. DÉFAUT DE LA FICHE À SIGNALER : il manque une consommation unique pour des faîtières canal scellées, et rien n'est prévu pour le mortier bâtard (chaux + sable) que fait le couvreur, donc la quantité reste à chiffrer."
+  }
+]

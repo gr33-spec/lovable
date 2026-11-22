@@ -1,0 +1,61 @@
+{
+ "liste": [
+  {
+   "article": "Bobine Anthra-Zinc 0,65 mm, largeur 650 mm",
+   "quantite": "48",
+   "unite": "ml",
+   "detail": "13 bacs × 3,65 m"
+  },
+  {
+   "article": "Bobineau Anthra-Zinc 0,65 mm, 650 mm × 17 m",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "pour 8 m de chéneau, marge 5 % comprise"
+  },
+  {
+   "article": "Descente d'eaux pluviales en zinc anthracite Ø80",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": "1 descente × 3 m"
+  },
+  {
+   "article": "Feuilles Anthra-Zinc 2 × 1 m, 0,65 mm",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "pour 8 ml de bande, développé 20 cm"
+  }
+ ],
+ "questions_posees_au_couvreur": [
+  {
+   "key": "param:developpe",
+   "text": "Bande de solin en zinc anthracite : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "200 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:developpe_cheneau",
+   "text": "Ton chéneau fait quel développé ?",
+   "options": [
+    "Jusqu'à 50 cm",
+    "Jusqu'à 65 cm",
+    "Jusqu'à 1 m"
+   ],
+   "reponse": "Jusqu'à 65 cm"
+  }
+ ]
+}

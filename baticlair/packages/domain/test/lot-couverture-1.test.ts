@@ -34,8 +34,12 @@ const CAS: Metier[] = [
       { ref: "3", designation: "Noue encaissée zinc", quantity: "4", unit: "ml" },
     ],
     // Dans l'ordre du calcul (Greg, 20 novembre 2026 : les questions sont décidées par le code).
-    questions: ["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
-    couleurs: { vert: 0, orange: 3, gris: 1 },
+    // Règle changée (Greg, 21 novembre 2026) : avant, deux questions → l'égout se demande quand aucune gouttière n'est écrite.
+    // Tant qu'elle attend, les ardoises n'ont pas de chiffre et la ligne des crochets (un par ardoise) n'est pas encore là :
+    // 2 lignes orange au lieu de 3. Répondu « Oui » : 150 m² + 10 m d'arêtier × 0,66 + 4 m de noue × 0,50 = 158,6 m² ;
+    // × 42,5 = 6 740,5 ; + 5 % = 7 077,5 → 7 078 ardoises (avant 6 694).
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
+    couleurs: { vert: 0, orange: 2, gris: 1 },
   },
 ];
 
@@ -87,7 +91,11 @@ describe("noues et arêtiers : les règles du fondateur", () => {
   it("arêtier seul : le comptoir demande tuiles ou zinc ; en zinc, la bande de 25 ou de 33 et 3 pattes par mètre", () => {
     const before = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }]);
     expect(before.questions.map((q) => q.question?.text)).toContain("Arêtier en tuiles (arêtières) ou en bande zinc ?");
-    const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm") });
+    // Banc du calcul (21 novembre 2026) : un arêtier en bande zinc est une pièce pliée ; la réponse « je plie » du devis vaut
+    // pour lui. Commandé façonné : des bandes de 2 m (comme avant). Plié sur place : des feuilles 2 × 1 m.
+    const plie = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm"), "param:faconnage@pieces-pliees": u("1") });
+    expect(plie.toBuy.find((b) => b.label.startsWith("Feuilles"))!.quantity).toBe("2 pièces"); // 9 ml ÷ (2 m × 3 bandes de 33 dans 1 m) = 1,5 → 2
+    const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm"), "param:faconnage@pieces-pliees": u("2") });
     expect(v.questions).toEqual([]);
     expect(labels(v)).toEqual(expect.arrayContaining([expect.stringMatching(/^Arêtier zinc naturel 0,65 mm, bande dév\. 33/), expect.stringMatching(/^Pattes de fixation/)]));
     expect(v.toBuy.find((b) => b.label.startsWith("Arêtier zinc"))!.quantity).toBe("5 longueurs de 2 m"); // 9 × 1,05 = 9,45 ml en longueurs de 2 m (fiche couverture, 2026-11-19 ; avant 3 m)

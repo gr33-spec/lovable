@@ -37,6 +37,8 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     expect(e.suggestions).toEqual([
       // Skill du fondateur : « Pointes pour liteaux… : en Suggestion » (une par croisement, fixations.json).
       { key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" },
+      // Greg, 21 novembre 2026 (soir) : sur toute couverture écrite avec sa surface et sans sortie de toit au devis.
+      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" },
       { key: "gouttiere/naissance", label: "Naissances de gouttière" },
       { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)" },
       { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)" },
@@ -58,7 +60,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { id, projetId } = await chantier(agent);
     expect((await repondre(agent, id, "gouttiere/etain")).status).toBe(400);
     expect((await repondre(agent, id, "couverture-ardoise/liteau")).status).toBe(400);
-    expect((await ecran(agent, projetId)).suggestions).toHaveLength(8);
+    expect((await ecran(agent, projetId)).suggestions).toHaveLength(9); // Greg, 21 novembre 2026 : la sortie de ventilation en plus (avant 8).
   });
 
   it("naissances cochées : elles entrent dans la liste, l'étape est close ; talons et angles n'existent pas", async () => {

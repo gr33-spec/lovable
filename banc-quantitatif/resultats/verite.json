@@ -1,0 +1,65 @@
+{
+ "M0 entraînement": {
+  "n": 10,
+  "juste": 32,
+  "quantite_fausse": 27,
+  "manquante": 6,
+  "en_trop": 3
+ },
+ "M0 total": {
+  "n": 15,
+  "juste": 50,
+  "quantite_fausse": 39,
+  "manquante": 13,
+  "en_trop": 7
+ },
+ "M4 entraînement": {
+  "n": 10,
+  "juste": 32,
+  "quantite_fausse": 27,
+  "manquante": 6,
+  "en_trop": 2
+ },
+ "M4 total": {
+  "n": 15,
+  "juste": 51,
+  "quantite_fausse": 38,
+  "manquante": 15,
+  "en_trop": 6
+ },
+ "M11 entraînement": {
+  "n": 10,
+  "juste": 31,
+  "quantite_fausse": 28,
+  "manquante": 6,
+  "en_trop": 3
+ },
+ "M11 total": {
+  "n": 15,
+  "juste": 49,
+  "quantite_fausse": 41,
+  "manquante": 12,
+  "en_trop": 7
+ },
+ "M0 examen": {
+  "n": 5,
+  "juste": 18,
+  "quantite_fausse": 12,
+  "manquante": 7,
+  "en_trop": 4
+ },
+ "M4 examen": {
+  "n": 5,
+  "juste": 19,
+  "quantite_fausse": 11,
+  "manquante": 9,
+  "en_trop": 4
+ },
+ "M11 examen": {
+  "n": 5,
+  "juste": 18,
+  "quantite_fausse": 13,
+  "manquante": 6,
+  "en_trop": 4
+ }
+}

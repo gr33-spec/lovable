@@ -1,0 +1,106 @@
+[
+  {
+    "article": "Écran de sous-toiture HPV, rouleau 1,50 × 50 m (75 m²)",
+    "quantite": 2,
+    "unite": "rouleaux",
+    "a_chiffrer": false,
+    "calcul": "95 m² × 1,15 m²/m² (Écrans sous toiture › écran souple : consommation 1,15 m²/m², recouvrements compris, une_source ; plage 1,10 à 1,20) = 109,25 m² ÷ 75 m² par rouleau (écran HPV : format 1,50 × 50 m = 75 m²) = 1,46 → 2 rouleaux. Type HPV donné par le couvreur. Contre-liteaux non écrits au devis (fiche : « contre-lattage obligatoire », jamais dit indissociable) : non sortis.",
+    "ligne_devis": "3 — F et P écran sous-toiture, 95 m2"
+  },
+  {
+    "article": "Liteau 27×40 sapin traité classe 2",
+    "quantite": 270,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 95 m² × (1 ÷ pureau 0,37 m = 2,70 ml/m² ; règle générale « liteaux = 1 / pureau », cohérent avec HP 10 Huguenot 2,66 ml/m² au pureau maxi 376) = 256,8 ml × 1,05 (Bois de couverture › liteau : perte casse coupes 5 %) = 269,6 → 270 ml (vente au ml). Section et pureau donnés par le couvreur. La chute d'aboutage (0 à 10 % selon longueur vendue et entraxe des chevrons, une_source) n'est pas ajoutée : l'entraxe des chevrons n'est pas connu ; 270 ml ≈ 68 liteaux de 4 m.",
+    "ligne_devis": "4 — F et P liteaux, 95 m2"
+  },
+  {
+    "article": "Tuile terre cuite à emboîtement Edilians HP 10 Huguenot, teinte ardoisé",
+    "quantite": 1026,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Formule de la fiche 1 ÷ (largeur utile 0,268 × pureau 0,37) = 10,08 tuiles/m² (HP 10 : 9,9 à 12 /m², pureau 310 à 376) × 95 m² = 958,1 ; perte « toit compliqué » 7 % (bas de la fourchette 7 à 10 %, a_confirmer : le toit a 3 fenêtres de toit) → 1 025,1 → 1 026 tuiles (≈ 4,3 palettes de 240). Avec les 10 /m² dits par le couvreur : 1 017. Aucune règle de déduction des ouvertures ni des rives dans la fiche : rien déduit.",
+    "ligne_devis": "5 — F et P couverture tuiles terre cuite HP10 ardoisé, pente 35°, rampant 6 m, 95 m2"
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 Huguenot ardoisé, gauche (réf. G 205.73)",
+    "quantite": 17,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "1 rive de 6 m côté gauche × 2,7 /ml (HP 10 : tuile de rive à rabat 2,7/ml par côté ; règle générale 1 / pureau, gauche et droite = deux articles) = 16,2 ; casse 1 % (faîtières, arêtiers, tuiles de rive, a_confirmer) = 16,4 → 17 pièces.",
+    "ligne_devis": "6 — F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m"
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 Huguenot ardoisé, droite (réf. D 205.72)",
+    "quantite": 17,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "1 rive de 6 m côté droit × 2,7 /ml (HP 10 : tuile de rive à rabat 2,7/ml par côté) = 16,2 ; casse 1 % = 16,4 → 17 pièces.",
+    "ligne_devis": "6 — F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m"
+  },
+  {
+    "article": "Faîtière demi-ronde à emboîtement HP 10 Huguenot ardoisé (1/2 rond 717)",
+    "quantite": 23,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 9 ml × 2,5 /ml (HP 10 : faîtière 1/2 rond 717 2,5/ml) = 22,5 ; casse 1 % = 22,7 → 23 faîtières. La fiche décrit le « système faîtage à sec » (closoir + lisse de rehausse + supports de lisse + clips) sans dire ces pièces indissociables de la ligne : non sorties car non écrites au devis.",
+    "ligne_devis": "7 — Faîtage à sec, 9 ml"
+  },
+  {
+    "article": "Fenêtre de toit Velux GGL SK06 (114 × 118), bois peint blanc 2076",
+    "quantite": 2,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "2 fenêtres écrites ; Fenêtres de toit › conditionnement : fenêtre à la pièce ; SK06 = 114 × 118 cm (confirme). Finition donnée par le couvreur.",
+    "ligne_devis": "8 — F et P fenêtre de toit Velux GGL SK06 114x118 avec raccord tuiles, 2 u"
+  },
+  {
+    "article": "Raccord d'étanchéité Velux EDW SK06 0000 (tuiles)",
+    "quantite": 2,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Un raccord par fenêtre seule, à la taille de la fenêtre (Fenêtres de toit › conditionnement) : 2 × 1 = 2. EDW = tuiles profilées jusqu'à 120 mm de relief ; 0000 = gris ; pente 35° ≥ 15° (pose standard).",
+    "ligne_devis": "8 — F et P fenêtre de toit Velux GGL SK06 114x118 avec raccord tuiles, 2 u"
+  },
+  {
+    "article": "Fenêtre de toit Velux GGL CK02 (55 × 78), bois peint blanc 2076",
+    "quantite": 1,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "1 fenêtre écrite ; fenêtre à la pièce ; CK02 = 55 × 78 cm (confirme).",
+    "ligne_devis": "9 — F et P fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles, 1 u"
+  },
+  {
+    "article": "Raccord d'étanchéité Velux EDW CK02 0000 (tuiles)",
+    "quantite": 1,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Un raccord par fenêtre seule, à la taille de la fenêtre : 1 × 1 = 1.",
+    "ligne_devis": "9 — F et P fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles, 1 u"
+  },
+  {
+    "article": "Tuile à douille HP 10 Huguenot ardoisé (sortie de toit VMC)",
+    "quantite": 1,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 1 sortie écrite = 1 tuile à douille (Ventilation : tuile à douille + lanterne). La fiche ne donne pour la HP 10 qu'une tuile à douille Ø 160 (réf. 205.32), pas de Ø 125 : diamètre de la douille et réduction éventuelle à confirmer.",
+    "ligne_devis": "10 — Sortie de toit Ø125 pour VMC, fournie et posée, 1 u"
+  },
+  {
+    "article": "Lanterne de sortie de toit Ø 125 ardoisé",
+    "quantite": 1,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 1 lanterne par tuile à douille (Ventilation : tuile à douille + lanterne / chapeau, Ø 100, 126, 150 ou 160). Pour la HP 10, la fiche donne une lanterne bi-section Ø 126 et Ø 160 (réf. 1007), pas de Ø 125 exact.",
+    "ligne_devis": "10 — Sortie de toit Ø125 pour VMC, fournie et posée, 1 u"
+  },
+  {
+    "article": "Plomb laminé en rouleau, largeur 300 mm, épaisseur 1,5 mm",
+    "quantite": 1,
+    "unite": "rouleaux",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? 4 ml en largeur 300 mm (Abergements › plomb laminé : bandes en rouleau de 10, 5 ou 2 m, largeurs 160 à 400 mm) → 1 rouleau de 5 m (≈ 20,4 kg à 17 kg/m²). Mais Le Plomb Français ne cite le 300 mm qu'en 10 m (5 m seulement en 330 mm) : longueur du rouleau à confirmer (5 ou 10 m). Épaisseur 1,5 mm donnée par le couvreur.",
+    "ligne_devis": "11 — Bavette plomb larg. 30 sous fenêtres de toit, 4 ml en tout, 1 ens"
+  }
+]

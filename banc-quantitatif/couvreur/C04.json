@@ -1,0 +1,81 @@
+{
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je plie moi-même."
+  }
+ },
+ "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?": {
+  "question": {
+   "id": "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?"
+  },
+  "reponse": {
+   "bouton": "Jusqu'à 65 cm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "650 mm, bobineau de 650."
+  }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, raccordée direct sur le regard."
+  }
+ },
+ "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?": {
+  "question": {
+   "id": "param:longueur_bande@bandes-zinc__3 ¦ Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?",
+   "question": "Tasseaux bois et des couvre-joints zinc quartz ( au poste 2) : longueur de bande zinc ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "75",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "75 mètres de couvre-joints."
+  }
+ },
+ "param:epaisseur_zinc ¦ Épaisseur du zinc ?": {
+  "question": {
+   "id": "param:epaisseur_zinc ¦ Épaisseur du zinc ?",
+   "question": "Épaisseur du zinc ?",
+   "boutons": [
+    "0,65 mm",
+    "0,70 mm",
+    "0,80 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "0,70 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "0,70 mm"
+  }
+ }
+}

@@ -1,0 +1,276 @@
+{
+ "posees": [
+  {
+   "key": "param:longueur_plomb",
+   "text": "Longueur de bande de plomb ?",
+   "options": [],
+   "reponse": "4 m"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "F et P fenêtre de toit Velux GGL SK06 114x118 avec raccord tuiles",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "F et P fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 125, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bavette plomb larg. 30 sous fenêtres de toit, 4 ml en tout, fournie et posée",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "11"
+    ],
+    "attend": [
+     "a-preciser:11"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Liteaux)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Echafaudage de pied + protections, montage, location et repli",
+   "Dépose ancienne couverture ardoises fibro + liteaux, descente et évacuation en déchetterie",
+   "Nettoyage du chantier et repli"
+  ],
+  "questions": [
+   "param:longueur_plomb"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "F et P fenêtre de toit Velux GGL SK06 114x118 avec raccord tuiles",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "F et P fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 125, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Plomb laminé 1,5 mm, rouleau largeur 30 cm × 10 m",
+    "quantite": "1",
+    "unite": "rouleau",
+    "affiche": "1 rouleau",
+    "etat": "ready",
+    "precision": "4 ml de bande",
+    "lignes": [
+     "11"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Liteaux)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Echafaudage de pied + protections, montage, location et repli",
+   "Dépose ancienne couverture ardoises fibro + liteaux, descente et évacuation en déchetterie",
+   "Nettoyage du chantier et repli"
+  ],
+  "questions": []
+ }
+}

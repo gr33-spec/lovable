@@ -1,0 +1,10 @@
+[
+ "ligne 3 : donnée surface divergente (95 contre rien), retirée : le code la demandera.",
+ "ligne 3 : donnée pente divergente (35 contre rien), retirée : le code la demandera.",
+ "ligne 4 : donnée surface divergente (95 contre rien), retirée : le code la demandera.",
+ "ligne 6 : donnée longueur_rives divergente (12 contre rien), retirée : le code la demandera.",
+ "ligne 7 : « Faîtage à sec » deux quantités (9 contre ), à demander.",
+ "ligne 10 : « Sortie de toit Ø125 pour VMC » deux quantités (1 contre ), à demander.",
+ "ligne 10 : donnée usage_sortie divergente (ventilation contre rien), retirée : le code la demandera.",
+ "ligne 11 : « Bavette plomb larg. 30 » deux quantités (4 contre ), à demander."
+]

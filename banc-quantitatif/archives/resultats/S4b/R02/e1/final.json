@@ -1,0 +1,489 @@
+{
+ "posees": [
+  {
+   "key": "param:fixation_crochet",
+   "text": "Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?",
+   "options": [
+    "Sur les chevrons",
+    "En façade (bandeau)"
+   ],
+   "reponse": "En façade (bandeau)"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": "posé sur fermettes d'entraxe 90 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "140",
+    "unite": "ml",
+    "affiche": "140 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 90 cm",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets de faîtière",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets de gouttière dév. 25",
+    "quantite": "51",
+    "unite": "pièces",
+    "affiche": "51 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [
+     "param:fixation_crochet"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Naissances dév. 25 Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 4 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Coudes descente Ø80",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Colliers de descente Ø80",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chatières de ventilation - tuiles chatières de ventilation adaptées au modèle HP10 (5 de chaque côté)",
+    "quantite": "10",
+    "unite": "pièces",
+    "affiche": "10 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 80, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 80",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Tuiles)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles (Tuiles)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles (Tuiles)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles de rive (Tuiles de rive)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": [
+   "param:fixation_crochet"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": "posé sur fermettes d'entraxe 90 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "140",
+    "unite": "ml",
+    "affiche": "140 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 90 cm",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets de faîtière",
+    "quantite": "30",
+    "unite": "pièces",
+    "affiche": "30 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets de gouttière bandeau dév. 25",
+    "quantite": "51",
+    "unite": "pièces",
+    "affiche": "51 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Naissances dév. 25 Ø80",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 4 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Coudes descente Ø80",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Colliers de descente Ø80",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chatières de ventilation - tuiles chatières de ventilation adaptées au modèle HP10 (5 de chaque côté)",
+    "quantite": "10",
+    "unite": "pièces",
+    "affiche": "10 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 80, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "Ø 80",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Tuiles)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles (Tuiles)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles (Tuiles)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles de rive (Tuiles de rive)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": []
+ }
+}

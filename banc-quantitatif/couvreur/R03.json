@@ -1,0 +1,214 @@
+{
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "unite": "u",
+   "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je façonne moi-même."
+  }
+ },
+ "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": {
+  "question": {
+   "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Espagne 1er choix",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Espagne 1er choix."
+  }
+ },
+ "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?": {
+  "question": {
+   "id": "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?",
+   "question": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+   "boutons": [
+    "De 25",
+    "De 28",
+    "De 33",
+    "De 40"
+   ],
+   "unite": "cm",
+   "aide": "Le développé : la largeur de la feuille avant façonnage."
+  },
+  "reponse": {
+   "bouton": "De 25",
+   "valeur": "",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "Gouttière de 25."
+  }
+ },
+ "param:developpe@bande-porte-solin ¦ Bande porte-solin zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bande-porte-solin ¦ Bande porte-solin zinc : développé de la bande zinc ?",
+   "question": "Bande porte-solin zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "100 mm (solin, couvre-joint)",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "100 mm."
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Bandes de rive zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Bandes de rive zinc : développé de la bande zinc ?",
+   "question": "Bandes de rive zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 mm."
+  }
+ },
+ "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?": {
+  "question": {
+   "id": "param:longueur_rampant ¦ Longueur du rampant (de l'égout au faîtage) ?",
+   "question": "Longueur du rampant (de l'égout au faîtage) ?",
+   "boutons": [
+    "Jusqu'à 5,5 m",
+    "5,5 à 8 m",
+    "Plus de 8 m",
+    "Plus de 11 m"
+   ],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Jusqu'à 5,5 m",
+   "valeur": "",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "3,30 m de rampant"
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Bandes de rive en zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Bandes de rive en zinc : développé de la bande zinc ?",
+   "question": "Bandes de rive en zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 pour les rives"
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Bandes de rive en zinc (verrière) : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Bandes de rive en zinc (verrière) : développé de la bande zinc ?",
+   "question": "Bandes de rive en zinc (verrière) : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 pour la verrière"
+  }
+ },
+ "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?",
+   "question": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 pour le faîtage"
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Bandes zinc façonnées : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Bandes zinc façonnées : développé de la bande zinc ?",
+   "question": "Bandes zinc façonnées : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "200 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "200 pour les bandes de rive"
+  }
+ }
+}

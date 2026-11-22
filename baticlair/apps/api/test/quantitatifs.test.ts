@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { attendreLaQuestionDeLEgout, egoutCompris, QUESTION_EGOUT } from "./support/egout.js";
 import { cocherLesNaissances } from "./support/suggestions.js";
 import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
 import { FakeLectureReader } from "../src/modules/takeoff/infrastructure/fake-lecture-reader.js";
@@ -78,14 +79,19 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // NF DTU 40.11 (fiche couverture) : 89 mm, + 10 mm en situation exposée (Brest, commune au bord de mer) = 99 mm ;
     // formule Cupa (§34) 200 / (0,1005 × 0,2227) = 8 936,7 + 5 % = 9 383 ardoises
     // (avant, ancien tableau : 95 mm, formule Cupa, 9 200).
+    // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises à l'égout, qui fait la longueur de la gouttière écrite au devis
+    // (24 m ÷ 0,22 m de large = 109,09 ardoises), compté avant la perte ; le faîtage, non écrit, vaut 0.
+    // (8 936,01 + 109,09) × 1,05 = 9 497,36 → 9 498 ardoises ; avant 9 383 → 9 498.
     const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
-    expect(ardoises).toMatchObject({ quantite: 9383, unite: "pièces", origine: "calcul" });
+    expect(ardoises).toMatchObject({ quantite: 9498, unite: "pièces", origine: "calcul" });
     // Un crochet par ardoise commandée (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 384), longueur recouvrement + 3 mm
     // arrondie au cm (avant + 1 cm : 11 cm).
     const crochets = ligne(res.body, "Crochets d'ardoise inox Ø 2,7, longueur 11 cm");
-    expect(crochets.quantite).toBe(9383);
-    expect(crochets.quantite!).toBeGreaterThanOrEqual(ardoises.quantite!);
-    expect(crochets.explication.phrase).toMatch(/^9 383 pièces = ardoises après marge 9 383 · marge 0 %$/);
+    // Règle changée (Greg, 21 novembre 2026) : les crochets se commandent en boîtes de 500 (avant : à la pièce).
+    // 9 498 ÷ 500 = 18,996 → 19 boîtes (le nombre de boîtes ne bouge pas).
+    expect(crochets).toMatchObject({ quantite: 19, unite: "boîtes de 500" });
+    expect(crochets.quantite! * 500).toBeGreaterThanOrEqual(ardoises.quantite!);
+    expect(crochets.explication.phrase).toMatch(/^19 boîtes de 500 = ardoises après marge 9 498 · marge 0 %$/);
     // Le prix de la ligne de devis (85 €/m² de couverture) n'est pas celui d'une ardoise.
     expect(ardoises.prix).toBeUndefined();
     expect(res.body.devis).toEqual([
@@ -95,8 +101,10 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
 
     // §39 : une phrase, chaque hypothèse modifiable porte sa clé.
     expect(ardoises.explication.phrase).toBe(
-      "9 383 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III (estimation) · longueur du rampant 5,5 m · situation du chantier exposée · recouvrement 99 mm · pureau 10,05 cm · diamètre du crochet Ø 2,7 mm · ardoises au m² (formule Cupa Pizarras, hors table) 44,68 /m² · marge recommandée 5 % · qualité de l'ardoise Espagne 1er choix",
+      "9 498 pièces = surface de toiture 200 m² · pente du toit 45° · région ardoise III (estimation) · longueur du rampant 5,5 m · situation du chantier exposée · recouvrement 99 mm · pureau 10,05 cm · diamètre du crochet Ø 2,7 mm · ardoises au m² (formule Cupa Pizarras, hors table) 44,68 /m² · longueur de gouttière 24 m · marge recommandée 5 % · qualité de l'ardoise Espagne 1er choix",
     );
+    // Règle changée (Greg, 21 novembre 2026) : la phrase dit la longueur de gouttière, qui fait le rang d'égout (avant : absente).
+    expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ texte: "longueur de gouttière 24 m", confiance: "devis" }));
     expect(ardoises.explication.phrase).not.toMatch(/zone climatique/);
     expect(ardoises.explication.morceaux).toContainEqual({ texte: "région ardoise III (estimation)", cle: "param:zone", valeur: "3", confiance: "estimation" });
     expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ texte: "diamètre du crochet Ø 2,7 mm", cle: "param:diametre_crochet", valeur: "2,7" }));
@@ -150,7 +158,7 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     // sur le format : calcul par la formule, ligne marquée « estimation », le 40×22 proposé en conseil, pas en question.
     const steep = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "30" });
     const estimated = ligne(steep.body, "Ardoises naturelles Espagne 1er choix 30×22");
-    expect(estimated.quantite).toBeGreaterThan(9383);
+    expect(estimated.quantite).toBeGreaterThan(9498);
     expect(estimated.estimation).toBe("Recouvrement posé 131 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
     expect(estimated.explication.morceaux).toContainEqual({ texte: "estimation : recouvrement posé 131 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.", confiance: "estimation" });
     expect(steep.body.questions.some((q: { texte: string }) => /non admis|Quel format/.test(q.texte))).toBe(false);
@@ -164,16 +172,18 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     expect(ligne(switched.body, "Ardoises naturelles Espagne 1er choix 40×22").estimation).toBeUndefined();
     await agent.post(`/v1/quantitatifs/${before.id}/reponses`).send({ reponses: [{ question: "product:ardoise", valeur: "ardoise-30x22" }] });
     // 40° en région III, Brest exposée : 97 mm (NF DTU 40.11, ligne 80 %) + 10 % = 107 mm, hors table Cupa : la formule.
+    // Règle changée (Greg, 21 novembre 2026) : le rang d'égout de la gouttière (24 m ÷ 0,22 = 109,09 ardoises) s'ajoute avant la perte :
+    // pureau 9,65 cm, 200 / (0,0965 × 0,2227) = 9 306,42 ; (9 306,42 + 109,09) × 1,05 = 9 886,28 → 9 887 ; avant 9 772 → 9 887.
     const table = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "40" });
-    expect(ligne(table.body, "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9772);
+    expect(ligne(table.body, "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9887);
     expect(ligne(table.body, "Ardoises naturelles Espagne 1er choix 30×22").explication.phrase).toMatch(/recouvrement 107 mm .*ardoises au m² \(formule Cupa Pizarras, hors table\)/);
-    // Une valeur choisie reste modifiable : retour à 45°, retour aux 9 383 ardoises.
+    // Une valeur choisie reste modifiable : retour à 45°, retour aux 9 498 ardoises (avant la règle du 21 novembre 2026 : 9 383).
     const back = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "45" });
-    expect(ligne(back.body, "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9383);
+    expect(ligne(back.body, "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9498);
     // Les crochets suivent toujours les ardoises corrigées.
     // La longueur du crochet suit le recouvrement (Cupa : R + 1 cm) : la désignation change avec la pente.
     const crochetsDe = (b: typeof res.body) => b.lignes.find((l: { libelle: string }) => l.libelle.startsWith("Crochets d'ardoise")) as { quantite: number };
-    for (const b of [res.body, table.body, back.body]) expect(crochetsDe(b).quantite).toBeGreaterThanOrEqual(ligne(b, "Ardoises naturelles Espagne 1er choix 30×22").quantite!);
+    for (const b of [res.body, table.body, back.body]) expect(crochetsDe(b).quantite * 500).toBeGreaterThanOrEqual(ligne(b, "Ardoises naturelles Espagne 1er choix 30×22").quantite!);
     // Une valeur qui n'existe pas n'est pas modifiable.
     expect((await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:inconnu", valeur: "3" })).status).toBe(400);
   });
@@ -199,14 +209,16 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
   });
 
   // Zone par commune (fiche couverture, 2026-11-19) : Grenoble, 212 m d'altitude, loin de la mer → zone 2 (avant : toute
-  // l'Isère en zone 3). 45°, zone 2 : recouvrement 80 mm, table Cupa 40,7/m² → 8 140 + 5 % = 8 547 ; crochet 80 + 3 → 9 cm.
-  it("hors littoral (Grenoble, zone 2 à la commune) : crochet courant 1 mm, 8 547 ardoises (ligne de la table Cupa), toujours au moins autant de crochets", async () => {
+  // l'Isère en zone 3). 45°, zone 2 : recouvrement 80 mm, table Cupa 40,7/m² → 8 140 ardoises ; crochet 80 + 3 → 9 cm.
+  // Règle changée (Greg, 21 novembre 2026) : le rang d'égout de la gouttière (24 m ÷ 0,22 = 109,09 ardoises) s'ajoute avant la perte :
+  // (8 140 + 109,09) × 1,05 = 8 661,55 → 8 662 ; avant 8 547 → 8 662. Crochets : 8 662 ÷ 500 = 17,3 → 18 boîtes (inchangé).
+  it("hors littoral (Grenoble, zone 2 à la commune) : crochet courant 1 mm, 8 662 ardoises (ligne de la table Cupa, plus le rang d'égout), toujours au moins autant de crochets", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     const res = await agent.post("/v1/quantitatifs").send({ ...RAPPIDOS, adresse: "38000 Grenoble" });
     const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
-    expect(ardoises.quantite).toBe(8547);
+    expect(ardoises.quantite).toBe(8662);
     expect(ardoises.explication.phrase).toMatch(/diamètre du crochet standard/);
-    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 9 cm").quantite).toBe(8547);
+    expect(ligne(res.body, "Crochets d'ardoise inox standard, longueur 9 cm").quantite).toBe(18);
   });
 
   it("range le quantitatif dans un chantier existant", async () => {
@@ -238,13 +250,22 @@ describe("POST /v1/quantitatifs en PDF", () => {
     const pdf = await makePdf(["devis"], rows, "Total HT 17 000,00", "DEVIS N° 2026-119 – Toitures Martin  ·  Pente 35° · rampant 5,50 m");
     const res = await agent.post("/v1/quantitatifs").field("adresse", "29200 Brest").attach("file", Buffer.from(pdf), { filename: "devis.pdf", contentType: "application/pdf" });
     expect(res.status).toBe(201);
-    const ardoises = ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22");
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
+    // Ce devis n'a que des ardoises : c'est la seule question (la pente, lue dans l'en-tête, ne se demande pas). « Oui » : rien n'est ajouté.
+    expect(res.body.questions.map((q: { id: string }) => q.id)).toEqual([QUESTION_EGOUT]);
+    attendreLaQuestionDeLEgout(res.body.questions);
+    expect(ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22")).toBeUndefined();
+    const repondu = await egoutCompris<{ lignes: Ligne[]; hypotheses: { cle: string }[]; questions: { id: string }[] }>(agent, res.body.id);
+    const ardoises = ligne(repondu, "Ardoises naturelles Espagne 1er choix 30×22");
     // À 35° le recouvrement passe de 95 à 105 mm (région III, §34) : plus d'ardoises qu'à 45°, sans question posée.
     expect(ardoises.quantite).toBeGreaterThan(9200);
     expect(ardoises.explication.morceaux).toContainEqual({ texte: "pente du toit 35°", cle: "param:pente", valeur: "35", unite: "°", confiance: "devis" });
     expect(ardoises.explication.morceaux).toContainEqual(expect.objectContaining({ cle: "param:longueur_rampant", valeur: "5,50", unite: "m", confiance: "devis" }));
-    expect(res.body.hypotheses).not.toContainEqual(expect.objectContaining({ cle: "param:pente" }));
-    expect(res.body.questions).not.toContainEqual(expect.objectContaining({ cle: "param:pente" }));
+    for (const b of [res.body, repondu]) {
+      expect(b.hypotheses).not.toContainEqual(expect.objectContaining({ cle: "param:pente" }));
+      expect(b.questions).not.toContainEqual(expect.objectContaining({ cle: "param:pente" }));
+      expect(b.questions.map((q: { id: string }) => q.id)).not.toContain("engine:param:pente");
+    }
   });
 
   it("lecture longue : 202 « en_cours », puis le quantitatif quand la lecture finit", async () => {
@@ -389,7 +410,9 @@ describe("le chat de l'appli passe par la porte", () => {
     const res = await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "param:pente", valeur: "40", unite: "°" }] });
     expect(res.status).toBe(201);
     // 40° : ligne 80 % du NF DTU 40.11 (38,66°), recouvrement 97 mm (fiche couverture ; avant 100 mm, 9 408).
-    expect(ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9772);
+    // Règle changée (Greg, 21 novembre 2026) : le rang d'égout de la gouttière (24 m ÷ 0,22 = 109,09 ardoises) s'ajoute avant la perte :
+    // (9 306,42 + 109,09) × 1,05 = 9 886,28 → 9 887 ; avant 9 772 → 9 887.
+    expect(ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9887);
     expect((await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "param:pente", valeur: "beaucoup", unite: "°" }] })).status).toBe(400);
     expect((await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "DROP TABLE", valeur: "1" }] })).status).toBe(400);
   });
@@ -416,7 +439,9 @@ describe("§ 41.4 : chaque ligne du quantitatif se réécrit d'un tap", () => {
     const renamed = await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "renommer", id: "product:Ardoises naturelles Espagne 1er choix 30×22", libelle: "Ardoises Cupa 30×22 naturelles" });
     expect(renamed.status).toBe(201);
     const line = ligne(renamed.body, "Ardoises Cupa 30×22 naturelles");
-    expect(line).toMatchObject({ id: "product:Ardoises naturelles Espagne 1er choix 30×22", quantite: 9383, modifie: ["libelle"] });
+    // Règle changée (Greg, 21 novembre 2026) : le rang d'égout de la gouttière (24 m ÷ 0,22 = 109,09 ardoises) s'ajoute avant la perte :
+    // (8 936,01 + 109,09) × 1,05 = 9 497,36 → 9 498 ; avant 9 383 → 9 498.
+    expect(line).toMatchObject({ id: "product:Ardoises naturelles Espagne 1er choix 30×22", quantite: 9498, modifie: ["libelle"] });
 
     const fixed = await agent.post(`/v1/quantitatifs/${q.id}/corrections`).send({ action: "fixer_quantite", id: "product:Ardoises naturelles Espagne 1er choix 30×22", quantite: "9000", unite: "pièces" });
     const after = ligne(fixed.body, "Ardoises Cupa 30×22 naturelles");

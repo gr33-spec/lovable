@@ -1,0 +1,35 @@
+{
+ "m": "S4",
+ "c": "R05",
+ "e": 1,
+ "nRef": 7,
+ "justes": 3,
+ "quantite": 2,
+ "manquantes": 2,
+ "inventees": 4,
+ "doutes": 0,
+ "questions": 2,
+ "questionsRef": 4,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 2,
+ "detail": {
+  "quantite": [
+   "Feuilles zinc naturel 2 × 1 m, 0,65 mm : 5 pièces attendu, 3 pièces lu",
+   "Liteaux 18×40 : 1991 ml attendu, à chiffrer  lu"
+  ],
+  "manquantes": [
+   "Ardoises naturelles Espagne 1er choix 30×22 (8925 pièces)",
+   "Bandes porte-solin 2 m (3 pièces)"
+  ],
+  "inventees": [
+   "Entourage de cheminée zinc et solin (2 pièces)",
+   "Ardoises (Ardoises) (à chiffrer )",
+   "Contre-liteaux (Ardoises) (à chiffrer )",
+   "Ardoises (Ardoises) (à chiffrer )"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerEmail } from "./confirmer-email";
+import { continuerSansSortieDeVentilation } from "./discussion";
 
 /**
  * DEUX PARCOURS RELIÉS (Greg, 7 novembre 2026, captures « Mobiiz | Assistant ») : 1) une seule porte, la conversation :
@@ -64,6 +65,8 @@ test("une phrase, deux articles : « J'ai compris », ajouter, voir ma liste, pu
   await expect(chat.getByRole("button", { name: "Ma liste · 2" })).toBeVisible();
   await chat.getByRole("button", { name: "Voir ma liste (2)" }).click();
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
+  // L'étape « Suggestions » (pointes de liteaux, sortie de ventilation…) : l'artisan ne coche rien et continue.
+  await continuerSansSortieDeVentilation(page);
   // « Ton quantitatif est prêt » : l'interrupteur allumé sur l'article à fort potentiel ; un seul bouton principal.
   const prete = page.getByRole("region", { name: "Ton quantitatif est prêt" });
   await expect(prete).toBeVisible({ timeout: 20_000 });
@@ -121,6 +124,8 @@ test("le langage des artisans (Greg, 8 novembre 2026) : « 36 mètres de Lito »
   await expect(chat.getByRole("button", { name: "Ma liste · 1" })).toBeVisible();
   await chat.getByRole("button", { name: "Voir ma liste (1)" }).click();
   await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/);
+  // L'étape « Suggestions » (des liteaux : leurs pointes) : l'artisan ne coche rien et continue.
+  await continuerSansSortieDeVentilation(page);
   await expect(page.getByText("Liteau 27×40").first()).toBeVisible({ timeout: 20_000 });
 });
 

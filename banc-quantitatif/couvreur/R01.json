@@ -1,0 +1,120 @@
+{
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "unite": "u",
+   "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je plie moi-même."
+  }
+ },
+ "param:hauteur_descente ¦ Hauteur d'une descente ?": {
+  "question": {
+   "id": "param:hauteur_descente ¦ Hauteur d'une descente ?",
+   "question": "Hauteur d'une descente ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "3",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "3 mètres."
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Habillages de rive : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Habillages de rive : développé de la bande zinc ?",
+   "question": "Habillages de rive : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "250 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "250 mm."
+  }
+ },
+ "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?",
+   "question": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "330 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "330 mm."
+  }
+ },
+ "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?": {
+  "question": {
+   "id": "param:developpe_cheneau ¦ Ton chéneau fait quel développé ?",
+   "question": "Ton chéneau fait quel développé ?",
+   "boutons": [
+    "Jusqu'à 50 cm",
+    "Jusqu'à 65 cm",
+    "Jusqu'à 1 m"
+   ],
+   "unite": "mm",
+   "aide": "La largeur de zinc avant façonnage : elle choisit la largeur du bobineau (500, 650 ou 1 000 mm)."
+  },
+  "reponse": {
+   "bouton": "Jusqu'à 65 cm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "65 cm."
+  }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Non",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Non, raccordée sur regard, pas de dauphin."
+  }
+ }
+}

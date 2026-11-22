@@ -1,0 +1,205 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier, échafaudage de pied et protections",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Couverture zinc à tasseaux sur voligeage existant, zinc quartz épaisseur 0,70 mm, un pan, bacs de 5 m, rive sur tasseau 1 côté (l'autre côté contre le mur de la maison)",
+   "quantite": "45",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Couverture zinc à tasseaux zinc quartz épaisseur 0,70 mm",
+     "quantite": "45",
+     "unite": "m2",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "couverture",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "45"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "5"
+      },
+      {
+       "cle": "nb_rives_tasseau",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "sur voligeage existant, un pan, bacs de 5 m, rive sur tasseau 1 côté (l'autre côté contre le mur de la maison)"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Fourniture des tasseaux bois et des couvre-joints zinc quartz (pose comprise au poste 2)",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tasseaux bois",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "tasseau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour couverture zinc à tasseaux, pose comprise au poste 2"
+    },
+    {
+     "nom": "Couvre-joints zinc quartz",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "couvre_joint",
+     "donnees": [
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour couverture zinc à tasseaux, pose comprise au poste 2"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Bande de solin zinc quartz contre le mur de la maison, développé 200 mm",
+   "quantite": "5",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bande de solin zinc quartz",
+     "quantite": "5",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "5"
+      },
+      {
+       "cle": "developpe",
+       "valeur": "200"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "contre le mur de la maison, développé 200 mm"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "cheneau-encaisse",
+     "emplacement": "cheneau",
+     "donnees": [
+      {
+       "cle": "longueur_cheneau",
+       "valeur": "9"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "developpe"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Descente d'eaux pluviales zinc quartz Ø100",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "100"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "3"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "hauteur 3 m"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Nettoyage du chantier et évacuation des déchets",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

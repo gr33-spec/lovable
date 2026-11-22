@@ -20,6 +20,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     const e = ecran();
     expect(e.suggestions.map((o) => o.label)).toEqual([
       "Pointes pour liteaux", // skill du fondateur (« Pointes pour liteaux… : en Suggestion ») ; ratio : fixations.json
+      // Greg, 21 novembre 2026 (soir) : sur toute couverture écrite avec sa surface et sans sortie de toit au devis.
+      "Sortie de ventilation (VMC, extraction d'air)",
       "Naissances de gouttière",
       "Talons de gouttière (si tu ne les fabriques pas)",
       "Angles de gouttière (si tu ne les fabriques pas)",
@@ -29,7 +31,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "Pattes de fixation",
     ]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/pointe", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/pointe", "couverture-ardoises-crochet/sortie_ventilation", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -70,17 +72,23 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     expect(angles?.quantity).toMatch(/^2\b/);
   });
 
-  it("un devis d'ardoises seules : une seule case, les pointes de liteaux ; un devis sans oubli probable n'a pas d'étape", () => {
+  it("un devis d'ardoises seules : les pointes de liteaux et la sortie de ventilation (Greg, 21 novembre 2026) ; un devis sans oubli probable n'a pas d'étape", () => {
     const ardoisesSeules = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => /ardoise/i.test(l.designation)), questions: [] };
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
-    expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([{ key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" }]);
+    expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([
+      { key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" },
+      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" },
+    ]);
     const rien = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: { ...ardoisesSeules, lignes: [] }, answers: {}, preferences: {} });
     expect(rien.suggestions).toEqual([]);
   });
 
   it("toute suggestion de la fiche couverture a ses mots, et ne dit jamais un article ajouté d'office dans la lecture", () => {
     const slots = ROOFING_REFERENTIAL.workItems.flatMap((w) => w.slots.filter((s) => s.suggested).map((s) => `${w.id}/${s.key} : ${s.suggested!.label}`));
-    expect(slots).toEqual([
+    // Greg, 21 novembre 2026 (soir) : chaque couverture porte aussi sa sortie de ventilation (comparées hors de cette liste).
+    const ventilation = slots.filter((x) => x.endsWith("/sortie_ventilation : Sortie de ventilation (VMC, extraction d'air)"));
+    expect(ventilation.map((x) => x.split("/")[0]).sort()).toEqual(["couverture-ardoises-crochet", "couverture-ardoises-fibres-ciment", "couverture-bac-acier", "couverture-tuiles-canal", "couverture-tuiles-emboitement", "couverture-zinc-joint-debout", "couverture-zinc-tasseaux"]);
+    expect(slots.filter((x) => !ventilation.includes(x))).toEqual([
       // Pointes de liteaux (skill du fondateur ; une par croisement liteau / chevron, recherche fixations du 20/11/2026).
       "couverture-tuiles-emboitement/pointe : Pointes pour liteaux",
       // Rives (skill du fondateur : « rive absente du devis : d'abord en Suggestion »).
@@ -96,6 +104,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "fenetre-de-toit/volet : Volets roulants de fenêtre de toit",
       "fenetre-de-toit/store : Stores de fenêtre de toit",
       "fenetre-de-toit/habillage : Habillages intérieurs de fenêtre de toit",
+      // Greg, 21 novembre 2026 : la bande porte-solin d'un abergement, non dite au devis, se propose ici (avant : ajoutée d'office).
+      "abergement-cheminee/porte_solin : Bandes porte-solin de l'abergement",
       "gouttiere/crochet : Crochets de gouttière",
       "gouttiere/naissance : Naissances de gouttière",
       "gouttiere/talon : Talons de gouttière (si tu ne les fabriques pas)",

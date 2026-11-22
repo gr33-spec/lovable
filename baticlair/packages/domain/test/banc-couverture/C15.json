@@ -1,0 +1,380 @@
+{
+ "id": "C15",
+ "jeu": "examen",
+ "commune": "Vannes",
+ "code_postal": "56000",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "réfection de la couverture d'une maison et de son appentis, avec zinguerie",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « Réfection couv. maison + appentis, zinguerie »"
+   },
+   {
+    "donnee": "neuf ou rénovation",
+    "valeur": "rénovation",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "lignes 2 et 4 : dépose des couvertures existantes ; TVA 10 %"
+   },
+   {
+    "donnee": "couverture de la toiture principale",
+    "valeur": "tuile mécanique grand moule terre cuite",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « couv. tuile mécanique grand moule terre cuite »"
+   },
+   {
+    "donnee": "surface de la toiture principale",
+    "valeur": "90 m²",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « 90 m² »"
+   },
+   {
+    "donnee": "pente de la toiture principale",
+    "valeur": "35°",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « pente 35° »"
+   },
+   {
+    "donnee": "rampant de la toiture principale",
+    "valeur": "6 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « rampant 6 m »"
+   },
+   {
+    "donnee": "couverture de l'appentis",
+    "valeur": "bac acier RAL 8012, sans feutre",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « couv. bac acier RAL 8012, sans feutre »"
+   },
+   {
+    "donnee": "surface de l'appentis",
+    "valeur": "25 m2",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « 25 m2 »"
+   },
+   {
+    "donnee": "pans de l'appentis",
+    "valeur": "1 pan",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « 1 pan »"
+   },
+   {
+    "donnee": "rampant de l'appentis",
+    "valeur": "4 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « rampant 4 m »"
+   },
+   {
+    "donnee": "gouttières",
+    "valeur": "alu gris anthracite, 2 × 9 m + 1 × 6 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 6 : « goutt. alu gris anthracite, 2 x 9 m + 1 x 6 m »"
+   },
+   {
+    "donnee": "longueur de gouttière",
+    "valeur": "24 ML",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 6 : « 24 ML »"
+   },
+   {
+    "donnee": "lignes de gouttière",
+    "valeur": "3",
+    "origine": "deduite",
+    "regle": "2 lignes de 9 m + 1 ligne de 6 m = 3 lignes",
+    "preuve": ""
+   },
+   {
+    "donnee": "nombre de descentes",
+    "valeur": "3",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « DEP alu gris anthracite Ø80 », 3 U"
+   },
+   {
+    "donnee": "diamètre des descentes",
+    "valeur": "Ø80",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « Ø80 »"
+   },
+   {
+    "donnee": "dauphin",
+    "valeur": "sans dauphin",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « sans dauphin »"
+   },
+   {
+    "donnee": "modèle et teinte de la tuile",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "développé de gouttière",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "hauteur des descentes",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Réfection de la couverture d'une maison existante et de son appentis, avec la zinguerie.",
+   "Les couvertures existantes sont déposées.",
+   "Toiture principale : 90 m² de tuile mécanique grand moule terre cuite, pente 35°, rampant 6 m.",
+   "Appentis : 25 m2 de bac acier RAL 8012, sans feutre, 1 pan, rampant 4 m.",
+   "24 ML de gouttière alu gris anthracite, en 3 lignes (2 × 9 m + 1 × 6 m).",
+   "3 descentes alu gris anthracite Ø80, sans dauphin.",
+   "Le modèle de la tuile, le développé de la gouttière et la hauteur des descentes ne sont pas écrits."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Install. chantier, échaf. de pied 2 façades, protections",
+    "quantite": "1",
+    "unite": "Ft",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "2",
+    "designation": "Dépose couv. existante tuiles, évac. gravats en déchetterie",
+    "quantite": "90",
+    "unite": "m2",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "3",
+    "designation": "F. et P. couv. tuile mécanique grand moule terre cuite, pente 35°, rampant 6 m",
+    "quantite": "90",
+    "unite": "m²",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Tuile mécanique grand moule terre cuite",
+      "quantite": "90",
+      "unite": "m²",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "tuile",
+      "donnees": {
+       "surface": "90",
+       "pente": "35",
+       "longueur_rampant": "6"
+      },
+      "attend": [],
+      "aPreciser": [
+       "modèle",
+       "teinte"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Dépose anc. tôles ondulées, évac.",
+    "quantite": "25",
+    "unite": "m2",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "5",
+    "designation": "F. et P. couv. bac acier RAL 8012, sans feutre, 1 pan, rampant 4 m",
+    "quantite": "25",
+    "unite": "m2",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Bac acier RAL 8012, sans feutre",
+      "quantite": "25",
+      "unite": "m2",
+      "ouvrage": "couverture-bac-acier",
+      "emplacement": "couverture",
+      "donnees": {
+       "surface": "25",
+       "teinte_bac": "8012",
+       "feutre_bac": "2",
+       "nb_pans": "1",
+       "longueur_rampant": "4"
+      },
+      "attend": [],
+      "aPreciser": [
+       "profil du bac"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "F. et P. goutt. alu gris anthracite, 2 x 9 m + 1 x 6 m",
+    "quantite": "24",
+    "unite": "ML",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Gouttière alu gris anthracite",
+      "quantite": "24",
+      "unite": "ml",
+      "ouvrage": "gouttiere-pvc-alu",
+      "emplacement": "profil",
+      "donnees": {
+       "longueur_gouttiere": "24",
+       "matiere_gouttiere": "2",
+       "teinte_gouttiere": "5",
+       "nb_lignes": "3",
+       "nb_descentes": "3",
+       "diametre_descente": "80"
+      },
+      "attend": [
+       "developpe_gouttiere"
+      ],
+      "aPreciser": [
+       "profil"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "designation": "F. et P. DEP alu gris anthracite Ø80, sans dauphin",
+    "quantite": "3",
+    "unite": "U",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Descente alu gris anthracite Ø80",
+      "quantite": "3",
+      "unite": "u",
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "nb_descentes": "3",
+       "diametre_descente": "80",
+       "dauphin": "0"
+      },
+      "attend": [
+       "hauteur_descente"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "8",
+    "designation": "Nettoyage fin de chantier, repli échaf.",
+    "quantite": "1",
+    "unite": "Ft",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   }
+  ],
+  "contexte": {
+   "entreprise": "SARL Le Gallic Couverture",
+   "client": "M. et Mme Kervadec",
+   "adresse": "14 rue du Vincin",
+   "ville": "Vannes",
+   "code postal": "56000",
+   "numéro du devis": "D-2026-1187",
+   "date": "12/11/2026",
+   "neuf ou rénovation": "rénovation"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:feutre_bac": {
+   "bouton": "Sans feutre"
+  },
+  "param:developpe_gouttiere@gouttiere-pvc-alu__6": {
+   "bouton": "De 25"
+  },
+  "fiche:modele_tuile": {
+   "valeur": "Terreal Volnay PV rouge vieilli"
+  },
+  "product:tuile": {
+   "valeur": "terreal-volnay-pv"
+  },
+  "param:hauteur_descente": {
+   "valeur": "4",
+   "unite": "m"
+  },
+  "param:developpe_gouttiere": {
+   "bouton": "25"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Tuiles à emboîtement",
+   "mots": [
+    "tuile|volnay",
+    "!rive",
+    "!faiti"
+   ],
+   "quantite": 942,
+   "unite": "n"
+  },
+  {
+   "article": "Plaques bac acier",
+   "mots": [
+    "plaque|bac",
+    "!faitiere",
+    "!closoir",
+    "!vis"
+   ],
+   "quantite": 7,
+   "unite": "n"
+  },
+  {
+   "article": "Gouttière alu de 25",
+   "mots": [
+    "gouttiere",
+    "!crochet",
+    "!naissance",
+    "!talon",
+    "!jonction"
+   ],
+   "quantite": 6,
+   "unite": "n"
+  },
+  {
+   "article": "Tubes de descente alu Ø80",
+   "mots": [
+    "tube|tuyau|descente",
+    "!dauphin",
+    "!coude",
+    "!collier"
+   ],
+   "quantite": 6,
+   "unite": "n"
+  }
+ ],
+ "suggestions": []
+}

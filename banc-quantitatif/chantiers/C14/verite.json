@@ -1,0 +1,111 @@
+{
+ "id": "C14",
+ "commune": "Saint-Malo",
+ "code_postal": "35400",
+ "nature": "neuf",
+ "batiment": "Appentis neuf accolé au pignon de la maison, toit monopente : pan de 8 m de large (le long de l'égout) × 3,50 m de rampant = 28 m². Rive libre des deux côtés. Haut du pan contre le mur de la maison (bande de solin sur 8 m). Bas de pente : chéneau encaissé sur toute la largeur (8 m), une descente.",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-zinc-tasseaux",
+   "description": "Couverture zinc à tasseaux sur voligeage posé par le charpentier, un seul pan",
+   "surface": 28,
+   "nb_pans": 1,
+   "largeur_pan": 8,
+   "longueur_rampant": 3.5,
+   "longueur_bac": "bacs de 3,50 m d'une seule longueur (3,65 m coupés, relevés compris)",
+   "pente": "8° (environ 14 %)",
+   "materiau": "zinc prépatiné anthracite (Anthra-Zinc)",
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "largeur_bobine_tasseaux": 650,
+   "bobine": "bobine de 650 mm, zinc anthracite 0,65 mm ; entraxe des tasseaux 620 mm, soit 13 bacs (13 × 3,65 m ≈ 47,5 m de bobine)",
+   "nb_bacs": 13,
+   "nb_rives_tasseau": 2,
+   "rives": "une rive sur tasseau de chaque côté (gauche et droite)",
+   "tasseaux": "tasseaux bois trapézoïdaux de 50 mm, 14 rangs de 3,50 m (12 entre bacs + 2 de rive) = 49 m",
+   "couvre_joints": "couvre-joints zinc anthracite 0,65 mm pour tasseaux de 50 mm, 14 rangs de 3,50 m = 49 m",
+   "pattes": "pattes à tasseaux zinc, une tous les 50 cm sous chaque tasseau",
+   "support": "voligeage sapin posé par le charpentier, non compris",
+   "ecran": "aucun (voligeage ventilé en sous-face)",
+   "liteaux": "aucun",
+   "faitage": "aucun : le haut des bacs se relève contre le mur, recouvert par la bande de solin",
+   "noues": "aucune",
+   "particularites": "pas de fenêtre de toit ni de sortie de toit ; bord de mer (Saint-Malo)"
+  },
+  {
+   "ouvrage": "cheneau-encaisse",
+   "description": "Chéneau encaissé zinc en bas de pente, dans un encaissement bois fait par le charpentier",
+   "longueur_cheneau": 8,
+   "developpe_cheneau": 650,
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "forme_achat": "bobineau zinc anthracite 0,65 mm, largeur 650 mm",
+   "talons": "2 talons soudés",
+   "naissance": "1 moignon Ø80 soudé en fond de chéneau",
+   "angles": "aucun",
+   "nb_descentes": 1
+  },
+  {
+   "ouvrage": "descente",
+   "matiere": "zinc anthracite",
+   "nb_descentes": 1,
+   "diametre_descente": 80,
+   "hauteur_descente": 3,
+   "longueur_tube": 2,
+   "dauphin": 0,
+   "pied": "raccordée directement sur le regard d'eaux pluviales, sans dauphin",
+   "coudes_par_descente": 2,
+   "colliers": "un collier tous les 2 m, plus un, soit 3"
+  },
+  {
+   "ouvrage": "bandes-zinc",
+   "piece": "bande de solin contre le mur de la maison, en haut du pan",
+   "longueur_bande": 8,
+   "developpe": 200,
+   "aspect_zinc": 3,
+   "epaisseur_zinc": 0.65,
+   "faconnage": 1,
+   "fixation": "engravée dans le mur, mastic en tête, vis inox"
+  }
+ ],
+ "faconnage": 1,
+ "faconnage_texte": "Il plie lui-même : bande de solin dans des feuilles de zinc anthracite 2 × 1 m, chéneau dans du bobineau de 650, bacs dans la bobine de 650. Tasseaux, couvre-joints et tubes de descente achetés tout faits.",
+ "ne_sait_pas": [
+  "de quel côté du chéneau sortira la descente (angle gauche ou angle droit) : à voir avec le maçon pour le regard, sans effet sur les quantités"
+ ],
+ "ecrit_au_devis": [
+  "neuf : couverture zinc de l'appentis, à Saint-Malo (35400)",
+  "couverture en zinc à tasseaux, 28 m²",
+  "zinc anthracite, épaisseur 0,65 mm",
+  "bacs de 3,50 m",
+  "largeur de bobine 650 mm",
+  "rives sur tasseau des 2 côtés",
+  "sur voligeage (non compris)",
+  "chéneau encaissé en zinc anthracite épaisseur 0,65 mm, 8 m, en bas de pente",
+  "1 descente d'eaux pluviales en zinc anthracite Ø80, hauteur 3 m",
+  "bande de solin en zinc anthracite, 8 m, contre le mur de la maison en haut du pan",
+  "un prix global par ouvrage, pas de colonne quantité"
+ ],
+ "tu_au_devis": [
+  "développé du chéneau : 650 mm (developpe_cheneau: 650)",
+  "développé de la bande de solin : 200 mm (developpe: 200)",
+  "épaisseur du zinc de la bande de solin : 0,65 mm",
+  "façonnage : il plie lui-même (faconnage: 1)",
+  "pente du toit : 8°",
+  "largeur du pan : 8 m, 13 bacs",
+  "tubes de descente en longueurs de 2 m (longueur_tube: 2)",
+  "2 coudes sur la descente (coudes_par_descente: 2)",
+  "pas de dauphin (dauphin: 0)"
+ ],
+ "oublis": [
+  "tasseaux bois trapézoïdaux de 50 mm (49 m)",
+  "couvre-joints zinc anthracite (49 m)",
+  "pattes à tasseaux (fixation des bacs)",
+  "moignon / naissance Ø80 du chéneau",
+  "talons du chéneau (2)",
+  "coudes de descente Ø80 (2)",
+  "colliers de descente Ø80 (3)",
+  "mastic et vis inox pour la bande de solin",
+  "étain et décapant pour les soudures du chéneau"
+ ]
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ecranDeLecture, ROOFING_REFERENTIAL, type EngineAnswer } from "../src/index.js";
 import { HABITUDES_BANC } from "./support/habitudes.js";
 import { lectureEnregistree } from "./support/lectures.js";
+import { EGOUT_COMPRIS_OUI } from "./support/read-quote.js";
 
 /**
  * COUVERTURE EN ARDOISES AU CROCHET : chaque composant détaillé, calculé avec les hypothèses du référentiel, dites.
@@ -18,12 +19,20 @@ const LINES = [
 function read(answers: Record<string, EngineAnswer> = {}, acceptDraft = false, lines: typeof LINES = LINES) {
   const lecture = lectureEnregistree(ROOFING_REFERENTIAL, lines, [], HABITUDES_BANC, { acceptDraft }, undefined, answers);
   const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture, answers, preferences: HABITUDES_BANC, options: { acceptDraft }, interdits: false });
-  return { proposals: e.roles, view: e.view, ouvrage: (ref: string) => e.view.ouvrages.find((o) => o.lineId === ref)! };
+  return { proposals: e.roles, view: e.view, questions: e.questions, ouvrage: (ref: string) => e.view.ouvrages.find((o) => o.lineId === ref)! };
 }
 
 describe("couverture en ardoises au crochet : chaque composant détaillé", () => {
   it("dès l'ouverture, sans rien demander : ardoises, crochets et liteaux 18×40 calculés avec les hypothèses du référentiel, dites", () => {
-    const { ouvrage } = read();
+    // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
+    const ouverture = read();
+    const oui = read(EGOUT_COMPRIS_OUI);
+    // La seule question de la couverture : celle de l'égout (les autres questions du devis, cheminée et pliage, ne changent pas).
+    expect(ouverture.questions.map((q) => q.key).filter((k) => !oui.questions.some((q) => q.key === k))).toEqual(["param:egout_compris"]);
+    expect(ouverture.questions.find((q) => q.key === "param:egout_compris")).toMatchObject({ text: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", options: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }] });
+    expect(ouverture.ouvrage("a1").needs.find((n) => n.slot === "ardoise")).toMatchObject({ need: null, missing: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?" });
+    // « Oui » : tout est calculé comme avant.
+    const { ouvrage } = oui;
     const couverture = ouvrage("a1");
     expect(couverture.role).toBe("measure");
     const ardoises = couverture.needs.find((n) => n.slot === "ardoise")!;
@@ -35,7 +44,10 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     expect(ardoises.need).toEqual({ value: "8925", unit: "u" });
     expect(crochets.need).toEqual({ value: "8925", unit: "u" });
     expect(liteaux.need).toEqual({ value: "1990.52", unit: "ml" });
-    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual(["param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "param:situation=normale", "derived:recouvrement=89", "param:pureau=10,55", "param:diametre_crochet=standard"]);
+    expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual([
+      // Greg, 21 novembre 2026 : les ouvrages au mètre se lisent au devis ; il n'en écrit aucun : zéro, jamais dit en hypothèse.
+      "param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "param:situation=normale", "derived:recouvrement=89", "param:pureau=10,55", "param:diametre_crochet=standard",
+    ]);
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");
     expect(liteaux.assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40", note: expect.stringMatching(/18×40 par défaut/) }));
@@ -43,7 +55,7 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
   });
 
   it("pureau donné par l'artisan : il remplace l'hypothèse, les pertes restent", () => {
-    const { ouvrage } = read({ "param:pureau": { value: "11", unit: "cm" } });
+    const { ouvrage } = read({ ...EGOUT_COMPRIS_OUI, "param:pureau": { value: "11", unit: "cm" } });
     const ardoises = ouvrage("a1").needs.find((n) => n.slot === "ardoise")!;
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;

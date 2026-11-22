@@ -1,0 +1,40 @@
+{
+ "liste": [
+  {
+   "article": "Bobine Quartz-Zinc 0,70 mm, largeur 650 mm",
+   "quantite": "78",
+   "unite": "ml",
+   "detail": "15 bacs × 5,15 m"
+  },
+  {
+   "article": "Tasseaux bois trapézoïdaux de 50 mm",
+   "quantite": "75",
+   "unite": "ml",
+   "detail": "15 rangs × 5 m"
+  },
+  {
+   "article": "Couvre-joints Quartz-Zinc 0,70 mm pour tasseaux de 50 mm",
+   "quantite": "75",
+   "unite": "ml",
+   "detail": "15 rangs × 5 m"
+  },
+  {
+   "article": "Feuilles Quartz-Zinc 2 × 1 m, 0,70 mm",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "pour 5 ml de bande, développé 20 cm"
+  },
+  {
+   "article": "Bobineau Quartz-Zinc 0,70 mm, 650 mm × 17 m",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "pour 9 m de chéneau, marge 5 % comprise"
+  },
+  {
+   "article": "Tubes de descente Ø100, longueur 2 m",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": "1 descente × 3 m"
+  }
+ ]
+}

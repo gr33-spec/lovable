@@ -1,0 +1,118 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Remplact noue zinc",
+   "quantite": "6",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Noues zinc",
+     "quantite": "6",
+     "unite": "ml",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [
+      {
+       "cle": "longueur_noue",
+       "valeur": "6 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Remaniage ardoises autour noue, ardoises identiques à l'existant",
+   "quantite": "12",
+   "unite": "m2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Ardoises",
+     "quantite": "12",
+     "unite": "m2",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "12 m2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Remplact DEP Ø80",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tubes de descente",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1 u"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80 mm"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "mortier",
+   "quantite": "3",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "mortier",
+     "quantite": "3",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "Reprise solin au mortier"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Echelle de toit + évac gravats",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

@@ -1,0 +1,45 @@
+{
+  "accords": [
+    {"article": "Fenêtre de toit Velux GGL MK04 (78 × 98)", "quantite": 2, "unite": "pièces"},
+    {"article": "Raccord d'étanchéité Velux EDL MK04 pour ardoise (inclus dans la ligne fenêtres de toit côté référence)", "quantite": 2, "unite": "pièces"},
+    {"article": "Sortie de toit Ø 125 pour VMC, chapeau + embase plomb (une ligne côté contrôleur, deux lignes embase/chapeau côté référence)", "quantite": 2, "unite": "pièces"}
+  ],
+  "desaccords": [
+    {
+      "article": "Ardoise naturelle 30×20, Espagne 1er choix",
+      "controleur": "8000 pièces",
+      "reference": "161 pièces",
+      "ecart": "Quantité très différente : le contrôleur compte le toit entier plus les jouées (8000), la référence ne compte que les jouées de 3,2 m² (161)."
+    },
+    {
+      "article": "Crochets à pointe inox Ø 2,7 laqués noir, 10 cm",
+      "controleur": "12 boîtes de 700 (8400 crochets)",
+      "reference": "161 pièces",
+      "ecart": "Quantité différente (8400 contre 161 crochets), conditionnement en boîtes de 700 d'un côté et à la pièce de l'autre ; la référence suit le nombre d'ardoises de ses seules jouées."
+    },
+    {
+      "article": "Feuille de zinc naturel 0,65 mm, 2 × 1 m",
+      "controleur": "4 feuilles",
+      "reference": "2 pièces",
+      "ecart": "Quantité différente : le contrôleur compte 2 feuilles pour les noues et 2 pour l'abergement de souche, la référence 2 feuilles au total."
+    },
+    {
+      "article": "Bandes porte-solin 2 m",
+      "controleur": "absent",
+      "reference": "2 pièces",
+      "ecart": "Article absent côté contrôleur (porte-solin non écrit au devis, non compté), présent côté référence pour 2 pièces."
+    },
+    {
+      "article": "Faîtière demi-ronde terre cuite rouge de 40",
+      "controleur": "34 pièces",
+      "reference": "33 pièces",
+      "ecart": "Quantité différente d'une pièce : 34 côté contrôleur (casse 1 % ajoutée), 33 côté référence."
+    },
+    {
+      "article": "4 noues de 1,80 m",
+      "controleur": "absent",
+      "reference": "à chiffrer",
+      "ecart": "Ligne à chiffrer côté référence (« ens » n'est pas une unité de commande) ; le contrôleur n'a pas de ligne noues et les inclut dans ses feuilles de zinc."
+    }
+  ]
+}

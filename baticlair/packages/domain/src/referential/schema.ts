@@ -72,6 +72,8 @@ const param = z.object({
   neverAsk: z.literal(true).optional(),
   textValues: z.array(z.object({ value: str, keywords: z.array(str).min(1) })).optional(),
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
+  askOnlyAfter: z.object({ param: str, value: str }).optional(),
+  silentDefault: z.literal(true).optional(),
   onlyFromPrincipal: z.literal(true).optional(),
   ownOnly: z.literal(true).optional(),
   groupe: z.object({ id: z.string().regex(/^[a-z0-9-]+$/), question: str, hint: z.string().optional() }).optional(),
@@ -91,11 +93,11 @@ const slot = z.object({
   charsFrom: z.string().optional(),
   formOf: z.string().optional(),
   indissociable: z.literal(true).optional(),
-  suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional() }).strict().optional(),
+  suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional(), unlessWorks: z.array(str).min(1).optional(), onlyOnMeasuredWork: z.literal(true).optional() }).strict().optional(),
   piecesFrom: z.object({ count: str, length: str, piece: z.object({ one: str, many: str }).optional() }).optional(),
   citedBy: z.array(str).optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), precision: z.string().optional(), pieceUnit: z.object({ one: str, many: str }).strict().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional(), consumable: z.literal(true).optional(), consumableFor: z.string().optional(), estimate: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), covers: z.string().optional(), precision: z.string().optional(), pieceUnit: z.object({ one: str, many: str }).strict().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional(), consumable: z.literal(true).optional(), consumableFor: z.string().optional(), estimate: z.string().optional() });
 const workItem = z.object({
   id: str,
   trade: str,

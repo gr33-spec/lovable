@@ -1,0 +1,24 @@
+{"lignes": [
+{"ref": "1", "designation": "Liteaux bois pour ardoises", "quantite": "200", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Liteaux bois pour ardoises", "quantite": "", "unite": "", "ouvrage": "couverture-ardoises-crochet", "emplacement": "liteau", "donnees": [{"cle": "surface", "valeur": "200"}], "a_preciser": ["section"], "precision": ""}
+]},
+{"ref": "2", "designation": "Ardoises naturelles 30x22", "quantite": "200", "unite": "m²", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Ardoises naturelles 30x22", "quantite": "", "unite": "", "ouvrage": "couverture-ardoises-crochet", "emplacement": "ardoise", "donnees": [{"cle": "surface", "valeur": "200"}], "a_preciser": [], "precision": ""}
+]},
+{"ref": "3", "designation": "Gouttière de 25, bandeau en zinc", "quantite": "17", "unite": "m", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Gouttière zinc de 25", "quantite": "17", "unite": "ml", "ouvrage": "gouttiere", "emplacement": "profil", "donnees": [{"cle": "longueur_gouttiere", "valeur": "17"}, {"cle": "developpe_gouttiere", "valeur": "25"}, {"cle": "fixation_crochet", "valeur": "2"}], "a_preciser": ["profil"], "precision": "bandeau en zinc"}
+]},
+{"ref": "4", "designation": "Faîtage zinc", "quantite": "17", "unite": "m", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Faîtage zinc", "quantite": "17", "unite": "ml", "ouvrage": "faitage-zinc", "emplacement": "bande", "donnees": [{"cle": "longueur_faitage", "valeur": "17"}], "a_preciser": ["développé", "épaisseur"], "precision": ""}
+]},
+{"ref": "5", "designation": "Ardoises pour jouées de lucarnes", "quantite": "6", "unite": "unités", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Ardoises pour jouées de lucarnes", "quantite": "", "unite": "", "ouvrage": "", "emplacement": "", "donnees": [], "a_preciser": ["dimension", "quantité"], "precision": "pour 6 jouées de lucarnes"}
+]},
+{"ref": "6", "designation": "Entourage de cheminée zinc et solin", "quantite": "2", "unite": "unités", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Entourage de cheminée zinc", "quantite": "2", "unite": "u", "ouvrage": "abergement-cheminee", "emplacement": "abergement", "donnees": [{"cle": "nb_cheminees", "valeur": "2"}], "a_preciser": ["périmètre", "épaisseur"], "precision": ""},
+  {"nom": "Solin de cheminée", "quantite": "", "unite": "", "ouvrage": "abergement-cheminee", "emplacement": "porte_solin", "donnees": [{"cle": "nb_cheminees", "valeur": "2"}], "a_preciser": ["périmètre"], "precision": ""}
+]},
+{"ref": "7", "designation": "Chatières de ventilation", "quantite": "12", "unite": "unités", "role": "fourniture_et_pose", "fournitures": [
+  {"nom": "Chatières de ventilation", "quantite": "12", "unite": "u", "ouvrage": "", "emplacement": "", "donnees": [], "a_preciser": ["modèle"], "precision": ""}
+]}
+]}

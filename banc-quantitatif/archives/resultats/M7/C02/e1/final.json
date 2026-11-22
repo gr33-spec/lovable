@@ -1,0 +1,159 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuiles terre cuite HP10 Huguenot Fenal",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "120 m² au devis",
+    "lignes": [
+     "1"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "210",
+    "unite": "ml",
+    "affiche": "210 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 60 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières terre cuite rouge",
+    "quantite": "24",
+    "unite": "pièces",
+    "affiche": "24 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir ventilé",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage",
+   "Main-d'œuvre"
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuiles terre cuite HP10 Huguenot Fenal",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "120 m² au devis",
+    "lignes": [
+     "1"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "210",
+    "unite": "ml",
+    "affiche": "210 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 60 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières terre cuite rouge",
+    "quantite": "24",
+    "unite": "pièces",
+    "affiche": "24 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir ventilé",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage",
+   "Main-d'œuvre"
+  ],
+  "questions": []
+ }
+}

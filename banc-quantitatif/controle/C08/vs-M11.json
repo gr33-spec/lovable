@@ -1,0 +1,26 @@
+{
+  "juste": 1,
+  "quantite_fausse": 3,
+  "manquante": 0,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Ardoise naturelle d'Espagne 1er choix 32×22, ép. 3,5 mm, gris-noir (identique à l'existant)",
+      "classe": "quantite_fausse",
+      "attendu": "168 pièces",
+      "obtenu": "à chiffrer (Ardoises)"
+    },
+    {
+      "article": "Mortier bâtard pour solin, sac de 25 kg",
+      "classe": "quantite_fausse",
+      "attendu": "1 sac de 25 kg",
+      "obtenu": "3 ml (Mortier)"
+    },
+    {
+      "article": "Tuyau de descente zinc naturel Ø80, longueur 2 m",
+      "classe": "quantite_fausse",
+      "attendu": "à chiffrer (tubes de 2 m)",
+      "obtenu": "1 pièce (DEP Ø80)"
+    }
+  ]
+}

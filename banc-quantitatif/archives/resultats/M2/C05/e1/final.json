@@ -1,0 +1,354 @@
+{
+ "posees": [
+  {
+   "key": "param:perimetre_cheminee",
+   "text": "Périmètre d'une cheminée (les 4 côtés) ?",
+   "options": [
+    "2 m",
+    "3 m",
+    "4 m",
+    "5 m"
+   ],
+   "reponse": "3 m"
+  },
+  {
+   "key": "param:diametre_sortie",
+   "text": "Sortie de toit : quel diamètre ?",
+   "options": [
+    "Ø 80",
+    "Ø 100",
+    "Ø 125",
+    "Ø 150",
+    "Ø 180",
+    "VMC"
+   ],
+   "reponse": "Ø 125"
+  },
+  {
+   "key": "param:usage_sortie",
+   "text": "Sortie de toit : conduit de fumée ou ventilation ?",
+   "options": [
+    "Conduit de fumée",
+    "Ventilation"
+   ],
+   "reponse": "Ventilation"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:longueur_noue",
+   "text": "Longueur de noue ?",
+   "options": [],
+   "reponse": "7.2 m"
+  },
+  {
+   "key": "param:qualite_ardoise",
+   "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles 30×20",
+    "quantite": "6851",
+    "unite": "pièces",
+    "affiche": "6 851 pièces",
+    "etat": "ready",
+    "precision": "140 m² × 46,6 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "param:qualite_ardoise"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "6851",
+    "unite": "pièces",
+    "affiche": "6 851 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "param:qualite_ardoise"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Noues de lucarnes",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Fenêtres de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Abergement de cheminée",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sorties de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "10"
+    ],
+    "attend": [
+     "param:diametre_sortie"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "10"
+    ],
+    "attend": [
+     "param:diametre_sortie"
+    ],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoise naturelle 30×20",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier",
+   "Dépose de la couverture existante",
+   "Dépose des anciens châssis de toit",
+   "Évacuation des gravats",
+   "Fin de chantier"
+  ],
+  "questions": [
+   "param:perimetre_cheminee",
+   "param:diametre_sortie",
+   "param:usage_sortie",
+   "param:faconnage@pieces-pliees",
+   "param:longueur_noue",
+   "param:qualite_ardoise"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 30×20",
+    "quantite": "6851",
+    "unite": "pièces",
+    "affiche": "6 851 pièces",
+    "etat": "ready",
+    "precision": "140 m² × 46,6 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "6851",
+    "unite": "pièces",
+    "affiche": "6 851 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Fenêtres de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 7,2 ml de noue, développé 50 cm ; pour façonner l'abergement de cheminée, développé 33 cm",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoise naturelle 30×20",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Noues de lucarnes",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier",
+   "Dépose de la couverture existante",
+   "Dépose des anciens châssis de toit",
+   "Évacuation des gravats",
+   "Fin de chantier"
+  ],
+  "questions": []
+ }
+}

@@ -1,0 +1,32 @@
+{"lignes":[
+{"ref":"1","designation":"Installation de chantier, échafaudage de pied sur les deux façades, protections","mesure":"m18","role":"hors_quantitatif","fournitures":[]},
+{"ref":"2","designation":"Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie","mesure":"m20","role":"hors_quantitatif","fournitures":[]},
+{"ref":"3","designation":"Fourniture et pose d'un écran sous-toiture HPV","mesure":"m22","role":"fourniture_et_pose","fournitures":[
+{"nom":"écran sous-toiture HPV","mesure":"m22","ouvrage":"couverture-ardoises-crochet","emplacement":"ecran","donnees":[],"a_preciser":[],"precision":""}]},
+{"ref":"4","designation":"Fourniture et pose de liteaux sapin traité","mesure":"m24","role":"fourniture_et_pose","fournitures":[
+{"nom":"liteaux sapin traité","mesure":"m24","ouvrage":"couverture-ardoises-crochet","emplacement":"liteau","donnees":[],"a_preciser":[],"precision":""}]},
+{"ref":"5","designation":"Couverture en ardoise naturelle d'Espagne 1er choix 32×22 : pose au crochet inox, pente 45°, rampant 6 m","mesure":"m27","role":"fourniture_et_pose","fournitures":[
+{"nom":"ardoise naturelle d'Espagne 1er choix 32×22","mesure":"m27","ouvrage":"couverture-ardoises-crochet","emplacement":"ardoise","donnees":[
+{"cle":"qualite_ardoise","etiquette":"","choix":"1","mots":"naturelle d'Espagne 1er choix"},
+{"cle":"pente","etiquette":"m29","choix":"","mots":""},
+{"cle":"longueur_rampant","etiquette":"m30","choix":"","mots":""}],"a_preciser":[],"precision":"32×22"},
+{"nom":"crochets inox","mesure":"","ouvrage":"couverture-ardoises-crochet","emplacement":"crochet","donnees":[
+{"cle":"diametre_crochet","etiquette":"","choix":"2.7","mots":"crochet inox"}],"a_preciser":[],"precision":""}]},
+{"ref":"6","designation":"Faîtage zinc","mesure":"m32","role":"fourniture_et_pose","fournitures":[
+{"nom":"Faîtage zinc","mesure":"m32","ouvrage":"faitage-zinc","emplacement":"bande","donnees":[
+{"cle":"longueur_faitage","etiquette":"m32","choix":"","mots":""}],"a_preciser":[],"precision":""}]},
+{"ref":"7","designation":"Gouttière demi-ronde zinc de 25 (2 longueurs de 8 m)","mesure":"m37","role":"fourniture_et_pose","fournitures":[
+{"nom":"Gouttière demi-ronde zinc","mesure":"m37","ouvrage":"gouttiere","emplacement":"profil","donnees":[
+{"cle":"longueur_gouttiere","etiquette":"m37","choix":"","mots":""},
+{"cle":"developpe_gouttiere","etiquette":"m34","choix":"","mots":""}],"a_preciser":[],"precision":"2 longueurs de 8 m"},
+{"nom":"Naissances","mesure":"","ouvrage":"gouttiere","emplacement":"naissance","donnees":[],"a_preciser":[],"precision":""}]},
+{"ref":"8","designation":"Descente d'eau pluviale zinc Ø80, hauteur 5,50 m","mesure":"m41","role":"fourniture_et_pose","fournitures":[
+{"nom":"Descente d'eau pluviale zinc","mesure":"m41","ouvrage":"descente","emplacement":"tube","donnees":[
+{"cle":"nb_descentes","etiquette":"m41","choix":"","mots":""},
+{"cle":"diametre_descente","etiquette":"","choix":"80","mots":"Ø80"},
+{"cle":"hauteur_descente","etiquette":"m40","choix":"","mots":""}],"a_preciser":[],"precision":""}]},
+{"ref":"9","designation":"Dauphin fonte Ø80 en pied de descente","mesure":"m44","role":"fourniture_et_pose","fournitures":[
+{"nom":"Dauphin fonte","mesure":"m44","ouvrage":"descente","emplacement":"dauphin","donnees":[
+{"cle":"diametre_descente","etiquette":"","choix":"80","mots":"Ø80"}],"a_preciser":[],"precision":""}]},
+{"ref":"10","designation":"Nettoyage du chantier et repli de l'échafaudage","mesure":"m46","role":"hors_quantitatif","fournitures":[]}
+]}

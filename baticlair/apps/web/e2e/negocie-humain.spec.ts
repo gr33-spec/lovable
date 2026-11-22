@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { continuerSansSuggestionParApi, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 
 /**
  * BUSINESS MODEL FINAL (Greg, 25 octobre 2026) : le regroupement NÉGOCIÉ PAR UN HUMAIN, mode par défaut. L'artisan
@@ -59,8 +59,11 @@ async function inscrire(page: Page, email: string, zone: string, lignes?: { libe
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: `3 rue de la Gare, ${VILLES[zone]}`, siret: "73282932000074", phone: null, email: null })).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/groupe/siret")).status).toBe(200);
   if (!lignes) return null;
-  const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
+  const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
   expect(q.status).toBe(201);
+  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
+  // (VMC, extraction d'air) » ; rien de coché, la liste reste telle qu'écrite (avant : aucune étape « Suggestions » ici).
+  await continuerSansSuggestionParApi(page, q.body.id);
   expect((await apiJson(page, "PATCH", `/v1/projects/${q.body.projetId}`, { address: `8 rue de la Gare, ${VILLES[zone]}` })).status).toBe(200);
   return q.body.projetId;
 }

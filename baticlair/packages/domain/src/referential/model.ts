@@ -273,6 +273,13 @@ export interface ParamDef {
    * zinc ; ardoises ou tuiles → embase plomb). Deux valeurs possibles dans le même devis : rien n'est déduit, on demande.
    */
   fromWorks?: { value: string; workItems: string[] }[];
+  /**
+   * La question ne se pose qu'une fois une autre donnée répondue avec cette valeur (« Quelle longueur d'égout ? » seulement
+   * après « Non » à « Tes m² comprennent déjà l'égout ? ») : jamais avant, jamais dans une liste de questions d'avance.
+   */
+  askOnlyAfter?: { param: string; value: string };
+  /** La valeur par défaut ne dit rien à l'artisan (0 m d'arêtier quand le devis n'en a pas) : jamais listée en hypothèse. */
+  silentDefault?: true;
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
   /** Jamais prêtée par un autre ouvrage : ce que le devis écrit pour une pièce ne vaut pas pour sa voisine (§48.6). */
@@ -384,8 +391,10 @@ export interface Slot {
   /**
    * Étape « Suggestions » : la case proposée. `vaut` : les données qu'une case cochée tranche (le « oui » d'un dauphin) ;
    * elles ne se demandent plus (skill du fondateur, 18/11/2026 : cochée, la case vaut l'article écrit).
+   * `unlessWorks` : pas proposée quand le devis a déjà l'un de ces ouvrages (une sortie de toit écrite).
+   * `onlyOnMeasuredWork` : seulement quand l'article principal de l'ouvrage est écrit avec sa surface (une couverture en m²).
    */
-  suggested?: { label: string; vaut?: Record<string, string> };
+  suggested?: { label: string; vaut?: Record<string, string>; unlessWorks?: string[]; onlyOnMeasuredWork?: true };
   /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
@@ -431,6 +440,11 @@ export interface NeedRule extends Provenance {
   core: boolean;
   /** Ce que la règle ne compte pas (dit à l'artisan dans « Voir le calcul »). */
   exclusions?: string;
+  /**
+   * La donnée que le besoin COUVRE, quand il compte plus qu'elle (« 13 ml » de gouttière, plus 30 mm par jonction) : la liste
+   * dit ce qui est couvert (« 13 ml à couvrir »), jamais la longueur gonflée des recouvrements.
+   */
+  covers?: string;
   /**
    * Ce qui sert au comptoir (§45.3, colonne « précision ») : l'usage de la pièce
    * (« pour façonner la bande d'égout »), une position (« zone fixe de chaque bac »).

@@ -1,0 +1,225 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:developpe_cheneau",
+   "text": "Ton chéneau fait quel développé ?",
+   "options": [
+    "Jusqu'à 50 cm",
+    "Jusqu'à 65 cm",
+    "Jusqu'à 1 m"
+   ],
+   "reponse": "Jusqu'à 65 cm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Bobine Quartz-Zinc 0,70 mm, largeur 650 mm",
+    "quantite": "78",
+    "unite": "ml",
+    "affiche": "78 ml",
+    "etat": "ready",
+    "precision": "15 bacs × 5,15 m",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tasseaux bois trapézoïdaux de 50 mm",
+    "quantite": "75",
+    "unite": "ml",
+    "affiche": "75 ml",
+    "etat": "ready",
+    "precision": "15 rangs × 5 m",
+    "lignes": [
+     "3.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Couvre-joints Quartz-Zinc 0,70 mm pour tasseaux de 50 mm",
+    "quantite": "75",
+    "unite": "ml",
+    "affiche": "75 ml",
+    "etat": "ready",
+    "precision": "15 rangs × 5 m",
+    "lignes": [
+     "3.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bande de solin zinc quartz contre le mur de la maison, développé 200 mm",
+    "quantite": "5",
+    "unite": "ml",
+    "affiche": "5 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Bobineau Quartz-Zinc 0,70 mm, × 17 m",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 9 m de chéneau, marge 5 % comprise",
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "param:developpe_cheneau",
+     "param:largeur_bobineau"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø100, longueur 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 3 m",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier, échafaudage de pied et protections",
+   "Nettoyage du chantier et évacuation des déchets"
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:developpe_cheneau"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Bobine Quartz-Zinc 0,70 mm, largeur 650 mm",
+    "quantite": "78",
+    "unite": "ml",
+    "affiche": "78 ml",
+    "etat": "ready",
+    "precision": "15 bacs × 5,15 m",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tasseaux bois trapézoïdaux de 50 mm",
+    "quantite": "75",
+    "unite": "ml",
+    "affiche": "75 ml",
+    "etat": "ready",
+    "precision": "15 rangs × 5 m",
+    "lignes": [
+     "3.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Couvre-joints Quartz-Zinc 0,70 mm pour tasseaux de 50 mm",
+    "quantite": "75",
+    "unite": "ml",
+    "affiche": "75 ml",
+    "etat": "ready",
+    "precision": "15 rangs × 5 m",
+    "lignes": [
+     "3.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles Quartz-Zinc 2 × 1 m, 0,70 mm",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 5 ml de bande, développé 20 cm",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bobineau Quartz-Zinc 0,70 mm, 650 mm × 17 m",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 9 m de chéneau, marge 5 % comprise",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø100, longueur 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 3 m",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier, échafaudage de pied et protections",
+   "Nettoyage du chantier et évacuation des déchets"
+  ],
+  "questions": []
+ }
+}

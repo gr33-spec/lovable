@@ -1,0 +1,94 @@
+{
+  "id": "C03",
+  "commune": "Paimpol",
+  "code_postal": "22500",
+  "nature": "rénovation",
+  "description": "Zinguerie seule sur une maison existante à étage, en bord de mer : remplacement des gouttières pendantes et des descentes d'eaux pluviales. La couverture n'est pas touchée. Une seule ligne de gouttière continue qui fait le tour de 3 façades (9 + 10 + 9 = 28 ml), donc 2 angles et 2 talons.",
+  "ouvrages": [
+    {
+      "ouvrage": "gouttiere",
+      "libelle": "Gouttière pendante demi-ronde zinc naturel",
+      "profil": "demi-ronde",
+      "matiere": "zinc naturel",
+      "epaisseur_zinc_mm": 0.65,
+      "developpe_gouttiere": 33,
+      "longueur_gouttiere": 28,
+      "unite_longueur": "ml",
+      "facades": 3,
+      "longueur_par_ligne": [9, 10, 9],
+      "nb_lignes": 1,
+      "nb_angles": 2,
+      "type_angles": "angles extérieurs 90° du commerce, soudés",
+      "talons": 2,
+      "nb_descentes": 3,
+      "naissances": 3,
+      "diametre_descente": 100,
+      "zone": 3,
+      "zone_libelle": "bord de mer (Paimpol)",
+      "fixation_crochet": 1,
+      "fixation_crochet_libelle": "crochets sur les chevrons",
+      "crochets": "crochets galvanisés de 33, un tous les 40 cm (bord de mer) : environ 73",
+      "longueurs_commerce": "longueurs de 4 m : 7 longueurs",
+      "jonctions": "soudées à l'étain"
+    },
+    {
+      "ouvrage": "descente",
+      "libelle": "Descentes d'eaux pluviales zinc naturel",
+      "matiere": "zinc naturel",
+      "nb_descentes": 3,
+      "diametre_descente": 100,
+      "hauteur_descente": 6,
+      "unite_hauteur": "m",
+      "longueur_tube": 2,
+      "tubes": "3 tubes de 2 m par descente : 9 tubes",
+      "coudes_par_descente": 2,
+      "coudes": 6,
+      "colliers": "un collier tous les 2 m plus un : 4 par descente, 12 en tout",
+      "dauphin": 1,
+      "dauphins": "3 dauphins fonte Ø100 de 1 m, un en pied de chaque descente"
+    },
+    {
+      "ouvrage": "depose",
+      "libelle": "Dépose des anciennes gouttières et descentes (zinc), évacuation en déchetterie",
+      "longueur": 28,
+      "descentes": 3
+    }
+  ],
+  "faconnage": "achète tout fait (gouttières, angles, naissances, talons, coudes du commerce) ; il soude sur place mais ne plie rien",
+  "faconnage_valeur": 2,
+  "ne_sait_pas": [
+    "l'état des planches de rive et des abouts de chevrons derrière les anciennes gouttières (visible seulement après dépose)",
+    "si les regards en pied de descente sont à reprendre",
+    "l'épaisseur exacte du zinc des anciennes gouttières"
+  ],
+  "ecrit_au_devis": [
+    "zinguerie seule, remplacement des gouttières et des descentes",
+    "chantier à Paimpol (22500)",
+    "dépose des anciennes gouttières et descentes, évacuation en déchetterie (forfait)",
+    "fourniture et pose de gouttière demi-ronde zinc naturel développé 33 : 28 ml",
+    "sur 3 façades",
+    "2 angles",
+    "fourniture et pose de 3 descentes zinc Ø100",
+    "3 dauphins fonte en pied de descente",
+    "échafaudage roulant et protections (forfait)"
+  ],
+  "tu_au_devis": [
+    "hauteur des descentes : 6 m",
+    "tubes en longueurs de 2 m",
+    "2 coudes par descente",
+    "crochets posés sur les chevrons, un tous les 40 cm",
+    "longueur de chaque façade : 9, 10 et 9 m",
+    "une seule ligne continue : 2 talons",
+    "il achète tout fait, il ne plie pas",
+    "épaisseur du zinc 0,65",
+    "bord de mer (zone 3)"
+  ],
+  "oublis": [
+    "crochets de gouttière de 33 (environ 73)",
+    "talons de gouttière (2)",
+    "coudes de descente Ø100 (6)",
+    "colliers de descente Ø100 (12)",
+    "étain à souder et décapant"
+  ],
+  "note_naissances": "3 naissances Ø100 : non écrites au devis, mais accessoire indissociable de la gouttière (§49.1 point 3), que le code doit sortir d'office."
+}

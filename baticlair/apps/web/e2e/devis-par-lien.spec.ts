@@ -162,7 +162,8 @@ test("envoi trié par métier : les offres de chaque demande se comparent, « Co
   await zinc.getByRole("button", { name: "Comparer", exact: true }).click();
   const feuille = page.getByRole("dialog", { name: "Devis reçus" });
   await expect(feuille.getByLabel("Devis de Zingueur Cyan")).toContainText("Le moins cher");
-  await expect(feuille.getByLabel("Devis de Zingueur Cyan")).toContainText("60,00 € HT livré");
+  // Règle changée (Greg, 21 novembre 2026) : 30 mm par jonction soudée ; 24 m de gouttière zinc font 7 longueurs (avant : 6), donc 70 €.
+  await expect(feuille.getByLabel("Devis de Zingueur Cyan")).toContainText("70,00 € HT livré");
   await feuille.getByLabel("Devis de Zingueur Cyan").getByRole("button", { name: "Commander" }).click();
   const confirmation = page.getByRole("dialog", { name: "Confirmer la commande" });
   await expect(confirmation).toContainText("Tu commandes chez Zingueur Cyan.");
@@ -178,7 +179,7 @@ test("envoi trié par métier : les offres de chaque demande se comparent, « Co
   const mails = (await apiJson<{ emails: { subject: string; text: string; attachments?: { filename: string }[] }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent(fiches[2]!.email)}`, undefined, SECRET)).body.emails;
   const bon = mails.find((m) => m.subject.startsWith("Bon de commande de"));
   expect(bon).toBeTruthy();
-  expect(bon!.subject).toContain("60,00 € HT livré");
+  expect(bon!.subject).toContain("70,00 € HT livré");
   // Greg, 16 novembre 2026 : le négoce retenu lit la date de livraison souhaitée, mot pour mot.
   expect(bon!.text).toMatch(/C'est OK pour moi, livraison souhaitée le \d{1,2}(er)? \S+ \d{4}, on s'appelle pour caler les détails\./);
   await expect(zinc.getByRole("status", { name: "Commandé" })).toContainText("Livraison souhaitée le");
@@ -194,7 +195,7 @@ test("envoi trié par métier : les offres de chaque demande se comparent, « Co
   expect(poli).toHaveLength(1);
   expect(poli[0]!.text).toContain("Merci pour votre offre, elle n'a pas été retenue cette fois. Je vous recontacte pour mes prochains chantiers.");
   // Jamais le prix ni le nom du négoce retenu ; le retenu, lui, ne reçoit pas ce message, ni l'ardoisier d'une autre demande.
-  expect(poli[0]!.text + poli[0]!.subject).not.toMatch(/Cyan|60,00|10,00|€/);
+  expect(poli[0]!.text + poli[0]!.subject).not.toMatch(/Cyan|70,00|10,00|€/);
   for (const f of [fiches[0]!, fiches[2]!]) expect((await apiJson<{ emails: { subject: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent(f.email)}`, undefined, SECRET)).body.emails.filter((m) => /suite à ma demande de prix/.test(m.subject))).toHaveLength(0);
   // L'onglet « Offres » montre les offres (avant : « Aucune offre reçue »).
   await page.goto(`/chantiers/${projectId}?onglet=offres`);

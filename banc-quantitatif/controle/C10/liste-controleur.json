@@ -1,0 +1,66 @@
+[
+  {
+    "article": "Écran sous-toiture HPV, rouleau 1,50 × 50 m (75 m²)",
+    "quantite": 2,
+    "unite": "rouleaux",
+    "a_chiffrer": false,
+    "calcul": "110 m² × 1,15 m²/m² (écran souple : consommation recouvrements compris, une_source) = 126,5 m² ÷ 75 m² par rouleau (écran HPV : format 1,50 × 50 m, confirme) = 1,69 → 2 rouleaux ; marque inconnue sans effet (format commun à toutes les marques)",
+    "ligne_devis": "2 — Écran sous-toiture HPV, 110 M2"
+  },
+  {
+    "article": "Liteaux sapin traité classe 2, 18×40",
+    "quantite": 770,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "Surface réelle 110 m² (le devis écrit 100 m² sur cette ligne, mais 110 m² sur l'écran et la couverture ; vérité 110) × 6,67 ml/m² (ardoises fibres-ciment 40×24 : recouvrement 100 mm, pureau 150 mm, liteaux = 1 ÷ pureau, confirme) = 733,3 ml + 5 % casse/coupes (liteau, confirme) = 770 ml ; vendu au ml. FICHE ? chute d'aboutage non tranchée (0 % en 4,20 m, +10 % en 4,00 m sur fermettes à 60 cm → 847 ml) ; et la fiche limite le 18×40 à 53 cm entre appuis alors que les fermettes sont à 60 cm",
+    "ligne_devis": "3 — Liteaux sapin traité, 100 M2 (écart : 110 m² réels)"
+  },
+  {
+    "article": "Ardoises fibres-ciment 40×24 noires",
+    "quantite": 3209,
+    "unite": "ardoises (pièces)",
+    "a_chiffrer": false,
+    "calcul": "Recouvrement 100 mm (Cedral 40×24, recouvrement_minimal 100) → pureau (400 − 100) ÷ 2 = 150 mm → 1 ÷ (0,150 × 0,240) = 27,78 u/m² ; 110 m² × 27,78 = 3 055,6 + 5 % casse/coupes (ardoise fibres-ciment, toit simple, a_confirmer) = 3 208,3 → 3 209 ardoises (≈ 1,62 palette de 1 980). FICHE ? la liste Cedral 40×24 donne six valeurs (24,64 à 29,04 u/m²) sans dire laquelle vaut pour 35° ; pas de plus-value d'égout (doublis) donnée pour la fibres-ciment ; clous inox et crochets d'antivent non écrits au devis et non dits indissociables par la fiche : non sortis",
+    "ligne_devis": "4 — Couverture ardoises fibres-ciment 40×24 noires, pente 35°, 110 M2"
+  },
+  {
+    "article": "Faîtières fibres-ciment noires à emboîtement, assorties aux ardoises",
+    "quantite": null,
+    "unite": "pièces",
+    "a_chiffrer": true,
+    "calcul": "10 ml × pièces au ml du modèle, arrondi à la pièce sup., casse 1 % (faîtières : méthode, a_confirmer) ; le modèle dépend de la marque des ardoises, que le couvreur ne sait pas → pièces au ml inconnues. FICHE ? aucune longueur ni pièces/ml de faîtière fibres-ciment dans la fiche (au mieux : 2,5 u/ml pour une faîtière de 45-50 cm → 26, ou 3 u/ml pour 40-42 cm → 31) ; closoir, vis et abouts non écrits : non sortis",
+    "ligne_devis": "5 — Faîtage, faîtières, 10 ML"
+  },
+  {
+    "article": "Feuilles de zinc naturel 2 × 1 m, 0,65 mm (bandes de rive dév. 250 pliées par le couvreur)",
+    "quantite": 3,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "Il façonne (faconnage 1) → feuilles 2 × 1 m ; 4 rives de 5,50 m, bandes de 2 m avec recouvrement aux jonctions (zinc en bandes : +2,5 % à 5 cm, +5 % à 10 cm, a_confirmer) → 3 bandes par rive (5,80 à 5,90 m ≥ 5,50) = 12 bandes ; dév. 250 → 4 bandes de 2 m par feuille (feuille de zinc, confirme) → 12 ÷ 4 = 3 feuilles ; épaisseur 0,65 courante, aspect naturel ; pattes de fixation non écrites : non sorties",
+    "ligne_devis": "6 — Rives, bandes de rive zinc dév. 250, 4 rives de 5,50 m, 22 ML"
+  },
+  {
+    "article": "Gouttière PVC demi-ronde de 25, teinte sable, longueur 4 m",
+    "quantite": 5,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "2 lignes de 10 m = 20 ml ; gouttière PVC vendue en 4 m ou 2 m (longueurs_vendues, confirme) ; chaque ligne = 2 × 4 m + 2 m, le 2 m de chaque ligne tiré d'une même longueur de 4 m → 5 longueurs de 4 m (ou 4 × 4 m + 2 × 2 m). FICHE ? pas de méthode de métré propre au PVC (celle du zinc : ml arrondi aux longueurs de 4 m) ; crochets, jonctions, talons et naissances non écrits et non dits indissociables par la fiche : non sortis",
+    "ligne_devis": "7 — Gouttières PVC sable, 2 longueurs de 10 m, 20 ML"
+  },
+  {
+    "article": "Tube de descente PVC Ø80, teinte sable, longueur 4 m",
+    "quantite": 3,
+    "unite": "tubes de 4 m",
+    "a_chiffrer": false,
+    "calcul": "2 descentes × 5 m = 10 m ; tubes de 4 m (descente EP PVC : 4 m standard, confirme ; tubes de 4 m dits par le couvreur) → par descente 4 m + 1 m, les deux bouts de 1 m tirés d'un même tube → 3 tubes de 4 m (4 sans réemploi des chutes) ; coudes (2 par descente) et colliers non écrits : non sortis",
+    "ligne_devis": "8 — Descentes PVC Ø80, hauteur 5 m, 2 U"
+  },
+  {
+    "article": "Sortie de toit Ø100 pour évent, pour couverture ardoise",
+    "quantite": 1,
+    "unite": "pièce",
+    "a_chiffrer": false,
+    "calcul": "1 U écrite, commandée telle quelle ; référence du chapeau au choix du négoce (le couvreur ne la sait pas, sans effet sur la quantité). FICHE ? la fiche ne décrit que la tuile à douille + lanterne/chapeau Ø100 pour tuiles, rien pour une sortie de toit sur ardoise",
+    "ligne_devis": "9 — Sortie de toit Ø100 pour évent, 1 U"
+  }
+]

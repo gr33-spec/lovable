@@ -61,8 +61,12 @@ describe("ce qui part chez le négoce : une commande claire, rien d'autre", () =
     expect(posees.join(" | ")).not.toMatch(/pureau/i);
     const liste = (q.lignes as { libelle: string; texte: string | null }[]).map((l) => [l.libelle, l.texte]);
     expect(liste).toEqual([
-      ["Ardoises naturelles Espagne 1er choix 32×22", "2 106 pièces"],
-      ["Crochets d'ardoise inox Ø 2,7, longueur 11 cm", "2 106 pièces"],
+      // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises au faîtage (8 m, la bande de faîtage du devis) et à l'égout (10 m, la
+      // gouttière du devis), compté avant la perte : (8 + 10) ÷ 0,22 m de large = 81,82 ardoises, × 1,05 = 85,91 de plus.
+      // Avant : 2 106 (soit entre 2 105 et 2 106 avant l'arrondi) ; + 85,91 = entre 2 190,91 et 2 191,91 → 2 192. Avant 2 106 → 2 192.
+      // Crochets : 2 192 ÷ 500 = 4,4 → 5 boîtes (inchangé).
+      ["Ardoises naturelles Espagne 1er choix 32×22", "2 192 pièces"],
+      ["Crochets d'ardoise inox Ø 2,7, longueur 11 cm", "5 boîtes de 500"],
       ["Gouttière havraise zinc dév. 25", "3 longueurs de 4 m"],
       ["Naissances dév. 25 Ø80", "2 pièces"],
       ["Crochets de gouttière havraise, acier galvanisé ou zinc", "20 pièces"],

@@ -1,0 +1,16 @@
+[
+  {
+    "article": "Vis autoperceuses rondelle EPDM pour bac acier",
+    "bonne_valeur": "à chiffrer",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "DÉFAUT DE FICHE À SIGNALER : la fiche couverture n'a aucune section bac acier, donc ni densité de vis ni conditionnement en boîte (seule existe « fixations_au_m2 : 6 ondes 1,38 ; 5 ondes 1,65 » pour les plaques fibres-ciment). Le couvreur dit ne pas connaître le nombre exact (« il prend des boîtes », env. 6/m² + rives ≈ 900 + rives), alors que les 12 boîtes de 100 de la référence supposent un ratio (≈ 7/m² + rives) et une boîte de 100 qu'aucune source nommée ne donne."
+  },
+  {
+    "article": "Faîtière bac acier",
+    "bonne_valeur": "7 pièces de 2 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "38 = 12,5 ml × 3 u/ml : le moteur a pris la règle « faîtage tuile, faîtière 1/2 ronde ou angulaire 40-42 cm : 3 u/ml », qui ne vaut que pour la tuile, alors que le devis dit « faîtière BA RAL 7016, lg 12,50 m » et le couvreur « en longueurs de 2 m » ; 12,50 m en pièces de 2 m avec recouvrement (5 à 20 cm) donne 7 dans tous les cas. La fiche n'a pas non plus de faîtière bac acier (défaut de fiche à signaler), ce qui laisse le moteur se rabattre sur la règle de la tuile."
+  }
+]

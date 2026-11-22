@@ -1,0 +1,216 @@
+{
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier Mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente.",
+   "quantite": "1",
+   "unite": "U",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV.",
+   "quantite": "110",
+   "unite": "M2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV.",
+     "quantite": "110",
+     "unite": "M2",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Liteaux Fourniture et pose de liteaux sapin traité.",
+   "quantite": "100",
+   "unite": "M2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Liteaux Fourniture et pose de liteaux sapin traité.",
+     "quantite": "100",
+     "unite": "M2",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture ardoises fibres-ciment Fourniture et pose d'ardoises fibres-ciment 40×24 noires. Pente 35°.",
+   "quantite": "110",
+   "unite": "M2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises fibres-ciment",
+     "quantite": "110",
+     "unite": "M2",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "teinte_fc",
+       "valeur": "2"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faîtage Fourniture et pose de faîtières.",
+   "quantite": "10",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières",
+     "quantite": "10",
+     "unite": "ML",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Rives Fourniture et pose de bandes de rive en zinc, développé 250. 4 rives de 5,50 m.",
+   "quantite": "22",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Rives de bandes de rive en zinc, développé 250. 4 rives de 5,50 m.",
+     "quantite": "22",
+     "unite": "ML",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Gouttières Fourniture et pose de gouttières PVC sable. 2 longueurs de 10 m.",
+   "quantite": "20",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttière",
+     "quantite": "20",
+     "unite": "ML",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "25"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Descentes Fourniture et pose de descentes PVC Ø80, hauteur 5 m.",
+   "quantite": "2",
+   "unite": "U",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tubes de descente",
+     "quantite": "2",
+     "unite": "U",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "5 m"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Sortie de toit Fourniture et pose d'une sortie de toit Ø100 pour évent.",
+   "quantite": "1",
+   "unite": "U",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Sortie de toit d'une sortie de toit Ø100 pour évent.",
+     "quantite": "1",
+     "unite": "U",
+     "ouvrage": "sortie-de-toit",
+     "emplacement": "sortie",
+     "donnees": [
+      {
+       "cle": "diametre_sortie",
+       "valeur": "100"
+      },
+      {
+       "cle": "usage_sortie",
+       "valeur": "2"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "note1",
+   "designation": "Objet : couverture en ardoises fibres-ciment, zinguerie et évacuation des eaux pluviales d'un pavillon neuf.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note2",
+   "designation": "Délai : intervention sous 6 semaines après accord, durée prévue 2 semaines hors intempéries.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note3",
+   "designation": "TVA au taux de 20 % (construction neuve).",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ]
+}

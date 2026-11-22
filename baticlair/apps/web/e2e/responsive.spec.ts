@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { calculerEtVoirMaListe, repondreAuxQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { calculerEtVoirMaListe, continuerSansSuggestionParApi, repondreAuxQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -209,7 +209,10 @@ test("responsive : la commande du mois (artisan, négoce, admin), rien ne débor
   expect((await appel(page, "POST", "/v1/groupe/siret")).status).toBe(200);
   const ponant = `ponant-${unique()}@example.com`;
   expect((await appel(page, "POST", "/v1/groupe/negoces", { nom: "Négoce du Ponant", email: ponant, familles: ["couverture"] })).status).toBe(201);
-  const q = await appel<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "2400", unite: "pièces" }, { libelle: "Liteau sapin traité 27×38", quantite: "520", unite: "m" }] });
+  const q = await appel<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes: [{ libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "2400", unite: "pièces" }, { libelle: "Liteau sapin traité 27×38", quantite: "520", unite: "m" }] });
+  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
+  // (VMC, extraction d'air) » ; rien de coché, la liste reste telle qu'écrite (avant : aucune étape « Suggestions » ici).
+  await continuerSansSuggestionParApi(page, q.body.id);
   const projet = q.body.projetId;
   expect((await appel(page, "PATCH", `/v1/projects/${projet}`, { address: "2 rue de Siam, 29200 Brest" })).status).toBe(200);
   const articles = (await appel<{ takeoff: { purchase: { toBuy: { key: string }[] } } }>(page, "GET", `/v1/projects/${projet}/takeoff`)).body.takeoff.purchase.toBuy.map((b) => b.key);

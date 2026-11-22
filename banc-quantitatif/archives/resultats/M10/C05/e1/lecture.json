@@ -1,0 +1,291 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier. Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Dépose de la couverture existante. Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "quantite": "140",
+   "unite": "m²",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "Dépose des anciens châssis de toit. Dépose sans réemploi.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture en ardoise naturelle 30×20 : pose au crochet noir. Fourniture et pose. Pente 50°, rampant 7 m.",
+   "quantite": "140",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoise naturelle 30×20",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "140",
+       "preuve": "140"
+      },
+      {
+       "cle": "pente",
+       "valeur": "50",
+       "preuve": "Pente 50°"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7",
+       "preuve": "rampant 7 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Crochet noir",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "crochet",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "longueur"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Jouées de lucarnes. Fourniture et pose : habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoise naturelle 30×20",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour jouées des 2 lucarnes"
+    },
+    {
+     "nom": "Crochet noir",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "pour jouées des 2 lucarnes"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Noues de lucarnes. Fourniture et pose de noues en zinc : 4 noues de 1,80 m.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Noues en zinc",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "épaisseur",
+      "aspect"
+     ],
+     "precision": "4 noues de 1,80 m"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Fenêtres de toit. Fourniture et pose de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Fenêtre de toit Velux GGL MK04 78×98",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "fenetre-de-toit",
+     "emplacement": "fenetre",
+     "donnees": [
+      {
+       "cle": "taille_fenetre",
+       "valeur": "78x98",
+       "preuve": "78×98"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Raccords d'étanchéité pour ardoise",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "fenetre-de-toit",
+     "emplacement": "raccord",
+     "donnees": [
+      {
+       "cle": "raccord_couverture",
+       "valeur": "2",
+       "preuve": "pour ardoise"
+      },
+      {
+       "cle": "taille_fenetre",
+       "valeur": "78x98",
+       "preuve": "78×98"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "Raccord MK04 78×98 pour ardoise"
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Abergement de cheminée. Fourniture et pose d'un abergement de cheminée en zinc, périmètre 3 m.",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Abergement de cheminée en zinc",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "abergement-cheminee",
+     "emplacement": "abergement",
+     "donnees": [
+      {
+       "cle": "perimetre_cheminee",
+       "valeur": "3",
+       "preuve": "périmètre 3 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "épaisseur",
+      "aspect"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Faîtage. Fourniture et pose d'un faîtage en faîtières terre cuite.",
+   "quantite": "11",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières terre cuite",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "11",
+       "preuve": "11"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "10",
+   "designation": "Sorties de toit. Fourniture et pose de sorties de toit Ø125 pour VMC.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Sorties de toit Ø125 pour VMC",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "sortie-de-toit",
+     "emplacement": "sortie",
+     "donnees": [
+      {
+       "cle": "diametre_sortie",
+       "valeur": "125",
+       "preuve": "Ø125"
+      },
+      {
+       "cle": "usage_sortie",
+       "valeur": "2",
+       "preuve": "pour VMC"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "11",
+   "designation": "Évacuation des gravats. Tri et évacuation des gravats en déchetterie agréée.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "12",
+   "designation": "Fin de chantier. Nettoyage du chantier et repli de l'échafaudage.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

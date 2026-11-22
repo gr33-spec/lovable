@@ -1,0 +1,26 @@
+{
+  "juste": 1,
+  "quantite_fausse": 3,
+  "manquante": 0,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Tuile terre cuite à emboîtement grand moule Terreal Volnay PV, rouge vieilli",
+      "classe": "quantite_fausse",
+      "attendu": "945 pièces",
+      "obtenu": "aucune quantité (à chiffrer ; « 90 m² au devis »)"
+    },
+    {
+      "article": "Gouttière pendante demi-ronde aluminium laqué gris anthracite (RAL 7016), développé 25, longueur 4 m",
+      "classe": "quantite_fausse",
+      "attendu": "8 longueurs de 4 m",
+      "obtenu": "6 longueurs de 4 m"
+    },
+    {
+      "article": "Tuyau de descente aluminium laqué gris anthracite Ø80, longueur 2 m",
+      "classe": "quantite_fausse",
+      "attendu": "6 tubes de 2 m",
+      "obtenu": "3 pièces"
+    }
+  ]
+}

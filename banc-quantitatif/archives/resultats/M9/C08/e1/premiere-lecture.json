@@ -1,0 +1,112 @@
+{
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Remplact noue zinc",
+   "quantite": "6",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Noues zinc façonnées",
+     "quantite": "6",
+     "unite": "ml",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Remaniage ardoises autour noue, ardoises identiques à l'existant",
+   "quantite": "12",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises",
+     "quantite": "12",
+     "unite": "m2",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Reprise solin au mortier",
+   "quantite": "3",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Reprise solin au mortier",
+     "quantite": "3",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Remplact DEP Ø080",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Remplact DEP Ø080",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Echelle de toit + évac gravats",
+   "quantite": "",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note1",
+   "designation": "réparation toiture suite fuite",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note2",
+   "designation": "valable 1 mois - acompte 30% à la commande",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note3",
+   "designation": "travaux sous 15 jours selon temps",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ]
+}

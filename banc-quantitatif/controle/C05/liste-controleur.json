@@ -1,0 +1,58 @@
+[
+  {
+    "article": "Ardoise naturelle 30×20, Espagne 1er choix, épaisseur 3,5 mm",
+    "quantite": 8000,
+    "unite": "ardoises (pièces)",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (pertes : 5 % toit simple après plus-values, 7 % lucarnes/fenêtres « sans plus-values », 10 % toit compliqué : règles qui se recouvrent, a_confirmer ; plus-value du rang de doublage au faîtage absente du tableau des plus-values) Ardoises/m² = 1/[pureau × (largeur + Ø 3 mm)] = 1/(0,10 × 0,203) = 49,26/m² (formule_ardoises_m2, pureau 10 cm du couvreur). Toit : méthode des points singuliers : 140 m² + égout droit 0,10 × 20 m = 2 m² (rangs_supplementaires_egout, doublis) + 4 rives tranchis droit 4 × 7 × 0,16 = 4,48 m² + rang de doublage au faîtage 2 × 10 × 0,10 = 2 m² (rangs_supplementaires_faitage) = 148,48 m² × 49,26 = 7 314 × 1,07 (perte toit compliqué, lucarnes et fenêtres de toit) = 7 826,3. Jouées : 3,2 m² (fiche vérité) × 49,26 = 157,6 × 1,10 (perte toit compliqué, petites surfaces coupées) = 173,4. Total 7 999,7 → 8 000 (unité de vente du négoce souvent au mille, Cupa ; palette 30×20 non connue de la fiche)",
+    "ligne_devis": "4 et 5"
+  },
+  {
+    "article": "Crochets à pointe inox Ø 2,7 mm laqués noir, longueur 10 cm",
+    "quantite": 12,
+    "unite": "boîtes de 700",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (longueur_crochet = R + 3 mm arrondi au cm sup. donnerait 11 cm pour R 100 mm ; le couvreur dit 10 cm, gardé ; surplus 0 à 10 % a_confirmer) 1 crochet par ardoise (crochets_par_ardoise, pureau entier) : 8 000 crochets, la casse des ardoises sert de surplus ; crochet à pointe Ø 2,7 de 7 à 14 cm vendu par 700/boîte (conditionnement) : 8 000 / 700 = 11,43 → 12 boîtes (8 400). Ø 2,7 = minimum Bretagne (diametre_minimal_bretagne) ; à < 10 km de la mer : inox 18/10 (nuance_inox_selon_distance_mer, 316Ti si < 3 km)",
+    "ligne_devis": "4 et 5"
+  },
+  {
+    "article": "Feuille de zinc naturel 0,65 mm, 2 × 1 m",
+    "quantite": 4,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (aucun développé ni débit d'abergement de souche dans la fiche : débit estimé à la main) Le couvreur plie lui-même (faconnage 1) → feuilles 2 × 1 m (format_courant). Noues : 4 noues de 1,80 m, dév. 500 → 2 bandes de 2 m par feuille (bandes_de_2_m_tirees_d_une_feuille, dev_500 : 2) ; chaque noue tient dans une bande de 2 m sans jonction → 4 bandes / 2 = 2 feuilles. Abergement de souche 0,90 × 0,60 : bavette 0,90 + 2 × 0,12 = 1,14 m (debord_de_la_bavette) × ≈ 0,30 dév. ; besace 0,90 + 2 × 0,15 = 1,20 m × ≈ 0,50 (relevé 10-12 + 3-4 pureaux) ; noquets 1/(2 × 0,10) × 0,60 = 3 + 1 = 4 par côté → 8 noquets 0,30 × 0,20 ; total ≈ 1,42 m², débit tendu dans une feuille de 2 m², chutes non réutilisées → 2 feuilles. Total 2 + 2 = 4 feuilles (porte-solin non écrit au devis : non compté)",
+    "ligne_devis": "6 et 8"
+  },
+  {
+    "article": "Fenêtre de toit Velux GGL MK04 (78 × 98), pin verni, vitrage confort",
+    "quantite": 2,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (le couvreur dit « vitrage confort (2070) » ; la fiche ne connaît que les suffixes Confort 2076 / 0076) Fenêtre à la pièce (conditionnement, unite_de_vente) : 2 u écrites au devis ; MK04 = 78 × 98 (Velux MK04) ; GGL rotation, pente 50° dans 15 à 90° (pentes admises)",
+    "ligne_devis": "7"
+  },
+  {
+    "article": "Raccord d'étanchéité Velux EDL MK04 0000 pour ardoise",
+    "quantite": 2,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Un raccord par fenêtre seule, à la pièce, à la taille de la fenêtre (conditionnement) : 2 × 1 = 2 ; EDL = ardoises ≤ 8 mm (ardoise 3,5 mm) ; 0000 = gris (coloris_et_suffixe) ; pose standard, pente 50° ≥ 15°",
+    "ligne_devis": "7"
+  },
+  {
+    "article": "Faîtière demi-ronde terre cuite rouge de 40, à emboîtement",
+    "quantite": 34,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Faîtière 1/2 ronde 40-42 cm : 3 u/ml (faîtage tuile) ; méthode faîtières : ml × pièces au ml, arrondi à la pièce sup., casse 1 % (a_confirmer) : 11 ml × 3 = 33 × 1,01 = 33,3 → 34 (par tronçon 30 + 2 + 2 = 34, même résultat) ; pas d'about (arrêtées au mortier contre les pignons)",
+    "ligne_devis": "9"
+  },
+  {
+    "article": "Sortie de toit Ø 125 pour VMC, chapeau teinte ardoise avec embase plomb",
+    "quantite": 2,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? (la fiche n'a pas de règle de sortie de toit pour ardoise ; seulement tuile à douille + chapeau Ø 100 / 126 / 150 / 160) Article à la pièce, tel qu'écrit : 2 u au devis",
+    "ligne_devis": "10"
+  }
+]

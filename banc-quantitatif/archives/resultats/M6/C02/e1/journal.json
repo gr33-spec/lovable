@@ -1,0 +1,6 @@
+[
+ "ligne 4 : donnée longueur_rampant divergente (7.5 contre 7.50), retirée : le code la demandera.",
+ "ligne 5 : donnée longueur_rives divergente (30 contre 4 x 7.50 m), retirée : le code la demandera.",
+ "ligne 6 : donnée longueur_faitage divergente (8 contre 8.00), retirée : le code la demandera.",
+ "ligne 6 : donnée longueur_faitage divergente (8 contre 8.00), retirée : le code la demandera."
+]

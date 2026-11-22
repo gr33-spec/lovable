@@ -1,0 +1,223 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "210",
+    "unite": "ml",
+    "affiche": "210 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 60 cm",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tuiles terre cuite HP10 Huguenot Fenal",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "120 m² au devis",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Tuiles de rive HP 10",
+    "quantite": "4",
+    "unite": "",
+    "affiche": "4",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières terre cuite",
+    "quantite": "24",
+    "unite": "pièces",
+    "affiche": "24 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir ventilé",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Écran sous-toiture HPV)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Contre-liteaux et liteaux Fourniture et pose de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+    "raison": "Je n'ai pas su en tirer les articles : ajoute ce qu'il te faut, ou retire la ligne.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "Main-d'œuvre Main-d'œuvre de pose de la couverture, des rives et du faîtage."
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Liteaux 27×40",
+    "quantite": "210",
+    "unite": "ml",
+    "affiche": "210 ml",
+    "etat": "ready",
+    "precision": "contre-lattage 120 m², une file tous les 60 cm",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tuiles terre cuite HP10 Huguenot Fenal",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "120 m² au devis",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Tuiles de rive HP 10",
+    "quantite": "4",
+    "unite": "",
+    "affiche": "4",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières terre cuite",
+    "quantite": "24",
+    "unite": "pièces",
+    "affiche": "24 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Closoir ventilé",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6.2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 27×40 (Écran sous-toiture HPV)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Contre-liteaux et liteaux Fourniture et pose de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+    "raison": "Je n'ai pas su en tirer les articles : ajoute ce qu'il te faut, ou retire la ligne.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "Main-d'œuvre Main-d'œuvre de pose de la couverture, des rives et du faîtage."
+  ],
+  "questions": []
+ }
+}

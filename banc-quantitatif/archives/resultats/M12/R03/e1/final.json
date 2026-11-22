@@ -1,0 +1,362 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:developpe@bande-porte-solin",
+   "text": "Bande porte-solin zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "100 mm (solin, couvre-joint)"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Bandes zinc façonnées : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "200 mm"
+  },
+  {
+   "key": "param:developpe@faitage-zinc",
+   "text": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "250 mm"
+  },
+  {
+   "key": "param:developpe_gouttiere",
+   "text": "Gouttière de 25, de 28, de 33 ou de 40 ?",
+   "options": [
+    "De 25",
+    "De 28",
+    "De 33",
+    "De 40"
+   ],
+   "reponse": "De 25"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Gouttière",
+    "quantite": "3",
+    "unite": "longueurs de 4 m",
+    "affiche": "3 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "param:developpe_gouttiere"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour 4 ml de bande",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Bandes porte-solin",
+    "quantite": "4",
+    "unite": "ml",
+    "affiche": "4 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Mortier de solin pour",
+    "quantite": "1",
+    "unite": "sac de 25 kg",
+    "affiche": "1 sac de 25 kg",
+    "etat": "ready",
+    "precision": "4 ml × 2 kg/ml",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente",
+    "quantite": "2",
+    "unite": "tubes de 3 m",
+    "affiche": "2 tubes de 3 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "12"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Coudes",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "13"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Crochets d'ardoise)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic+bande-porte-solin/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Pose de couverture en ardoises 32x22",
+   "Pose de gouttière Havraise sur chevrons",
+   "Pose de bandes de rive en zinc (verrière)",
+   "Pose de bande de faîtage en zinc",
+   "Pose de bande porte-solin et réalisation du solin ciment",
+   "Pose de tuyaux de descente et coudes zinc"
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc",
+   "param:developpe@faitage-zinc",
+   "param:developpe_gouttiere"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "3",
+    "unite": "longueurs de 4 m",
+    "affiche": "3 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 4 ml de bande, développé 20 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 10 cm",
+    "lignes": [
+     "6",
+     "8",
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Mortier de solin pour",
+    "quantite": "1",
+    "unite": "sac de 25 kg",
+    "affiche": "1 sac de 25 kg",
+    "etat": "ready",
+    "precision": "4 ml × 2 kg/ml",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente",
+    "quantite": "2",
+    "unite": "tubes de 3 m",
+    "affiche": "2 tubes de 3 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "12"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Coudes",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "13"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "1.1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Crochets d'ardoise)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "1.2"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic+bande-porte-solin/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Pose de couverture en ardoises 32x22",
+   "Pose de gouttière Havraise sur chevrons",
+   "Pose de bandes de rive en zinc (verrière)",
+   "Pose de bande de faîtage en zinc",
+   "Pose de bande porte-solin et réalisation du solin ciment",
+   "Pose de tuyaux de descente et coudes zinc"
+  ],
+  "questions": []
+ }
+}

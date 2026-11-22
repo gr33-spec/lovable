@@ -1,0 +1,22 @@
+{
+  "accords": [
+    {"article": "Plaque bac acier simple peau RAL 7016 avec feutre anti-condensation", "quantite": 26, "unite": "plaques (pièces) de 6 m"},
+    {"article": "Closoir mousse profilé au bac acier", "quantite": 52, "unite": "pièces"},
+    {"article": "Gouttière PVC grise dév. 25", "quantite": 7, "unite": "longueurs de 4 m"},
+    {"article": "Tube de descente EP PVC gris Ø80, ht 4,00 m", "quantite": 2, "unite": "pièces (tubes de 4 m)"}
+  ],
+  "desaccords": [
+    {
+      "article": "Vis autoperceuses rondelle EPDM pour bac acier",
+      "controleur": "à chiffrer",
+      "reference": "12 boîtes de 100",
+      "ecart": "Le contrôleur n'a pas pu chiffrer les vis (densité et conditionnement inconnus) alors que la référence sort 12 boîtes de 100."
+    },
+    {
+      "article": "Faîtière bac acier",
+      "controleur": "7 pièces de 2 m",
+      "reference": "38 pièces",
+      "ecart": "Quantité très différente : 7 faîtières de 2 m côté contrôleur contre 38 pièces côté référence (longueur de la pièce non précisée en référence)."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "juste": 3,
+  "quantite_fausse": 4,
+  "manquante": 0,
+  "en_trop": 2,
+  "detail": [
+    {
+      "article": "Ardoise naturelle 30×20, Espagne 1er choix, épaisseur 3,5 mm",
+      "classe": "quantite_fausse",
+      "attendu": "7 846 pièces",
+      "obtenu": "157 pièces"
+    },
+    {
+      "article": "Crochets à pointe inox Ø 2,7 mm laqués noir, longueur 10 cm",
+      "classe": "quantite_fausse",
+      "attendu": "12 boîtes de 700",
+      "obtenu": "157 pièces"
+    },
+    {
+      "article": "Feuille de zinc naturel 0,65 mm, 2 × 1 m",
+      "classe": "quantite_fausse",
+      "attendu": "4 feuilles",
+      "obtenu": "2 pièces"
+    },
+    {
+      "article": "Faîtière demi-ronde terre cuite rouge de 40, à emboîtement",
+      "classe": "quantite_fausse",
+      "attendu": "34 pièces",
+      "obtenu": "33 pièces"
+    },
+    {
+      "article": "Bandes porte-solin 2 m",
+      "classe": "en_trop",
+      "attendu": "ne doit pas sortir",
+      "obtenu": "2 pièces"
+    },
+    {
+      "article": "4 noues de 1,80 m.",
+      "classe": "en_trop",
+      "attendu": "ne doit pas sortir",
+      "obtenu": "à chiffrer"
+    }
+  ]
+}

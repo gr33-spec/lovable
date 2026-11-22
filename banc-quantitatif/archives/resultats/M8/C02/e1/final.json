@@ -1,0 +1,167 @@
+{
+ "posees": [
+  {
+   "key": "param:surface",
+   "text": "Surface du toit ?",
+   "options": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "reponse": "120 m2"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m².",
+    "quantite": "120",
+    "unite": "ml",
+    "affiche": "120 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "120 m². Pente 30°, rampant 7,50 m.",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Closoir",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Contre-liteaux et liteaux de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles de rive (Tuiles de rive)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "Main-d'œuvre Main-d'œuvre de pose de la couverture, des rives et du faîtage.",
+   "Construction neuve : maison individuelle",
+   "Lot n° 7, lotissement du Clos des Mésanges",
+   "22400 Lamballe",
+   "Objet : couverture en tuiles terre cuite d'une maison neuve.",
+   "Délai : démarrage sous 6 semaines à réception du devis signé, sous réserve des conditions météorologiques.",
+   "Les déchets de chantier sont évacués par nos soins en déchetterie professionnelle."
+  ],
+  "questions": [
+   "param:surface"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m².",
+    "quantite": "120",
+    "unite": "ml",
+    "affiche": "120 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "120 m². Pente 30°, rampant 7,50 m.",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Closoir",
+    "quantite": "2",
+    "unite": "rouleaux de 5 m",
+    "affiche": "2 rouleaux de 5 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Contre-liteaux et liteaux de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+    "raison": "« ens » n'est pas une unité de commande : le fournisseur ne sait pas quoi charger.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Tuiles de rive (Tuiles de rive)",
+    "raison": "Calcul impossible sans « Pureau minimal » de tuile.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Échafaudage Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "Main-d'œuvre Main-d'œuvre de pose de la couverture, des rives et du faîtage.",
+   "Construction neuve : maison individuelle",
+   "Lot n° 7, lotissement du Clos des Mésanges",
+   "22400 Lamballe",
+   "Objet : couverture en tuiles terre cuite d'une maison neuve.",
+   "Délai : démarrage sous 6 semaines à réception du devis signé, sous réserve des conditions météorologiques.",
+   "Les déchets de chantier sont évacués par nos soins en déchetterie professionnelle."
+  ],
+  "questions": []
+ }
+}

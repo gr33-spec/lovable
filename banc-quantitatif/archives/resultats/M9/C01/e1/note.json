@@ -1,0 +1,31 @@
+{
+ "m": "M9",
+ "c": "C01",
+ "e": 1,
+ "nRef": 8,
+ "justes": 5,
+ "quantite": 2,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 2,
+ "questionsRef": 2,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Liteaux 18×40 (Liteaux sapin traité) : à chiffrer  attendu, 893 ml lu",
+   "Crochets d'ardoise (Ardoises) : à chiffrer  attendu, 3992 pièces lu"
+  ],
+  "manquantes": [
+   "Ardoises (Ardoises) (à chiffrer )"
+  ],
+  "inventees": [
+   "Ardoises naturelles Espagne 1er choix 32×22 (3992 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

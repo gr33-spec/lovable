@@ -1,0 +1,74 @@
+[
+  {
+    "article": "Ardoise naturelle 35×25, Espagne 1er choix, gris-noir",
+    "quantite": 6494,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Ardoises/m² = 1/[pureau × (largeur + Ø crochet)] = 1/[0,12 × (0,25 + 0,0027)] = 32,98 u/m² (formule_ardoises_m2, pureau 12 cm donné par le couvreur ; avec un crochet de 11 cm la fiche donnerait R ≈ 105 mm, pureau ≈ 12,25 cm, et R = 110 mm demanderait un crochet de 12 cm : petite incohérence des données) ; surface à considérer (méthode des plus-values, Pertes §ardoise naturelle) = 160 + égout 0,12×44 = 5,28 + rang de doublage au faîtage 0,12×4×2 = 0,96 (rangs_supplementaires_faitage, valeur prise comme l'égout, absente de la fiche) + arêtiers ardoises biaises 0,66×30 = 19,8 + noues zinc 0,5×3 = 1,5 (deux tranchis biais 2×0,25 : aucune plus-value de noue métallique dans la fiche) = 187,54 m² ; 187,54 × 32,98 = 6 185 ; + 5 % casse et coupes (après plus-values ; la fiche écrit cette ligne pour un toit simple, l'autre règle, 10 % sans plus-values, donnerait 5 804) = 6 493,8 → 6 494 pièces (≈ 8,1 palettes de 800, une_source)",
+    "ligne_devis": "3"
+  },
+  {
+    "article": "Crochets d'ardoise inox à agrafe, Ø 2,7 mm, longueur 11 cm, agrafe 18 (liteau 18), inox 18/10",
+    "quantite": 11,
+    "unite": "boîtes de 500",
+    "a_chiffrer": false,
+    "calcul": "1 crochet par ardoise (crochets_par_ardoise, pureau entier) + surplus 5 % (crochets_d_ardoise : 0 à 10 %) = 6 185 × 1,05 = 6 494 crochets ; pose sur liteaux : 80 % à agrafe (part_crochets_pointe 0,2) = 5 195 ; conditionnement 500 u/boîte (agrafe Ø 2,7, 7 à 14 cm) → 5 195 / 500 = 10,4 → 11 boîtes ; agrafe 18 pour liteau 18 (agrafe_selon_liteau) ; nuance inox 18/10 pour 10-20 km de la mer (nuance_inox_selon_distance_mer) ; Ø 2,7 ≥ minimum Bretagne (22)",
+    "ligne_devis": "3"
+  },
+  {
+    "article": "Crochets d'ardoise inox à pointe, Ø 2,7 mm, longueur 11 cm, inox 18/10",
+    "quantite": 2,
+    "unite": "boîtes de 700",
+    "a_chiffrer": false,
+    "calcul": "Part des crochets-pointes au droit des chevrons, pose à l'agrafe sur liteaux : 0,2 (part_crochets_pointe, une_source) × 6 494 = 1 299 ; conditionnement 700 u/boîte (pointe Ø 2,7, 7 à 14 cm) → 1 299 / 700 = 1,86 → 2 boîtes",
+    "ligne_devis": "3"
+  },
+  {
+    "article": "Feuille de zinc naturel 2 × 1 m, ép. 0,65 mm (arêtiers dév. 330, pliés par le couvreur)",
+    "quantite": 6,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "Façonnage par le couvreur → feuilles 2 × 1 m (feuille de zinc format_courant) ; zinc en bandes : ml + recouvrement aux jonctions (+5 % pour 10 cm), arrondi à 2 m, par arêtier : 7,5 × 1,05 = 7,9 → 8 m = 4 bandes de 2 m ; 4 arêtiers × 4 = 16 bandes ; dév. 330 → 3 bandes par feuille (bandes_de_2_m_tirees_d_une_feuille) → 16 / 3 = 5,33 → 6 feuilles (total zinc plié des lignes 4, 5 et 6 : 8 feuilles)",
+    "ligne_devis": "4"
+  },
+  {
+    "article": "Feuille de zinc naturel 2 × 1 m, ép. 0,65 mm (faîtage dév. 330, plié par le couvreur)",
+    "quantite": 1,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "Zinc en bandes : 4 ml + recouvrement à la jonction (4 × 1,05 = 4,2) arrondi à 2 m → 6 m = 3 bandes de 2 m ; dév. 330 → 3 bandes par feuille → 1 feuille 2 × 1 m 0,65 (faîtage zinc, développé 330 donné par le couvreur)",
+    "ligne_devis": "5"
+  },
+  {
+    "article": "Feuille de zinc naturel 2 × 1 m, ép. 0,65 mm (noues dév. 500, pliées par le couvreur)",
+    "quantite": 1,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "2 noues de 1,5 m : chacune tient dans 1 bande de 2 m sans jonction → 2 bandes ; dév. 500 → 2 bandes par feuille (bandes_de_2_m_tirees_d_une_feuille, dev_500 : 2) → 1 feuille 2 × 1 m 0,65",
+    "ligne_devis": "6"
+  },
+  {
+    "article": "Gouttière demi-ronde zinc naturel de 25 (dév. 250), ép. 0,65 mm, longueur 4 m",
+    "quantite": 12,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "Gouttières zinc : ml + 30 mm par jonction soudée, arrondi aux longueurs de 4 m, sans % (méthode, confirme) ; lignes 13 + 9 + 13 + 9 = 44 m ; jonctions : 3 + 2 + 3 + 2 entre longueurs + 8 aux 4 équerres = 18 × 0,03 = 0,54 m ; 44,54 / 4 = 11,1 → 12 longueurs de 4 m (longueur_vendue_standard 4 m)",
+    "ligne_devis": "7"
+  },
+  {
+    "article": "Équerre (angle) extérieure 90° pour gouttière demi-ronde zinc de 25",
+    "quantite": 4,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "4 angles écrits au devis (« y compris 4 angles »), 4 angles extérieurs à 90° (équerre de gouttière, types extérieure 90°, VMZINC équerre 90° demi-ronde de 25) → 4 pièces",
+    "ligne_devis": "7"
+  },
+  {
+    "article": "Tuyau de descente zinc naturel Ø 80, longueur 2 m",
+    "quantite": 12,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "4 descentes (ligne 7 et couvreur), hauteur 5,5 m dont 1 m de dauphin en pied → 4,5 m de tube par descente ; tubes de 2 m (longueurs_vendues 2 m, donnée du couvreur) → 4,5 / 2 = 2,25 → 3 tubes par descente × 4 = 12 tubes (9 si les chutes de 0,5 m sont réutilisées ; la fiche ne donne pas de règle d'arrondi des tubes) ; coudes, colliers et dauphins non écrits au devis : non sortis",
+    "ligne_devis": "8"
+  }
+]

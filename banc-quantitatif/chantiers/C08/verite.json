@@ -1,0 +1,105 @@
+{
+  "id": "C08",
+  "commune": "Guingamp",
+  "code_postal": "22200",
+  "nature": "rénovation",
+  "description": "Petite réparation sur une maison ancienne couverte en ardoises au crochet : une noue zinc percée entre le toit principal et un retour. Le couvreur remplace la noue (6 ml), remanie les ardoises des deux côtés de la noue (12 m², soit 1 m de chaque côté sur 6 m), reprend au mortier le solin du pignon voisin sur 3 ml et remplace la descente d'eaux pluviales qui reçoit la noue (1 descente Ø80).",
+  "ouvrages": [
+    {
+      "ouvrage": "noue",
+      "libelle": "Noue zinc à remplacer",
+      "longueur_noue": 6,
+      "unite_longueur": "ml",
+      "developpe_noue": 500,
+      "developpe_libelle": "noue de 50",
+      "matiere": "zinc naturel",
+      "aspect_zinc": 1,
+      "epaisseur_zinc": 0.65,
+      "faconnage": 1,
+      "forme_achat": "feuilles de zinc naturel 2 × 1 m en 0,65, pliées à l'atelier : 2 bandes de 50 par feuille, donc 2 feuilles pour 6 ml (recouvrements compris de justesse)",
+      "fixation": "pattes zinc clouées sur la fonçure",
+      "fonçure": "voliges existantes conservées"
+    },
+    {
+      "ouvrage": "couverture-ardoises-crochet",
+      "libelle": "Remaniage des ardoises de part et d'autre de la noue",
+      "surface": 12,
+      "unite_surface": "m2",
+      "detail_surface": "1 m de chaque côté de la noue × 6 m = 12 m²",
+      "materiau": "ardoise naturelle",
+      "format": "32×22",
+      "qualite_ardoise": 1,
+      "modele": "ardoise naturelle d'Espagne 1er choix 32×22, épaisseur 3,5 mm",
+      "teinte": "gris-noir, comme l'existant",
+      "pente": 45,
+      "zone": 2,
+      "situation": 1,
+      "longueur_crochet": 9,
+      "diametre_crochet": 1,
+      "crochets": "crochets inox standard de 9, comme l'existant ; il en reprend une partie et remplace les tordus",
+      "ardoises_neuves": "il compte remplacer environ un tiers des ardoises déposées (cassées ou à retailler le long de la noue) : environ 170 ardoises neuves",
+      "liteaux": "liteaux existants conservés",
+      "ecran": "pas d'écran sous-toiture (toit ancien)"
+    },
+    {
+      "ouvrage": "bandes-zinc",
+      "libelle": "Reprise d'un solin au mortier contre le pignon voisin",
+      "longueur_bande": 3,
+      "unite_longueur": "ml",
+      "nature_solin": "solin au mortier seul, sans bande zinc",
+      "mortier": "mortier bâtard (chaux + ciment), environ 1 sac de 25 kg"
+    },
+    {
+      "ouvrage": "descente",
+      "libelle": "Descente d'eaux pluviales à remplacer",
+      "nb_descentes": 1,
+      "diametre_descente": 80,
+      "matiere": "zinc naturel",
+      "hauteur_descente": null,
+      "hauteur_descente_note": "pas encore mesurée (maison à étage, il repassera)",
+      "longueur_tube": 2,
+      "coudes_par_descente": 2,
+      "dauphin": 0,
+      "dauphin_note": "le dauphin fonte existant est gardé",
+      "colliers": "colliers neufs, un tous les 2 m plus un"
+    },
+    {
+      "ouvrage": "acces",
+      "libelle": "Échelle de toit et évacuation des gravats (forfait)"
+    }
+  ],
+  "faconnage": "il plie lui-même (plieuse à l'atelier) : il achète des feuilles de zinc",
+  "faconnage_valeur": 1,
+  "ne_sait_pas": [
+    "la hauteur de la descente (pas encore mesurée)",
+    "l'état des voliges sous l'ancienne noue (visible après dépose)",
+    "le nombre exact d'ardoises cassées à la dépose"
+  ],
+  "ecrit_au_devis": [
+    "chantier à Guingamp (22200)",
+    "remplacement noue zinc : 6 ml",
+    "remaniage ardoises autour de la noue, ardoises identiques à l'existant : 12 m2",
+    "reprise solin au mortier : 3 ml",
+    "remplacement d'une descente Ø80 : 1 u",
+    "échelle de toit et évacuation des gravats (forfait)"
+  ],
+  "tu_au_devis": [
+    "format et modèle de l'ardoise : 32×22 naturelle d'Espagne 1er choix",
+    "développé de la noue : 500 (noue de 50)",
+    "épaisseur du zinc 0,65, zinc naturel",
+    "il plie lui-même (faconnage 1)",
+    "crochets inox de 9",
+    "pente 45°",
+    "matière de la descente : zinc",
+    "tubes en longueurs de 2 m, 2 coudes",
+    "dauphin existant gardé",
+    "environ un tiers d'ardoises neuves"
+  ],
+  "oublis": [
+    "crochets d'ardoise inox de 9 pour remplacer les tordus",
+    "pattes de fixation de la noue",
+    "coudes de descente Ø80 (2)",
+    "colliers de descente Ø80",
+    "étain à souder et décapant"
+  ]
+}

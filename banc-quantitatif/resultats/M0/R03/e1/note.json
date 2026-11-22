@@ -1,0 +1,32 @@
+{
+ "m": "M0",
+ "c": "R03",
+ "e": 1,
+ "nRef": 8,
+ "justes": 6,
+ "quantite": 2,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 5,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 1,
+ "detail": {
+  "quantite": [
+   "Ardoises naturelles Espagne 1er choix 32×22 : 2122 pièces attendu, 2270 pièces lu",
+   "Crochets d'ardoise inox standard, longueur 11 cm : 2122 pièces attendu, 2270 pièces lu"
+  ],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:longueur_rampant",
+    "text": "Longueur du rampant (de l'égout au faîtage) ?"
+   }
+  ]
+ }
+}

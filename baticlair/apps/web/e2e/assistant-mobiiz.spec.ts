@@ -2,6 +2,7 @@ import path from "node:path";
 import { continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { expect, test, type Page } from "@playwright/test";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
+import { continuerSansSuggestionParApi } from "./discussion";
 
 test.beforeEach(async ({ page }) => {
   await confirmerAnalyseDoffice(page);
@@ -51,6 +52,9 @@ async function compteEtListe(page: Page) {
     ],
   });
   expect(q.status).toBe(201);
+  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
+  // (VMC, extraction d'air) » ; rien de coché, la liste reste telle qu'écrite (avant : aucune étape « Suggestions » ici).
+  await continuerSansSuggestionParApi(page, q.body.id);
   return q.body;
 }
 

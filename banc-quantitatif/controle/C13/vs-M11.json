@@ -1,0 +1,32 @@
+{
+  "juste": 3,
+  "quantite_fausse": 3,
+  "manquante": 1,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Bande de rive zinc naturel 0,65 mm, façonnée, développé 250 mm, longueur 2 m",
+      "classe": "quantite_fausse",
+      "attendu": "8 bandes de 2 m",
+      "obtenu": "7 longueurs de 2 m"
+    },
+    {
+      "article": "Bande porte-solin zinc naturel 0,65 mm, façonnée, développé 100 mm, longueur 3 m",
+      "classe": "quantite_fausse",
+      "attendu": "2 bandes de 3 m",
+      "obtenu": "7 pièces"
+    },
+    {
+      "article": "Naissance zinc pour gouttière demi-ronde de 25, sortie Ø80",
+      "classe": "manquante",
+      "attendu": "1 pièce",
+      "obtenu": null
+    },
+    {
+      "article": "Abergement de cheminée zinc naturel 0,65 mm, façonné (bavette, 2 rives à noquets, besace, bande porte-solin)",
+      "classe": "quantite_fausse",
+      "attendu": "à chiffrer",
+      "obtenu": "1"
+    }
+  ]
+}

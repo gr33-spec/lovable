@@ -1,0 +1,44 @@
+{
+  "juste": 2,
+  "quantite_fausse": 4,
+  "manquante": 2,
+  "en_trop": 0,
+  "detail": [
+    {
+      "article": "Contre-liteau sapin traité classe 2, 27×40",
+      "classe": "quantite_fausse",
+      "attendu": "200 ml",
+      "obtenu": "à chiffrer (ligne « Liteaux 27×40 (Contre-liteaux sapin traité 27×40) »)"
+    },
+    {
+      "article": "Liteau sapin traité classe 2, 27×40",
+      "classe": "manquante",
+      "attendu": "336 ml",
+      "obtenu": "absent (la seule ligne liteaux/contre-liteaux est rapprochée du contre-liteau)"
+    },
+    {
+      "article": "Tuile terre cuite HP 10 Huguenot rouge",
+      "classe": "quantite_fausse",
+      "attendu": "1260 pièces",
+      "obtenu": "1 pièces"
+    },
+    {
+      "article": "Tuile de rive à rabat HP 10 rouge, gauche (réf. 205.73)",
+      "classe": "quantite_fausse",
+      "attendu": "41 pièces",
+      "obtenu": "à chiffrer (ligne « Tuiles de rive HP 10 rouge », unique, rapprochée de la gauche)"
+    },
+    {
+      "article": "Tuile de rive à rabat HP 10 rouge, droite (réf. 205.72)",
+      "classe": "manquante",
+      "attendu": "41 pièces",
+      "obtenu": "absent (la seule ligne de tuiles de rive est rapprochée de la gauche)"
+    },
+    {
+      "article": "Faîtière terre cuite demi-ronde à emboîtement rouge",
+      "classe": "quantite_fausse",
+      "attendu": "25 pièces",
+      "obtenu": "24 pièces"
+    }
+  ]
+}

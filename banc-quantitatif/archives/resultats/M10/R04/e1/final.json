@@ -1,0 +1,57 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuile terre cuite mécanique",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [
+     "a-preciser:1"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "Refixation mécanique et consolidation de l'élément de rive de toit arraché, y compris les petites fournitures de fixation",
+   "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuile terre cuite mécanique",
+    "quantite": "20",
+    "unite": "pièces",
+    "affiche": "20 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [
+     "a-preciser:1"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "Refixation mécanique et consolidation de l'élément de rive de toit arraché, y compris les petites fournitures de fixation",
+   "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé"
+  ],
+  "questions": []
+ }
+}

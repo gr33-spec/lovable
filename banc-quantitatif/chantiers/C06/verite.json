@@ -1,0 +1,70 @@
+{
+ "id": "C06",
+ "commune": "Les Sables-d'Olonne",
+ "code_postal": "85100",
+ "nature": "rénovation",
+ "batiment": "Maison de ville de plain-pied, 9 m de long, toiture 2 pans inégaux à faible pente : pan sud rampant 6 m, pan nord rampant 3,45 m (9 × (6 + 3,45) = 85 m²). Bord de mer.",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-tuiles-canal",
+   "description": "Réfection complète de la couverture en tuiles canal après dépose des anciennes tuiles et des vieux liteaux",
+   "surface": 85,
+   "nb_pans": 2,
+   "longueur_pan": 9,
+   "rampants": "6 m (pan sud) et 3,45 m (pan nord)",
+   "pente": "30 % (environ 17°)",
+   "materiau": "tuile canal terre cuite, courants et couverts",
+   "modele": "canal de 50 (Edilians Canal 50)",
+   "produit": "edilians-canal-50",
+   "teinte": "rouge vieilli",
+   "recouvrement_canal": 150,
+   "tuiles": "11,1 tuiles au m² à 150 mm de recouvrement, courants et couverts compris selon la fiche",
+   "liteaux": "liteaux sapin traité 27×40, neufs sur les 85 m²",
+   "ecran": "aucun (pas d'écran prévu, combles ventilés)",
+   "longueur_rives": 12,
+   "rives": "2 rives de 6 m aux deux bouts du pan sud, en bardelis terre cuite ; le pan nord bute aux deux bouts contre des pignons maçonnés débordants, solins existants conservés",
+   "noues": "aucune",
+   "gouttieres": "existantes, conservées, hors devis",
+   "descentes": "existantes, conservées, hors devis",
+   "zone": "littoral, site exposé",
+   "particularites": "pas de fenêtre de toit ; une souche de cheminée en pignon, hors couverture"
+  },
+  {
+   "ouvrage": "faitage",
+   "longueur_faitage": 9,
+   "faitieres": "faîtières canal terre cuite de la même teinte, 3 au mètre, scellées au mortier bâtard (pas de closoir ni de crochets : faîtage scellé, pas à sec)",
+   "pose": "scellé au mortier"
+  }
+ ],
+ "faconnage": "sans objet (aucun zinc à plier sur ce chantier)",
+ "ne_sait_pas": [
+  "l'état des chevrons et de la volige sous les vieux liteaux (d'où la ligne divers et imprévus)",
+  "si la cliente veut garder des anciennes tuiles en couvert (réemploi) : pas décidé"
+ ],
+ "ecrit_au_devis": [
+  "objet : réfection toiture tuiles canal",
+  "dépose des anciennes tuiles et des vieux liteaux, évacuation à la déchetterie",
+  "fourniture et pose de tuiles canal terre cuite, courants et couverts, sur 85 m2",
+  "liteaux neufs sur toute la toiture, 85 m2",
+  "rives 2 x 6 ml soit 12 ml",
+  "faîtage 9 ml scellé au mortier",
+  "divers et imprévus",
+  "client, adresse du chantier (Les Sables-d'Olonne, 85100), numéro et date du devis, prix"
+ ],
+ "tu_au_devis": [
+  "recouvrement des tuiles canal : 150 mm",
+  "modèle et teinte de la tuile : canal de 50, rouge vieilli",
+  "pente 30 %, rampants 6 m et 3,45 m, longueur 9 m",
+  "section des liteaux : 27×40 sapin traité",
+  "nature des rives : bardelis terre cuite",
+  "faîtières canal, 3 au mètre",
+  "pas d'écran sous toiture",
+  "gouttières et descentes conservées"
+ ],
+ "oublis": [
+  "mortier bâtard (chaux, sable) pour sceller le faîtage et les rives : le devis dit « scellé au mortier » mais ne compte pas le mortier",
+  "pointes pour les liteaux",
+  "crochets de fixation des tuiles de couvert (bord de mer, site exposé)",
+  "tuiles à douille ou chatières de ventilation"
+ ]
+}

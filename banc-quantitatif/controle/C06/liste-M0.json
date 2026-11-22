@@ -1,0 +1,28 @@
+{
+ "liste": [
+  {
+   "article": "Tuiles canal terre cuite, courants et couverts",
+   "quantite": "85",
+   "unite": "pièces",
+   "detail": "150 mm"
+  },
+  {
+   "article": "Liteaux",
+   "quantite": "85",
+   "unite": "ml",
+   "detail": "liteaux neufs sur toute la toiture, 150 mm"
+  },
+  {
+   "article": "Rives",
+   "quantite": "12",
+   "unite": "pièces",
+   "detail": "2 rives de 6 ml"
+  },
+  {
+   "article": "Faîtières",
+   "quantite": "27",
+   "unite": "pièces",
+   "detail": null
+  }
+ ]
+}

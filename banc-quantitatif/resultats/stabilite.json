@@ -1,0 +1,81 @@
+{
+ "M4": {
+  "chantiers": 10,
+  "lectures": 50,
+  "memeCommande": 7,
+  "memeListe": 4,
+  "memesQuestions": 9,
+  "stables": 4,
+  "instables": [
+   "C02 (3 listes, 1 séries de questions sur 5)",
+   "C03 (3 listes, 1 séries de questions sur 5)",
+   "C05 (2 listes, 1 séries de questions sur 5)",
+   "C06 (2 listes, 2 séries de questions sur 5)",
+   "C07 (4 listes, 1 séries de questions sur 5)",
+   "C08 (4 listes, 1 séries de questions sur 5)"
+  ]
+ },
+ "M6": {
+  "chantiers": 10,
+  "lectures": 50,
+  "memeCommande": 9,
+  "memeListe": 5,
+  "memesQuestions": 9,
+  "stables": 5,
+  "instables": [
+   "C02 (2 listes, 2 séries de questions sur 5)",
+   "C03 (5 listes, 1 séries de questions sur 5)",
+   "C06 (2 listes, 1 séries de questions sur 5)",
+   "C07 (4 listes, 1 séries de questions sur 5)",
+   "C08 (2 listes, 1 séries de questions sur 5)"
+  ]
+ },
+ "M11": {
+  "chantiers": 10,
+  "lectures": 50,
+  "memeCommande": 9,
+  "memeListe": 5,
+  "memesQuestions": 9,
+  "stables": 4,
+  "instables": [
+   "C02 (2 listes, 1 séries de questions sur 5)",
+   "C03 (5 listes, 1 séries de questions sur 5)",
+   "C06 (2 listes, 1 séries de questions sur 5)",
+   "C07 (4 listes, 1 séries de questions sur 5)",
+   "C08 (2 listes, 1 séries de questions sur 5)",
+   "C10 (1 listes, 2 séries de questions sur 5)"
+  ]
+ },
+ "M12": {
+  "chantiers": 10,
+  "lectures": 50,
+  "memeCommande": 9,
+  "memeListe": 8,
+  "memesQuestions": 9,
+  "stables": 7,
+  "instables": [
+   "C02 (2 listes, 1 séries de questions sur 5)",
+   "C08 (2 listes, 1 séries de questions sur 5)",
+   "C10 (1 listes, 2 séries de questions sur 5)"
+  ]
+ },
+ "M0": {
+  "chantiers": 10,
+  "lectures": 30,
+  "memeCommande": 7,
+  "memeListe": 4,
+  "memesQuestions": 5,
+  "stables": 1,
+  "instables": [
+   "C02 (2 listes, 1 séries de questions sur 3)",
+   "C03 (2 listes, 1 séries de questions sur 3)",
+   "C04 (1 listes, 2 séries de questions sur 3)",
+   "C05 (1 listes, 2 séries de questions sur 3)",
+   "C06 (3 listes, 1 séries de questions sur 3)",
+   "C07 (3 listes, 1 séries de questions sur 3)",
+   "C08 (3 listes, 2 séries de questions sur 3)",
+   "C09 (1 listes, 2 séries de questions sur 3)",
+   "C10 (2 listes, 3 séries de questions sur 3)"
+  ]
+ }
+}

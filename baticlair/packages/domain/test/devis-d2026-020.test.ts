@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyRuleConfirmations, ROOFING_REFERENTIAL, type QuoteLineReading, type SiteFact } from "../src/index.js";
 import { planOf } from "./support/plan-of.js";
 import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
-import { readQuote } from "./support/read-quote.js";
+import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * DEVIS D-2026-020 (BATI INVEST, ardoises 32×22 + zinguerie), retour du fondateur 2026-10-06 : « 8 coudes au lieu de
@@ -52,16 +52,18 @@ describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", 
 });
 
 describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le reste suit", () => {
+  // Règle changée (Greg, 21 novembre 2026) : ces devis d'une ligne n'écrivent pas de gouttière, l'égout se demande ; ici
+  // répondu « Oui » (les m² le comprennent déjà) : rien n'est ajouté.
   // NF DTU 40.11 (fiche couverture) : zone 1, 45° → recouvrement 73 mm → crochet 73 + 3 = 76 mm, soit 8 cm (avant 9).
   it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 73 mm → crochet 8 cm)", () => {
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], EGOUT_COMPRIS_OUI, ZONE_1);
     expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 8 cm");
   });
   // Règle du fondateur, confirmée le 2026-11-19 (fiche couverture, ardoise.jeu_de_tete_crochet) : recouvrement = crochet − 5 mm,
   // pureau = (320 − 105) ÷ 2 = 107,5 mm. Avant : crochet − 1 cm, pureau 11 cm.
   it("« crochet inox de 11 cm » : crochets de 11 cm, recouvrement 10,5 cm, pureau 10,75 cm, ardoises recomptées", () => {
-    const sans = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], {}, ZONE_1);
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 posées au crochet inox de 11 cm")], {}, ZONE_1);
+    const sans = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], EGOUT_COMPRIS_OUI, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 posées au crochet inox de 11 cm")], EGOUT_COMPRIS_OUI, ZONE_1);
     expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 11 cm");
     expect(v.assumptions.find((a) => a.key === "param:pureau")?.value).toBe("10,75");
     // Plus de recouvrement, plus d'ardoises : la liste reste cohérente avec le crochet commandé.
@@ -70,11 +72,11 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
     expect(slates(v)?.label).toBe("Ardoises naturelles Espagne 1er choix 32×22");
   });
   it("sur une ligne de crochets à part (« 110 mm ») : lue aussi", () => {
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22"), { ref: "2", designation: "Crochets d'ardoise inox teintés noirs 110 mm", quantity: "1", unit: "lot" }], {}, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22"), { ref: "2", designation: "Crochets d'ardoise inox teintés noirs 110 mm", quantity: "1", unit: "lot" }], EGOUT_COMPRIS_OUI, ZONE_1);
     expect(crochets(v)?.label).toMatch(/longueur 11 cm/);
   });
   it("« Ø 2,7 mm » n'est pas une longueur de crochet", () => {
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], {}, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], EGOUT_COMPRIS_OUI, ZONE_1);
     expect(crochets(v)?.label).toMatch(/longueur 8 cm/);
   });
 });
@@ -105,8 +107,10 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
 
   it("1. la liste attendue, dans l'ordre du devis (avant réponse) : chaque article écrit, la naissance d'office, rien d'autre", () => {
     expect(liste()).toEqual([
-      ["Ardoises naturelles Espagne 1er choix 32×22", "2 122 pièces"],
-      ["Crochets d'ardoise inox standard, longueur 11 cm", "2 122 pièces"],
+      // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises au faîtage (ligne 8 : 8 m) et à l'égout (ligne 3 : 10 m de
+      // gouttière), avant 2 122 → 2 208 : 48 m² × 42,09 = 2 020,4 ; + (8 + 10) m ÷ 0,22 m = 81,8 ; 2 102,2 + 5 % = 2 207,4 → 2 208.
+      ["Ardoises naturelles Espagne 1er choix 32×22", "2 208 pièces"],
+      ["Crochets d'ardoise inox standard, longueur 11 cm", "5 boîtes de 500"], // 2 208 pièces, en boîtes de 500 (Greg, 21 novembre 2026)
       ["Gouttière zinc Havraise", "3 longueurs de 4 m"],
       ["Naissances Ø80", "2 pièces"],
       ["Crochets de gouttière Havraise", "20 pièces"],
@@ -126,7 +130,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
 
   it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = un par ardoise", () => {
     const ardoises = v.toBuy[0]!;
-    expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°) + 5 % de marge");
+    // Greg, 21 novembre 2026 : la précision détaille les ouvrages au mètre (avant : « … (crochet 11 cm, pente 30°) + 5 % de marge »).
+    expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge");
     expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée");
     expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
   });

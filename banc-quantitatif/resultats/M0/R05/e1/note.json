@@ -1,0 +1,52 @@
+{
+ "m": "M0",
+ "c": "R05",
+ "e": 1,
+ "nRef": 7,
+ "justes": 3,
+ "quantite": 2,
+ "manquantes": 2,
+ "inventees": 4,
+ "doutes": 0,
+ "questions": 8,
+ "questionsRef": 4,
+ "questionsHorsRef": 4,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Feuilles zinc naturel 2 × 1 m, 0,65 mm : 5 pièces attendu, 3 pièces lu",
+   "Liteaux 18×40 : 1991 ml attendu, à chiffrer  lu"
+  ],
+  "manquantes": [
+   "Ardoises naturelles Espagne 1er choix 30×22 (8925 pièces)",
+   "Bandes porte-solin 2 m (3 pièces)"
+  ],
+  "inventees": [
+   "Entourage de cheminée zinc et solin (2 pièces)",
+   "Ardoises (Ardoises) (à chiffrer )",
+   "Contre-liteaux (Ardoises) (à chiffrer )",
+   "Ardoises (Ardoises) (à chiffrer )"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "fiche:format_ardoise_jouees",
+    "text": "Les ardoises des jouées, c'est le même format que le toit (30×22) ?"
+   },
+   {
+    "key": "param:longueur_rampant",
+    "text": "Longueur du rampant (de l'égout au faîtage) ?"
+   },
+   {
+    "key": "param:nb_descentes",
+    "text": "Combien de descentes pour cette gouttière ?"
+   },
+   {
+    "key": "param:pente",
+    "text": "Pente du toit ?"
+   }
+  ]
+ }
+}
