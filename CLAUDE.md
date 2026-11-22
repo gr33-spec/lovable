@@ -371,6 +371,14 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Code : `components/accueil.tsx`, `packages/domain/src/accueil/mon-activite.ts` ; photos : `apps/web/public/accueil/`, `lib/photos-accueil.ts`, crédits `baticlair/docs/photos-accueil.md` (remplaçables par celles de Greg).
 - Prix : état des lieux et proposition dans `baticlair/docs/prix-etat-des-lieux-2026-11-20.md` (rien n'est touché dans la base).
 
+## Décisions du 22 novembre 2026 : base couverture et banc d'essai
+
+- Partage du travail (Greg) : la session « base couverture » fait la recherche et la fiche, avec les sources ; tout ce qui touche au calcul, aux suggestions ou aux questions s'écrit dans `banc-quantitatif/A-INTEGRER.md`, et c'est le banc d'essai qui l'intègre.
+- Suggestions : pas de limite à 5 ; rangées par catégorie (Couverture, Zinguerie, Fixations, Ventilation…) avec un petit titre, une vingtaine au plus (fait par le banc d'essai).
+- Chatières et vis : calculées d'après le modèle et la surface, jamais demandées.
+- Fixation des tuiles : zone de vent et situation exposée déduites de la commune ; seule question « Écran sous toiture ? », si le devis ne le dit pas.
+- Clous d'ardoise en Suggestion : longueurs d'égout, de faîtage et de rive prises au devis, demandées seulement si la case est cochée et qu'elles manquent. Règle changée : faîtage à 2 clous au moins au dernier rang (DTU), avant 1.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.
