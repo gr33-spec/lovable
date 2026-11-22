@@ -22,6 +22,14 @@
    partir de ton devis. Vérifie les quantités avant d'envoyer. » reste en haut.
 9. **Clous d'ardoise** : vendus en boîtes de 1 kg de clous cuivre 3 × 30 (≈ 418 au kg). Inox à la place ? (aucun catalogue
    inox trouvé par la base couverture.)
+10. **Fixation des tuiles (A-INTEGRER §2) : pas faite cette nuit.** Il faut compter les tuiles d'égout, de rive et les
+    faîtières, et le tableau du DTU 40.21 de la recherche ne couvre que la Bretagne (22, 29, 56 en vent 3 ; 35 en vent 2).
+    Je propose : seulement en Bretagne pour commencer (ailleurs, la ligne reste « à chiffrer »), zone de vent par
+    département, site exposé par la commune (déjà lu), « Écran sous toiture ? » (déjà posé pour les chatières), crochets en
+    boîtes de 400. Tu valides ce périmètre ?
+11. **Fautes d'orthographe** : la remise au propre est faite par le code (les mots du métier, par le son), sans IA. Je n'ai
+    pas changé le prompt de lecture (une vraie lecture pour le vérifier coûte ; zéro dépense). Si tu veux que l'IA corrige
+    aussi les noms qu'elle écrit, il faudra une lecture de contrôle payée.
 
 ## Avant (21 novembre 2026 au soir)
 

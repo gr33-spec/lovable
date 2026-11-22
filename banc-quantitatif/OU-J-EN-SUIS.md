@@ -2,6 +2,25 @@
 
 Mis à jour : 22 novembre 2026, soir. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
 
+## NUIT DU 22 AU 23 NOVEMBRE (Greg : « enchaîne les lots, pousse si toute la chaîne est verte et /version bon »)
+Fait sur ma branche, dans l'ordre de Greg :
+1. Crochets agrafe / pointe : déjà fait (-77), tests serveur mis à jour par l'agent (5 fichiers verts).
+2. Calculateur de feuilles de zinc (-79) : longueur des pièces 1 m / 2 m (une question pour le devis, 2 m par défaut),
+   part de feuille additionnée sur la liste puis UN arrondi (pièces partagées), développé de l'abergement (25/33/40),
+   détail sous la flèche. C11 : 7 feuilles (avant 6+1+1). D-2026-020 : 2 feuilles (avant 3).
+3. Suggestions par catégorie (Couverture, Zinguerie, Fixations, Ventilation, Fenêtres de toit, Autres), 20 au plus, titres
+   et comptes repliables dans la carte.
+4. A-INTEGRER §3 clous d'ardoise en Suggestion (-80) ; §1 chatières (-81, `cos_deg` et cm² au moteur) ; §2 fixation des
+   tuiles PAS faite (A-TRANCHER n° 10).
+5. Flèche (déjà faite) + apparence d'après la maquette de Greg (`maquettes/fournitures-greg-2026-11-22.png`) : lignes
+   plates, point et quantité à droite, crayon carré, « Voir le calcul » et « Valider / Préciser » sous la ligne, bandeau
+   « Quantités à vérifier », « Aperçu » et « Demander les prix ». Coordination : `COORDINATION.md` (la messagerie ne touche
+   pas la liste).
+6. Orthographe (00dfa339) : `lecture/orthographe.ts`, devis remis au propre par le son des mots du métier, doutes en
+   questions `orthographe:<mot>` ; 6 chantiers du banc écrits avec des fautes = même liste.
+Banc : 98/99 (C05 feuilles 3 contre 4, à trancher). Points à trancher : `A-TRANCHER.md`, section « NUIT ».
+Chaîne complète lancée sur 7786bf0e (tout sauf l'orthographe) : moteur 1 383 vert ; la suite dans b3ly2a7kz.
+
 ## Score
 - Banc du calcul : **98 sur 99** (fiche `roofing-2026.11.22-75`). Objectif de Greg (95 %) atteint.
 - Rejouer : `cd baticlair/packages/domain && npx vitest run test/banc-couverture.test.ts` ; enregistrer : `BANC_MAJ=1 …` ;
