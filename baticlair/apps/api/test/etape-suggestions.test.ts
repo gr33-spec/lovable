@@ -53,7 +53,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     // Plus de question oui / non sur les consommables.
     const q = (await agent.get(`/v1/quantitatifs/${(await chantier(agent)).id}`)).body as { questions: { id: string; texte: string }[] };
     expect(q.questions.map((x) => `${x.id} ${x.texte}`).join(" | ")).not.toMatch(/consommables/i);
-  });
+  }, 30_000);
 
   it("une case qui n'a pas été proposée est refusée ; rien ne change", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");

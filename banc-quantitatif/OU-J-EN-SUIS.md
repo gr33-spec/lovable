@@ -63,6 +63,12 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
     ne fait plus confiance à rien ». Règle : « À vérifier » SEULEMENT quand la ligne repose sur une valeur par défaut ou une
     hypothèse incertaine, et la flèche dit LAQUELLE. Une ligne calculée avec des règles validées et les infos du devis
     affiche seulement « Calculé ». (Message transmis par la discussion « messagerie », qui ne touche pas au calcul.)
+  - MAQUETTE DE GREG (22 novembre 2026, `maquettes/fournitures-greg-2026-11-22.png`, « à titre d'information, n'hésite pas à
+    faire mieux, sans rien oublier comme bouton ») : l'écran « Fournitures » refait DANS CE LOT, en même temps que la flèche.
+    Ligne compacte (nom, précision dessous, point de couleur, quantité, crayon) ; « Autres fournitures » repliées ; en bas
+    « Aperçu » et « Demander les prix » ; le crayon ouvre une feuille du bas (« Modifier la quantité », quantité et unité,
+    « Calcul proposé » = le détail de la flèche, « Enregistrer »). Rien ne disparaît (« Envoyer une partie », valider,
+    retirer, renommer, ajouter un article, « N lignes à vérifier »). La discussion « messagerie » ne touche pas à cet écran.
   - Conséquence pour le moteur : il faudra que le calcul sorte ses POSTES (libellé, mesure, taux, résultat, par défaut ou
     non), pas seulement une phrase de précision.
 - À VÉRIFIER ET DIRE (sans coder) : où en est l'apprentissage des corrections (retenu pour l'artisan ; même correction par
