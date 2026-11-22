@@ -27,7 +27,7 @@ export function avecJournalDesEnvois<T extends TransactionalEmailSender>(sender:
           pieces: (email.attachments ?? []).map((a) => a.filename).slice(0, 20),
         },
       })
-      .catch((err: unknown) => logger.warn(`Envoi non noté dans « Envoyés » : ${err instanceof Error ? err.message : String(err)}`, "JournalEnvois"));
+      .catch((err: unknown) => logger.warn({ err: err instanceof Error ? err.message : String(err) }, "Envoi non noté dans « Envoyés »"));
   };
   return sender;
 }

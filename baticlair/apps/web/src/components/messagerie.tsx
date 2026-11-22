@@ -131,6 +131,8 @@ export function Messagerie() {
   useLayoutEffect(() => {
     const e = lireEtat();
     if (e) {
+      // L'état gardé n'existe que dans le navigateur : relu une fois monté (comme l'encart d'installation).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDossier(e.dossier);
       setOuverts(e.ouverts);
     }

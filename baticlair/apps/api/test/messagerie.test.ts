@@ -22,7 +22,7 @@ const alertes: { kind: AlertKind; message: string }[] = [];
 const alerter: Alerter = { enabled: true, alert: (kind, message) => void alertes.push({ kind, message }) };
 const lecteur: LecteurEmailRecu = {
   lire(): Promise<EmailRecu | null> {
-    return Promise.resolve({ from: "Négoce Dupont <ventes@dupont.example>", to: [], subject: "Re: votre demande", date: "2026-11-22T09:00:00.000Z", text: "Bonjour, voici notre devis.", html: null, attachments: [], tropLourdes: [], authentification: OK, ...recuSimule });
+    return Promise.resolve({ from: "Négoce Dupont <ventes@dupont.example>", to: [], subject: "Re: votre demande", date: new Date().toISOString(), text: "Bonjour, voici notre devis.", html: null, attachments: [], tropLourdes: [], authentification: OK, ...recuSimule });
   },
 };
 function signe(corps: string, id = `msg_${Math.random().toString(36).slice(2)}`, ts = Math.floor(Date.now() / 1000)) {
