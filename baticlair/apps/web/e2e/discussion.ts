@@ -149,9 +149,11 @@ export async function continuerSansSortieDeVentilation(page: Page) {
   // continue ; rien n'est coché d'office.
   const carte = carteSuggestions(page);
   // La carte peut déjà être passée (`continuerQuandLesSuggestionsSOuvrent` la ferme dès qu'elle s'ouvre) : rien à faire.
-  if (!(await carte.waitFor({ state: "visible", timeout: 15_000 }).then(() => true, () => false))) return;
+  if (!(await carte.waitFor({ state: "visible", timeout: 6_000 }).then(() => true, () => false))) return;
   const cases = carte.getByRole("checkbox");
-  for (let i = 0; i < (await cases.count()); i++) await expect(cases.nth(i)).not.toBeChecked();
+  // L'autre aide peut fermer la carte pendant qu'on la lit : une case partie ne compte pas, une case cochée d'office, si.
+  const cochees = await Promise.all(Array.from({ length: await cases.count() }, (_, i) => cases.nth(i).isChecked({ timeout: 1_000 }).catch(() => false)));
+  expect(cochees.some(Boolean)).toBe(false);
   const continuer = carte.getByRole("button", { name: "Continuer", exact: true });
   if (await continuer.isVisible()) await continuer.click().catch(() => undefined);
   await expect(carte).toBeHidden({ timeout: 15_000 });

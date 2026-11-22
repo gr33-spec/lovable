@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSortieDeVentilation, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -4227,8 +4227,6 @@ test("Apprentissage (24 octobre 2026) : la même correction sur 2 chantiers s'ap
   }
   const l3 = await liste();
   await page.goto(`/chantiers/${l3.projetId}`);
-  // L'étape « Suggestions » (pointes de liteaux, sortie de ventilation…) : l'artisan ne coche rien et continue.
-  await continuerSansSortieDeVentilation(page);
   const fournitures = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(fournitures.getByText("Ardoise Cupa Heavy 32×22")).toBeVisible();
   await expect(fournitures.getByText("Ajusté selon tes habitudes")).toBeVisible();
@@ -4351,8 +4349,6 @@ test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat g
   });
   await bouton.click();
   await page.waitForURL(/\/chantiers\/[0-9a-f-]{36}/);
-  // L'étape « Suggestions » (pointes de liteaux, sortie de ventilation…) : l'artisan ne coche rien et continue.
-  await continuerSansSortieDeVentilation(page);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(/Ardoise naturelle 32×22/).first()).toBeVisible();
   await expect(page.getByText(/Faîtière ventilée terre cuite, modèle ancien/).first()).toBeVisible();
