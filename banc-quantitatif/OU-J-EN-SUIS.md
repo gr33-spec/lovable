@@ -72,7 +72,7 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## LOT DE LA FLÈCHE (Greg, 22 novembre au soir) — EN COURS
+## LOT DE LA FLÈCHE (Greg, 22 novembre au soir) — FAIT SUR MA BRANCHE, chaîne en cours
 Consignes de Greg (à faire ENSEMBLE) :
 1. « À vérifier » seulement si la ligne repose sur une valeur par défaut ou une hypothèse incertaine, et la flèche dit
    laquelle ; une ligne calculée avec des règles validées et les infos du devis : « Calculé ». (Aujourd'hui tout est « à
@@ -90,6 +90,24 @@ Consignes de Greg (à faire ENSEMBLE) :
 Plan : (a) moteur : `postes` sur un besoin (fiche), calculés et vérifiés (somme = besoin), + la perte ; (b) état
 « calcule » / « a_verifier » par ligne avec ses raisons ; (c) API : postes et état dans la vue ; (d) écran ; (e) captures ;
 (f) chaîne complète ; (g) rapport à Greg, il valide seul ce qui part.
+FAIT sur ma branche (commits a0e75817 → 7fa232e3, fiche -78) :
+- (a)(b)(c) moteur, état, API : faits. Clé d'un poste = `param:<donnée>@<ouvrage>` (une correction ne vaut que pour son
+  ouvrage). Un produit pris par défaut dont le format est écrit sur la ligne (« Ardoises naturelles 32×22 ») n'est pas un
+  défaut ; un autre se dit « Ardoises 32×22 : modèle par défaut ».
+- (d) écran (`supply-list.tsx`) : point de couleur (vert, orange, jaune = modifié par toi) à la place de la bordure ; petite
+  flèche « Voir le calcul : … » qui déroule les postes (« Surface 48 m² × 42,09 au m² = 2 020 », « Perte 5 % = 105 ») et les
+  raisons ; bulle « Touche la flèche pour voir le calcul » une seule fois (appareil, `mobiiz.bulle-calcul`) ; crayon → feuille
+  du bas (« Modifier la quantité », nom, précision, − / + et unité, « Calcul proposé » avec une case par donnée, la question
+  de la ligne, nom, précision, croquis, retirer, « Enregistrer ») ; « Autres fournitures » (consommables et divers) repliées
+  en bas, jamais une ligne orange ni une ligne déjà partie à part ; « Modifié par toi » aussi sur une ligne orange.
+  Règle changée : une ligne « Calculé » / « Dit par toi » ne porte plus en plus « à vérifier » (point 31 du 27 octobre).
+  Gardé : « Demander les prix à mes négoces » (pas « Demander les prix ») : mot validé le 28 octobre, à confirmer par Greg.
+- Parcours : « la flèche du calcul » (nouveau), §49.8 « Enregistrer » au lieu de « Fermer », feuille dans l'écran, suggestions
+  8 cases (pas de liteaux dans D-2026-020), aide `continuerSansSuggestionParApi` sans case = rien à répondre.
+- Serveur : l'agent a mis les tests à jour (crochets agrafe / pointe, 8 cases), 5 fichiers verts.
+- (e) captures : scratchpad/captures (iPhone 375 et ordinateur, clair et sombre). (f) chaîne complète lancée (b155sn0tb).
+- Défaut vu sur les captures, à traiter : la ligne d'attente des crochets dit « Crochets d'ardoise inox de 11 standard,
+  longueur cm » (mots du devis mal recollés) ; « Une réponse est attendue » ne nomme pas la question.
 
 ## EN LIGNE (vérifié par /version) : `b90a279e`, 22 novembre, 16 h 45 UTC
 - Contenu : fiche -74 (banc 96/99, ce qui était déjà en ligne avec 9ceac7d0) + `/version` site et API + tests. Les deux
