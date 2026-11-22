@@ -1,4 +1,5 @@
 import { RetoursHaptiques } from "@/components/retours-haptiques";
+import { RevelerApresToucher } from "@/components/reveler-apres-toucher";
 import { ChampVisible } from "@/components/champ-visible";
 import { headers } from "next/headers";
 import "./globals.css";
@@ -84,6 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-dvh antialiased">
         <RetoursHaptiques />
+        <RevelerApresToucher />
         {children}
         <EnregistrementServiceWorker />
         <ChampVisible />

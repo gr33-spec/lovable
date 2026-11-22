@@ -52,6 +52,13 @@ describe("un message externe n'est jamais habillé en Mobiiz", () => {
     expect(liensDesactives("Bonjour, voici le devis.")).toBe("Bonjour, voici le devis.");
   });
 
+  it("un texte énorme (3 Mo, sans point) est traité vite : jamais de calcul sans fin", () => {
+    const debut = Date.now();
+    liensDesactives("A".repeat(3 * 1024 * 1024));
+    liensDesactives("a-".repeat(500_000) + "b.example");
+    expect(Date.now() - debut).toBeLessThan(2000);
+  });
+
   it("l'objet est préfixé [Externe] une seule fois", () => {
     expect(objetExterne("Votre colis")).toBe("[Externe] Votre colis");
     expect(objetExterne("[Externe] Votre colis")).toBe("[Externe] Votre colis");

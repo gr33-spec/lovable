@@ -163,7 +163,9 @@ export function liensDesactives(texte: string): string {
       .replace(/h(?:tt|xx)p(s?):\/\//gi, (_m, s: string) => `hxxp${s}[:]//`)
       .replace(/([a-z][a-z0-9+.-]*):\/\//gi, "$1[:]//")
       // Tout nom de domaine (« www.site.fr », « bit.ly/x », « site.com/login ») : ses points deviennent « [.] ».
-      .replace(/\b((?:[a-z0-9-]+\.)+[a-z]{2,})(?=$|[\s/:?#)\]>"',;!]|\.(?:\s|$))/gi, (d: string) => d.replace(/\./g, "[.]"))
+      // Longueurs bornées (un nom de domaine fait au plus 63 caractères par partie) : jamais de calcul sans fin sur un
+      // texte énorme sans point (saboteur, 22 novembre 2026, corps de 3 Mo).
+      .replace(/\b((?:[a-z0-9-]{1,63}\.){1,8}[a-z]{2,24})(?=$|[\s/:?#)\]>"',;!]|\.(?:\s|$))/gi, (d: string) => d.replace(/\./g, "[.]"))
   );
 }
 

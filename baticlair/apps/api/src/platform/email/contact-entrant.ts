@@ -1,4 +1,4 @@
-import { BANDEAU_EXTERNE, contenuDangereux, liensDesactives, objetExterne, pieceDangereuse, verdictEntrant, type Authentification, type VerdictEntrant } from "@baticlair/domain";
+import { BANDEAU_EXTERNE, contenuDangereux, expediteurEntrant, liensDesactives, objetExterne, pieceDangereuse, verdictEntrant, type Authentification, type VerdictEntrant } from "@baticlair/domain";
 import type { AppLogger } from "../logging/logger.js";
 import type { TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
 
@@ -157,7 +157,7 @@ export function emailDeRenvoi(recu: EmailRecu, adresse: string, vers: string, ve
   const verification = verdict.authentifie ? "Expéditeur authentifié par son domaine (DMARC)." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.";
   // Tout ce qui vient de l'expéditeur (nom affiché, objet, noms de fichiers) : une seule ligne, liens non cliquables.
   const sur = (t: string) => ligneExterne(t);
-  const entete = [`${BANDEAU_EXTERNE}.`, verification, "", `De : ${sur(recu.from)}`, `À : ${adresse}`, `Reçu le : ${new Date(recu.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, `Objet : ${sur(recu.subject || "(sans objet)")}`];
+  const entete = [`${BANDEAU_EXTERNE}.`, verification, "", `De : ${expediteurExterne(recu.from)}`, `À : ${adresse}`, `Reçu le : ${new Date(recu.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, `Objet : ${sur(recu.subject || "(sans objet)")}`];
   const lourdes = recu.tropLourdes.length ? [`Pièces jointes trop lourdes, à lire dans Resend : ${recu.tropLourdes.map(sur).join(", ")}`] : [];
   const retenues = verdict.piecesBloquees.length ? [`Pièces jointes retenues (dangereuses) : ${verdict.piecesBloquees.map(sur).join(", ")}`] : [];
   const expediteur = adresseNue(recu.from);
@@ -165,12 +165,18 @@ export function emailDeRenvoi(recu: EmailRecu, adresse: string, vers: string, ve
   return {
     to: vers,
     subject: objetExterne(liensDesactives(recu.subject)),
-    text: [...entete, ...lourdes, ...retenues, "", liensDesactives(texteRecu(recu))].join("\n"),
+    text: [...entete, ...lourdes, ...retenues, "", liensDesactives(texteRecu(recu).slice(0, 200_000))].join("\n"),
     externe: true,
     ...(sures.length ? { attachments: sures } : {}),
     ...(expediteur.includes("@") ? { replyTo: expediteur } : {}),
     mustDeliver: true,
   };
+}
+
+/** L'expéditeur tel qu'il s'affiche : son nom rendu sûr, puis sa vraie adresse (une adresse n'ouvre qu'un nouvel e-mail). */
+export function expediteurExterne(de: string): string {
+  const { nom, adresse } = expediteurEntrant(de);
+  return nom ? `${ligneExterne(nom)} <${adresse}>` : adresse;
 }
 
 /** Une ligne écrite par l'expéditeur, rendue sûre : sans retour à la ligne, sans lien cliquable. */

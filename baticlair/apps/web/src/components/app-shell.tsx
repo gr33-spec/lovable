@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Sur grand écran, la place du menu (pl-72) s'ajoute à la colonne au lieu de la rogner : 48rem de contenu, 56rem au-delà de 1280 px. */}
         {/* Ordinateur (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : le contenu prend toute la largeur à
             droite du menu (16 rem), jusqu'à 76 rem, avec de vraies marges ; chaque page y pose sa grille. */}
-        <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pt-4 pb-(--nav-space) lg:mx-0 lg:ml-64 lg:w-auto lg:max-w-none lg:gap-6 lg:px-10 lg:pt-8 lg:pb-14 xl:px-14">
+        <main className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 pt-4 pb-[calc(var(--nav-space)+var(--barre-action,0px))] lg:mx-0 lg:ml-64 lg:w-auto lg:max-w-none lg:gap-6 lg:px-10 lg:pt-8 lg:pb-14 xl:px-14">
           <div className="contents lg:mx-auto lg:flex lg:w-full lg:max-w-[76rem] lg:flex-col lg:gap-6">
           <MenuArtisan />
           {/* L'accès démo (Greg, 7 novembre 2026) : le visiteur sait toujours qu'il est dans un espace fictif. */}

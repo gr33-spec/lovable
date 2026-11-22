@@ -109,7 +109,7 @@ describe("contact@mobiiz.fr : rien de suspect n'est renvoyé, rien n'est habill�
     expect(m.externe).toBe(true);
     expect(m.text.split("\n")[0]).toBe("Message externe, non vérifié par Mobiiz.");
     expect(m.text).toContain("De : Client Martin <martin@client.example>");
-    expect(m.text).toContain("hxxps://client[.]example/chantier");
+    expect(m.text).toContain("hxxps[:]//client[.]example/chantier");
     expect(m.text).not.toContain("https://client.example");
     // Jamais la page HTML de l'expéditeur.
     expect(m.html).toBeUndefined();
@@ -183,7 +183,7 @@ describe("l'adresse Mobiiz d'un artisan", () => {
     const avis = ctx.emails.sent.find((e) => e.to === "artisan@example.fr")!;
     expect(avis.subject).toBe("[Externe] Votre commande");
     expect(avis.text).not.toContain("t'a répondu");
-    expect(avis.text).toContain("hxxps://faux-negoce[.]example/paiement");
+    expect(avis.text).toContain("hxxps[:]//faux-negoce[.]example/paiement");
     expect(await ctx.prisma.alerteCourte.count()).toBe(0);
     const recus = (await agent.get("/v1/recus")).body.items;
     expect(recus[0].demande).toBeNull();

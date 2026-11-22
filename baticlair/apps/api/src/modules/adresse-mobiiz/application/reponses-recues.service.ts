@@ -1,6 +1,6 @@
 import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur } from "@baticlair/domain";
 import { alertePropositionNegoce, BANDEAU_EXTERNE, liensDesactives, objetExterne } from "@baticlair/domain";
-import { ligneExterne, verdictDuRecu } from "../../../platform/email/contact-entrant.js";
+import { expediteurExterne, ligneExterne, verdictDuRecu } from "../../../platform/email/contact-entrant.js";
 import type { JournalEntrants } from "../../../platform/email/journal-entrants.js";
 import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -191,7 +191,7 @@ export class ReponsesRecuesService {
     if (destinataire) rattache = await this.devisDepuisPdf(companyId, destinataire.id, email.id);
     const negoce = destinataire?.supplier.name ?? nomExpediteur(from);
     const url = destinataire ? `/chantiers/${destinataire.priceRequest.projectId}#fournisseurs` : "/recus";
-    const copie = liensDesactives(recu.text ?? "").trim().slice(0, 4000);
+    const copie = liensDesactives((recu.text ?? "").slice(0, 4000)).trim();
     const pieces = email.fichiers.map((f) => f.nom);
     // LA CLOCHE (Greg, 10 novembre 2026) : une alerte courte, une seule par e-mail (un webhook rejoué n'en écrit pas deux).
     // Seule une réponse rattachée à une vraie demande se dit « réponse de négoce » ; le reste est un message reçu.
@@ -212,7 +212,7 @@ export class ReponsesRecuesService {
             `${BANDEAU_EXTERNE}.`,
             verdict.authentifie ? "Expéditeur authentifié par son domaine." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.",
             "",
-            `De : ${ligneExterne(recu.from || from)}`,
+            `De : ${expediteurExterne(recu.from || from)}`,
             `À : ton adresse ${NOM_APP} (${cible.adresse}@${this.domaine})`,
             `Objet : ${ligneExterne(recu.subject || "(sans objet)")}`,
             ...(destinataire ? [`Demande : ${destinataire.supplier.name}`] : []),

@@ -532,7 +532,7 @@ html[data-theme="clair"] {
 /* Recette du 18 novembre 2026 : faire défiler jusqu'à un élément le laisse au-dessus de la barre du bas et du ＋. */
 @media (max-width: 1023px) {
   html {
-    scroll-padding-bottom: var(--nav-space);
+    scroll-padding-bottom: calc(var(--nav-space) + var(--barre-action, 0px));
   }
 }
 
@@ -549,5 +549,25 @@ html[data-theme="clair"] {
 @media (prefers-reduced-motion: reduce) {
   .accueil-apparait {
     animation: none;
+  }
+}
+
+/* Ce qui apparaît se montre (Greg, 22 novembre 2026) : le premier champ à remplir est mis en avant, un instant. */
+.champ-revele {
+  animation: champ-revele 1.6s ease-out;
+}
+@keyframes champ-revele {
+  0%,
+  40% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-accent, #fed206) 70%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .champ-revele {
+    animation: none;
+    outline: 3px solid var(--color-accent, #fed206);
   }
 }
