@@ -1625,8 +1625,8 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   // Points 14 et 15 : une seule étape, les mots de Greg, des cases tirées de la fiche ; les crochets, écrits, ne sont pas proposés.
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
-  // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; cinq au plus.
-  await expect(cases).toHaveCount(5);
+  // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; sans limite de nombre (skill du fondateur, 18/11/2026) : huit cases (pointes de liteaux et dauphins compris).
+  await expect(cases).toHaveCount(8);
   await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
   // Règle changée (Greg, 21 novembre 2026) : la sortie de ventilation est proposée sur toute couverture dont le devis n'écrit
   // pas de sortie de toit ; cinq cases au plus, articles de la fiche d'abord : elle prend la place des vis. Avant : « Vis inox 4 × 40 ».

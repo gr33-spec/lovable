@@ -210,7 +210,7 @@
    "attribut": "ardoises_par_palette_estimation",
    "valeur": "≈ 1 350 kg ÷ poids unitaire (poids = L × l × e × 2,8 g/cm³)",
    "unite": "u/palette",
-   "condition": "palette de 1 300 à 1 400 kg dans la plupart des cas (de 0,9 à 1,45 t) ; estimation pour l'affichage, à faire confirmer par le négoce",
+   "condition": "palette de 1 300 à 1 400 kg dans la plupart des cas (palettes publiées de 1,13 à 1,66 t, ardoise-modeles.json, 20/11/2026) ; estimation pour l'affichage, à faire confirmer par le négoce",
    "regions": [
     "France"
    ],
@@ -416,13 +416,13 @@
    "marque": "",
    "modele": "30x20",
    "attribut": "ardoises_par_palette",
-   "valeur": null,
+   "valeur": "1 800 à 2 000",
    "unite": "u/palette",
-   "condition": "non publié ; estimation par le poids : ≈ 2300 (1 350 kg ÷ 0.588 kg)",
+   "condition": "Corrigé le 20/11/2026 (ardoise-modeles.json : Cupa Prestige, ancienne production d'Angers, Rathscheck = 1 800 à 2 000, confirmé par 3 sources) ; l'estimation par le poids (≈ 2 300) était trop haute. Gardé ici en une_source : le chiffre confirmé est dans ardoise-modeles.",
    "regions": [
     "France"
    ],
-   "statut": "a_confirmer",
+   "statut": "une_source",
    "sources": [
     {
      "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",

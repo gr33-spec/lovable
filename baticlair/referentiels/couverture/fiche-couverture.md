@@ -2,7 +2,7 @@
 
 Fichier GÉNÉRÉ par `construire_fiche.py` depuis `recherche/` : ne pas modifier à la main.
 
-Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
+Taux de chiffres confirmés : **89.8 %**. Règle : confirme : deux sources indépendantes, dont un fabricant ou un DTU quand c'est possible ; confirme_fabricant : fiche officielle du fabricant, sur son domaine, datée, et contrôle par le calcul du modèle (décision du fondateur, 19/11/2026) ; une_source ; a_confirmer.
 
 ## Ardoises
 
@@ -30,7 +30,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 | agrafe_selon_liteau | agrafe 14 (liteau 14-16,5), 18 (liteau 18), 20 (liteau 20) ; autres 18 à 40 mm sur demande mm | Frénéhard Anjou Color ; négoce : A16 pour liteau 15-18 | confirme |
 | conditionnement | 500 u/boîte | crochet à agrafe Ø 2,7, longueurs 7 à 14 cm (400 pour 15-16 cm) | confirme |
 | conditionnement | 700 u/boîte | crochet à pointe Ø 2,7, longueurs 7 à 14 cm (500 pour 15-16 cm) | confirme |
-| crochets_par_boite_5kg | None u | inox Ø 2,7 : 7 cm 670 agrafes / 830 pointes … 11 cm 540 / 640 … 16 cm 430 / 500 | une_source |
+| crochets_par_boite_5kg | inox Ø 2,7 : 7 cm 670 agrafes / 830 pointes … 11 cm 540 / 640 … 16 cm 430 / 500 u | crochets inox Ø 2,7 en boîte de 5 kg, par longueur | une_source |
 | clous_ardoise | 27×15 (Ø 2,4, L 27) ; 30×16 (Ø 2,7, L 30) ; 35×17 (Ø 3,0, L 35) ; tête ≥ 7,5 mm mm | clous à tête large, acier galvanisé, cuivre ou inox (NF DTU 40.11 P1-2 tableau 3) | confirme |
 | clous_par_ardoise | 2 u | pose au clou (ardoise naturelle) ; ardoises de rive, doublis, premier rang et dernier rang : 2 clous | confirme |
 | unite_de_vente | au kg (boîtes de 1 kg et 5 kg) kg | galva 2,7×30 en 5 kg ; cuivre 2,7×27 et 2,7×30 en 1 kg | confirme |
@@ -79,7 +79,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 - **Cupa Pizarras Cupa 2** (confirme_fabricant 1) : carriere_et_epaisseurs carrière souterraine de Riodolas, Carballeda de Valdeorras (Ourense), depuis 1972 ; épaisseurs nominales 3,5 à 6 mm
 - **Cupa Pizarras Cupa 3** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Solana de Forcadas (León), zone San Pedro, depuis 1892 ; épaisseur moyenne 3,5 mm, 7 à 8 mm en « Heavy »
 - **Cupa Pizarras Cupa 4** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Armadilla, zone Benuza (León), depuis 1968 ; 3,5 à 4 mm, jusqu'à 8 mm (modèles épais) ; gamme Monument historique
-- **Cupa Pizarras Cupa 5** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Valdacal, zone Pusmazán (Ourense), depuis 1971 ; 3,5 à 5 mm, 7-8 mm (épais, Pyrineas) ; gris clair
+- **Cupa Pizarras Cupa 5** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Valdacal, zone Pusmazán (Ourense), depuis 1971 ; 5 / 6,5 / 7,5 / 9 mm (fiche carrière actuelle, plus de 3,5 mm ; relu le 20/11/2026) (épais, Pyrineas) ; gris clair
 - **Cupa Pizarras Cupa 6** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Los Campos, zone San Pedro (León), depuis 1968 ; 3,5 à 5 mm
 - **Cupa Pizarras Cupa 7** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Las Arcas Prada, zone San Pedro (León), depuis 1983 ; 3,5 à 5 mm
 - **Cupa Pizarras Cupa 9** (confirme_fabricant 1) : carriere_et_epaisseurs carrière Anabel, Abejera de Aliste (Zamora), depuis 2001 ; 4, 5 et jusqu'à 8 mm ; noire
@@ -559,7 +559,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes_vendus | [160, 250, 330, 400] mm | appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 » | confirme |
+| developpes_vendus | [160, 250, 333, 400] mm | appellation comptoir « de 16 », « de 25 », « de 33 », « de 40 » ; RHEINZINK, Edilians et NedZink écrivent 166 / 333 pour la « 16 » / la « 33 » ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce) | confirme |
 | section_d_ecoulement | {'160': 20, '250': 57, '330': 113, '400': 174} cm2 |  | confirme |
 | surface_en_plan_desservie_par_sortie_pente_5_mm_m | {'250': 35, '330': 95, '400': 180} m2 | surface en projection horizontale, par sens d'écoulement vers une naissance ; une naissance au milieu reçoit les deux côtés | confirme |
 
@@ -589,7 +589,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes_et_section | {'250': 43, '330': 100} cm2 | régions de neige (montagne, Est) ; rare en Bretagne | confirme |
+| developpes_et_section | {'250': 43, '333': 100} cm2 | régions de neige (montagne, Est) ; rare en Bretagne ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce) | confirme |
 
 
 ### gouttière zinc (demi-ronde, lyonnaise, nantaise)
@@ -603,7 +603,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| developpes | [330, 400] mm | « de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul | confirme |
+| developpes | [333, 400] mm | « de 33 » et « de 40 » chez VMZINC (écrit 33 / 40), RHEINZINK et Edilians (écrivent 333 / 400) ; la nantaise de 25 n'est plus au catalogue VMZINC 2026 ; la 50 (500 mm) est nouvelle chez VMZINC seul ; « de 33 » au comptoir = 333 mm sur les fiches fabricant (harmonisé le 20/11/2026, testeur-négoce) | confirme |
 
 - **VMZINC Gouttière nantaise (ou laval) de 33** (confirme_fabricant 1) : 
 - **VMZINC Gouttière nantaise (ou laval) de 40 et de 50** (confirme_fabricant 1) : 
@@ -923,7 +923,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 | seuil_de_pente_qui_change_le_recouvrement | 30 % | 30 % = 16,7° ; 10 cm strictement au-dessus, 20 cm à 30 % et en dessous | confirme |
 | consommation_d_ecran_par_m2_de_toiture | 1.15 m²/m² | plage 1,10 à 1,20 selon la pente (recouvrements compris) | une_source |
 | entraxe_maxi_des_chevrons_selon_la_classe_mecanique | 60 cm | TR1 45 cm, TR2 (« R2 ») 60 cm, TR3 (« R3 ») 90 cm | confirme |
-| mode_de_pose | None  | pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite | confirme |
+| mode_de_pose | pose tendue avec contre-lattage obligatoire ; pose en auget (non tendue) interdite  | selon la classe de l'écran (HPV R1 / R2 / R3) | confirme |
 
 
 ### écran souple à double bande adhésive intégrée
@@ -945,7 +945,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 - **Monier Spirtech 110** (une_source 1) : format_de_rouleau 150 m²
 - **Monier Divoroll Spirtech 200** (une_source 1) : 
 - **Monier Divoroll Spirtech 300** (une_source 1) : 
-- **Monier Divoroll Ecotech 200FR** (une_source 1) : rouleaux_par_palette 25 rouleaux
+- **Monier Divoroll Ecotech 200FR** (une_source 1) : rouleaux_par_palette 20 rouleaux
 - **Dörken DELTA-MAXX PLUS** (confirme_fabricant 2) : valeur_sd 0.17 m
 - **Dörken DELTA-XX PLUS UNIVERSAL** (confirme_fabricant 1) : 
 - **Dörken DELTA-FOXX PLUS** (confirme_fabricant 1) : 
@@ -1318,7 +1318,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 
 | Règle | Valeur | Condition | Statut |
 |---|---|---|---|
-| methode | ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus  |  | confirme |
+| methode | ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus  |  | une_source |
 
 
 ## Points du comptoir et situation exposée
@@ -1341,7 +1341,7 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 - **Toutes marques 35x25** (une_source 1) : ardoises_par_palette 800 u/palette
 - **Toutes marques 40x25** (une_source 1) : ardoises_par_palette 950 u/palette
 - **Toutes marques 46x30** (une_source 1) : ardoises_par_palette 700 u/palette
-- **Toutes marques 30x20** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques 30x20** (une_source 1) : ardoises_par_palette 1 800 à 2 000 u/palette
 - **Toutes marques 33x23** (a_confirmer 1) : ardoises_par_palette None u/palette
 - **Toutes marques 35x22** (a_confirmer 1) : ardoises_par_palette None u/palette
 - **Toutes marques 45x30** (a_confirmer 1) : ardoises_par_palette None u/palette
@@ -1645,6 +1645,343 @@ Taux de chiffres confirmés : **91.3 %**. Règle : confirme : deux sources indé
 | teintes | Cedral : anthracite (Kergoat), anthracite ou brun (Orléane), brun flammé (Pommay), gris / brun / rouge (Tecta) ; Cembrit : noir, brun  | le comptoir demande la gamme et la teinte | confirme |
 | liteaux_ml_par_m2 | 40×24 : 6,67 ; 60×30 : 4,00 ; 33×23 : 8,70 ; 45×30 : 5,71 ml/m² | recouvrement 100 mm : pureau = (longueur − 100) ÷ 2 ; liteaux = 1 ÷ pureau (une file par pureau) | confirme |
 
+
+## Accessoires de tuiles : chatières, rives, closoirs, mortier
+
+### chatière (tuile de ventilation)
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 3) : chatiere_reference 205.20 référence; chatiere_section_ventilation 50 cm² par tuile
+- **Edilians PV 10 Huguenot** (confirme_fabricant 3) : chatiere_reference 214.20 référence; chatiere_section_ventilation 50 cm² par tuile
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 3) : chatiere_reference 200.20 référence; chatiere_section_ventilation 19 cm² par tuile
+- **Koramic Actua** (confirme_fabricant 3) : chatiere_reference MACT 8640 (+ grille 6070272) référence; chatiere_section_ventilation 26 cm² par tuile
+- **Terreal Romane Canal** (confirme_fabricant 3) : chatiere_reference 610 RC référence; chatiere_section_ventilation 18 cm² par tuile
+- **Monier Signy** (confirme_fabricant 3) : chatiere_reference (pas de code sur la fiche) référence; chatiere_section_ventilation 33 cm² par tuile
+- **Toutes marques toutes tuiles** (confirme 1) : chatieres_nombre_total arrondi supérieur de (surface projetée × 1/5000 ou 1/3000) ÷ section de la chatière, la moitié en bas du versant, la moitié en haut formule
+
+### tuile à douille / sortie
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+
+### demi-tuile / ajustement
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+
+### tuile de rive
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+- **Toutes marques tuiles à emboîtement grand moule** (confirme 1) : 
+
+### faîtière / about / fronton
+
+- **Edilians HP 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians PV 10 Huguenot** (confirme_fabricant 1) : 
+- **Edilians Alpha 10 Ste Foy** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : 
+
+### coloris
+
+- **Terreal Romane Canal** (confirme_fabricant 1) : 
+- **Koramic Actua** (confirme_fabricant 1) : 
+- **Monier Signy** (confirme_fabricant 1) : coloris_restriction_accessoires rive universelle de 33 et about de rive de 33 : Rouge Vieilli uniquement texte
+- **Toutes marques HP 10, PV 10, Alpha 10, Actua, Signy, Romane Canal** (a_confirmer 1) : coloris_les_plus_vendus_en_bretagne None liste
+
+### closoir ventilé de faîtage / arêtier
+
+- **Toutes marques HP 10 Huguenot** (confirme 1) : 
+- **Toutes marques PV 10 Huguenot** (confirme 1) : 
+- **Toutes marques Alpha 10 Ste Foy** (confirme 1) : 
+- **Toutes marques Actua** (confirme 1) : 
+- **Toutes marques Signy** (confirme 1) : 
+- **Toutes marques Romane Canal** (confirme 1) : 
+- **Toutes marques closoir souple en rouleau de 5 m** (confirme 1) : rouleaux arrondi supérieur de (ml faîtage + ml arêtiers) ÷ 4,95 formule
+- **Edilians SIROKO+ (bavette plissée alu)** (une_source 1) : 
+- **Edilians SIROKO+** (une_source 1) : section_ventilation 150 à 200 cm²/ml
+- **Edilians ZEF (bavette alu)** (une_source 1) : 
+- **Edilians SHARK+ (rigide)** (une_source 1) : 
+- **Monier Figaroll Plus** (confirme 1) : 
+- **Terreal Lahe-Roll (alu)** (une_source 1) : 
+
+### mortier de faîtage scellé
+
+- **Toutes marques mortiers de couverture** (confirme 1, a_confirmer 1, une_source 1) : 
+- **Toutes marques sac de 25 kg** (confirme 1) : 
+- **Saint-Gobain Weber webercel tuile** (une_source 1) : rendement_sac 15 l de mortier par sac de 25 kg
+
+## Ardoises : carrières, palettes, faîtage breton, crochets
+
+### ardoise naturelle
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| selection_sur_palette | 1re sélection = D1 seules ; 2e sélection = D2 seules ; 3e sélection exclue de la marque NF ; seules les A1 T1 S1 (et W1) sont admises  | le niveau de sélection est obligatoirement écrit sur l'étiquette de palette (marque NF) | confirme |
+| tendance_regionale | Bretagne et Pyrénées : ardoises épaisses ; Val de Loire : 32×22 en 3,5 mm ; Pyrénées : 32×22 en 5 mm  | conseil de choix du fabricant (pas une règle) | une_source |
+
+- **Cupa Pizarras Cupa 3 (Solana de Forcadas, León)** (une_source 1) : 
+- **Cupa Pizarras Cupa 5 (Valdacal, Pusmazán, Ourense)** (une_source 1) : 
+- **Cupa Pizarras Cupa 12 (La Campa, Folgoso del Caurel, Lugo)** (une_source 1) : 
+- **Cupa Pizarras Cupa 30 (La Invencible-Proinor)** (une_source 1) : classement_nf_en_12326 W1 (0,22 %) T1 S1 ; NF 16/01 n° 37493
+- **Cupa Pizarras sélections Excellence / Ardoisier / Naturelle** (une_source 1) : 
+- **Cupa Pizarras 32×22** (confirme_fabricant 1) : poids_au_m2 26.9 kg/m2
+- **Cupa Pizarras Prestige 30×20 (Cupa 4 Armadilla), 3,8 mm** (une_source 1) : ardoises_par_palette 2000 u/palette
+- **Rathscheck Schiefer (InterSIN) SIN 240 (Rozadais III, Casayo)** (confirme 1) : 
+- **Rathscheck Schiefer Domaine / Renaissance (SIN 150, SIN 340)** (une_source 1) : garantie 30 ans
+- **Rathscheck Schiefer 32×22 Domaine / Renaissance (≈ 5 mm)** (confirme 1) : poids_au_m2 35.2 kg/m2
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 27×18** (confirme_fabricant 1) : ardoises_par_palette 1800 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 30×20** (confirme_fabricant 1) : ardoises_par_palette 1850 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 32×22** (confirme_fabricant 1) : ardoises_par_palette 1450 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 40×22** (confirme_fabricant 1) : ardoises_par_palette 1300 u/palette
+- **Rathscheck Schiefer Domaine / Renaissance SIN 150 et SIN 340 40×25** (confirme_fabricant 1) : ardoises_par_palette 850 u/palette
+- **Rathscheck Schiefer 40×22 et 40×25, 5 mm** (une_source 1) : 
+- **Pizarras La Baña (BAÑA) Élite / Supérieure / Classique / MH** (une_source 1) : 
+- **Ardoisières d'Angers (Imerys) Angers-Trélazé (H1, H2, Prieuré, Armor, Armen)** (confirme 1) : production arrêtée en mars 2014 (dernier site : les Fresnais) ; plus de production neuve, seulement stocks ou réemploi
+- **Toutes marques 27×18** (confirme_fabricant 2, une_source 1) : poids_unitaire 0.612 kg; poids_unitaire 0.68 kg
+- **Toutes marques 30×20** (confirme_fabricant 4, confirme 1) : poids_unitaire 0.756 kg; poids_unitaire 0.84 kg; poids_unitaire 1.176 kg; poids_unitaire 1.344 kg; ardoises_par_palette 1 800 à 2 000 u/palette
+- **Toutes marques 32×22** (confirme_fabricant 4, confirme 1) : poids_unitaire 0.887 kg; poids_unitaire 0.986 kg; poids_unitaire 1.38 kg; poids_unitaire 1.577 kg
+- **Toutes marques 33×23** (confirme_fabricant 4) : poids_unitaire 0.956 kg; poids_unitaire 1.063 kg; poids_unitaire 1.488 kg; poids_unitaire 1.7 kg
+- **Toutes marques 35×22** (confirme_fabricant 4) : poids_unitaire 0.97 kg; poids_unitaire 1.078 kg; poids_unitaire 1.509 kg; poids_unitaire 1.725 kg
+- **Toutes marques 40×20** (confirme_fabricant 4) : poids_unitaire 1.008 kg; poids_unitaire 1.12 kg; poids_unitaire 1.568 kg; poids_unitaire 1.792 kg
+- **Toutes marques 40×22** (a_confirmer 1, confirme_fabricant 3) : poids_unitaire 1.109 kg; poids_unitaire 1.232 kg; poids_unitaire 1.725 kg; poids_unitaire 1.971 kg
+- **Toutes marques 40×25** (confirme_fabricant 4) : poids_unitaire 1.26 kg; poids_unitaire 1.4 kg; poids_unitaire 1.96 kg; poids_unitaire 2.24 kg
+- **Toutes marques 46×30** (confirme_fabricant 3) : poids_unitaire 1.932 kg; poids_unitaire 2.705 kg; poids_unitaire 3.091 kg
+- **Toutes marques 50×25** (confirme_fabricant 3) : poids_unitaire 1.75 kg; poids_unitaire 2.45 kg; poids_unitaire 2.8 kg
+- **Toutes marques 60×30** (confirme_fabricant 3) : poids_unitaire 2.52 kg; poids_unitaire 3.528 kg; poids_unitaire 4.032 kg
+- **Toutes marques 32×22 (et 32,5×22 Angers H1)** (confirme 1) : poids_au_m2 34.7 kg/m2
+- **Toutes marques Ardoise d'Espagne 4A 32×22 A1 T1 S1** (une_source 1) : ardoises_par_palette 1900 u/palette
+- **Toutes marques 33×23, 35×25** (a_confirmer 1) : ardoises_par_palette None u/palette
+- **Toutes marques tous formats** (confirme 1) : poids_palette 1 130 à 1 660 kg
+
+### ardoise naturelle épaisse
+
+- **Cupa Pizarras Cupa Heavy 3** (une_source 1) : epaisseur_moyenne 7.5 mm
+- **Cupa Pizarras Heavy (7 à 8 mm), 32×22** (a_confirmer 1) : poids_au_m2 54 kg/m2
+
+### ardoise naturelle importée
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| classement_et_epaisseur | None  | aucune fiche de carrière brésilienne ou chinoise vendue en Bretagne trouvée ; le Brésil et la Chine exportent en Europe | a_confirmer |
+
+
+### ardoise naturelle (historique)
+
+- **Ardoisières d'Angers 32,5×22 H1** (une_source 1) : ardoises_par_palette 1800 u/palette
+- **Ardoisières d'Angers 30×20 12H1** (une_source 1) : ardoises_par_palette 1800 u/palette
+- **Ardoisières d'Angers 30×18 Grande Moyenne H1** (une_source 1) : ardoises_par_palette 2000 u/palette
+- **Ardoisières d'Angers 27×18 Moyenne H1** (une_source 1) : ardoises_par_palette 2000 u/palette
+- **Ardoisières d'Angers 27×16 Flamande H1** (une_source 1) : ardoises_par_palette 2500 u/palette
+- **Ardoisières d'Angers 30×20 12H2** (une_source 1) : ardoises_par_palette 1200 u/palette
+- **Ardoisières d'Angers 27×18 Moyenne H2** (une_source 1) : ardoises_par_palette 1600 u/palette
+
+### faîtage ardoise
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| fabricants_actifs | None  | anciens centres (Dol, Lannilis, Quimper, Lamballe, Guingamp…) disparus ; aucune faîtière bretonne actuelle trouvée ; Terreal : pas de faîtière propre à l'ardoise trouvée | a_confirmer |
+
+- **Edilians Faîtière Ardoise (réf. 720)** (une_source 2) : conditionnement 120 u/palette
+- **Edilians Faîtière Armor 33 (réf. 729)** (confirme 1) : conditionnement 184 u/palette
+- **Edilians faîtage simple à pinces / à ourlets** (une_source 1) : 
+- **Toutes marques lignolet** (confirme 1) : mise_en_oeuvre deux rangées d'ardoises superposées au faîte, celles du côté au vent débordant ; Morbihan et Finistère nord : ardoises triangulaires
+- **Toutes marques lignolet en 32×22** (a_confirmer 1) : ardoises_par_ml_de_faitage 9.0 ardoises/ml de faîtage (les deux versants)
+- **Toutes marques lignolet en 30×20** (a_confirmer 1) : ardoises_par_ml_de_faitage 9.9 ardoises/ml de faîtage (les deux versants)
+
+### crochet d'ardoise
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| correspondance_nuances | {'inox 17 %': 'X6Cr17 (AISI 430, ferritique, pas A2)', 'inox 18/10 = A2': 'X5CrNi18-10 (1.4301, AISI 304)', 'inox 316Ti = famille A4': 'X6CrNiMoTi17-12-2 (1.4571)'}  | le vendeur dit « 17 % », « 18/10 » ou « 316 » : A2 = 18/10, A4 = 316 / 316Ti | confirme |
+| nuance_selon_distance_mer | {'> 20 km, rural': '17 % admis', '3 à 20 km (marine)': '18/10 (A2) ; 17 % seulement par dérogation Frénéhard au-delà de 3 km en zone 2', '< 3 km': '316Ti (A4), 18/10 ou cuivre sur dérogation écrite du fabricant', 'front de mer (embruns)': "316Ti seul (Frénéhard admet l'Anjou Color 18/10)"}  | Bretagne : la plupart des communes côtières sont à moins de 20 km de la mer → au moins 18/10 | confirme |
+| part_crochets_pointe_bretagne | None fraction | pointe = voligeage (100 %), agrafe = liteaux ; règle de la base : 1/5 de pointes sur liteaux (une_source) | a_confirmer |
+
+- **Bati-Avenue (fabrication Frénéhard probable) CA Inox 18/10 agrafe A16, 10 cm et crosinus 12 cm, Ø 2,7** (confirme 1) : conditionnement 500 u/boîte
+
+### crochet d'ardoise teinté
+
+- **Frénéhard Anjou Color (inox 17 % ou 18/10 laqué)** (une_source 1) : conditionnement 403 à 1 300 u/boîte bois
+- **Frénéhard Anjou Color** (a_confirmer 1) : garantie 10 à 20 ans
+
+### clou d'ardoise
+
+- **Clouterie Rivierre pointe ardoise cuivre tête plate large 2,7 × 27 et 2,7 × 30** (une_source 1) : diametre_tete 7.6 mm
+- **Toutes marques cuivre 2,7 × 30 tête large** (a_confirmer 1) : clous_par_kg 572 u/kg
+- **Toutes marques inox A2 / A4 tête large 2,7 à 3,0 × 30** (a_confirmer 1) : clous_par_kg None u/kg
+- **PGB Europe (TEL D.1160B) cuivre Ø 2,5 / 2,8 / 3,0 × 25 à 65** (une_source 1) : conditionnement 5 kg
+
+## Fixations : pointes, clous d'ardoise, fixation des tuiles, cuvettes, chatières
+
+### pointes de liteaux
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pointes_par_croisement_liteau_chevron | 1 u | liteau de largeur ≤ 50 mm (18×38, 27×40, 25×27…), à chaque croisement liteau / chevron (ou contre-liteau) ; liteau sur 3 appuis au moins | confirme |
+| pointes_par_ml_de_liteau | 1 ÷ entraxe des chevrons (m) + 1 ÷ longueur d'un liteau (m) u/ml | une pointe par croisement + la pointe de l'about (liteaux aboutés sur chevron, joints décalés) ; ex. entraxe 0,50 m et liteaux de 4 m : 2,25 /ml ; entraxe 0,60 m : 1,92 /ml | confirme |
+| pointes_par_m2_de_toiture | (1 ÷ pureau en m) × (1 ÷ entraxe + 1 ÷ longueur de liteau) u/m² | ardoise pureau 0,115 m, liteaux de 4 m : 19,6 /m² (entraxe 0,50) ou 16,7 /m² (0,60) ; tuile pureau 0,34 m : 6,6 /m² (0,50) ou 5,6 /m² (0,60) ; m² en rampant | confirme |
+| diametre_minimal | 2.7 mm | pointes de fixation des liteaux et voliges sous ardoise (NF DTU 40.11 P1-2 §3.3.1.1) ; une pointe 2,0×45 ou 2,5×50 ne convient donc pas sous ardoise | une_source |
+| longueur_minimale | e ≤ 15 mm : 2,5 × e ; 15 < e ≤ 38 mm : 2 × e (e = épaisseur de la pièce fixée) mm | tableau de pose cité par Koramic (DTU 40.23, tableau 3) ; soit liteau 18 mm ≥ 36 mm, liteau ou contre-liteau 27 mm ≥ 54 mm | une_source |
+| epaisseur_maxi_a_fixer | {'2,5 x 50': 17, '2,8 x 60': 20, '3,1 x 70': 27, '3,1 x 80': 30, '3,6 x 90': 33} mm | pointe tête plate carré torsadée galvanisée à chaud (Alsafix TP CT HDG), selon la fiche fabricant | une_source |
+| pointe_conseillee | {'liteau 18×38 (ardoise, Bretagne)': '2,8 × 60 (2,7 × 60) galva', 'liteau 27×40 (tuile)': '3,1 × 70 galva', 'contre-liteau 27×38 (sur chevron)': '3,1 × 70 galva', 'volige 18 mm': '2,8 × 60 galva, 2 par chevron', 'volige 22 à 27 mm': '3,1 × 70 galva, 2 par chevron'} mm | ce qui respecte à la fois Ø ≥ 2,7 (DTU 40.11), longueur ≥ 2 × e (Koramic / DTU 40.23), ≥ 2,5 × e pour la volige (Ministère) et l'épaisseur à fixer Alsafix ; tige torsadée ou annelée conseillée (meilleure tenue) | confirme |
+| longueur_sur_contre_liteau | à confirmer : la pointe du liteau traverse-t-elle le contre-liteau jusqu'au chevron (27 + 27 mm → 3,1 × 80 ou 3,6 × 90) ou seulement le contre-liteau ? mm | pose avec écran sous-toiture (NF DTU 40.29) | a_confirmer |
+| types_de_tige_admis | lisse, crénelée (crantée), torsadée ou annelée ; annelée = « clou cranté » ; galvanisée ou inox (chêne, châtaignier : galva ou inox) texte | DTU 40.11 P1-2 §3.3.1.1 ; DTU 40.23 §3.3.1.1.1 (lisse, crantée, torsadée) ; NOTE DTU 40.23 : torsadées ou crantées tiennent mieux | confirme |
+
+
+### pointes de voliges
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pointes_par_chevron | 2 u | élément de plus de 50 mm de large (volige 100 à 200 mm, quelle que soit l'épaisseur) | confirme |
+| pointes_par_m2_de_toiture | 2 × (1 ÷ (largeur de volige + jeu) en m) × (1 ÷ entraxe des chevrons en m) u/m² | jeu entre voliges 5 à 10 mm (DTU 40.11 §4.2.1.1) ; volige 150 + 7 mm : 25,5 /m² (0,50) ou 21,2 /m² (0,60) ; volige 200 + 7 mm : 19,3 /m² (0,50) ou 16,1 /m² (0,60) ; + les pointes d'about | confirme |
+
+
+### pointes de contre-liteaux
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| espacement_des_pointes | non trouvé (pratique annoncée 1 pointe tous les 30 à 60 cm le long du chevron, sans source) cm | contre-liteau cloué dans l'axe du chevron | a_confirmer |
+
+
+### pointes (conditionnement)
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| pointes_par_kg | 510 u/kg | 2,5 × 50 galvanisée torsadée : ArcelorMittal Sitor 524 ; Alsafix CT HDG 500 (2 500 par boîte de 5 kg) ; tête plate lisse galva 2,4 × 50 : 473 | confirme |
+| pointes_par_kg | 335 u/kg | 2,8 × 60 galvanisée : Alsafix CT HDG 340 (1 700 / 5 kg) ; Alsafix TEL HDG 340 ; ArcelorMittal Sitor galva 2,85 × 60 : 336 ; tête plate galva 2,7 × 60 : 312 ; annelée inox 2,8/3,1 × 60 (Alsafix) : 282 | confirme |
+| pointes_par_kg | 230 u/kg | 3,1 × 70 galvanisée : Alsafix CT HDG 234 (1 170 / 5 kg) ; Alsafix TEL HDG 240 ; ArcelorMittal Sitor galva 3,2 × 70 : 228 ; tête plate galva 3,0 × 70 : 216 ; annelée inox 3,1/3,4 × 70 : 244 | confirme |
+| pointes_par_kg | 205 u/kg | 3,1 × 80 galvanisée : Alsafix CT HDG 210 (1 048 / 5 kg) ; ArcelorMittal Sitor galva 3,2 × 80 : 200 | confirme |
+| pointes_par_kg | non trouvé (2,0 × 35 galva tête plate : 974 /kg ; 2,0 × 45 estimé ≈ 750) u/kg | pointe trop fine pour liteaux et voliges sous ardoise (Ø < 2,7) | a_confirmer |
+| conditionnements | ['boîte ou carton de 1 kg', 'carton de 2,5 kg', 'boîte ou seau de 5 kg'] kg | pointes en vrac galvanisées : 5 kg pour les torsadées (1 kg sur demande chez ArcelorMittal) ; tête extra-large Alsafix en 1 / 2,5 / 5 kg ; annelées inox en 1 et 5 kg | confirme |
+| kg_pour_100_m2 | {'ardoise, liteau 18×38, pointe 2,8×60, entraxe 0,50': 5.9, 'ardoise, entraxe 0,60': 5.0, 'tuile pureau 0,34, liteau 27×40, pointe 3,1×70, entraxe 0,50': 2.9, 'tuile, entraxe 0,60': 2.4, 'volige 200 mm, pointe 3,1×70, entraxe 0,50': 8.4} kg | calcul : pointes/m² × 100 ÷ pointes/kg (335 pour 2,8×60, 230 pour 3,1×70) ; sans perte ; arrondir à la boîte (1, 2,5 ou 5 kg) | confirme |
+
+
+### clous d'ardoise naturelle
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| clous_par_ardoise_dernier_rang | 2 u | dernier rang sous le faîtage (rive de tête) : 2 clous au moins par ardoise, en pose au crochet comme au clou | confirme |
+| clous_par_ardoise_doublis | 2 u | doublis d'égout : 2 clous, pas de crochet | confirme |
+| clous_par_ardoise_premier_rang | 2 u | 1er rang d'égout : 2 clous (Ministère) ; CAPEB : crochet ET clous | confirme |
+| clous_par_ardoise_de_rive | 2 u | toutes les ardoises de rive latérale, entières et demies : 2 clous (DTU, rive gauche ; Ministère) ; CAPEB rive droite : demie = clou de tête + clou de milieu, entière = clou de tête + crochet | confirme |
+| clous_par_fendis | 1 u | fendis de noue en ardoise : 1 clou de tête ; pied de noue : 2 clous ; noquets : 2 clous | une_source |
+| nombre_de_clous | égout : 2 rangs (doublis + 1er rang) × (longueur d'égout ÷ largeur d'ardoise) × 2 ; faîtage : (longueur ÷ largeur) × 2 par versant ; rive : (rampant ÷ pureau) × 2 par rive ; pose au clou : 2 par ardoise u | pose au crochet en partie courante ; ex. ardoise 32×22, égout 10 m : 2 × 45,5 × 2 = 182 clous | confirme |
+| clous_par_kg | 665 u/kg | acier galvanisé tête extra-large : 2,7 × 30 = 653 (ArcelorMittal) ; 2,8 × 30 = 680 (Alsafix HDG) ; 2,4/2,5 × 27 : 919 / 880 | confirme |
+| clous_par_kg | {'3 × 30': 418, '3 × 35': 358, '3 × 27': 464} u/kg | cuivre carré cranté : 3 × 30 = 420 (ArcelorMittal) et 417 (Alsafix) ; 3 × 35 = 360 / 357 ; 3 × 27 = 464 (Alsafix) | confirme |
+| clous_par_kg | ≈ galva de même dimension (≈ 650 à 680 pour 2,7/2,8 × 30) u/kg | acier inoxydable : densité 7,9 contre 7,85, écart < 1 % | a_confirmer |
+| conditionnements | ['1 kg', '2,5 kg', '5 kg'] kg | galva TEL : cartons de 1, 2,5 et 5 kg (Alsafix) ; boîte de 5 kg (ArcelorMittal) ; cuivre : 5 kg (Alsafix, ArcelorMittal), 1 kg chez la clouterie Rivierre (ardoise.json) | confirme |
+
+
+### fixation des tuiles à emboîtement
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| tuiles_fixees_egout | toutes fraction | 1er rang d'égout, quelle que soit la région de vent (Edilians : crochet « PM » réf. CRP03) | confirme |
+| tuiles_fixees_rives | toutes fraction | tuiles de rive latérales et accessoires de rive : vis + rondelle d'étanchéité (Edilians) ; vissage ou clouage (Koramic) | confirme |
+| faitieres_fixees | toutes, 1 crochet ou clip par faîtière / arêtier (voir points-singuliers.json clip_faitiere_par_piece) u | faîtage à sec : crochet adapté vissé dans la lisse (Edilians) | confirme |
+| vis_par_tuile_de_rive | à confirmer (1 vis + rondelle supposée) u | tuile de rive individuelle ou rive universelle | a_confirmer |
+| tuiles_fixees_partie_courante_bretagne | {'22, 29, 56 (région de vent 3), sans écran, pente ≤ 100 %': {'site normal': '1 sur 3', 'site exposé': 'toutes'}, '22, 29, 56, sans écran, 100-175 %': {'site normal': '1 sur 2', 'site exposé': 'toutes'}, '22, 29, 56, avec écran, pente ≤ 175 %': {'site normal': '1 sur 5', 'site exposé': '1 sur 5'}, '35 (région 2), sans écran, ≤ 100 %': {'site normal': '1 sur 5', 'site exposé': '1 sur 3'}, '35, sans écran, 100-175 %': {'site normal': '1 sur 3', 'site exposé': 'toutes'}, '35, avec écran, ≤ 100 %': {'site normal': 'aucune', 'site exposé': '1 sur 5'}, '35, avec écran, 100-175 %': {'site normal': '1 sur 5', 'site exposé': '1 sur 5'}, 'toute la Bretagne, pente > 175 %': 'toutes'} fraction | bâtiment fermé, hauteur ≤ 15 m, crochetage ou pannetonnage ; tableau DTU 40.21 §5.4 lu chez Edilians et Koramic (tuiles-emboitement.json) appliqué aux régions de vent de regions.json ; Edilians conseille au moins 1 sur 5 partout | confirme |
+| nombre_de_fixations | arrondi_sup(tuiles de partie courante × fraction) + tuiles du 1er rang d'égout + tuiles de rive (vis) + 1 par faîtière / arêtier u | fraction : 1/5, 1/3, 1/2 ou 1 selon le tableau ; partie courante = total − égout − rives | confirme |
+| crochet_selon_section_de_liteau | {'25×27': 'Mono 14', '27×40': 'Mono 16', '40×40': 'Mono 17'} référence | crochet Mono Edilians (plain carré) ; Koramic : crochet de pannetonnage choisi selon la section, liteau ≤ 40 mm de large | une_source |
+| crochets_par_boite | 400 u/boîte | crochets inox Dimos (X-Tile, Croch'tuile) : 400 (Croch'tuile aussi en 203) ; crochet tuile canal Frénéhard : 400, 5,6 kg, 144 boîtes par palette | une_source |
+| vis_de_tuile | 4,5 × 45 ou 4,5 × 60 inox + rondelle EPDM mm | fixation au vissage (bardage vertical chez Koramic ; rives et forte pente chez Edilians, sans dimension) | une_source |
+
+
+### cuvette / boîte à eau
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| quand_en_mettre | une cuvette de branchement ou de face réunit deux descentes (ou deux gouttières) en une seule ; une boîte à eau reçoit l'eau d'un chéneau ou d'une sortie d'acrotère (toiture-terrasse), avec trop-plein ; une descente simple sous gouttière n'en a pas (naissance directe) texte | jamais calculée : une par point de jonction ou par sortie de chéneau, nombre dit par l'artisan (cohérent avec zinguerie.json cuvette_crapaudine) | confirme |
+| diametres_de_sortie | [80, 100, 120] mm | Ø 80 et 100 courants (Rheinzink boîte à eau, cuvettes zinc) ; Ø 120 en zinc et cuivre (edilians.eu) ; boîte à eau carrée 200 × 200 × 200 | confirme |
+| unite_de_vente | pièce (carton de 70 chez Rheinzink) u |  | une_source |
+
+
+### chatières
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| section_totale_de_ventilation | {"comble perdu, ou au-dessus d'un écran": '1/5000 de la surface projetée = 2 cm²/m²', "comble aménagé sans écran, ou sous l'écran": '1/3000 = 3,3 cm²/m²', 'écran non HPV ventilé': "1/5000 au-dessus + 1/3000 sous l'écran"} de la surface projetée | moitié en partie basse, moitié près du faîtage (DTU 40.11 §4.5.2, DTU 40.23 tableau 6) ; même règle déjà dans points-singuliers.json et accessoires-tuiles.json : rien ne change | confirme |
+| nombre_de_chatieres | arrondi_sup(surface projetée (m²) × 2 ou 3,3 cm²/m² ÷ section d'une chatière en cm²), arrondi au nombre pair (moitié en bas, moitié en haut) u | ex. 100 m² projetés, comble perdu, chatière 50 cm² (HP 10) : 200 ÷ 50 = 4 ; rampant isolé sans écran : 333 ÷ 50 = 7, porté à 8 pour répartir moitié / moitié | confirme |
+
+
+## Zinguerie et écrans : modèles et références du marché
+
+### zinc prépatiné
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| epaisseurs_vendues_en_prepatine_feuilles | {'VMZINC Quartz / Anthra': [0.65, 0.7, 0.8], 'VMZINC Pigmento': [0.7], 'RHEINZINK prePATINA clair / ardoise': [0.65, 0.7, 0.8, 1.0]} mm | 0,65 mm existe en prépatiné gris chez les deux fabricants ; un zinc « coloré » (Pigmento) est en 0,70 seulement | confirme |
+
+- **VMZINC QUARTZ-ZINC, ANTHRA-ZINC, PIGMENTO** (confirme_fabricant 1) : 
+- **VMZINC Feuilles 2000 × 1000 (et 650 / 800) prépatinées** (confirme_fabricant 1) : 
+- **VMZINC Bobineaux prépatinés** (confirme_fabricant 1) : 
+- **RHEINZINK prePATINA clair (blaugrau) et prePATINA ardoise (schiefergrau)** (confirme_fabricant 1) : 
+- **RHEINZINK Feuilles prePATINA clair / ardoise** (confirme_fabricant 1) : 
+- **RHEINZINK Bobineaux prePATINA clair / ardoise** (confirme_fabricant 1) : 
+
+### feuille de zinc
+
+- **Toutes marques Feuille naturel 2000 × 1000** (confirme_fabricant 1) : 
+
+### crochet de gouttière
+
+- **VMZINC Gouttières demi-rondes 25 / 33 (sans pince)** (confirme_fabricant 1) : crochets_fournis_par_vmzinc aucun crochet standard ; seulement le crochet discret PLUVIAZINC pour gouttière à pince (25 : 100, 33 : 50 par carton) texte
+- **RHEINZINK Crochets de gouttière (gamme complète)** (confirme_fabricant 1) : 
+
+### crochet de gouttière rampante
+
+- **Toutes marques Crochets nantais / havrais** (une_source 1) : ecartement_maximal 0.5 m
+
+### cuvette
+
+- **VMZINC Cuvettes (branchement, carrées, ½ rondes de face et d'angle, « Nice »)** (confirme_fabricant 1) : 
+- **RHEINZINK Cuvettes de branchement, ½ rondes mini, moulurées d'angle** (confirme_fabricant 1) : 
+- **Toutes marques Cuvette de branchement zinc** (confirme 1) : 
+
+### manchon de descente
+
+- **VMZINC Manchon pour tuyau cylindrique** (confirme_fabricant 1) : 
+
+### coude de descente
+
+- **Toutes marques Coudes zinc** (confirme 1) : coude_a_67_en_zinc aucun texte
+
+### équerre (angle) de gouttière
+
+| Règle | Valeur | Condition | Statut |
+|---|---|---|---|
+| equerre_zinc_demi_ronde_a_135_vendue_toute_faite | non trouvée  | deuxième recherche (VMZINC 2026, RHEINZINK 2026 : équerres embouties et soudées ext. / int. sans autre angle ; recherche web) : seuls existent un angle 135° PVC Nicoll LG25 et un angle acier (Suède) | a_confirmer |
+
+
+### écran HPV
+
+- **Dörken DELTA-VENT S / DELTA-VENT S PLUS** (une_source 1) : 
+- **Dörken DELTA-XX PLUS LIGHT** (confirme_fabricant 1) : 
+- **DuPont Tyvek Tyvek Toiture 60 / Toiture 60 Tape** (une_source 1) : 
+- **DuPont Tyvek Tyvek Toiture 90** (une_source 1) : 
+- **DuPont Tyvek Tyvek Supro** (a_confirmer 1) : disponibilite_en_france non vendu sous ce nom en France
+- **Monier Divoroll Ecotech 200FR** (confirme 1) : 
+- **Siplast (BMI) —** (une_source 1) : ecran_de_sous_toiture_sous_la_marque_siplast aucun trouvé
+- **Terreal ESTERRE 150 HPV** (une_source 1) : 
+- **Terreal ESTERRE 160 HPV** (une_source 1) : 
+- **Atout Pro (marque Samse) Écran de sous-toiture HPV R3** (une_source 1) : 
+
+### écran HPV / pare-pluie
+
+- **Dörken DELTA-VENT N / DELTA-VENT N PLUS** (une_source 1) : 
 
 ## Sous-faces et habillages de débord
 

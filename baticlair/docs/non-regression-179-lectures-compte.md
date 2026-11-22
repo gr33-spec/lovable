@@ -25,5 +25,5 @@ Généré par `packages/domain/test/banc-179-lectures.test.ts` (`npx vitest run 
 | roofing | 153 | 460 | 223 | 230 | 7 | 297 | 7 |
 | solar | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
 | tiling | 2 | 5 | 5 | 0 | 0 | 0 | 0 |
-| waterproofing | 1 | 1 | 1 | 0 | 0 | 0 | 0 |
-| **Tous** | 179 | 526 | 283 | 236 | 7 | 303 | 7 |
+| waterproofing | 2 | 3 | 2 | 1 | 0 | 1 | 0 |
+| **Tous** | 180 | 528 | 284 | 237 | 7 | 304 | 7 |

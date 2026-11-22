@@ -1,5 +1,10 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-74 — Fusion de la branche de test (suggestions sans limite, pointes de liteaux, fixations) dans le banc du calcul (2026-11-22)
+
+- Réunit la fiche `roofing-2026.11.22-73` (banc du calcul) et la fiche `roofing-2026.11.20-63` de la branche de test : leurs
+  deux suites de changements, sans en retirer aucun. La numérotation reprend après la plus haute (73).
+
 ## roofing-2026.11.22-73 — Ardoise fibres-ciment 40×24 : 27,1 au m² ; deux lignes qui ne disent pas la même surface (2026-11-22)
 
 Le banc du calcul passe de 94 à 96 lignes justes sur 99 (97 %).
@@ -137,6 +142,26 @@ Le banc du calcul (`packages/domain/test/banc-couverture.test.ts`, 15 chantiers 
 - La quantité d'une ligne qui mesure l'ouvrage (30 ml d'arêtier) n'est jamais remplacée par un détail du texte (« 4 arêtiers de 7,50 m »).
 - Le format ou la référence du modèle écrits dans la désignation du devis (« 32×22 », « HP 10 ») sont lus même quand le code renomme l'article.
 - Les chantiers déjà calculés gardent leur version figée : rien n'y change.
+## roofing-2026.11.20-63 — Suggestions : sans limite de nombre
+
+- **§49.1 point 5, Règle changée** : l'étape « Suggestions » propose tous les oublis probables de la fiche et tous les
+  consommables liés aux lignes écrites, sans limite de nombre (skill du fondateur, 18/11/2026 : « toutes les cases
+  décochées au départ, sans limite de nombre »). Avant : cinq au plus (`SUGGESTIONS_MAX`), au-delà les derniers n'étaient
+  pas proposés. D-2026-020 : les pattes de fixation (faîtage zinc) sont maintenant proposées (6 cases au lieu de 5).
+- **§11 Fenêtres de toit, Suggestions** (skill du fondateur, 18/11/2026 : « En Suggestion : kit d'isolation (BDX),
+  pare-vapeur (BBX), volet roulant, store, habillage intérieur ») : six cases proposées quand une fenêtre de toit est
+  écrite, la collerette d'écran (BFX) en plus (vendue à part du raccord, tarif Velux France 2024, recherche du
+  20/11/2026). Cochées : un par fenêtre, à sa taille (« Kits d'isolation (type BDX), fenêtre 78 × 98 »). Avant : rien.
+- **Rives, dauphins, jonctions, Suggestions** (skill du fondateur : « rive absente du devis : d'abord en Suggestion » ;
+  « Dauphin, cuvette (boîte à eau), jonctions : en Suggestion ») : tuiles de rive (emboîtement), bardelis (canal),
+  dauphins (descentes), jonctions (gouttière PVC ou alu) proposés en cases quand le devis ne les écrit pas. Une case
+  cochée tranche ce qu'elle dit (`suggested.vaut`) : « Dauphins » coché vaut « oui », la question « Un dauphin en pied
+  de chaque descente ? » ne se pose plus. Avant : jamais proposés. Cuvette : pas encore d'article au tiroir.
+- **Pointes de liteaux, Suggestions** (skill du fondateur : « Pointes pour liteaux, contre-liteaux et voliges : en
+  Suggestion ») : proposées sur l'ardoise au crochet et la tuile à emboîtement. Cochées : une pointe par croisement
+  liteau / chevron plus une par bout de liteau de 4 m (NF DTU 40.11 §4.2.1.4, DTU 40.21, Koramic, guide du ministère de
+  la Culture), en boîtes de 1 kg : 2,8 × 60 sous ardoise (≈ 335 au kg), 3,1 × 70 sous tuile (≈ 230 au kg) (Alsafix,
+  ArcelorMittal). Avant : rien. Contre-liteaux et voliges : pas encore.
 
 ## roofing-2026.11.20-62 — Tasseaux sourcés, chéneau encaissé, questions décidées par le code (Greg, 2026-11-20, devis D-2026-024)
 

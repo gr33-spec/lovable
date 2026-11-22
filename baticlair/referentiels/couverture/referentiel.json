@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-73",
+  "version": "roofing-2026.11.22-74",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -126,6 +126,21 @@
       "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       "retrievedAt": "2026-10-04",
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
+    },
+    {
+      "id": "recherche-fixations-2026-11-20",
+      "kind": "manufacturer",
+      "title": "Pointes de liteaux : une par croisement avec le chevron (NF DTU 40.11 §4.2.1.4, DTU 40.21, Koramic, guide du ministère de la Culture) ; pointes au kg (Alsafix, ArcelorMittal)",
+      "documentRef": "referentiels/couverture/recherche/fixations.json",
+      "retrievedAt": "2026-11-20"
+    },
+    {
+      "id": "fondateur-skill-regles-metier-2026-11-18",
+      "kind": "trade_practice",
+      "title": "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
+      "documentRef": ".claude/skills/regles-metier/SKILL.md (§ Velux, § Oublis probables)",
+      "retrievedAt": "2026-11-18",
+      "note": "« En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur. » Un par fenêtre, à sa taille ; la collerette d'écran (BFX) ajoutée d'après le tarif Velux France 2024 (vendue à part du raccord), recherche du 20/11/2026."
     },
     {
       "id": "fondateur-reponses-2026-11-18",
@@ -1288,6 +1303,55 @@
         ],
         "answered": "\\b\\d{2,3} ?[x×*] ?\\d{2,3}\\b|\\b[a-z]k ?\\d{2}\\b"
       }
+    },
+    {
+      "code": "roof_window_insulation",
+      "label": "Kit d'isolation de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_vapour",
+      "label": "Pare-vapeur de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_collar",
+      "label": "Collerette d'écran de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_shutter",
+      "label": "Volet roulant de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_blind",
+      "label": "Store de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "roof_window_lining",
+      "label": "Habillage intérieur de fenêtre de toit",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "batten_nail",
+      "label": "Pointes de liteaux",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
     },
     {
       "code": "roof_window_flashing",
@@ -4858,6 +4922,256 @@
       ]
     },
     {
+      "id": "kit-isolation-fenetre",
+      "family": "roof_window_insulation",
+      "label": "Kit d'isolation de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Kits d'isolation (type BDX)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pare-vapeur-fenetre",
+      "family": "roof_window_vapour",
+      "label": "Pare-vapeur de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Pare-vapeur de fenêtre (type BBX)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "collerette-ecran-fenetre",
+      "family": "roof_window_collar",
+      "label": "Collerette d'écran de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Collerettes d'écran (type BFX)",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "volet-fenetre-toit",
+      "family": "roof_window_shutter",
+      "label": "Volet roulant de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Volets roulants de fenêtre de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "store-fenetre-toit",
+      "family": "roof_window_blind",
+      "label": "Store de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Stores de fenêtre de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "habillage-fenetre-toit",
+      "family": "roof_window_lining",
+      "label": "Habillage intérieur de fenêtre de toit, à la taille de la fenêtre",
+      "shortLabel": "Habillages intérieurs de fenêtre de toit",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pointes-liteau-28x60",
+      "family": "batten_nail",
+      "label": "Pointes galva annelées 2,8 × 60 pour liteaux, boîte de 1 kg",
+      "shortLabel": "Pointes galva 2,8 × 60",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "335",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "2,8 × 60 : ≈ 335 pointes au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "pointes-liteau-31x70",
+      "family": "batten_nail",
+      "label": "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg",
+      "shortLabel": "Pointes galva 3,1 × 70",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "230",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "raccord-fenetre-toit",
       "family": "roof_window_flashing",
       "label": "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre",
@@ -6364,6 +6678,19 @@
           }
         },
         {
+          "key": "pointe",
+          "family": "batten_nail",
+          "label": "Pointes de liteaux",
+          "usual": {
+            "text": "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "pointes-liteau-31x70"
+          },
+          "suggested": {
+            "label": "Pointes pour liteaux"
+          }
+        },
+        {
           "key": "rive",
           "family": "verge_tile",
           "label": "Tuiles de rive",
@@ -6374,6 +6701,9 @@
             "text": "Tuile de rive du modèle de tuile posé.",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "tuile-rive-standard"
+          },
+          "suggested": {
+            "label": "Tuiles de rive"
           }
         },
         {
@@ -6417,6 +6747,19 @@
         }
       ],
       "constants": {
+        "liteau_vendu": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "m",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "label": "liteau de {v} : une pointe de plus à chaque bout"
+        },
         "seuil_pente_ecran": {
           "kind": "installation_condition",
           "value": "16.7",
@@ -6503,6 +6846,22 @@
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "pointes-liteaux",
+          "slot": "pointe",
+          "formula": "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          "unit": "u",
+          "core": false,
+          "precision": "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          "exclusions": "Pointes de contre-liteaux et de voliges à part.",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
           },
           "version": 1
         },
@@ -6728,6 +7087,9 @@
             "text": "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "bardelis-standard"
+          },
+          "suggested": {
+            "label": "Bardelis (tuiles de rive)"
           }
         },
         {
@@ -7531,6 +7893,19 @@
           }
         },
         {
+          "key": "pointe",
+          "family": "batten_nail",
+          "label": "Pointes de liteaux",
+          "usual": {
+            "text": "Une pointe par croisement liteau / chevron (NF DTU 40.11).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "pointes-liteau-28x60"
+          },
+          "suggested": {
+            "label": "Pointes pour liteaux"
+          }
+        },
+        {
           "key": "sortie_ventilation",
           "family": "outlet_vent",
           "label": "Sortie de ventilation",
@@ -7549,6 +7924,19 @@
         }
       ],
       "constants": {
+        "liteau_vendu": {
+          "kind": "installation_condition",
+          "value": "4",
+          "unit": "m",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "label": "liteau de {v} : une pointe de plus à chaque bout"
+        },
         "seuil_pente_ecran": {
           "kind": "installation_condition",
           "value": "16.7",
@@ -9395,6 +9783,22 @@
           "version": 1
         },
         {
+          "id": "pointes-liteaux",
+          "slot": "pointe",
+          "formula": "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          "unit": "u",
+          "core": false,
+          "precision": "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          "exclusions": "Pointes de contre-liteaux et de voliges à part.",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1
+        },
+        {
           "id": "contre-liteaux-ardoise",
           "slot": "contre_liteau",
           "formula": "surface / entraxe_supports",
@@ -9619,6 +10023,9 @@
             "text": "Deux clous inox par ardoise (§4).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "clou-ardoise-fc"
+          },
+          "suggested": {
+            "label": "Clous d'ardoise fibres-ciment"
           }
         },
         {
@@ -12534,6 +12941,84 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "raccord-fenetre-toit"
           }
+        },
+        {
+          "key": "isolation",
+          "family": "roof_window_insulation",
+          "label": "Kits d'isolation (type BDX)",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "kit-isolation-fenetre"
+          },
+          "suggested": {
+            "label": "Kits d'isolation de fenêtre de toit (type BDX)"
+          }
+        },
+        {
+          "key": "pare_vapeur",
+          "family": "roof_window_vapour",
+          "label": "Pare-vapeur de fenêtre (type BBX)",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "pare-vapeur-fenetre"
+          },
+          "suggested": {
+            "label": "Pare-vapeur de fenêtre de toit (type BBX)"
+          }
+        },
+        {
+          "key": "collerette",
+          "family": "roof_window_collar",
+          "label": "Collerettes d'écran (type BFX)",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "collerette-ecran-fenetre"
+          },
+          "suggested": {
+            "label": "Collerettes d'écran de fenêtre de toit (type BFX)"
+          }
+        },
+        {
+          "key": "volet",
+          "family": "roof_window_shutter",
+          "label": "Volets roulants de fenêtre de toit",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "volet-fenetre-toit"
+          },
+          "suggested": {
+            "label": "Volets roulants de fenêtre de toit"
+          }
+        },
+        {
+          "key": "store",
+          "family": "roof_window_blind",
+          "label": "Stores de fenêtre de toit",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "store-fenetre-toit"
+          },
+          "suggested": {
+            "label": "Stores de fenêtre de toit"
+          }
+        },
+        {
+          "key": "habillage",
+          "family": "roof_window_lining",
+          "label": "Habillages intérieurs de fenêtre de toit",
+          "usual": {
+            "text": "Un par fenêtre, à sa taille (skill du fondateur).",
+            "source": "fondateur-skill-regles-metier-2026-11-18",
+            "productId": "habillage-fenetre-toit"
+          },
+          "suggested": {
+            "label": "Habillages intérieurs de fenêtre de toit"
+          }
         }
       ],
       "constants": {},
@@ -12555,6 +13040,102 @@
             "verifiedAt": "2026-10-03",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "kit-isolation-fenetre",
+          "slot": "isolation",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Kits d'isolation (type BDX), {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "pare-vapeur-fenetre",
+          "slot": "pare_vapeur",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Pare-vapeur de fenêtre (type BBX), {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "collerette-ecran-fenetre",
+          "slot": "collerette",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Collerettes d'écran (type BFX), {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "volet-fenetre-toit",
+          "slot": "volet",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Volets roulants de fenêtre de toit, {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "store-fenetre-toit",
+          "slot": "store",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Stores de fenêtre de toit, {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
+          },
+          "version": 1
+        },
+        {
+          "id": "habillage-fenetre-toit",
+          "slot": "habillage",
+          "formula": "nb_fenetres",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un par fenêtre, à la taille de la fenêtre.",
+          "designation": "Habillages intérieurs de fenêtre de toit, {taille_fenetre}",
+          "source": "fondateur-skill-regles-metier-2026-11-18",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-18",
+            "verifiedBy": "Fondateur (couvreur), interview du skill regles-metier"
           },
           "version": 1
         }
@@ -20018,6 +20599,9 @@
             "text": "Une jonction entre deux longueurs (§15).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "jonction-gouttiere"
+          },
+          "suggested": {
+            "label": "Jonctions de gouttière"
           }
         },
         {
@@ -20595,6 +21179,12 @@
             "text": "Un dauphin par descente, 1 m (§15).",
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "dauphin-standard"
+          },
+          "suggested": {
+            "label": "Dauphins (pied de descente)",
+            "vaut": {
+              "dauphin": "1"
+            }
           }
         }
       ],

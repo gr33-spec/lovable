@@ -91,21 +91,19 @@ test("À faire (Greg, 6 novembre 2026 ; UX simplifiée du 8 novembre) : un seul 
   await expect(page.getByRole("heading", { name: "Bonjour Jean", level: 1 })).toBeVisible();
   // Seulement des actions : ni « Commencer » ni « Suivi en cours » (le suivi vit dans Demandes et Groupes).
   await expect(page.getByText(/Achète en groupe, paie moins cher|Par où commencer \?|Mes listes et chantiers|Achats groupés près de chez toi/)).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "À faire maintenant", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("region", { name: /^(Commencer|Suivi en cours)$/ })).toHaveCount(0);
-  // RÈGLE CHANGÉE (Greg, 7 novembre 2026) : « Aucun besoin en cours », puis des actions écrites en toutes lettres.
-  // UX simplifiée (Greg, 8 novembre 2026) : UN bouton principal, « Créer un quantitatif » ; rien d'autre que ce qui attend.
-  await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
-  for (const t of ["Achat individuel", "Achats groupés"]) await expect(page.getByRole("main").getByRole("heading", { name: t, exact: true })).toHaveCount(0);
+  // Accueil premium (Greg, 20 novembre 2026) : sans dossier, pas de « Mon activité » ; UN bouton jaune, « Nouveau quantitatif ».
+  await expect(page.getByRole("region", { name: "Mon activité", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: /^(À faire maintenant|Commencer|Suivi en cours)$/ })).toHaveCount(0);
+  await expect(page.getByRole("main").getByRole("heading", { name: "Achat individuel", exact: true })).toHaveCount(0);
   await expect(page.getByRole("main").getByRole("link", { name: /^Ajouter un matériau|^Depuis un quantitatif|^Mes besoins groupés/ })).toHaveCount(0);
   const vide = page.getByRole("main");
-  await expect(vide.getByRole("link", { name: /^Créer un quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
+  await expect(vide.getByRole("link", { name: "Nouveau quantitatif", exact: true })).toHaveAttribute("href", "/chantiers/nouveau");
   // Un seul départ, un seul nom (revue UX, 8 novembre 2026) : la carte de l'écran vide, le bouton de Demandes et, sur
   // ordinateur, celui de la colonne. Sur téléphone, la barre du bas ne porte plus de bouton de création.
   const nav = page.getByRole("navigation", { name: "Navigation principale" });
   if (info.project.name === "telephone") await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveCount(0);
   else await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
-  await vide.getByRole("link", { name: /^Créer un quantitatif/ }).click();
+  await vide.getByRole("link", { name: "Nouveau quantitatif", exact: true }).click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau$/);
   // Direction A (Greg, 12 novembre 2026) : le départ est le choix, « Je saisis ma liste » ou « Mobiiz m'aide ».
   await expect(page.getByRole("heading", { name: "Nouveau quantitatif" })).toBeVisible();
@@ -116,7 +114,7 @@ test("À faire (Greg, 6 novembre 2026 ; UX simplifiée du 8 novembre) : un seul 
   // Téléphone : l'écran vide se lit au-dessus de la barre du menu.
   if (info.project.name === "telephone") {
     await page.goto("/");
-    const fin = page.getByText("Rien à faire pour le moment.");
+    const fin = page.getByRole("region", { name: "Nouveau quantitatif" }).getByRole("link", { name: "Nouveau quantitatif", exact: true });
     await fin.scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     const [b, n] = [await fin.boundingBox(), await nav.boundingBox()];
@@ -139,39 +137,38 @@ test("Accueil : plusieurs brouillons, le plus récent d'abord ; « Voir 1 autre 
   await ecran.getByRole("button", { name: "Ajouter à la sélection" }).click();
   await page.waitForTimeout(800);
   await page.goto("/");
-  const afaire = page.getByRole("region", { name: "À faire maintenant", exact: true });
+  // Accueil premium (20 novembre 2026) : « Mon activité », le plus récent d'abord ; chaque dossier a sa carte, entière cliquable.
+  const afaire = page.getByRole("region", { name: "Mon activité", exact: true });
   await expect(afaire).toBeVisible();
-  const premiere = afaire.getByRole("link").first();
-  await expect(premiere).toContainText("Brouillon");
-  await expect(premiere).toContainText("Terminer ta liste");
+  const premiere = afaire.getByRole("link", { name: /^Continuer/ }).first();
+  await expect(premiere).toContainText("À terminer");
+  await expect(premiere).toContainText("Quantitatif");
   await expect(premiere).toContainText("Ta liste · 1 matériau");
-  // Capture 01 (Greg, 10 novembre 2026) : la carte entière reprend la saisie, sans bouton « Continuer » dedans.
-  await expect(afaire.getByRole("link")).toHaveCount(1);
-  await afaire.getByRole("button", { name: "Voir 1 autre brouillon" }).click();
-  await expect(afaire.getByRole("link", { name: /^Terminer ton achat groupé/ })).toBeVisible();
+  await expect(afaire.getByRole("link", { name: /^Continuer : Achat groupé, .*À terminer$/ })).toBeVisible();
   await premiere.click();
   await expect(page).toHaveURL(/\/chantiers\/nouveau\?liste=1$/);
   await expect(page.getByRole("dialog", { name: "Saisir ma liste" }).getByRole("region", { name: "Ma liste en cours" }).getByLabel("Désignation")).toHaveValue("Liteaux 27×38 maison");
 });
 
-test("À faire : une demande envoyée sans réponse n'y est pas ; la réponse reçue passe « À faire maintenant » ; rien ne part depuis l'accueil", async ({ page }) => {
+test("Mon activité : une demande envoyée se suit, la réponse reçue passe en tête, une seule carte ; rien ne part depuis l'accueil", async ({ page }) => {
   await inscrire(page);
   const { projectId, recipientId } = await demandeEnvoyee(page, "Maison Dupont");
   const demandes = async () => (await apiJson<{ items: { recipients: unknown[] }[] }>(page, "GET", `/v1/projects/${projectId}/price-requests`)).body.items;
   const avant = JSON.stringify(await demandes());
   await page.goto("/");
-  await expect(page.getByText("Rien à faire pour le moment.")).toBeVisible();
-  await expect(page.getByRole("region", { name: "À faire maintenant", exact: true })).toHaveCount(0);
+  // Accueil premium (20 novembre 2026) : la demande partie se suit dans « Mon activité », sans action pressante.
+  const afaire = page.getByRole("region", { name: "Mon activité", exact: true });
+  await expect(afaire.getByRole("listitem").first().getByRole("link")).toContainText("Envoyée à 1 négoce, en attente");
 
   await reponseRecue(page, recipientId);
   await page.goto("/");
-  const afaire = page.getByRole("region", { name: "À faire maintenant", exact: true });
-  await expect(afaire.getByRole("link").first()).toContainText("Voir les réponses de tes négoces");
-  await expect(afaire.getByRole("link").first()).toContainText("Maison Dupont");
-  await expect(page.getByText("Rien à faire pour le moment.")).toHaveCount(0);
+  await expect(afaire.getByRole("listitem").first().getByRole("link")).toContainText("1 réponse reçue");
+  await expect(afaire.getByRole("listitem").first().getByRole("link")).toContainText("Maison Dupont");
+  // Un dossier, une carte : jamais la même demande deux fois.
+  await expect(afaire.getByText("Maison Dupont")).toHaveCount(1);
   // Ouvrir l'accueil ne déclenche aucun envoi : la demande est la même qu'avant.
   expect(JSON.stringify((await demandes()).map((d) => ({ ...d, recipients: d.recipients.length })))).toBe(JSON.stringify(JSON.parse(avant).map((d: { recipients: unknown[] }) => ({ ...d, recipients: d.recipients.length }))));
-  await afaire.getByRole("link").first().click();
+  await afaire.getByRole("listitem").first().getByRole("link").click();
   await expect(page).toHaveURL(new RegExp(`/chantiers/${projectId}`));
 });
 
@@ -281,8 +278,8 @@ test("Mes listes : une liste envoyée ne se supprime pas (raison dite) ; « Sél
 
 test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des cartes se lisent (contraste AA)", async ({ page }) => {
   await inscrire(page);
-  // « À faire » vide d'abord (« Créer un quantitatif »), puis la liste créée pour « Mes demandes ».
-  for (const [url, texte, theme] of [["/", "Créer un quantitatif", "sombre"], ["/", "Créer un quantitatif", "clair"], ["/chantiers?vue=suivi", "Liste du thème", "sombre"], ["/chantiers?vue=suivi", "Liste du thème", "clair"]] as const) {
+  // L'accueil d'un nouveau compte d'abord (« Mon premier quantitatif »), puis la liste créée pour « Mes demandes ».
+  for (const [url, texte, theme] of [["/", "Faire mon premier quantitatif", "sombre"], ["/", "Faire mon premier quantitatif", "clair"], ["/chantiers?vue=suivi", "Liste du thème", "sombre"], ["/chantiers?vue=suivi", "Liste du thème", "clair"]] as const) {
     if (url !== "/" && theme === "sombre") await liste(page, "Liste du thème");
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     {

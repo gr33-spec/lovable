@@ -1,0 +1,89 @@
+{
+ "devis": [
+  {
+   "ref": "1",
+   "designation": "Étanchéité toiture terrasse bicouche SBS autoprotégée",
+   "quantity": "48",
+   "unit": "m²"
+  },
+  {
+   "ref": "2",
+   "designation": "Isolant PIR ep 100 mm",
+   "quantity": "48",
+   "unit": "m²"
+  }
+ ],
+ "lecture": {
+  "fiche": {
+   "donnees": []
+  },
+  "bref": [],
+  "questions": [
+   {
+    "cle": "format_pir",
+    "texte": "Isolant PIR : panneaux de quel format ?",
+    "boutons": [
+     {
+      "label": "1 200 × 600",
+      "valeur": "1"
+     },
+     {
+      "label": "1 200 × 1 000",
+      "valeur": "2"
+     }
+    ],
+    "unite": "u",
+    "donnee": "format du panneau PIR",
+    "ligne": "2"
+   }
+  ],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Étanchéité toiture terrasse bicouche SBS autoprotégée",
+    "quantite": "48",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Étanchéité toiture terrasse bicouche SBS autoprotégée",
+      "quantite": "48",
+      "unite": "m²",
+      "ouvrage": "terrasse-bitume",
+      "emplacement": "terrasse",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "2",
+    "designation": "Isolant PIR ep 100 mm",
+    "quantite": "48",
+    "unite": "m²",
+    "role": "fourniture",
+    "fournitures": [
+     {
+      "nom": "Isolant PIR ep 100 mm",
+      "quantite": "48",
+      "unite": "m²",
+      "ouvrage": "terrasse-bitume",
+      "emplacement": "isolant",
+      "donnees": {
+       "epaisseur_isolant": "100 mm"
+      },
+      "attend": [
+       "format_pir"
+      ],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   }
+  ],
+  "contexte": null,
+  "notes": []
+ }
+}
