@@ -73,7 +73,15 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## DERNIER ÉTAT (22 novembre) : fiche `roofing-2026.11.22-73` poussée sur ma branche
+## DERNIER ÉTAT (22 novembre, après-midi) : fiche `roofing-2026.11.22-74` (fusion de la branche de test)
+- Avant fusion, chaîne COMPLÈTE VERTE sur la -73 : moteur 1313, serveur 921, site construit, parcours 354 (ordinateur +
+  téléphone), 0 échec.
+- Fusion de `claude/saas-achat-artisans-prompt-1lyihx` (23 commits : suggestions sans limite, pointes de liteaux, fixations,
+  kits Velux, dauphins, tuiles de rive en suggestion, accueil premium) dans ma branche. Conflits réglés en gardant les deux
+  côtés. Moteur 1331 verts, banc 96 sur 99 inchangé. Chaîne complète relancée sur le code fusionné (résultat à lire).
+- Rien sur la branche de test ni sur test.mobiiz.fr : rapport à Greg d'abord.
+
+## État précédent (22 novembre) : fiche -73
 - **Banc : 96 sur 99 (97 %)** : entraînement 61/64 (95,3 %), examen 35/35. Objectif de 95 % atteint (une ligne « incertaine »
   hors compte : crochets à pointe de C11). Moteur 1312 verts.
 - Fiche -73 : fibres-ciment 40×24 à 27,1 au m² (Cedral + Cembrit) ; deux lignes d'un même ouvrage qui n'écrivent pas la même
