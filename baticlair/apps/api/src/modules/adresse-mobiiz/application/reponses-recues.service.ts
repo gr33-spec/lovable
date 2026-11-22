@@ -1,4 +1,5 @@
-import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur } from "@baticlair/domain";
+import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur, objetAvecRepere } from "@baticlair/domain";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import { alertePropositionNegoce, BANDEAU_EXTERNE, liensDesactives, objetExterne } from "@baticlair/domain";
 import { expediteurExterne, ligneExterne, verdictDuRecu } from "../../../platform/email/contact-entrant.js";
 import type { JournalEntrants } from "../../../platform/email/journal-entrants.js";
@@ -42,6 +43,8 @@ export interface EmailRecuVue {
   demande: { recipientId: string; projectId: string; negoce: string; chantier: string } | null;
   fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
   tropLourdes: string[];
+  /** Rangé dans les Indésirables (Greg, 22 novembre 2026). */
+  indesirable: boolean;
 }
 
 type Evenement = { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string };
@@ -65,6 +68,8 @@ export class ReponsesRecuesService {
     private readonly adressesInternes: readonly string[] = [],
     /** Le journal des entrants (Greg, 22 novembre 2026) : verdict, liste de l'admin, volume anormal. */
     private readonly journal: JournalEntrants | null = null,
+    /** L'envoi des réponses écrites dans Mobiiz (Greg, 22 novembre 2026). */
+    private readonly mailer: TransactionalEmailSender | null = null,
   ) {}
 
   /** Le webhook : null quand l'e-mail ne vise aucune adresse Mobiiz (la suite du routage décide). */
@@ -354,6 +359,65 @@ export class ReponsesRecuesService {
     return this.vue(await this.charger(tenant, id));
   }
 
+  /**
+   * « RÉPONDRE », COMME GMAIL (Greg, 22 novembre 2026) : sous un message de négoce, l'artisan écrit sa réponse dans Mobiiz.
+   * Elle part de SON adresse Mobiiz, au négoce de la demande (jamais à l'adresse d'un expéditeur inconnu), avec l'étiquette
+   * de la demande : la réponse du négoce revient rangée dans le bon chantier. Elle est notée dans « Envoyés ».
+   */
+  async repondre(tenant: TenantContext, id: string, texte: string): Promise<{ envoye: true }> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    const e = await this.charger(tenant, id);
+    if (!e.recipientId) throw validationFailed("Not attached", { reason: "non_rattache", phrase: "Ce message n'est rattaché à aucune demande : Mobiiz ne sait pas à quel négoce répondre." });
+    if (e.indesirable) throw validationFailed("Spam", { reason: "indesirable", phrase: "Ce message est dans les indésirables : on n'y répond pas." });
+    const corps = texte.replace(/\r\n?/g, "\n").trim();
+    if (!corps) throw validationFailed("Empty", { reason: "vide", phrase: "Écris ta réponse avant d'envoyer." });
+    const r = await this.prisma.priceRequestRecipient.findFirst({
+      where: { id: e.recipientId, priceRequest: { companyId: tenant.companyId } },
+      select: { id: true, etiquette: true, supplier: { select: { name: true, email: true } }, priceRequest: { select: { projectId: true } } },
+    });
+    if (!r) throw notFound("Recipient");
+    const via = await this.adresses.expediteur(tenant.companyId);
+    if (!via || !this.mailer) throw validationFailed("No Mobiiz address", { reason: "adresse_absente", phrase: "Ton adresse Mobiiz n'est pas encore prête : réessaie dans un instant." });
+    let etiquette = r.etiquette;
+    if (!etiquette) {
+      etiquette = await this.adresses.etiquetteNeuve();
+      await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { etiquette } });
+    }
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
+    const objet = /^re\s*:/i.test(e.objet.trim()) ? e.objet.trim() : `Re: ${e.objet.trim() || "votre réponse"}`;
+    const cite = (e.texte ?? "").split("\n").slice(0, 60).map((l) => `> ${l}`).join("\n");
+    const quand = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" }).format(e.recuLe);
+    const text = [corps, "", c?.name ?? "", ...(cite ? ["", `Le ${quand}, ${r.supplier.name} a écrit :`, cite] : [])].join("\n");
+    await this.mailer.send({
+      to: r.supplier.email,
+      subject: objetAvecRepere(objet.slice(0, 200), etiquette),
+      text,
+      from: via.from,
+      replyTo: via.replyTo(etiquette),
+      mustDeliver: true,
+      envoi: { companyId: tenant.companyId, sorte: "reponse", projectId: r.priceRequest.projectId, recipientId: r.id, repondA: e.id, destinataire: r.supplier.name },
+    });
+    return { envoye: true };
+  }
+
+  /**
+   * INDÉSIRABLES, COMME GMAIL (Greg, 22 novembre 2026) : « Signaler comme indésirable » range un message reçu de côté (rien
+   * n'est supprimé) ; « Ce n'est pas un indésirable » le remet dans les Reçus. Une pièce dangereuse reste retenue : elle n'a
+   * jamais été gardée.
+   */
+  async indesirable(tenant: TenantContext, id: string, indesirable: boolean): Promise<EmailRecuVue> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    await this.charger(tenant, id);
+    await this.prisma.emailRecuArtisan.updateMany({ where: { id, companyId: tenant.companyId }, data: indesirable ? { indesirable: true, indesirablePar: "artisan" } : { indesirable: false, indesirablePar: null } });
+    return this.vue(await this.charger(tenant, id));
+  }
+
+  /** Le dossier « Indésirables » : jamais supprimés en silence, avec la raison. */
+  async indesirables(tenant: TenantContext) {
+    const liste = await this.prisma.emailRecuArtisan.findMany({ where: { companyId: tenant.companyId, indesirable: true }, orderBy: { recuLe: "desc" }, take: 200, select: { id: true, de: true, objet: true, texte: true, recuLe: true, raisons: true, indesirablePar: true, piecesBloquees: true } });
+    return liste.map((e) => ({ id: e.id, expediteur: nomExpediteur(e.de), objet: e.objet, extrait: (e.texte ?? "").replace(/\s+/g, " ").trim().slice(0, 140), le: e.recuLe.toISOString(), raison: e.indesirablePar === "artisan" ? "Signalé par toi" : (e.raisons[0] ?? "Mis de côté par Mobiiz"), piecesBloquees: e.piecesBloquees }));
+  }
+
   private async charger(tenant: TenantContext, id: string) {
     if (!/^[0-9a-f-]{36}$/i.test(id)) throw notFound("Email");
     const e = await this.prisma.emailRecuArtisan.findFirst({
@@ -372,6 +436,7 @@ export class ReponsesRecuesService {
     recuLe: Date;
     luLe: Date | null;
     tropLourdes: string[];
+    indesirable: boolean;
     fichiers: { id: string; nom: string; type: string; taille: number; documentId: string | null }[];
     recipient: { id: string; supplier: { name: string }; priceRequest: { projectId: string; project: { name: string } } } | null;
   }): EmailRecuVue {
@@ -386,6 +451,7 @@ export class ReponsesRecuesService {
       demande: e.recipient ? { recipientId: e.recipient.id, projectId: e.recipient.priceRequest.projectId, negoce: e.recipient.supplier.name, chantier: e.recipient.priceRequest.project.name } : null,
       fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type, taille: f.taille, devisRecu: !!f.documentId })),
       tropLourdes: e.tropLourdes,
+      indesirable: e.indesirable,
     };
   }
 }

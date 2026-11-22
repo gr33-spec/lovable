@@ -1,7 +1,7 @@
 "use client";
 
-import { Boite } from "@/components/messages";
+import { Messagerie } from "@/components/messagerie";
 
 export default function Page() {
-  return <Boite />;
+  return <Messagerie />;
 }
