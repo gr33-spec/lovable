@@ -1,4 +1,5 @@
 import path from "node:path";
+import { continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { expect, test, type Page } from "@playwright/test";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 
@@ -28,6 +29,7 @@ async function apiJson<T = unknown>(page: Page, method: string, url: string, bod
 type Ecran = { purchase: { toBuy: { key: string; label: string; quantity: string | null }[] }; chantier?: { adresse: string | null; livraison: string | null } };
 
 async function compteEtListe(page: Page) {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
     await page.getByRole("button", { name: "Passer le guide" }).click();
   });

@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, repondreAuxQuestions, voirMaListe, zoneDesQuestions } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, repondreAuxQuestions, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1240,6 +1240,7 @@ test("§48.5 : envoyer une partie de la liste à un fournisseur, le reste à un 
 });
 
 test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon pour la modifier", async ({ page }) => {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   // Retour du fondateur (2026-10-10, capture iPhone) : « pouvoir cliquer directement sur un bouton pour valider, ligne par
   // ligne. Et un crayon pour modifier. »
   await signUp(page);
@@ -1794,6 +1795,7 @@ test("§50 : trois écrans, et rien de ce que le §50.4 a retiré", async ({ pag
 });
 
 test("§49.9 : une ligne nomme une fourniture ; les heures et le forfait sont repliés sous « lignes sans fourniture »", async ({ page }) => {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-reparation.pdf"));
@@ -3826,6 +3828,7 @@ async function grilleDeposee(browser: Browser, page: Page, email: string, rows: 
 }
 
 test("Commande du mois : un cycle complet, trois artisans (C après la clôture), trois négoces (N3 sans les crochets), les totaux posés à la main", { tag: "@ancien" }, async ({ page, browser }) => {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   test.setTimeout(300_000);
   const projet = test.info().project.name;
   const n = (i: number) => `n${i}-${projet}@example.com`;
@@ -4197,6 +4200,7 @@ test("Abonnement : un paiement refusé met le bandeau rouge, avec la date limite
 });
 
 test("Apprentissage (24 octobre 2026) : la même correction sur 2 chantiers s'applique d'elle-même, « Ajusté selon tes habitudes », annulable d'un clic", async ({ page }) => {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await signUp(page);
   const ardoise = "Ardoise naturelle 32×22 Espagne 1er choix";
   const liste = async () => {
@@ -4279,6 +4283,7 @@ test("Espace admin (24 octobre 2026, refait le 25 : « compréhensible pour un e
 });
 
 test("« Saisir ma liste » (Greg, 31 octobre 2026) : le sélecteur de l'achat groupé, sans sa logique ; une suggestion, un matériau absent, la désignation libre, quantité et unité, retour sans perte, bouton dynamique, puis l'éditeur ; aucun crédit, aucun achat groupé, aucun négoce", async ({ page }) => {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await signUp(page);
   const jaugeAvant = (await apiJson<{ quotas?: unknown; jauge?: unknown }>(page, "GET", "/v1/ai-usage/jauge")).body;
   await page.goto("/chantiers/nouveau?mode=manuel");

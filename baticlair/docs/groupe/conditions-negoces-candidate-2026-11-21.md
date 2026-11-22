@@ -35,3 +35,5 @@ Version proposée (corrigée par le juriste) :
 - Les offres des achats groupés y sont versées, et passent à « commandé » à la commande.
 - La commande d'une demande de prix fait passer ses prix à « commandé ».
 - L'export de l'admin dit le statut et la région, sans nom ni empreinte.
+- Conservation validée par Greg le 22 novembre 2026 : l'empreinte de la source effacée 12 mois après la clôture, la ligne supprimée à 3 ans (ménage de nuit).
+- La relecture par l'avocat est dans la liste des vérifications avant la production (`MISE-EN-PROD.md`, section 0).

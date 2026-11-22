@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerEmail } from "./confirmer-email";
 
 /**
@@ -16,6 +17,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function inscrire(page: Page) {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await page.goto("/inscription");
   await page.getByLabel("Prénom et nom").fill("Jean Martin");
   await page.getByLabel("Nom de ton entreprise").fill(`Toitures ${unique()}`);

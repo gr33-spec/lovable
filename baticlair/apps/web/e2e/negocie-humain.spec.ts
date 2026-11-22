@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 
 /**
  * BUSINESS MODEL FINAL (Greg, 25 octobre 2026) : le regroupement NÉGOCIÉ PAR UN HUMAIN, mode par défaut. L'artisan
@@ -41,6 +42,7 @@ async function emailsVers(page: Page, to: string): Promise<{ subject: string; te
 
 /** Un couvreur inscrit, SIRET vérifié, adresse dans la zone ; avec une liste si des lignes sont données. */
 async function inscrire(page: Page, email: string, zone: string, lignes?: { libelle: string; quantite: string; unite: string }[]): Promise<string | null> {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   const entreprise = `Toitures ${unique()}`;
   await page.goto("/inscription");
   await page.getByLabel("Prénom et nom").fill("Jean Martin");

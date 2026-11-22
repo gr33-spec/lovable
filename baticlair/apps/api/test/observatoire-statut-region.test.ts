@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { empreinteSource, ObservatoireService } from "../src/modules/recentrage/application/observatoire.service.js";
+import { purgerSelonLeRegistre } from "../src/modules/privacy/application/purges.js";
 import { createTestApp, resetDatabase, type TestContext } from "./support/test-app.js";
 
 /**
@@ -53,5 +54,20 @@ describe("Observatoire : proposé, commandé, région", () => {
     expect(csv).toContain(';perso;propose;"Bretagne"');
     expect(csv).not.toContain(empreinteSource("perso", "reponse-secrete"));
     expect(csv).not.toContain("reponse-secrete");
+  });
+  it("conservation (Greg, 22 novembre 2026) : l'empreinte effacée à 12 mois, la ligne supprimée à 3 ans, le reste intact", async () => {
+    const a = (jour: string) => new ObservatoireService(ctx.prisma, () => new Date(`${jour}T10:00:00Z`));
+    const ligne = [{ designation: "Liteau 27x40", unite: "m", quantite: 300, prixHt: 0.5 }];
+    await a("2023-10-01").enregistrer({ type: "perso", sourceId: "tres-vieille", departement: "22", lignes: ligne });
+    await a("2025-09-01").enregistrer({ type: "perso", sourceId: "vieille", departement: "22", lignes: ligne });
+    await a("2026-11-01").enregistrer({ type: "perso", sourceId: "recente", departement: "22", lignes: ligne });
+    const bilan = await purgerSelonLeRegistre(ctx.prisma, new Date("2026-11-22T03:00:00Z"));
+    expect(bilan).toMatchObject({ lignesPrix: 1, empreintesPrix: 1 });
+    const sources = (await ctx.prisma.observationPrix.findMany({ orderBy: { le: "asc" } })).map((o) => o.source);
+    expect(sources).toHaveLength(2);
+    expect(sources[0]).toMatch(/^efface:/);
+    expect(sources[1]).toBe(empreinteSource("perso", "recente"));
+    // Une deuxième passe ne change plus rien.
+    expect(await purgerSelonLeRegistre(ctx.prisma, new Date("2026-11-22T03:00:00Z"))).toMatchObject({ lignesPrix: 0, empreintesPrix: 0 });
   });
 });

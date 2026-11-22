@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { calculerEtVoirMaListe, repondreAuxQuestions } from "./discussion";
+import { calculerEtVoirMaListe, repondreAuxQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -24,6 +24,7 @@ test.beforeEach(async ({ page }) => {
  * passe dès qu'il paraît (« Passer le guide »), sauf le test du guide, qui retire ce réflexe.
  */
 async function passeGuide(page: Page): Promise<Page> {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
     await page.getByRole("button", { name: "Passer le guide" }).click();
   });

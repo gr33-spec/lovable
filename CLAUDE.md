@@ -328,6 +328,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - La liste complète : `baticlair/docs/groupe/MISE-EN-PROD.md`, section 0.
 - La page `/couvreurs-bretagne` ne doit PAS partir en production (Greg, 19 novembre 2026) : non liée, « Page introuvable » quand `VERCEL_ENV=production`. Vérifier qu'elle répond 404 en production.
 - Anti-robot (Turnstile) à activer ; admin de test à retirer de `GROUPE_ADMINS`.
+- Conditions négoces du 21 novembre 2026 (repères de prix) : relues par l'avocat avant toute publication (version majeure, réacceptation des négoces).
 
 ## Décisions du 19 novembre 2026 : pages régionales, inscription par métier (en partie remplacées le même jour, voir plus bas)
 
@@ -375,8 +376,9 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 - Partage du travail : la discussion du banc d'essai (`banc-quantitatif/DEFAUTS.md`, `A-TRANCHER.md`) corrige le calcul du moteur et branche la nouvelle lecture des devis. Cette discussion-ci ne touche plus ni au calcul du moteur ni aux questions du quantitatif : elle garde l'accueil, les prix et la recherche pour la fiche couverture.
 - Accueil : les deux photos sont celles de Greg, sans crédit (avant : Wikimedia Commons, crédit en bas de l'accueil). La photo des plans sert à tous les métiers. Anciennes photos gardées dans `baticlair/docs/photos-accueil-anciennes/`. Le chrono d'un groupé a sa propre ligne. L'encart « Mets Mobiiz sur ton écran d'accueil » ne revient plus une fois l'appli installée.
-- Prix (oui de Greg aux 4 changements). L'observatoire garde un statut, proposé ou commandé, et la région (migration additive `20261121090000_observatoire_statut_region`). Les offres des achats groupés et les commandes y sont versées. Rien n'est montré aux artisans pour l'instant. Ligne 23 du registre RGPD, corrigée par le juriste (données pseudonymisées). Phrase des conditions négoces : changement MAJEUR selon le juriste (réacceptation), seuil de trois négoces, jamais visible par un négoce ; NON PUBLIÉE, `baticlair/docs/groupe/conditions-negoces-candidate-2026-11-21.md`, à l'avocat. Les durées proposées (empreinte effacée à 12 mois, ligne à 3 ans) attendent l'accord de Greg.
+- Prix (oui de Greg aux 4 changements). L'observatoire garde un statut, proposé ou commandé, et la région (migration additive `20261121090000_observatoire_statut_region`). Les offres des achats groupés et les commandes y sont versées. Rien n'est montré aux artisans pour l'instant. Ligne 23 du registre RGPD, corrigée par le juriste (données pseudonymisées). Phrase des conditions négoces : changement MAJEUR selon le juriste (réacceptation), seuil de trois négoces, jamais visible par un négoce ; NON PUBLIÉE, `baticlair/docs/groupe/conditions-negoces-candidate-2026-11-21.md`, à l'avocat. Conservation (accord de Greg le 22 novembre 2026) : empreinte de la source effacée 12 mois après la clôture, ligne supprimée à 3 ans, appliquées chaque nuit. Ligne 20 du registre : plus de « factures de commission ». La relecture des conditions négoces par l'avocat est dans `MISE-EN-PROD.md`, section 0.
 - Analyses offertes sur le site de test : 60 (avant : 50), pour finir les lectures de D-2026-024.
+- Parcours de test (22 novembre 2026) : la carte « Suggestions » s'ouvre maintenant dans des listes qui n'en avaient pas (pointes de liteaux) ; les parcours qui ne la regardent pas touchent « Continuer » sans rien cocher (`continuerQuandLesSuggestionsSOuvrent`, `e2e/discussion.ts`). Tests seulement, rien du moteur.
 
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 

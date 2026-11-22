@@ -36,6 +36,18 @@ export async function passerLesSuggestions(page: Page, cocher: readonly (string 
   await expect(carte).toBeHidden({ timeout: 15_000 });
 }
 
+/**
+ * Pour les parcours qui ne regardent pas l'étape « Suggestions » (Greg, 22 novembre 2026) : quand la carte s'ouvre (la fiche
+ * propose maintenant des cases dans des listes qui n'en avaient pas, pointes de liteaux par exemple), on touche
+ * « Continuer » sans rien cocher, comme un artisan pressé : la liste reste telle que le devis la dit. À ne pas poser dans
+ * un parcours qui teste la carte elle-même.
+ */
+export async function continuerQuandLesSuggestionsSOuvrent(page: Page) {
+  await page.addLocatorHandler(carteSuggestions(page).getByRole("button", { name: "Continuer", exact: true }), async (bouton) => {
+    await bouton.click();
+  });
+}
+
 export async function repondreAuxQuestions(
   page: Page,
   choisir: (question: string, boutons: Locator) => Choix | Promise<Choix> = () => null,
