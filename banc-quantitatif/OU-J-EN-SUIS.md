@@ -72,6 +72,22 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
+## POUSSÉ SUR LA BRANCHE DE TEST (accord de Greg du 22 novembre, nuit)
+- 22 novembre vers 14 h 10 (UTC) : commit `9ceac7d0` poussé sur `claude/saas-achat-artisans-prompt-1lyihx` = fiche -74 (banc
+  96/99) + pointe de la branche de test (300dd4ab, puis 842c39b2 : documents seulement). Chaîne sur ce code : moteur 1331,
+  serveur 926, site construit, parcours 360 (ordinateur + téléphone), 0 échec. Premier envoi de ma discussion sur cette branche.
+- Vérification : API de test « ok », base « ok », site 200. Le commit servi n'est PAS prouvé (ni l'API ni le site ne disent
+  leur commit ; pas d'accès à Vercel) : à vérifier par Greg dans Vercel (déploiement « Ready » sur 9ceac7d0).
+- Ma branche a fusionné 9ceac7d0 ensuite (bc76f30f).
+
+## À INTÉGRER, confié par la base couverture (`banc-quantitatif/A-INTEGRER.md`, 22 novembre)
+- 1. Chatières : section à atteindre (2 cm²/m² comble perdu ou au-dessus d'un écran ; 3,3 cm²/m² sous l'écran), surface
+  projetée = surface × cos(pente), nombre arrondi au-dessus puis au pair, section par modèle (HP 10 : 50 cm²…) ; modèle
+  inconnu → à chiffrer avec sa question.
+- 2. Fixation des tuiles (en Suggestion) : zone et exposition par la commune, une seule question « Écran sous toiture ? »,
+  tableau NF DTU 40.21 §5.4 pour la partie courante, toujours fixées égout, rives, faîtières, arêtières ; boîtes de 400.
+- 3. Clous d'ardoise (en Suggestion) : 2 clous au doublis, 1er rang, rives, dernier rang sous le faîtage ; au kg.
+
 ## RÉPONSES DE GREG DU 22 NOVEMBRE (nuit) — À APPLIQUER
 - « OUI, pousse ce lot sur le site de test » : le lot annoncé prêt = fiche -74 (commit ce07225d, chaîne verte). En cours :
   dossier à part `/home/user/lot-pousse` (branche locale `lot-a-pousser`), ce07225d + fusion de la pointe de la branche de
