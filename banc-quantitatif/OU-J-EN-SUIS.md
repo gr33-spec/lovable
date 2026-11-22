@@ -87,6 +87,9 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   dans le moteur : la sortie de ventilation ne se propose que si la couverture elle-même est écrite avec sa surface. Moteur
   1313 verts, `dist` et site reconstruits. Les cinq fichiers de parcours qui utilisent les aides de l'agent sont relancés
   sur ordinateur (certaines listes sans surface ne verront plus la case : retirer le passage là où c'est le cas).
+- 22 novembre (suite 2) : les passages ajoutés par l'agent dans assistant-mobiiz, negocie-humain, recentrage, responsive et
+  trois de parcours-artisan sont retirés (ces listes n'ont pas de surface : plus de case). Six fichiers verts sur ordinateur
+  (112). Chaîne complète lancée : serveur puis tous les parcours (ordinateur + téléphone), en une seule commande.
 - Défauts d'écran vus par l'agent, PAS corrigés (à dire à Greg) : (a) la carte « Suggestions » dit « J'ai lu ton devis »
   même pour une liste écrite à la main ou dictée ; (b) l'API répond « prêt », `peut_partir: true`, alors que l'écran attend
   encore l'étape « Suggestions » ; (c) la question de l'égout et les nouveaux nombres ne sont couverts par AUCUN parcours à
