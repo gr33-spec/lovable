@@ -1,13 +1,12 @@
 # Où j'en suis (banc du calcul) — à lire en premier à chaque reprise
 
-Mis à jour : 21 novembre 2026, soir. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
+Mis à jour : 22 novembre 2026, soir. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
 
 ## Score
-- Banc du calcul : **88 sur 100** (fiche `roofing-2026.11.21-70`, poussée sur ma branche) : entraînement 54/64, examen 34/36,
-  0 en trop. Objectif : 95 %.
+- Banc du calcul : **98 sur 99** (fiche `roofing-2026.11.22-75`). Objectif de Greg (95 %) atteint.
 - Rejouer : `cd baticlair/packages/domain && npx vitest run test/banc-couverture.test.ts` ; enregistrer : `BANC_MAJ=1 …` ;
   voir un chantier : `BANC_VOIR=C05 … --reporter=verbose`. La liste juste : `cd banc-quantitatif && node outils/exporter-banc.mjs`.
-- Dernière chaîne complète verte (fiche -68) : moteur 1305, serveur 921, site construit, parcours 350 (2 mis à jour).
+- Dernière chaîne complète verte : fiche -74 (fusion), moteur 1331, serveur 921, parcours 359 (22 novembre).
 
 ## Consignes en cours (Greg)
 - RIEN sur la branche de test ni sur test.mobiiz.fr sans son accord : rapport d'abord. Pousser sur
