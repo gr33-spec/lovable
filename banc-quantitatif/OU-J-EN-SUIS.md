@@ -79,7 +79,13 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
 - Fusion de `claude/saas-achat-artisans-prompt-1lyihx` (23 commits : suggestions sans limite, pointes de liteaux, fixations,
   kits Velux, dauphins, tuiles de rive en suggestion, accueil premium) dans ma branche. Conflits réglés en gardant les deux
   côtés. Moteur 1331 verts, banc 96 sur 99 inchangé. Chaîne complète relancée sur le code fusionné (résultat à lire).
-- Rien sur la branche de test ni sur test.mobiiz.fr : rapport à Greg d'abord.
+- CHAÎNE COMPLÈTE VERTE SUR LE CODE FUSIONNÉ (22 novembre, soir) : moteur 1331, serveur 921, site construit, parcours 359
+  sur ordinateur + téléphone (1 lent relancé seul : vert). Parcours adaptés à l'étape « Suggestions » (pointes de liteaux de
+  l'autre discussion, sortie de ventilation) : aides `continuerSansSortieDeVentilation` et `continuerSansSuggestionParApi`
+  dans `apps/web/e2e/discussion.ts`, rendues générales.
+- Rien sur la branche de test ni sur test.mobiiz.fr : rapport à Greg rendu, J'ATTENDS SON ACCORD pour pousser.
+- À signaler à Greg : la case « Pointes pour liteaux » (autre discussion) s'affiche aussi sur une liste d'ardoises dictée en
+  pièces, sans liteaux ; la carte dit « J'ai lu ton devis » sur une liste sans devis.
 
 ## État précédent (22 novembre) : fiche -73
 - **Banc : 96 sur 99 (97 %)** : entraînement 61/64 (95,3 %), examen 35/35. Objectif de 95 % atteint (une ligne « incertaine »
