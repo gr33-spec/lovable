@@ -459,7 +459,9 @@ function aggregate(
       // pièces (« boîte de 200 »), le compte se refait sur le besoin additionné (108 vis = 1 boîte, pas 1 + 1).
       const contenance = /\bde (\d+)\b/.exec(orders[0].unit.one)?.[1];
       const pieces = group.length > 1 && contenance && quantities.every((q) => q && q.unit === "u") ? quantities.reduce((sum, q) => sum.plus(q!.value), new Decimal(0)) : null;
-      const count = pieces ? pieces.dividedBy(Number(contenance)).toDecimalPlaces(6).ceil() : orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
+      // Les parts de feuille (calculateur de feuilles, Greg, 22 novembre 2026) : additionnées, puis UN arrondi.
+      const parts = group.length > 1 && group.every((n) => n.partage !== undefined) ? group.reduce((sum, n) => sum.plus(n.partage!), new Decimal(0)) : null;
+      const count = parts ? parts.toDecimalPlaces(4).ceil() : pieces ? pieces.dividedBy(Number(contenance)).toDecimalPlaces(6).ceil() : orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
       quantity = unitText(count, orders[0].unit);
       order = { count: count.toFixed(), unit: count.equals(1) ? orders[0].unit.one : orders[0].unit.many };
       // Un article vendu en boîtes dit aussi son nombre de pièces (« 8 boîtes de 500 (3 992 pièces) », Greg, 21 novembre 2026).

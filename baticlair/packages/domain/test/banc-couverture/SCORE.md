@@ -1,8 +1,8 @@
 # Banc du calcul de la couverture
 
 - Entraînement (10 chantiers) : 64/65 (98.5 %), 0 en trop, 0 « à chiffrer » sans question
-- Examen (5 chantiers) : 36/36 (100 %), 0 en trop, 0 « à chiffrer » sans question
-- Ensemble : 100/101 (99 %), 0 en trop, 0 « à chiffrer » sans question
+- Examen (5 chantiers) : 34/34 (100 %), 0 en trop, 0 « à chiffrer » sans question
+- Ensemble : 98/99 (99 %), 0 en trop, 0 « à chiffrer » sans question
 
 | Chantier | Justes | Lignes fausses | En trop |
 |---|---|---|---|
@@ -16,7 +16,7 @@
 | C08 | 4/4 | aucune | aucune |
 | C09 | 6/6 | aucune | aucune |
 | C10 | 8/8 | aucune | aucune |
-| C11 | 9/9 | aucune | aucune |
+| C11 | 7/7 | aucune | aucune |
 | C12 | 13/13 | aucune | aucune |
 | C13 | 6/6 | aucune | aucune |
 | C14 | 4/4 | aucune | aucune |

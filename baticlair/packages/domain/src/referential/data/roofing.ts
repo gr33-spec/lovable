@@ -960,6 +960,63 @@ const ARETIER_PARAM: ParamDef = {
   display: { "1": "en tuiles", "2": "en zinc" },
 };
 /** Arêtier zinc : « bande zinc dév. 25 à 33 cm » (§3) ; le comptoir sert « de 25 » ou « de 33 », il ne le devine pas. */
+/**
+ * CALCULATEUR DE FEUILLES (Greg, 22 novembre 2026) : une feuille de zinc fait 2 × 1 m ; une pièce pliée se coupe en bandes
+ * de 2 m (une pièce de 2 m) ou de 1 m (deux pièces par bande). Pièces = ml ÷ longueur, arrondi au-dessus ; bandes par
+ * feuille = 100 cm ÷ développé, arrondi en dessous ; feuilles = bandes ÷ bandes par feuille. Pas de recouvrement ajouté.
+ * Demandée une fois pour toutes les pièces (comme le pliage), changeable pièce par pièce ; 2 m par défaut, la longueur de la
+ * feuille (prudence de la nuit du 22 novembre : à confirmer par Greg, qui la voulait « par pièce »).
+ */
+const LONGUEUR_PIECES_PARAM: ParamDef = {
+  key: "longueur_pieces",
+  label: "Longueur des pièces pliées",
+  unit: "m",
+  kind: "site_data",
+  question: "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+  hint: "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+  groupe: { id: "longueur-pieces-pliees", question: "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?", hint: "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m." },
+  default: { value: "2", source: "greg-calculateur-feuilles-2026-11-22", verification: { status: "verified", verifiedAt: "2026-11-22", verifiedBy: "Greg (couvreur) : calculateur de feuilles" }, version: 1, note: "pièces de 2 m, la longueur de la feuille" },
+  choices: [
+    { label: "2 m", value: "2" },
+    { label: "1 m", value: "1" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["longueurs de 1 m", "pieces de 1 m", "elements de 1 m"] },
+    { value: "2", keywords: ["longueurs de 2 m", "pieces de 2 m", "elements de 2 m"] },
+  ],
+};
+/** Développé de l'abergement (§7 : « dév. 33 à 40 cm ») : lu au devis, sinon 33, dit et modifiable (calculateur de feuilles). */
+const DEVELOPPE_ABERGEMENT_PARAM: ParamDef = {
+  key: "developpe_abergement",
+  label: "Développé de l'abergement",
+  unit: "mm",
+  kind: "site_data",
+  question: "Abergement : bande de 25, de 33 ou de 40 ?",
+  hint: "Le développé : la largeur de la feuille avant façonnage.",
+  default: { value: "330", source: F, verification: FOUNDER_DOC, version: 1, note: "« dév. 33 à 40 cm » (§7) : 33 retenu" },
+  choices: [
+    { label: "De 25", value: "250" },
+    { label: "De 33", value: "330" },
+    { label: "De 40", value: "400" },
+  ],
+  textValues: [
+    { value: "250", keywords: ["dev 25", "dev. 25", "developpe 25"] },
+    { value: "330", keywords: ["dev 33", "dev. 33", "developpe 33"] },
+    { value: "400", keywords: ["dev 40", "dev. 40", "developpe 40"] },
+  ],
+};
+/** Le détail sous la flèche : « 4 pièces de 2 m, 8 ml, développé 25 cm, 4 par feuille » ; la longueur se corrige. */
+const postesDeFeuille = (ml: string, dev: string) => [
+  {
+    id: "pieces",
+    libelle: `{= arrondi_sup(${ml} / longueur_pieces)} pièces de {longueur_pieces|m} ({${ml}|ml}), développé {${dev}|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / ${dev}))} par feuille`,
+    formule: `arrondi_sup(arrondi_sup(${ml} / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / ${dev}))`,
+    cle: ml,
+  },
+];
+/** La part de feuille d'une pièce (voir `LONGUEUR_PIECES_PARAM`) : additionnée sur la liste, arrondie une fois. */
+const partDeFeuille = (ml: string, dev: string) =>
+  `arrondi_sup(arrondi_sup(${ml} / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / ${dev}))`;
 const DEVELOPPE_ARETIER_PARAM: ParamDef = {
   key: "developpe_aretier",
   label: "Développé de l'arêtier zinc",
@@ -1477,7 +1534,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.22-78",
+  version: "roofing-2026.11.22-79",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1576,6 +1633,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       title: "Format commercial d'une ardoise « L × l » (en cm), écrit dans le devis",
       retrievedAt: "2026-10-02",
       note: "Convention « longueur × largeur » (30×22 = 30 cm de long, 22 cm de large), confirmée par le fondateur le 2026-10-02.",
+    },
+    {
+      id: "greg-calculateur-feuilles-2026-11-22",
+      kind: "trade_practice",
+      title: "Calculateur de feuilles de zinc (Greg, couvreur)",
+      documentRef: "Message de Greg dans la conversation du banc du calcul, 2026-11-22",
+      retrievedAt: "2026-11-22",
+      note: "Feuilles 2 × 1 m. Par pièce : développé (20, 25, 33, 40 cm, autre) et longueur des pièces (1 m ou 2 m). Pièces = ml ÷ longueur, arrondi au-dessus ; bandes par feuille = 100 cm ÷ développé, arrondi en dessous ; feuilles = pièces ÷ bandes par feuille, arrondi au-dessus ; pièces de même longueur regroupées sur les mêmes feuilles ; pas de recouvrement ajouté. Exemple : 10 ml, pièces de 2 m, dév. 20 → 5 pièces, 5 bandes par feuille → 1 feuille.",
     },
     {
       id: "fondateur-reponses-2026-10-04",
@@ -3160,6 +3225,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       label: "Faîtage en bande zinc",
       triggers: ["zinc_ridge"],
       params: [
+        LONGUEUR_PIECES_PARAM,
         { key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] },
         DEVELOPPE_PARAM,
         // §48.6 : « tu le façonnes toi-même ? », pour le faîtage seul.
@@ -3194,7 +3260,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "feuilles-faitage-zinc",
           slot: "feuille",
           when: "faconnage < 2",
-          formula: "arrondi_sup(longueur_faitage / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          formula: partDeFeuille("longueur_faitage", "developpe"),
+          partage: true,
+          postes: postesDeFeuille("longueur_faitage", "developpe"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
@@ -3228,6 +3296,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       label: "Noue zinc (façonnée ou à façonner)",
       triggers: ["valley"],
       params: [
+        LONGUEUR_PIECES_PARAM,
         { key: "longueur_noue", label: "Longueur de noue", unit: "m", kind: "site_data", question: "Longueur de noue ?", fromLineQuantity: true, textLabels: ["noue"] },
         DEVELOPPE_NOUE_PARAM,
         FACONNAGE_NOUE_PARAM,
@@ -3269,7 +3338,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           slot: "feuille",
           when: "faconnage < 2",
           // §48.6 : feuilles 2 × 1 m (jamais de bobineau hors joint debout, terrasse, chéneaux), estimées d'après le développé.
-          formula: "arrondi_sup(longueur_noue / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))))",
+          formula: partDeFeuille("longueur_noue", "developpe_noue"),
+          partage: true,
+          postes: postesDeFeuille("longueur_noue", "developpe_noue"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
@@ -3291,6 +3362,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       label: "Arêtier (arêtières et closoir, ou bande zinc)",
       triggers: ["hip"],
       params: [
+        LONGUEUR_PIECES_PARAM,
         { key: "longueur_aretier", label: "Longueur d'arêtier", unit: "m", kind: "site_data", question: "Longueur d'arêtier ?", fromLineQuantity: true, textLabels: ["aretier", "aretiers"] },
         ARETIER_PARAM,
         ARETIER_FERME_PARAM,
@@ -3365,7 +3437,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "feuilles-aretier-zinc",
           slot: "feuille",
           when: "si(aretier_matiere < 2, 9, faconnage) < 2",
-          formula: "arrondi_sup(longueur_aretier / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))))",
+          formula: partDeFeuille("longueur_aretier", "developpe_aretier"),
+          partage: true,
+          postes: postesDeFeuille("longueur_aretier", "developpe_aretier"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
@@ -3526,6 +3600,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       // §48.6 : une pièce écrite = sa question (« Bande de ventilation en Z : tu façonnes ? »), jamais « Bandes zinc (…) ».
       perLine: true,
       params: [
+        LONGUEUR_PIECES_PARAM,
         { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande zinc ?", fromLineQuantity: true },
         DEVELOPPE_PARAM,
         FACONNAGE_BANDES_PARAM,
@@ -3576,7 +3651,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           slot: "feuille",
           when: "faconnage < 2",
           // §48.6 : « 1 feuille 2 × 1 m, développé 25 cm → 4 bandes de 2 m = 8 m par feuille ; 8 m de porte-solin ⇒ 1 feuille ».
-          formula: "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          formula: partDeFeuille("longueur_bande", "developpe"),
+          partage: true,
+          postes: postesDeFeuille("longueur_bande", "developpe"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
@@ -3638,6 +3715,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       label: "Bande porte-solin zinc",
       triggers: ["solin_support"],
       params: [
+        LONGUEUR_PIECES_PARAM,
         { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande porte-solin ?", fromLineQuantity: true, ownOnly: true },
         DEVELOPPE_PARAM,
         FACONNAGE_BANDES_PARAM,
@@ -3677,7 +3755,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "feuilles-porte-solin",
           slot: "feuille",
           when: "faconnage < 2",
-          formula: "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          formula: partDeFeuille("longueur_bande", "developpe"),
+          partage: true,
+          postes: postesDeFeuille("longueur_bande", "developpe"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
@@ -3780,6 +3860,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       label: "Bandes cuivre (façonnées, feuilles ou bobine)",
       triggers: ["copper_strip"],
       params: [
+        LONGUEUR_PIECES_PARAM,
         { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande cuivre ?", fromLineQuantity: true },
         DEVELOPPE_CUIVRE_PARAM,
         FACONNAGE_CUIVRE_PARAM,
@@ -3833,7 +3914,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "feuilles-cuivre",
           slot: "feuille",
           when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
-          formula: "arrondi_sup(ml_cuivre / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))))",
+          formula: partDeFeuille("ml_cuivre", "developpe_cuivre"),
+          partage: true,
+          postes: postesDeFeuille("ml_cuivre", "developpe_cuivre"),
           unit: "u",
           core: true,
           exclusions: "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
@@ -3865,6 +3948,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       label: "Abergement de cheminée (zinc + porte-solin)",
       triggers: ["chimney_flashing"],
       params: [
+        LONGUEUR_PIECES_PARAM, DEVELOPPE_ABERGEMENT_PARAM,
         { key: "nb_cheminees", label: "Nombre de cheminées", unit: "u", kind: "site_data", question: "Combien de cheminées ?", fromLineQuantity: true, textLabels: ["cheminee"] },
         {
           key: "perimetre_cheminee",
@@ -3921,7 +4005,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "feuilles-abergement",
           slot: "feuille",
           when: "faconnage < 2",
-          formula: "arrondi_sup(ml_zinc / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_abergement))))",
+          formula: partDeFeuille("ml_zinc", "developpe_abergement"),
+          partage: true,
+          postes: postesDeFeuille("ml_zinc", "developpe_abergement"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",

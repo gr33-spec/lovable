@@ -1,5 +1,18 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-79 — Calculateur de feuilles de zinc (Greg, 2026-11-22)
+
+Banc du calcul : 98 sur 99 (C11 : les trois lignes de feuilles deviennent une, juste ; C05 reste à trancher, voir A-TRANCHER).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Feuilles 2 × 1 m de plusieurs pièces | chaque pièce arrondie à part, puis additionnées (D-2026-020 : 1 + 1 + 1 = 3) | chaque pièce compte sa part de feuille, la liste additionne et arrondit une fois (16 ml en dév. 25 : 2 feuilles) | Greg, 22 novembre 2026 |
+| Longueur des pièces pliées | toujours 2 m | question « Tes pièces pliées : en longueurs de 2 m ou de 1 m ? » (une fois pour le devis, 2 m par défaut, posée quand elle change la commande) ; 1 m = deux pièces par bande | Greg, 22 novembre 2026 |
+| Développé de l'abergement | 33 cm fixe | donnée « De 25 / De 33 / De 40 », 33 par défaut (§7 « dév. 33 à 40 cm ») | §7, Greg |
+| Détail du calcul des feuilles | une phrase | « 15 pièces de 2 m (30 ml), développé 33 cm, 3 par feuille », la longueur se corrige | Greg, 22 novembre 2026 |
+
+Pas fait (prudence) : « Combien de feuilles ? » quand le développé dépasse 1 m ou est inconnu : la ligne reste « à préciser », avec − / +.
+
 ## roofing-2026.11.22-78 — Le détail du calcul et « À vérifier » seulement sur une vraie hypothèse (Greg, 2026-11-22)
 
 Le banc du calcul ne bouge pas (100 sur 101) : rien ne change dans les quantités.

@@ -430,34 +430,13 @@
    "unite": "bt"
   },
   {
-   "article": "Feuilles de zinc (arêtiers)",
+   "article": "Feuilles de zinc (arêtiers, faîtage, noues)",
    "mots": [
     "feuille",
     "zinc"
    ],
-   "quantite": 6,
-   "unite": "n",
-   "groupe": "feuilles"
-  },
-  {
-   "article": "Feuilles de zinc (faîtage)",
-   "mots": [
-    "feuille",
-    "zinc"
-   ],
-   "quantite": 1,
-   "unite": "n",
-   "groupe": "feuilles"
-  },
-  {
-   "article": "Feuilles de zinc (noues)",
-   "mots": [
-    "feuille",
-    "zinc"
-   ],
-   "quantite": 1,
-   "unite": "n",
-   "groupe": "feuilles"
+   "quantite": 7,
+   "unite": "n"
   },
   {
    "article": "Gouttière de 25",

@@ -192,7 +192,9 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : une seule ligne par article identique, avec le total (1 + 1 + 1 feuille,
     // chaque pièce comptée à part, chutes non réemployées). Avant : trois lignes de feuilles, une par pièce.
     expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision])).toEqual([
-      [["6", "8", "10"], "3 pièces", "pour 4 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 25 cm"],
+      // Règle changée (Greg, 22 novembre 2026, calculateur de feuilles) : les pièces partagent les feuilles, un seul arrondi :
+      // 4 + 8 + 4 = 16 ml, 8 pièces de 2 m de dév. 25, 4 par feuille = 2 feuilles (avant : 1 + 1 + 1 = 3).
+      [["6", "8", "10"], "2 pièces", "pour 4 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 25 cm"],
     ]);
     // Commandé tout fait : des longueurs, pas des feuilles.
     const achete = read({ ...REPONSES, "param:faconnage@faitage-zinc": u("2") });

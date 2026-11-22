@@ -1186,7 +1186,8 @@ const valeurDuPoste = (x: Poste) => {
   // Des pièces se comptent en entiers, sans « u » (« = 2 020 ») ; une longueur ou une surface garde son unité.
   const piece = x.unite === "u" || x.unite === "pièce" || x.unite === "pièces";
   const n = Number(x.valeur);
-  const v = piece && Number.isFinite(n) ? Math.round(n).toLocaleString("fr-FR") : nombreDuCalcul(x.valeur);
+  // Une part de feuille (calculateur de feuilles) reste en décimales : « = 0,67 ».
+  const v = piece && Number.isFinite(n) && (n >= 10 || Number.isInteger(n)) ? Math.round(n).toLocaleString("fr-FR") : nombreDuCalcul(x.valeur);
   return piece ? `= ${v}` : `${v} ${uniteLisible(x.unite)}`.trim();
 };
 const uniteLisible = (u: string) => enMetres(u).replace(/^m2$/, "m²").replace(/^m3$/, "m³");

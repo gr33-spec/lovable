@@ -295,6 +295,8 @@ export interface NeedResult {
   /** Colonne « précision » de la demande de devis (§45.3). */
   precision?: string;
   /** Le détail du calcul, poste par poste, puis la perte (voir `NeedRule.postes`). */
+  /** Une part de feuille, à additionner avec les autres pièces du même article avant l'arrondi (`NeedRule.partage`). */
+  partage?: string;
   postes?: { id: string; texte: string; valeur: string; unite: string; cle?: string; perte?: true; info?: true; /** La mesure que le poste utilise, à corriger d'un toucher. */ mesure?: { valeur: string; unite: string }; /** Mesure réécrite par l'artisan : « modifié par toi ». */ modifie?: true }[];
   /** Comment la quantité se compte (« pour 10 ml de gouttière, un tous les 50 cm + 1 en bout »), pour dire un écart avec le devis. */
   basis?: string;
@@ -1240,6 +1242,7 @@ function computeNeed(
       ...(precision !== undefined ? { precision } : {}),
       ...(basis !== undefined ? { basis } : {}),
       ...(postes ? { postes } : {}),
+      ...(rule.partage && exact ? { partage: need.lo.toDecimalPlaces(6).toFixed() } : {}),
       ...(unknownParams.length > 0 ? { unknownParams } : {}),
       status: "calculated",
       ...(exact

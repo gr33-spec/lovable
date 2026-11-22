@@ -169,7 +169,8 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
     // Toute feuille se compte en bandes découpées dans le mètre de largeur.
     const feuilles = needs.filter((n) => /^feuilles-/.test(n.id));
     expect(feuilles.length).toBeGreaterThan(0);
-    expect(feuilles.filter((n) => !/regle\.longueur_feuille \* max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula)).map((n) => n.id)).toEqual([]);
+    // Calculateur de feuilles (Greg, 22 novembre 2026) : une part de feuille, la même formule partout (`partDeFeuille`).
+    expect(feuilles.filter((n) => !/arrondi_inf\(regle\.longueur_feuille \/ longueur_pieces\)\)\) \/ max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula) || !n.partage).map((n) => n.id)).toEqual([]);
   });
 
   it("chaque règle cite sa section, et le tableau règle / section / test est à jour", async () => {

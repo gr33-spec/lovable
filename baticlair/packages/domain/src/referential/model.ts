@@ -513,6 +513,12 @@ export interface NeedRule extends Provenance {
    * phrase (« ajuste selon ton façonnage », §49.6), jusqu'au « C'est bon » de l'artisan.
    */
   estimate?: string;
+  /**
+   * Calculateur de feuilles (Greg, 22 novembre 2026) : le besoin est une PART de feuille (bandes ÷ bandes par feuille), pas
+   * encore arrondie. La liste additionne les parts de toutes les pièces du même article et n'arrondit qu'une fois : les
+   * pièces de plusieurs ouvrages partagent les mêmes feuilles.
+   */
+  partage?: true;
 }
 
 export interface WorkItemType {
