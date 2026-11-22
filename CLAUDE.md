@@ -396,6 +396,17 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - « Ajoute ta quantité » (achats groupés), validé par Greg. Règle changée : avant, un bloc « Conditionnement » à confirmer à part, puis la quantité à l'écran suivant → la quantité se tape juste sous l'unité choisie (« Combien de longueurs de 4 m ? », « 12 longueurs = 48 m », « Corriger » sur place) ; « Continuer » confirme le conditionnement écrit dans la question ; l'étape suivante devient « Où et pour quand ? ». La barre « Continuer » se range pendant la saisie sur téléphone.
 - Ce qui apparaît après un toucher se montre (`reveler-apres-toucher.tsx`) : défilement doux, premier champ mis en avant, la page garde en bas la place des barres d'action (`data-barre-action`, `--barre-action`). Test petit iPhone : `e2e-ag-v1/ce-qui-apparait-se-voit.spec.ts`.
 
+## Décisions du 22 novembre 2026 (soir) : la messagerie, comme Gmail et Outlook
+
+- « Messages pour lire, Demandes pour décider » (maquettes validées par Greg). Trois dossiers : Reçus, Envoyés, Indésirables (`components/messagerie.tsx`). Règle changée : avant, une liste plate et six filtres → Reçus regroupe les réponses des négoces PAR CHANTIER (« Négoce · Toiture Dupont », « 3 réponses sur 5 », un négoce une seule fois, ceux qui n'ont pas répondu « En attente »), qui se déplie sur place ; puis les autres messages (Mission seulement si Mission est ouverte, Mon site, Mobiiz, réponses à classer). Pastille ronde : camion jaune pour un négoce, poignée de main grise pour une mission.
+- Règle changée : avant, « Écrire à » ouvrait la messagerie du téléphone → les échanges avec les négoces passent par Mobiiz : « Répondre » sous chaque message de négoce (`POST /v1/recus/:id/repondre`), la réponse part de l'adresse Mobiiz de l'artisan, au négoce de la demande seulement (jamais à un expéditeur inconnu), avec l'étiquette de la demande, et la réponse du négoce revient rangée dans le bon chantier. Pas de bouton « Appeler ». Le message s'ouvre en fil (reçus et envoyés à ce négoce, dans l'ordre).
+- « Envoyés » : tout ce qui part au nom de l'artisan (demandes de prix, bons de commande, ses réponses, relances automatiques, « prévenir les autres négoces »), noté une fois parti pour de vrai (table `message_envoye`, migration additive `20261122120000_messages_envoyes`, `platform/email/journal-envois.ts`).
+- Indésirables : rangés par Mobiiz ou par l'artisan (« Signaler comme indésirable »), « Ce n'est pas un indésirable » les remet dans Reçus ; rien n'est supprimé.
+- Ordinateur : le menu à gauche, la liste au milieu, le message ouvert à droite. Téléphone : le message en plein écran, Retour ramène au même endroit (dossier, chantier déplié, défilement).
+- Règle changée : avant, les brouillons mêlés aux demandes envoyées dans « Toutes » → repliés en bas de Demandes, « À terminer (N) » (étape `parties` de `/v1/projects`) ; le filtre « À préparer » reste ; « Sélectionner » les déplie.
+- Fiche d'une demande : un négoce une seule fois (le bloc du suivi ne montre plus que les négoces qui ont quelque chose à dire : question, refus, conditions).
+- Tests : `apps/api/test/messagerie.test.ts`, `e2e/messagerie.spec.ts`.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

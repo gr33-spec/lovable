@@ -234,7 +234,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await page.goto("/messages");
   await page.getByRole("link", { name: /^Mon site, Paul Client, non lu/ }).click();
   await expect(page.getByRole("heading", { name: "Paul Client", level: 1 })).toBeVisible();
-  await expect(page.getByText("Bonjour, j'ai une fuite sur ma toiture.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Message du client" }).getByText("Bonjour, j'ai une fuite sur ma toiture.")).toBeVisible();
   await expect(page.getByRole("link", { name: "Appeler Paul Client" })).toHaveAttribute("href", "tel:0600000000");
   await page.goto("/mon-site");
   await expect(page.getByRole("heading", { name: "Mon site", level: 1 })).toBeVisible();

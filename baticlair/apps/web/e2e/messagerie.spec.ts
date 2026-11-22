@@ -107,7 +107,8 @@ test("messagerie : Reçus par chantier, Répondre depuis Mobiiz, Envoyés, Retou
   const { adresse } = await inscrire(page);
   const { etiquette } = await demandeEnvoyee(page);
   const nom = adresse.split("@")[0]!;
-  await emailRecu(page, `${nom}+r${etiquette}@mobiiz.test`, "Re: votre demande");
+  // Relu comme chez Resend, avec son authentification (sans elle, il irait « à classer »).
+  await emailRecu(page, `${nom}+r${etiquette}@mobiiz.test`, "Re: votre demande", { attachmentsBase64: [] });
   await page.goto("/messages");
   await expect(page.getByRole("heading", { name: "Messages" })).toBeVisible();
   await expect(page.getByRole("group", { name: "Dossiers" }).getByRole("button")).toHaveText(["Reçus", "Envoyés", "Indésirables"]);
@@ -140,7 +141,7 @@ test("messagerie : Reçus par chantier, Répondre depuis Mobiiz, Envoyés, Retou
   await expect(envoyes.getByText("Ta réponse")).toBeVisible();
   await expect(envoyes.getByText("Demande de prix")).toBeVisible();
   // Un message sans demande, signalé indésirable, puis remis.
-  await emailRecu(page, adresse, "Promo du mois", { from: "Pub <promo@pub.example>" });
+  await emailRecu(page, adresse, "Promo du mois", { from: "Pub <promo@pub.example>", attachmentsBase64: [] });
   await page.getByRole("group", { name: "Dossiers" }).getByRole("button", { name: "Reçus" }).click();
   await page.getByRole("link", { name: /E-mail à classer, Pub/ }).click();
   const zone2 = ordi ? page.getByRole("region", { name: "Message ouvert" }) : page;

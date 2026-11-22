@@ -161,7 +161,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
     }
   }
 
-  const choisies = items && selection ? items.filter((p) => selection.has(p.id)) : [];
+  const choisies = items && selection ? [...items, ...brouillons].filter((p) => selection.has(p.id)) : [];
   return (
     <>
       {/* « Mes demandes » + « Créer un quantitatif » + Aide débordaient d'un iPhone SE : les actions passent à la ligne.
@@ -235,7 +235,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
               </button>
             ))}
           </div>
-          {filter === "toutes" && items && items.length > 0 && !selection ? (
+          {filter === "toutes" && items && (items.length > 0 || brouillons.length > 0) && !selection ? (
             <button type="button" onClick={() => setSelection(new Set())} className="ml-auto min-h-11 shrink-0 px-1 text-[15px] font-bold whitespace-nowrap text-accent-text">
               Sélectionner
             </button>
@@ -302,7 +302,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
 
       {/* Les brouillons, repliés en bas (Greg, 22 novembre 2026) : ils ne noient plus les demandes envoyées. */}
       {avecBrouillons && brouillons.length > 0 ? (
-        <details className="group rounded-[20px] border border-line bg-surface">
+        <details open={selection ? true : undefined} className="group rounded-[20px] border border-line bg-surface">
           <summary className="pressable flex min-h-13 cursor-pointer list-none items-center justify-between gap-3 px-4 text-[16px] font-extrabold [&::-webkit-details-marker]:hidden">
             <span>
               À terminer ({brouillons.length}
@@ -315,7 +315,10 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
           <ul className="grid grid-cols-1 gap-2.5 px-3 pb-3 lg:grid-cols-2">
             {brouillons.map((p) => (
               <li key={p.id}>
-                <CarteListe projet={p} selection={null} occupe={verif} onSupprimer={() => void demanderSuppression([p])} onTerminer={() => void basculerTerminee(p).then(rechargerBrouillons)} />
+                <CarteListe
+                  projet={p}
+                  selection={selection ? { coche: selection.has(p.id), basculer: () => setSelection((s) => { const n = new Set(s); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n; }) } : null}
+                  occupe={verif} onSupprimer={() => void demanderSuppression([p])} onTerminer={() => void basculerTerminee(p).then(rechargerBrouillons)} />
               </li>
             ))}
           </ul>
