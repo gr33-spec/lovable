@@ -128,7 +128,8 @@ export class ReponsesRecuesService {
       return { traite: false, raison: "boucle" };
     }
     const lu = evenement.email_id ? await lecteur.lire(evenement.email_id).catch(() => null) : null;
-    const recu: EmailRecu = lu ?? {
+    // Le corps relu sans expéditeur garde celui de l'enveloppe (jamais « adresse illisible » pour un message ordinaire).
+    const recu: EmailRecu = lu ? { ...lu, from: lu.from || from } : {
       from,
       to,
       subject: evenement.subject ?? "",

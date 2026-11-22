@@ -208,7 +208,7 @@ export async function renvoyerContact(
     return { traite: false, raison: "boucle" };
   }
   const lu = evenement.email_id ? await lecteur.lire(evenement.email_id) : null;
-  const recu: EmailRecu = lu ?? {
+  const recu: EmailRecu = lu ? { ...lu, from: lu.from || (evenement.from ?? "") } : {
     from: evenement.from ?? "",
     to,
     subject: evenement.subject ?? "",
