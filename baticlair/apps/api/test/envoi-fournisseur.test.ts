@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { cocherLesNaissances } from "./support/suggestions.js";
+import { attendreLaQuestionDesCrochets } from "./support/crochets.js";
 import { pdfPageCount } from "../src/modules/documents/index.js";
 import { packetDocument, packetDocumentLines, packetMail, packetPdf, priceLeak, type SupplierPacket } from "../src/modules/price-requests/application/supplier-packet.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type Agent, type TestContext } from "./support/test-app.js";
@@ -37,6 +38,9 @@ async function chantierPret(agent: Agent) {
   await cocherLesNaissances(agent, q.id);
   await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: "engine:param:nb_descentes", valeur: "2" }] });
   let current = (await agent.get(`/v1/quantitatifs/${q.id}`)).body;
+  // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : un crochet par ardoise, sans question).
+  // Le devis écrit « posées au crochet », sans type : la question est posée ; le premier bouton répond « À agrafe ».
+  attendreLaQuestionDesCrochets(current.questions);
   for (let i = 0; i < 10 && current.questions.length > 0; i++) {
     const question = current.questions[0];
     current = (await agent.post(`/v1/quantitatifs/${q.id}/reponses`).send({ reponses: [{ question: question.id, valeur: question.boutons[0]?.valeur ?? "ok" }] })).body;
@@ -61,10 +65,18 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(packet).toMatchObject({ entreprise: "Toitures Martin", chantier: "Dupont — réfection toiture", joindre_detail: true });
     // Bloc 1 : les lignes prêtes à charger (ardoises, crochets, liteaux, gouttière…), jamais une mesure en m².
     // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises à l'égout, sur la longueur de la gouttière du devis (24 m ÷ 0,22 m
-    // = 109,09 ardoises), compté avant la perte : (8 936,01 + 109,09) × 1,05 = 9 497,36 → 9 498 ; avant 9 383 → 9 498. Crochets : 19 boîtes, inchangé.
+    // = 109,09 ardoises), compté avant la perte : (8 936,01 + 109,09) × 1,05 = 9 497,36 → 9 498 ; avant 9 383 → 9 498.
+    // Crochets (Greg, 22 novembre 2026, « À agrafe ») : avant 9 498 ÷ 500 = 19 boîtes de 500, un par ardoise, sans type ; maintenant
+    // à agrafe ⌈9 498 × 0,8⌉ = 7 599 → 7 599 ÷ 500 = 15,2 → 16 boîtes de 500, et à pointe ⌈9 498 × 0,2⌉ = 1 900 → 1 900 ÷ 700 = 2,7 → 3 boîtes de 700.
     expect(packet.articles).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 498 pièces/), expect.stringMatching(/^Crochets d'ardoise inox Ø 2,7, longueur 11 cm : 19 boîtes de 500/), expect.stringMatching(/^Chatière de ventilation : 4 pièces/)]),
+      expect.arrayContaining([
+        expect.stringMatching(/^Ardoises naturelles Espagne 1er choix 30×22 : 9 498 pièces/),
+        expect.stringMatching(/^Crochets d'ardoise inox à agrafe Ø 2,7, longueur 11 cm : 16 boîtes de 500/),
+        expect.stringMatching(/^Crochets d'ardoise inox à pointe Ø 2,7, longueur 11 cm : 3 boîtes de 700/),
+        expect.stringMatching(/^Chatière de ventilation : 4 pièces/),
+      ]),
     );
+    expect(packet.articles.filter((a: string) => /^Crochets d'ardoise/.test(a))).toHaveLength(2);
     for (const a of packet.articles) expect(a).not.toMatch(/ : [\d\s,.]+ m²/);
     // Le chantier en bref : des faits (8 au plus), les réponses de l'artisan (2 descentes), jamais la pente par défaut.
     // Retour du fondateur (2026-10-11) : un seul texte descriptif.
@@ -77,7 +89,8 @@ describe("envoi fournisseur : un document, aucun prix", () => {
     expect(email.subject).toMatch(/^Toitures Martin : demande de prix( [a-zéèêçàâîôû]+)?, Brest$/);
     // Lot final, point 4 : le message de l'artisan remplace le texte libre ; la date et la pièce jointe restent écrites.
     // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Bonjour, » sans prénom (avant : le prénom du commercial), e-mail court.
-    expect(email.body).toMatch(/^Bonjour,\nLivraison sur chantier possible \?\nLa liste est en pièce jointe \(6 articles\)\.\n/);
+    // Greg, 22 novembre 2026 : les crochets se partagent (à agrafe, à pointe), une ligne de plus : 7 articles (avant 6).
+    expect(email.body).toMatch(/^Bonjour,\nLivraison sur chantier possible \?\nLa liste est en pièce jointe \(7 articles\)\.\n/);
     expect(email.body).toContain("Si possible, réponse souhaitée avant le 15 octobre.");
     // Greg, 12 novembre 2026 (dossier de corrections UX, point 5) : ces formulations ne reviennent pas.
     expect(email.body).not.toMatch(/plusieurs (fournisseurs|négoces)|détail du devis sans prix|achètent ensemble|rapidement/i);

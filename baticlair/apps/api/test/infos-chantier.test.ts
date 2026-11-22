@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { attendreLaQuestionDesCrochets, crochetsAAgrafe, QUESTION_CROCHETS } from "./support/crochets.js";
 import { attendreLaQuestionDeLEgout, egoutCompris, QUESTION_EGOUT } from "./support/egout.js";
 import { makePdf, type FixtureRow } from "./support/pdf-fixtures.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
@@ -34,10 +35,17 @@ describe("la note de l'artisan entre dans le calcul", () => {
     const cree = res.body as Q;
     expect(cree.infos.texte).toBe("Rénovation complète. Pente 35°. Rampant 6 m. Les Velux sont conservés.");
     // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
-    // C'est la SEULE question : ni la pente ni le rampant ne se demandent. Après « Oui », tout est comme avant.
-    expect(cree.questions.map((x) => x.id)).toEqual([QUESTION_EGOUT]);
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : un crochet par ardoise, sans question).
+    // Ce sont les DEUX seules questions : ni la pente ni le rampant ne se demandent. Après « Oui » et « À agrafe », les ardoises sont comme avant.
+    expect(cree.questions.map((x) => x.id)).toEqual([QUESTION_EGOUT, QUESTION_CROCHETS]);
     attendreLaQuestionDeLEgout(cree.questions);
-    const q = await egoutCompris<Q>(agent, cree.id);
+    attendreLaQuestionDesCrochets(cree.questions);
+    await egoutCompris<Q>(agent, cree.id);
+    const q = await crochetsAAgrafe<Q>(agent, cree.id);
+    // Les crochets se partagent (Greg, 22 novembre 2026) : à agrafe ⌈10 537 × 0,8⌉ = 8 430 → 8 430 ÷ 500 = 16,9 → 17 boîtes ;
+    // à pointe ⌈10 537 × 0,2⌉ = 2 108 → 2 108 ÷ 700 = 3,01 → 4 boîtes. Avant : 10 537 crochets sans type, 22 boîtes de 500.
+    expect(q.lignes.find((l) => /^Crochets d'ardoise inox à agrafe/.test(l.libelle))?.quantite).toBe(17);
+    expect(q.lignes.find((l) => /^Crochets d'ardoise inox à pointe/.test(l.libelle))?.quantite).toBe(4);
     // Sans note : 45° et rampant 5,5 m par défaut, 9 383 ardoises (test de la porte ; Brest en situation exposée). À 35° et 6 m de rampant, le
     // recouvrement du NF DTU 40.11 (table de 5,50 à 11 m, fiche couverture) monte : 10 537 ardoises (Brest exposée, fiche couverture).
     expect(ardoises(q).quantite).toBe(10537);

@@ -1243,6 +1243,45 @@ test("§48.5 : envoyer une partie de la liste à un fournisseur, le reste à un 
   await expect(list.getByRole("button", { name: "Voir la demande envoyée" })).toHaveCount(0);
 });
 
+test("la flèche du calcul (Greg, 21 et 22 novembre 2026) : elle déroule les postes sous la ligne ; le crayon ouvre « Modifier la quantité », un poste corrigé recalcule la ligne", async ({ page }) => {
+  await continuerQuandLesSuggestionsSOuvrent(page);
+  await signUp(page);
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-ardoise-zinguerie.pdf"));
+  await passQuestions(page);
+  await openList(page);
+  const list = page.getByRole("region", { name: "Liste des fournitures" });
+  const fleche = list.getByRole("button", { name: /^Voir le calcul : Ardoise/ }).first();
+  await expect(fleche).toBeVisible();
+  const nom = (await fleche.getAttribute("aria-label"))!.replace(/^Voir le calcul : /, "");
+  // La bulle de première utilisation, une seule fois.
+  await expect(list.getByText("Touche la flèche pour voir le calcul")).toHaveCount(1);
+  await fleche.click();
+  const detail = list.getByRole("region", { name: `Calcul : ${nom}` });
+  await expect(detail.getByText(/^Surface /)).toBeVisible();
+  await expect(detail.getByText(/^Perte \d+ %/)).toBeVisible();
+  await expect(list.getByText("Touche la flèche pour voir le calcul")).toHaveCount(0);
+  await list.getByRole("button", { name: `Masquer le calcul : ${nom}` }).click();
+  await expect(detail).toHaveCount(0);
+  // Le crayon : la feuille du bas, le nom, la quantité, « Calcul proposé », « Enregistrer ».
+  const ligne = list.getByRole("listitem").filter({ has: page.getByRole("button", { name: `Modifier la ligne : ${nom}` }) });
+  const avant = await ligne.innerText();
+  await page.getByRole("button", { name: `Modifier la ligne : ${nom}` }).click();
+  const feuille = page.getByRole("group", { name: `Ligne ouverte : ${nom}` });
+  await expect(feuille.getByRole("heading", { name: "Modifier la quantité" })).toBeVisible();
+  await expect(feuille.getByRole("heading", { name: "Calcul proposé" })).toBeVisible();
+  const surface = feuille.getByRole("textbox", { name: /^Corriger : Surface/ });
+  await surface.fill("50");
+  await feuille.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(feuille).toHaveCount(0);
+  await settle(page);
+  await expect.poll(() => ligne.innerText()).not.toBe(avant);
+  await expect(ligne.getByText("Modifié par toi")).toBeVisible();
+  await list.getByRole("button", { name: `Voir le calcul : ${nom}` }).click();
+  await expect(detail.getByText(/^Surface 50 m²/)).toBeVisible();
+  await expect(detail.getByText("modifié par toi")).toBeVisible();
+});
+
 test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon pour la modifier", async ({ page }) => {
   await continuerQuandLesSuggestionsSOuvrent(page);
   // Retour du fondateur (2026-10-10, capture iPhone) : « pouvoir cliquer directement sur un bouton pour valider, ligne par
