@@ -58,6 +58,8 @@ export interface PurchaseItem {
   rules?: RuleToConfirm[];
   /** §47.3 : les règles encore à confirmer sur ce chantier : la ligne est orange, « Quantité à confirmer : … ». */
   toConfirm?: RuleToConfirm[];
+  /** Le détail du calcul sous la flèche, poste par poste (`NeedResult.postes`) ; jamais dans le PDF ni l'e-mail. */
+  postes?: NonNullable<OwnedNeed["postes"]>;
   /** §49.2.5 « Info manquante » : les questions dont la réponse manque à cette ligne (elle est orange, un tap ouvre la question). */
   waitsOn?: string[];
   /**
@@ -399,6 +401,7 @@ export function supplierTest(designation: string, unit: string | null): string |
  */
 /** Défauts affichés, jamais demandés (§49.4.3 : zone climatique, entraxe, taux de perte, pureau ; situation exposée, lue à la commune). */
 const SHOWN_ONLY = new Set(["param:zone", "param:region_ardoise", "param:entraxe", "param:pureau", "param:situation"]);
+export const DEFAUTS_AFFICHES: ReadonlySet<string> = SHOWN_ONLY;
 
 function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
   const out: RuleToConfirm[] = [];
@@ -411,7 +414,7 @@ function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
     ...new Map(
       group
         .flatMap((n) => n.assumptions)
-        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key) && !a.shownOnly)
+        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && !a.sur && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key) && !a.shownOnly)
         .map((a) => [a.key, a]),
     ).values(),
   ];
@@ -526,6 +529,7 @@ function aggregate(
       lineIds: [...new Set(group.flatMap(owner))],
       state: "ready",
       assumptionKeys: [...new Set(group.flatMap((n) => n.assumptions.map((a) => a.key)))],
+      ...(group.some((n) => n.postes?.length) ? { postes: group.flatMap((n) => n.postes ?? []) } : {}),
       ...(() => {
         const rules = [...group.flatMap((n) => n.toConfirm ?? []), ...lineRules(key, group)].filter((r, i, all) => all.findIndex((x) => x.key === r.key) === i);
         return rules.length > 0 ? { rules } : {};

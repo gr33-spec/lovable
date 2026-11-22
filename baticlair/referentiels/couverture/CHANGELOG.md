@@ -1,5 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-78 — Le détail du calcul et « À vérifier » seulement sur une vraie hypothèse (Greg, 2026-11-22)
+
+Le banc du calcul ne bouge pas (100 sur 101) : rien ne change dans les quantités.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| « À vérifier » sur une ligne calculée | toute ligne qui portait une valeur par défaut, même déduite du devis ou validée | seulement une vraie hypothèse (valeur par défaut non validée), une règle non vérifiée, une estimation ou une réponse attendue ; la raison est dite ; sinon « Calculé » | Greg, 22 novembre 2026 |
+| Valeurs par défaut validées (`sur`) | — | tubes de 2 m, liteaux 18×40, bobine de 650 : dites, modifiables, jamais « à vérifier » à elles seules | Greg (19, 21 et 22 novembre 2026) |
+| Détail du calcul (`postes`) | une phrase | poste par poste : ardoises (surface, arêtiers, noues, faîtage, égout, perte) ; gouttière zinc (longueur, croisures, « 5 longueurs couvriraient 19,88 m ») ; un poste par défaut ailleurs | Greg, 22 novembre 2026 |
+
 ## roofing-2026.11.22-77 — Crochets d'ardoise : à agrafe ou à pointe (Greg, 2026-11-22)
 
 Le banc du calcul passe à 100 lignes justes sur 101 (99 %) ; examen 36 sur 36.

@@ -188,6 +188,11 @@ export interface ParamDefault extends Provenance {
   /** Pourquoi, en mots d'artisan (« Pente moyenne d'une toiture »). */
   note?: string;
   /**
+   * Valeur VALIDÉE par le fondateur (les tubes de 2 m) : dite, modifiable, mais elle ne rend pas la ligne « à vérifier »
+   * (Greg, 22 novembre 2026). Sans ce mot, une valeur par défaut est une hypothèse à vérifier.
+   */
+  sur?: true;
+  /**
    * Le devis nomme la chose sans la préciser (« zinc prépatiné » : quartz ou anthra ?) : l'hypothèse ne vaut plus,
    * on demande (règle du comptoir, §47.8). Mots cherchés dans les lignes de l'ouvrage.
    */
@@ -359,7 +364,7 @@ export interface Slot {
    * utilisée sans question, dite à l'artisan dans les hypothèses et modifiable.
    * Elle s'efface dès que le devis nomme un produit.
    */
-  usual?: { text: string; source: string; productShort?: string; productId?: string };
+  usual?: { text: string; source: string; productShort?: string; productId?: string; /** Article par défaut validé (voir `ParamDefault.sur`). */ sur?: true };
   /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
   measureOnly?: true;
   /**

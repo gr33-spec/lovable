@@ -62,6 +62,8 @@ export interface Assumption {
   computed?: true;
   /** Donnée que la fiche interdit de demander (`neverAsk` : le pureau, la largeur de bobine) : un défaut affiché, jamais à confirmer. */
   shownOnly?: true;
+  /** Valeur par défaut validée par le fondateur (`ParamDefault.sur`, `usual.sur`) : jamais « à vérifier » à elle seule. */
+  sur?: true;
 }
 
 /**
@@ -679,7 +681,7 @@ function computeNeed(
       if (o === "default") {
         const usual = slot.usual!;
         trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: `Par défaut : ${usual.text}`, origin: "assumption", verified: true });
-        assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text });
+        assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text, ...(usual.sur ? { sur: true as const } : {}) });
       } else if (o === "declined") {
         // Pas d'hypothèse à re-poser : l'artisan a déjà dit qu'aucun modèle proposé ne convenait.
         trace.push({ label: "Produit", value: `${product.shortLabel} (modèle à préciser)`, unit: "", from: "Aucun des modèles proposés ne convient : le fournisseur propose le sien pour cette quantité", origin: "project", verified: true });
@@ -863,7 +865,7 @@ function computeNeed(
       // Une valeur par défaut qui ne dit rien (« le devis n'en parle pas » : 0 m d'arêtier) n'est ni tracée ni dite en hypothèse.
       if (!def.silentDefault) {
         trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-        assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+        assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(d.sur ? { sur: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
       }
       return v;
     }

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-77",
+  "version": "roofing-2026.11.22-78",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -8022,7 +8022,8 @@
             "text": "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).",
             "source": "fondateur-pratique-2026-10-02",
             "productShort": "Liteaux 18×40",
-            "productId": "liteau-sapin-18x40"
+            "productId": "liteau-sapin-18x40",
+            "sur": true
           }
         },
         {
@@ -10324,7 +10325,8 @@
             "text": "Section 18×40 par défaut, comme l'ardoise naturelle.",
             "source": "fondateur-pratique-2026-10-02",
             "productShort": "Liteaux 18×40",
-            "productId": "liteau-sapin-18x40"
+            "productId": "liteau-sapin-18x40",
+            "sur": true
           }
         },
         {
@@ -17142,7 +17144,8 @@
           "usual": {
             "text": "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.",
             "source": "fondateur-reponses-2026-11-18",
-            "productId": "bobine-zinc-standard"
+            "productId": "bobine-zinc-standard",
+            "sur": true
           },
           "formOf": "couverture"
         },
@@ -21468,6 +21471,7 @@
           "kind": "site_data",
           "question": "Tubes de descente en longueurs de 2 m ou de 4 m ?",
           "default": {
+            "sur": true,
             "value": "2",
             "source": "fiche-couverture",
             "verification": {

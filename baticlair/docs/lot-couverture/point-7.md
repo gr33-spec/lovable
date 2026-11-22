@@ -7,7 +7,7 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Devis de test | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Deux descentes zinc de 5 m, dauphin à demander | 0 | 1 | 0 | 0 |
+| Deux descentes zinc de 5 m, dauphin à demander | 1 | 0 | 0 | 0 |
 | Une descente PVC en longueurs de 2 m, avec dauphin | 2 | 0 | 0 | 0 |
 
 ## Deux descentes zinc de 5 m, dauphin à demander
@@ -18,13 +18,9 @@ Devis de test :
 | --- | --- | --- |
 | 1 | Descente zinc Ø100, hauteur 5 m | 2 u |
 
-**À l'ouverture : 0 verte · 1 orange · 0 grise.**
+**À l'ouverture : 1 verte · 0 orange · 0 grise.**
 
 Questions du comptoir : aucune.
-
-| Ligne orange | Chiffre | Sous-ligne |
-| --- | --- | --- |
-| Tubes de descente zinc Ø100, longueur 2 m | 6 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
