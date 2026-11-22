@@ -83,7 +83,14 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   parcours-artisan, recentrage, deux-parcours, negocie-humain, achat-groupe). `dist` du moteur et site RECONSTRUITS sur la -73.
   Adaptation confiée à un agent (il ne touche qu'à `apps/web/e2e/`). À sa fin : lire son rapport (vrais défauts d'écran),
   commit, rejouer serveur complet sur la -73 (40 min, seul), puis parcours complets, puis rapport à Greg.
-- NE PAS reconstruire `dist` ni lancer de gros tests pendant que l'agent fait tourner les parcours.
+- 22 novembre (suite) : parcours adaptés par l'agent, tous verts sauf « 36 m de liteaux » → c'était un vrai défaut, corrigé
+  dans le moteur : la sortie de ventilation ne se propose que si la couverture elle-même est écrite avec sa surface. Moteur
+  1313 verts, `dist` et site reconstruits. Les cinq fichiers de parcours qui utilisent les aides de l'agent sont relancés
+  sur ordinateur (certaines listes sans surface ne verront plus la case : retirer le passage là où c'est le cas).
+- Défauts d'écran vus par l'agent, PAS corrigés (à dire à Greg) : (a) la carte « Suggestions » dit « J'ai lu ton devis »
+  même pour une liste écrite à la main ou dictée ; (b) l'API répond « prêt », `peut_partir: true`, alors que l'écran attend
+  encore l'étape « Suggestions » ; (c) la question de l'égout et les nouveaux nombres ne sont couverts par AUCUN parcours à
+  l'écran (les devis d'ardoise des parcours ont tous une gouttière) : un parcours à ajouter.
 - Les 3 lignes encore fausses : liteaux C01 (+ 10 % d'aboutage ?), feuilles de zinc de l'abergement C05 (3 contre 4),
   faîtières fibres-ciment C10 (le devis ne dit pas laquelle : question « Quelle faîtière ? » à proposer à Greg).
 - Demande de Greg du 22 novembre : l'AJOUT 2 devient une flèche qui déroule le détail (voir plus bas).
