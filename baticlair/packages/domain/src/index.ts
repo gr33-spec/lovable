@@ -49,6 +49,7 @@ export * from "./trust/completion.js";
 export * from "./trust/short-reason.js";
 export * from "./projects/site-name.js";
 export * from "./lecture/lecture.js";
+export * from "./lecture/orthographe.js";
 export * from "./lecture/par-le-code.js";
 export * from "./lecture/texte-du-devis.js";
 export * from "./lecture/controles.js";

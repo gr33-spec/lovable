@@ -1,4 +1,29 @@
-# À trancher par Greg (banc du calcul, mis à jour le 21 novembre 2026 au soir)
+# À trancher par Greg (banc du calcul)
+
+## NUIT DU 22 AU 23 NOVEMBRE 2026 — ce que tu dois trancher (option prudente prise en attendant)
+
+1. **C05, feuilles de zinc : 3 ou 4 ?** Avec ta règle (pièces = ml ÷ longueur, bandes par feuille = 100 ÷ développé), les
+   4 noues de 1,80 m (dév. 50) donnent 4 pièces → 2 feuilles, et l'abergement (périmètre 3 m × 1,3 = 3,9 ml, dév. 33) donne
+   2 pièces → 1 feuille : **3 feuilles**. La vérité du banc dit 4. Le banc garde « 3 » comme faux tant que tu n'as pas dit
+   laquelle est juste (si c'est 4 : l'abergement se compte-t-il côté par côté, 4 pièces ?).
+2. **Longueur des pièces pliées (1 m ou 2 m)** : tu la voulais « par pièce ». Je la pose UNE fois pour le devis (comme le
+   pliage), changeable pièce par pièce, 2 m par défaut, et seulement quand elle change la commande. Tu confirmes ?
+3. **Pièces de 1 m** : j'ai compté deux pièces de 1 m par bande de 2 m. Juste ?
+4. **« Combien de feuilles ? »** quand le développé dépasse 1 m ou est inconnu : pas fait (prudence). La ligne reste « à
+   préciser » avec − / +. Tu veux vraiment la question ?
+5. **Chatières** : seule la HP 10 a sa section dans le catalogue du moteur (50 cm²). Une Volnay PV (C15) reste sans nombre
+   (« à chiffrer »). Il faut la section de la chatière Volnay (Terreal) : je cherche, ou tu la donnes ?
+6. **Crochets à pointe 1 sur 5** : une seule source chiffrée (manuel du CAP). On garde ?
+7. **Écran « Fournitures »** : le bouton jaune dit « Demander les prix » (ta maquette) ; pour les lecteurs d'écran il garde
+   « Demander les prix à mes négoces ». « Valider » / « Préciser » et « Voir le calcul » sont sous la ligne, en petit (sur un
+   petit iPhone, tout sur une ligne écrasait le nom).
+8. **Règle changée** : une ligne venue d'un devis ne dit plus « à vérifier » si elle est « Calculé » ou « Dit par toi » (avant,
+   point 31 du 27 octobre : toute ligne du devis restait « à vérifier » jusqu'à la validation). La note « Liste préparée à
+   partir de ton devis. Vérifie les quantités avant d'envoyer. » reste en haut.
+9. **Clous d'ardoise** : vendus en boîtes de 1 kg de clous cuivre 3 × 30 (≈ 418 au kg). Inox à la place ? (aucun catalogue
+   inox trouvé par la base couverture.)
+
+## Avant (21 novembre 2026 au soir)
 
 Le banc est à 81 lignes justes sur 100. Les 19 lignes qui restent dépendent presque toutes des points ci-dessous.
 

@@ -1,3 +1,4 @@
+import { devisAuPropre, ORTHOGRAPHE_KEY } from "./orthographe.js";
 import { Decimal } from "../shared/decimal.js";
 import { parseUnit, type UnitCode } from "../quantity/unit.js";
 import { paramsFromContext, type ChantierContext, type SiteFact } from "../referential/context.js";
@@ -779,7 +780,9 @@ export function ecranDeLecture(input: {
   // Greg, 20 novembre 2026 : le même devis donne toujours la même liste et les mêmes questions ; l'ouvrage, les articles et
   // les données d'une ligne sont décidés par le code d'après la fiche du métier, les questions par le calcul.
   const { ref } = input;
-  const lecture = lectureParLeCode(ref, input.lecture);
+  // Greg, 22 novembre 2026 : le devis remis au propre (fautes d'orthographe) avant tout calcul ; les doutes sont des questions.
+  const auPropre = devisAuPropre(ref, input.lecture, input.answers ?? {});
+  const lecture = lectureParLeCode(ref, auPropre.lecture);
   const answers = input.answers ?? {};
   const lignes = lignesDeLecture(lecture, input.ids).map((l) => {
     const edited = input.lines?.get(l.id);
@@ -1142,7 +1145,14 @@ export function ecranDeLecture(input: {
     const g = groupeDuNomSimple(a.key);
     return g !== null && (answers[g] !== undefined || live.some((x) => x.key === g));
   };
-  const questions = live.filter((a) => !answered(a) && !doublon(a)).map((a) => a.question);
+  // Les vrais doutes d'orthographe (Greg, 22 novembre 2026) : « Tu as écrit "…", c'est bien … ? », d'abord.
+  const doutesOrthographe: Question[] = auPropre.doutes.map((d) => ({
+    key: `${ORTHOGRAPHE_KEY}${d.mot}`,
+    kind: "choose",
+    text: d.question,
+    options: [...d.candidats.map((c) => ({ label: c, value: c })), { label: `Non, c'est bien « ${d.mot} »`, value: d.mot }],
+  }));
+  const questions = [...doutesOrthographe, ...live.filter((a) => !answered(a) && !doublon(a)).map((a) => a.question)];
   const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
   const raw = purchaseView(view, { ...engine, questions }, { plan, roles: roleOf, ref, validation });
