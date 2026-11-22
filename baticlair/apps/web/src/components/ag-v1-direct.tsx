@@ -3,10 +3,11 @@
 import { Check } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { CARTE, CaseAnonyme, LigneZone, Note, VerificationEntreprise, Volumes } from "@/components/ag-v1-commun";
 import { Button, INPUT, PageTitle } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
+import { useTyping } from "@/lib/typing";
 import { CASE_UNE_LIGNE, dateCourte, dateLongue, DELAI_MIN_JOURS_AG, jourDans, libelleLot, PHRASE_ADRESSE_PRIVEE, zoneLisible, type BesoinV1, type CompatibiliteV1, type EtatV1, type ProduitV1 } from "@/lib/ag-v1";
 
 type Etape = "produit" | "quantite" | "resultat" | "raison" | "verification" | "confirmer";
@@ -115,6 +116,59 @@ export function ConfirmerConditionnement({ produit, unite, parUnite, confirme, o
 }
 
 /**
+ * COMBIEN, DANS L'UNITÉ CHOISIE (Greg, 22 novembre 2026 : « je devrais pouvoir commencer par mettre mes quantités
+ * directement lorsque je clique sur mes linéaires ou longueurs, et ensuite passer à la suite »). Sous « Je compte en »,
+ * la question dit l'unité et ce qu'elle contient (« Combien de longueurs de 4 m ? »), la case est juste dessous, le total
+ * se lit aussitôt (« 12 longueurs = 48 m ») ; « Pas 4 m ? » corrige le conditionnement sur place. RÈGLE CHANGÉE : avant, un
+ * bloc « Conditionnement » à confirmer à part (« Confirmer 4 m par longueur »), puis la quantité à l'écran suivant ;
+ * maintenant le conditionnement est écrit dans la question et « Continuer » le confirme (jamais supposé : il est lu).
+ */
+function CombienEn({ produit, unite, parUnite, onParUnite, quantite, onQuantite, champ }: { produit: ProduitV1; unite: string; parUnite: number | null; onParUnite: (v: number | null) => void; quantite: string; onQuantite: (v: string) => void; champ: React.RefObject<HTMLInputElement | null> }) {
+  const c = produit.conditionnements.find((x) => x.unite.code === unite) ?? null;
+  const [corriger, setCorriger] = useState(false);
+  const u = c?.unite ?? produit.unite;
+  const q = Number(quantite.replace(",", "."));
+  const total = Number.isFinite(q) && q > 0 ? (c && parUnite ? `${nf(q)} ${unitesDe(q, c.unite)} = ${nf(q * parUnite)} ${unitesDe(q * parUnite, produit.unite)}` : `${nf(q)} ${unitesDe(q, u)}`) : null;
+  const ouvert = !!c && (corriger || !parUnite);
+  return (
+    <div className={`${CARTE} flex flex-col gap-2 p-4`}>
+      <label htmlFor="ag-quantite" className="text-[16px] font-semibold">
+        Combien de {u.pluriel}
+        {c && parUnite ? ` de ${nf(parUnite)} ${unitesDe(parUnite, produit.unite)}` : ""} ?
+      </label>
+      <div className="flex items-center gap-3">
+        <input ref={champ} id="ag-quantite" inputMode="decimal" enterKeyHint="done" value={quantite} onChange={(e) => onQuantite(e.target.value)} className={`${INPUT} w-36 text-[18px] font-semibold`} />
+        <span className="text-[16px]">{u.pluriel}</span>
+      </div>
+      {total ? (
+        <p role="status" className="text-[15px] font-semibold">
+          {total}
+        </p>
+      ) : null}
+      {c ? (
+        ouvert ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-ground p-3">
+            <label htmlFor="ag-par-unite" className="text-[15px]">
+              {produit.unite.pluriel} par {c.unite.singulier}
+            </label>
+            <input id="ag-par-unite" type="number" inputMode="decimal" min={1} value={parUnite ?? ""} onChange={(e) => onParUnite(e.target.value ? Number(e.target.value) : null)} className={`${INPUT} w-28`} />
+            {parUnite ? (
+              <button type="button" className="min-h-11 px-2 text-[15px] font-semibold underline underline-offset-4" onClick={() => setCorriger(false)}>
+                OK
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <button type="button" className="min-h-11 self-start text-[15px] text-muted underline underline-offset-4" onClick={() => setCorriger(true)}>
+            Pas {nf(parUnite!)} {unitesDe(parUnite!, produit.unite)} par {c.unite.singulier} chez toi ? Corriger
+          </button>
+        )
+      ) : null}
+    </div>
+  );
+}
+
+/**
  * L'ENTRÉE DIRECTE PAR PRODUIT (V5.2, écrans 2, 4, 5) : 1 choisir précisément le produit ; 2 quantité, livraison ou
  * retrait, date ; 3 rejoindre l'achat compatible (ou en ouvrir un s'il n'y en a pas), puis confirmer. La vérification de
  * l'entreprise n'apparaît que la première fois, avant la confirmation. Rien n'est créé avant le clic final.
@@ -138,8 +192,11 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   // Rejoindre un achat ouvert (recette du 18 novembre 2026) : l'unité proposée est celle du total affiché (les pièces), pour
   // que « 1000 » veuille dire la même chose pour tous ; la palette reste au choix. Avant : la palette d'office.
   const [unite, setUnite] = useState<string>(() => (uniteDite && produit && [produit.unite.code, ...produit.conditionnements.map((c) => c.unite.code)].includes(uniteDite) ? uniteDite : verrouille ? (produit?.unite.code ?? "") : (produit?.conditionnements[0]?.unite.code ?? produit?.unite.code ?? "")));
-  const [parUnite, setParUnite] = useState<number | null>(() => produit?.conditionnements[0]?.parDefaut ?? null);
+  const [parUnite, setParUnite] = useState<number | null>(() => produit?.conditionnements.find((c) => c.unite.code === unite)?.parDefaut ?? produit?.conditionnements[0]?.parDefaut ?? null);
+  // Le conditionnement est lu dans la question ; « Continuer » le confirme (Greg, 22 novembre 2026).
   const [conversionConfirmee, setConversionConfirmee] = useState(false);
+  const champQuantite = useRef<HTMLInputElement | null>(null);
+  const typing = useTyping();
   const [quantite, setQuantite] = useState(() => params.get("quantite") ?? "");
   const [reception, setReception] = useState<"livraison" | "retrait" | null>(() => (params.get("reception") === "livraison" || params.get("reception") === "retrait" ? (params.get("reception") as "livraison" | "retrait") : null));
   const [lieu, setLieu] = useState("");
@@ -160,7 +217,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
   const cond = produit?.conditionnements.find((c) => c.unite.code === unite) ?? null;
   const q = Number(quantite.replace(",", "."));
   const qOk = Number.isFinite(q) && q > 0;
-  const conversionOk = !cond || (!!parUnite && conversionConfirmee);
+  const conversionOk = !cond || !!parUnite;
   const nomExact = compat?.produit.nom ?? produit?.libelle ?? "";
   const quantiteLisible = produit && qOk ? (cond && parUnite ? `${nf(q)} ${unitesDe(q, cond.unite)} = ${nf(q * parUnite)} ${unitesDe(q * parUnite, produit.unite)}` : `${nf(q)} ${unitesDe(q, produit.unite)}`) : "";
 
@@ -209,12 +266,14 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
     }
   }
 
-  const manqueQuantite = [!qOk ? "la quantité" : null, !reception ? "livraison ou retrait" : null, lieu.trim().length < 3 ? "le lieu" : null, !dateBesoin ? "la date de besoin" : null].filter(Boolean);
+  const manqueQuantite = [!reception ? "livraison ou retrait" : null, lieu.trim().length < 3 ? "le lieu" : null, !dateBesoin ? "la date de besoin" : null].filter(Boolean);
   const bloque =
     etape === "produit" && produit && !complet
       ? "Choisis toutes les caractéristiques pour continuer."
       : etape === "produit" && produit && !conversionOk
-        ? "Confirme ou corrige le conditionnement pour continuer."
+        ? "Dis combien il y en a par conditionnement pour continuer."
+        : etape === "produit" && produit && !qOk
+          ? "Écris ta quantité pour continuer."
         : etape === "quantite" && !etat.zone
           ? "Ajoute l'adresse de ton entreprise (code postal) dans Profil pour continuer."
           : etape === "quantite" && manqueQuantite.length
@@ -228,7 +287,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
                   : etape === "confirmer" && !coche
                     ? "Coche la case pour confirmer."
                     : null;
-  const titre = etape === "produit" ? (verrouille ? "Ajoute ta quantité" : "Choisis précisément le produit") : etape === "quantite" ? "Combien, où et pour quand ?" : etape === "resultat" ? (compat?.compatible ? "Un achat groupé correspond" : "Aucun achat groupé compatible pour le moment") : etape === "raison" ? "Pourquoi cet achat groupé ne te convient pas ?" : etape === "verification" ? "Ton entreprise" : "Confirmer mon besoin";
+  const titre = etape === "produit" ? (verrouille ? "Ajoute ta quantité" : "Choisis précisément le produit") : etape === "quantite" ? "Où et pour quand ?" : etape === "resultat" ? (compat?.compatible ? "Un achat groupé correspond" : "Aucun achat groupé compatible pour le moment") : etape === "raison" ? "Pourquoi cet achat groupé ne te convient pas ?" : etape === "verification" ? "Ton entreprise" : "Confirmer mon besoin";
 
   return (
     <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-[40rem]">
@@ -258,14 +317,14 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
                   <div className="flex flex-wrap gap-2">
                     {[...produit.conditionnements.map((c) => c.unite), produit.unite].map((u) => (
                       <label key={u.code} className={`flex min-h-11 items-center gap-2 rounded-full border px-4 text-[15px] ${unite === u.code ? "border-ink font-bold" : "border-line"}`}>
-                        <input type="radio" name="unite" className="sr-only" checked={unite === u.code} onChange={() => setUnite(u.code)} />
+                        <input type="radio" name="unite" className="sr-only" checked={unite === u.code} onChange={() => { setUnite(u.code); setParUnite(produit.conditionnements.find((c) => c.unite.code === u.code)?.parDefaut ?? null); }} onClick={() => window.setTimeout(() => champQuantite.current?.focus(), 0)} />
                         {u.pluriel}
                       </label>
                     ))}
                   </div>
                 </fieldset>
               ) : null}
-              {cond ? <ConfirmerConditionnement produit={produit} unite={unite} parUnite={parUnite} confirme={conversionConfirmee} onChange={(v) => { setParUnite(v.parUnite); setConversionConfirmee(v.confirme); }} /> : null}
+              {complet ? <CombienEn produit={produit} unite={unite} parUnite={parUnite} onParUnite={setParUnite} quantite={quantite} onQuantite={setQuantite} champ={champQuantite} /> : null}
             </>
           )}
           {verrouille ? (
@@ -283,13 +342,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
       {etape === "quantite" && produit ? (
         <>
           <div className={`${CARTE} flex flex-col gap-4 p-4`}>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="ag-quantite" className="text-[14px] font-semibold">
-                Quantité ({(cond?.unite ?? produit.unite).pluriel})
-              </label>
-              <input id="ag-quantite" inputMode="decimal" value={quantite} onChange={(e) => setQuantite(e.target.value)} className={INPUT} />
-              {quantiteLisible ? <p className="text-[15px] font-semibold">{quantiteLisible}</p> : null}
-            </div>
+            {quantiteLisible ? <p className="text-[15px] font-semibold">{quantiteLisible}</p> : null}
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-1 text-[14px] font-semibold">Réception (obligatoire)</legend>
               {(["livraison", "retrait"] as const).map((r) => (
@@ -397,7 +450,7 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
         </p>
       ) : null}
 
-      <div data-barre-action className="fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 border-t border-line bg-ground px-4 pt-3 pb-2 lg:static lg:border-t-0 lg:bg-transparent lg:p-0">
+      <div data-barre-action data-typing={typing || undefined} className={`${typing ? "max-lg:pointer-events-none max-lg:translate-y-full max-lg:opacity-0 " : ""}fixed inset-x-0 bottom-[calc(var(--nav-height)+var(--nav-gap))] z-20 flex flex-col gap-2 transition-[translate,opacity] duration-200 border-t border-line bg-ground px-4 pt-3 pb-2 lg:static lg:border-t-0 lg:bg-transparent lg:p-0`}>
         {/* Greg, 7 novembre 2026 : la raison d'un bouton désactivé se lit tout de suite, juste au-dessus de lui. */}
         {bloque ? (
           <p role="status" className="text-center text-[14px] font-semibold text-ink">
@@ -405,12 +458,12 @@ export function ParcoursDirectV1({ etat: etat0 }: { etat: EtatV1 }) {
           </p>
         ) : null}
         {etape === "produit" && produit ? (
-          <Button className="w-full" disabled={!complet || !conversionOk} onClick={() => setEtape("quantite")}>
+          <Button className="w-full" disabled={!complet || !conversionOk || !qOk} onClick={() => { setConversionConfirmee(!!cond); setEtape("quantite"); }}>
             Continuer
           </Button>
         ) : null}
         {etape === "quantite" ? (
-          <Button className="w-full" pending={pending} disabled={!qOk || !reception || lieu.trim().length < 3 || !dateBesoin || !etat.zone} onClick={() => void chercher()}>
+          <Button className="w-full" pending={pending} disabled={!reception || lieu.trim().length < 3 || !dateBesoin || !etat.zone} onClick={() => void chercher()}>
             Continuer
           </Button>
         ) : null}

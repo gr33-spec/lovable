@@ -127,8 +127,9 @@ describe("1. faux négoce sur une vraie demande (l'étiquette a fuité : transfe
     const r = (await webhook("toitures-martin@mobiiz.fr", "Votre devis", "pirate@x.example")).body;
     const s = (await agent.get(`/v1/recus/demandes?email=${r.id}`)).body;
     expect(s.suggestion).toBeNull();
-    const recu = (await agent.get("/v1/recus")).body.items[0];
-    expect(recu.expediteur).not.toContain("dupont.example");
+    // Un nom affiché qui contient une adresse est suspect : le message va aux Indésirables, jamais affiché comme Dupont.
+    const recus = (await agent.get("/v1/recus")).body.items as { expediteur: string }[];
+    expect(recus.every((x) => !x.expediteur.includes("dupont.example"))).toBe(true);
   });
 });
 

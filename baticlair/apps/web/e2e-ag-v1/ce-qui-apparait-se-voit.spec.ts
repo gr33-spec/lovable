@@ -78,7 +78,7 @@ async function auDessusDesBarres(page: Page, l: Locator) {
     .toBe(true);
 }
 
-test("petit iPhone : toucher « longueurs » montre la question qui s'ouvre, au-dessus de « Continuer » ; rien n'est coincé sous les barres", async ({ page }, info) => {
+test("petit iPhone : toucher « longueurs » ouvre aussitôt « Combien de longueurs de … ? », au-dessus de « Continuer », et la case prend la saisie ; rien n'est coincé sous les barres", async ({ page }, info) => {
   test.skip(info.project.name !== "iphone-se", "Le petit iPhone est le cas qui cache le plus.");
   await inscrire(page);
   await page.goto("/achats-groupes/nouveau?type=gouttiere");
@@ -87,37 +87,44 @@ test("petit iPhone : toucher « longueurs » montre la question qui s'ouvre, au-
   await page.getByLabel("Matière").selectOption("zinc");
   await page.getByLabel("Développé").selectOption("33");
   // Comme sur le téléphone de Greg : le choix est tout en bas de ce qui se voit, juste au-dessus de la barre « Continuer ».
-  const longueurs = page.getByText("longueurs", { exact: true });
+  const longueurs = page.getByRole("group", { name: "Je compte en" }).getByText("longueurs", { exact: true });
   await auRasDesBarres(page, longueurs);
   await toucher(longueurs);
-  // Ce qui s'ouvre (le conditionnement) est en vue, au-dessus de la barre « Continuer ».
-  const conditionnement = page.getByText(/^Conditionnement/);
-  await expect(conditionnement).toBeVisible();
-  await auDessusDesBarres(page, conditionnement);
+  // La question de la quantité, dans l'unité choisie, est là et la case a la main (Greg, 22 novembre 2026).
+  const champ = page.getByLabel(/^Combien de longueurs de [\d,]+ m \?$/);
+  await expect(champ).toBeFocused();
+  await champ.fill("12");
+  await expect(page.getByRole("status").filter({ hasText: /^12 longueurs = [\d\s,]+ m$/ })).toBeVisible();
+  // Pendant la saisie, la barre « Continuer » se range : jamais une barre qui flotte au milieu de l'écran.
+  await expect(page.locator("[data-barre-action]")).toHaveCSS("opacity", "0");
+  await champ.blur();
+  await expect(page.locator("[data-barre-action]")).toHaveCSS("opacity", "1");
+  await auDessusDesBarres(page, champ);
+  await expect(page.getByRole("button", { name: "Continuer" })).toBeEnabled();
   // En bas de page, le dernier lien n'est jamais sous les barres.
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const lien = page.getByRole("link", { name: "Je ne trouve pas mon produit" });
-  await auDessusDesBarres(page, lien);
-  // Le premier champ apparu (la correction du conditionnement) est amené en vue quand on l'ouvre.
-  const corriger = page.getByRole("button", { name: "Corriger" });
-  if (await corriger.isVisible()) {
-    await corriger.click();
-    await auDessusDesBarres(page, page.getByLabel(/par longueur$/));
-  }
+  await auDessusDesBarres(page, page.getByRole("link", { name: "Je ne trouve pas mon produit" }));
+  await page.getByRole("button", { name: "Continuer" }).click();
+  await expect(page.getByRole("heading", { name: "Où et pour quand ?" })).toBeVisible();
+  await expect(page.getByText(/^12 longueurs = /)).toBeVisible();
 });
 
-test("petit iPhone : « Ajoute ta quantité » (produit verrouillé), en longueurs : le lien « Pas exactement ton produit ? » se lit au-dessus des barres", async ({ page }, info) => {
+test("petit iPhone : « Ajoute ta quantité » (produit verrouillé), en longueurs : la quantité d'abord, et le lien « Pas exactement ton produit ? » se lit au-dessus des barres", async ({ page }, info) => {
   test.skip(info.project.name !== "iphone-se", "Le petit iPhone est le cas qui cache le plus.");
   await inscrire(page);
   // L'écran verrouillé, comme depuis la carte d'un achat ouvert par d'autres.
   await page.goto("/achats-groupes/nouveau?type=gouttiere&matiere=zinc&developpe=33&achat=verrouille");
   await zoneDuGeste(page);
   await expect(page.getByRole("heading", { name: "Ajoute ta quantité" })).toBeVisible();
-  const longueurs = page.getByText("longueurs", { exact: true });
+  const longueurs = page.getByRole("group", { name: "Je compte en" }).getByText("longueurs", { exact: true });
   await auRasDesBarres(page, longueurs);
   await toucher(longueurs);
-  await auDessusDesBarres(page, page.getByText(/^Conditionnement/));
+  const champ = page.getByLabel(/^Combien de longueurs de [\d,]+ m \?$/);
+  await expect(champ).toBeFocused();
+  await champ.blur();
+  await auDessusDesBarres(page, champ);
   // La barre grandit (la raison du bouton désactivé) : le bas de page garde toujours la place.
+  await expect(page.getByText("Écris ta quantité pour continuer.")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await auDessusDesBarres(page, page.getByRole("link", { name: "Pas exactement ton produit ? Saisis ton besoin" }));
 });

@@ -156,16 +156,21 @@ export function verdictEntrant(m: { de: string; authentification: Authentificati
  * Les liens d'un message externe, rendus NON CLIQUABLES (comme un filtre de messagerie) : « https://site.fr/x » devient
  * « hxxps://site[.]fr/x » ; une adresse « www.site.fr » devient « www[.]site[.]fr ». Le texte reste lisible.
  */
+/** « devis-dupont.pdf » est un nom de fichier, pas un site : il reste lisible (jamais « www. » devant). */
+const EXTENSIONS_DE_FICHIER = new Set(["pdf", "jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "doc", "docx", "xls", "xlsx", "odt", "ods", "csv", "txt", "dwg", "dxf"]);
+const nomDeFichier = (d: string): boolean => !/^www\./i.test(d) && EXTENSIONS_DE_FICHIER.has(d.slice(d.lastIndexOf(".") + 1).toLowerCase());
+
 export function liensDesactives(texte: string): string {
   return (
     texte
       // Tout schéma suivi de « :// », même collé à un mot (« voirhttps://… », « ftp:// ») : le « :// » est cassé.
       .replace(/h(?:tt|xx)p(s?):\/\//gi, (_m, s: string) => `hxxp${s}[:]//`)
-      .replace(/([a-z][a-z0-9+.-]*):\/\//gi, "$1[:]//")
+      .replace(/(?<![a-z0-9+.-])([a-z][a-z0-9+.-]{0,31}):\/\//gi, "$1[:]//")
       // Tout nom de domaine (« www.site.fr », « bit.ly/x », « site.com/login ») : ses points deviennent « [.] ».
       // Longueurs bornées (un nom de domaine fait au plus 63 caractères par partie) : jamais de calcul sans fin sur un
-      // texte énorme sans point (saboteur, 22 novembre 2026, corps de 3 Mo).
-      .replace(/\b((?:[a-z0-9-]{1,63}\.){1,8}[a-z]{2,24})(?=$|[\s/:?#)\]>"',;!]|\.(?:\s|$))/gi, (d: string) => d.replace(/\./g, "[.]"))
+      // texte énorme sans point (saboteur, 22 novembre 2026, corps de 3 Mo) ; un motif ne part qu'en début de mot, jamais
+      // de chaque lettre d'un mot géant.
+      .replace(/(?<![a-z0-9-])((?:[a-z0-9-]{1,63}\.){1,8}[a-z]{2,24})(?=$|[\s/:?#)\]>"',;!]|\.(?:\s|$))/gi, (d: string) => (nomDeFichier(d) ? d : d.replace(/\./g, "[.]")))
   );
 }
 
