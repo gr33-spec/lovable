@@ -295,7 +295,7 @@ export interface NeedResult {
   /** Colonne « précision » de la demande de devis (§45.3). */
   precision?: string;
   /** Le détail du calcul, poste par poste, puis la perte (voir `NeedRule.postes`). */
-  postes?: { id: string; texte: string; valeur: string; unite: string; cle?: string; perte?: true; info?: true }[];
+  postes?: { id: string; texte: string; valeur: string; unite: string; cle?: string; perte?: true; info?: true; /** La mesure que le poste utilise, à corriger d'un toucher. */ mesure?: { valeur: string; unite: string }; /** Mesure réécrite par l'artisan : « modifié par toi ». */ modifie?: true }[];
   /** Comment la quantité se compte (« pour 10 ml de gouttière, un tous les 50 cm + 1 en bout »), pour dire un écart avec le devis. */
   basis?: string;
   /** Cité par une ligne de pose sans être chiffré (le mot qui le cite : « fixation ») : la ligne sort orange (§49.6). */
@@ -1176,6 +1176,15 @@ function computeNeed(
     // Greg, 18 novembre 2026 : jamais « développé ? » dans une ligne ; la donnée qui manque se demande, elle ne s'écrit pas.
     const precision = rule.precision ? render(rule.precision, unknownParams.length > 0, true)?.replace(/,\s*[^,;]*\s\?(?=\s*(?:;|$))/g, "") : undefined;
     const basis = rule.basis ? render(rule.basis, false, true) : undefined;
+    // La mesure d'un poste (sa donnée) : la valeur lue, répondue ou par défaut, pour la corriger d'un toucher.
+    const mesureDe = (cle: string | undefined): { mesure?: { valeur: string; unite: string }; modifie?: true } => {
+      if (!cle) return {};
+      const def = work.params.find((x) => x.key === cle);
+      const given = input.params[cle];
+      const valeur = given?.value ?? (input.askInstead?.includes(cle) ? undefined : def?.default?.value);
+      if (!def || valeur === undefined) return {};
+      return { mesure: { valeur, unite: given?.unit ?? def.unit }, ...(given?.origin === "artisan" ? { modifie: true as const } : {}) };
+    };
     // Le détail du calcul (`postes`) : calculé seulement quand le besoin est exact ; leur somme doit faire le besoin.
     const postes = (() => {
       if (!exact) return undefined;
@@ -1200,7 +1209,7 @@ function computeNeed(
             const x = evaluateInterval(parseFormula(f), valueOf);
             return isPoint(x) ? fr(x.lo) : "?";
           });
-          if (!val.isZero()) out.push({ id: p.id, texte: (render(libelle, true, true) ?? libelle).replace(/\s+\?(?=\s|,|$)/g, ""), valeur: val.toDecimalPlaces(2).toFixed(), unite: rule.unit, ...(p.cle ? { cle: `param:${p.cle}` } : {}), ...(p.info ? { info: true as const } : {}) });
+          if (!val.isZero()) out.push({ id: p.id, texte: (render(libelle, true, true) ?? libelle).replace(/\s+\?(?=\s|,|$)/g, ""), valeur: val.toDecimalPlaces(2).toFixed(), unite: rule.unit, ...(p.cle ? { cle: `param:${p.cle}` } : {}), ...(p.info ? { info: true as const } : {}), ...mesureDe(p.cle) });
         } catch {
           return undefined;
         } finally {

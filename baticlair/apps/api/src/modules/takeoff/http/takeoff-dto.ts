@@ -1,5 +1,5 @@
 import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, phraseLotNonLu, phrasePrecision, precisionDeLigne, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
-import type { ArtisanView, PurchaseView } from "@baticlair/domain";
+import { verificationDeLaLigne, type ArtisanView, type Assumption, type PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
 
@@ -8,7 +8,7 @@ import type { ReviewedTakeoff } from "../application/takeoff.service.js";
  * mesure, et pour chaque élément sa PREUVE (« Voir le calcul ») — critères et
  * origines, calcul détaillé pour un besoin calculé. Aucun pourcentage.
  */
-function item(b: PurchaseView["toBuy"][number]) {
+function item(b: PurchaseView["toBuy"][number], assumptions: readonly Assumption[] = []) {
   return {
     key: b.key,
     label: b.label,
@@ -35,15 +35,21 @@ function item(b: PurchaseView["toBuy"][number]) {
      * en boutons ; vide quand elle est précise. Ne bloque jamais l'envoi à son négoce.
      */
     aPreciserPourGroupe: precisionDeLigne(b.label).questions,
+    /**
+     * Greg, 22 novembre 2026 : « Calculé » ou « À vérifier », et pourquoi (une vraie hypothèse, une réponse attendue) ; le
+     * détail du calcul poste par poste sous la flèche. Ni l'un ni l'autre ne part dans le PDF ni l'e-mail.
+     */
+    verification: verificationDeLaLigne(b, assumptions),
+    postes: (b.postes ?? []).map((x) => ({ id: x.id, texte: x.texte, valeur: x.valeur, unite: x.unite, cle: x.cle ?? null, perte: x.perte ?? false, info: x.info ?? false, mesure: x.mesure ?? null, modifie: x.modifie ?? false })),
   };
 }
 
 function purchaseDto(p: PurchaseView) {
   return {
     understood: p.understood,
-    toBuy: p.toBuy.map(item),
+    toBuy: p.toBuy.map((b) => item(b, p.assumptions)),
     /** §45.8 « On ajoute ? » : Oui / Non d'un tap (réponse « ajout:<clé> »), au plus huit. */
-    suggestions: p.suggestions.map(item),
+    suggestions: p.suggestions.map((b) => item(b, p.assumptions)),
     groups: p.groups.map((g) => ({ key: g.key, label: g.label, measure: g.measure, itemKeys: g.itemKeys })),
     toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
     assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [], named: a.named ?? false })),
