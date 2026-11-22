@@ -3732,6 +3732,9 @@ async function listePrete(page: Page, adresse: string, lignes: { libelle: string
 async function ajouterAuMois(page: Page, projectId: string, nature: "Un chantier signé" | "Du stock"): Promise<void> {
   await page.goto(`/chantiers/${projectId}`);
   const bloc = page.getByRole("region", { name: /^Regroupement d/ });
+  // La carte « Suggestions » (pointes de liteaux) passe avant le chantier : « Continuer », rien de coché.
+  await expect(bloc.or(carteSuggestions(page)).first()).toBeVisible({ timeout: 15_000 });
+  await passerLesSuggestions(page, []);
   await expect(bloc.getByText("Une commande toutes les deux semaines avec les artisans de ta région.")).toBeVisible();
   await expect(bloc.getByText(/^Clôture dans \d+ (j|h|min)/)).toBeVisible();
   await bloc.getByRole("button", { name: /^Ajouter à la commande d/ }).click();
