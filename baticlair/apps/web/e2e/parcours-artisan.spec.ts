@@ -1669,8 +1669,11 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   const cases = carte.getByRole("checkbox");
   // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; sans limite de nombre (skill du fondateur, 18/11/2026) : huit cases (pointes de liteaux et dauphins compris).
   // Greg, 21 novembre 2026 (soir) : la sortie de ventilation en plus. Greg, 22 novembre 2026 : « Pointes pour liteaux »
-  // seulement s'il y a des liteaux (ce devis n'en a pas) : huit cases (avant : neuf).
-  await expect(cases).toHaveCount(8);
+  // seulement s'il y a des liteaux (ce devis n'en a pas) : huit cases (avant : neuf). Puis (A-INTEGRER §3, 22 novembre 2026)
+  // « Clous d'ardoise (égout, rives, faîtage) » : neuf cases, rangées par catégorie.
+  await expect(cases).toHaveCount(9);
+  await expect(carte.getByRole("checkbox", { name: "Clous d'ardoise (égout, rives, faîtage)" })).not.toBeChecked();
+  await expect(carte.getByText("Fixations", { exact: true })).toBeVisible();
   await expect(carte.getByRole("checkbox", { name: /pointes/i })).toHaveCount(0);
   await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
   // Greg, 21 novembre 2026 (soir) : la sortie de ventilation est proposée sur toute couverture écrite avec sa surface et sans

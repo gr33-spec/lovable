@@ -216,12 +216,13 @@ export function SupplyList({
         <button
           type="button"
           onClick={() => document.getElementById(`ligne-${toCheck[0]!.key}`)?.scrollIntoView({ block: "center", behavior: "smooth" })}
-          className="pressable sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-11 items-center gap-2 self-start rounded-full border border-line bg-surface/95 px-4 shadow-card backdrop-blur"
+          aria-label={`${toCheck.length} ligne${toCheck.length > 1 ? "s" : ""} à vérifier`}
+          className="pressable sticky top-[max(8px,env(safe-area-inset-top))] z-20 mb-2 flex min-h-12 w-full items-center gap-2.5 rounded-xl border border-mark-warn/30 bg-warn-bg px-4 text-left shadow-card backdrop-blur"
         >
           <span className="size-2.5 shrink-0 rounded-full bg-mark-warn" aria-hidden="true" />
-          <span className="text-[14px] leading-tight font-semibold text-warn">
-            {toCheck.length} ligne{toCheck.length > 1 ? "s" : ""} à vérifier
-          </span>
+          {/* Maquette de Greg (22 novembre 2026) : « Quantités à vérifier », un bandeau sur toute la largeur. */}
+          <span className="text-[15px] leading-tight font-bold text-ink">Quantités à vérifier</span>
+          <span className="ml-auto text-[13px] font-bold text-warn">{`${toCheck.length} ligne${toCheck.length > 1 ? "s" : ""}`}</span>
         </button>
       ) : null}
       <header className="mb-3 flex flex-col gap-0.5">
@@ -336,21 +337,21 @@ export function SupplyList({
           )}
         </h4>
       ) : null}
-      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col gap-2">
+      <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className={`flex flex-col ${selecting ? "gap-2" : "border-t border-line"}`}>
         {section.rows.map(rangee)}
       </ul>
       </div>
       ))}
       {autres.length > 0 ? (
-        <details className="group mt-3 rounded-xl">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-1 text-[15px] font-extrabold">
+        <details className="group border-b border-line">
+          <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-2 text-[15px] font-extrabold">
             <span>Autres fournitures</span>
             <span className="flex items-center gap-1.5 text-[13px] font-bold text-muted">
               {`${autres.length} ligne${autres.length > 1 ? "s" : ""}`}
               <ChevronDown size={16} aria-hidden="true" className="transition-transform group-open:rotate-180" />
             </span>
           </summary>
-          <ul aria-label="Autres fournitures" className="flex flex-col gap-2 pt-1">
+          <ul aria-label="Autres fournitures" className="flex flex-col border-t border-line">
             {autres.map(rangee)}
           </ul>
         </details>
@@ -474,9 +475,10 @@ export function SupplyList({
             >
               {onPreview ? (
                 // Sur un iPhone étroit, « Aperçu » garde son œil seul : « Demander les prix à mes négoces » tient sur une ligne.
-                <Button variant="secondary" aria-label="Aperçu" className="w-13 shrink-0 px-0! text-[15px] min-[400px]:w-auto min-[400px]:px-3.5!" onClick={onPreview}>
-                  <Eye size={18} aria-hidden="true" className="shrink-0" />
-                  <span className="hidden min-[400px]:inline">Aperçu</span>
+                // Maquette de Greg (22 novembre 2026) : deux boutons côte à côte, « Aperçu » et « Demander les prix ».
+                <Button variant="secondary" aria-label="Aperçu" className="min-w-0 flex-1 px-3 text-[15px]" onClick={onPreview}>
+                  <Eye size={18} aria-hidden="true" className="hidden shrink-0 min-[400px]:block" />
+                  Aperçu
                 </Button>
               ) : null}
               {sent ? (
@@ -486,7 +488,8 @@ export function SupplyList({
                 </Button>
               ) : (
                 <Button
-                  className="min-w-0 flex-1 gap-1.5 px-4 py-1.5 text-center text-[15px] leading-tight font-bold! tracking-[-0.01em] text-balance shadow-card!"
+                  aria-label="Demander les prix à mes négoces"
+                  className="min-w-0 flex-[1.4] gap-1.5 px-4 py-1.5 text-center text-[15px] leading-tight font-bold! tracking-[-0.01em] text-balance shadow-card!"
                   pending={pending}
                   onClick={() => {
                     if (toCheck.length === 0) return onSend();
@@ -497,7 +500,7 @@ export function SupplyList({
                   {/* Sur un iPhone étroit, l'icône cède sa place. Revue UX (8 novembre 2026) : le texte débordait du bouton
                       jaune (iPhone SE, colonne du milieu sur ordinateur) ; il passe à la ligne plutôt que d'être coupé. */}
                   <Send size={18} aria-hidden="true" className="hidden min-[400px]:block" />
-                  Demander les prix à mes négoces
+                  Demander les prix
                 </Button>
               )}
               {blocked && toCheck.length > 0 && !sent ? (
@@ -868,10 +871,10 @@ function Row({
   const body = (
     <>
       {opens ? null : <StatusMark ok={dot.ok} label={dot.label} />}
-      <span aria-hidden="true" className={`mt-[7px] size-2 shrink-0 rounded-full ${sentTo ? "bg-line" : point}`} />
       <span className="flex min-w-0 grow flex-col">
-        {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé). Sur téléphone, la quantité passe dessous. */}
-        <span className="text-[14px] leading-snug font-semibold">{label}</span>
+        {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé, il passe à la ligne). Maquette de Greg (22 novembre
+            2026) : le nom en gras, la précision dessous, le point et la quantité à droite. */}
+        <span className="text-[15px] leading-snug font-bold">{label}</span>
         {/* La précision (Greg, 1er novembre 2026 : « Rouge vieilli » sous la désignation) : une ligne discrète, coupée
             proprement sur téléphone, en entier au survol ; c'est celle qui part dans le PDF. */}
         {item?.precision ? (
@@ -887,14 +890,20 @@ function Row({
         ) : null}
         {/* Greg, 7 novembre 2026 : la famille est le titre de la section ; un badge seulement quand elle est incertaine. */}
         {row.familleIncertaine ? <span className="self-start rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-bold text-warn">Famille à vérifier</span> : null}
-        {quantity || sub ? (
+        {sub || !dot.ok ? (
           <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 text-[13px] leading-snug">
-            {quantity ? <span className="shrink-0 text-[14px] font-extrabold tabular-nums sm:hidden">{quantity}</span> : null}
-            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : "font-bold text-warn"}`}>{sub}</span> : !dot.ok ? <span className="min-w-0 font-bold text-warn">À vérifier</span> : null}
+            {sub ? <span className={`min-w-0 ${sentTo ? "font-bold text-muted" : "font-bold text-warn"}`}>{sub}</span> : <span className="min-w-0 font-bold text-warn">À vérifier</span>}
           </span>
         ) : null}
       </span>
-      <span className="shrink-0 text-right text-[15px] font-extrabold whitespace-nowrap tabular-nums max-sm:hidden">{quantity ?? ""}</span>
+      {quantity ? (
+        <span className="flex max-w-[45%] shrink-0 items-center gap-1.5 self-center text-right text-[15px] leading-tight font-extrabold tabular-nums">
+          <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${sentTo ? "bg-line" : point}`} />
+          <span>{quantity}</span>
+        </span>
+      ) : (
+        <span aria-hidden="true" className={`size-2 shrink-0 self-center rounded-full ${sentTo ? "bg-line" : point}`} />
+      )}
     </>
   );
   // §48.5 : en mode sélection, la ligne entière coche sa case ; rien d'autre ne s'ouvre.
@@ -924,9 +933,7 @@ function Row({
   return (
     <li
       id={`ligne-${row.key}`}
-      className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-xl border border-line bg-surface px-3 py-2 transition-[background-color,box-shadow] duration-200 ${
-        dot.ok ? "" : "border-mark-warn/60"
-      } ${open ? "z-[51]" : ""}`}
+      className={`relative flex scroll-mt-24 flex-col gap-1 overflow-hidden border-b border-line py-2 transition-[background-color] duration-200 ${open ? "z-[51]" : ""}`}
     >
       {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
           flou la referme. */}
@@ -968,7 +975,7 @@ function Row({
         </span>
       ) : null}
       <div
-        className={`relative ${open ? "" : "bg-surface"}`}
+        className={`relative ${open ? "" : "bg-ground"}`}
         style={{ transform: dx ? `translateX(${dx}px)` : undefined, touchAction: "pan-y" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -991,6 +998,26 @@ function Row({
             >
               {body}
             </button>
+            {/* Ouverte, le crayon devient une croix : on voit comment refermer (retour du fondateur, 2026-10-10). */}
+            <button
+              type="button"
+              onClick={() => {
+                setNaming(false);
+                setOpen(!open);
+              }}
+              aria-label={`${open ? "Fermer la ligne" : "Modifier la ligne"} : ${label}`}
+              className="pressable flex size-11 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-ink active:bg-ground"
+            >
+              {open ? <X size={20} aria-hidden="true" /> : <Pencil size={18} aria-hidden="true" />}
+            </button>
+          </div>
+        ) : (
+          <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
+        )}
+        {/* Maquette de Greg (22 novembre 2026) : la ligne garde le nom, la quantité et le crayon ; dessous, en petit, « Voir le
+            calcul » (la flèche) et, sur une ligne à vérifier, « Valider » ou « Préciser ». */}
+        {opens && !open && (postes.length > 0 || !dot.ok) ? (
+          <div className="flex flex-wrap items-center gap-2">
             {/* Greg, 22 novembre 2026 : une petite flèche discrète déroule le détail du calcul juste en dessous. */}
             {postes.length > 0 && !open ? (
               <span className="relative shrink-0">
@@ -999,12 +1026,13 @@ function Row({
                   onClick={voirLeCalcul}
                   aria-expanded={calcul}
                   aria-label={`${calcul ? "Masquer le calcul" : "Voir le calcul"} : ${label}`}
-                  className="pressable flex size-11 items-center justify-center rounded-full text-muted active:bg-ground"
+                  className="pressable inline-flex min-h-11 items-center gap-1 rounded-full pr-2 text-[13px] font-bold text-muted active:bg-ground"
                 >
-                  <ChevronDown size={18} aria-hidden="true" className={`transition-transform ${calcul ? "rotate-180" : ""}`} />
+                  Voir le calcul
+                  <ChevronDown size={16} aria-hidden="true" className={`transition-transform ${calcul ? "rotate-180" : ""}`} />
                 </button>
                 {bulle && !bulleVue ? (
-                  <span role="note" className="pointer-events-none absolute right-0 bottom-full z-10 mb-1 w-max max-w-[220px] rounded-xl bg-ink px-3 py-2 text-[13px] leading-snug font-semibold text-white shadow-card">
+                  <span role="note" className="pointer-events-none absolute left-0 bottom-full z-10 mb-1 w-max max-w-[220px] rounded-xl bg-ink px-3 py-2 text-[13px] leading-snug font-semibold text-white shadow-card">
                     Touche la flèche pour voir le calcul
                   </span>
                 ) : null}
@@ -1024,27 +1052,13 @@ function Row({
                   }
                 }}
                 aria-label={quick ? `Valider : ${label}` : `À préciser, ouvrir : ${label}`}
-                className="pressable inline-flex min-h-11 shrink-0 items-center rounded-full bg-ink px-3 text-[13px] font-semibold text-white disabled:opacity-50"
+                className="pressable inline-flex min-h-10 shrink-0 items-center rounded-full bg-ink px-3.5 text-[13px] font-semibold text-white disabled:opacity-50"
               >
                 {quick ? "Valider" : "Préciser"}
               </button>
             ) : null}
-            {/* Ouverte, le crayon devient une croix : on voit comment refermer (retour du fondateur, 2026-10-10). */}
-            <button
-              type="button"
-              onClick={() => {
-                setNaming(false);
-                setOpen(!open);
-              }}
-              aria-label={`${open ? "Fermer la ligne" : "Modifier la ligne"} : ${label}`}
-              className={`pressable flex size-11 shrink-0 items-center justify-center rounded-full active:bg-ground ${open ? "border border-line bg-surface text-ink" : "text-muted"}`}
-            >
-              {open ? <X size={20} aria-hidden="true" /> : <Pencil size={18} aria-hidden="true" />}
-            </button>
           </div>
-        ) : (
-          <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
-        )}
+        ) : null}
       </div>
       {calcul && !open && postes.length > 0 ? <DetailDuCalcul label={label} postes={postes} raisons={raisons} /> : null}
       {/* Greg, 17 novembre 2026 : le nombre de feuilles de zinc est une estimation, il s'ajuste d'un toucher dans la liste,
@@ -1063,8 +1077,8 @@ function Row({
           className="fixed inset-x-0 bottom-0 z-[52] mx-auto flex max-h-[88dvh] w-full max-w-lg flex-col gap-2 overflow-y-auto overscroll-contain rounded-t-[20px] bg-surface px-4 pt-2 pb-[max(16px,env(safe-area-inset-bottom))] text-ink shadow-[0_-12px_40px_-12px_rgba(19,9,1,0.45)] lg:bottom-6 lg:rounded-[20px]"
         >
           <span aria-hidden="true" className="mx-auto mb-1 h-1 w-10 shrink-0 rounded-full bg-line" />
-          <h3 className="text-[13px] font-bold tracking-[0.04em] text-muted uppercase">{item && postes.length > 0 ? "Modifier la quantité" : "Modifier la ligne"}</h3>
-          <p className="text-[17px] leading-snug font-extrabold">{label}</p>
+          <h3 className="text-[24px] leading-tight font-extrabold tracking-[-0.02em]">{item ? "Modifier la quantité" : "Modifier la ligne"}</h3>
+          <p className="-mt-1 text-[16px] leading-snug font-semibold text-muted">{label}</p>
           {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}
           {error ? <ErrorNotice error={error} /> : null}
           {stepper ? (
