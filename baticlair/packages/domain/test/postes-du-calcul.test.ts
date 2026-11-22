@@ -19,7 +19,7 @@ describe("les postes du calcul", () => {
     const lecture = parseLecture(JSON.parse(readFileSync(new URL("./banc-couverture/C01.json", import.meta.url), "utf8")).lecture)!;
     const ardoises = besoins(lecture).find((n) => n.needId === "ardoises")!;
     expect(ardoises.postes?.map((p) => p.texte)).toEqual(["Surface 96 m² × 39,6 au m²", "Faîtage 8 ml, 1 rang", "Égout 16 ml (la gouttière), 1 rang", "Perte 5 %"]);
-    expect(ardoises.postes?.find((p) => p.id === "surface")?.cle).toBe("param:surface");
+    expect(ardoises.postes?.find((p) => p.id === "surface")?.cle).toMatch(/^param:surface@/);
     const total = ardoises.postes!.reduce((s, p) => s + Number(p.valeur), 0);
     expect(total).toBeCloseTo(Number(ardoises.quantity!.value), 1);
   });

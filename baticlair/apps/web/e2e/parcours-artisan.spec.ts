@@ -1270,7 +1270,8 @@ test("§49.8 : sur chaque ligne, un ✓ pour valider sans l'ouvrir, et un crayon
   await expect(ouverte).toHaveCount(1);
   // Retour du fondateur (2026-10-10) : « on ne comprend pas comment la fermer ». Le crayon devient une croix, et la ligne
   // ouverte a son bouton « Fermer » en bas.
-  await ouverte.getByRole("button", { name: "Fermer", exact: true }).click();
+  // Greg, 22 novembre 2026 : la ligne s'ouvre en feuille qui monte du bas ; « Enregistrer » la ferme.
+  await ouverte.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(ouverte).toHaveCount(0);
   await list.getByRole("button", { name: /^Modifier la ligne : / }).first().click();
   await expect(ouverte).toHaveCount(1);
@@ -1376,7 +1377,7 @@ test("§50.7 : une ligne ouverte passe au premier plan, le reste flouté ; un ta
   await expect(voile).toHaveCount(0);
 });
 
-test("une ligne ouverte en bas d'un petit écran se montre en entier, et un glissement sur le flou fait défiler la page", async ({ page }) => {
+test("une ligne ouverte en bas d'un petit écran se montre en entier (feuille du bas), et un glissement sur le flou ne la referme pas", async ({ page }) => {
   // Retour de Greg (12 novembre 2026, captures test.mobiiz.fr dans un navigateur à barres haute et basse) : la ligne ouverte
   // ne montrait que « Modifier le nom », ses boutons sous l'écran ; « Ici je ne peux pas scroller pour modifier ».
   await signUp(page);
@@ -1393,20 +1394,20 @@ test("une ligne ouverte en bas d'un petit écran se montre en entier, et un glis
   const ouverte = list.getByRole("group", { name: /^Ligne ouverte : / });
   await expect(ouverte).toHaveCount(1);
   // La page a défilé d'elle-même : la ligne ouverte tient dans l'écran, boutons compris (ou son haut est sous l'en-tête).
+  // Greg, 22 novembre 2026 : elle s'ouvre en feuille collée en bas de l'écran ; « Enregistrer » est à portée du pouce.
   await expect
     .poll(async () => ouverte.evaluate((el) => {
-      const r = el.closest("li")!.getBoundingClientRect();
-      return r.bottom <= window.innerHeight || r.top <= 100;
+      const r = el.getBoundingClientRect();
+      return r.bottom <= window.innerHeight + 1 && r.top >= 0;
     }))
     .toBe(true);
-  // Un glissement sur le flou fait défiler la page, sans refermer la ligne.
-  const avant = await page.evaluate(() => window.scrollY);
+  await expect(ouverte.getByRole("button", { name: "Enregistrer", exact: true })).toBeVisible();
+  // Greg, 22 novembre 2026 : la feuille tient dans l'écran et défile d'elle-même ; un glissement sur le flou ne la referme pas.
   await page.mouse.move(8, 400);
   await page.mouse.down();
   await page.mouse.move(8, 340, { steps: 4 });
   await page.mouse.move(8, 280, { steps: 4 });
   await page.mouse.up();
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(avant + 60);
   await expect(ouverte).toHaveCount(1);
   // Un appui sans glisser referme toujours.
   await page.getByRole("button", { name: "Fermer la ligne ouverte" }).click({ position: { x: 8, y: 8 } });
@@ -1627,8 +1628,10 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   await expect(carte.getByText("Coche ce qu'il te faut, on l'ajoute à ta liste.")).toBeVisible();
   const cases = carte.getByRole("checkbox");
   // Greg, 18 novembre 2026 : les consommables sont des cases aussi (plus jamais d'office, plus de question oui / non) ; sans limite de nombre (skill du fondateur, 18/11/2026) : huit cases (pointes de liteaux et dauphins compris).
-  // Greg, 21 novembre 2026 (soir) : la sortie de ventilation en plus (neuf cases ; avant : huit).
-  await expect(cases).toHaveCount(9);
+  // Greg, 21 novembre 2026 (soir) : la sortie de ventilation en plus. Greg, 22 novembre 2026 : « Pointes pour liteaux »
+  // seulement s'il y a des liteaux (ce devis n'en a pas) : huit cases (avant : neuf).
+  await expect(cases).toHaveCount(8);
+  await expect(carte.getByRole("checkbox", { name: /pointes/i })).toHaveCount(0);
   await expect(carte.getByRole("checkbox", { name: "Cartouches de silicone zinc" })).not.toBeChecked();
   // Greg, 21 novembre 2026 (soir) : la sortie de ventilation est proposée sur toute couverture écrite avec sa surface et sans
   // sortie de toit au devis ; plus de limite de nombre (skill du fondateur) : les vis restent proposées.

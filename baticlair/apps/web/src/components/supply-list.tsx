@@ -2,7 +2,7 @@
 
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import { AideBouton } from "@/components/aide";
-import { Check, ChevronDown, ChevronUp, Eye, ListChecks, Paperclip, Pencil, Plus, Send, Trash2, Users, X } from "lucide-react";
+import { Check, ChevronDown, Eye, ListChecks, Paperclip, Pencil, Plus, Send, Trash2, Users, X } from "lucide-react";
 import { openDocument } from "@/lib/open-document";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -13,7 +13,7 @@ import { GroupeBar, GroupeSection, type Groupe } from "@/components/groupe";
 import { CommandeDuMoisBar, CommandeDuMoisBloc, MesLignesDuMois } from "@/components/commande-du-mois";
 import { Button, ButtonLink, ErrorNotice } from "@/components/ui";
 import type { ApiError, ItemSketch, PurchaseItem, ScreenRow, Takeoff, TakeoffDecision } from "@/lib/api";
-import { origineDeLaLigne } from "@/lib/origine-ligne";
+import { nombreDuCalcul, origineDeLaLigne } from "@/lib/origine-ligne";
 import { enMetres, parseQuantity, shortName } from "@/lib/labels";
 import { NOM, nom } from "@/lib/nom";
 
@@ -144,12 +144,20 @@ export function SupplyList({
   // §52 (directive du fondateur, 2026-10-12 : « multi métiers ») : un devis à plusieurs lots donne une section par lot
   // (« Électricité », « Sanitaire »), chacune avec ses lignes, les oranges d'abord ; un devis d'un seul lot, une liste.
   const parLot = screen.groups.some((g) => g.key.startsWith("lot:"));
+  // Écran « Fournitures » (Greg, 22 novembre 2026) : les petites fournitures (consommables, divers) repliées en bas,
+  // sous « Autres fournitures » ; jamais une ligne à vérifier, jamais en sélection (tout se coche).
+  const kindOf = new Map(screen.groups.flatMap((g) => g.rows.map((r) => [r.key, g.kind] as const)));
+  // Une ligne déjà partie à part reste en vue, avec son « Envoyé · négoce ».
+  const autre = (r: ScreenRow) =>
+    r.status !== "check" && !(articleOf(r) && selection?.sent.has(articleOf(r)!)) && (kindOf.get(r.key) === "consommables" || kindOf.get(r.key) === "autres");
+  const replier = !parLot && !selecting && ordered.some(autre) && ordered.some((r) => !autre(r));
+  const autres = replier ? ordered.filter(autre) : [];
   const sections = parLot
     ? screen.groups.map((g) => {
         const own = g.rows.filter((r) => !hidden(r));
         return { key: g.key, label: g.label as string | null, rows: [...own.filter((r) => r.status === "check"), ...own.filter((r) => r.status !== "check")] };
       }).filter((x) => x.rows.length > 0)
-    : [{ key: "liste", label: null as string | null, rows: ordered }];
+    : [{ key: "liste", label: null as string | null, rows: ordered.filter((r) => !replier || !autre(r)) }];
   // Les lignes qu'on peut cocher : prêtes (pas orange), avec un article, pas encore parties à part ; au groupé, un article
   // calculé ou repris (jamais une ligne « à faire chiffrer ») qui n'y est pas déjà.
   // Décision de Greg (22 octobre) : une ligne vague ne se propose pas au regroupement (elle part chez ton négoce).
@@ -157,6 +165,47 @@ export function SupplyList({
   const cochable = (r: ScreenRow) =>
     r.status !== "check" && Boolean(articleOf(r)) && (pourGroupe ? Boolean(r.itemKey) && !groupe?.besoins.has(r.itemKey!) && !vagueRow(r) : !selection?.sent.has(articleOf(r)!));
   const selectable = rows.filter(cochable).map((r) => articleOf(r)!);
+  // La bulle de première utilisation : sur la première ligne qui a le détail de son calcul.
+  const bulleSur = rows.find((r) => r.itemKey && items.get(r.itemKey)?.kind === "computed" && (items.get(r.itemKey)?.postes?.length ?? 0) > 0)?.key;
+  const rangee = (r: ScreenRow) => (
+          <Row
+            key={r.key}
+            {...(selection && articleOf(r) && selection.sent.has(articleOf(r)!) ? { sentTo: selection.sent.get(articleOf(r)!)! } : {})}
+            {...(selecting
+              ? {
+                  selectMode: {
+                    checked: checked.has(articleOf(r) ?? ""),
+                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas ; au groupé, une
+                    // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
+                    disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
+                    ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
+                    ...(pourGroupe ? { label: groupe?.mode === "mois" ? "Ajouter à la commande" : `Ajouter au ${nom}` } : {}),
+                    onToggle: () =>
+                      setChecked((prev) => {
+                        const next = new Set(prev);
+                        const k = articleOf(r)!;
+                        if (next.has(k)) next.delete(k);
+                        else next.add(k);
+                        return next;
+                      }),
+                  },
+                }
+              : {})}
+            row={r}
+            bulle={r.key === bulleSur}
+            takeoff={takeoff}
+            label={labelOf(r)}
+            editable={editable}
+            pending={pending}
+            handlers={handlers}
+            decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
+            onEdit={onEditItem}
+            onSetAside={() => putAside(r)}
+            error={error}
+            sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
+            {...(sketchHandlers ? { sketchHandlers } : {})}
+          />
+  );
   const allChecked = selectable.length > 0 && selectable.every((k) => checked.has(k));
 
   return (
@@ -288,47 +337,24 @@ export function SupplyList({
         </h4>
       ) : null}
       <ul aria-label={section.label ? `Fournitures · ${section.label}` : "Fournitures"} className="flex flex-col gap-2">
-        {section.rows.map((r) => (
-          <Row
-            key={r.key}
-            {...(selection && articleOf(r) && selection.sent.has(articleOf(r)!) ? { sentTo: selection.sent.get(articleOf(r)!)! } : {})}
-            {...(selecting
-              ? {
-                  selectMode: {
-                    checked: checked.has(articleOf(r) ?? ""),
-                    // Une ligne orange se vérifie d'abord ; une ligne sans article (question) ne part pas ; au groupé, une
-                    // ligne déjà proposée non plus (une ligne déjà envoyée à part reste décochée, pas grisée).
-                    disabled: !articleOf(r) || r.status === "check" || (pourGroupe && !cochable(r)),
-                    ...(pourGroupe && vagueRow(r) ? { note: takeoff.phrasePrecision ?? "à préciser d'abord" } : {}),
-                    ...(pourGroupe ? { label: groupe?.mode === "mois" ? "Ajouter à la commande" : `Ajouter au ${nom}` } : {}),
-                    onToggle: () =>
-                      setChecked((prev) => {
-                        const next = new Set(prev);
-                        const k = articleOf(r)!;
-                        if (next.has(k)) next.delete(k);
-                        else next.add(k);
-                        return next;
-                      }),
-                  },
-                }
-              : {})}
-            row={r}
-            takeoff={takeoff}
-            label={labelOf(r)}
-            editable={editable}
-            pending={pending}
-            handlers={handlers}
-            decision={r.decisionKey ? decisions.get(r.decisionKey) : undefined}
-            onEdit={onEditItem}
-            onSetAside={() => putAside(r)}
-            error={error}
-            sketches={sketches.filter((s) => r.itemKey && s.article === r.itemKey)}
-            {...(sketchHandlers ? { sketchHandlers } : {})}
-          />
-        ))}
+        {section.rows.map(rangee)}
       </ul>
       </div>
       ))}
+      {autres.length > 0 ? (
+        <details className="group mt-3 rounded-xl">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-1 text-[15px] font-extrabold">
+            <span>Autres fournitures</span>
+            <span className="flex items-center gap-1.5 text-[13px] font-bold text-muted">
+              {`${autres.length} ligne${autres.length > 1 ? "s" : ""}`}
+              <ChevronDown size={16} aria-hidden="true" className="transition-transform group-open:rotate-180" />
+            </span>
+          </summary>
+          <ul aria-label="Autres fournitures" className="flex flex-col gap-2 pt-1">
+            {autres.map(rangee)}
+          </ul>
+        </details>
+      ) : null}
       {/* Nouveau cap (22 octobre) : un gros « + Ajouter » sous les cartes (avant : un petit lien sous l'envoi). */}
       {editable && onAdd && !selecting ? (
         <button
@@ -693,9 +719,12 @@ function Row({
   sketchHandlers,
   selectMode,
   sentTo,
+  bulle = false,
   error = null,
 }: {
   error?: ApiError | null;
+  /** La bulle de première utilisation (« Touche la flèche pour voir le calcul »), sur une seule ligne. */
+  bulle?: boolean;
   /** §48.5 : mode sélection, une case à cocher à la place du point ; toucher la ligne la coche. */
   selectMode?: { checked: boolean; disabled: boolean; onToggle: () => void; /** Ce que la case fait (« Proposer au groupé »), « Envoyer à part » sinon. */ label?: string; /** Pourquoi la case est grisée. */ note?: string };
   /** §48.5 : déjà envoyée à part (« Envoyé · fournisseur »), toujours visible dans la liste. */
@@ -718,30 +747,18 @@ function Row({
   const [naming, setNaming] = useState(false);
   /** Le glissement en cours sur le voile d'une ligne ouverte (voir plus bas). */
   const voile = useRef<{ y: number; glisse: boolean } | null>(null);
-  // Retour de Greg (12 novembre 2026) : une ligne ouverte en bas de l'écran montrait son titre et cachait ses boutons sous
-  // la barre du navigateur. À l'ouverture (et quand son contenu grandit), la page défile pour montrer la ligne entière ; si
-  // elle est plus haute que l'écran, son haut passe sous l'en-tête et le reste se fait défiler.
-  useEffect(() => {
-    if (!open) return;
-    const montrer = () => {
-      const li = document.getElementById(`ligne-${row.key}`);
-      if (!li) return;
-      const r = li.getBoundingClientRect();
-      const hauteur = window.visualViewport?.height ?? window.innerHeight;
-      const haut = 96;
-      const bas = hauteur - 16;
-      if (r.bottom > bas) window.scrollBy({ top: Math.min(r.bottom - bas, r.top - haut), behavior: "smooth" });
-      else if (r.top < haut) window.scrollBy({ top: r.top - haut, behavior: "smooth" });
-    };
-    const t = setTimeout(montrer, 60);
-    const li = document.getElementById(`ligne-${row.key}`);
-    const obs = li && typeof ResizeObserver !== "undefined" ? new ResizeObserver(montrer) : null;
-    if (li && obs) obs.observe(li);
-    return () => {
-      clearTimeout(t);
-      obs?.disconnect();
-    };
-  }, [open, row.key]);
+  // Greg, 22 novembre 2026 : le crayon ouvre une feuille qui monte du bas (la ligne reste à sa place, la page ne défile plus).
+  // La flèche déroule le détail du calcul sous la ligne ; dans la feuille, chaque poste se corrige.
+  const [calcul, setCalcul] = useState(false);
+  const [brouillon, setBrouillon] = useState<Record<string, string>>({});
+  const [enregistre, setEnregistre] = useState(false);
+  const [bulleVue, setBulleVue] = useState(() => {
+    try {
+      return typeof window === "undefined" || window.localStorage.getItem(BULLE_CALCUL) === "vue";
+    } catch {
+      return true;
+    }
+  });
   const [precising, setPrecising] = useState(false);
   const [dx, setDx] = useState(0);
   // Une ligne orange réglée (« C'est bon », un choix) se referme d'elle-même : le flou derrière elle s'en va avec elle.
@@ -774,6 +791,40 @@ function Row({
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
   const stepper = editable && !sentTo && item && parsed && Number.isFinite(toNumber(parsed.quantity)) ? { value: toNumber(parsed.quantity), unit: parsed.unit } : null;
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
+  const postes = !sentTo && item?.kind === "computed" ? (item.postes ?? []) : [];
+  const origine = item ? origineDeLaLigne(item) : null;
+  const point = !dot.ok || origine === "À vérifier" ? "bg-mark-warn" : origine === "Modifié par toi" ? "bg-accent" : "bg-mark-ok";
+  const raisons = item?.verification?.etat === "a_verifier" ? item.verification.raisons : [];
+  const voirLeCalcul = () => {
+    setCalcul(!calcul);
+    if (!bulleVue) {
+      setBulleVue(true);
+      try {
+        window.localStorage.setItem(BULLE_CALCUL, "vue");
+      } catch {
+        /* rien : la bulle reviendra */
+      }
+    }
+  };
+  const fermer = () => {
+    setNaming(false);
+    setBrouillon({});
+    setOpen(false);
+  };
+  // « Enregistrer » : les postes corrigés partent comme des réponses (la donnée du poste), puis la feuille se ferme.
+  const enregistrer = async () => {
+    const changes = postes.filter((x) => x.cle && x.mesure && brouillon[x.cle] !== undefined && plainNumber(brouillon[x.cle]!) !== plainNumber(x.mesure.valeur));
+    setEnregistre(true);
+    try {
+      for (const x of changes) {
+        const v = plainNumber(brouillon[x.cle!]!);
+        if (v && Number.isFinite(Number(v))) await handlers.onAnswer(x.cle!, { value: v, unit: x.mesure!.unite });
+      }
+    } finally {
+      setEnregistre(false);
+    }
+    fermer();
+  };
   // Le nom se corrige sur l'article, sinon sur la ligne du devis (une seule) d'où vient la ligne.
   const nameLine = !item && lines.length === 1 ? lines[0] : undefined;
   const renamable = editable && !sentTo && (item !== undefined || nameLine !== undefined);
@@ -814,6 +865,7 @@ function Row({
   const body = (
     <>
       {opens ? null : <StatusMark ok={dot.ok} label={dot.label} />}
+      <span aria-hidden="true" className={`mt-[7px] size-2 shrink-0 rounded-full ${sentTo ? "bg-line" : point}`} />
       <span className="flex min-w-0 grow flex-col">
         {/* Le nom entier : c'est ce que le comptoir lit (jamais coupé). Sur téléphone, la quantité passe dessous. */}
         <span className="text-[14px] leading-snug font-semibold">{label}</span>
@@ -868,8 +920,8 @@ function Row({
     <li
       id={`ligne-${row.key}`}
       className={`relative flex scroll-mt-24 flex-col gap-2 overflow-hidden rounded-xl border border-line bg-surface px-3 py-2 transition-[background-color,box-shadow] duration-200 ${
-        dot.ok ? "" : "border-l-4 border-l-mark-warn"
-      } ${open ? "z-[51] shadow-[0_24px_60px_-12px_rgba(19,9,1,0.45)]" : ""}`}
+        dot.ok ? "" : "border-mark-warn/60"
+      } ${open ? "z-[51]" : ""}`}
     >
       {/* Retour du fondateur (2026-10-11) : la ligne ouverte passe au premier plan, le reste est flouté derrière ; un tap sur le
           flou la referme. */}
@@ -897,8 +949,7 @@ function Row({
                 const glisse = voile.current?.glisse;
                 voile.current = null;
                 if (glisse) return;
-                setNaming(false);
-                setOpen(false);
+                fermer();
               }}
               style={{ touchAction: "none" }}
               className="fixed inset-0 z-50 cursor-default bg-[#130901]/35 backdrop-blur-[3px]"
@@ -935,6 +986,25 @@ function Row({
             >
               {body}
             </button>
+            {/* Greg, 22 novembre 2026 : une petite flèche discrète déroule le détail du calcul juste en dessous. */}
+            {postes.length > 0 && !open ? (
+              <span className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={voirLeCalcul}
+                  aria-expanded={calcul}
+                  aria-label={`${calcul ? "Masquer le calcul" : "Voir le calcul"} : ${label}`}
+                  className="pressable flex size-11 items-center justify-center rounded-full text-muted active:bg-ground"
+                >
+                  <ChevronDown size={18} aria-hidden="true" className={`transition-transform ${calcul ? "rotate-180" : ""}`} />
+                </button>
+                {bulle && !bulleVue ? (
+                  <span role="note" className="pointer-events-none absolute right-0 bottom-full z-10 mb-1 w-max max-w-[220px] rounded-xl bg-ink px-3 py-2 text-[13px] leading-snug font-semibold text-white shadow-card">
+                    Touche la flèche pour voir le calcul
+                  </span>
+                ) : null}
+              </span>
+            ) : null}
             {/* Greg, 28 octobre 2026 (point 2) : à droite d'une ligne à vérifier, « Valider » (la garde telle quelle) ou
                 « Préciser » (ouvre la question qui reste). Toucher la ligne ouvre la correction. */}
             {!dot.ok && !open ? (
@@ -971,6 +1041,7 @@ function Row({
           <div className="flex min-h-11 w-full min-w-0 items-start gap-2.5">{body}</div>
         )}
       </div>
+      {calcul && !open && postes.length > 0 ? <DetailDuCalcul label={label} postes={postes} raisons={raisons} /> : null}
       {/* Greg, 17 novembre 2026 : le nombre de feuilles de zinc est une estimation, il s'ajuste d'un toucher dans la liste,
           sans ouvrir la ligne. Vaut pour toute quantité que la fiche du métier marque comme une estimation. */}
       {!open && stepper && item?.estimation ? (
@@ -979,7 +1050,17 @@ function Row({
         </div>
       ) : null}
       {open ? (
-        <div role="group" aria-label={`Ligne ouverte : ${label}`} className="flex flex-col gap-2 pb-2 pl-5">
+        // Greg, 22 novembre 2026 : la feuille qui monte du bas. « Modifier la quantité », le nom, la quantité et son unité,
+        // « Calcul proposé » (chaque poste corrigeable), puis tout ce que la ligne ouverte faisait déjà, et « Enregistrer ».
+        <div
+          role="group"
+          aria-label={`Ligne ouverte : ${label}`}
+          className="fixed inset-x-0 bottom-0 z-[52] mx-auto flex max-h-[88dvh] w-full max-w-lg flex-col gap-2 overflow-y-auto overscroll-contain rounded-t-[20px] bg-surface px-4 pt-2 pb-[max(16px,env(safe-area-inset-bottom))] text-ink shadow-[0_-12px_40px_-12px_rgba(19,9,1,0.45)] lg:bottom-6 lg:rounded-[20px]"
+        >
+          <span aria-hidden="true" className="mx-auto mb-1 h-1 w-10 shrink-0 rounded-full bg-line" />
+          <h3 className="text-[13px] font-bold tracking-[0.04em] text-muted uppercase">{item && postes.length > 0 ? "Modifier la quantité" : "Modifier la ligne"}</h3>
+          <p className="text-[17px] leading-snug font-extrabold">{label}</p>
+          {item?.precision ? <p className="-mt-1 text-[13px] leading-snug text-muted">{item.precision}</p> : null}
           {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}
           {error ? <ErrorNotice error={error} /> : null}
           {/* §51.6 (retour du fondateur, 2026-10-12) : une ligne orange se règle là où on l'ouvre : sa question d'abord. */}
@@ -1012,6 +1093,9 @@ function Row({
               de l'écrire et la demande partait chez le négoce sans quantité. */}
           {!stepper && editable && !sentTo && item ? (
             <QuantiteManquante label={label} unite={parsed?.unit ?? ""} pending={pending} onSave={(q, u) => onEdit(item, { libelle: item.label, quantite: q, unite: u || null })} />
+          ) : null}
+          {postes.length > 0 ? (
+            <CalculPropose label={label} postes={postes} raisons={raisons} brouillon={brouillon} onChange={(cle, v) => setBrouillon((b) => ({ ...b, [cle]: v }))} />
           ) : null}
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
@@ -1065,17 +1149,10 @@ function Row({
               </button>
             ) : null}
           </div>
-          {/* Un geste clair pour refermer la ligne, en bas, là où le pouce arrive. */}
-          <Button
-            variant="secondary"
-            className="min-h-11 w-full"
-            onClick={() => {
-              setNaming(false);
-              setOpen(false);
-            }}
-          >
-            <ChevronUp size={18} aria-hidden="true" />
-            Fermer
+          {/* Un geste clair pour finir, en bas, là où le pouce arrive : les postes corrigés partent, la feuille se ferme. */}
+          <Button className="min-h-12 w-full" pending={enregistre} onClick={() => void enregistrer()}>
+            <Check size={18} aria-hidden="true" />
+            Enregistrer
           </Button>
         </div>
       ) : null}
@@ -1094,6 +1171,96 @@ function Row({
 
 /** Ajout proposé par l'appel IA n° 2 : jamais vert d'office, il attend un oui ou un non. */
 const AI_ADDITION = "ia-ajout:";
+/** La bulle « Touche la flèche pour voir le calcul » : vue une fois sur l'appareil, elle ne revient plus. */
+const BULLE_CALCUL = "mobiiz.bulle-calcul";
+
+type Poste = NonNullable<PurchaseItem["postes"]>[number];
+
+/** Une valeur du calcul, lisible (« 5 925 », « 39,5 ») ; « ml » s'écrit « m » (§50.7). */
+const valeurDuPoste = (x: Poste) => `${nombreDuCalcul(x.valeur)} ${enMetres(x.unite)}`.trim();
+
+/**
+ * Le détail du calcul sous la ligne (Greg, 21 et 22 novembre 2026) : un poste par ligne, en mots simples (« Surface 96 m²
+ * × 39,6 au m² », « Perte 5 % »), sa part à droite ; une donnée prise par défaut est dite. Jamais dans le PDF ni l'e-mail.
+ */
+function DetailDuCalcul({ label, postes, raisons }: { label: string; postes: readonly Poste[]; raisons: readonly string[] }) {
+  return (
+    <div role="region" aria-label={`Calcul : ${label}`} className="-mt-1 mb-1 ml-4 flex flex-col gap-1 border-l-2 border-line pl-3 text-[13px] leading-snug">
+      <ul className="flex flex-col gap-1">
+        {postes.map((x) => (
+          <li key={x.id} className={`flex items-baseline justify-between gap-3 ${x.info ? "text-muted italic" : ""}`}>
+            <span className="min-w-0">
+              {x.texte}
+              {x.modifie ? <span className="ml-1.5 font-bold text-accent-text">modifié par toi</span> : null}
+            </span>
+            {x.info ? null : <span className="shrink-0 font-bold tabular-nums">{valeurDuPoste(x)}</span>}
+          </li>
+        ))}
+      </ul>
+      {raisons.map((r) => (
+        <p key={r} className="font-semibold text-warn">
+          {r}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * « Calcul proposé » dans la feuille (Greg, 22 novembre 2026) : chaque poste qui vient d'une donnée (surface, longueur,
+ * nombre) se corrige dans sa case, avec son unité ; « Enregistrer » envoie la donnée corrigée et le total se recalcule.
+ */
+function CalculPropose({
+  label,
+  postes,
+  raisons,
+  brouillon,
+  onChange,
+}: {
+  label: string;
+  postes: readonly Poste[];
+  raisons: readonly string[];
+  brouillon: Record<string, string>;
+  onChange: (cle: string, valeur: string) => void;
+}) {
+  return (
+    <section aria-label={`Calcul proposé : ${label}`} className="mt-1 flex flex-col gap-2 rounded-xl bg-ground p-3">
+      <h4 className="text-[14px] font-extrabold">Calcul proposé</h4>
+      <ul className="flex flex-col gap-2">
+        {postes.map((x) => (
+          <li key={x.id} className={`flex flex-col gap-1 text-[14px] leading-snug ${x.info ? "text-muted italic" : ""}`}>
+            <span className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0">
+                {x.texte}
+                {x.modifie ? <span className="ml-1.5 text-[12px] font-bold text-accent-text not-italic">modifié par toi</span> : null}
+              </span>
+              {x.info ? null : <span className="shrink-0 font-bold tabular-nums">{valeurDuPoste(x)}</span>}
+            </span>
+            {x.cle && x.mesure ? (
+              <label className="flex items-center gap-2 text-[13px] font-semibold text-muted">
+                <span className="sr-only">{`${x.texte} : ${label}`}</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  aria-label={`Corriger : ${x.texte}`}
+                  value={brouillon[x.cle] ?? x.mesure.valeur.replace(".", ",")}
+                  onChange={(e) => onChange(x.cle!, e.target.value)}
+                  className="min-h-11 w-28 rounded-xl border-2 border-line bg-surface px-3 text-[15px] font-bold text-ink tabular-nums outline-none focus:border-accent"
+                />
+                <span>{enMetres(x.mesure.unite)}</span>
+              </label>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      {raisons.map((r) => (
+        <p key={r} className="text-[13px] font-semibold text-warn">
+          {r}
+        </p>
+      ))}
+    </section>
+  );
+}
 
 /** Une quantité tapée par l'artisan, au format du serveur (« 1 234,5 » → « 1234.5 »). */
 const plainNumber = (q: string) => q.replace(/[\s  ]/g, "").replace(",", ".");

@@ -1209,7 +1209,7 @@ function computeNeed(
             const x = evaluateInterval(parseFormula(f), valueOf);
             return isPoint(x) ? fr(x.lo) : "?";
           });
-          if (!val.isZero()) out.push({ id: p.id, texte: (render(libelle, true, true) ?? libelle).replace(/\s+\?(?=\s|,|$)/g, ""), valeur: val.toDecimalPlaces(2).toFixed(), unite: rule.unit, ...(p.cle ? { cle: `param:${p.cle}` } : {}), ...(p.info ? { info: true as const } : {}), ...mesureDe(p.cle) });
+          if (!val.isZero()) out.push({ id: p.id, texte: (render(libelle, true, true) ?? libelle).replace(/\s+\?(?=\s|,|$)/g, ""), valeur: val.toDecimalPlaces(2).toFixed(), unite: rule.unit, ...(p.cle ? { cle: `param:${p.cle}@${input.workItemId}` } : {}), ...(p.info ? { info: true as const } : {}), ...mesureDe(p.cle) });
         } catch {
           return undefined;
         } finally {

@@ -169,15 +169,16 @@ export async function continuerSansSuggestionParApi(page: Page, quantitatifId: s
       const companyId = localStorage.getItem("baticlair.companyId");
       const headers = { "content-type": "application/json", accept: "application/json", ...(companyId ? { "x-company-id": companyId } : {}) };
       const lu = (await (await fetch(`/v1/quantitatifs/${id}?ecran=1`, { headers })).json()) as { ecran?: { suggestions?: { label: string }[] } };
+      // Aucune case proposée (une liste sans liteaux ni couverture mesurée) : pas d'étape, rien à répondre.
+      if ((lu.ecran?.suggestions ?? []).length === 0) return { proposees: [] as string[], status: 200, restantes: 0 };
       const res = await fetch(`/v1/quantitatifs/${id}/reponses`, { method: "POST", headers, body: JSON.stringify({ reponses: [{ question: "suggestions:choisies", valeur: "aucune" }] }) });
       const apres = (await (await fetch(`/v1/quantitatifs/${id}?ecran=1`, { headers })).json()) as { ecran?: { suggestions?: { label: string }[] } };
       return { proposees: (lu.ecran?.suggestions ?? []).map((s) => s.label), status: res.status, restantes: (apres.ecran?.suggestions ?? []).length };
     },
     { id: quantitatifId },
   );
-  // Sans liste donnée : au moins une case proposée (pointes de liteaux, sortie de ventilation…), toutes refusées.
+  // Les cases proposées (s'il y en a) sont toutes refusées ; une liste donnée doit être exactement celle proposée.
   if (attendues) expect(r.proposees).toEqual([...attendues]);
-  else expect(r.proposees.length).toBeGreaterThan(0);
   expect(r.status).toBeLessThan(300);
   expect(r.restantes).toBe(0);
 }
