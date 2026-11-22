@@ -292,6 +292,8 @@ export interface NeedResult {
   exclusions?: string;
   /** Colonne « précision » de la demande de devis (§45.3). */
   precision?: string;
+  /** Le détail du calcul, poste par poste, puis la perte (voir `NeedRule.postes`). */
+  postes?: { id: string; texte: string; valeur: string; unite: string; cle?: string; perte?: true; info?: true }[];
   /** Comment la quantité se compte (« pour 10 ml de gouttière, un tous les 50 cm + 1 en bout »), pour dire un écart avec le devis. */
   basis?: string;
   /** Cité par une ligne de pose sans être chiffré (le mot qui le cite : « fixation ») : la ligne sort orange (§49.6). */
@@ -1172,6 +1174,43 @@ function computeNeed(
     // Greg, 18 novembre 2026 : jamais « développé ? » dans une ligne ; la donnée qui manque se demande, elle ne s'écrit pas.
     const precision = rule.precision ? render(rule.precision, unknownParams.length > 0, true)?.replace(/,\s*[^,;]*\s\?(?=\s*(?:;|$))/g, "") : undefined;
     const basis = rule.basis ? render(rule.basis, false, true) : undefined;
+    // Le détail du calcul (`postes`) : calculé seulement quand le besoin est exact ; leur somme doit faire le besoin.
+    const postes = (() => {
+      if (!exact) return undefined;
+      const out: NonNullable<NeedResult["postes"]> = [];
+      // Sans postes écrits dans la fiche : un seul poste, la précision de la ligne (le même affichage partout).
+      if (!rule.postes) {
+        const besoin = raw.lo.dividedBy(needUnit.factor);
+        out.push({ id: "calcul", texte: (precision ?? basis ?? rule.exclusions ?? rule.slot).replace(/\s*\+\s*[\d,]+\s*%\s*de marge\s*$/, ""), valeur: besoin.toDecimalPlaces(2).toFixed(), unite: rule.unit });
+        if (!factor.equals(1)) out.push({ id: "perte", texte: `Perte ${fr(factor.minus(1).times(100))} %`, valeur: besoin.times(factor.minus(1)).toDecimalPlaces(2).toFixed(), unite: rule.unit, perte: true });
+        return out;
+      }
+      let somme = new Decimal(0);
+      for (const p of rule.postes) {
+        const [tl, ml, al] = [trace.length, missing.length, assumptions.length];
+        try {
+          const v = evaluateInterval(parseFormula(p.formule), valueOf);
+          if (!isPoint(v)) return undefined;
+          const val = v.lo.dividedBy(needUnit.factor);
+          if (!p.info) somme = somme.plus(val);
+          // « {= formule} » dans un libellé : un petit calcul dit en chiffres (« {= nombre de longueurs - 1} longueurs »).
+          const libelle = p.libelle.replace(/\{=\s*([^}]+)\}/g, (_m, f: string) => {
+            const x = evaluateInterval(parseFormula(f), valueOf);
+            return isPoint(x) ? fr(x.lo) : "?";
+          });
+          if (!val.isZero()) out.push({ id: p.id, texte: (render(libelle, true, true) ?? libelle).replace(/\s+\?(?=\s|,|$)/g, ""), valeur: val.toDecimalPlaces(2).toFixed(), unite: rule.unit, ...(p.cle ? { cle: `param:${p.cle}` } : {}), ...(p.info ? { info: true as const } : {}) });
+        } catch {
+          return undefined;
+        } finally {
+          trace.splice(tl);
+          missing.splice(ml);
+          assumptions.splice(al);
+        }
+      }
+      if (somme.minus(raw.lo.dividedBy(needUnit.factor)).abs().greaterThan("0.01")) throw new FormulaError(`Les postes du besoin ${rule.id} ne font pas son total`);
+      if (!factor.equals(1)) out.push({ id: "perte", texte: `Perte ${fr(factor.minus(1).times(100))} %`, valeur: raw.lo.dividedBy(needUnit.factor).times(factor.minus(1)).toDecimalPlaces(2).toFixed(), unite: rule.unit, perte: true });
+      return out;
+    })();
     // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
     const designation = rule.designation ? render(rule.designation, options.blankUnknown === true && options.quantityOnly === true) : undefined;
@@ -1189,6 +1228,7 @@ function computeNeed(
       ...(withQuote ? { labelWithQuote: withQuote } : {}),
       ...(precision !== undefined ? { precision } : {}),
       ...(basis !== undefined ? { basis } : {}),
+      ...(postes ? { postes } : {}),
       ...(unknownParams.length > 0 ? { unknownParams } : {}),
       status: "calculated",
       ...(exact

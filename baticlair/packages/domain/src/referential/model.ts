@@ -452,6 +452,12 @@ export interface NeedRule extends Provenance {
    */
   precision?: string;
   /**
+   * LE DÉTAIL DU CALCUL, POSTE PAR POSTE (Greg, 22 novembre 2026 : « Surface 150 m² × 39,5 = 5 925 · Arêtiers 12 m × 26 =
+   * 312 · … · Perte 5 % »). Chaque poste : un libellé en mots simples (gabarit comme `precision`), sa formule, et la donnée
+   * qui le règle d'un toucher (`cle`). Leur somme est le besoin avant la perte : le moteur le vérifie. Un poste nul ne se dit pas.
+   */
+  postes?: { id: string; libelle: string; formule: string; cle?: string; /** Dit pour aider, hors du total (« 5 longueurs couvrent 19,88 m »). */ info?: true }[];
+  /**
    * L'unité de vente d'une pièce dont la longueur est une donnée du chantier (Greg, 18 novembre 2026 : « 2 tubes de 3 m »,
    * jamais « 2 pièces ») : deux gabarits, au singulier et au pluriel (« tube de {longueur_tube|m} »).
    */

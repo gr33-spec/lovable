@@ -2854,6 +2854,15 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           unit: "u",
           core: true,
           exclusions: "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
+          // Le détail sous la flèche (Greg, 22 novembre 2026) : les mêmes termes que la formule, un par ligne.
+          postes: [
+            { id: "surface", libelle: "Surface {surface|m2} × {points.ardoises_m2|u/m2#} au m²", formule: "surface * points.ardoises_m2", cle: "surface" },
+            { id: "aretiers", libelle: "Arêtiers {longueur_aretier|ml}", formule: "si(aretier_ferme > 0, regle.aretier_m2_par_ml, regle.aretier_zinc_m2_par_ml) * longueur_aretier * points.ardoises_m2", cle: "longueur_aretier" },
+            { id: "noues", libelle: "Noues {longueur_noue|ml}", formule: "regle.noue_m2_par_ml * longueur_noue * points.ardoises_m2", cle: "longueur_noue" },
+            { id: "faitage", libelle: "Faîtage {longueur_faitage|ml}, 1 rang", formule: "longueur_faitage / ardoise.largeur", cle: "longueur_faitage" },
+            { id: "egout-gouttiere", libelle: "Égout {longueur_gouttiere|ml} (la gouttière), 1 rang", formule: "si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, regle.sans_gouttiere) / ardoise.largeur", cle: "longueur_gouttiere" },
+            { id: "egout-reponse", libelle: "Égout {egout_a_ajouter|ml} (ta réponse), 1 rang", formule: "si(longueur_gouttiere > regle.sans_gouttiere, regle.sans_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur", cle: "egout_a_ajouter" },
+          ],
           // Le comptoir ne chiffre pas une ardoise sans sa qualité (§47.8) ; le format suit l'ardoise du devis.
           designation: "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
           // §49.3.4 : la phrase d'hypothèse, la marge du tiroir écrite (§49.2.4).
@@ -4658,6 +4667,12 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           core: true,
           exclusions: "Recouvrement des jonctions soudées compris (30 mm par jonction).",
           covers: "longueur_gouttiere",
+          // Greg, 22 novembre 2026 : sous la flèche, en clair, « 5 longueurs couvrent 19,88 m » (pour repasser à 5 d'un toucher).
+          postes: [
+            { id: "longueur", libelle: "Gouttière {longueur_gouttiere|ml}", formule: "longueur_gouttiere", cle: "longueur_gouttiere" },
+            { id: "croisures", libelle: "Croisures : {= arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1} jonctions × 3 cm", formule: "regle.recouvrement_jonction * (arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1)" },
+            { id: "une-de-moins", libelle: "{= arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1} longueurs couvriraient", formule: "(arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1) * (regle.longueur_barre_gouttiere - regle.recouvrement_jonction) + regle.recouvrement_jonction", info: true },
+          ],
           // Comme au comptoir : « Gouttière zinc demi-ronde dév. 33 » ; le développé, il ne le devine pas.
           designation: "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
           precisionRequires: ["developpe_gouttiere"],
