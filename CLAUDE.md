@@ -380,6 +380,14 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Analyses offertes sur le site de test : 60 (avant : 50), pour finir les lectures de D-2026-024.
 - Parcours de test (22 novembre 2026) : la carte « Suggestions » s'ouvre maintenant dans des listes qui n'en avaient pas (pointes de liteaux) ; les parcours qui ne la regardent pas touchent « Continuer » sans rien cocher (`continuerQuandLesSuggestionsSOuvrent`, `e2e/discussion.ts`). Tests seulement, rien du moteur.
 
+## Décisions du 22 novembre 2026 : base couverture et banc d'essai
+
+- Partage du travail (Greg) : la session « base couverture » fait la recherche et la fiche, avec les sources ; tout ce qui touche au calcul, aux suggestions ou aux questions s'écrit dans `banc-quantitatif/A-INTEGRER.md`, et c'est le banc d'essai qui l'intègre.
+- Suggestions : pas de limite à 5 ; rangées par catégorie (Couverture, Zinguerie, Fixations, Ventilation…) avec un petit titre, une vingtaine au plus (fait par le banc d'essai).
+- Chatières et vis : calculées d'après le modèle et la surface, jamais demandées.
+- Fixation des tuiles : zone de vent et situation exposée déduites de la commune ; seule question « Écran sous toiture ? », si le devis ne le dit pas.
+- Clous d'ardoise en Suggestion : longueurs d'égout, de faîtage et de rive prises au devis, demandées seulement si la case est cochée et qu'elles manquent. Règle changée : faîtage à 2 clous au moins au dernier rang (DTU), avant 1.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.
