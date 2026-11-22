@@ -58,6 +58,7 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Tests sans appel à l'API IA réelle ; respecter `BUDGET_IA_JOUR`. Jamais d'e-mail réel à un négoce ou à un artisan, jamais de paiement réel, pendant un test.
 - Ne jamais toucher à la production ni à la branche principale sans accord. Aucune suppression de données sans accord. Migrations additives et réversibles.
 - On ne pousse sur la branche de test qu'un commit dont toute la chaîne de tests est verte ; on vérifie ensuite que le site et l'API servent ce commit.
+- Vérifier la mise en ligne (Greg, 22 novembre 2026) : `https://test.mobiiz.fr/version` (le site) et `https://api-test.mobiiz.fr/version` (l'API) donnent `{ "commit", "environnement" }`, rien d'autre. Après chaque poussée, attendre que LES DEUX donnent le commit poussé (relire toutes les minutes, quelques minutes de construction) avant de dire « c'est en ligne » ; c'est à la discussion de le faire, pas à Greg. Code : `apps/web/src/app/version/route.ts`, `apps/api/src/modules/health/http/version.controller.ts` (le commit vient de `VERCEL_GIT_COMMIT_SHA`).
 - Chaque règle changée se dit : « Règle changée : avant → après ».
 - Ne jamais afficher une clé ni un secret. Pas de nouvelle dépendance sans accord.
 - Mettre ce fichier à jour à chaque décision importante.
