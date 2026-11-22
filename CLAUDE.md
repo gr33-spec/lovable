@@ -407,6 +407,13 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Fiche d'une demande : un négoce une seule fois (le bloc du suivi ne montre plus que les négoces qui ont quelque chose à dire : question, refus, conditions).
 - Tests : `apps/api/test/messagerie.test.ts`, `e2e/messagerie.spec.ts`.
 
+## Décisions du 22 novembre 2026 (soir) : la dictée du quantitatif
+
+- RÈGLE CHANGÉE (Greg, 22 novembre 2026), discussion des questions du quantitatif seulement : avant, le texte dicté s'écrivait dans la case et attendait « Envoyer », sans « Annuler » (règle du 7 novembre) → pendant la dictée, aucun texte : une onde jaune qui suit la vraie voix (Web Audio, rien n'est enregistré ni envoyé ; sans accès au son, l'onde respire), un petit chrono, un gros bouton rouge « Arrêter » et « Annuler ». À l'arrêt, ce qui a été dit part comme une bulle normale ; un toucher sur la bulle rouvre la réponse et remet le texte dans la case. « Annuler » : rien ne part. Le reste du parcours ne change pas. L'assistant de la liste garde l'ancienne dictée (texte dans la case).
+- Écoute continue : elle ne s'arrête qu'à « Arrêter » ; un morceau redonné en double par Chrome sur Android n'est pas répété.
+- Code : `lib/dictee.ts` (`continu`), `components/chat-mobiiz.tsx` (`EcouteEnCours`, `dicteeEnBulle`), `components/journey.tsx`. Test : `e2e/parcours-artisan.spec.ts`, « la dictée du quantitatif ».
+- À vérifier par Greg sur son iPhone : Safari peut couper l'écoute seul après un long silence (le message part alors tout seul) ; l'onde et la dictée utilisent le micro en même temps.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

@@ -408,14 +408,14 @@ export function EcouteEnCours({ onArreter, onAnnuler }: { onArreter: () => void;
       <p className="text-[15px] font-semibold tabular-nums text-[#111111]/70" aria-label={`Durée ${chrono}`}>
         {chrono}
       </p>
-      <div className="flex w-full items-center justify-between">
-        <button type="button" onClick={onAnnuler} className="pressable min-h-12 min-w-20 rounded-full px-4 text-[16px] font-semibold text-[#111111]/75">
+      <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
+        <button type="button" onClick={onAnnuler} className="pressable min-h-12 min-w-20 justify-self-start rounded-full px-4 text-[16px] font-semibold text-[#111111]/75">
           Annuler
         </button>
         <button type="button" onClick={onArreter} aria-label="Arrêter la dictée" className="pressable flex size-16 items-center justify-center rounded-full bg-[#FF5A3C] text-white shadow-card">
           <Square size={24} fill="currentColor" aria-hidden="true" />
         </button>
-        <span className="min-w-20" aria-hidden="true" />
+        <span aria-hidden="true" />
       </div>
     </div>
   );
