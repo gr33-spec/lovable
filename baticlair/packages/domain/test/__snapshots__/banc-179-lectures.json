@@ -942,6 +942,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -1163,6 +1164,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1181,6 +1183,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1387,6 +1390,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1406,6 +1410,7 @@
   "questions": [
    "param:pente",
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1525,6 +1530,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1617,6 +1623,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1736,6 +1743,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -1917,6 +1925,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2002,6 +2011,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2059,6 +2069,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2160,6 +2171,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -2181,7 +2193,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Marque, qualité à préciser"
+    "raison": "Marque, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2248,6 +2260,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2273,7 +2286,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2340,6 +2353,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2425,6 +2439,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2496,6 +2511,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2602,6 +2618,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2650,6 +2667,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2669,8 +2687,8 @@
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
     "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde dév. 33",
@@ -2687,7 +2705,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:type_crochet@crochets-ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2727,6 +2747,7 @@
    "param:egout_compris",
    "param:diametre_sortie",
    "param:usage_sortie",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2747,7 +2768,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2814,6 +2835,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2856,7 +2878,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2923,6 +2945,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2966,6 +2989,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3253,6 +3277,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3290,7 +3315,7 @@
     "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde dév. 33",
@@ -3301,6 +3326,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3514,8 +3540,9 @@
    }
   ],
   "questions": [
-   "param:egout_compris",
    "param:surface",
+   "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3652,7 +3679,7 @@
     "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde dév. 33",
@@ -3663,6 +3690,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3682,6 +3710,7 @@
   "questions": [
    "param:pente",
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3764,6 +3793,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3900,6 +3930,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4061,6 +4092,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4226,6 +4258,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "product:tuile",
    "param:qualite_ardoise"
   ],
@@ -4463,6 +4496,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise",
    "fiche:fenetre_de_toit_quelle_taille"
   ],
@@ -4520,6 +4554,7 @@
    "param:egout_compris",
    "param:diametre_sortie",
    "param:usage_sortie",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4633,6 +4668,7 @@
   "questions": [
    "param:pente",
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4671,7 +4707,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -4738,6 +4774,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -4793,7 +4830,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -4860,6 +4897,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -4882,6 +4920,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4944,7 +4983,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -5011,6 +5050,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -5033,6 +5073,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5053,7 +5094,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -5120,6 +5161,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -5267,6 +5309,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5300,6 +5343,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5350,6 +5394,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -5386,6 +5431,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []

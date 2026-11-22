@@ -484,6 +484,11 @@ export interface NeedRule extends Provenance {
    * Condition d'existence (« faconnage < 2 ») : le besoin n'existe que si elle est vraie. Tant que
    * ses données ne sont pas connues, le besoin existe et pose sa question (« tu façonnes ? »).
    */
+  /**
+   * La ligne reste visible, orange, tant que la donnée de sa condition attend sa réponse (les crochets d'ardoise avant
+   * « Agrafe ou pointe ? ») : seulement si cette donnée ne fait que l'article (`precisionRequires`).
+   */
+  ligneEnAttente?: true;
   when?: string;
   /**
    * §49.1 point 4 : consommable de pose (pointes, vis, pattes, étain, silicone). Il ne sort que si l'artisan a dit OUI à

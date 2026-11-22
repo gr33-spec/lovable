@@ -1,5 +1,22 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-77 — Crochets d'ardoise : à agrafe ou à pointe (Greg, 2026-11-22)
+
+Le banc du calcul passe à 100 lignes justes sur 101 (99 %) ; examen 36 sur 36.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Type de crochet non écrit au devis | aucune question ; un crochet par ardoise, boîtes de 500 | une question pour tout le devis : « Tes crochets d'ardoise : à agrafe ou à pointe ? » | Greg, 22 novembre 2026 |
+| Pose à agrafe | — | 4 ardoises sur 5 au crochet à agrafe (boîtes de 500) + 1 sur 5 au crochet à pointe, au droit des chevrons (boîtes de 700) | Greg, 22 novembre 2026 ; manuel du CAP couvreur, ch. 21 (« 4/5 de crochets-agrafes ; 1/5 de crochets-pointes ») : UNE seule source chiffrée |
+| Pose à pointe | — | un crochet à pointe par ardoise, boîtes de 700 | Greg ; Chausson, Frénéhard (boîtes de 700, Ø 2,7, 7 à 14 cm) |
+| Exemple : 4 107 ardoises, à agrafe | 9 boîtes de 500 | 3 286 agrafes (7 boîtes de 500) + 822 pointes (2 boîtes de 700) | |
+
+- Tant que la question attend : une ligne « Crochets d'ardoise », un par ardoise, orange, avec sa question (jamais de ligne disparue).
+- Mots du devis reconnus : « agrafe », « à agrafer », « pression », « ressort » ; « à pointe », « à piquer », « passe-chevron »,
+  « pour volige », « crochet double » (recherche `recherche/crochets-pointe-et-agrafe-2026-11-22.md`).
+- Cœur : une ligne peut rester visible en attente de sa condition (`ligneEnAttente`), seulement si la donnée ne fait que son
+  article ; une question posée une fois pour le devis n'apparaît plus en double sous son nom simple.
+
 ## roofing-2026.11.22-76 — Réponses de Greg du 22 novembre (nuit) : liteaux, arêtier zinc, jouées, pointes (2026-11-22)
 
 Le banc du calcul reste à 98 sur 99.

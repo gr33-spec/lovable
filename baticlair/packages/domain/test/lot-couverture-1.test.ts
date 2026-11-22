@@ -40,7 +40,10 @@ const CAS: Metier[] = [
     // × 42,5 = 6 672,5 ; + 5 % = 7 006,1 → 7 007 ardoises.
     // Règle changée (Greg, 22 novembre 2026) : l'arêtier en bande zinc (« Arêtier zinc dév. 33 ») compte 0,50 m² d'ardoise par
     // mètre (avant 0,66, gardé pour un arêtier fermé en ardoises) ; avant (hier) 7 078 → 7 007 ardoises.
-    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise). Répondu « À agrafe » (premier bouton) : 7 007 × 0,8 = 5 605,6 → 5 606 agrafes, / 500 = 11,2 → 12
+    // boîtes ; 7 007 × 0,2 = 1 401,4 → 1 402 pointes, / 700 = 2,003 → 3 boîtes (avant : 7 007 crochets, 15 boîtes de 500).
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes crochets d'ardoise : à agrafe ou à pointe ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
     couleurs: { vert: 0, orange: 2, gris: 1 },
   },
 ];

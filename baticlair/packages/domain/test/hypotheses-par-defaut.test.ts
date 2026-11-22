@@ -22,16 +22,20 @@ const ARDOISE_SANS_REPONSE: WorkItemInput = {
 };
 // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
 // Répondu « Oui » (les m² comprennent déjà l'égout et les coupes) : rien n'est ajouté, les quantités d'avant restent.
-const ARDOISE: WorkItemInput = { ...ARDOISE_SANS_REPONSE, params: { ...ARDOISE_SANS_REPONSE.params, egout_compris: { value: "1", unit: "u", origin: "artisan" } } };
+// Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+// crochet par ardoise). Répondu « À agrafe ».
+const ARDOISE: WorkItemInput = { ...ARDOISE_SANS_REPONSE, params: { ...ARDOISE_SANS_REPONSE.params, egout_compris: { value: "1", unit: "u", origin: "artisan" }, type_crochet: { value: "1", unit: "u", origin: "artisan" } } };
 
 describe("hypothèses par défaut : utilisées sans question, dites, modifiables", () => {
   it("pente 45°, zone littorale, rampant ≤ 5,5 m, entraxe 60 cm : le devis ne dit rien, tout se calcule quand même", () => {
     // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
     const ouverture = computeWorkItem(REFERENTIEL_COMPLET, ARDOISE_SANS_REPONSE);
     expect(ouverture.nextQuestion).toMatchObject({ key: "param:egout_compris", text: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", options: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }] });
-    // La seule question : tout ce qui attend, attend elle.
-    expect([...new Set(ouverture.needs.filter((n) => n.status !== "calculated").map((n) => n.question?.key))]).toEqual(["param:egout_compris"]);
-    // « Oui » : tout se calcule comme avant.
+    // Deux questions : tout ce qui attend, attend l'une ou l'autre. Règle changée (Greg, 22 novembre 2026) : sans type de
+    // crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un crochet par ardoise).
+    expect([...new Set(ouverture.needs.filter((n) => n.status !== "calculated").map((n) => n.question?.key))]).toEqual(["param:egout_compris", "param:type_crochet"]);
+    expect(ouverture.needs.find((n) => n.question?.key === "param:type_crochet")!.question).toMatchObject({ options: [{ label: "À agrafe", value: "1" }, { label: "À pointe", value: "2" }] });
+    // « Oui » et « À agrafe » : tout se calcule.
     const r = computeWorkItem(REFERENTIEL_COMPLET, ARDOISE);
     expect(r.nextQuestion).toBeNull();
     for (const n of r.needs) expect(n.status).toBe("calculated");
@@ -117,7 +121,11 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(r, "ardoises").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5", unit: "%" });
     // Crochets = un par ardoise commandée, 9 408 (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 597).
     // Greg, 21 novembre 2026 : les crochets se commandent en boîtes de 500, le nombre de pièces reste écrit (9 408 → 19 boîtes).
-    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "19" } } });
+    // Règle changée (Greg, 22 novembre 2026), pose à agrafe : 9 408 × 0,8 = 7 526,4 → 7 527 agrafes, 7 527 / 500 = 15,05 → 16
+    // boîtes de 500 ; 9 408 × 0,2 = 1 881,6 → 1 882 pointes, 1 882 / 700 = 2,69 → 3 boîtes de 700 (avant : 9 408, 19 boîtes de 500).
+    // Toujours un crochet au moins par ardoise : 7 527 + 1 882 = 9 409 ≥ 9 408.
+    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "7527" }, purchase: { order: { count: "16" } } });
+    expect(need(r, "crochets-ardoise-pointe")).toMatchObject({ quantity: { value: "1882" }, purchase: { order: { count: "3" } } });
     // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 310 → 2 200 ml
     // (200 ÷ 0,10 = 2 000 ml × 1,10 = 2 200).
     expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2200" } });

@@ -1033,7 +1033,7 @@ function computeNeed(
       const w = evaluateInterval(parseFormula(rule.when), valueOf);
       // Sauf pour la ligne « en attente » (calcul de la quantité seule) d'un besoin dont la donnée indécise ne fait que son
       // article (`precisionRequires`) : la ligne reste, orange, avec sa question (les crochets avant « Agrafe ou pointe ? »).
-      const articleSeul = options.quantityOnly === true && missing[0] !== undefined && (rule.precisionRequires ?? []).includes(missing[0].key);
+      const articleSeul = options.quantityOnly === true && rule.ligneEnAttente === true && missing[0] !== undefined && (rule.precisionRequires ?? []).includes(missing[0].key);
       if (!isPoint(w) && missing[0] && !articleSeul) throw new Stop({ status: "question", question: missing[0].question });
       missing.splice(missingBefore);
     }

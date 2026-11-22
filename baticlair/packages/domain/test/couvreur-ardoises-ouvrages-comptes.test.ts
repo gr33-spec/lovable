@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ecranDeLecture, ROOFING_REFERENTIAL, type EngineAnswer } from "../src/index.js";
 import { HABITUDES_BANC } from "./support/habitudes.js";
 import { lectureEnregistree } from "./support/lectures.js";
-import { EGOUT_COMPRIS_OUI } from "./support/read-quote.js";
+import { CROCHETS_A_AGRAFE, CROCHETS_A_POINTE, EGOUT_COMPRIS_OUI } from "./support/read-quote.js";
 
 /**
  * COUVERTURE EN ARDOISES AU CROCHET : chaque composant détaillé, calculé avec les hypothèses du référentiel, dites.
@@ -26,24 +26,30 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
   it("dès l'ouverture, sans rien demander : ardoises, crochets et liteaux 18×40 calculés avec les hypothèses du référentiel, dites", () => {
     // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
     const ouverture = read();
-    const oui = read(EGOUT_COMPRIS_OUI);
-    // La seule question de la couverture : celle de l'égout (les autres questions du devis, cheminée et pliage, ne changent pas).
-    expect(ouverture.questions.map((q) => q.key).filter((k) => !oui.questions.some((q) => q.key === k))).toEqual(["param:egout_compris"]);
+    const oui = read({ ...EGOUT_COMPRIS_OUI, ...CROCHETS_A_AGRAFE });
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un crochet par ardoise).
+    // Les questions de la couverture : l'égout et les crochets (les autres questions du devis, cheminée et pliage, ne changent pas).
+    expect(ouverture.questions.map((q) => q.key).filter((k) => !oui.questions.some((q) => q.key === k))).toEqual(["param:egout_compris", "param:type_crochet@crochets-ardoise"]);
+    expect(ouverture.questions.find((q) => q.key === "param:type_crochet@crochets-ardoise")).toMatchObject({ text: "Tes crochets d'ardoise : à agrafe ou à pointe ?", options: [{ label: "À agrafe", value: "1" }, { label: "À pointe", value: "2" }] });
     expect(ouverture.questions.find((q) => q.key === "param:egout_compris")).toMatchObject({ text: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", options: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }] });
     expect(ouverture.ouvrage("a1").needs.find((n) => n.slot === "ardoise")).toMatchObject({ need: null, missing: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?" });
-    // « Oui » : tout est calculé comme avant.
+    // « Oui » et « À agrafe » : tout est calculé.
     const { ouvrage } = oui;
     const couverture = ouvrage("a1");
     expect(couverture.role).toBe("measure");
     const ardoises = couverture.needs.find((n) => n.slot === "ardoise")!;
     const crochets = couverture.needs.find((n) => n.slot === "crochet")!;
+    const pointes = couverture.needs.find((n) => n.slot === "crochet_pointe")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pente 45°, zone 3, rampant ≤ 5,5 m → recouvrement 89 mm (NF DTU 40.11, fiche couverture) → pureau (300 − 89) / 2 = 105,5 mm.
     // Table Cupa (§34) : 42,5/m² × 200 = 8 500 ardoises + 5 % = 8 925 ; crochets = un par ardoise commandée, 8 925 ;
     // 200 / 0,1055 = 1 895,73 ml + 10 % de chute = 2 085,31 ml. (Avant, ancien tableau : recouvrement 95 mm, 9 271 ardoises.)
     // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 189,57 → 2 085,31 ml (200 ÷ 0,1055 × 1,10).
     expect(ardoises.need).toEqual({ value: "8925", unit: "u" });
-    expect(crochets.need).toEqual({ value: "8925", unit: "u" });
+    // À agrafe (Greg, 22 novembre 2026) : 8 925 × 0,8 = 7 140 agrafes, 8 925 × 0,2 = 1 785 pointes ; 7 140 + 1 785 = 8 925,
+    // toujours un crochet par ardoise commandée (avant : une ligne de 8 925).
+    expect(crochets.need).toEqual({ value: "7140", unit: "u" });
+    expect(pointes.need).toEqual({ value: "1785", unit: "u" });
     expect(liteaux.need).toEqual({ value: "2085.31", unit: "ml" });
     expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual([
       // Greg, 21 novembre 2026 : les ouvrages au mètre se lisent au devis ; il n'en écrit aucun : zéro, jamais dit en hypothèse.
@@ -52,22 +58,29 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     // Le devis ne précise pas la section : 18×40 par défaut, dit comme hypothèse (modifiable).
     expect(liteaux.label).toBe("Liteaux 18×40");
     expect(liteaux.assumptions).toContainEqual(expect.objectContaining({ key: "product:liteau", value: "Liteaux 18×40", note: expect.stringMatching(/18×40 par défaut/) }));
-    for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false, state: "verified" });
+    for (const n of [ardoises, crochets, pointes, liteaux]) expect(n).toMatchObject({ provisional: false, state: "verified" });
+    // À pointe : une seule ligne, un crochet à pointe par ardoise commandée (8 925), aucun à agrafe.
+    const aPointe = read({ ...EGOUT_COMPRIS_OUI, ...CROCHETS_A_POINTE }).ouvrage("a1");
+    expect(aPointe.needs.find((n) => n.slot === "crochet_pointe")!.need).toEqual({ value: "8925", unit: "u" });
+    expect(aPointe.needs.find((n) => n.slot === "crochet")).toBeUndefined();
   });
 
   it("pureau donné par l'artisan : il remplace l'hypothèse, les pertes restent", () => {
-    const { ouvrage } = read({ ...EGOUT_COMPRIS_OUI, "param:pureau": { value: "11", unit: "cm" } });
+    const { ouvrage } = read({ ...EGOUT_COMPRIS_OUI, ...CROCHETS_A_AGRAFE, "param:pureau": { value: "11", unit: "cm" } });
     const ardoises = ouvrage("a1").needs.find((n) => n.slot === "ardoise")!;
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
+    const pointes = ouvrage("a1").needs.find((n) => n.slot === "crochet_pointe")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pureau 110 mm sur 30×22 = recouvrement posé 80 mm : ligne de la table Cupa (40,7/m²) → 8 140 + 5 % = 8 547 ;
     // crochets = un par ardoise commandée, 8 547 (avant × 1,02) ; 200 / 0,11 = 1 818,18 ml + 10 % de chute = 2 000.
     // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 100 → 2 000 ml (200 ÷ 0,11 × 1,10).
     expect(ardoises.need).toEqual({ value: "8547", unit: "u" });
-    expect(crochets.need).toEqual({ value: "8547", unit: "u" });
+    // À agrafe : 8 547 × 0,8 = 6 837,6 → 6 838 agrafes ; 8 547 × 0,2 = 1 709,4 → 1 710 pointes (6 838 + 1 710 = 8 548 ≥ 8 547).
+    expect(crochets.need).toEqual({ value: "6838", unit: "u" });
+    expect(pointes.need).toEqual({ value: "1710", unit: "u" });
     expect(liteaux.need).toEqual({ value: "2000", unit: "ml" });
     expect(ardoises.assumptions.some((a) => a.key === "param:pureau" || a.key === "derived:recouvrement")).toBe(false);
-    for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });
+    for (const n of [ardoises, crochets, pointes, liteaux]) expect(n).toMatchObject({ provisional: false });
   });
 
   it("le devis nomme une autre section de liteau : elle l'emporte, plus de « 18×40 par défaut »", () => {

@@ -1477,7 +1477,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.22-76",
+  version: "roofing-2026.11.22-77",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2887,6 +2887,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "crochets-ardoise-a-preciser",
           slot: "crochet",
           when: "type_crochet < 1",
+          ligneEnAttente: true,
           formula: "commande.ardoises",
           unit: "u",
           core: true,
@@ -2908,7 +2909,6 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           unit: "u",
           core: true,
           exclusions: "Pose à agrafe : 1 ardoise sur 5, au droit des chevrons ; pose à pointe : une par ardoise commandée.",
-          precision: "au droit des chevrons (1 ardoise sur 5) en pose à agrafe ; une par ardoise en pose à pointe",
           designation: "Crochets d'ardoise inox à pointe {diametre_crochet}, longueur {longueur_crochet|cm}",
           source: F,
           verification: FOUNDER_DOC,

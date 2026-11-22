@@ -1107,7 +1107,18 @@ export function ecranDeLecture(input: {
     return { ...q, text: nom ? questionDePiece(nom, `param:${piece.name}`, propre.question) : propre.question, ...(propre.choices ? { options: propre.choices } : {}) };
   };
   for (const a of live) a.question = aSonNom(a.question);
-  const questions = live.filter((a) => !answered(a)).map((a) => a.question);
+  // Une donnée posée une fois pour le devis (`groupe` : le pliage, le type de crochet) n'est jamais posée en plus sous son nom
+  // simple : « Je ne sais pas » à la question commune la laisse ouverte, une seule fois (banc du calcul, 22 novembre 2026).
+  const groupeDuNomSimple = (key: string) => {
+    const m = /^param:([a-z0-9_]+)$/.exec(key);
+    const g = m ? ref.workItems.flatMap((w) => w.params).find((p) => p.key === m[1] && p.groupe)?.groupe : undefined;
+    return m && g ? `param:${m[1]}@${g.id}` : null;
+  };
+  const doublon = (a: Asked) => {
+    const g = groupeDuNomSimple(a.key);
+    return g !== null && (answers[g] !== undefined || live.some((x) => x.key === g));
+  };
+  const questions = live.filter((a) => !answered(a) && !doublon(a)).map((a) => a.question);
   const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
   const raw = purchaseView(view, { ...engine, questions }, { plan, roles: roleOf, ref, validation });

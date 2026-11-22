@@ -23,6 +23,15 @@ export const SUGGESTIONS_DU_BANC = "gouttiere/naissance,gouttiere-pvc-alu/naissa
  */
 export const EGOUT_COMPRIS_OUI: Record<string, EngineAnswer> = { "param:egout_compris": { value: "1", unit: "u" } };
 
+/**
+ * Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit au devis, UNE question pour tout le devis (« Tes crochets
+ * d'ardoise : à agrafe ou à pointe ? », groupe `crochets-ardoise`). La réponse « À agrafe » : 4 crochets sur 5 à agrafe (boîtes
+ * de 500), le cinquième à pointe (boîtes de 700). Un banc qui mesure autre chose la donne explicitement ; la question elle-même
+ * a ses tests (`ardoise-cupa`, `couvreur-ardoises-ouvrages-comptes`).
+ */
+export const CROCHETS_A_AGRAFE: Record<string, EngineAnswer> = { "param:type_crochet@crochets-ardoise": { value: "1", unit: "u" } };
+export const CROCHETS_A_POINTE: Record<string, EngineAnswer> = { "param:type_crochet@crochets-ardoise": { value: "2", unit: "u" } };
+
 /** Tout le parcours d'un devis de couvreur jusqu'à la liste, comme l'API (§51.5) : la lecture enregistrée du devis, puis le calcul. */
 export function readQuote(
   bench: readonly QuoteLineInput[],

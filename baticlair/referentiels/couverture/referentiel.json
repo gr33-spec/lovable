@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-76",
+  "version": "roofing-2026.11.22-77",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -981,6 +981,19 @@
         "crochet galva ardoise",
         "crochet galvanise ardoise",
         "crochet teinte ardoise"
+      ]
+    },
+    {
+      "code": "slate_hook_pointe",
+      "label": "Crochet d'ardoise à pointe",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "crochet a pointe",
+        "crochets a pointe",
+        "crochet pointe",
+        "crochets pointe"
       ]
     },
     {
@@ -3829,6 +3842,39 @@
               "verifiedBy": "BatiClair (définition)"
             },
             "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "crochet-ardoise-pointe",
+      "family": "slate_hook_pointe",
+      "label": "Crochet d'ardoise inox à pointe",
+      "shortLabel": "Crochets d'ardoise à pointe",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 700",
+            "many": "boîtes de 700"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "700",
+            "unit": "u",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "Crochets à pointe en boîtes de 700 (Greg, 22 novembre 2026 ; Chausson, Frénéhard)."
           },
           "primary": true
         }
@@ -7835,6 +7881,63 @@
           }
         },
         {
+          "key": "type_crochet",
+          "label": "Type de crochet",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Agrafe ou pointe ?",
+          "hint": "À agrafe : le crochet s'agrafe sur le liteau. À pointe : il se plante (volige, ou au droit des chevrons).",
+          "groupe": {
+            "id": "crochets-ardoise",
+            "question": "Tes crochets d'ardoise : à agrafe ou à pointe ?",
+            "hint": "À agrafe : on ajoute 1 crochet à pointe sur 5, pour ceux qui tombent sur les chevrons."
+          },
+          "choices": [
+            {
+              "label": "À agrafe",
+              "value": "1"
+            },
+            {
+              "label": "À pointe",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "agrafe",
+                "a agrafe",
+                "a agrafer",
+                "tige agrafe",
+                "crochet agrafe",
+                "crochets agrafe",
+                "pression",
+                "ressort"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "a pointe",
+                "crochet pointe",
+                "crochets pointe",
+                "crochet a pointe",
+                "crochets a pointe",
+                "a piquer",
+                "a pic",
+                "passe chevron",
+                "pour volige",
+                "crochet double"
+              ]
+            }
+          ],
+          "display": {
+            "1": "à agrafe",
+            "2": "à pointe"
+          }
+        },
+        {
           "key": "longueur_rampant",
           "label": "Longueur du rampant",
           "unit": "m",
@@ -7894,6 +7997,17 @@
             "source": "fondateur-referentiel-2026-10-03",
             "productId": "crochet-ardoise-standard"
           }
+        },
+        {
+          "key": "crochet_pointe",
+          "family": "slate_hook_pointe",
+          "label": "Crochets d'ardoise à pointe",
+          "usual": {
+            "text": "Crochets à pointe : au droit des chevrons en pose à agrafe, tous sur volige.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "crochet-ardoise-pointe"
+          },
+          "formOf": "crochet"
         },
         {
           "key": "liteau",
@@ -8115,6 +8229,20 @@
           },
           "version": 1,
           "note": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm. Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa."
+        },
+        "part_crochets_pointe": {
+          "kind": "installation_condition",
+          "value": "0.2",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Pose à agrafe : 1 crochet à pointe sur 5 (manuel du CAP couvreur, ch. 21 ; une seule source chiffrée)."
         },
         "sans_gouttiere": {
           "kind": "installation_condition",
@@ -9812,18 +9940,59 @@
         {
           "id": "crochets-ardoise",
           "slot": "crochet",
-          "formula": "commande.ardoises",
+          "when": "type_crochet < 2",
+          "formula": "arrondi_sup(commande.ardoises * (1 - regle.part_crochets_pointe))",
           "unit": "u",
           "core": true,
-          "exclusions": "Un crochet par ardoise commandée (règle du fondateur) : jamais moins de crochets que d'ardoises.",
-          "precision": "un par ardoise commandée",
-          "designation": "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
+          "exclusions": "Un crochet par ardoise commandée (règle du fondateur) ; en pose à agrafe, 1 sur 5 à pointe au droit des chevrons.",
+          "precision": "4 ardoises sur 5 (la cinquième au crochet à pointe)",
+          "designation": "Crochets d'ardoise inox à agrafe {diametre_crochet}, longueur {longueur_crochet|cm}",
           "source": "baticlair-geometrie-ardoise",
           "verification": {
             "status": "verified",
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "crochets-ardoise-a-preciser",
+          "slot": "crochet",
+          "when": "type_crochet < 1",
+          "ligneEnAttente": true,
+          "formula": "commande.ardoises",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un crochet par ardoise commandée ; à agrafe ou à pointe selon la réponse.",
+          "precision": "un par ardoise commandée",
+          "designation": "Crochets d'ardoise inox {type_crochet} {diametre_crochet}, longueur {longueur_crochet|cm}",
+          "precisionRequires": [
+            "type_crochet"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "crochets-ardoise-pointe",
+          "slot": "crochet_pointe",
+          "formula": "si(type_crochet < 2, arrondi_sup(commande.ardoises * regle.part_crochets_pointe), commande.ardoises)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Pose à agrafe : 1 ardoise sur 5, au droit des chevrons ; pose à pointe : une par ardoise commandée.",
+          "designation": "Crochets d'ardoise inox à pointe {diametre_crochet}, longueur {longueur_crochet|cm}",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
