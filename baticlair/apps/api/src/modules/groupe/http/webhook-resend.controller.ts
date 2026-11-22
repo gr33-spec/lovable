@@ -54,7 +54,8 @@ export class WebhookResendController {
   ) {}
 
   @Public()
-  @Throttle({ default: HOURLY(600) })
+  // Une avalanche de spam ne doit pas faire refuser les vrais e-mails (saboteur, 22 novembre 2026) : plafond relevé.
+  @Throttle({ default: HOURLY(6000) })
   @Post("resend")
   @HttpCode(200)
   async recevoir(
@@ -73,7 +74,9 @@ export class WebhookResendController {
 
   private async traiter(req: { body?: unknown }) {
     const evenement = (req.body ?? {}) as { type?: string; data?: { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string } };
-    if (evenement.type !== "email.received" || !evenement.data?.from) return { traite: false, raison: "ignore" };
+    if (evenement.type !== "email.received" || !evenement.data) return { traite: false, raison: "ignore" };
+    // Un expéditeur vide n'est jamais ignoré en silence (saboteur, 22 novembre 2026) : il passe au filtre, noté, indésirable.
+    evenement.data.from = evenement.data.from ?? "";
     // Greg, 14 novembre 2026 : ce qui arrive sur contact@ est transféré vers l'adresse d'alerte réglée dans l'admin
     // (avant : une adresse fixe de la configuration).
     const vers = this.config.contact ? await this.adresse.actuelle().catch(() => null) : null;

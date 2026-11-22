@@ -117,15 +117,32 @@ export function lireAdresseMobiiz(to: readonly string[], domaine: string): { adr
  */
 export const cleAdresse = (adresse: string): string => adresse.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-/** L'adresse nue d'un « Nom <adresse> ». */
-export function adresseNue(s: string): string {
-  return (/<([^>]+)>/.exec(s)?.[1] ?? s).trim().toLowerCase();
+/**
+ * Un « Nom <adresse> » lu comme une messagerie (saboteur, 22 novembre 2026) : la VRAIE adresse est le DERNIER « <…> »
+ * hors guillemets ; un « <…> » écrit dans le nom affiché ne compte pas ; commentaire « (…) » et point final retirés.
+ */
+function partiesExpediteur(s: string): { nom: string; adresse: string } {
+  const masque = s.replace(/"(?:[^"\\]|\\.)*"/g, (m) => " ".repeat(m.length));
+  const chevrons = [...masque.matchAll(/<([^<>]*)>/g)];
+  const dernier = chevrons.at(-1);
+  const nettoyer = (a: string) => a.replace(/\([^)]*\)/g, " ").trim().toLowerCase().replace(/\.+$/, "");
+  if (dernier) return { nom: s.slice(0, dernier.index).replace(/["\\]/g, "").trim(), adresse: nettoyer(dernier[1]!) };
+  const sansCommentaire = nettoyer(s);
+  return { nom: "", adresse: /[^\s<>"]+@[^\s<>"]+/.exec(sansCommentaire)?.[0].replace(/\.+$/, "") ?? sansCommentaire };
 }
 
-/** Le nom affiché d'un expéditeur (« Négoce Dupont <ventes@dupont.fr> » → « Négoce Dupont »), sinon l'adresse. */
+/** L'adresse nue d'un « Nom <adresse> » : la vraie, jamais une adresse écrite dans le nom affiché. */
+export function adresseNue(s: string): string {
+  return partiesExpediteur(s).adresse;
+}
+
+/**
+ * Le nom affiché d'un expéditeur (« Négoce Dupont <ventes@dupont.fr> » → « Négoce Dupont »), sinon l'adresse. Un nom
+ * affiché qui contient une adresse (« contact@mobiiz.fr <pirate@x> ») n'est jamais montré : la vraie adresse le remplace.
+ */
 export function nomExpediteur(s: string): string {
-  const m = /^\s*"?([^"<]+?)"?\s*<[^>]+>\s*$/.exec(s);
-  return m ? m[1]!.trim() : adresseNue(s);
+  const { nom, adresse } = partiesExpediteur(s);
+  return nom && !nom.includes("@") ? nom : adresse;
 }
 
 /** Les phrases de l'écran dédié (Greg, 27 octobre 2026, mot pour mot), pour le nom d'application donné. */

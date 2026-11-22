@@ -25,8 +25,8 @@ describe("verdict d'un message reçu", () => {
     const v = verdictEntrant({ de: "Mobiiz <contact@mobiiz.fr>", authentification: { spf: "gray", dkim: "gray", dmarc: "gray" }, pieces: [], domaineApp: "mobiiz.fr" });
     expect(v.raisons).toContain("Se fait passer pour mobiiz.fr sans le prouver");
     expect(verdictEntrant({ de: "support@reponses.mobiiz.fr", authentification: null, pieces: [], domaineApp: "mobiiz.fr" }).suspect).toBe(true);
-    // « mobiiz.fr.arnaque.com » n'est pas mobiiz.fr : jugé comme un autre domaine.
-    expect(verdictEntrant({ de: "a@mobiiz.fr.arnaque.com", authentification: ok, pieces: [], domaineApp: "mobiiz.fr" }).suspect).toBe(false);
+    // « mobiiz.fr.arnaque.com » imite mobiiz.fr (saboteur, 22 novembre 2026) : suspect, même authentifié.
+    expect(verdictEntrant({ de: "a@mobiiz.fr.arnaque.com", authentification: ok, pieces: [], domaineApp: "mobiiz.fr" }).raisons).toContain("Domaine qui imite mobiiz.fr : mobiiz.fr.arnaque.com");
   });
 
   it("sans résultat d'authentification : pas suspect, jamais authentifié", () => {
@@ -47,8 +47,8 @@ describe("verdict d'un message reçu", () => {
 
 describe("un message externe n'est jamais habillé en Mobiiz", () => {
   it("les liens deviennent du texte non cliquable", () => {
-    expect(liensDesactives("Cliquez ici : https://mobiiz-paiement.com/login?x=1 ou www.arnaque.fr.")).toBe("Cliquez ici : hxxps://mobiiz-paiement[.]com/login?x=1 ou www[.]arnaque[.]fr.");
-    expect(liensDesactives("http://a.b")).toBe("hxxp://a[.]b");
+    expect(liensDesactives("Cliquez ici : https://mobiiz-paiement.com/login?x=1 ou www.arnaque.fr.")).toBe("Cliquez ici : hxxps[:]//mobiiz-paiement[.]com/login?x=1 ou www[.]arnaque[.]fr.");
+    expect(liensDesactives("http://site.fr")).toBe("hxxp[:]//site[.]fr");
     expect(liensDesactives("Bonjour, voici le devis.")).toBe("Bonjour, voici le devis.");
   });
 

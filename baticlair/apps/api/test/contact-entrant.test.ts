@@ -28,6 +28,8 @@ const lecteur: LecteurEmailRecu = {
       html: "<p>Bonjour, combien coûte l'abonnement annuel ?</p>",
       attachments: [{ filename: "devis.pdf", contentType: "application/pdf", contentBase64: Buffer.from("%PDF-1.4").toString("base64") }],
       tropLourdes: [],
+      // Un expéditeur authentifié, comme Resend le dit pour un vrai négoce (Greg, 22 novembre 2026).
+      authentification: { spf: "pass", dkim: "pass", dmarc: "pass" },
     });
   },
 };

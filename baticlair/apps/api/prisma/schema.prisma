@@ -2130,6 +2130,8 @@ model EmailRecuArtisan {
   authentifie    Boolean  @default(false)
   /// Pièces jointes dangereuses, retenues (jamais gardées).
   piecesBloquees String[] @default([]) @map("pieces_bloquees")
+  /// L'étiquette de demande que l'e-mail visait, quand il n'a pas été rattaché d'office (expéditeur non prouvé).
+  etiquetteVisee String?  @map("etiquette_visee")
 
   company   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
   recipient PriceRequestRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)

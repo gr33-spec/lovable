@@ -1,4 +1,4 @@
-import { BANDEAU_EXTERNE, liensDesactives, objetExterne, pieceDangereuse, verdictEntrant, type Authentification, type VerdictEntrant } from "@baticlair/domain";
+import { BANDEAU_EXTERNE, contenuDangereux, liensDesactives, objetExterne, pieceDangereuse, verdictEntrant, type Authentification, type VerdictEntrant } from "@baticlair/domain";
 import type { AppLogger } from "../logging/logger.js";
 import type { TransactionalEmail, TransactionalEmailSender } from "./email.port.js";
 
@@ -112,7 +112,8 @@ export class LecteurEmailRecuDeTest implements LecteurEmailRecu {
     // Comme Resend : une pièce dangereuse n'est jamais « téléchargée », seul son nom reste.
     const pieces = e.attachments ?? [];
     const retenues = pieces.filter((p) => pieceDangereuse(p.filename, p.contentType)).map((p) => p.filename);
-    return Promise.resolve({ from: e.from ?? "", to: e.to ?? [], subject: e.subject ?? "", date: e.date ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments: pieces.filter((p) => !retenues.includes(p.filename)), tropLourdes: e.tropLourdes ?? [], authentification: e.authentification ?? null, piecesRetenues: [...(e.piecesRetenues ?? []), ...retenues] });
+    return Promise.resolve({ from: e.from ?? "", to: e.to ?? [], subject: e.subject ?? "", date: e.date ?? new Date().toISOString(), text: e.text ?? null, html: e.html ?? null, attachments: pieces.filter((p) => !retenues.includes(p.filename)), tropLourdes: e.tropLourdes ?? [], // Sans verdict déposé, le message est celui d'un expéditeur authentifié (comme Resend pour un vrai négoce).
+      authentification: e.authentification === undefined ? { spf: "pass", dkim: "pass", dmarc: "pass" } : e.authentification, piecesRetenues: [...(e.piecesRetenues ?? []), ...retenues] });
   }
 }
 
@@ -123,7 +124,9 @@ export function adresseNue(s: string): string {
 
 /** Le verdict d'un message relu (Greg, 22 novembre 2026) : authentification, pièces jointes, usurpation du domaine. */
 export function verdictDuRecu(recu: EmailRecu, domaineApp: string | null): VerdictEntrant {
-  const pieces = [...recu.attachments.map((p) => ({ nom: p.filename, type: p.contentType })), ...(recu.piecesRetenues ?? []).map((nom) => ({ nom }))];
+  // Le contenu doit dire ce que le nom promet (saboteur, 22 novembre 2026) : un « devis.pdf » exécutable ou archive est retenu.
+  const debut = (b64: string) => new Uint8Array(Buffer.from(b64.slice(0, 64), "base64"));
+  const pieces = [...recu.attachments.map((p) => ({ nom: p.filename, type: p.contentType, dangereux: contenuDangereux(p.filename, debut(p.contentBase64)) })), ...(recu.piecesRetenues ?? []).map((nom) => ({ nom, dangereux: true }))];
   return verdictEntrant({ de: recu.from, authentification: recu.authentification ?? null, pieces, domaineApp });
 }
 
@@ -152,20 +155,27 @@ export function texteRecu(recu: Pick<EmailRecu, "text" | "html">): string {
  */
 export function emailDeRenvoi(recu: EmailRecu, adresse: string, vers: string, verdict: VerdictEntrant = verdictDuRecu(recu, null)): TransactionalEmail {
   const verification = verdict.authentifie ? "Expéditeur authentifié par son domaine (DMARC)." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.";
-  const entete = [`${BANDEAU_EXTERNE}.`, verification, "", `De : ${recu.from}`, `À : ${adresse}`, `Reçu le : ${new Date(recu.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, `Objet : ${recu.subject || "(sans objet)"}`];
-  const lourdes = recu.tropLourdes.length ? [`Pièces jointes trop lourdes, à lire dans Resend : ${recu.tropLourdes.join(", ")}`] : [];
-  const retenues = verdict.piecesBloquees.length ? [`Pièces jointes retenues (dangereuses) : ${verdict.piecesBloquees.join(", ")}`] : [];
+  // Tout ce qui vient de l'expéditeur (nom affiché, objet, noms de fichiers) : une seule ligne, liens non cliquables.
+  const sur = (t: string) => ligneExterne(t);
+  const entete = [`${BANDEAU_EXTERNE}.`, verification, "", `De : ${sur(recu.from)}`, `À : ${adresse}`, `Reçu le : ${new Date(recu.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`, `Objet : ${sur(recu.subject || "(sans objet)")}`];
+  const lourdes = recu.tropLourdes.length ? [`Pièces jointes trop lourdes, à lire dans Resend : ${recu.tropLourdes.map(sur).join(", ")}`] : [];
+  const retenues = verdict.piecesBloquees.length ? [`Pièces jointes retenues (dangereuses) : ${verdict.piecesBloquees.map(sur).join(", ")}`] : [];
   const expediteur = adresseNue(recu.from);
   const sures = recu.attachments.filter((p) => !verdict.piecesBloquees.includes(p.filename));
   return {
     to: vers,
-    subject: objetExterne(recu.subject),
+    subject: objetExterne(liensDesactives(recu.subject)),
     text: [...entete, ...lourdes, ...retenues, "", liensDesactives(texteRecu(recu))].join("\n"),
     externe: true,
     ...(sures.length ? { attachments: sures } : {}),
     ...(expediteur.includes("@") ? { replyTo: expediteur } : {}),
     mustDeliver: true,
   };
+}
+
+/** Une ligne écrite par l'expéditeur, rendue sûre : sans retour à la ligne, sans lien cliquable. */
+export function ligneExterne(t: string): string {
+  return liensDesactives(t.replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim());
 }
 
 /** Ce qu'il faut garder d'un message reçu sur contact@ (le journal des entrants, la liste de l'admin). */
@@ -185,7 +195,12 @@ export async function renvoyerContact(
   const to = (Array.isArray(evenement.to) ? evenement.to : evenement.to ? [evenement.to] : []).map(adresseNue);
   const adresse = contact.adresses.find((a) => to.includes(a));
   if (!adresse) return null;
-  if (adresseNue(evenement.from ?? "") === contact.vers) return { traite: false, raison: "boucle" };
+  if (adresseNue(evenement.from ?? "") === contact.vers) {
+    // Rien n'est écarté en silence : la « boucle » (un expéditeur qui se dit l'adresse de l'admin) est notée au journal.
+    const recuBoucle: EmailRecu = { from: evenement.from ?? "", to, subject: evenement.subject ?? "", date: evenement.created_at ?? new Date().toISOString(), text: null, html: null, attachments: [], tropLourdes: [] };
+    await journal({ adresse, recu: recuBoucle, verdict: { suspect: true, raisons: ["Expéditeur identique à l'adresse de l'admin (boucle)"], piecesBloquees: [], authentifie: false }, emailId: evenement.email_id ?? null }).catch(() => undefined);
+    return { traite: false, raison: "boucle" };
+  }
   const lu = evenement.email_id ? await lecteur.lire(evenement.email_id) : null;
   const recu: EmailRecu = lu ?? {
     from: evenement.from ?? "",

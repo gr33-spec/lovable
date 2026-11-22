@@ -1,6 +1,6 @@
 import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur } from "@baticlair/domain";
 import { alertePropositionNegoce, BANDEAU_EXTERNE, liensDesactives, objetExterne } from "@baticlair/domain";
-import { verdictDuRecu } from "../../../platform/email/contact-entrant.js";
+import { ligneExterne, verdictDuRecu } from "../../../platform/email/contact-entrant.js";
 import type { JournalEntrants } from "../../../platform/email/journal-entrants.js";
 import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -122,7 +122,11 @@ export class ReponsesRecuesService {
     // Pas de boucle : un e-mail parti d'une adresse d'envoi de l'application (contact@, réponse) n'est jamais repris ; une
     // autre adresse du domaine (un vrai négoce ne l'a jamais, mais la recette, si) passe.
     const expediteur = adresseNue(from);
-    if (this.adressesInternes.includes(expediteur) || expediteur === `${cible.adresse}@${this.domaine}`) return { traite: false, raison: "boucle" };
+    if (this.adressesInternes.includes(expediteur) || expediteur === `${cible.adresse}@${this.domaine}`) {
+      // Rien n'est écarté en silence (saboteur, 22 novembre 2026) : la boucle est notée au journal des entrants.
+      await this.journal?.noter({ adresse: `${cible.adresse}@${this.domaine}`, companyId, recu: { from, subject: evenement.subject ?? "", authentification: null }, verdict: { suspect: true, raisons: ["Expéditeur d'une adresse de Mobiiz (boucle)"], piecesBloquees: [], authentifie: false }, emailId: evenement.email_id ?? null }).catch(() => undefined);
+      return { traite: false, raison: "boucle" };
+    }
     const lu = evenement.email_id ? await lecteur.lire(evenement.email_id).catch(() => null) : null;
     const recu: EmailRecu = lu ?? {
       from,
@@ -138,8 +142,13 @@ export class ReponsesRecuesService {
     // Mobiiz. Suspect : en Indésirables, jamais rattaché à une demande, aucune alerte ; noté pour l'admin.
     const verdict = verdictDuRecu(recu, this.domaine);
     await this.journal?.noter({ adresse: `${cible.adresse}@${this.domaine}`, companyId, recu, verdict, emailId: evenement.email_id ?? null }).catch((err: unknown) => this.logger.warn({ err }, "adresse mobiiz: journal des entrants indisponible"));
-    // Une réponse de négoce ne passe pour telle que si elle se rattache à une vraie demande de CET artisan (étiquette).
-    const destinataire = verdict.suspect ? null : await this.demandeVisee(companyId, cible.etiquette ?? etiquetteDansObjet(evenement.subject ?? "") ?? etiquetteDansObjet(recu.subject));
+    // Une réponse de négoce ne passe pour telle que si elle se rattache à une vraie demande de CET artisan (étiquette) ET que
+    // l'expéditeur est prouvé être ce négoce (saboteur, 22 novembre 2026 : l'étiquette peut fuiter, par un transfert ou
+    // une copie) : même adresse, ou même domaine privé, et DMARC passé. Sinon l'e-mail attend dans « Réponses à classer ».
+    const visee = verdict.suspect ? null : await this.demandeVisee(companyId, cible.etiquette ?? etiquetteDansObjet(evenement.subject ?? "") ?? etiquetteDansObjet(recu.subject));
+    const memeNegoce = !!visee && memeExpediteur(adresseNue(recu.from || from), visee.supplier.email);
+    const destinataire = visee && memeNegoce && verdict.authentifie ? visee : null;
+    const raisonsNonRattache = visee && !destinataire ? [memeNegoce ? "Expéditeur non authentifié : vérifie avant de classer" : `Expéditeur différent du négoce de la demande (${visee.supplier.name})`] : [];
     const fichiers: { nom: string; type: string; contenu: Uint8Array }[] = [];
     const tropLourdes = [...recu.tropLourdes];
     let total = 0;
@@ -161,13 +170,14 @@ export class ReponsesRecuesService {
         projectId: destinataire?.priceRequest.projectId ?? null,
         de: from,
         objet: recu.subject,
-        texte: recu.text ?? texteDuHtml(recu.html),
+        texte: texteGarde200k(recu.text ?? texteDuHtml(recu.html)),
         recuLe: dateLisible(recu.date, this.now()),
         tropLourdes,
         indesirable: verdict.suspect,
         indesirablePar: verdict.suspect ? "mobiiz" : null,
-        raisons: verdict.raisons,
+        raisons: [...verdict.raisons, ...raisonsNonRattache],
         authentifie: verdict.authentifie,
+        etiquetteVisee: visee && !destinataire ? visee.etiquette : null,
         piecesBloquees: verdict.piecesBloquees,
         fichiers: { create: fichiers.map((f) => ({ nom: f.nom, type: f.type, taille: f.contenu.length, contenu: new Uint8Array(f.contenu) })) },
       },
@@ -191,25 +201,24 @@ export class ReponsesRecuesService {
         companyId,
         destinataire
           ? { titre: `${negoce} t'a répondu`, corps: "Sa réponse est sur ton chantier, dans Mobiiz.", url, etiquette: `recu-${email.id}` }
-          : { titre: "Nouveau message reçu", corps: `Un message de ${adresseNue(from)} est dans tes reçus, dans Mobiiz.`, url, etiquette: `recu-${email.id}` },
+          : { titre: "Nouveau message reçu", corps: `Un message de ${adresseNue(recu.from || from)} est dans tes reçus, dans Mobiiz.`, url, etiquette: `recu-${email.id}` },
         // Greg, 14 novembre 2026 : la réponse est COPIÉE sur la vraie adresse de l'artisan (son message, le nom de ses pièces
         // jointes, le lien). Greg, 22 novembre 2026 : jamais habillée en Mobiiz : bandeau « Message externe », expéditeur
         // réel, objet « [Externe] », liens non cliquables, aucun logo.
         {
-          objet: objetExterne(destinataire ? `${negoce} t'a répondu par e-mail` : recu.subject),
+          objet: objetExterne(destinataire ? `${negoce} t'a répondu par e-mail` : ligneExterne(recu.subject)),
           externe: true,
           texte: [
             `${BANDEAU_EXTERNE}.`,
             verdict.authentifie ? "Expéditeur authentifié par son domaine." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.",
             "",
-            `De : ${from}`,
+            `De : ${ligneExterne(recu.from || from)}`,
             `À : ton adresse ${NOM_APP} (${cible.adresse}@${this.domaine})`,
-            `Objet : ${recu.subject || "(sans objet)"}`,
+            `Objet : ${ligneExterne(recu.subject || "(sans objet)")}`,
             ...(destinataire ? [`Demande : ${destinataire.supplier.name}`] : []),
             "",
             ...(copie ? [copie, ""] : []),
-            ...(pieces.length ? [`Pièce${pieces.length > 1 ? "s" : ""} jointe${pieces.length > 1 ? "s" : ""} (à ouvrir dans ${NOM_APP}) : ${pieces.join(", ")}`, ""] : []),
-            ...(verdict.piecesBloquees.length ? [`Pièces jointes retenues (dangereuses) : ${verdict.piecesBloquees.join(", ")}`, ""] : []),
+            ...(pieces.length ? [`Pièce${pieces.length > 1 ? "s" : ""} jointe${pieces.length > 1 ? "s" : ""} (à ouvrir dans ${NOM_APP}) : ${pieces.map(ligneExterne).join(", ")}`, ""] : []),
             `Lire dans ${NOM_APP} : ${this.notifications.lienVers(url)}`,
           ].join("\n"),
         },
@@ -222,7 +231,7 @@ export class ReponsesRecuesService {
   /** La demande que l'étiquette nomme, si elle est bien de cette entreprise. */
   private async demandeVisee(companyId: string, etiquette: string | null) {
     if (!etiquette) return null;
-    const r = await this.prisma.priceRequestRecipient.findUnique({ where: { etiquette }, include: { priceRequest: { select: { projectId: true, companyId: true } }, supplier: { select: { name: true } } } });
+    const r = await this.prisma.priceRequestRecipient.findUnique({ where: { etiquette }, include: { priceRequest: { select: { projectId: true, companyId: true } }, supplier: { select: { name: true, email: true } } } });
     return r && r.priceRequest.companyId === companyId ? r : null;
   }
 
@@ -275,6 +284,12 @@ export class ReponsesRecuesService {
     if (!emailId) return { items, suggestion: null };
     const e = await this.charger(tenant, emailId);
     const expediteur = adresseNue(e.de);
+    // Un expéditeur non prouvé (saboteur, 22 novembre 2026) : aucune proposition, sauf la demande que son étiquette visait
+    // quand l'adresse est exactement celle du négoce, dite « à vérifier ».
+    if (!e.authentifie) {
+      const visee = e.etiquetteVisee ? liste.find((r) => r.etiquette === e.etiquetteVisee && r.supplier.email.trim().toLowerCase() === expediteur) : undefined;
+      return { items, suggestion: visee ? { recipientId: visee.id, raison: `L'e-mail répond à ta demande à ${visee.supplier.name}, mais Mobiiz n'a pas pu vérifier l'expéditeur : vérifie avant de classer.` } : null };
+    }
     const domaine = expediteur.split("@")[1] ?? "";
     const enAttenteDAbord = [...liste].sort((x, y) => Number(!!(x.documentId || x.reponduLe)) - Number(!!(y.documentId || y.reponduLe)));
     const memeAdresse = enAttenteDAbord.find((r) => r.supplier.email.trim().toLowerCase() === expediteur);
@@ -385,4 +400,20 @@ export function texteDuHtml(html: string | null): string | null {
 export function dateLisible(texte: string | null | undefined, maintenant: Date): Date {
   const d = texte ? new Date(texte) : null;
   return d && !Number.isNaN(d.getTime()) ? d : maintenant;
+}
+
+/** Même expéditeur que le négoce : même adresse, ou même domaine quand il n'est pas une messagerie grand public. */
+function memeExpediteur(expediteur: string, negoce: string): boolean {
+  const a = expediteur.trim().toLowerCase();
+  const b = negoce.trim().toLowerCase();
+  if (a === b) return true;
+  const da = a.split("@")[1] ?? "";
+  return !!da && da === (b.split("@")[1] ?? "") && !MESSAGERIES_PUBLIQUES.has(da);
+}
+
+/** Un corps énorme n'est jamais gardé en entier (saboteur, 22 novembre 2026) : 200 000 caractères au plus, et il le dit. */
+export const TEXTE_RECU_MAX = 200_000;
+function texteGarde200k(texte: string | null): string | null {
+  if (!texte || texte.length <= TEXTE_RECU_MAX) return texte;
+  return `${texte.slice(0, TEXTE_RECU_MAX - 80)}\n\n[Message coupé : trop long pour être gardé en entier.]`;
 }

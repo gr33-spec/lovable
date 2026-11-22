@@ -30,6 +30,8 @@ const lecteur: LecteurEmailRecu = {
       html: null,
       attachments: [],
       tropLourdes: [],
+      // Un expéditeur authentifié, comme Resend le dit pour un vrai négoce (Greg, 22 novembre 2026).
+      authentification: { spf: "pass", dkim: "pass", dmarc: "pass" },
       ...recuSimule,
     };
   },
