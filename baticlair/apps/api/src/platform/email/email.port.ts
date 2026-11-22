@@ -30,6 +30,22 @@ export interface TransactionalEmail {
    * <toitures-martin@mobiiz.fr> », une demande de prix). Toujours sur le domaine de l'application.
    */
   from?: string;
+  /**
+   * « Envoyés » (Greg, 22 novembre 2026) : cet e-mail part AU NOM de l'artisan (demande de prix, bon de commande, réponse,
+   * relance, « prévenir les autres négoces »). Une fois parti pour de vrai, il est noté dans son dossier « Envoyés ».
+   */
+  envoi?: EnvoiAuNomDe;
+}
+
+export type SorteEnvoi = "demande" | "commande" | "reponse" | "relance" | "prevenir";
+export interface EnvoiAuNomDe {
+  companyId: string;
+  sorte: SorteEnvoi;
+  projectId?: string | null;
+  recipientId?: string | null;
+  repondA?: string | null;
+  /** Le nom lisible du destinataire (« Point P Lannion »). */
+  destinataire?: string | null;
 }
 
 export interface TransactionalEmailSender {

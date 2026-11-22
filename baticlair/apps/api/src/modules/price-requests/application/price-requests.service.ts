@@ -359,6 +359,7 @@ export class PriceRequestsService {
         // partir, sinon la demande ne passe pas « envoyée ».
         ...(via ? { from: via.from, replyTo: via.replyTo } : (packet.expediteur?.emailReponse ?? packet.expediteur?.email) ? { replyTo: (packet.expediteur?.emailReponse ?? packet.expediteur?.email)! } : {}),
         mustDeliver: true,
+        envoi: { companyId: tenant.companyId, sorte: "demande", projectId: request.projectId, recipientId, destinataire: recipient.supplier.name },
         // Le PDF « Demande de devis » (les blocs + les croquis en pages), puis chaque croquis d'origine, pour le zoom.
         attachments: [
           { filename: pdf.filename, contentType: "application/pdf", contentBase64: Buffer.from(pdf.bytes).toString("base64") },

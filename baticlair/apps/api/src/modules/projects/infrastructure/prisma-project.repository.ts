@@ -100,6 +100,8 @@ function etapeSql(etape: EtapeDemande): Prisma.Sql {
   switch (etape) {
     case "a-preparer":
       return Prisma.sql`(${enCours} AND NOT ${PARTIE})`;
+    case "parties":
+      return Prisma.sql`NOT (${enCours} AND NOT ${PARTIE})`;
     case "envoyees":
       return Prisma.sql`(${enCours} AND ${PARTIE} AND NOT ${REPONDUE} AND NOT ${RETENUE})`;
     case "reponses":

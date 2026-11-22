@@ -919,6 +919,8 @@ export interface EmailRecu {
   demande: { recipientId: string; projectId: string; negoce: string; chantier?: string } | null;
   fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
   tropLourdes: string[];
+  /** Rangé dans les Indésirables (Greg, 22 novembre 2026). */
+  indesirable?: boolean;
 }
 
 /** R7 : une demande partie, à laquelle rattacher un e-mail reçu (`GET /v1/recus/demandes`). */

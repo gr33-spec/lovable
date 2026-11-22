@@ -340,66 +340,132 @@ function RetourPanneau({ titre, onRetour }: { titre: string; onRetour: () => voi
   );
 }
 
-/** Capture 23 : la réponse d'un négoce reçue par e-mail. Le devis n'est jamais lu par l'IA : l'artisan l'ouvre. */
-export function ReponseNegoce({ id }: { id: string }) {
+/**
+ * UN MESSAGE DE NÉGOCE, COMME GMAIL (Greg, 22 novembre 2026) : le fil avec ce négoce (ses messages et ce qui lui est parti,
+ * dans l'ordre), ses pièces jointes, « Répondre » (la réponse part de l'adresse Mobiiz de l'artisan, au négoce de la
+ * demande, et sa réponse revient rangée dans le bon chantier), « Signaler comme indésirable ». Jamais de bouton « Appeler ».
+ * Le devis n'est jamais lu par l'IA : l'artisan l'ouvre.
+ */
+export function ReponseNegoce({ id, panneau = false }: { id: string; panneau?: boolean }) {
   const fetcher = useCallback((signal: AbortSignal) => api<EmailRecu>(`/v1/recus/${id}`, { signal }), [id]);
-  const { data: e, error, reload } = useResource(fetcher);
+  const { data: e, error, reload, setData } = useResource(fetcher);
+  const recipientId = e?.demande?.recipientId ?? null;
+  const filFetcher = useCallback((signal: AbortSignal) => (recipientId ? api<FilNegoce>(`/v1/messagerie/fil/${recipientId}`, { signal }) : Promise.resolve(null)), [recipientId]);
+  const { data: fil, reload: rechargerFil } = useResource(filFetcher);
+  const [texte, setTexte] = useState("");
+  const [envoi, setEnvoi] = useState<"repos" | "envoi" | "parti">("repos");
+  const [refus, setRefus] = useState<string | null>(null);
+  const titre = panneau ? null : <EcranTitre titre={e?.indesirable ? "Indésirable" : "Message du négoce"} retour="/messages" />;
   if (!e) {
     return (
       <>
-        <EcranTitre titre="Réponse du négoce" retour="/messages" />
-        <EtatEcran erreur={error} onReessayer={reload} retour={{ href: "/messages", libelle: "Revenir aux messages" }} />
+        {titre}
+        <EtatEcran erreur={error} onReessayer={reload} retour={panneau ? undefined : { href: "/messages", libelle: "Revenir aux messages" }} />
       </>
     );
   }
-  const quand = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(new Date(e.recuLe));
-  const adresse = /<([^>]+)>/.exec(e.de)?.[1] ?? e.de;
+  const quand = (iso: string) => new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).format(new Date(iso));
+  const repondre = async () => {
+    if (!texte.trim()) return;
+    setEnvoi("envoi");
+    setRefus(null);
+    try {
+      await api(`/v1/recus/${encodeURIComponent(e.id)}/repondre`, { method: "POST", body: { texte } });
+      setTexte("");
+      setEnvoi("parti");
+      rechargerFil();
+    } catch (err) {
+      setRefus(phraseErreur(err));
+      setEnvoi("repos");
+    }
+  };
+  const ranger = async (indesirable: boolean) => {
+    try {
+      setData(await api<EmailRecu>(`/v1/recus/${encodeURIComponent(e.id)}/indesirable`, { method: "POST", body: { indesirable } }));
+    } catch (err) {
+      setRefus(phraseErreur(err));
+    }
+  };
+  // Le fil : les messages reçus et envoyés à ce négoce ; sans demande, le message seul.
+  const messages: FilNegoce["items"] = fil?.items.length ? fil.items : [{ sens: "recu", id: e.id, libelle: e.demande?.negoce ?? e.expediteur, objet: e.objet, texte: e.texte ?? "", le: e.recuLe, fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type })) }];
   return (
     <>
-      <EcranTitre titre="Réponse du négoce" retour="/messages" />
+      {titre}
       <header className="flex flex-col gap-1">
-        <Etiquette ton="vert">Négoce</Etiquette>
-        <h1 className="font-display text-[26px] leading-[1.1] font-extrabold tracking-[-0.02em]">{e.demande?.negoce ?? e.expediteur}</h1>
-        <p className="text-[14px] text-muted">{e.objet || "Sans objet"}</p>
+        {e.demande ? <p className="text-[14px] font-bold text-muted">Négoce · {titreCourt(e.demande.chantier ?? "", 56)}</p> : null}
+        <h1 className="font-display text-[26px] leading-[1.1] font-extrabold tracking-[-0.02em] break-words">{e.demande?.negoce ?? e.expediteur}</h1>
+        <p className="text-[15px] break-words text-muted">{e.objet || "Sans objet"}</p>
       </header>
-      <div className={`flex items-center justify-between gap-3 p-4 ${CARTE}`}>
-        <div className="flex flex-col">
-          <p className="text-[12px] text-[#6b6557]">Reçue le {quand}</p>
-          <p className="text-[18px] font-extrabold">{e.fichiers.length ? (e.fichiers.some((f) => f.devisRecu) ? "Devis reçu" : "E-mail avec pièce jointe") : "E-mail reçu"}</p>
-        </div>
-        <Etiquette ton={e.demande ? "vert" : "jaune"}>{e.demande ? "Classée" : "À classer"}</Etiquette>
-      </div>
-      <section aria-label="Message du négoce" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
-        <h2 className="text-[16px] font-extrabold">Message du négoce</h2>
-        <p className="text-[14px] leading-snug break-words whitespace-pre-line">{e.texte?.trim() || "Ce message n'a pas de texte."}</p>
-        <p className="text-[12px] text-[#6b6557]">{e.demande ? `Réponse reçue par e-mail, classée dans ${e.demande.chantier ? `« ${e.demande.chantier} »` : "son quantitatif"}.` : "Réponse reçue par e-mail. Mobiiz n'a pas reconnu la demande : classe-la pour la comparer."}</p>
-      </section>
-      {e.fichiers.length ? (
-        <ul aria-label="Pièces jointes" className="flex flex-col gap-3">
-          {e.fichiers.map((f) => (
-            <li key={f.id}>
-              <button type="button" onClick={() => openFile({ url: `/v1/recus/${encodeURIComponent(e.id)}/fichiers/${encodeURIComponent(f.id)}`, title: f.nom, fileName: f.nom })} className={`pressable flex w-full items-center gap-3 p-4 text-left ${CARTE}`}>
-                <FileText size={22} aria-hidden="true" className="shrink-0" />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[16px] font-extrabold">{f.nom}</span>
-                  <span className="text-[13px] text-[#5c5648]">
-                    {f.type === "application/pdf" ? "PDF" : "Fichier"} · {tailleLisible(f.taille)}
-                  </span>
-                </span>
-                <span className="shrink-0 text-[14px] font-extrabold text-[#0b6b43]">Ouvrir</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+      {e.indesirable ? (
+        <Encart titre="Ce message est dans les indésirables">Mobiiz l&apos;a mis de côté, ou tu l&apos;as signalé. Ses liens ne sont pas cliquables et ses pièces dangereuses n&apos;ont pas été gardées.</Encart>
       ) : null}
+      <ol aria-label="Fil des messages" className="flex flex-col gap-3">
+        {messages.map((m) => (
+          <li key={`${m.sens}-${m.id}`} className={`flex flex-col gap-2 p-4 ${CARTE} ${m.sens === "envoye" ? "ml-6 border-accent/60" : "mr-6"}`}>
+            <p className="text-[13px] text-muted">
+              <span className="font-extrabold text-ink">{m.sens === "envoye" ? `Toi · ${m.libelle}` : m.libelle}</span> · {quand(m.le)}
+            </p>
+            <p className="text-[16px] leading-snug break-words whitespace-pre-line">{m.texte.trim() || "Ce message n'a pas de texte."}</p>
+            {m.fichiers.length ? (
+              <ul aria-label="Pièces jointes" className="flex flex-col gap-2">
+                {m.fichiers.map((f) =>
+                  f.id && m.sens === "recu" ? (
+                    <li key={f.id}>
+                      <button type="button" onClick={() => openFile({ url: `/v1/recus/${encodeURIComponent(m.id)}/fichiers/${encodeURIComponent(f.id!)}`, title: f.nom, fileName: f.nom })} className="pressable flex w-full items-center gap-3 rounded-xl border border-line p-3 text-left">
+                        <FileText size={20} aria-hidden="true" className="shrink-0" />
+                        <span className="min-w-0 flex-1 truncate text-[15px] font-extrabold">{f.nom}</span>
+                        <span className="shrink-0 text-[14px] font-extrabold text-[#0b6b43]">Ouvrir</span>
+                      </button>
+                    </li>
+                  ) : (
+                    <li key={f.nom} className="flex items-center gap-3 rounded-xl border border-line p-3">
+                      <FileText size={20} aria-hidden="true" className="shrink-0" />
+                      <span className="min-w-0 flex-1 truncate text-[15px]">{f.nom}</span>
+                    </li>
+                  ),
+                )}
+              </ul>
+            ) : null}
+          </li>
+        ))}
+      </ol>
       {e.tropLourdes.length ? <Encart titre="Pièces trop lourdes, non gardées">{e.tropLourdes.join(", ")}. Demande au négoce de te les renvoyer plus légères.</Encart> : null}
-      {e.demande ? <LienJaune href={`/chantiers/${e.demande.projectId}#fournisseurs`}>Voir et comparer la proposition</LienJaune> : <LienJaune href="/recus">Classer cette réponse</LienJaune>}
-      <a href={`mailto:${adresse}?subject=${encodeURIComponent(`Re: ${e.objet}`)}`} className="pressable inline-flex min-h-13 w-full items-center justify-center rounded-[18px] border-2 border-accent px-5 text-center text-[15px] font-extrabold text-accent-text">
-        Répondre au négoce
-      </a>
-      <p className="text-center text-[13px] text-muted">Le message original et ses pièces jointes restent conservés{e.demande ? " dans la demande" : ""}.</p>
+      {e.demande && !e.indesirable ? (
+        <section aria-label="Répondre" className={`flex flex-col gap-2 p-4 ${CARTE}`}>
+          <label htmlFor="repondre-negoce" className="text-[16px] font-extrabold">
+            Répondre à {e.demande.negoce}
+          </label>
+          <textarea id="repondre-negoce" value={texte} onChange={(ev) => { setTexte(ev.target.value); if (envoi === "parti") setEnvoi("repos"); }} rows={4} maxLength={10_000} placeholder="Ta réponse" className="min-h-28 w-full rounded-xl border border-line bg-surface p-3 text-[16px] outline-none focus:border-ink" />
+          {refus ? <Refus>{refus}</Refus> : null}
+          {envoi === "parti" ? (
+            <p role="status" className="text-[15px] font-bold text-[#0b6b43]">
+              Réponse envoyée. Elle est dans « Envoyés ».
+            </p>
+          ) : null}
+          <BoutonJaune onClick={() => void repondre()} disabled={!texte.trim() || envoi === "envoi"}>
+            {envoi === "envoi" ? "Envoi…" : "Envoyer ma réponse"}
+          </BoutonJaune>
+          <p className="text-[13px] text-muted">Elle part de ton adresse Mobiiz ; sa réponse reviendra ici, dans ce chantier.</p>
+        </section>
+      ) : null}
+      {e.demande ? <LienContour href={`/chantiers/${e.demande.projectId}#fournisseurs`}>Voir la demande et comparer</LienContour> : !e.indesirable ? <LienContour href="/recus">Classer ce message dans une demande</LienContour> : null}
+      {e.indesirable ? (
+        <BoutonContour onClick={() => void ranger(false)}>Ce n&apos;est pas un indésirable</BoutonContour>
+      ) : (
+        <button type="button" onClick={() => void ranger(true)} className="pressable min-h-11 self-center px-3 text-[15px] font-bold text-muted underline underline-offset-4">
+          Signaler comme indésirable
+        </button>
+      )}
     </>
   );
+}
+
+interface FilNegoce {
+  recipientId: string;
+  negoce: string;
+  projectId: string;
+  chantier: string;
+  items: { sens: "recu" | "envoye"; id: string; libelle: string; objet: string; texte: string; le: string; fichiers: { id: string | null; nom: string; type: string | null }[] }[];
 }
 
 /** Une demande de devis reçue sur « Mon site » (Greg, 17 novembre 2026) : le message entier, appeler ou répondre d'un tap. */

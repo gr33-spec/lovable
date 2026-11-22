@@ -9,6 +9,7 @@ import { PrismaService } from "../database/prisma.service.js";
 import { ALERTER, CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../tokens.js";
 import { EnveloppeSeule, LecteurEmailRecuDeTest, ResendLecteurEmailRecu } from "./contact-entrant.js";
 import { JournalEntrants } from "./journal-entrants.js";
+import { avecJournalDesEnvois } from "./journal-envois.js";
 import type { Alerter } from "../alerts/alerter.js";
 import type { TransactionalEmailSender } from "./email.port.js";
 import { CapturingEmailSender } from "./capturing-email.sender.js";
@@ -28,28 +29,31 @@ export class RelaisEchecsEmail {
 }
 export const RELAIS_EMAIL = Symbol("RELAIS_EMAIL");
 
+/** L'envoyeur selon la configuration (Resend en ligne, capture en test…). */
+function envoyeur(config: AppConfig, logger: AppLogger, relais: RelaisEchecsEmail): TransactionalEmailSender {
+  switch (config.emailProvider) {
+    case "resend": {
+      const resend = new ResendEmailSender(config.resend!.apiKey, config.resend!.from, logger, undefined, config.resend!.replyTo, (email, erreur) => relais.surEchec?.(email, erreur));
+      relais.renvoyer = (email) => resend.send({ ...email, mustDeliver: true });
+      return new EmailSortantSender(resend, config.webAppUrl, config.emailGarde, logger);
+    }
+    case "disabled":
+      return new DisabledEmailSender(logger);
+    case "capture":
+      return new CapturingEmailSender();
+    case "console":
+      return new EmailSortantSender(new ConsoleEmailSender(logger), config.webAppUrl, config.emailGarde, logger);
+  }
+}
+
 @Global()
 @Module({
   providers: [
     { provide: RELAIS_EMAIL, useFactory: () => new RelaisEchecsEmail() },
     {
       provide: EMAIL_SENDER,
-      useFactory: (config: AppConfig, logger: AppLogger, relais: RelaisEchecsEmail) => {
-        switch (config.emailProvider) {
-          case "resend": {
-            const resend = new ResendEmailSender(config.resend!.apiKey, config.resend!.from, logger, undefined, config.resend!.replyTo, (email, erreur) => relais.surEchec?.(email, erreur));
-            relais.renvoyer = (email) => resend.send({ ...email, mustDeliver: true });
-            return new EmailSortantSender(resend, config.webAppUrl, config.emailGarde, logger);
-          }
-          case "disabled":
-            return new DisabledEmailSender(logger);
-          case "capture":
-            return new CapturingEmailSender();
-          case "console":
-            return new EmailSortantSender(new ConsoleEmailSender(logger), config.webAppUrl, config.emailGarde, logger);
-        }
-      },
-      inject: [CONFIG, LOGGER, RELAIS_EMAIL],
+      useFactory: (config: AppConfig, logger: AppLogger, relais: RelaisEchecsEmail, prisma: PrismaService) => avecJournalDesEnvois(envoyeur(config, logger, relais), prisma, logger),
+      inject: [CONFIG, LOGGER, RELAIS_EMAIL, PrismaService],
     },
     {
       // La boîte de contact (contact@mobiiz.fr) : le corps et les pièces jointes relus chez Resend.

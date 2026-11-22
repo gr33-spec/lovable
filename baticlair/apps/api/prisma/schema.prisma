@@ -204,6 +204,7 @@ model Company {
   lignesRapprochement       LigneRapprochement[]
   propositionsRapprochement PropositionRapprochement[]
   lignesAchatGroupe         LigneAchatGroupe[]
+  messagesEnvoyes           MessageEnvoye[]
   emailsRecus               EmailRecuArtisan[]
   offers                    SupplierOffer[]
   preferences               CompanyPreference[]
@@ -2140,6 +2141,30 @@ model EmailRecuArtisan {
   @@index([companyId, recuLe])
   @@index([projectId])
   @@map("email_recu_artisan")
+}
+
+/// « Envoyés » (Greg, 22 novembre 2026) : chaque e-mail parti AU NOM de l'artisan (demande de prix, bon de commande,
+/// réponse écrite dans Mobiiz, relance automatique, « prévenir les autres négoces »). Écrit après l'envoi réel seulement.
+model MessageEnvoye {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  companyId    String   @map("company_id") @db.Uuid
+  projectId    String?  @map("project_id") @db.Uuid
+  recipientId  String?  @map("recipient_id") @db.Uuid
+  /// La réponse à un e-mail reçu (`email_recu_artisan`).
+  repondA      String?  @map("repond_a") @db.Uuid
+  /// demande | commande | reponse | relance | prevenir
+  sorte        String
+  destinataire String
+  objet        String
+  texte        String
+  pieces       String[] @default([])
+  envoyeLe     DateTime @default(now()) @map("envoye_le") @db.Timestamptz(3)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, envoyeLe])
+  @@index([recipientId])
+  @@map("message_envoye")
 }
 
 model EmailRecuFichier {

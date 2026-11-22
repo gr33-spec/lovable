@@ -25,7 +25,8 @@ export type ProjectStatusFilter = ProjectStatus | "all";
  * À préparer : rien n'est encore parti ; Envoyées : partie, sans réponse ; Réponses reçues : au moins une réponse, aucun
  * négoce retenu ; Terminées : marquée terminée ou un négoce retenu.
  */
-export type EtapeDemande = "a-preparer" | "envoyees" | "reponses" | "terminees";
+/** « parties » (Greg, 22 novembre 2026) : tout sauf les brouillons, qui vivent repliés en bas de Demandes. */
+export type EtapeDemande = "a-preparer" | "parties" | "envoyees" | "reponses" | "terminees";
 
 export interface ProjectListQuery {
   status: ProjectStatusFilter;

@@ -429,6 +429,7 @@ export class DemandePersoService {
         .join("\n"),
       ...repondreA,
       mustDeliver: true,
+      envoi: { companyId: tenant.companyId, sorte: "commande", projectId: d.projectId, recipientId: r.id, destinataire: r.supplier.name },
     });
     // Le mail est parti : la commande est notée, et la demande passe « Commandé » chez ce négoce (suivi du chantier).
     await this.prisma.$transaction([
@@ -475,6 +476,7 @@ export class DemandePersoService {
           ].join("\n"),
           // La réponse revient par l'adresse Mobiiz de l'artisan quand elle existe ; jamais son e-mail imprimé dans le texte.
           ...(via && r.etiquette ? { from: via.from, replyTo: via.replyTo(r.etiquette) } : secours ? { replyTo: secours } : {}),
+          envoi: { companyId: tenant.companyId, sorte: "prevenir", projectId: d.projectId, recipientId: r.id, destinataire: r.supplier.name },
         })
         .catch(() => undefined);
     }
@@ -736,7 +738,7 @@ export class DemandePersoService {
         const via = await this.expediteurDe(d.companyId).catch(() => null);
         const m = mailRelanceDemande({ entreprise: d.company.name, dateLimite: d.dueDate ?? new Date(dateLimite.getTime() - 86_400_000), lien: `${this.cfg.webAppUrl}/chiffrer/${jeton}`, prenomCommercial: r.supplier.contactName, individuelle: true, sansDate: !d.dueDate });
         await this.mailer
-          .send({ to: r.supplier.email, subject: m.objet, text: m.texte, html: mailEnHtml(m.texte, `${this.cfg.webAppUrl}/chiffrer/${jeton}`), ...(via ? { from: via.from, ...(r.etiquette ? { replyTo: via.replyTo(r.etiquette) } : {}) } : {}) })
+          .send({ to: r.supplier.email, subject: m.objet, text: m.texte, html: mailEnHtml(m.texte, `${this.cfg.webAppUrl}/chiffrer/${jeton}`), ...(via ? { from: via.from, ...(r.etiquette ? { replyTo: via.replyTo(r.etiquette) } : {}) } : {}), envoi: { companyId: d.companyId, sorte: "relance", projectId: d.projectId, recipientId: r.id, destinataire: r.supplier.name } })
           .catch(() => undefined);
         relances++;
       }

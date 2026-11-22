@@ -1,4 +1,6 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Res, StreamableFile, UseGuards } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import type { Response } from "express";
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -8,6 +10,8 @@ import { ReponsesRecuesService } from "../application/reponses-recues.service.js
 
 const adresseBody = z.object({ adresse: z.string().min(1).max(80) });
 const rattacherBody = z.object({ recipientId: z.string().uuid() });
+const repondreBody = z.object({ texte: z.string().min(1).max(10_000) });
+const indesirableBody = z.object({ indesirable: z.boolean() });
 
 /** R7 : l'adresse Mobiiz de l'entreprise, et les e-mails reçus dessus. */
 @Controller("v1")
@@ -46,6 +50,12 @@ export class AdresseMobiizController {
     return { items: await this.recus.lister(tenant, projectId || undefined) };
   }
 
+  /** Le dossier « Indésirables » (déclaré avant `recus/:id`). */
+  @Get("recus/indesirables")
+  async indesirables(@Tenant() tenant: TenantContext) {
+    return { items: await this.recus.indesirables(tenant) };
+  }
+
   /** Les demandes parties, pour « Rattacher à une demande » (déclarée avant `recus/:id`). */
   @Get("recus/demandes")
   demandes(@Tenant() tenant: TenantContext, @Query("email") email?: string) {
@@ -74,6 +84,21 @@ export class AdresseMobiizController {
   @HttpCode(200)
   rattacher(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(rattacherBody)) body: z.infer<typeof rattacherBody>) {
     return this.recus.rattacher(tenant, id, body.recipientId);
+  }
+
+  /** « Répondre », comme Gmail : la réponse part de l'adresse Mobiiz de l'artisan, au négoce de la demande. */
+  @Post("recus/:id/repondre")
+  @HttpCode(200)
+  @Throttle({ default: HOURLY(30) })
+  repondre(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(repondreBody)) body: z.infer<typeof repondreBody>) {
+    return this.recus.repondre(tenant, id, body.texte);
+  }
+
+  /** « Signaler comme indésirable » / « Ce n'est pas un indésirable ». */
+  @Post("recus/:id/indesirable")
+  @HttpCode(200)
+  indesirable(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(indesirableBody)) body: z.infer<typeof indesirableBody>) {
+    return this.recus.indesirable(tenant, id, body.indesirable);
   }
 
   /** « Ce n'est pas la bonne demande » : l'e-mail retourne dans les réponses à classer, sans rien supprimer. */

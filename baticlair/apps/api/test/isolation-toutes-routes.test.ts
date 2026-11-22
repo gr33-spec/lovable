@@ -136,6 +136,7 @@ describe("isolation entre entreprises, toutes les routes", () => {
       photoPage: "",
       signalementPage: "",
       messageSite: "",
+      envoye: "",
       realisationPage: "",
     };
     // Étape 6 : une offre de A, sur un lot choisi.
@@ -200,6 +201,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
     ids.signalementPage = (await ctx.prisma.signalementPage.create({ data: { companyId, motif: "autre", precision: "Signalement de la page de Toitures A" } })).id;
     // « Demander un devis » (17 novembre 2026) : la copie du message reçu par A.
     ids.messageSite = (await ctx.prisma.messageSite.create({ data: { companyId, nom: "Client de Toitures A", message: "Message pour Toitures A" } })).id;
+    // La messagerie (22 novembre 2026) : un e-mail parti au nom de A (« Envoyés »).
+    ids.envoye = (await ctx.prisma.messageEnvoye.create({ data: { companyId, sorte: "reponse", destinataire: "Négoce de Toitures A <negoce@a.example>", objet: "Objet de Toitures A", texte: "Texte de Toitures A" } })).id;
     const idFor = (path: string, param: string): string => {
       if (param === "projectId" || param === "projetId") return ids.project;
       if (param === "uploadId") return ids.upload;
@@ -257,6 +260,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
         // R7 : l'e-mail reçu de A et son fichier.
         [/\/recus$/, ids.recu],
         [/\/boite\/site$/, ids.messageSite],
+        [/\/messagerie\/envoyes$/, ids.envoye],
+        [/\/messagerie\/fil$/, ids.recipient],
         // Correction après test de Greg (30 octobre 2026) : les e-mails mis de côté ; B n'est pas admin (403).
         [/\/admin\/emails-mis-de-cote$/, ids.recu],
         [/\/fichiers$/, ids.recuFichier],
