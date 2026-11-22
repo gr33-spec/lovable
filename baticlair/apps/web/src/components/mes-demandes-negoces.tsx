@@ -12,7 +12,11 @@ import { fr } from "@/lib/fr";
 import { useResource } from "@/lib/use-resource";
 
 type Filter = "toutes" | "a-preparer" | "envoyees" | "reponses" | "terminees";
-/** « MES DEMANDES » (Greg, 1er novembre 2026) : les étapes d'un dossier. Pas d'« Archivées » : l'archivage, c'est « Terminées ». */
+/**
+ * « MES DEMANDES » (Greg, 1er novembre 2026) : les étapes d'un dossier. Pas d'« Archivées » : l'archivage, c'est « Terminées ».
+ * RÈGLE CHANGÉE (Greg, 22 novembre 2026) : avant, les brouillons mêlés aux demandes envoyées dans « Toutes » → sous
+ * « Toutes », ils vivent repliés en bas, « À terminer (N) » ; le filtre « À préparer » les montre seuls.
+ */
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "toutes", label: "Toutes" },
   { value: "a-preparer", label: "À préparer" },
@@ -85,7 +89,8 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
   const queryKey = `${filter}|${q.trim()}`;
   const fetchPage = useCallback(
     (signal: AbortSignal | undefined, after: string | null) => {
-      const sp = new URLSearchParams(filter === "toutes" ? { status: "all", limit: "30", resume: "1" } : { etape: filter, limit: "30", resume: "1" });
+      // « Toutes » sans recherche : ce qui est parti ; les brouillons sont à part, repliés en bas. Une recherche porte sur tout.
+      const sp = new URLSearchParams(filter === "toutes" ? (q.trim() ? { status: "all", limit: "30", resume: "1" } : { etape: "parties", limit: "30", resume: "1" }) : { etape: filter, limit: "30", resume: "1" });
       if (q.trim()) sp.set("q", q.trim());
       if (after) sp.set("cursor", after);
       return api<ProjectPage>(`/v1/projects?${sp.toString()}`, signal ? { signal } : {});
@@ -94,6 +99,10 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
   );
   const fetchFirst = useCallback((signal: AbortSignal) => fetchPage(signal, null), [fetchPage]);
   const { data: first, error: firstError, reload } = useResource(fetchFirst);
+  const avecBrouillons = filter === "toutes" && !q.trim();
+  const fetchBrouillons = useCallback((signal: AbortSignal) => (avecBrouillons ? api<ProjectPage>("/v1/projects?etape=a-preparer&limit=30&resume=1", { signal }) : Promise.resolve(null)), [avecBrouillons]);
+  const { data: brouillonsPage, reload: rechargerBrouillons } = useResource(fetchBrouillons);
+  const brouillons = brouillonsPage ? brouillonsPage.items.filter((p) => !retirees.has(p.id)) : [];
 
   const extra = more && more.key === queryKey ? more : null;
   const items = first ? [...first.items, ...(extra?.items ?? [])].filter((p) => !retirees.has(p.id)) : null;
@@ -152,7 +161,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
     }
   }
 
-  const choisies = items && selection ? items.filter((p) => selection.has(p.id)) : [];
+  const choisies = items && selection ? [...items, ...brouillons].filter((p) => selection.has(p.id)) : [];
   return (
     <>
       {/* « Mes demandes » + « Créer un quantitatif » + Aide débordaient d'un iPhone SE : les actions passent à la ligne.
@@ -226,7 +235,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
               </button>
             ))}
           </div>
-          {filter === "toutes" && items && items.length > 0 && !selection ? (
+          {filter === "toutes" && items && (items.length > 0 || brouillons.length > 0) && !selection ? (
             <button type="button" onClick={() => setSelection(new Set())} className="ml-auto min-h-11 shrink-0 px-1 text-[15px] font-bold whitespace-nowrap text-accent-text">
               Sélectionner
             </button>
@@ -279,7 +288,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
           ) : null}
         </>
       ) : null}
-      {items && items.length === 0 ? (
+      {items && items.length === 0 && !(avecBrouillons && brouillons.length > 0) ? (
         q.trim() ? (
           <EmptyState icon={<Search size={40} />} title="Aucune demande trouvée">
             <p className="max-w-xs text-[16px] text-muted">Essaie un nom de liste, un client, une ville ou une partie de l&apos;adresse.</p>
@@ -289,6 +298,31 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
             {filter === "toutes" || filter === "a-preparer" ? <ButtonLink href="/chantiers/nouveau">Créer un quantitatif</ButtonLink> : null}
           </EmptyState>
         )
+      ) : null}
+
+      {/* Les brouillons, repliés en bas (Greg, 22 novembre 2026) : ils ne noient plus les demandes envoyées. */}
+      {avecBrouillons && brouillons.length > 0 ? (
+        <details open={selection ? true : undefined} className="group rounded-[20px] border border-line bg-surface">
+          <summary className="pressable flex min-h-13 cursor-pointer list-none items-center justify-between gap-3 px-4 text-[16px] font-extrabold [&::-webkit-details-marker]:hidden">
+            <span>
+              À terminer ({brouillons.length}
+              {brouillonsPage?.nextCursor ? "+" : ""})
+            </span>
+            <span aria-hidden="true" className="text-[20px] transition-transform group-open:rotate-180">
+              ⌄
+            </span>
+          </summary>
+          <ul className="grid grid-cols-1 gap-2.5 px-3 pb-3 lg:grid-cols-2">
+            {brouillons.map((p) => (
+              <li key={p.id}>
+                <CarteListe
+                  projet={p}
+                  selection={selection ? { coche: selection.has(p.id), basculer: () => setSelection((s) => { const n = new Set(s); if (n.has(p.id)) n.delete(p.id); else n.add(p.id); return n; }) } : null}
+                  occupe={verif} onSupprimer={() => void demanderSuppression([p])} onTerminer={() => void basculerTerminee(p).then(rechargerBrouillons)} />
+              </li>
+            ))}
+          </ul>
+        </details>
       ) : null}
 
       {/* La barre de la sélection : au-dessus de la barre du menu sur téléphone, jamais dessous. */}

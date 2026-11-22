@@ -25,7 +25,7 @@ import { AdresseMobiizController } from "./http/adresse-mobiiz.controller.js";
     {
       provide: ReponsesRecuesService,
       useFactory: (p: PrismaService, a: AdresseMobiizService, pr: PriceRequestsService, push: PushSender, e: TransactionalEmailSender, c: AppConfig, l: AppLogger, j: JournalEntrants) =>
-        new ReponsesRecuesService(p, a, pr, new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl), c.emailDomaine, l, undefined, [...(c.contact?.adresses ?? []), ...(c.resend?.replyTo ? [c.resend.replyTo.toLowerCase()] : []), ...(c.emailDomaine ? [`contact@${c.emailDomaine}`] : [])], j),
+        new ReponsesRecuesService(p, a, pr, new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl), c.emailDomaine, l, undefined, [...(c.contact?.adresses ?? []), ...(c.resend?.replyTo ? [c.resend.replyTo.toLowerCase()] : []), ...(c.emailDomaine ? [`contact@${c.emailDomaine}`] : [])], j, e),
       inject: [PrismaService, AdresseMobiizService, PriceRequestsService, PUSH_SENDER, EMAIL_SENDER, CONFIG, LOGGER, JournalEntrants],
     },
   ],

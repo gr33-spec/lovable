@@ -18,8 +18,8 @@ import { useResource } from "@/lib/use-resource";
  * Réponses / Offres / Documents). Suivi : où en est chaque négoce (va répondre, précision à donner, ne chiffre pas) et
  * chaque ligne (cycle de vie), puis l'écran du chantier tel qu'il était (liste, envoi, suivi), jamais démonté.
  * Offres : ce que chacun a envoyé (prix par le lien, devis PDF). Documents : tout ce qui est rangé dans la demande.
- * PAS DE FAUSSE MESSAGERIE : l'artisan ne peut pas encore répondre depuis MOBIIZ, donc aucun fil de discussion ; « Écrire à »
- * ouvre sa vraie messagerie.
+ * RÈGLE CHANGÉE (Greg, 22 novembre 2026) : avant, « Écrire à » ouvrait la messagerie du téléphone ; maintenant les échanges
+ * passent par la messagerie de Mobiiz (« Répondre » sous chaque message du négoce, depuis l'adresse Mobiiz).
  */
 export const ONGLETS_DOSSIER = [
   { value: "suivi", label: "Suivi" },
@@ -165,15 +165,22 @@ export function SuiviDemande({ projectId }: { projectId: string }) {
         .map((r) => ({ cle: r.id, nom: r.nom, statut: STATUT_PERSO[r.statut], envoye: null as string | null, email: null as string | null, vaRepondre: Boolean(r.vaRepondre), refusMotif: r.refusMotif ?? null, precision: r.precision ?? null })),
     ),
   ];
-  if (lignes.length === 0) return null;
+  // UN NÉGOCE UNE SEULE FOIS SUR LA FICHE (Greg, 22 novembre 2026) : le nom, la date d'envoi et l'état sont déjà dans la liste
+  // des négoces de la demande, avec leurs boutons ; ici ne restent que les négoces qui ont quelque chose à dire (une question
+  // à laquelle répondre, un refus, des conditions de livraison). Avant : chaque négoce deux fois.
+  const aDire = lignes.filter((l) => l.precision || l.refusMotif || (l.conditions && (l.conditions.livraisons === "plusieurs" || l.conditions.minimumCommandeHt != null || l.conditions.dechargement)));
   const etats = cycle?.lignes ?? [];
+  // Avant le premier envoi, rien (comme avant) : le suivi n'a de sens qu'une fois la demande partie.
+  if (lignes.length === 0 || (aDire.length === 0 && etats.length === 0)) return null;
   return (
     <section aria-label="Suivi de la demande" className="flex flex-col gap-3">
-      <ul aria-label="Les négoces" className="flex flex-col divide-y divide-line rounded-xl bg-surface shadow-card">
-        {lignes.map((l) => (
+      {aDire.length ? (
+      <ul aria-label="Ce que disent les négoces" className="flex flex-col divide-y divide-line rounded-xl bg-surface shadow-card">
+        {aDire.map((l) => (
           <LigneSuiviNegoce key={l.cle} l={l} onRepondu={reload} />
         ))}
       </ul>
+      ) : null}
       {etats.length > 0 ? (
         <details className="rounded-xl bg-surface p-4 shadow-card">
           <summary className="cursor-pointer text-[15px] font-bold">Où en est chaque ligne ({etats.length})</summary>
@@ -240,11 +247,7 @@ function LigneSuiviNegoce({ l, onRepondu }: { l: LigneNegoce; onRepondu: () => v
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={l.vaRepondre ? "ok" : l.statut.ton}>{l.vaRepondre ? "Va répondre" : l.statut.texte}</Badge>
-          {l.email ? (
-            <a href={`mailto:${l.email}`} className="pressable inline-flex min-h-11 items-center rounded-xl px-2 text-[14px] font-semibold underline">
-              Écrire à {l.nom}
-            </a>
-          ) : null}
+          {/* Plus de « Écrire à » (mailto) : les échanges passent par la messagerie de Mobiiz (Greg, 22 novembre 2026). */}
         </div>
       </div>
       {l.refusMotif ? <p className="text-[14px] text-muted">Motif : « {l.refusMotif} »</p> : null}

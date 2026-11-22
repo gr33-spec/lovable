@@ -5,6 +5,9 @@ import { isUuid } from "../../../platform/validation/ids.js";
 import { assertCanWrite, type TenantContext } from "../../tenancy/index.js";
 import type { MissionsService } from "./missions.service.js";
 
+/** Ce qui est parti au nom de l'artisan, en mots simples. */
+const LIBELLE_ENVOI: Record<string, string> = { demande: "Demande de prix", commande: "Bon de commande", reponse: "Ta réponse", relance: "Relance automatique", prevenir: "Autres négoces prévenus" };
+
 const nomExpediteur = (de: string) => /^\s*"?([^"<]+?)"?\s*</.exec(de)?.[1]?.trim() || de.replace(/[<>]/g, "").trim();
 
 /**
@@ -88,6 +91,112 @@ export class BoiteService {
       ...alertes.map((a) => ({ cle: `alerte:${a.id}`, sorte: "mobiiz" as const, titre: "Mobiiz", sujet: a.titre, extrait: a.detail, le: a.createdAt.toISOString(), nonLu: !a.luLe, href: a.href })),
     ];
     return { items, missions };
+  }
+
+  /**
+   * LA MESSAGERIE, COMME GMAIL (Greg, 22 novembre 2026) : « Reçus » regroupe les réponses des négoces PAR CHANTIER (un
+   * négoce une seule fois, « 3 réponses sur 5 », ceux qui n'ont pas répondu « En attente »), puis les autres messages
+   * (Missions si Mission est ouverte, Mon site, Mobiiz, réponses à classer). « Envoyés » : tout ce qui est parti au nom de
+   * l'artisan. Les indésirables n'y sont jamais.
+   */
+  async messagerie(t: TenantContext) {
+    const [boite, destinataires, emails, envoyes, lues] = await Promise.all([
+      this.boite(t),
+      this.prisma.priceRequestRecipient.findMany({
+        where: { priceRequest: { companyId: t.companyId }, status: { not: "to_send" } },
+        orderBy: { createdAt: "desc" },
+        take: 400,
+        select: { id: true, status: true, sentAt: true, createdAt: true, reponduLe: true, commandeLe: true, supplierId: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
+      }),
+      this.prisma.emailRecuArtisan.findMany({
+        where: { companyId: t.companyId, indesirable: false, recipientId: { not: null } },
+        orderBy: { recuLe: "desc" },
+        take: 400,
+        select: { id: true, recipientId: true, texte: true, recuLe: true, luLe: true, fichiers: { select: { nom: true } } },
+      }),
+      this.prisma.messageEnvoye.count({ where: { companyId: t.companyId } }),
+      this.prisma.lectureBoite.findMany({ where: { companyId: t.companyId, cle: { startsWith: "reponse:" } }, select: { cle: true } }),
+    ]);
+    const dejaLues = new Set(lues.map((l) => l.cle));
+    const parDestinataire = new Map<string, typeof emails>();
+    for (const e of emails) parDestinataire.set(e.recipientId!, [...(parDestinataire.get(e.recipientId!) ?? []), e]);
+    type Negoce = { recipientId: string; negoce: string; etat: "repondu" | "attente" | "commande"; le: string; extrait: string; pdf: boolean; nonLu: boolean; href: string | null };
+    const chantiers = new Map<string, { projectId: string; nom: string; negoces: Map<string, Negoce> }>();
+    for (const r of destinataires) {
+      const projet = r.priceRequest.projectId;
+      const c = chantiers.get(projet) ?? { projectId: projet, nom: r.priceRequest.project.name, negoces: new Map<string, Negoce>() };
+      chantiers.set(projet, c);
+      const recus = parDestinataire.get(r.id) ?? [];
+      const dernier = recus[0];
+      const repondu = !!dernier || !!r.reponduLe || r.status === "received";
+      const le = (dernier?.recuLe ?? r.reponduLe ?? r.sentAt ?? r.createdAt).toISOString();
+      const n: Negoce = {
+        recipientId: r.id,
+        negoce: r.supplier.name,
+        etat: r.commandeLe ? "commande" : repondu ? "repondu" : "attente",
+        le,
+        extrait: dernier ? (dernier.texte ?? "").replace(/\s+/g, " ").trim().slice(0, 140) || (dernier.fichiers[0]?.nom ?? "") : r.reponduLe ? "Prix donnés ligne par ligne." : repondu ? "Devis reçu." : "En attente",
+        pdf: recus.some((e) => e.fichiers.some((f) => /\.pdf$/i.test(f.nom))),
+        nonLu: recus.some((e) => !e.luLe) || (!!r.reponduLe && !dejaLues.has(`reponse:${r.id}`) && !r.commandeLe),
+        href: dernier ? `/messages/negoce/${dernier.id}` : r.reponduLe || repondu ? `/chantiers/${projet}#fournisseurs` : null,
+      };
+      // Un négoce une seule fois par chantier (plusieurs demandes d'un même lot) : on garde son état le plus avancé.
+      const deja = c.negoces.get(r.supplierId);
+      const rang = (x: Negoce) => (x.etat === "commande" ? 2 : x.etat === "repondu" ? 1 : 0);
+      if (!deja || rang(n) > rang(deja) || (rang(n) === rang(deja) && n.le > deja.le)) c.negoces.set(r.supplierId, deja ? { ...n, nonLu: n.nonLu || deja.nonLu } : n);
+      else if (n.nonLu) deja.nonLu = true;
+    }
+    const liste = [...chantiers.values()]
+      .map((c) => {
+        const negoces = [...c.negoces.values()].sort((a, b) => (a.etat === "attente" ? 1 : 0) - (b.etat === "attente" ? 1 : 0) || b.le.localeCompare(a.le));
+        return {
+          projectId: c.projectId,
+          nom: c.nom,
+          sujet: `Négoce · ${c.nom}`,
+          consultes: negoces.length,
+          repondus: negoces.filter((n) => n.etat !== "attente").length,
+          le: negoces.reduce((m, n) => (n.le > m ? n.le : m), ""),
+          nonLu: negoces.some((n) => n.nonLu),
+          negoces,
+        };
+      })
+      .sort((a, b) => b.le.localeCompare(a.le))
+      .slice(0, 60);
+    // Les autres messages : tout sauf les réponses déjà rangées sous leur chantier.
+    const autres = boite.items.filter((i) => !(i.sorte === "negoce" && !i.aClasser) && !i.cle.startsWith("reponse:"));
+    return { chantiers: liste, autres, missions: boite.missions, envoyes };
+  }
+
+  /** « Envoyés » : du plus récent au plus ancien, avec le chantier. */
+  async envoyes(t: TenantContext) {
+    const liste = await this.prisma.messageEnvoye.findMany({ where: { companyId: t.companyId }, orderBy: { envoyeLe: "desc" }, take: 200 });
+    const projets = await this.prisma.project.findMany({ where: { companyId: t.companyId, id: { in: [...new Set(liste.map((m) => m.projectId).filter((x): x is string => !!x))] } }, select: { id: true, name: true } });
+    const nom = new Map(projets.map((p) => [p.id, p.name]));
+    return { items: liste.map((m) => ({ id: m.id, sorte: m.sorte, libelle: LIBELLE_ENVOI[m.sorte] ?? "E-mail envoyé", destinataire: m.destinataire, objet: m.objet, extrait: m.texte.replace(/\s+/g, " ").trim().slice(0, 140), le: m.envoyeLe.toISOString(), projectId: m.projectId, chantier: m.projectId ? (nom.get(m.projectId) ?? null) : null, pieces: m.pieces })) };
+  }
+
+  async envoye(t: TenantContext, id: string) {
+    if (!isUuid(id)) throw notFound("Message");
+    const m = await this.prisma.messageEnvoye.findFirst({ where: { id, companyId: t.companyId } });
+    if (!m) throw notFound("Message");
+    const p = m.projectId ? await this.prisma.project.findFirst({ where: { id: m.projectId, companyId: t.companyId }, select: { name: true } }) : null;
+    return { id: m.id, sorte: m.sorte, libelle: LIBELLE_ENVOI[m.sorte] ?? "E-mail envoyé", destinataire: m.destinataire, objet: m.objet, texte: m.texte, le: m.envoyeLe.toISOString(), projectId: m.projectId, chantier: p?.name ?? null, pieces: m.pieces, repondA: m.repondA };
+  }
+
+  /** Le fil avec un négoce (comme une conversation Gmail) : ses messages reçus et ce qui lui est parti, dans l'ordre. */
+  async fil(t: TenantContext, recipientId: string) {
+    if (!isUuid(recipientId)) throw notFound("Fil");
+    const r = await this.prisma.priceRequestRecipient.findFirst({ where: { id: recipientId, priceRequest: { companyId: t.companyId } }, select: { id: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } });
+    if (!r) throw notFound("Fil");
+    const [recus, partis] = await Promise.all([
+      this.prisma.emailRecuArtisan.findMany({ where: { companyId: t.companyId, recipientId, indesirable: false }, orderBy: { recuLe: "asc" }, take: 100, select: { id: true, objet: true, texte: true, recuLe: true, fichiers: { select: { id: true, nom: true, type: true } } } }),
+      this.prisma.messageEnvoye.findMany({ where: { companyId: t.companyId, recipientId }, orderBy: { envoyeLe: "asc" }, take: 100 }),
+    ]);
+    const items = [
+      ...recus.map((e) => ({ sens: "recu" as const, id: e.id, libelle: r.supplier.name, objet: e.objet, texte: e.texte ?? "", le: e.recuLe.toISOString(), fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type })) })),
+      ...partis.map((m) => ({ sens: "envoye" as const, id: m.id, libelle: LIBELLE_ENVOI[m.sorte] ?? "Envoyé", objet: m.objet, texte: m.texte, le: m.envoyeLe.toISOString(), fichiers: m.pieces.map((nom) => ({ id: null, nom, type: null })) })),
+    ].sort((a, b) => a.le.localeCompare(b.le));
+    return { recipientId: r.id, negoce: r.supplier.name, projectId: r.priceRequest.projectId, chantier: r.priceRequest.project.name, items };
   }
 
   /** Marquer lu un élément de MA boîte. La clé dit le circuit ; un identifiant d'une autre entreprise répond 404. */

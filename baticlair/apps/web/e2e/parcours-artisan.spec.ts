@@ -276,6 +276,8 @@ test("un artisan crée son compte et son premier chantier depuis le +", async ({
   await page.getByRole("button", { name: "Retour" }).click();
   await expect(page).not.toHaveURL(/\/chantiers\/nouveau/);
   await page.goto("/chantiers?vue=suivi");
+  // Les brouillons sont repliés en bas de « Mes demandes », « À terminer (N) » (Greg, 22 novembre 2026).
+  await page.getByText(/^À terminer \(\d+\+?\)$/).click();
   await expect(page.getByRole("link", { name: /Toiture Dupont/ })).toBeVisible();
 });
 
@@ -993,6 +995,7 @@ test("accueil : la prochaine action de chaque chantier ; plus de limite de chant
   await createProject(page, "Chantier 2", "", "");
   // « Client non renseigné » n'existe plus : un chantier sans client ni adresse n'a rien sous son nom.
   await page.goto("/chantiers?vue=suivi");
+  await page.getByText(/^À terminer \(\d+\+?\)$/).click();
   await expect(page.getByText("Chantier 2")).toBeVisible();
   await expect(page.getByText("Client non renseigné")).toHaveCount(0);
   await createProject(page, "Chantier 3", "", "");

@@ -333,6 +333,27 @@ export class BoiteController {
     return this.b.boite(t);
   }
 
+  /** La messagerie (Greg, 22 novembre 2026) : Reçus regroupés par chantier, puis les autres messages. */
+  @Get("messagerie")
+  messagerie(@Tenant() t: TenantContext) {
+    return this.b.messagerie(t);
+  }
+
+  @Get("messagerie/envoyes")
+  envoyes(@Tenant() t: TenantContext) {
+    return this.b.envoyes(t);
+  }
+
+  @Get("messagerie/envoyes/:id")
+  envoye(@Tenant() t: TenantContext, @Param("id") id: string) {
+    return this.b.envoye(t, id);
+  }
+
+  @Get("messagerie/fil/:recipientId")
+  fil(@Tenant() t: TenantContext, @Param("recipientId") recipientId: string) {
+    return this.b.fil(t, recipientId);
+  }
+
   @Get("boite/site/:id")
   messageSite(@Tenant() t: TenantContext, @Param("id") id: string) {
     return this.b.messageSite(t, id);

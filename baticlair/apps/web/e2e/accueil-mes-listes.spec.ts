@@ -204,6 +204,9 @@ test("Mes listes : le nom, la recherche, les filtres, la carte ; supprimer un br
   await expect(page.getByRole("searchbox")).toHaveAttribute("placeholder", "Rechercher un quantitatif");
   await expect(page.getByRole("group", { name: "Filtrer" }).getByRole("button")).toHaveText(["Toutes", "À préparer", "Envoyées", "Réponses reçues", "Terminées"]);
   await expect(page.getByRole("button", { name: "Toutes" })).toHaveAttribute("aria-pressed", "true");
+  // Les brouillons vivent repliés en bas, « À terminer (N) » (Greg, 22 novembre 2026) : on les déplie.
+  const brouillons = page.getByText(/^À terminer \(\d+\+?\)$/);
+  await brouillons.click();
   const carte = page.getByRole("link", { name: /^Liste de test à jeter/ });
   await expect(carte).toContainText("1 ligne");
   await expect(carte).toContainText("Saisie");
@@ -213,6 +216,7 @@ test("Mes listes : le nom, la recherche, les filtres, la carte ; supprimer un br
   await expect(carte).toBeVisible();
   await expect(page.getByRole("link", { name: /^Liste gardée/ })).toHaveCount(0);
   await page.getByRole("searchbox").fill("");
+  await brouillons.click();
   await expect(page.getByRole("link", { name: /^Liste gardée/ })).toBeVisible();
 
   // Annuler : rien ne part.
@@ -284,6 +288,8 @@ test("Accueil et Mes listes, thèmes clair et sombre : le titre et le texte des 
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     {
       await page.goto(url);
+      // Les brouillons de « Mes demandes » sont repliés en bas (Greg, 22 novembre 2026) : on les déplie.
+      if (url !== "/") await page.getByText(/^À terminer \(\d+\+?\)$/).click();
       await expect(page.locator("main").getByText(texte, { exact: true }).first()).toBeVisible();
       const ratios = await page.evaluate((cible) => {
         const toile = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
@@ -392,7 +398,8 @@ test("Dossier d'une demande (Greg, 6 novembre 2026) : Suivi, Offres, Documents ;
   const suivi = page.getByRole("region", { name: "Suivi de la demande" });
   await expect(suivi.getByText("Va répondre")).toBeVisible();
   await expect(suivi).toContainText("Les liteaux : traités classe 2 ou classe 4 ?");
-  await expect(suivi.getByRole("link", { name: /^Écrire à Négoce/ })).toHaveAttribute("href", /^mailto:ventes-/);
+  // Plus de « Écrire à » (mailto) : les échanges passent par la messagerie de Mobiiz (Greg, 22 novembre 2026).
+  await expect(suivi.getByRole("link", { name: /^Écrire à/ })).toHaveCount(0);
   await suivi.getByLabel("Ta réponse").fill("Classe 4, autoclave vert.");
   await suivi.getByRole("button", { name: /^Envoyer ma réponse à / }).click();
   await expect(suivi.getByText("Ta réponse : « Classe 4, autoclave vert. »")).toBeVisible();

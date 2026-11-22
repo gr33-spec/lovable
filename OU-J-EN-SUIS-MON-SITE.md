@@ -8,7 +8,7 @@ Mis à jour : 22 novembre 2026, soir. Session : https://claude.ai/code/session_0
   Saboteur : 53 attaques, toutes bloquées. DMARC de mobiiz.fr en `p=reject` (vérifié en ligne).
 - « Ajoute ta quantité » (achats groupés) validé par Greg ; défilement « ce qui apparaît se montre ».
 
-## En cours : PARTIE 2, la messagerie
+## PARTIE 2, la messagerie : EN LIGNE (commit 3867235c, chaîne 125 verte, /version vérifié)
 - Code écrit dans une copie à part : worktree `/home/user/wt-p2`, branche locale `messagerie-p2`, commit 41edc97f
   (partie du commit 5d815abc, donc AVANT les fusions du soir : à fusionner dans la branche de test, conflits possibles).
   Si le worktree a disparu (nouveau conteneur), la branche locale est perdue : tout refaire d'après la liste ci-dessous.

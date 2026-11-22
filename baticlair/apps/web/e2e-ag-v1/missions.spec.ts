@@ -226,14 +226,11 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   // B : la boîte « Messages et réponses » (22), non lu, filtres ; la conversation (12) ; le numéro est masqué.
   await b.page.goto("/messages");
   await expect(b.page.getByRole("heading", { name: "Messages", exact: true })).toBeVisible();
-  const filtres = b.page.getByRole("group", { name: "Filtrer la boîte" });
-  for (const f of ["Tous", "Missions", "Négoces", "Non lus"]) await expect(filtres.getByRole("button", { name: f, exact: true })).toBeVisible();
+  // La messagerie (Greg, 22 novembre 2026) : trois dossiers comme Gmail, plus de filtres ; une ligne Mission a sa pastille.
+  await expect(b.page.getByRole("group", { name: "Dossiers" }).getByRole("button")).toHaveText(["Reçus", "Envoyés", "Indésirables"]);
   const element = b.page.getByRole("link", { name: new RegExp(`^Mission, ${a.nom}, non lu`) });
   await expect(element).toBeVisible();
   await capture(b.page, "22-messages-et-reponses");
-  await filtres.getByRole("button", { name: "Négoces", exact: true }).click();
-  await expect(b.page.getByText("Aucune réponse de négoce")).toBeVisible();
-  await filtres.getByRole("button", { name: "Non lus", exact: true }).click();
   await element.click();
   await expect(b.page.getByRole("list", { name: "Messages" })).toContainText("coordonnées masquées");
   await expect(b.page.getByRole("list", { name: "Messages" })).not.toContainText("06 12 34 56 78");
@@ -281,7 +278,7 @@ test("missions : publier, répondre avec un document, alerte, conversation, non-
   expect((await apiJson(c.page, "GET", `/v1/missions/conversations/${convId}`)).status).toBe(404);
   expect((await apiJson(c.page, "POST", `/v1/missions/conversations/${convId}/messages`, { texte: "Je m'invite", cle: "cle-e2e-intrus-0001" })).status).toBe(404);
   await c.page.goto("/messages");
-  await expect(c.page.getByRole("heading", { name: "Aucun message pour le moment" })).toBeVisible();
+  await expect(c.page.getByText("Aucun message pour le moment")).toBeVisible();
   await capture(c.page, "47-boite-vide");
 
   // C PROPOSE SES SERVICES (08, 50) ; A le contacte depuis « Entreprises dispo » (10).
