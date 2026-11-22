@@ -21,18 +21,22 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     expect(e.suggestions.map((o) => o.label)).toEqual([
       // « Pointes pour liteaux » : Greg, 22 novembre 2026 : seulement s'il y a des liteaux dans la liste (avant : sur toute
       // couverture). D-2026-020 n'écrit aucune ligne de liteaux : pas de case.
-      // Greg, 21 novembre 2026 (soir) : sur toute couverture écrite avec sa surface et sans sortie de toit au devis.
-      "Sortie de ventilation (VMC, extraction d'air)",
+      // Règle changée (Greg, 22 novembre 2026) : rangées par catégorie, Couverture, Zinguerie, Fixations, Ventilation…
+      // (avant : l'ordre de la fiche). Zinguerie :
       "Naissances de gouttière",
       "Talons de gouttière (si tu ne les fabriques pas)",
       "Angles de gouttière (si tu ne les fabriques pas)",
       "Dauphins (pied de descente)", // skill du fondateur : dauphin en Suggestion (le devis n'en dit rien)
       "Cartouches de silicone zinc",
+      // Fixations :
       "Vis inox 4 × 40",
       "Pattes de fixation",
+      // Ventilation (Greg, 21 novembre 2026, soir : sur toute couverture écrite avec sa surface et sans sortie de toit) :
+      "Sortie de ventilation (VMC, extraction d'air)",
     ]);
+    expect(e.suggestions.map((o) => o.categorie)).toEqual(["Zinguerie", "Zinguerie", "Zinguerie", "Zinguerie", "Zinguerie", "Fixations", "Fixations", "Ventilation"]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/sortie_ventilation", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte", "couverture-ardoises-crochet/sortie_ventilation"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -78,7 +82,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
     // Greg, 22 novembre 2026 : seulement s'il y a des liteaux dans la liste (avant : sur toute couverture).
     expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([
-      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" },
+      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)", categorie: "Ventilation" },
     ]);
     const rien = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: { ...ardoisesSeules, lignes: [] }, answers: {}, preferences: {} });
     expect(rien.suggestions).toEqual([]);
@@ -134,5 +138,24 @@ describe("pointes de liteaux cochées (skill du fondateur ; recherche fixations 
     const p = e.purchase.toBuy.find((b) => /Pointes galva 2,8 × 60/.test(b.label));
     expect(p?.quantity).toMatch(/boîtes? de 1 kg/);
     expect(p?.precision ?? "").toMatch(/croisement avec un chevron/);
+  });
+});
+
+describe("suggestions par catégorie (Greg, 22 novembre 2026)", () => {
+  it("la catégorie vient de la famille ; l'ordre de Greg ; une vingtaine au plus", async () => {
+    const { categorieDeSuggestion, rangerLesSuggestions } = await import("../src/index.js");
+    expect(["gutter_outlet", "batten_nail", "outlet_vent", "roof_window_blind", "verge_tile", "zinc_clip", "sealant"].map(categorieDeSuggestion)).toEqual([
+      "Zinguerie",
+      "Fixations",
+      "Ventilation",
+      "Fenêtres de toit",
+      "Couverture",
+      "Fixations",
+      "Zinguerie",
+    ]);
+    const vingtCinq = Array.from({ length: 25 }, (_, i) => ({ key: `k${i}`, categorie: i % 2 ? "Fixations" : "Couverture" }));
+    const range = rangerLesSuggestions(vingtCinq);
+    expect(range).toHaveLength(20);
+    expect(range.slice(0, 13).every((x) => x.categorie === "Couverture")).toBe(true);
   });
 });

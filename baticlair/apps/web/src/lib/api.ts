@@ -398,7 +398,8 @@ export interface Takeoff {
   /** Un devis a vraiment été lu (Greg, 22 novembre 2026 : sinon, jamais « J'ai lu ton devis »). */
   devisLu?: boolean;
   /** Étape « Suggestions » : les cases à proposer avant les questions ; vide ou absent : pas d'étape. */
-  suggestions?: { key: string; label: string }[];
+  /** Rangées par catégorie (Couverture, Zinguerie, Fixations, Ventilation…), Greg, 22 novembre 2026. */
+  suggestions?: { key: string; label: string; categorie?: string }[];
   metiersAjoutables?: { metier: string; libelle: string }[];
   /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
   lotsNonLus?: string[];
