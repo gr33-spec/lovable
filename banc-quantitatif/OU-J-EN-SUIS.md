@@ -73,7 +73,35 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## DERNIER ÉTAT (22 novembre, après-midi) : fiche `roofing-2026.11.22-74` (fusion de la branche de test)
+## DERNIER ÉTAT (22 novembre, soir) : fiche `roofing-2026.11.22-75`
+- **Banc : 98 sur 99 (99 %)** : entraînement 63/64, examen 35/35. Reste faux : feuilles de zinc de l'abergement (C05, 3
+  contre 4) ; crochets à pointe de C11 hors compte (« incertain »).
+- Fait (-75) : liteaux × 1,10 (aboutage) × 1,05 ; faîtière fibres-ciment « Quelle faîtière ? » (Demi-ronde, Angulaire,
+  D'aération ; longueurs utiles Cedral) ; une mesure en mètres d'un article en pièces n'est jamais une quantité.
+- Tests du moteur et du serveur à adapter : confiés à un agent (il ne touche qu'aux tests). Puis : parcours de l'écran
+  COMPLETS (ordinateur + téléphone) AVANT de proposer de pousser (exigence de Greg du 22 novembre).
+
+## Consignes de Greg du 22 novembre (soir)
+- Ne fusionner RIEN dans la branche de test sans son accord. Avant de proposer de pousser : moteur, serveur ET parcours.
+- Vérifié le 22 novembre : AUCUN commit de ma discussion sur la branche de test ; ma branche n'y est pas. La case « Pointes
+  pour liteaux » vient d'une autre discussion (session …eSR2whwoenEzNd4TQZ, commits d03ce052 et 41834731 du 20 novembre,
+  fusion 1f798072 du 21 novembre). L'autre discussion adapte ses 40 parcours ; ne pas m'en occuper.
+- Contre-liteaux : Greg demande s'ils doivent suivre les 10 % d'aboutage → mon avis à lui donner.
+
+## PROCHAIN LOT : calculateur de feuilles de zinc (Greg, 22 novembre), dans la FICHE, pas dans le cœur
+- Zinguerie sur mesure (abergements, bandes, solins, habillages). Par pièce, deux questions à boutons : développé (20, 25,
+  33, 40 cm, « autre ») et longueur des pièces (1 m ou 2 m). La longueur en ml vient du devis.
+- Feuilles de 2 × 1 m : pièces = ml ÷ longueur, arrondi au-dessus ; bandes par feuille = 100 cm ÷ développé, arrondi en
+  dessous ; feuilles = pièces ÷ bandes par feuille, arrondi au-dessus. Ex. 10 ml, pièces de 2 m, dév. 20 → 5 pièces, 5 bandes
+  par feuille → 1 feuille.
+- Regrouper les pièces de même longueur sur les mêmes feuilles quand ça réduit le total.
+- Calcul affiché sous la flèche (« 5 pièces de 2 m × 20 cm = 1 feuille 2 × 1 m »), quantité modifiable.
+- Pas de recouvrement ajouté. Développé > largeur de feuille, ou « je ne sais pas » → « Combien de feuilles ? ».
+- Règle changée à dire : avant, le développé ne se demandait jamais pour des feuilles (Greg, 10 octobre).
+- Idée de mise en œuvre : la fiche dit la feuille (2 × 1 m) et les deux questions ; le cœur n'a qu'un rangement générique
+  de bandes dans des feuilles (aucun mot de couverture). Pour 1 m : deux pièces par bande de 2 m (à vérifier avec Greg).
+
+## État précédent (22 novembre, après-midi) : fiche `roofing-2026.11.22-74` (fusion de la branche de test)
 - Avant fusion, chaîne COMPLÈTE VERTE sur la -73 : moteur 1313, serveur 921, site construit, parcours 354 (ordinateur +
   téléphone), 0 échec.
 - Fusion de `claude/saas-achat-artisans-prompt-1lyihx` (23 commits : suggestions sans limite, pointes de liteaux, fixations,
