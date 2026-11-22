@@ -170,7 +170,8 @@ export function SuiviDemande({ projectId }: { projectId: string }) {
   // à laquelle répondre, un refus, des conditions de livraison). Avant : chaque négoce deux fois.
   const aDire = lignes.filter((l) => l.precision || l.refusMotif || (l.conditions && (l.conditions.livraisons === "plusieurs" || l.conditions.minimumCommandeHt != null || l.conditions.dechargement)));
   const etats = cycle?.lignes ?? [];
-  if (aDire.length === 0 && etats.length === 0) return null;
+  // Avant le premier envoi, rien (comme avant) : le suivi n'a de sens qu'une fois la demande partie.
+  if (lignes.length === 0 || (aDire.length === 0 && etats.length === 0)) return null;
   return (
     <section aria-label="Suivi de la demande" className="flex flex-col gap-3">
       {aDire.length ? (
