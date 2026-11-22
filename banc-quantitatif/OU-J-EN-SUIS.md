@@ -72,6 +72,21 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
+## 22 NOVEMBRE (fin d'après-midi) — EN COURS
+- Greg : contre-liteaux 5 %, validé. « Vérifier la mise en ligne, c'est à toi » → adresse `/version` (site :
+  `apps/web/src/app/version/route.ts` ; API : `apps/api/src/modules/health/http/version.controller.ts`, aussi `/v1/version`),
+  méthode écrite dans `CLAUDE.md` (Règles de travail). Après chaque poussée : attendre que les DEUX `/version` donnent le
+  commit poussé avant de dire « c'est en ligne ».
+- Les autres discussions avaient les numéros de déploiement Vercel (`dpl_…`, docs/REPRISE.md) : elles avaient un accès Vercel
+  que cette discussion n'a pas.
+- Poussée de `/version` seule en préparation : dossier `/home/user/lot-pousse`, branche locale `version-a-pousser` =
+  9ceac7d0 (en ligne) + d05484b9 (cherry-pick de cbd514b5). Chaîne complète en cours (bases `_lot`). Si verte : pousser,
+  puis attendre les deux `/version`.
+- Lot en cours dans le dossier habituel (fiche à passer en -76) : liteaux 10 % au total (marge par emplacement `slot`,
+  nouveau champ des marges, dans le cœur et générique), arêtier zinc 0,50 / fermé 0,66 (`aretier_ferme`), jouées sans
+  égout (`ownOnly`), pointes seulement avec des liteaux (`suggested.onlyWith`), « J'ai ta liste » sans devis (`devisLu`).
+  Banc 98/99. Tests du moteur confiés à un agent ; recherche crochets à pointe confiée à un agent.
+
 ## POUSSÉ SUR LA BRANCHE DE TEST (accord de Greg du 22 novembre, nuit)
 - 22 novembre vers 14 h 10 (UTC) : commit `9ceac7d0` poussé sur `claude/saas-achat-artisans-prompt-1lyihx` = fiche -74 (banc
   96/99) + pointe de la branche de test (300dd4ab, puis 842c39b2 : documents seulement). Chaîne sur ce code : moteur 1331,
