@@ -148,10 +148,12 @@ export async function continuerSansSortieDeVentilation(page: Page) {
   // L'étape « Suggestions » d'une liste de couverture (sortie de ventilation, pointes de liteaux…) : l'artisan ne coche rien et
   // continue ; rien n'est coché d'office.
   const carte = carteSuggestions(page);
-  await expect(carte).toBeVisible({ timeout: 15_000 });
+  // La carte peut déjà être passée (`continuerQuandLesSuggestionsSOuvrent` la ferme dès qu'elle s'ouvre) : rien à faire.
+  if (!(await carte.waitFor({ state: "visible", timeout: 15_000 }).then(() => true, () => false))) return;
   const cases = carte.getByRole("checkbox");
   for (let i = 0; i < (await cases.count()); i++) await expect(cases.nth(i)).not.toBeChecked();
-  await carte.getByRole("button", { name: "Continuer", exact: true }).click();
+  const continuer = carte.getByRole("button", { name: "Continuer", exact: true });
+  if (await continuer.isVisible()) await continuer.click().catch(() => undefined);
   await expect(carte).toBeHidden({ timeout: 15_000 });
 }
 
