@@ -81,7 +81,8 @@ describe("référentiel couverture", () => {
   it("règles de calcul validées par le fondateur : tracées (qui, quand) et calculées pour l'artisan", () => {
     expect(REFERENTIEL_COMPLET.products[0]!.attributes.largeur_utile!.verification.status).toBe("verified");
     // Les pointes de liteaux (Suggestion) viennent de la recherche du 20/11/2026 (DTU 40.21, Koramic), pas du fondateur.
-    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs.filter((x) => x.id !== "pointes-liteaux")) {
+    // Les chatières (A-INTEGRER §1, 22 novembre 2026) viennent de la recherche (accessoires-tuiles.json), pas du fondateur.
+    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs.filter((x) => x.id !== "pointes-liteaux" && x.id !== "chatieres")) {
       expect(n.verification).toMatchObject({ status: "verified", verifiedBy: "Fondateur (couvreur)" });
       expect(n.verification.verifiedAt).toMatch(/^2026-10-0[23]$/);
     }

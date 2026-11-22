@@ -99,7 +99,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       // Pointes de liteaux (skill du fondateur ; une par croisement liteau / chevron, recherche fixations du 20/11/2026).
       "couverture-tuiles-emboitement/pointe : Pointes pour liteaux",
       // Rives (skill du fondateur : « rive absente du devis : d'abord en Suggestion »).
-      "couverture-tuiles-emboitement/rive : Tuiles de rive",
+      "couverture-tuiles-emboitement/chatiere : Chatières (ventilation de la toiture)",
+    "couverture-tuiles-emboitement/rive : Tuiles de rive",
       "couverture-tuiles-canal/rive : Bardelis (tuiles de rive)",
       "couverture-ardoises-crochet/pointe : Pointes pour liteaux",
       "couverture-ardoises-crochet/clou : Clous d'ardoise (égout, rives, faîtage)",

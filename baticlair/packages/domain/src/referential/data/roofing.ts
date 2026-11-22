@@ -466,6 +466,8 @@ const RAMPANT_BACS_PARAM: ParamDef = {
 const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
 /** Recherche « fixations » du 20/11/2026 (`referentiels/couverture/recherche/fixations.json`). */
 const RECH_FIXATIONS = "recherche-fixations-2026-11-20";
+const RECH_ACCESSOIRES_TUILES = "recherche-accessoires-tuiles-2026-11-20";
+const ACCESSOIRES_TUILES_VERIFIE = { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026" } as const;
 const FIXATIONS_VERIFIE = { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "Recherche base couverture (fixations.json) : deux sources indépendantes" } as const;
 /** Le skill « regles-metier » du fondateur (interview du 18/11/2026). */
 const SKILL_FONDATEUR = "fondateur-skill-regles-metier-2026-11-18";
@@ -1534,7 +1536,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.22-80",
+  version: "roofing-2026.11.22-81",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -1649,6 +1651,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       documentRef: "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       retrievedAt: "2026-10-04",
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
+    },
+    {
+      id: RECH_ACCESSOIRES_TUILES,
+      kind: "manufacturer",
+      title: "Chatières : section par modèle (Edilians, Monier, Koramic, Terreal) et section de ventilation à atteindre (NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink)",
+      documentRef: "referentiels/couverture/recherche/accessoires-tuiles.json",
+      retrievedAt: "2026-11-20",
+      note: "1/5000 de la surface projetée (comble perdu ou au-dessus d'un écran, 2 cm² par m²) ; 1/3000 sans écran (3,3 cm² par m²). HP 10 et PV 10 : 50 cm² ; Signy 33 ; Actua 26 ; Alpha 10 : 19 ; Romane Canal 18.",
     },
     {
       id: RECH_FIXATIONS,
@@ -1845,6 +1855,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "largeur_utile", label: "Largeur utile", unit: "m" },
         { key: "pureau_min", label: "Pureau minimal", unit: "m" },
         { key: "pureau_max", label: "Pureau maximal", unit: "m" },
+        { key: "section_chatiere", label: "Section de la chatière du modèle", unit: "cm2" },
       ],
       keyAttributes: ["largeur_utile"],
       keywords: ["tuile"],
@@ -2061,6 +2072,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         largeur_utile: spec("0.268", "m", "edilians-hp10", FOUNDER_CHECKED, "≈ 268 mm selon la documentation."),
         pureau_min: spec("0.310", "m", "edilians-hp10", FOUNDER_CHECKED),
         pureau_max: spec("0.376", "m", "edilians-hp10", FOUNDER_CHECKED),
+        // A-INTEGRER §1 : chatière HP 10 réf. 205.20, 50 cm² (fiche Edilians, `recherche/accessoires-tuiles.json`).
+        section_chatiere: spec("50", "cm2", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "Chatière 205.20 : 50 cm² (Edilians)."),
       },
       sellingUnits: [
         { id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true },
@@ -2394,6 +2407,8 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("clou-ardoise-cuivre-3x30", "slate_nail", "Clous cuivre 3 × 30 pour ardoise, boîte de 1 kg", "Clous cuivre 3 × 30", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("418", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."), primary: true }],
     }),
+    // A-INTEGRER §1 : la chatière du modèle de tuile posé (le comptoir la sert d'après la tuile).
+    generic("chatiere-standard", "vent_tile", "Tuile chatière du modèle de tuile posé", "Chatières"),
     generic("pointes-liteau-31x70", "batten_nail", "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg", "Pointes galva 3,1 × 70", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("230", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
     }),
@@ -2515,6 +2530,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         ENTRAXE_PARAM,
         PENTE_PARAM,
         ZONE_PARAM,
+        // A-INTEGRER §1 et §2 (Greg, 22 novembre 2026) : une seule question, et seulement si le devis ne le dit pas.
+        { key: "ecran_sous_toiture", label: "Écran sous toiture", unit: "u", kind: "site_data", question: "Écran sous toiture ?", textValues: [{ value: "1", keywords: ["ecran", "hpv", "sous toiture", "sous-toiture"] }], choices: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }], display: { "1": "oui", "2": "non" } },
         RAMPANT_PARAM,
         { key: "longueur_rives", label: "Longueur de rives", unit: "m", kind: "site_data", question: "Longueur totale des rives ?", fromLineQuantity: true, forSlots: ["rive"] },
       ],
@@ -2524,12 +2541,16 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
         { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).", source: RECH_FIXATIONS, productId: "pointes-liteau-31x70" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
+        // A-INTEGRER §1 : les chatières se comptent d'après le modèle et la surface, jamais demandées ; proposées en Suggestion.
+        { key: "chatiere", family: "vent_tile", label: "Chatières", keywords: ["chatiere"], usual: { text: "Chatière du modèle de tuile posé.", source: RECH_ACCESSOIRES_TUILES, productId: "chatiere-standard" }, suggested: { label: "Chatières (ventilation de la toiture)", onlyOnMeasuredWork: true } },
         { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
         // Greg, 21 novembre 2026 : « Tuiles de rive : deux lignes, gauches et droites » (ce ne sont pas les mêmes pièces).
         { key: "rive_gauche", family: "verge_tile", label: "Tuiles de rive gauches", usual: { text: "Tuile de rive gauche du modèle de tuile posé.", source: F, productId: "tuile-rive-gauche-standard" }, formOf: "rive" },
         { key: "rive_droite", family: "verge_tile", label: "Tuiles de rive droites", usual: { text: "Tuile de rive droite du modèle de tuile posé.", source: F, productId: "tuile-rive-droite-standard" }, formOf: "rive" },
       ],
       constants: {
+        ventilation_avec_ecran: condition("0.0002", "u", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "1/5000 de la surface projetée, au-dessus d'un écran ou en comble perdu (NF DTU 40.11 §4.5.2) : 2 cm² par m²."),
+        ventilation_sans_ecran: condition("0.000333", "u", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "1/3000 de la surface projetée, sans écran (DTU 40.23 tableau 6) : 3,3 cm² par m²."),
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
         liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
@@ -2570,6 +2591,21 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           exclusions: "Pointes de contre-liteaux et de voliges à part.",
           source: RECH_FIXATIONS,
           verification: FIXATIONS_VERIFIE,
+          version: 1,
+        },
+        {
+          // A-INTEGRER §1 : surface projetée × 1/5000 (écran) ou 1/3000 (sans écran) ÷ section de la chatière du modèle,
+          // arrondi au nombre pair au-dessus (moitié en bas, moitié près du faîtage). 100 m² sans écran, HP 10 : 333 ÷ 50 = 6,7
+          // → 8. Modèle sans section connue : pas de nombre, la ligne reste à chiffrer (jamais inventé).
+          id: "chatieres",
+          slot: "chatiere",
+          formula: "2 * arrondi_sup(surface * cos_deg(pente) * si(ecran_sous_toiture < 2, regle.ventilation_avec_ecran, regle.ventilation_sans_ecran) / (2 * tuile.section_chatiere))",
+          unit: "u",
+          core: false,
+          precision: "ventilation de la sous-face : surface projetée × section à atteindre ÷ section d'une chatière, en nombre pair",
+          exclusions: "Moitié en partie basse, moitié près du faîtage.",
+          source: RECH_ACCESSOIRES_TUILES,
+          verification: ACCESSOIRES_TUILES_VERIFIE,
           version: 1,
         },
         {

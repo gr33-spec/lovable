@@ -36,6 +36,7 @@ const COMPTOIR: Record<string, string> = {
   fixation_crochet: "« crochets à queue ou bandeau ? »",
   // Greg, 22 novembre 2026 : une fois pour tout le devis, quand il ne le dit pas.
   type_crochet: "« tes crochets d'ardoise : à agrafe ou à pointe ? » quand le devis ne le dit pas",
+  ecran_sous_toiture: "« écran sous toiture ? » pour compter les chatières, quand le devis ne le dit pas (A-INTEGRER §1, 22 novembre 2026)",
   nb_descentes: "le nombre de naissances et de descentes",
   diametre_descente: "« descente de 80 ou de 100 ? »",
   hauteur_descente: "les mètres de tube",

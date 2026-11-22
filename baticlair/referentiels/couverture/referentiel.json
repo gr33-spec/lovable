@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-80",
+  "version": "roofing-2026.11.22-81",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -134,6 +134,14 @@
       "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       "retrievedAt": "2026-10-04",
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
+    },
+    {
+      "id": "recherche-accessoires-tuiles-2026-11-20",
+      "kind": "manufacturer",
+      "title": "Chatières : section par modèle (Edilians, Monier, Koramic, Terreal) et section de ventilation à atteindre (NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink)",
+      "documentRef": "referentiels/couverture/recherche/accessoires-tuiles.json",
+      "retrievedAt": "2026-11-20",
+      "note": "1/5000 de la surface projetée (comble perdu ou au-dessus d'un écran, 2 cm² par m²) ; 1/3000 sans écran (3,3 cm² par m²). HP 10 et PV 10 : 50 cm² ; Signy 33 ; Actua 26 ; Alpha 10 : 19 ; Romane Canal 18."
     },
     {
       "id": "recherche-fixations-2026-11-20",
@@ -748,6 +756,11 @@
           "key": "pureau_max",
           "label": "Pureau maximal",
           "unit": "m"
+        },
+        {
+          "key": "section_chatiere",
+          "label": "Section de la chatière du modèle",
+          "unit": "cm2"
         }
       ],
       "keyAttributes": [
@@ -1439,6 +1452,19 @@
             "note": "Page et version exactes à compléter à réception du PDF."
           },
           "version": 1
+        },
+        "section_chatiere": {
+          "kind": "manufacturer_spec",
+          "value": "50",
+          "unit": "cm2",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "Chatière 205.20 : 50 cm² (Edilians)."
         }
       },
       "sellingUnits": [
@@ -5226,6 +5252,37 @@
       ]
     },
     {
+      "id": "chatiere-standard",
+      "family": "vent_tile",
+      "label": "Tuile chatière du modèle de tuile posé",
+      "shortLabel": "Chatières",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "pointes-liteau-31x70",
       "family": "batten_nail",
       "label": "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg",
@@ -6668,6 +6725,38 @@
           ]
         },
         {
+          "key": "ecran_sous_toiture",
+          "label": "Écran sous toiture",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Écran sous toiture ?",
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "ecran",
+                "hpv",
+                "sous toiture",
+                "sous-toiture"
+              ]
+            }
+          ],
+          "choices": [
+            {
+              "label": "Oui",
+              "value": "1"
+            },
+            {
+              "label": "Non",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "oui",
+            "2": "non"
+          }
+        },
+        {
           "key": "longueur_rampant",
           "label": "Longueur du rampant",
           "unit": "m",
@@ -6780,6 +6869,23 @@
           }
         },
         {
+          "key": "chatiere",
+          "family": "vent_tile",
+          "label": "Chatières",
+          "keywords": [
+            "chatiere"
+          ],
+          "usual": {
+            "text": "Chatière du modèle de tuile posé.",
+            "source": "recherche-accessoires-tuiles-2026-11-20",
+            "productId": "chatiere-standard"
+          },
+          "suggested": {
+            "label": "Chatières (ventilation de la toiture)",
+            "onlyOnMeasuredWork": true
+          }
+        },
+        {
           "key": "rive",
           "family": "verge_tile",
           "label": "Tuiles de rive",
@@ -6836,6 +6942,32 @@
         }
       ],
       "constants": {
+        "ventilation_avec_ecran": {
+          "kind": "installation_condition",
+          "value": "0.0002",
+          "unit": "u",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "1/5000 de la surface projetée, au-dessus d'un écran ou en comble perdu (NF DTU 40.11 §4.5.2) : 2 cm² par m²."
+        },
+        "ventilation_sans_ecran": {
+          "kind": "installation_condition",
+          "value": "0.000333",
+          "unit": "u",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "1/3000 de la surface projetée, sans écran (DTU 40.23 tableau 6) : 3,3 cm² par m²."
+        },
         "liteau_vendu": {
           "kind": "installation_condition",
           "value": "4",
@@ -6951,6 +7083,22 @@
             "status": "verified",
             "verifiedAt": "2026-11-20",
             "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1
+        },
+        {
+          "id": "chatieres",
+          "slot": "chatiere",
+          "formula": "2 * arrondi_sup(surface * cos_deg(pente) * si(ecran_sous_toiture < 2, regle.ventilation_avec_ecran, regle.ventilation_sans_ecran) / (2 * tuile.section_chatiere))",
+          "unit": "u",
+          "core": false,
+          "precision": "ventilation de la sous-face : surface projetée × section à atteindre ÷ section d'une chatière, en nombre pair",
+          "exclusions": "Moitié en partie basse, moitié près du faîtage.",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
           },
           "version": 1
         },

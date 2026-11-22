@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-81 — Chatières calculées d'après le modèle et la surface (A-INTEGRER §1, Greg, 2026-11-22)
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Chatières (tuiles à emboîtement) | rien | case « Chatières (ventilation de la toiture) » (Ventilation) ; cochée ou écrite : surface × cos(pente) × 1/5000 (écran) ou 1/3000 (sans écran) ÷ section de la chatière du modèle, au nombre pair au-dessus ; jamais demandées | NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink ; sections Edilians (`recherche/accessoires-tuiles.json`) |
+| Écran sous toiture | — | « Écran sous toiture ? » (Oui / Non), seulement si le devis n'en dit rien | Greg, 22 novembre 2026 |
+| Section de chatière | — | HP 10 : 50 cm² ; autres modèles du catalogue (Volnay PV) : inconnue, pas de nombre | fiches Edilians 2025-2026 |
+| Moteur | — | fonction `cos_deg` (cosinus d'un angle de 0 à 90°) et unité cm² | — |
+
 ## roofing-2026.11.22-80 — Clous d'ardoise naturelle en Suggestion (A-INTEGRER §3, Greg, 2026-11-22)
 
 | Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
