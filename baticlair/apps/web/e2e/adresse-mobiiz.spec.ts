@@ -282,7 +282,9 @@ test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mai
   await expect(fournisseurs.getByRole("button", { name: /^Voir les? devis reçus?$/ })).toHaveCount(0);
   // Un e-mail sans étiquette ni repère (Greg, 12 novembre 2026) : « Réponses à classer ». Mobiiz PROPOSE la demande du
   // même expéditeur, dit pourquoi, montre le quantitatif, la date et l'état ; rien n'est classé avant la confirmation.
-  const r2 = await emailRecu(page, `${nom}@mobiiz.test`, "Notre offre spéciale", { from: "Négoce Dupont <ventes@dupont.example>" });
+  // Le message est relu comme chez Resend, avec son authentification (sans elle, Mobiiz ne propose plus rien : saboteur,
+  // 22 novembre 2026).
+  const r2 = await emailRecu(page, `${nom}@mobiiz.test`, "Notre offre spéciale", { from: "Négoce Dupont <ventes@dupont.example>", attachmentsBase64: [] });
   expect(r2).toMatchObject({ traite: true, rattache: false });
   await page.goto("/messages");
   await expect(page.getByRole("link", { name: /1 réponse à classer/ })).toBeVisible();
@@ -314,7 +316,7 @@ test("R7 : la réponse du négoce arrive sur le chantier avec son PDF ; un e-mai
   await expect(page.getByRole("region", { name: "À classer" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // L'artisan a été prévenu par e-mail, à son adresse personnelle.
-  const avis = (await apiJson<{ emails: { to: string; subject: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent("")}`, undefined, SECRET)).body.emails.filter((e) => e.subject === "Négoce Dupont t'a répondu par e-mail");
+  const avis = (await apiJson<{ emails: { to: string; subject: string }[] }>(page, "GET", `/v1/internal/test/emails?to=${encodeURIComponent("")}`, undefined, SECRET)).body.emails.filter((e) => e.subject === "[Externe] Négoce Dupont t'a répondu par e-mail");
   expect(avis.length).toBeGreaterThanOrEqual(1);
   expect(avis[0]!.to).toMatch(/^artisan-.*@example\.fr$/);
   expect(recipientId).toBeTruthy();

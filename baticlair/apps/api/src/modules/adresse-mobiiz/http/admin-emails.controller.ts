@@ -7,6 +7,7 @@ import { forbidden } from "../../../platform/errors/domain-error.js";
 import { exigerDeuxFacteurs } from "../../../platform/http/deux-facteurs.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import { CONFIG, EMAIL_RECU } from "../../../platform/tokens.js";
+import { JournalEntrants } from "../../../platform/email/journal-entrants.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
 import { ReponsesRecuesService } from "../application/reponses-recues.service.js";
 
@@ -24,6 +25,7 @@ export class AdminEmailsController {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(CONFIG) private readonly config: AppConfig,
     @Inject(EMAIL_RECU) private readonly lecteur: LecteurEmailRecu,
+    @Inject(JournalEntrants) private readonly journal: JournalEntrants,
   ) {}
 
   private async garde(tenant: TenantContext): Promise<string> {
@@ -37,6 +39,17 @@ export class AdminEmailsController {
   async lister(@Tenant() tenant: TenantContext) {
     await this.garde(tenant);
     return { items: await this.recus.misDeCote() };
+  }
+
+  /**
+   * Les e-mails bloqués (Greg, 22 novembre 2026) : tout message jugé suspect sur contact@ ou une adresse Mobiiz, avec sa
+   * raison (DMARC, SPF et DKIM, usurpation de Mobiiz, pièce jointe dangereuse). Rien n'est supprimé en silence.
+   */
+  @Get("bloques")
+  async bloques(@Tenant() tenant: TenantContext) {
+    const email = await this.garde(tenant);
+    await this.prisma.journalAdmin.create({ data: { userId: tenant.userId, email, action: "emails:bloques", cible: "liste" } });
+    return { items: await this.journal.suspects() };
   }
 
   @Post(":id/rattacher")

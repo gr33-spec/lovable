@@ -8,6 +8,7 @@ import type { AppLogger } from "../../platform/logging/logger.js";
 import type { PushSender } from "../../platform/push/push.port.js";
 import { CONFIG, EMAIL_SENDER, LOGGER, PUSH_SENDER } from "../../platform/tokens.js";
 import { NotificationsGroupeService } from "../../platform/notifications/notifications-artisan.js";
+import { JournalEntrants } from "../../platform/email/journal-entrants.js";
 import { PriceRequestsModule, PriceRequestsService } from "../price-requests/index.js";
 import { lienEmailsCoupes } from "../privacy/index.js";
 import { TenancyModule, TenancyService } from "../tenancy/index.js";
@@ -23,9 +24,9 @@ import { AdresseMobiizController } from "./http/adresse-mobiiz.controller.js";
     { provide: AdresseMobiizService, useFactory: (p: PrismaService, c: AppConfig) => new AdresseMobiizService(p, c.emailDomaine), inject: [PrismaService, CONFIG] },
     {
       provide: ReponsesRecuesService,
-      useFactory: (p: PrismaService, a: AdresseMobiizService, pr: PriceRequestsService, push: PushSender, e: TransactionalEmailSender, c: AppConfig, l: AppLogger) =>
-        new ReponsesRecuesService(p, a, pr, new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl), c.emailDomaine, l, undefined, [...(c.contact?.adresses ?? []), ...(c.resend?.replyTo ? [c.resend.replyTo.toLowerCase()] : []), ...(c.emailDomaine ? [`contact@${c.emailDomaine}`] : [])]),
-      inject: [PrismaService, AdresseMobiizService, PriceRequestsService, PUSH_SENDER, EMAIL_SENDER, CONFIG, LOGGER],
+      useFactory: (p: PrismaService, a: AdresseMobiizService, pr: PriceRequestsService, push: PushSender, e: TransactionalEmailSender, c: AppConfig, l: AppLogger, j: JournalEntrants) =>
+        new ReponsesRecuesService(p, a, pr, new NotificationsGroupeService(p, push, e, (companyId) => lienEmailsCoupes(c.webAppUrl, c.authSecret, companyId), c.emailDomaine, c.webAppUrl), c.emailDomaine, l, undefined, [...(c.contact?.adresses ?? []), ...(c.resend?.replyTo ? [c.resend.replyTo.toLowerCase()] : []), ...(c.emailDomaine ? [`contact@${c.emailDomaine}`] : [])], j),
+      inject: [PrismaService, AdresseMobiizService, PriceRequestsService, PUSH_SENDER, EMAIL_SENDER, CONFIG, LOGGER, JournalEntrants],
     },
   ],
   exports: [AdresseMobiizService, ReponsesRecuesService],

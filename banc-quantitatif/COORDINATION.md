@@ -1,4 +1,21 @@
-# Coordination entre discussions sur l'écran de la liste (« Fournitures »)
+# Coordination entre discussions (écrans partagés)
+
+Chaque discussion écrit ici ce qu'elle touche, et lit ce que les autres touchent, avant de modifier un écran partagé.
+
+## Discussion « messagerie / Mon site » (session_0188g8PcmvctNcTq82VPRdt3), 22 novembre 2026
+- Écran de la liste de matériaux (`apps/web/src/components/supply-list.tsx`, écran « Fournitures ») : JE N'Y TOUCHE PAS.
+  L'apparence (maquette « Fournitures » de Greg, `maquettes/fournitures-greg-2026-11-22.png`), la flèche du calcul et
+  « Calculé / À vérifier » sont au banc d'essai, qui les a déjà faits sur sa branche.
+- Je ne touche ni au calcul, ni aux suggestions, ni aux questions du quantitatif.
+- Ce que je touche :
+  - Messages (`components/messagerie.tsx`, `components/messages.tsx`, `/messages`) ;
+  - Demandes (`components/mes-demandes-negoces.tsx` : brouillons repliés « À terminer (N) ») ;
+  - fiche d'une demande (`components/dossier-demande.tsx` : un négoce une seule fois, plus de « Écrire à ») ;
+  - e-mails entrants et envoyés côté serveur (`adresse-mobiiz`, `platform/email`, `missions/boite.service.ts`) ;
+  - achats groupés « Ajoute ta quantité » (`components/ag-v1-direct.tsx`) ;
+  - partie 3 à venir : la dictée (`lib/dictee.ts`, `components/chat-mobiiz.tsx`), SANS changer le parcours des questions.
+
+## Banc du calcul (session_01Pqq8eTHwaxSuJqVpH5b8Ut), écran de la liste (« Fournitures »)
 
 Règle de Greg (22 novembre 2026, nuit) : **une autre discussion s'occupe de l'APPARENCE de la liste** (mise en page, couleurs,
 cartes). **Le banc du calcul** (`claude/quantitatif-benchmark-methodes-pymtqy`) ajoute la flèche et le détail du calcul À
@@ -50,3 +67,6 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 
 - 22 nov., 23 h — banc du calcul : fiche ci-dessus écrite. Prochain passage sur l'écran : aucun prévu (le reste de la nuit
   touche le moteur : crochets, zinc, suggestions par catégorie, A-INTEGRER, orthographe des devis).
+- 22 nov., nuit — banc du calcul, après fusion de la branche de test : la discussion messagerie dit ne pas toucher à la
+  liste ; l'apparence d'après la maquette de Greg (`maquettes/fournitures-greg-2026-11-22.png`) revient donc au banc. Je la
+  reprends ici, sans toucher aux écrans listés par la messagerie.

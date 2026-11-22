@@ -157,18 +157,24 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(page.getByLabel("Épaisseur").getByRole("option", { name: "Standard fabricant" })).toBeAttached();
   await capture(page, "02-produit-a-preciser");
   await page.getByLabel("Épaisseur").selectOption("5");
-  await expect(page.getByText("1 palette = 480 pièces · non garanti par une référence")).toBeVisible();
-  await page.getByRole("button", { name: "Confirmer 480 pièces par palette" }).click();
+  // Greg, 22 novembre 2026 : la quantité se tape tout de suite, dans l'unité choisie, le conditionnement écrit dans la
+  // question ; « Continuer » le confirme (avant : « Confirmer 480 pièces par palette » à part, la quantité ensuite).
+  await expect(page.getByText("Écris ta quantité pour continuer.")).toBeVisible();
+  const combien = page.getByLabel("Combien de palettes de 480 pièces ?");
+  await combien.fill("10");
+  // Pendant la saisie, la barre « Continuer » se range ; le clavier refermé (« Terminé »), elle revient.
+  await combien.blur();
+  await expect(page.getByText("10 palettes = 4 800 pièces")).toBeVisible();
   await capture(page, "03-produit-precis");
   await page.getByRole("button", { name: "Continuer" }).click();
-  // 2. Quantité, livraison ou retrait, date.
-  await expect(page.getByRole("heading", { name: "Combien, où et pour quand ?" })).toBeVisible();
+  // 2. Livraison ou retrait, date.
+  await expect(page.getByRole("heading", { name: "Où et pour quand ?" })).toBeVisible();
   await expect(page.getByText("Ardoise naturelle 32 × 22 · Espagne · 1er choix · 5 mm").or(page.getByText("Ardoise naturelle", { exact: true })).first()).toBeVisible();
-  await page.getByLabel("Quantité (palettes)").fill("10");
   await expect(page.getByText("10 palettes = 4 800 pièces")).toBeVisible();
   await page.getByText("Livraison sur chantier").click();
   await page.getByLabel("Lieu de livraison (privé)").fill(`12 rue du Port, ${zone().cp} ${zone().ville}`);
   await page.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(45));
+  await page.getByLabel("J'ai besoin de ces matériaux avant le").blur();
   await expect(page.getByText("Ton adresse exacte n'est jamais montrée aux autres entreprises.")).toBeVisible();
   await capture(page, "04-quantite-date");
   await page.getByRole("button", { name: "Continuer" }).click();
@@ -234,12 +240,14 @@ test("entrée directe : produit précis, quantité, aucun achat compatible, entr
   await expect(b.page.getByRole("definition").filter({ hasText: "32 × 22" })).toBeVisible();
   await capture(b.page, "08c-produit-verrouille");
   // Recette du 18 novembre 2026 : rejoindre propose l'unité du total (les pièces), plus la palette d'office.
+  await b.page.getByLabel("Combien de pièces ?").fill("1920");
+  await b.page.getByLabel("Combien de pièces ?").blur();
   await b.page.getByRole("button", { name: "Continuer" }).click();
-  await b.page.getByLabel("Quantité (pièces)").fill("1920");
   await b.page.getByText("Retrait au dépôt").click();
   await b.page.getByText("Livraison sur chantier").click();
   await b.page.getByLabel("Lieu de livraison (privé)").fill("Perros-Guirec");
   await b.page.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(50));
+  await b.page.getByLabel("J'ai besoin de ces matériaux avant le").blur();
   await b.page.getByRole("button", { name: "Continuer" }).click();
   await expect(b.page.getByRole("heading", { name: "Un achat groupé correspond" })).toBeVisible();
   await expect(b.page.getByText(zone().ville)).toHaveCount(0);
@@ -455,6 +463,7 @@ test("depuis un quantitatif tapé : lots, mentions, correction d'une ligne, deux
   await page.getByText("Livraison sur chantier").click();
   await page.getByLabel("Lieu de livraison (privé)").fill(`3 rue des Ajoncs, ${zone().cp} ${zone().ville}`);
   await page.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(40));
+  await page.getByLabel("J'ai besoin de ces matériaux avant le").blur();
   // Mobiiz dit pour chaque article s'il rejoint un achat ouvert ou en ouvre un.
   await expect(page.getByText(/^(Rejoint un achat groupé ouvert|Ouvre un nouvel achat groupé)$/)).toHaveCount(2);
   const conversions = page.getByRole("button", { name: /^Confirmer \d+ (pièces|m) par (palette|longueur)$/ });
@@ -529,6 +538,7 @@ test("article déjà envoyé aux négoces (Greg, 16 novembre 2026) : il reste co
   await page.getByText("Livraison sur chantier").click();
   await page.getByLabel("Lieu de livraison (privé)").fill(`3 rue des Ajoncs, ${zone().cp} ${zone().ville}`);
   await page.getByLabel("J'ai besoin de ces matériaux avant le").fill(jourDans(40));
+  await page.getByLabel("J'ai besoin de ces matériaux avant le").blur();
   await page.getByRole("button", { name: /^Confirmer \d+ pièces par palette$/ }).click();
   await page.getByText("Ton entreprise").waitFor();
   await page.getByText("Dirigeant", { exact: true }).click();

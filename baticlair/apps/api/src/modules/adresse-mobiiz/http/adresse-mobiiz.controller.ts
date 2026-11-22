@@ -60,8 +60,12 @@ export class AdresseMobiizController {
   @Get("recus/:id/fichiers/:fichierId")
   async fichier(@Tenant() tenant: TenantContext, @Param("id") id: string, @Param("fichierId") fichierId: string, @Res({ passthrough: true }) res: Response) {
     const f = await this.recus.fichier(tenant, id, fichierId);
-    res.setHeader("Content-Type", f.type);
-    res.setHeader("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(f.nom)}`);
+    // Une pièce reçue n'est jamais servie comme une page (saboteur, 22 novembre 2026) : PDF et images tels quels, tout le
+    // reste en téléchargement neutre ; le navigateur ne devine jamais un autre type.
+    const sur = /^(application\/pdf|image\/(png|jpeg|gif|webp))$/i.test(f.type);
+    res.setHeader("Content-Type", sur ? f.type : "application/octet-stream");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Disposition", `${sur ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(f.nom)}`);
     res.setHeader("Cache-Control", "private, no-store");
     return new StreamableFile(f.contenu);
   }

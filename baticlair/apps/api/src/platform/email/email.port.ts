@@ -18,6 +18,11 @@ export interface TransactionalEmail {
    * d'être seulement journalisé comme pour un mail de compte (inscription, mot de passe), qu'on peut redemander.
    */
   mustDeliver?: boolean;
+  /**
+   * Un message EXTERNE renvoyé (Greg, 22 novembre 2026) : jamais habillé en Mobiiz. La mise en page ne pose ni logo, ni
+   * pied, ni lien : un bandeau gris et le texte tel quel (ses liens déjà rendus non cliquables).
+   */
+  externe?: boolean;
   /** En-têtes ajoutés par la mise en page (List-Unsubscribe). */
   headers?: Record<string, string>;
   /**

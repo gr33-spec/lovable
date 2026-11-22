@@ -35,7 +35,7 @@ export class NotificationsGroupeService {
     return proprietaire?.user.email ?? null;
   }
 
-  async prevenir(companyId: string, message: MessageArtisan, courriel?: { objet: string; texte: string; piecesJointes?: { filename: string; contentType: string; contentBase64: string }[] }, options: { sansEmail?: boolean } = {}): Promise<{ push: number; email: boolean }> {
+  async prevenir(companyId: string, message: MessageArtisan, courriel?: { objet: string; texte: string; piecesJointes?: { filename: string; contentType: string; contentBase64: string }[]; externe?: boolean }, options: { sansEmail?: boolean } = {}): Promise<{ push: number; email: boolean }> {
     // RÉGLAGES DE NOTIFICATION (Greg, 10 novembre 2026) : une catégorie coupée ou un canal coupé ne reçoit plus de push ni
     // d'e-mail ; un e-mail qui porte un bon de commande part toujours. La catégorie vient de l'écran que la notification ouvre.
     const reglage = await this.prisma.reglageAlertes.findUnique({ where: { companyId } }).catch(() => null);
@@ -59,7 +59,7 @@ export class NotificationsGroupeService {
     if (to) {
       const pied = this.lienStop ? `\n\nNe plus recevoir ces e-mails : ${this.lienStop(companyId)}` : "";
       try {
-        await this.email.send({ to, subject: courriel?.objet ?? `${message.titre} : ${message.corps}`, text: `${courriel?.texte ?? `${message.corps}\n\n${NOM_APP}`}${pied}`, ...(courriel?.piecesJointes?.length ? { attachments: courriel.piecesJointes } : {}) });
+        await this.email.send({ to, subject: courriel?.objet ?? `${message.titre} : ${message.corps}`, text: `${courriel?.texte ?? `${message.corps}\n\n${NOM_APP}`}${pied}`, ...(courriel?.piecesJointes?.length ? { attachments: courriel.piecesJointes } : {}), ...(courriel?.externe ? { externe: true } : {}) });
         email = true;
       } catch {
         email = false;

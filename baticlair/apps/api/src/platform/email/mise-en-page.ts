@@ -28,6 +28,8 @@ export function lienDesabonnement(email: Pick<TransactionalEmail, "text">, webAp
 
 /** L'e-mail tel qu'il part : HTML avec logo et pied, texte avec le pied légal, en-tête List-Unsubscribe. */
 export function miseEnPage(email: TransactionalEmail, webAppUrl: string): TransactionalEmail & { headers: Record<string, string> } {
+  // Un message externe n'est jamais habillé en Mobiiz : ni logo, ni pied, ni lien cliquable ; le texte tel quel.
+  if (email.externe) return { ...email, html: htmlExterne(email.text), headers: {} };
   const stop = lienDesabonnement(email, webAppUrl);
   const texteSansStop = stop.propre ? email.text.replace(LIGNE_STOP, "").trimEnd() : email.text.trimEnd();
   const corps =
@@ -73,4 +75,19 @@ export function garder(garde: GardeEnvoi | null, email: TransactionalEmail): Tra
   if (!garde || autorise(garde, email.to)) return email;
   if (!garde.redirigerVers) return null;
   return { ...email, to: garde.redirigerVers, subject: `[TEST → ${email.to}] ${email.subject}` };
+}
+
+/**
+ * Le HTML d'un message externe : le texte échappé, sans aucun lien (un texte « https://… » reste du texte), dans une
+ * page neutre, sans logo ni couleur de la marque ; la première ligne (le bandeau) sur fond gris.
+ */
+export function htmlExterne(texte: string): string {
+  const [bandeau, ...reste] = texte.split("\n");
+  return [
+    `<!doctype html><html lang="fr"><body style="margin:0;background:#FFFFFF;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#222222">`,
+    `<div style="max-width:640px;margin:0 auto;padding:16px">`,
+    `<div style="background:#EDEDED;border:1px solid #CCCCCC;border-radius:6px;padding:10px 12px;font-size:14px;font-weight:700;color:#333333">${echapper(bandeau ?? "")}</div>`,
+    `<div style="white-space:pre-wrap;font-size:14px;line-height:1.5;padding:12px 2px">${echapper(reste.join("\n"))}</div>`,
+    `</div></body></html>`,
+  ].join("");
 }

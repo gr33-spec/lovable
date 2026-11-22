@@ -98,6 +98,8 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
   const j3 = await prisma.aiExecution.updateMany({ where: { createdAt: { lt: limiteJournaux }, userId: { not: null } }, data: { userId: null } });
   // Le journal du pilotage admin (24 octobre 2026) : 12 mois, comme les autres journaux.
   const j5 = await prisma.journalAdmin.deleteMany({ where: { createdAt: { lt: limiteJournaux } } });
+  // Le journal des e-mails entrants (Greg, 22 novembre 2026) : 12 mois, comme les autres journaux.
+  const j6 = await prisma.emailEntrant.deleteMany({ where: { recuLe: { lt: limiteJournaux } } });
   // Les signalements de bugs (message, e-mail, capture d'écran) : 12 mois, puis suppression (Greg, 15 novembre 2026).
   const signalements = await prisma.signalement.deleteMany({ where: { createdAt: { lt: ilYa(maintenant, { mois: DUREES.signalementsMois }) } } });
   const j4 = await prisma.parametreGroupe.deleteMany({ where: { misAJourLe: { lt: limiteJournaux }, OR: ["ajouts:", "reponses:", "rappels-cloture:", "alerte:", "report:"].map((p) => ({ cle: { startsWith: p } })) } });
@@ -125,7 +127,7 @@ export async function purgerSelonLeRegistre(prisma: PrismaService, maintenant = 
     documentsAnciens: 0,
     reprises: reprises.count,
     evenementsWebhook: evenements.count,
-    journaux: j1.count + j2.count + j3.count + j4.count + j5.count,
+    journaux: j1.count + j2.count + j3.count + j4.count + j5.count + j6.count,
     signalements: signalements.count,
     archives: archives.count + factures.count,
     preuves: preuves.count,

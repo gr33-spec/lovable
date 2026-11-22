@@ -8,6 +8,7 @@ import { forbidden, notFound } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
 import { CONFIG, EMAIL_RECU, EMAIL_SENDER, LOGGER } from "../../../platform/tokens.js";
 import { renvoyerContact, type LecteurEmailRecu } from "../../../platform/email/contact-entrant.js";
+import { JournalEntrants } from "../../../platform/email/journal-entrants.js";
 import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
 import type { AppLogger } from "../../../platform/logging/logger.js";
 import { Public } from "../../identity/index.js";
@@ -49,10 +50,12 @@ export class WebhookResendController {
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(ReponsesRecuesService) private readonly reponses: ReponsesRecuesService,
     @Inject(AdresseAlerte) private readonly adresse: AdresseAlerte,
+    @Inject(JournalEntrants) private readonly journal: JournalEntrants,
   ) {}
 
   @Public()
-  @Throttle({ default: HOURLY(600) })
+  // Une avalanche de spam ne doit pas faire refuser les vrais e-mails (saboteur, 22 novembre 2026) : plafond relevé.
+  @Throttle({ default: HOURLY(6000) })
   @Post("resend")
   @HttpCode(200)
   async recevoir(
@@ -71,11 +74,13 @@ export class WebhookResendController {
 
   private async traiter(req: { body?: unknown }) {
     const evenement = (req.body ?? {}) as { type?: string; data?: { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string } };
-    if (evenement.type !== "email.received" || !evenement.data?.from) return { traite: false, raison: "ignore" };
+    if (evenement.type !== "email.received" || !evenement.data) return { traite: false, raison: "ignore" };
+    // Un expéditeur vide n'est jamais ignoré en silence (saboteur, 22 novembre 2026) : il passe au filtre, noté, indésirable.
+    evenement.data.from = evenement.data.from ?? "";
     // Greg, 14 novembre 2026 : ce qui arrive sur contact@ est transféré vers l'adresse d'alerte réglée dans l'admin
     // (avant : une adresse fixe de la configuration).
     const vers = this.config.contact ? await this.adresse.actuelle().catch(() => null) : null;
-    const contact = await renvoyerContact(this.config.contact && vers ? { ...this.config.contact, vers } : this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger);
+    const contact = await renvoyerContact(this.config.contact && vers ? { ...this.config.contact, vers } : this.config.contact, evenement.data, this.lecteur, this.envoi, this.logger, this.config.emailDomaine, (e) => this.journal.noter({ adresse: e.adresse, recu: e.recu, verdict: e.verdict, emailId: e.emailId }));
     if (contact) return contact;
     // R7 : un e-mail à l'adresse Mobiiz d'un artisan (réponse d'un négoce) arrive dans Mobiiz.
     const artisan = await this.reponses.recevoir(evenement.data, this.lecteur);

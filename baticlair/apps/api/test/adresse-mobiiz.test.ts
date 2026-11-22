@@ -30,6 +30,8 @@ const lecteur: LecteurEmailRecu = {
       html: null,
       attachments: [],
       tropLourdes: [],
+      // Un expéditeur authentifié, comme Resend le dit pour un vrai négoce (Greg, 22 novembre 2026).
+      authentification: { spf: "pass", dkim: "pass", dmarc: "pass" },
       ...recuSimule,
     };
   },
@@ -225,10 +227,14 @@ describe("l'adresse Mobiiz de l'artisan", () => {
     // Prévenu par e-mail à son adresse personnelle (jamais à l'adresse Mobiiz).
     const avis = ctx.emails.sent.find((e) => e.subject.includes("t'a répondu"))!;
     expect(avis.to).toBe("greg@example.fr");
-    expect(avis.subject).toBe("Négoce Dupont t'a répondu par e-mail");
+    expect(avis.subject).toBe("[Externe] Négoce Dupont t'a répondu par e-mail");
+    // Greg, 22 novembre 2026 : jamais habillé en Mobiiz (bandeau, expéditeur réel, aucun logo).
+    expect(avis.text).toContain("Message externe, non vérifié par Mobiiz");
+    expect(avis.externe).toBe(true);
     expect(avis.text).toContain(`/chantiers/${projectId}`);
     // Greg, 14 novembre 2026 : la réponse est copiée sur sa vraie adresse (le message, le nom des pièces jointes).
-    expect(avis.text).toContain("Son message :\nBonjour, voici notre devis. 1 200 € HT livré.");
+    expect(avis.text).toContain("De : Négoce Dupont <ventes@dupont.example>");
+    expect(avis.text).toContain("Bonjour, voici notre devis. 1 200 € HT livré.");
     expect(avis.text).toContain("devis-dupont.pdf");
   });
 

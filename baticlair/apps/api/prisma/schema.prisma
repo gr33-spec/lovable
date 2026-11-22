@@ -2122,6 +2122,16 @@ model EmailRecuArtisan {
   /// Pièces trop lourdes, nommées sans être gardées.
   tropLourdes String[]  @default([]) @map("trop_lourdes")
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// Indésirables (Greg, 22 novembre 2026) : rangé par Mobiiz (« mobiiz ») ou par l'artisan (« artisan »).
+  indesirable    Boolean  @default(false)
+  indesirablePar String?  @map("indesirable_par")
+  raisons        String[] @default([])
+  /// Le domaine de l'expéditeur est prouvé (DMARC, ou DKIM aligné).
+  authentifie    Boolean  @default(false)
+  /// Pièces jointes dangereuses, retenues (jamais gardées).
+  piecesBloquees String[] @default([]) @map("pieces_bloquees")
+  /// L'étiquette de demande que l'e-mail visait, quand il n'a pas été rattaché d'office (expéditeur non prouvé).
+  etiquetteVisee String?  @map("etiquette_visee")
 
   company   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
   recipient PriceRequestRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
@@ -3258,4 +3268,27 @@ model ListeAttenteMetier {
   @@index([metier])
   @@index([departement])
   @@map("liste_attente_metier")
+}
+
+/// Le journal des e-mails entrants (Greg, 22 novembre 2026) : chaque message reçu sur contact@ ou une adresse Mobiiz,
+/// son verdict (SPF, DKIM, DMARC, pièces jointes) ; les suspects forment la liste de l'admin ; le volume par adresse
+/// déclenche une alerte. Purgé à 12 mois comme les journaux.
+model EmailEntrant {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  adresse        String
+  companyId      String?  @map("company_id") @db.Uuid
+  de             String
+  objet          String
+  suspect        Boolean
+  raisons        String[] @default([])
+  piecesBloquees String[] @default([]) @map("pieces_bloquees")
+  spf            String?
+  dkim           String?
+  dmarc          String?
+  emailId        String?  @map("email_id")
+  recuLe         DateTime @default(now()) @map("recu_le") @db.Timestamptz(3)
+
+  @@index([adresse, recuLe])
+  @@index([suspect, recuLe])
+  @@map("email_entrant")
 }

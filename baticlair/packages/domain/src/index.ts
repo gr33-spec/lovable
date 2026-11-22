@@ -75,6 +75,7 @@ export * from "./groupe/ton.js";
 export * from "./groupe/relances.js";
 export * from "./groupe/reponse-negoce.js";
 export * from "./groupe/adresse-mobiiz.js";
+export * from "./messagerie/entrant.js";
 export * from "./groupe/adresse-mobiiz-phrases.js";
 export * from "./groupe/achat-groupe.js";
 export * from "./groupe/achat-groupe-panier.js";

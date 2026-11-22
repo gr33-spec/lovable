@@ -139,8 +139,12 @@ export function FileViewer() {
           <img src={loaded.objectUrl} alt={loaded.title} className="max-h-full max-w-full self-center rounded-xl object-contain" />
         ) : !native ? (
           <PdfPages file={loaded.file} title={loaded.title} onError={toNative} />
-        ) : (
+        ) : loaded.file.type === "application/pdf" ? (
           <iframe title={loaded.title} src={loaded.objectUrl} className="h-full w-full max-w-3xl rounded-xl bg-white" />
+        ) : (
+          // Saboteur, 22 novembre 2026 : seul un PDF s'affiche dans un cadre ; tout autre fichier ne s'ouvre jamais comme une
+          // page de Mobiiz (il se télécharge ou se partage).
+          <p className="self-center px-6 text-center text-white">Ce fichier ne s&apos;affiche pas dans Mobiiz : télécharge-le pour l&apos;ouvrir.</p>
         )}
       </div>
       <div className="flex gap-2 px-3 pt-2 pb-[max(12px,env(safe-area-inset-bottom))]">

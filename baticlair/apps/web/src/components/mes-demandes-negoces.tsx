@@ -293,7 +293,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
 
       {/* La barre de la sélection : au-dessus de la barre du menu sur téléphone, jamais dessous. */}
       {selection ? (
-        <div role="region" aria-label="Sélection" className="fixed inset-x-0 bottom-[calc(var(--nav-space,0px))] z-40 flex justify-center px-4 pb-3 lg:bottom-0 lg:left-64 lg:pb-5">
+        <div data-barre-action role="region" aria-label="Sélection" className="fixed inset-x-0 bottom-[calc(var(--nav-space,0px))] z-40 flex justify-center px-4 pb-3 lg:bottom-0 lg:left-64 lg:pb-5">
           <div className="flex w-full max-w-xl items-center gap-2 rounded-2xl bg-surface p-2.5 text-ink shadow-float ring-1 ring-ink/10">
             <span className="grow pl-2 text-[15px] font-semibold">{choisies.length > 1 ? `${choisies.length} listes choisies` : choisies.length === 1 ? "1 liste choisie" : "Choisis des listes"}</span>
             <button type="button" onClick={() => setSelection(null)} className="pressable min-h-11 rounded-xl border border-line px-4 text-[15px] font-semibold">
