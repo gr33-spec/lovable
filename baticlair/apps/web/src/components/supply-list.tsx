@@ -785,7 +785,10 @@ function Row({
   const vague = !sentTo && editable && row.status !== "check" && (item?.aPreciserPourGroupe?.length ?? 0) > 0;
   // Achat groupé par métier (Greg, 27 octobre 2026, point 31) : une ligne préparée depuis le devis ou la photo reste « à
   // vérifier » tant que l'artisan ne l'a ni confirmée ni corrigée et que la liste n'est pas validée.
-  const aVerifier = editable && !sentTo && takeoff.status === "draft" && row.status !== "check" && lines.some((l) => (l.origin === "ai" || l.origin === "liste") && !l.confirmed && !l.edited);
+  // Règle changée (Greg, 22 novembre 2026) : une ligne qui dit « Calculé » ou « Dit par toi » n'est plus « à vérifier » en plus ;
+  // seule une ligne qui repose sur une valeur par défaut ou une hypothèse incertaine dit « À vérifier » (son origine).
+  const aVerifier =
+    editable && !sentTo && takeoff.status === "draft" && row.status !== "check" && lines.some((l) => (l.origin === "ai" || l.origin === "liste") && !l.confirmed && !l.edited) && !item?.verification;
   const sub = sentTo ? `Envoyé · ${sentTo}` : row.status === "check" ? (row.reason ?? "À vérifier") : vague ? (takeoff.phrasePrecision ?? "Précise pour trouver d'autres couvreurs") : aVerifier ? "à vérifier" : null;
   const dot = sentTo ? DOT.supplier : vague ? { ok: false, label: "à préciser" } : DOT[row.status];
   const parsed = item?.quantity ? parseQuantity(item.quantity) : null;
@@ -1065,6 +1068,17 @@ function Row({
           {item?.precision ? <p className="-mt-1 text-[13px] leading-snug text-muted">{item.precision}</p> : null}
           {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}
           {error ? <ErrorNotice error={error} /> : null}
+          {stepper ? (
+            <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })} />
+          ) : null}
+          {/* Recette du 13 novembre 2026 (B9) : une ligne ajoutée SANS quantité la reçoit ici ; avant, rien ne permettait
+              de l'écrire et la demande partait chez le négoce sans quantité. */}
+          {!stepper && editable && !sentTo && item ? (
+            <QuantiteManquante label={label} unite={parsed?.unit ?? ""} pending={pending} onSave={(q, u) => onEdit(item, { libelle: item.label, quantite: q, unite: u || null })} />
+          ) : null}
+          {postes.length > 0 ? (
+            <CalculPropose label={label} postes={postes} raisons={raisons} brouillon={brouillon} onChange={(cle, v) => setBrouillon((b) => ({ ...b, [cle]: v }))} />
+          ) : null}
           {/* §51.6 (retour du fondateur, 2026-10-12) : une ligne orange se règle là où on l'ouvre : sa question d'abord. */}
           {row.status === "check" ? <CardActions label={label} decision={decision} item={item} pending={pending} handlers={handlers} onEdit={onEdit} /> : null}
           {vague && item ? <PrecisionActions label={label} questions={item.aPreciserPourGroupe ?? []} pending={pending} onAnswer={preciser} /> : null}
@@ -1087,17 +1101,6 @@ function Row({
                 {item.precision ? "Modifier la précision" : "Ajouter une précision"}
               </button>
             )
-          ) : null}
-          {stepper ? (
-            <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item!, { libelle: item!.label, quantite: String(n), unite: stepper.unit || null })} />
-          ) : null}
-          {/* Recette du 13 novembre 2026 (B9) : une ligne ajoutée SANS quantité la reçoit ici ; avant, rien ne permettait
-              de l'écrire et la demande partait chez le négoce sans quantité. */}
-          {!stepper && editable && !sentTo && item ? (
-            <QuantiteManquante label={label} unite={parsed?.unit ?? ""} pending={pending} onSave={(q, u) => onEdit(item, { libelle: item.label, quantite: q, unite: u || null })} />
-          ) : null}
-          {postes.length > 0 ? (
-            <CalculPropose label={label} postes={postes} raisons={raisons} brouillon={brouillon} onChange={(cle, v) => setBrouillon((b) => ({ ...b, [cle]: v }))} />
           ) : null}
           {sketches.length > 0 ? (
             <ul aria-label={`Croquis joints : ${label}`} className="flex flex-wrap gap-2">
@@ -1179,7 +1182,14 @@ const BULLE_CALCUL = "mobiiz.bulle-calcul";
 type Poste = NonNullable<PurchaseItem["postes"]>[number];
 
 /** Une valeur du calcul, lisible (« 5 925 », « 39,5 ») ; « ml » s'écrit « m » (§50.7). */
-const valeurDuPoste = (x: Poste) => `${nombreDuCalcul(x.valeur)} ${enMetres(x.unite)}`.trim();
+const valeurDuPoste = (x: Poste) => {
+  // Des pièces se comptent en entiers, sans « u » (« = 2 020 ») ; une longueur ou une surface garde son unité.
+  const piece = x.unite === "u" || x.unite === "pièce" || x.unite === "pièces";
+  const n = Number(x.valeur);
+  const v = piece && Number.isFinite(n) ? Math.round(n).toLocaleString("fr-FR") : nombreDuCalcul(x.valeur);
+  return piece ? `= ${v}` : `${v} ${uniteLisible(x.unite)}`.trim();
+};
+const uniteLisible = (u: string) => enMetres(u).replace(/^m2$/, "m²").replace(/^m3$/, "m³");
 
 /**
  * Le détail du calcul sous la ligne (Greg, 21 et 22 novembre 2026) : un poste par ligne, en mots simples (« Surface 96 m²
@@ -1249,7 +1259,7 @@ function CalculPropose({
                   onChange={(e) => onChange(x.cle!, e.target.value)}
                   className="min-h-11 w-28 rounded-xl border-2 border-line bg-surface px-3 text-[15px] font-bold text-ink tabular-nums outline-none focus:border-accent"
                 />
-                <span>{enMetres(x.mesure.unite)}</span>
+                <span>{uniteLisible(x.mesure.unite)}</span>
               </label>
             ) : null}
           </li>

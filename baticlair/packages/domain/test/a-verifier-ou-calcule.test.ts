@@ -34,3 +34,12 @@ describe("« À vérifier » seulement sur une vraie hypothèse", () => {
     expect(de(l, /^Dauphin/).etat).toBe("dit");
   });
 });
+
+describe("un produit par défaut dont le format est écrit sur la ligne", () => {
+  it("« Ardoises naturelles 32×22 » : le 32×22 n'est pas une valeur par défaut ; un autre format l'est, dit sans redite", () => {
+    const a = [{ key: "product:ardoise", label: "Ardoises", value: "Ardoises 32×22", unit: "" }];
+    const base = { kind: "computed" as const, state: "ok" as never, toConfirm: [], waitsOn: [], assumptionKeys: ["product:ardoise"], edited: [] };
+    expect(verificationDeLaLigne({ ...base, label: "Ardoises naturelles 32×22" } as never, a).etat).toBe("calcule");
+    expect(verificationDeLaLigne({ ...base, label: "Ardoises naturelles" } as never, a).raisons).toEqual(["Ardoises 32×22 : modèle par défaut"]);
+  });
+});

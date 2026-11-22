@@ -10,7 +10,7 @@ import { DEFAUTS_AFFICHES, type PurchaseItem } from "./purchase-view.js";
  */
 export type EtatDeLaLigne = "calcule" | "a_verifier" | "dit" | "modifie";
 
-export function verificationDeLaLigne(item: Pick<PurchaseItem, "kind" | "state" | "toConfirm" | "waitsOn" | "assumptionKeys" | "edited">, assumptions: readonly Assumption[]): { etat: EtatDeLaLigne; raisons: string[] } {
+export function verificationDeLaLigne(item: Pick<PurchaseItem, "kind" | "state" | "toConfirm" | "waitsOn" | "assumptionKeys" | "edited"> & Partial<Pick<PurchaseItem, "label">>, assumptions: readonly Assumption[]): { etat: EtatDeLaLigne; raisons: string[] } {
   if (item.edited?.includes("quantity")) return { etat: "modifie", raisons: [] };
   const raisons: string[] = [];
   for (const r of item.toConfirm ?? []) raisons.push(r.text);
@@ -22,6 +22,15 @@ export function verificationDeLaLigne(item: Pick<PurchaseItem, "kind" | "state" 
     if (!a || a.key.startsWith("derived:") || a.fromQuote || a.computed || a.shownOnly || a.sur || DEFAUTS_AFFICHES.has(a.key)) continue;
     // Déjà dite par sa règle « Valeur par défaut à confirmer : … » : une seule fois.
     if ((item.toConfirm ?? []).some((r) => r.key.startsWith(`defaut:${a.key}`))) continue;
+    // Un produit pris par défaut dont le format est écrit sur la ligne (« Ardoises naturelles 32×22 ») : le devis l'a dit.
+    if (a.key.startsWith("product:")) {
+      const formats = a.value.match(/\d+(?:[,.]\d+)?\s*[×x]\s*\d+(?:[,.]\d+)?/g) ?? [];
+      const nom = (item.label ?? "").replace(/\s/g, "").replace(/x/g, "×");
+      if (formats.length > 0 && formats.every((f) => nom.includes(f.replace(/\s/g, "").replace(/x/g, "×")))) continue;
+      const texte = `${a.value} : modèle par défaut`;
+      if (!raisons.includes(texte)) raisons.push(texte);
+      continue;
+    }
     const unite = !a.unit || a.unit === "u" || !/\d/.test(a.value) ? "" : a.unit === "°" ? "°" : ` ${a.unit.replace("m2", "m²")}`;
     const texte = `${a.label} ${a.value}${unite} : valeur par défaut`;
     if (!raisons.includes(texte)) raisons.push(texte);
