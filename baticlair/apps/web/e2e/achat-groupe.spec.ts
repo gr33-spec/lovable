@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { confirmerEmail } from "./confirmer-email";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { calculerEtVoirMaListe, repondreAuxQuestions } from "./discussion";
+import { calculerEtVoirMaListe, repondreAuxQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice } from "./confirmer-analyse";
 import { departementReserve } from "./departement";
 
@@ -97,6 +97,7 @@ async function capture(page: Page, projet: string, nom: string) {
 
 /** Un couvreur inscrit (écran de l'adresse Mobiiz passé), SIRET vérifié, adresse dans le département. */
 async function inscrire(page: Page, dep: string, prenom = "Jean"): Promise<{ entreprise: string; email: string }> {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   const entreprise = `Toitures ${unique()}`;
   const email = `artisan-${unique()}@example.fr`;
   await page.goto("/inscription");

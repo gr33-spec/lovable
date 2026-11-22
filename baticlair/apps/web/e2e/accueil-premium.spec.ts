@@ -95,7 +95,7 @@ test("nouveau compte : les zones dès l'inscription, l'accompagnement en trois �
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Greg", level: 1 })).toBeVisible();
   const a = page.getByRole("region", { name: "Nouveau quantitatif" });
-  await expect(a.getByRole("img")).toHaveAttribute("alt", /couvreur/i);
+  await expect(a.getByRole("img")).toHaveAttribute("alt", /artisan prépare sa liste/i);
   const bouton = a.getByRole("link", { name: "Nouveau quantitatif" });
   await expect(bouton).toHaveAttribute("href", "/chantiers/nouveau");
   // Visible sans défiler, sans occuper tout l'écran.
@@ -115,6 +115,18 @@ test("nouveau compte : les zones dès l'inscription, l'accompagnement en trois �
   await expect(guide.getByRole("link", { name: /^Faire mon premier quantitatif/ })).toHaveAttribute("href", "/chantiers/nouveau");
   await capture(page, "nouveau-compte");
   await rienSousLaBarre(page);
+  // Les photos sont celles de Greg (21 novembre 2026) : aucun crédit en bas de l'accueil.
+  await expect(page.getByRole("main").getByText(/^Photos :/)).toHaveCount(0);
+  // « Mets Mobiiz sur ton écran d'accueil » (Greg, 21 novembre 2026) : installée, l'appli ne le montre plus jamais.
+  if (test.info().project.name === "telephone") {
+    const encart = page.getByRole("region", { name: "Ajouter à l'écran d'accueil" });
+    await expect(encart).toBeVisible();
+    await page.evaluate(() => window.dispatchEvent(new Event("appinstalled")));
+    await expect(encart).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("region", { name: "Nouveau quantitatif" })).toBeVisible();
+    await expect(encart).toHaveCount(0);
+  }
   await guide.getByRole("button", { name: "Fermer l'accompagnement" }).click();
   await expect(guide).toHaveCount(0);
   await page.reload();

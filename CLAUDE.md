@@ -328,6 +328,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - La liste complète : `baticlair/docs/groupe/MISE-EN-PROD.md`, section 0.
 - La page `/couvreurs-bretagne` ne doit PAS partir en production (Greg, 19 novembre 2026) : non liée, « Page introuvable » quand `VERCEL_ENV=production`. Vérifier qu'elle répond 404 en production.
 - Anti-robot (Turnstile) à activer ; admin de test à retirer de `GROUPE_ADMINS`.
+- Conditions négoces du 21 novembre 2026 (repères de prix) : relues par l'avocat avant toute publication (version majeure, réacceptation des négoces).
 
 ## Décisions du 19 novembre 2026 : pages régionales, inscription par métier (en partie remplacées le même jour, voir plus bas)
 
@@ -368,8 +369,16 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 - RÈGLE CHANGÉE (Greg, 20 novembre 2026) : avant, un tableau de bord (« À faire maintenant », « Mes demandes en cours », « Messages et réponses », achats groupés, « Missions près de toi », « Activité récente ») → TROIS ZONES : « Nouveau quantitatif » (photo du métier, le bouton, devis / photo / dictée seulement s'ils marchent), « Mon activité » (un dossier une seule fois, deux cartes sur téléphone, « Voir tout » vers Demandes ; rien = pas de zone), « Achats groupés » (« Rejoins les couvreurs des Côtes-d'Armor », un groupé de son métier avec « Rejoindre », règle des 3, chrono sous 48 h jusqu'à « Clôturé », sinon « Sois le premier dans ton département »). Plus de bloc Missions ni de carte « Messages et réponses » sur l'accueil. « Bonjour » moins haut.
 - Nouveau compte : « Pour bien démarrer », trois étapes cochées d'après les vrais dossiers ; se ferme et ne revient pas (sur l'appareil).
-- Code : `components/accueil.tsx`, `packages/domain/src/accueil/mon-activite.ts` ; photos : `apps/web/public/accueil/`, `lib/photos-accueil.ts`, crédits `baticlair/docs/photos-accueil.md` (remplaçables par celles de Greg).
+- Code : `components/accueil.tsx`, `packages/domain/src/accueil/mon-activite.ts` ; photos : `apps/web/public/accueil/`, `lib/photos-accueil.ts`, `baticlair/docs/photos-accueil.md` (les photos de Greg depuis le 21 novembre 2026).
 - Prix : état des lieux et proposition dans `baticlair/docs/prix-etat-des-lieux-2026-11-20.md` (rien n'est touché dans la base).
+
+## Décisions du 21 novembre 2026 : accueil, prix, partage avec le banc d'essai
+
+- Partage du travail : la discussion du banc d'essai (`banc-quantitatif/DEFAUTS.md`, `A-TRANCHER.md`) corrige le calcul du moteur et branche la nouvelle lecture des devis. Cette discussion-ci ne touche plus ni au calcul du moteur ni aux questions du quantitatif : elle garde l'accueil, les prix et la recherche pour la fiche couverture.
+- Accueil : les deux photos sont celles de Greg, sans crédit (avant : Wikimedia Commons, crédit en bas de l'accueil). La photo des plans sert à tous les métiers. Anciennes photos gardées dans `baticlair/docs/photos-accueil-anciennes/`. Le chrono d'un groupé a sa propre ligne. L'encart « Mets Mobiiz sur ton écran d'accueil » ne revient plus une fois l'appli installée.
+- Prix (oui de Greg aux 4 changements). L'observatoire garde un statut, proposé ou commandé, et la région (migration additive `20261121090000_observatoire_statut_region`). Les offres des achats groupés et les commandes y sont versées. Rien n'est montré aux artisans pour l'instant. Ligne 23 du registre RGPD, corrigée par le juriste (données pseudonymisées). Phrase des conditions négoces : changement MAJEUR selon le juriste (réacceptation), seuil de trois négoces, jamais visible par un négoce ; NON PUBLIÉE, `baticlair/docs/groupe/conditions-negoces-candidate-2026-11-21.md`, à l'avocat. Conservation (accord de Greg le 22 novembre 2026) : empreinte de la source effacée 12 mois après la clôture, ligne supprimée à 3 ans, appliquées chaque nuit. Ligne 20 du registre : plus de « factures de commission ». La relecture des conditions négoces par l'avocat est dans `MISE-EN-PROD.md`, section 0.
+- Analyses offertes sur le site de test : 60 (avant : 50), pour finir les lectures de D-2026-024.
+- Parcours de test (22 novembre 2026) : la carte « Suggestions » s'ouvre maintenant dans des listes qui n'en avaient pas (pointes de liteaux) ; les parcours qui ne la regardent pas touchent « Continuer » sans rien cocher (`continuerQuandLesSuggestionsSOuvrent`, `e2e/discussion.ts`). Tests seulement, rien du moteur.
 
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 

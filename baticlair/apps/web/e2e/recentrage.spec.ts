@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
-import { continuerSansSuggestionParApi } from "./discussion";
+import { continuerSansSuggestionParApi, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 
 /**
  * RECENTRAGE (Greg, 25 octobre 2026) : la demande perso, « Mes prix », les regroupements, gratuit et payant. Les quinze
@@ -65,6 +65,7 @@ function zoneDuCas(cas: keyof typeof CAS, projet: string): string {
 const adresse = (zone: string, n = 3) => `${n} rue de la Gare, ${VILLES[zone] ?? "75011 Paris"}`;
 
 async function passeGuide(page: Page): Promise<void> {
+  await continuerQuandLesSuggestionsSOuvrent(page);
   await page.addLocatorHandler(page.getByRole("dialog", { name: "Guide" }), async () => {
     await page.getByRole("button", { name: "Passer le guide" }).click();
   });

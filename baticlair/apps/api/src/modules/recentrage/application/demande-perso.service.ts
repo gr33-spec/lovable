@@ -138,8 +138,8 @@ export class DemandePersoService {
     this.apresEnvoi = fn;
   }
   /** L'observatoire des prix : chaque réponse est notée sans identifiant ; la moyenne du secteur s'affiche en repère. */
-  private obs: Pick<ObservatoireService, "enregistrer" | "observe"> | null = null;
-  brancherObservatoire(o: Pick<ObservatoireService, "enregistrer" | "observe">): void {
+  private obs: Pick<ObservatoireService, "enregistrer" | "observe" | "commande"> | null = null;
+  brancherObservatoire(o: Pick<ObservatoireService, "enregistrer" | "observe" | "commande">): void {
     this.obs = o;
   }
 
@@ -435,6 +435,8 @@ export class DemandePersoService {
       this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { commandeLe: maintenant, suivi: "recue", livraisonSouhaitee: souhaitee } }),
       this.prisma.priceRequest.update({ where: { id: d.id }, data: { classifiedAt: maintenant, retainedSupplierIds: [r.supplier.id] } }),
     ]);
+    // L'observatoire (Greg, 21 novembre 2026) : les prix de cette réponse deviennent des prix commandés. Jamais bloquant.
+    await this.obs?.commande("perso", r.id).catch(() => undefined);
     return this.vue(tenant, requestId);
   }
 
