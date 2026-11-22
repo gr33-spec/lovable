@@ -144,12 +144,12 @@ export function SupplyList({
   // §52 (directive du fondateur, 2026-10-12 : « multi métiers ») : un devis à plusieurs lots donne une section par lot
   // (« Électricité », « Sanitaire »), chacune avec ses lignes, les oranges d'abord ; un devis d'un seul lot, une liste.
   const parLot = screen.groups.some((g) => g.key.startsWith("lot:"));
-  // Écran « Fournitures » (Greg, 22 novembre 2026) : les petites fournitures (consommables, divers) repliées en bas,
+  // Écran « Fournitures » (Greg, 22 novembre 2026) : les petites fournitures (les consommables) repliées en bas,
   // sous « Autres fournitures » ; jamais une ligne à vérifier, jamais en sélection (tout se coche).
   const kindOf = new Map(screen.groups.flatMap((g) => g.rows.map((r) => [r.key, g.kind] as const)));
   // Une ligne déjà partie à part reste en vue, avec son « Envoyé · négoce ».
   const autre = (r: ScreenRow) =>
-    r.status !== "check" && !(articleOf(r) && selection?.sent.has(articleOf(r)!)) && (kindOf.get(r.key) === "consommables" || kindOf.get(r.key) === "autres");
+    r.status !== "check" && !(articleOf(r) && selection?.sent.has(articleOf(r)!)) && kindOf.get(r.key) === "consommables";
   const replier = !parLot && !selecting && ordered.some(autre) && ordered.some((r) => !autre(r));
   const autres = replier ? ordered.filter(autre) : [];
   const sections = parLot
@@ -1065,7 +1065,6 @@ function Row({
           <span aria-hidden="true" className="mx-auto mb-1 h-1 w-10 shrink-0 rounded-full bg-line" />
           <h3 className="text-[13px] font-bold tracking-[0.04em] text-muted uppercase">{item && postes.length > 0 ? "Modifier la quantité" : "Modifier la ligne"}</h3>
           <p className="text-[17px] leading-snug font-extrabold">{label}</p>
-          {item?.precision ? <p className="-mt-1 text-[13px] leading-snug text-muted">{item.precision}</p> : null}
           {/* Retour du fondateur (2026-10-10) : « quand je clique sur un bouton, rien ne se passe ». Un geste refusé se dit ici. */}
           {error ? <ErrorNotice error={error} /> : null}
           {stepper ? (

@@ -24,7 +24,7 @@ Fichier `baticlair/apps/web/src/components/supply-list.tsx` :
    corrigeable), puis tout ce que la ligne ouverte avait déjà, et « Enregistrer ». Le voile flou est inchangé.
 4. **Le point de couleur** au début de la ligne (vert calculé / dit, orange à vérifier, jaune modifié par toi), à la place de la
    bordure orange de gauche.
-5. **« Autres fournitures »** : les groupes `consommables` et `autres` repliés en bas (`<details>`), jamais une ligne orange ni
+5. **« Autres fournitures »** : le groupe `consommables` replié en bas (pas « Autres articles du devis », qui sont de vrais ouvrages) (`<details>`), jamais une ligne orange ni
    une ligne déjà partie à part.
 6. **Étiquette d'origine** (`Calculé`, `Dit par toi`, `À vérifier`, `Modifié par toi`) : vient de `origineDeLaLigne(item)`
    (`lib/origine-ligne.ts`), qui lit `item.verification` (serveur). Plus de « à vérifier » en double sur une ligne calculée.

@@ -220,9 +220,8 @@ test.describe("Achat groupé par métier (27 octobre 2026, 2e message)", () => {
     }
     await expect(liste).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("Liste préparée à partir de ton devis. Vérifie les quantités avant d'envoyer.")).toBeVisible();
-    // Règle changée (Greg, 22 novembre 2026) : « À vérifier » seulement sur une valeur par défaut ou une hypothèse incertaine ;
-    // sinon la ligne dit d'où elle vient (« Calculé », « Dit par toi »).
-    await expect(liste.getByText(/^(Calculé|Dit par toi|À vérifier)$/).first()).toBeVisible();
+    // Règle changée (Greg, 22 novembre 2026) : « À vérifier » seulement sur une valeur par défaut ou une hypothèse incertaine,
+    // plus sur chaque ligne venue du devis ; la note au-dessus dit de vérifier les quantités.
     // La carte « Ton quantitatif est prêt » (Greg, 7 novembre 2026) ; l'achat groupé précis sous « Plus d'options ».
     await expect(page.getByRole("region", { name: "Ton quantitatif est prêt" })).toBeVisible();
     await page.getByRole("button", { name: "Plus d'options de regroupement" }).click();

@@ -1135,7 +1135,8 @@ test("§48.4 et règle numéro un : questions au bouton seulement, avant le calc
   const gouttiere = list.getByRole("listitem").filter({ hasText: /Gouttière zinc demi-ronde/ }).first();
   await gouttiere.getByRole("button", { name: /^Modifier : Gouttière zinc demi-ronde/ }).click();
   await gouttiere.getByRole("button", { name: /^Modifier le nom : / }).click();
-  await gouttiere.getByRole("textbox").fill("Gouttière zinc demi-ronde rouge");
+  // La feuille du crayon a aussi les cases du calcul (Greg, 22 novembre 2026) : la case du nom.
+  await gouttiere.getByRole("textbox", { name: /^Nom : / }).fill("Gouttière zinc demi-ronde rouge");
   await gouttiere.getByRole("button", { name: "OK" }).click();
   await expect(list.getByRole("button", { name: /^(Modifier|Fermer) : Gouttière zinc demi-ronde rouge/ })).toBeVisible();
   // §50.5 : la quantité reste celle du calcul, en unité commandable. Règle changée (Greg, 21 novembre 2026) : 30 mm par
