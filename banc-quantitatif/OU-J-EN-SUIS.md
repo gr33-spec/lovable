@@ -72,6 +72,25 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
+## LOT DE LA FLÈCHE (Greg, 22 novembre au soir) — EN COURS
+Consignes de Greg (à faire ENSEMBLE) :
+1. « À vérifier » seulement si la ligne repose sur une valeur par défaut ou une hypothèse incertaine, et la flèche dit
+   laquelle ; une ligne calculée avec des règles validées et les infos du devis : « Calculé ». (Aujourd'hui tout est « à
+   vérifier », même tasseaux et couvre-joints.) La branche de test n'avait pas encore la note de l'autre discussion le
+   22 novembre à 17 h : travaillé d'après le message de Greg.
+2. Écran « Fournitures » d'après la maquette de Greg (NON reçue par cette discussion : fait d'après sa description) : ligne
+   compacte (nom en gras, précision dessous, point de couleur, quantité, crayon) ; « Autres fournitures » repliées en bas ;
+   en bas « Aperçu » et « Demander les prix » ; le crayon ouvre une feuille du bas : « Modifier la quantité », nom, quantité
+   et unité, « Calcul proposé » (le détail de la flèche, chaque poste corrigeable), « Enregistrer ». Rien ne disparaît :
+   « Envoyer une partie », valider une ligne, la retirer, changer son nom, ajouter un article, « N lignes à vérifier », la
+   bulle de première utilisation, « modifié par toi ». Captures petit iPhone + ordinateur, clair + sombre, AVANT de pousser.
+3. Le détail (AJOUT 2) : postes en mots simples, chaque poste corrigeable, total recalculé, « modifié par toi », valeurs par
+   défaut signalées, lucarnes = réponse de l'artisan, ardoise et tuile plate d'abord puis toutes les lignes ; gouttière :
+   « 5 longueurs couvrent 19,88 m ». Jamais dans le PDF ni l'e-mail.
+Plan : (a) moteur : `postes` sur un besoin (fiche), calculés et vérifiés (somme = besoin), + la perte ; (b) état
+« calcule » / « a_verifier » par ligne avec ses raisons ; (c) API : postes et état dans la vue ; (d) écran ; (e) captures ;
+(f) chaîne complète ; (g) rapport à Greg, il valide seul ce qui part.
+
 ## EN LIGNE (vérifié par /version) : `b90a279e`, 22 novembre, 16 h 45 UTC
 - Contenu : fiche -74 (banc 96/99, ce qui était déjà en ligne avec 9ceac7d0) + `/version` site et API + tests. Les deux
   `/version` donnent b90a279e, environnement « test ». Méthode dans CLAUDE.md (Règles de travail).
