@@ -1,5 +1,21 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-76 — Réponses de Greg du 22 novembre (nuit) : liteaux, arêtier zinc, jouées, pointes (2026-11-22)
+
+Le banc du calcul reste à 98 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Liteaux | besoin × 1,10 × 1,05 (fiche -75) | besoin × 1,10 : « 10 % de chute au total, pas 10 % en plus des 5 % » | Greg, 22 novembre 2026 |
+| Exemple : 110 m² de fibres-ciment 40×24 | 848 ml | 808 ml | 110 × 6,67 × 1,10 |
+| Contre-liteaux | 5 % | inchangé : 5 % | Greg, 22 novembre 2026 (« d'accord, 5 % ») |
+| Ardoises : arêtier en bande zinc | 0,66 m² par mètre | 0,50 m² par mètre, comme la noue ; arêtier fermé en ardoises (« biaises », « fermé » écrits) : 0,66 | Greg, 22 novembre 2026 ; manuel du CAP couvreur |
+| Jouées de lucarne en ardoise | question « Tes m² comprennent déjà l'égout ? » | aucune question d'égout (le mot « jouée » sur la ligne) | Greg, 22 novembre 2026 |
+| « Pointes pour liteaux » (Suggestions) | sur toute couverture | seulement si des liteaux sont écrits | Greg, 22 novembre 2026 |
+
+- Cœur (générique) : une marge peut viser un seul emplacement (`slot` dans `wasteRules`) ; une donnée « propre à sa ligne » (`ownOnly`) n'est plus prêtée par les mots d'une autre ligne ; une suggestion peut exiger un article écrit (`suggested.onlyWith`).
+- Écran : la carte des suggestions et la discussion disent « J'ai ta liste » quand aucun devis n'a été lu (avant : « J'ai lu ton devis » toujours).
+
 ## roofing-2026.11.22-75 — Liteaux : 10 % de chute d'aboutage ; faîtière fibres-ciment demandée (Greg, 2026-11-22)
 
 Le banc du calcul passe de 96 à 98 lignes justes sur 99.

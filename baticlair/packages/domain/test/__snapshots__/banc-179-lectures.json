@@ -912,7 +912,7 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "2 190 ml",
+    "quantite": "2 086 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -1706,7 +1706,7 @@
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "2 190 ml",
+    "quantite": "2 086 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -2130,7 +2130,7 @@
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "2 190 ml",
+    "quantite": "2 086 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -3141,7 +3141,7 @@
   "lignes": [
    {
     "designation": "Liteaux 18×40",
-    "quantite": "4 380 ml",
+    "quantite": "4 171 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -3343,7 +3343,7 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "518 ml",
+    "quantite": "500 ml",
     "unite": "ml",
     "etat": "check",
     "raison": "Valeur par défaut à confirmer"

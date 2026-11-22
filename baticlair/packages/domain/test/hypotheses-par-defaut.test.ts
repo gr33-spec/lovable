@@ -109,7 +109,7 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(withRives, "tuiles-de-rive-droites")).toMatchObject({ status: "calculated", purchase: { order: { count: "33" } } });
   });
 
-  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
+  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 10 %, dites dans le calcul", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, { ...ARDOISE, params: { ...ARDOISE.params, pureau: { value: "10", unit: "cm", origin: "artisan" } } });
     // Pureau 100 mm sur 30×22 = recouvrement 100 mm : la table Cupa fait foi (44,8/m²) → 8 960 ardoises.
     expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")!.value).toBe("8 960");
@@ -118,8 +118,10 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     // Crochets = un par ardoise commandée, 9 408 (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 597).
     // Greg, 21 novembre 2026 : les crochets se commandent en boîtes de 500, le nombre de pièces reste écrit (9 408 → 19 boîtes).
     expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "19" } } });
-    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 2 100 → 2 310 ml (200 ÷ 0,10 × 1,10 × 1,05 ; la marge des liteaux reste 5 %).
-    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2310" } });
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 310 → 2 200 ml
+    // (200 ÷ 0,10 = 2 000 ml × 1,10 = 2 200).
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2200" } });
+    expect(need(r, "liteaux-ardoise").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "10", unit: "%" });
   });
 
   it("sans ces hypothèses, le moteur redemande : la règle produit tient aux données, pas à un contournement", () => {
@@ -127,7 +129,9 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     // Les longueurs des ouvrages au mètre (Greg, 21 novembre 2026) se lisent au devis, zéro quand il n'en parle pas : ce devis
     // n'en écrit aucun. Ce ne sont pas des hypothèses de calcul ; celle qui manque ici est le pureau.
     const aucun = { value: "0", unit: "m", origin: "devis" as const };
-    const r = computeWorkItem(bare, { ...ARDOISE, params: { ...ARDOISE.params, longueur_aretier: aucun, longueur_noue: aucun, longueur_faitage: aucun, longueur_gouttiere: aucun } });
+    // L'arêtier fermé ou en zinc (Greg, 22 novembre 2026) se lit aussi sur la ligne de l'arêtier : donnée du devis, pas une hypothèse.
+    const enZinc = { value: "0", unit: "u", origin: "devis" as const };
+    const r = computeWorkItem(bare, { ...ARDOISE, params: { ...ARDOISE.params, longueur_aretier: aucun, longueur_noue: aucun, longueur_faitage: aucun, longueur_gouttiere: aucun, aretier_ferme: enZinc } });
     expect(need(r, "ardoises").status).toBe("question");
     expect(r.nextQuestion?.key).toBe("param:pureau");
   });

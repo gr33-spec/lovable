@@ -41,15 +41,15 @@ describeLot({
 });
 
 describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous et ses antivents", () => {
-  it("100 m² de 40 × 24 : 2 846 ardoises (27,1/m² + 5 % ; Cedral et Cembrit, avant 27,8 : 2 919), 5 977 clous (× 2,1), 2 989 antivents (× 1,05), 771 ml de liteaux (6,67/m² × 1,10 d'aboutage + 5 %)", () => {
-    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 701 → 771 ml (100 × 6,67 × 1,10 × 1,05 = 770,4 → 771).
+  it("100 m² de 40 × 24 : 2 846 ardoises (27,1/m² + 5 % ; Cedral et Cembrit, avant 27,8 : 2 919), 5 977 clous (× 2,1), 2 989 antivents (× 1,05), 734 ml de liteaux (6,67/m² + 10 % de chute)", () => {
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 771 → 734 ml (100 × 6,67 × 1,10 = 733,7 → 734).
     const v = readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises fibres-ciment 40x24 bleu-noir", quantity: "100", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]))).toMatchObject({
       "Ardoises fibres-ciment bleu-noir 40×24": "2 846 pièces",
       "Clous inox d'ardoise": "5 977 pièces",
       "Crochets d'antivent": "2 989 pièces",
-      "Liteaux 18×40": "771 ml",
+      "Liteaux 18×40": "734 ml",
     });
   });
 
@@ -64,18 +64,19 @@ describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous
   });
 });
 
-describe("règles changées (Greg, 22 novembre 2026) : aboutage des liteaux, faîtière fibres-ciment", () => {
+describe("règles changées (Greg, 22 novembre 2026) : 10 % de chute sur les liteaux, faîtière fibres-ciment", () => {
   const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id);
-  it("110 m² de 40 × 24 : 110 × 6,67 × 1,10 × 1,05 = 847,4 → 848 ml de liteaux (avant 771) ; contre-liteaux inchangés", () => {
+  it("110 m² de 40 × 24 : 110 × 6,67 × 1,10 = 807,1 → 808 ml de liteaux (hier 848) ; contre-liteaux inchangés", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, {
       workItemId: "couverture-ardoises-fibres-ciment",
       params: { surface: { value: "110", unit: "m2", origin: "devis" }, teinte_fc: { value: "1", unit: "u", origin: "devis" } },
       products: { ardoise: { productId: "ardoise-fc-40x24", origin: "devis" } },
       mentioned: ["ardoise"],
     });
-    // Besoin avant marge : 110 × 6,67 × 1,10 = 807,07 ml ; + 5 % de la famille = 847,42 → 848 ml commandés.
-    expect(need(r, "liteaux-ardoise")).toMatchObject({ purchase: { order: { count: "848" } } });
-    expect(Number(need(r, "liteaux-ardoise")!.quantity!.value)).toBeCloseTo(847.42, 1);
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 848 → 808.
+    // Besoin : 110 × 6,67 = 733,7 ml ; + 10 % propres aux liteaux = 807,07 → 808 ml commandés.
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ purchase: { order: { count: "808" } } });
+    expect(Number(need(r, "liteaux-ardoise")!.quantity!.value)).toBeCloseTo(807.07, 1);
   });
 
   it("faîtage sur fibres-ciment : « Quelle faîtière ? » puis longueur ÷ longueur utile, arrondi au-dessus ; jamais de crochets de faîtière", () => {

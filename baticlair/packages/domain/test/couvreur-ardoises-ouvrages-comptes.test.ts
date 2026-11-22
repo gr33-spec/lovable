@@ -40,11 +40,11 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pente 45°, zone 3, rampant ≤ 5,5 m → recouvrement 89 mm (NF DTU 40.11, fiche couverture) → pureau (300 − 89) / 2 = 105,5 mm.
     // Table Cupa (§34) : 42,5/m² × 200 = 8 500 ardoises + 5 % = 8 925 ; crochets = un par ardoise commandée, 8 925 ;
-    // 200 / 0,1055 = 1 895,73 ml × 1,10 (aboutage) × 1,05 = 2 189,57 ml. (Avant, ancien tableau : recouvrement 95 mm, 9 271 ardoises.)
-    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 1 990,52 → 2 189,57 ml (200 ÷ 0,1055 × 1,10 × 1,05).
+    // 200 / 0,1055 = 1 895,73 ml + 10 % de chute = 2 085,31 ml. (Avant, ancien tableau : recouvrement 95 mm, 9 271 ardoises.)
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 189,57 → 2 085,31 ml (200 ÷ 0,1055 × 1,10).
     expect(ardoises.need).toEqual({ value: "8925", unit: "u" });
     expect(crochets.need).toEqual({ value: "8925", unit: "u" });
-    expect(liteaux.need).toEqual({ value: "2189.57", unit: "ml" });
+    expect(liteaux.need).toEqual({ value: "2085.31", unit: "ml" });
     expect(ardoises.assumptions.map((a) => `${a.key}=${a.value}`)).toEqual([
       // Greg, 21 novembre 2026 : les ouvrages au mètre se lisent au devis ; il n'en écrit aucun : zéro, jamais dit en hypothèse.
       "param:pente=45", "param:zone=III", "param:longueur_rampant=5,5", "param:situation=normale", "derived:recouvrement=89", "param:pureau=10,55", "param:diametre_crochet=standard",
@@ -61,11 +61,11 @@ describe("couverture en ardoises au crochet : chaque composant détaillé", () =
     const crochets = ouvrage("a1").needs.find((n) => n.slot === "crochet")!;
     const liteaux = ouvrage("a2").needs.find((n) => n.slot === "liteau")!;
     // Pureau 110 mm sur 30×22 = recouvrement posé 80 mm : ligne de la table Cupa (40,7/m²) → 8 140 + 5 % = 8 547 ;
-    // crochets = un par ardoise commandée, 8 547 (avant × 1,02) ; 200 / 0,11 = 1 818,18 ml × 1,10 (aboutage) × 1,05 = 2 100.
-    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 1 909,09 → 2 100 ml (200 ÷ 0,11 × 1,10 × 1,05).
+    // crochets = un par ardoise commandée, 8 547 (avant × 1,02) ; 200 / 0,11 = 1 818,18 ml + 10 % de chute = 2 000.
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 100 → 2 000 ml (200 ÷ 0,11 × 1,10).
     expect(ardoises.need).toEqual({ value: "8547", unit: "u" });
     expect(crochets.need).toEqual({ value: "8547", unit: "u" });
-    expect(liteaux.need).toEqual({ value: "2100", unit: "ml" });
+    expect(liteaux.need).toEqual({ value: "2000", unit: "ml" });
     expect(ardoises.assumptions.some((a) => a.key === "param:pureau" || a.key === "derived:recouvrement")).toBe(false);
     for (const n of [ardoises, crochets, liteaux]) expect(n).toMatchObject({ provisional: false });
   });

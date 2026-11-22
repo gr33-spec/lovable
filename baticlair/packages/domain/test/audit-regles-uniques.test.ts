@@ -30,6 +30,9 @@ const MEME_VALEUR_AUTRE_REGLE: Record<string, string> = {
   "650 mm": "Bobineau 650 (bandes) et bobine 650 du joint debout (bacs).",
   "3 u/m": "Pattes de bande zinc (§1, §3) et vis de rive du bac acier (§8).",
   "4 m": "Barre de gouttière zinc (§25.2) et profil PVC ou alu (§15).",
+  // Greg, 22 novembre 2026 : l'arêtier en bande zinc est « compté comme la noue » (0,50 m²/m), mais ce sont deux ouvrages :
+  // l'un peut changer sans l'autre (l'arêtier fermé en ardoises garde 0,66).
+  "0.5 m2/m": "Ardoise de l'arêtier en bande zinc et ardoise de la noue (0,50 m² par mètre, Greg, 22 novembre 2026) : deux ouvrages.",
 };
 /** Noms retirés par l'audit : une seule règle reste (le nom de droite). */
 const RETIRES: Record<string, string> = {

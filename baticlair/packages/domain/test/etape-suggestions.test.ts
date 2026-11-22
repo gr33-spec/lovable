@@ -19,7 +19,8 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
   it("à l'ouverture : naissances, talons, angles, puis les consommables (silicone, vis) ; jamais les crochets déjà écrits ; sans limite de nombre (skill du fondateur, 18/11/2026 ; avant : cinq au plus, les pattes n'étaient pas proposées) ; rien n'est ajouté", () => {
     const e = ecran();
     expect(e.suggestions.map((o) => o.label)).toEqual([
-      "Pointes pour liteaux", // skill du fondateur (« Pointes pour liteaux… : en Suggestion ») ; ratio : fixations.json
+      // « Pointes pour liteaux » : Greg, 22 novembre 2026 : seulement s'il y a des liteaux dans la liste (avant : sur toute
+      // couverture). D-2026-020 n'écrit aucune ligne de liteaux : pas de case.
       // Greg, 21 novembre 2026 (soir) : sur toute couverture écrite avec sa surface et sans sortie de toit au devis.
       "Sortie de ventilation (VMC, extraction d'air)",
       "Naissances de gouttière",
@@ -31,7 +32,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "Pattes de fixation",
     ]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/pointe", "couverture-ardoises-crochet/sortie_ventilation", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["couverture-ardoises-crochet/sortie_ventilation", "gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -72,11 +73,11 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     expect(angles?.quantity).toMatch(/^2\b/);
   });
 
-  it("un devis d'ardoises seules : les pointes de liteaux et la sortie de ventilation (Greg, 21 novembre 2026) ; un devis sans oubli probable n'a pas d'étape", () => {
+  it("un devis d'ardoises seules : la sortie de ventilation (Greg, 21 novembre 2026), pas les pointes de liteaux sans liteaux écrits (Greg, 22 novembre 2026) ; un devis sans oubli probable n'a pas d'étape", () => {
     const ardoisesSeules = { ...D2026_020_LECTURE, lignes: D2026_020_LECTURE.lignes.filter((l) => /ardoise/i.test(l.designation)), questions: [] };
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
+    // Greg, 22 novembre 2026 : seulement s'il y a des liteaux dans la liste (avant : sur toute couverture).
     expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([
-      { key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" },
       { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" },
     ]);
     const rien = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: { ...ardoisesSeules, lignes: [] }, answers: {}, preferences: {} });

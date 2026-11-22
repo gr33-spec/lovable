@@ -11,63 +11,63 @@ Document généré par le code (`packages/domain/test/tableau-ardoises.test.ts`)
 - Ardoises au m² : la valeur de la table des fabricants (Cupa) quand elle existe pour ce format et ce recouvrement ; sinon la formule 1 ÷ (pureau × (largeur + épaisseur du crochet)).
 - Ardoises à commander = surface × ardoises au m² + **5 % de chutes**.
 - Crochets = un par ardoise commandée.
-- Liteaux = un rang par pureau (surface ÷ pureau) + **10 % de chute d'aboutage** (Greg, 22 novembre 2026), puis + **5 %**.
+- Liteaux = un rang par pureau (surface ÷ pureau) + **10 % de chute au total**, aboutage compris (Greg, 22 novembre 2026).
 
 ## Le tableau (quantités pour 100 m² de toiture)
 
 | Format | Crochet | Recouvrement | Pureau | Ardoises au m² | D'où vient le chiffre | Ardoises pour 100 m² | Crochets pour 100 m² | Liteaux pour 100 m² |
 |---|---|---|---|---|---|---|---|---|
-| 40×25 | de 8 | 7,5 cm | 16,25 cm | 24,52 | formule | 2 575 | 2 575 | 711 ml |
-| 40×25 | de 9 | 8,5 cm | 15,75 cm | 25,3 | formule | 2 657 | 2 657 | 733 ml |
-| 40×25 | de 10 | 9,5 cm | 15,25 cm | 26,13 | formule | 2 744 | 2 744 | 757 ml |
-| 40×25 | de 11 | 10,5 cm | 14,75 cm | 27,01 | formule | 2 837 | 2 837 | 783 ml |
-| 40×25 | de 12 | 11,5 cm | 14,25 cm | 27,96 | formule | 2 936 | 2 936 | 811 ml |
-| 40×25 | de 13 | 12,5 cm | 13,75 cm | 28,98 | formule | 3 043 | 3 043 | 840 ml |
-| 40×22 | de 8 | 7,5 cm | 16,25 cm | 27,85 | formule | 2 924 | 2 924 | 711 ml |
-| 40×22 | de 9 | 8,5 cm | 15,75 cm | 28,73 | formule | 3 017 | 3 017 | 733 ml |
-| 40×22 | de 10 | 9,5 cm | 15,25 cm | 29,67 | formule | 3 116 | 3 116 | 757 ml |
-| 40×22 | de 11 | 10,5 cm | 14,75 cm | 30,68 | formule | 3 222 | 3 222 | 783 ml |
-| 40×22 | de 12 | 11,5 cm | 14,25 cm | 31,75 | formule | 3 335 | 3 335 | 811 ml |
-| 40×22 | de 13 | 12,5 cm | 13,75 cm | 32,91 | formule | 3 456 | 3 456 | 840 ml |
-| 35×25 | de 8 | 7,5 cm | 13,75 cm | 28,98 | formule | 3 043 | 3 043 | 840 ml |
-| 35×25 | de 9 | 8,5 cm | 13,25 cm | 30,07 | formule | 3 158 | 3 158 | 872 ml |
-| 35×25 | de 10 | 9,5 cm | 12,75 cm | 31,25 | formule | 3 281 | 3 281 | 906 ml |
-| 35×25 | de 11 | 10,5 cm | 12,25 cm | 32,52 | formule | 3 415 | 3 415 | 943 ml |
-| 35×25 | de 12 | 11,5 cm | 11,75 cm | 33,91 | formule | 3 561 | 3 561 | 983 ml |
-| 35×25 | de 13 | 12,5 cm | 11,25 cm | 35,41 | formule | 3 719 | 3 719 | 1 027 ml |
-| 35×22 | de 8 | 7,5 cm | 13,75 cm | 32,91 | formule | 3 456 | 3 456 | 840 ml |
-| 35×22 | de 9 | 8,5 cm | 13,25 cm | 34,15 | formule | 3 586 | 3 586 | 872 ml |
-| 35×22 | de 10 | 9,5 cm | 12,75 cm | 35,49 | formule | 3 727 | 3 727 | 906 ml |
-| 35×22 | de 11 | 10,5 cm | 12,25 cm | 36,94 | formule | 3 879 | 3 879 | 943 ml |
-| 35×22 | de 12 | 11,5 cm | 11,75 cm | 38,51 | formule | 4 044 | 4 044 | 983 ml |
-| 35×22 | de 13 | 12,5 cm | 11,25 cm | 40,22 | formule | 4 224 | 4 224 | 1 027 ml |
-| 33×23 | de 8 | 7,5 cm | 12,75 cm | 33,95 | formule | 3 566 | 3 566 | 906 ml |
-| 33×23 | de 9 | 8,5 cm | 12,25 cm | 35,34 | formule | 3 711 | 3 711 | 943 ml |
-| 33×23 | de 10 | 9,5 cm | 11,75 cm | 36,84 | formule | 3 869 | 3 869 | 983 ml |
-| 33×23 | de 11 | 10,5 cm | 11,25 cm | 38,48 | formule | 4 041 | 4 041 | 1 027 ml |
-| 33×23 | de 12 | 11,5 cm | 10,75 cm | 40,27 | formule | 4 229 | 4 229 | 1 074 ml |
-| 33×23 | de 13 | 12,5 cm | 10,25 cm | 42,23 | formule | 4 435 | 4 435 | 1 127 ml |
-| 32×22 | de 8 | 7,5 cm | 12,25 cm | 36,94 | formule | 3 879 | 3 879 | 943 ml |
-| 32×22 | de 9 | 8,5 cm | 11,75 cm | 38,51 | formule | 4 044 | 4 044 | 983 ml |
-| 32×22 | de 10 | 9,5 cm | 11,25 cm | 40,22 | formule | 4 224 | 4 224 | 1 027 ml |
-| 32×22 | de 11 | 10,5 cm | 10,75 cm | 42,09 | formule | 4 420 | 4 420 | 1 074 ml |
-| 32×22 | de 12 | 11,5 cm | 10,25 cm | 44,15 | formule | 4 636 | 4 636 | 1 127 ml |
-| 32×22 | de 13 | 12,5 cm | 9,75 cm | 46,41 | formule | 4 873 | 4 873 | 1 185 ml |
-| 30×22 | de 8 | 7,5 cm | 11,25 cm | 40,22 | formule | 4 224 | 4 224 | 1 027 ml |
-| 30×22 | de 9 | 8,5 cm | 10,75 cm | 42,09 | formule | 4 420 | 4 420 | 1 074 ml |
-| 30×22 | de 10 | 9,5 cm | 10,25 cm | 44,15 | formule | 4 636 | 4 636 | 1 127 ml |
-| 30×22 | de 11 | 10,5 cm | 9,75 cm | 46,41 | formule | 4 873 | 4 873 | 1 185 ml |
-| 30×22 | de 12 | 11,5 cm | 9,25 cm | 48,92 | formule | 5 137 | 5 137 | 1 249 ml |
-| 30×22 | de 13 | 12,5 cm | 8,75 cm | 51,71 | formule | 5 430 | 5 430 | 1 320 ml |
-| 30×20 | de 8 | 7,5 cm | 11,25 cm | 44,22 | formule | 4 644 | 4 644 | 1 027 ml |
-| 30×20 | de 9 | 8,5 cm | 10,75 cm | 46,28 | formule | 4 860 | 4 860 | 1 074 ml |
-| 30×20 | de 10 | 9,5 cm | 10,25 cm | 48,54 | formule | 5 097 | 5 097 | 1 127 ml |
-| 30×20 | de 11 | 10,5 cm | 9,75 cm | 51,03 | formule | 5 358 | 5 358 | 1 185 ml |
-| 30×20 | de 12 | 11,5 cm | 9,25 cm | 53,79 | formule | 5 648 | 5 648 | 1 249 ml |
-| 30×20 | de 13 | 12,5 cm | 8,75 cm | 56,86 | formule | 5 971 | 5 971 | 1 320 ml |
-| 30×18 | de 8 | 7,5 cm | 11,25 cm | 49,11 | formule | 5 157 | 5 157 | 1 027 ml |
-| 30×18 | de 9 | 8,5 cm | 10,75 cm | 51,39 | formule | 5 397 | 5 397 | 1 074 ml |
-| 30×18 | de 10 | 9,5 cm | 10,25 cm | 53,9 | formule | 5 660 | 5 660 | 1 127 ml |
-| 30×18 | de 11 | 10,5 cm | 9,75 cm | 56,67 | formule | 5 950 | 5 950 | 1 185 ml |
-| 30×18 | de 12 | 11,5 cm | 9,25 cm | 59,73 | formule | 6 272 | 6 272 | 1 249 ml |
-| 30×18 | de 13 | 12,5 cm | 8,75 cm | 63,14 | formule | 6 630 | 6 630 | 1 320 ml |
+| 40×25 | de 8 | 7,5 cm | 16,25 cm | 24,52 | formule | 2 575 | 2 575 | 677 ml |
+| 40×25 | de 9 | 8,5 cm | 15,75 cm | 25,3 | formule | 2 657 | 2 657 | 698 ml |
+| 40×25 | de 10 | 9,5 cm | 15,25 cm | 26,13 | formule | 2 744 | 2 744 | 721 ml |
+| 40×25 | de 11 | 10,5 cm | 14,75 cm | 27,01 | formule | 2 837 | 2 837 | 746 ml |
+| 40×25 | de 12 | 11,5 cm | 14,25 cm | 27,96 | formule | 2 936 | 2 936 | 772 ml |
+| 40×25 | de 13 | 12,5 cm | 13,75 cm | 28,98 | formule | 3 043 | 3 043 | 800 ml |
+| 40×22 | de 8 | 7,5 cm | 16,25 cm | 27,85 | formule | 2 924 | 2 924 | 677 ml |
+| 40×22 | de 9 | 8,5 cm | 15,75 cm | 28,73 | formule | 3 017 | 3 017 | 698 ml |
+| 40×22 | de 10 | 9,5 cm | 15,25 cm | 29,67 | formule | 3 116 | 3 116 | 721 ml |
+| 40×22 | de 11 | 10,5 cm | 14,75 cm | 30,68 | formule | 3 222 | 3 222 | 746 ml |
+| 40×22 | de 12 | 11,5 cm | 14,25 cm | 31,75 | formule | 3 335 | 3 335 | 772 ml |
+| 40×22 | de 13 | 12,5 cm | 13,75 cm | 32,91 | formule | 3 456 | 3 456 | 800 ml |
+| 35×25 | de 8 | 7,5 cm | 13,75 cm | 28,98 | formule | 3 043 | 3 043 | 800 ml |
+| 35×25 | de 9 | 8,5 cm | 13,25 cm | 30,07 | formule | 3 158 | 3 158 | 830 ml |
+| 35×25 | de 10 | 9,5 cm | 12,75 cm | 31,25 | formule | 3 281 | 3 281 | 863 ml |
+| 35×25 | de 11 | 10,5 cm | 12,25 cm | 32,52 | formule | 3 415 | 3 415 | 898 ml |
+| 35×25 | de 12 | 11,5 cm | 11,75 cm | 33,91 | formule | 3 561 | 3 561 | 936 ml |
+| 35×25 | de 13 | 12,5 cm | 11,25 cm | 35,41 | formule | 3 719 | 3 719 | 978 ml |
+| 35×22 | de 8 | 7,5 cm | 13,75 cm | 32,91 | formule | 3 456 | 3 456 | 800 ml |
+| 35×22 | de 9 | 8,5 cm | 13,25 cm | 34,15 | formule | 3 586 | 3 586 | 830 ml |
+| 35×22 | de 10 | 9,5 cm | 12,75 cm | 35,49 | formule | 3 727 | 3 727 | 863 ml |
+| 35×22 | de 11 | 10,5 cm | 12,25 cm | 36,94 | formule | 3 879 | 3 879 | 898 ml |
+| 35×22 | de 12 | 11,5 cm | 11,75 cm | 38,51 | formule | 4 044 | 4 044 | 936 ml |
+| 35×22 | de 13 | 12,5 cm | 11,25 cm | 40,22 | formule | 4 224 | 4 224 | 978 ml |
+| 33×23 | de 8 | 7,5 cm | 12,75 cm | 33,95 | formule | 3 566 | 3 566 | 863 ml |
+| 33×23 | de 9 | 8,5 cm | 12,25 cm | 35,34 | formule | 3 711 | 3 711 | 898 ml |
+| 33×23 | de 10 | 9,5 cm | 11,75 cm | 36,84 | formule | 3 869 | 3 869 | 936 ml |
+| 33×23 | de 11 | 10,5 cm | 11,25 cm | 38,48 | formule | 4 041 | 4 041 | 978 ml |
+| 33×23 | de 12 | 11,5 cm | 10,75 cm | 40,27 | formule | 4 229 | 4 229 | 1 023 ml |
+| 33×23 | de 13 | 12,5 cm | 10,25 cm | 42,23 | formule | 4 435 | 4 435 | 1 073 ml |
+| 32×22 | de 8 | 7,5 cm | 12,25 cm | 36,94 | formule | 3 879 | 3 879 | 898 ml |
+| 32×22 | de 9 | 8,5 cm | 11,75 cm | 38,51 | formule | 4 044 | 4 044 | 936 ml |
+| 32×22 | de 10 | 9,5 cm | 11,25 cm | 40,22 | formule | 4 224 | 4 224 | 978 ml |
+| 32×22 | de 11 | 10,5 cm | 10,75 cm | 42,09 | formule | 4 420 | 4 420 | 1 023 ml |
+| 32×22 | de 12 | 11,5 cm | 10,25 cm | 44,15 | formule | 4 636 | 4 636 | 1 073 ml |
+| 32×22 | de 13 | 12,5 cm | 9,75 cm | 46,41 | formule | 4 873 | 4 873 | 1 128 ml |
+| 30×22 | de 8 | 7,5 cm | 11,25 cm | 40,22 | formule | 4 224 | 4 224 | 978 ml |
+| 30×22 | de 9 | 8,5 cm | 10,75 cm | 42,09 | formule | 4 420 | 4 420 | 1 023 ml |
+| 30×22 | de 10 | 9,5 cm | 10,25 cm | 44,15 | formule | 4 636 | 4 636 | 1 073 ml |
+| 30×22 | de 11 | 10,5 cm | 9,75 cm | 46,41 | formule | 4 873 | 4 873 | 1 128 ml |
+| 30×22 | de 12 | 11,5 cm | 9,25 cm | 48,92 | formule | 5 137 | 5 137 | 1 189 ml |
+| 30×22 | de 13 | 12,5 cm | 8,75 cm | 51,71 | formule | 5 430 | 5 430 | 1 257 ml |
+| 30×20 | de 8 | 7,5 cm | 11,25 cm | 44,22 | formule | 4 644 | 4 644 | 978 ml |
+| 30×20 | de 9 | 8,5 cm | 10,75 cm | 46,28 | formule | 4 860 | 4 860 | 1 023 ml |
+| 30×20 | de 10 | 9,5 cm | 10,25 cm | 48,54 | formule | 5 097 | 5 097 | 1 073 ml |
+| 30×20 | de 11 | 10,5 cm | 9,75 cm | 51,03 | formule | 5 358 | 5 358 | 1 128 ml |
+| 30×20 | de 12 | 11,5 cm | 9,25 cm | 53,79 | formule | 5 648 | 5 648 | 1 189 ml |
+| 30×20 | de 13 | 12,5 cm | 8,75 cm | 56,86 | formule | 5 971 | 5 971 | 1 257 ml |
+| 30×18 | de 8 | 7,5 cm | 11,25 cm | 49,11 | formule | 5 157 | 5 157 | 978 ml |
+| 30×18 | de 9 | 8,5 cm | 10,75 cm | 51,39 | formule | 5 397 | 5 397 | 1 023 ml |
+| 30×18 | de 10 | 9,5 cm | 10,25 cm | 53,9 | formule | 5 660 | 5 660 | 1 073 ml |
+| 30×18 | de 11 | 10,5 cm | 9,75 cm | 56,67 | formule | 5 950 | 5 950 | 1 128 ml |
+| 30×18 | de 12 | 11,5 cm | 9,25 cm | 59,73 | formule | 6 272 | 6 272 | 1 189 ml |
+| 30×18 | de 13 | 12,5 cm | 8,75 cm | 63,14 | formule | 6 630 | 6 630 | 1 257 ml |
