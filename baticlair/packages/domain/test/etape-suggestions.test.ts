@@ -28,15 +28,16 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "Angles de gouttière (si tu ne les fabriques pas)",
       "Dauphins (pied de descente)", // skill du fondateur : dauphin en Suggestion (le devis n'en dit rien)
       "Cartouches de silicone zinc",
-      // Fixations :
+      // Fixations (A-INTEGRER §3, 22 novembre 2026 : les clous d'ardoise en case) :
+      "Clous d'ardoise (égout, rives, faîtage)",
       "Vis inox 4 × 40",
       "Pattes de fixation",
       // Ventilation (Greg, 21 novembre 2026, soir : sur toute couverture écrite avec sa surface et sans sortie de toit) :
       "Sortie de ventilation (VMC, extraction d'air)",
     ]);
-    expect(e.suggestions.map((o) => o.categorie)).toEqual(["Zinguerie", "Zinguerie", "Zinguerie", "Zinguerie", "Zinguerie", "Fixations", "Fixations", "Ventilation"]);
+    expect(e.suggestions.map((o) => o.categorie)).toEqual(["Zinguerie", "Zinguerie", "Zinguerie", "Zinguerie", "Zinguerie", "Fixations", "Fixations", "Fixations", "Ventilation"]);
     // Le silicone de deux pièces (la rive, le porte-solin) : une seule case, qui vaut pour les deux.
-    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "bandes-zinc/vis", "faitage-zinc/patte", "couverture-ardoises-crochet/sortie_ventilation"]);
+    expect(e.suggestions.map((o) => o.key)).toEqual(["gouttiere/naissance", "gouttiere/talon", "gouttiere/angle", "descente/dauphin", "bandes-zinc/mastic+bande-porte-solin/mastic", "couverture-ardoises-crochet/clou", "bandes-zinc/vis", "faitage-zinc/patte", "couverture-ardoises-crochet/sortie_ventilation"]);
     expect(SUGGESTIONS_TEXTE).toBe("Suggestions. Coche ce qu'il te faut, on l'ajoute à ta liste.");
     expect(noms(e).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // L'étape n'est pas une question de précision : elle ne s'y mêle pas ; et plus de question oui / non sur les consommables.
@@ -82,6 +83,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
     const e = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: ardoisesSeules, answers: {}, preferences: {} });
     // Greg, 22 novembre 2026 : seulement s'il y a des liteaux dans la liste (avant : sur toute couverture).
     expect(suggestionsDuPlan(ROOFING_REFERENTIAL, e.plan)).toEqual([
+      { key: "couverture-ardoises-crochet/clou", label: "Clous d'ardoise (égout, rives, faîtage)", categorie: "Fixations" },
       { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)", categorie: "Ventilation" },
     ]);
     const rien = ecranDeLecture({ ref: ROOFING_REFERENTIAL, lecture: { ...ardoisesSeules, lignes: [] }, answers: {}, preferences: {} });
@@ -100,6 +102,7 @@ describe("l'étape « Suggestions » : des cases à cocher tirées de la fiche, 
       "couverture-tuiles-emboitement/rive : Tuiles de rive",
       "couverture-tuiles-canal/rive : Bardelis (tuiles de rive)",
       "couverture-ardoises-crochet/pointe : Pointes pour liteaux",
+      "couverture-ardoises-crochet/clou : Clous d'ardoise (égout, rives, faîtage)",
       // Clous (skill du fondateur : « Clous (en Suggestion, jamais d'office) »).
       "couverture-ardoises-fibres-ciment/clou : Clous d'ardoise fibres-ciment",
       // Velux (skill du fondateur, 18/11/2026 ; BFX : tarif Velux France 2024) : un par fenêtre, à sa taille.

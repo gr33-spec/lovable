@@ -1534,7 +1534,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.22-79",
+  version: "roofing-2026.11.22-80",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2390,6 +2390,10 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("pointes-liteau-28x60", "batten_nail", "Pointes galva annelées 2,8 × 60 pour liteaux, boîte de 1 kg", "Pointes galva 2,8 × 60", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("335", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "2,8 × 60 : ≈ 335 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
     }),
+    // A-INTEGRER §3 : clous d'ardoise apparents en cuivre (ou inox), 3 × 30 : ≈ 418 au kg (Alsafix, ArcelorMittal), cartons de 1 kg.
+    generic("clou-ardoise-cuivre-3x30", "slate_nail", "Clous cuivre 3 × 30 pour ardoise, boîte de 1 kg", "Clous cuivre 3 × 30", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("418", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."), primary: true }],
+    }),
     generic("pointes-liteau-31x70", "batten_nail", "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg", "Pointes galva 3,1 × 70", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("230", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
     }),
@@ -2813,6 +2817,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         ...OUVRAGES_AU_METRE_ARDOISE,
         ARETIER_FERME_PARAM,
         TYPE_CROCHET_PARAM,
+        // Les rives (clous d'ardoise) : lues au devis ; demandées seulement si la case des clous est cochée.
+        { key: "longueur_rives", label: "Longueur des rives", unit: "m", kind: "site_data", question: "Longueur totale de tes rives (en mètres) ?", textLabels: ["rive", "rives"], ownOnly: true },
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -2845,6 +2851,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
         { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (NF DTU 40.11).", source: RECH_FIXATIONS, productId: "pointes-liteau-28x60" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
+        // A-INTEGRER §3 (Greg, 22 novembre 2026) : clous d'ardoise naturelle en Suggestion ; cochée, 2 clous par ardoise au
+        // doublis et au 1er rang d'égout, aux rives et au dernier rang sous le faîtage (NF DTU 40.11 P1-1 2020 §5.1.3).
+        { key: "clou", family: "slate_nail", label: "Clous d'ardoise", usual: { text: "Clous cuivre 3 × 30 (clous apparents : inox ou cuivre, NF DTU 40.11 2020).", source: RECH_FIXATIONS, productId: "clou-ardoise-cuivre-3x30" }, suggested: { label: "Clous d'ardoise (égout, rives, faîtage)" } },
       ],
       constants: {
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
@@ -2861,6 +2870,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         // (26 ardoises 32×22 : « seulement le surplus ») ; noue zinc 0,50 m² par mètre (deux tranchis biais).
         part_crochets_pointe: condition("0.2", "u", F, FOUNDER_DOC, "Pose à agrafe : 1 crochet à pointe sur 5 (manuel du CAP couvreur, ch. 21 ; une seule source chiffrée)."),
         sans_gouttiere: condition("0", "m", "definition", { status: "verified", verifiedAt: "2026-11-21", verifiedBy: "Mobiiz (définition)" }, "Aucune gouttière écrite au devis."),
+        clous_bord_ardoise: condition("2", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "2 clous par ardoise au doublis, au 1er rang d'égout, aux rives et au dernier rang du faîtage (NF DTU 40.11 P1-1 2020 §5.1.3, ministère de la Culture, CAPEB)."),
+        rangs_egout_cloues: condition("2", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Doublis et 1er rang d'égout cloués (NF DTU 40.11 P1-1 2020 §5.1.3)."),
         aretier_zinc_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Arêtier en bande zinc : 0,50 m² d'ardoise par mètre, comme la noue (Greg, 22 novembre 2026 ; deux tranchis biais, manuel du CAP couvreur)."),
         aretier_m2_par_ml: condition("0.66", "m2/m", F, FOUNDER_DOC, "Arêtier : 0,66 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
         noue_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Noue : 0,50 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
@@ -3009,6 +3020,26 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           core: false,
           precision: "une pointe par croisement avec un chevron, plus une par bout de liteau",
           exclusions: "Pointes de contre-liteaux et de voliges à part.",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
+          version: 1,
+        },
+        {
+          // A-INTEGRER §3 : égout 2 rangs (doublis + 1er rang) × ardoises au mètre × 2 ; faîtage 1 rang × 2 (au moins 2 clous
+          // au dernier rang, Greg, 22 novembre 2026 : avant, 1) ; rives (rampant ÷ pureau) × 2. Exemple : 32×22, 10 m
+          // d'égout : 2 × 45,5 × 2 = 182 clous.
+          id: "clous-ardoise",
+          slot: "clou",
+          formula: "regle.clous_bord_ardoise * (regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur + longueur_faitage / ardoise.largeur + longueur_rives / pureau)",
+          postes: [
+            { id: "egout", libelle: "Égout : 2 rangs × 2 clous", formule: "regle.clous_bord_ardoise * regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur" },
+            { id: "faitage", libelle: "Faîtage {longueur_faitage|ml} : dernier rang × 2 clous", formule: "regle.clous_bord_ardoise * longueur_faitage / ardoise.largeur", cle: "longueur_faitage" },
+            { id: "rives", libelle: "Rives {longueur_rives|ml} × 2 clous", formule: "regle.clous_bord_ardoise * longueur_rives / pureau", cle: "longueur_rives" },
+          ],
+          unit: "u",
+          core: false,
+          precision: "2 clous par ardoise : doublis et 1er rang d'égout, rives, dernier rang du faîtage",
+          exclusions: "Pose au crochet : la partie courante n'est pas clouée.",
           source: RECH_FIXATIONS,
           verification: FIXATIONS_VERIFIE,
           version: 1,

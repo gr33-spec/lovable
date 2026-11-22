@@ -16,6 +16,9 @@ const ARDOISE_SANS_REPONSE: WorkItemInput = {
   params: {
     surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 2" },
     qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" },
+    // Les clous d'ardoise (A-INTEGRER §3, 22 novembre 2026), calculés ici avec tous les articles : la longueur des rives
+    // est lue au devis (sinon elle se demande, case cochée).
+    longueur_rives: { value: "20", unit: "m", origin: "devis", evidence: "Devis, ligne 3" },
   },
   products: { ardoise: { productId: "ardoise-30x22", origin: "devis" } },
   mentioned: ["ardoise", "liteau"],

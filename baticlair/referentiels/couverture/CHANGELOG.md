@@ -1,5 +1,13 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-80 — Clous d'ardoise naturelle en Suggestion (A-INTEGRER §3, Greg, 2026-11-22)
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Clous d'ardoise naturelle | rien | case « Clous d'ardoise (égout, rives, faîtage) » (Fixations) ; cochée : 2 clous par ardoise au doublis et au 1er rang d'égout, aux rives et au dernier rang du faîtage ; longueurs du devis, la longueur des rives demandée seulement si elle manque | NF DTU 40.11 P1-1 2020 §5.1.3, ministère de la Culture, CAPEB (`recherche/fixations.json`) |
+| Clous au faîtage | 1 par ardoise (skill) | 2 au dernier rang (DTU) | Greg, 22 novembre 2026 |
+| Conditionnement | — | clous cuivre 3 × 30, boîtes de 1 kg (≈ 418 au kg) | Alsafix, ArcelorMittal |
+
 ## roofing-2026.11.22-79 — Calculateur de feuilles de zinc (Greg, 2026-11-22)
 
 Banc du calcul : 98 sur 99 (C11 : les trois lignes de feuilles deviennent une, juste ; C05 reste à trancher, voir A-TRANCHER).

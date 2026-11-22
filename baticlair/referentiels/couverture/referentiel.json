@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-79",
+  "version": "roofing-2026.11.22-80",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -5194,6 +5194,38 @@
       ]
     },
     {
+      "id": "clou-ardoise-cuivre-3x30",
+      "family": "slate_nail",
+      "label": "Clous cuivre 3 × 30 pour ardoise, boîte de 1 kg",
+      "shortLabel": "Clous cuivre 3 × 30",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "418",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "pointes-liteau-31x70",
       "family": "batten_nail",
       "label": "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg",
@@ -7946,6 +7978,18 @@
           }
         },
         {
+          "key": "longueur_rives",
+          "label": "Longueur des rives",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur totale de tes rives (en mètres) ?",
+          "textLabels": [
+            "rive",
+            "rives"
+          ],
+          "ownOnly": true
+        },
+        {
           "key": "longueur_rampant",
           "label": "Longueur du rampant",
           "unit": "m",
@@ -8074,6 +8118,19 @@
             "onlyWith": [
               "liteau"
             ]
+          }
+        },
+        {
+          "key": "clou",
+          "family": "slate_nail",
+          "label": "Clous d'ardoise",
+          "usual": {
+            "text": "Clous cuivre 3 × 30 (clous apparents : inox ou cuivre, NF DTU 40.11 2020).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "clou-ardoise-cuivre-3x30"
+          },
+          "suggested": {
+            "label": "Clous d'ardoise (égout, rives, faîtage)"
           }
         },
         {
@@ -8265,6 +8322,32 @@
           },
           "version": 1,
           "note": "Aucune gouttière écrite au devis."
+        },
+        "clous_bord_ardoise": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "2 clous par ardoise au doublis, au 1er rang d'égout, aux rives et au dernier rang du faîtage (NF DTU 40.11 P1-1 2020 §5.1.3, ministère de la Culture, CAPEB)."
+        },
+        "rangs_egout_cloues": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "Doublis et 1er rang d'égout cloués (NF DTU 40.11 P1-1 2020 §5.1.3)."
         },
         "aretier_zinc_m2_par_ml": {
           "kind": "installation_condition",
@@ -10068,6 +10151,41 @@
           "core": false,
           "precision": "une pointe par croisement avec un chevron, plus une par bout de liteau",
           "exclusions": "Pointes de contre-liteaux et de voliges à part.",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1
+        },
+        {
+          "id": "clous-ardoise",
+          "slot": "clou",
+          "formula": "regle.clous_bord_ardoise * (regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur + longueur_faitage / ardoise.largeur + longueur_rives / pureau)",
+          "postes": [
+            {
+              "id": "egout",
+              "libelle": "Égout : 2 rangs × 2 clous",
+              "formule": "regle.clous_bord_ardoise * regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur"
+            },
+            {
+              "id": "faitage",
+              "libelle": "Faîtage {longueur_faitage|ml} : dernier rang × 2 clous",
+              "formule": "regle.clous_bord_ardoise * longueur_faitage / ardoise.largeur",
+              "cle": "longueur_faitage"
+            },
+            {
+              "id": "rives",
+              "libelle": "Rives {longueur_rives|ml} × 2 clous",
+              "formule": "regle.clous_bord_ardoise * longueur_rives / pureau",
+              "cle": "longueur_rives"
+            }
+          ],
+          "unit": "u",
+          "core": false,
+          "precision": "2 clous par ardoise : doublis et 1er rang d'égout, rives, dernier rang du faîtage",
+          "exclusions": "Pose au crochet : la partie courante n'est pas clouée.",
           "source": "recherche-fixations-2026-11-20",
           "verification": {
             "status": "verified",
