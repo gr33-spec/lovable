@@ -1049,9 +1049,10 @@ function computeNeed(
           w.family === slot.family &&
           (w.product === undefined || w.product === product?.id) &&
           (w.workItem === undefined || w.workItem === work.id) &&
+          (w.slot === undefined || w.slot === slot.key) &&
           (w.verification.status === "verified" || options.acceptDraft),
       )
-      .sort((a, b) => Number(b.product !== undefined) * 2 + Number(b.workItem !== undefined) - (Number(a.product !== undefined) * 2 + Number(a.workItem !== undefined)))[0];
+      .sort((a, b) => Number(b.product !== undefined) * 4 + Number(b.slot !== undefined) * 2 + Number(b.workItem !== undefined) - (Number(a.product !== undefined) * 4 + Number(a.slot !== undefined) * 2 + Number(a.workItem !== undefined)))[0];
     let factor = new Decimal(1);
     if (companyRate !== undefined) {
       factor = new Decimal(companyRate).dividedBy(100).plus(1);

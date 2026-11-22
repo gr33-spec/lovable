@@ -394,7 +394,7 @@ export interface Slot {
    * `unlessWorks` : pas proposée quand le devis a déjà l'un de ces ouvrages (une sortie de toit écrite).
    * `onlyOnMeasuredWork` : seulement quand l'article principal de l'ouvrage est écrit avec sa surface (une couverture en m²).
    */
-  suggested?: { label: string; vaut?: Record<string, string>; unlessWorks?: string[]; onlyOnMeasuredWork?: true };
+  suggested?: { label: string; vaut?: Record<string, string>; unlessWorks?: string[]; onlyOnMeasuredWork?: true; /** Seulement quand l'un de ces emplacements de l'ouvrage est écrit (les pointes de liteaux : avec les liteaux). */ onlyWith?: string[] };
   /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
@@ -544,6 +544,8 @@ export interface WasteRule extends Provenance {
   family: string;
   product?: string;
   workItem?: string;
+  /** Un seul emplacement de l'ouvrage (les liteaux, pas les contre-liteaux, même s'ils sont de la même famille). */
+  slot?: string;
   /** En pourcentage (« 5 » = 5 %). */
   rate: string;
 }

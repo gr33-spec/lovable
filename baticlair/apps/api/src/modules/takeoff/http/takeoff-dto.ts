@@ -154,6 +154,11 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     // §52, la carte « Lots repérés » (directive du fondateur, 2026-10-13) : les lots que la lecture a repérés, ceux que
     // l'artisan a gardés ou ajoutés (null tant qu'il n'a pas dit « C'est bon »), et les métiers qu'il peut ajouter.
     lots: (takeoff.lecture?.lots ?? []).filter((l) => l.lignes.length > 0).map((l) => ({ metier: l.metier, libelle: l.libelle, lignes: l.lignes.length })),
+    /**
+     * Greg, 22 novembre 2026 : « J'ai lu ton devis » seulement s'il y a vraiment un devis. Vrai pour un devis lu ; faux pour
+     * une liste écrite à la main, dictée, envoyée en lignes, ou la photo d'une liste.
+     */
+    devisLu: takeoff.source === "pdf" && !takeoff.lines.some((l) => l.origin === "liste"),
     /** Étape « Suggestions » : les cases à proposer avant les questions (brouillon seulement) ; vide : pas d'étape. */
     suggestions: takeoff.status === "draft" ? (suggestions ?? []) : [],
     lotsConfirmes: typeof takeoff.answers[LOTS_KEY] === "string" ? (takeoff.answers[LOTS_KEY] as string).split(",").filter(Boolean) : null,

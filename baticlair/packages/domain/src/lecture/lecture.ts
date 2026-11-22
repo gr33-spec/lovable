@@ -717,6 +717,8 @@ export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: str
       if (!slot.suggested || input.mentioned.includes(slot.key) || out.some((o) => o.key === key || o.label === slot.suggested!.label)) continue;
       // Une réfection de toiture, pas un accessoire seul : la couverture elle-même est écrite, avec sa surface (« 36 m de
       // liteaux » dictés, ou des ardoises listées en pièces, ne proposent rien).
+      // Greg, 22 novembre 2026 : « Pointes pour liteaux : seulement s'il y a des liteaux dans la liste. »
+      if (slot.suggested.onlyWith && !slot.suggested.onlyWith.some((k) => input.mentioned.includes(k))) continue;
       const surfaceConnue = work.params.some((p) => p.fromLineQuantity && /^m ?(?:2|²)$/.test(p.unit) && input.params[p.key] !== undefined);
       if (slot.suggested.onlyOnMeasuredWork && !(input.mentioned.includes(work.slots[0]?.key ?? "") && surfaceConnue)) continue;
       // Le devis en parle déjà ailleurs (une sortie de toit écrite) : rien à proposer.

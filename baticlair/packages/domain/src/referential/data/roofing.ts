@@ -842,6 +842,9 @@ const OUVRAGES_AU_METRE_ARDOISE: ParamDef[] = [
     unit: "u",
     kind: "site_data",
     question: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?",
+    // Greg, 22 novembre 2026 : « Jouées de lucarne : pas de question d'égout, elles n'en ont pas. »
+    textValues: [{ value: "1", keywords: ["jouee", "jouees"] }],
+    ownOnly: true,
     choices: [
       { label: "Oui", value: "1" },
       { label: "Non", value: "2" },
@@ -858,8 +861,6 @@ const OUVRAGES_AU_METRE_ARDOISE: ParamDef[] = [
     askOnlyAfter: { param: "egout_compris", value: "2" },
   },
 ];
-/** Greg, 22 novembre 2026 : 10 % de chute d'aboutage sur les liteaux (en plus des 5 % de casse et de coupes). */
-const CHUTE_ABOUTAGE_LITEAUX = condition("0.10", "u", F, FOUNDER_DOC, "10 % de chute d'aboutage des liteaux (Greg, 22 novembre 2026 ; liteaux de 4 m sur chevrons à 60 cm).");
 /**
  * FAÎTIÈRE D'UN TOIT EN ARDOISES FIBRES-CIMENT (Greg, 22 novembre 2026 : « oui, pose Quelle faîtière ? avec des boutons
  * (demi-ronde, angulaire, d'aération) »). Le faîtage est sur fibres-ciment quand le devis a cette couverture (lu par le
@@ -894,6 +895,22 @@ const FAITIERE_FC_PARAM: ParamDef = {
     { value: "3", keywords: ["aeration", "d aeration", "ventilee", "ventilation"] },
   ],
   display: { "1": "demi-ronde", "2": "angulaire", "3": "d'aération" },
+};
+/**
+ * Arêtier d'un toit d'ardoises : fermé en ardoises biaises (Greg, 21 novembre : 26 ardoises au mètre, 0,66 m²) ou en bande
+ * zinc (Greg, 22 novembre : « compté comme la noue, 0,50 m² par mètre »). Lu sur la ligne de l'arêtier (« biaises »,
+ * « fermé ») ; sinon en zinc, la règle des toits d'ardoises (§3, §4). Jamais demandé.
+ */
+const ARETIER_FERME_PARAM: ParamDef = {
+  key: "aretier_ferme",
+  label: "Arêtier fermé en ardoises",
+  unit: "u",
+  kind: "site_data",
+  question: "L'arêtier est-il fermé en ardoises ?",
+  neverAsk: true,
+  silentDefault: true,
+  textValues: [{ value: "1", keywords: ["biaise", "biaises", "ferme", "aretier ferme"] }],
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "arêtier en bande zinc" },
 };
 const ARETIER_PARAM: ParamDef = {
   key: "aretier_matiere",
@@ -2405,14 +2422,13 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"], usual: USUAL_LITEAU_TUILE },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
-        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).", source: RECH_FIXATIONS, productId: "pointes-liteau-31x70" }, suggested: { label: "Pointes pour liteaux" } },
+        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).", source: RECH_FIXATIONS, productId: "pointes-liteau-31x70" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
         { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
         // Greg, 21 novembre 2026 : « Tuiles de rive : deux lignes, gauches et droites » (ce ne sont pas les mêmes pièces).
         { key: "rive_gauche", family: "verge_tile", label: "Tuiles de rive gauches", usual: { text: "Tuile de rive gauche du modèle de tuile posé.", source: F, productId: "tuile-rive-gauche-standard" }, formOf: "rive" },
         { key: "rive_droite", family: "verge_tile", label: "Tuiles de rive droites", usual: { text: "Tuile de rive droite du modèle de tuile posé.", source: F, productId: "tuile-rive-droite-standard" }, formOf: "rive" },
       ],
       constants: {
-        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
         liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
@@ -2433,9 +2449,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux",
           slot: "liteau",
-          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
-          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
-          formula: "(surface / pureau) * (1 + regle.chute_aboutage_liteaux)",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
+          formula: "surface / pureau",
           unit: "ml",
           precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
           core: true,
@@ -2544,7 +2559,6 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "rive_droite", family: "verge_tile", label: "Bardelis droits", usual: { text: "Bardelis droit du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-droit-standard" }, formOf: "rive" },
       ],
       constants: {
-        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         couvert_et_courant: condition("2", "u", "edilians-canal", FOUNDER_DOC, "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."),
         r150: condition("150", "mm", "edilians-canal", FOUNDER_DOC),
         r160: condition("160", "mm", "edilians-canal", FOUNDER_DOC),
@@ -2577,9 +2591,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux-canal",
           slot: "liteau",
-          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
-          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
-          formula: "(surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))) * (1 + regle.chute_aboutage_liteaux)",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
+          formula: "surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))",
           unit: "ml",
           core: false,
           exclusions: "Pose sur liteaux seulement (la tuile canal se pose aussi sur plaques support) ; hors liteau d'égout doublé.",
@@ -2701,6 +2714,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         DIAMETRE_CROCHET_PARAM,
         QUALITE_ARDOISE_PARAM,
         ...OUVRAGES_AU_METRE_ARDOISE,
+        ARETIER_FERME_PARAM,
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -2730,10 +2744,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
-        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (NF DTU 40.11).", source: RECH_FIXATIONS, productId: "pointes-liteau-28x60" }, suggested: { label: "Pointes pour liteaux" } },
+        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (NF DTU 40.11).", source: RECH_FIXATIONS, productId: "pointes-liteau-28x60" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
       ],
       constants: {
-        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
         liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
@@ -2747,6 +2760,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         // Greg, 21 novembre 2026 (soir), d'après le manuel du CAP couvreur : arêtier fermé 0,66 m² par mètre, les deux côtés
         // (26 ardoises 32×22 : « seulement le surplus ») ; noue zinc 0,50 m² par mètre (deux tranchis biais).
         sans_gouttiere: condition("0", "m", "definition", { status: "verified", verifiedAt: "2026-11-21", verifiedBy: "Mobiiz (définition)" }, "Aucune gouttière écrite au devis."),
+        aretier_zinc_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Arêtier en bande zinc : 0,50 m² d'ardoise par mètre, comme la noue (Greg, 22 novembre 2026 ; deux tranchis biais, manuel du CAP couvreur)."),
         aretier_m2_par_ml: condition("0.66", "m2/m", F, FOUNDER_DOC, "Arêtier : 0,66 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
         noue_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Noue : 0,50 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
         pas_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."),
@@ -2800,7 +2814,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           id: "ardoises",
           slot: "ardoise",
           // Table Cupa (§34) : elle fait foi ; la formule Cupa ne calcule que hors table.
-          formula: "(surface + regle.aretier_m2_par_ml * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
+          formula: "(surface + si(aretier_ferme > 0, regle.aretier_m2_par_ml, regle.aretier_zinc_m2_par_ml) * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
           unit: "u",
           core: true,
           exclusions: "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
@@ -2832,9 +2846,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux-ardoise",
           slot: "liteau",
-          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
-          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
-          formula: "(surface / pureau) * (1 + regle.chute_aboutage_liteaux)",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
+          formula: "surface / pureau",
           unit: "ml",
           precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
           core: true,
@@ -2904,7 +2917,6 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
       ],
       constants: {
-        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         ...ECRAN_CONSTANTS,
         clous_par_ardoise: condition("2.1", "u", F, FOUNDER_DOC, "« commander clous = 2,1 × ardoises » (§4)."),
         antivents_par_ardoise: condition("1.05", "u", F, FOUNDER_DOC, "« antivents = 1,05 × ardoises » (§4)."),
@@ -2928,9 +2940,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux-ardoise",
           slot: "liteau",
-          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
-          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
-          formula: "(surface * ardoise.liteaux_par_m2) * (1 + regle.chute_aboutage_liteaux)",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
+          formula: "surface * ardoise.liteaux_par_m2",
           unit: "ml",
           precision: "lattage {surface|m2}",
           core: true,
@@ -3202,6 +3213,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       params: [
         { key: "longueur_aretier", label: "Longueur d'arêtier", unit: "m", kind: "site_data", question: "Longueur d'arêtier ?", fromLineQuantity: true, textLabels: ["aretier", "aretiers"] },
         ARETIER_PARAM,
+        ARETIER_FERME_PARAM,
         NB_ARETIERS_PARAM,
         DEVELOPPE_ARETIER_PARAM,
         // Banc du calcul (C11, 21 novembre 2026) : un arêtier en bande zinc est une pièce pliée comme les autres ; la réponse
@@ -5001,7 +5013,10 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
     // Fiche couverture (2026-11-20) : la tuile canal a sa marge, jamais 0 % (casse à la pose 1 %, CTMNC ; coupes en plus).
     { family: "roof_tile_canal", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
     { family: "roof_tile_canal_part", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
-    { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
+    { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes des contre-liteaux (et des liteaux d'un ouvrage sans règle propre)." },
+    // Greg, 22 novembre 2026 : « Liteaux : 10 % de chute au total (pas 10 % en plus des 5 %) » : casse, coupes et aboutage
+    // (liteaux de 4 m sur chevrons à 60 cm). Avant : 5 %. Les contre-liteaux restent à 5 %.
+    { family: "batten", slot: "liteau", rate: "10", source: F, verification: FOUNDER_DOC, version: 1, note: "Liteaux : 10 % de chute au total, aboutage compris (Greg, 22 novembre 2026)." },
     { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes façonnées." },
     { family: "hip_strip", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Zinc en bande (faîtage, noue, rive) : 5 % » (§2), arêtier « ml × 1,05 » (§3)." },
     { family: "sheathing", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Support voligeage : m² rampant × 1,05 » (§7)." },

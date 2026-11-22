@@ -395,6 +395,8 @@ export interface Takeoff {
   /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */
   lots?: { metier: string; libelle: string; lignes: number }[];
   lotsConfirmes?: string[] | null;
+  /** Un devis a vraiment été lu (Greg, 22 novembre 2026 : sinon, jamais « J'ai lu ton devis »). */
+  devisLu?: boolean;
   /** Étape « Suggestions » : les cases à proposer avant les questions ; vide ou absent : pas d'étape. */
   suggestions?: { key: string; label: string }[];
   metiersAjoutables?: { metier: string; libelle: string }[];

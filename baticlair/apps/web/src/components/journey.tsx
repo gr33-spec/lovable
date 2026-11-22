@@ -567,7 +567,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   const [messages, setMessages] = useState<MessageQuestions[]>(() => {
     const habitudes = questions.filter((q) => q.kind === "habit" && q.usual !== null).map((q) => q.options.find((o) => o.value === q.usual)?.label).filter(Boolean);
     const aPoser = questions.length - habitudes.length;
-    const tete = aPoser > 1 ? "J'ai lu ton devis. Il me manque quelques réponses pour calculer ta liste." : aPoser === 1 ? "J'ai lu ton devis. Il me manque une réponse pour calculer ta liste." : "J'ai lu ton devis.";
+    // Greg, 22 novembre 2026 : « J'ai lu ton devis » seulement s'il y a vraiment un devis ; sinon, la liste de l'artisan.
+    const lu = takeoff.devisLu === false ? "J'ai ta liste." : "J'ai lu ton devis.";
+    const tete = aPoser > 1 ? `${lu} Il me manque quelques réponses pour calculer ta liste.` : aPoser === 1 ? `${lu} Il me manque une réponse pour calculer ta liste.` : lu;
     return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\nComme d'habitude : ${habitudes.join(", ")}.` : tete }];
   });
   const [reflexion, setReflexion] = useState(false);
@@ -1006,7 +1008,7 @@ function CasesSuggestions({ options, pending, error, onContinuer }: { options: r
  * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
  * serveur), sans limite de nombre (skill du fondateur) ; aucune proposition : pas d'étape.
  */
-export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+export function SuggestionsCard({ options, pending, error, onContinuer, devisLu = true }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; devisLu?: boolean; onContinuer: (valeur: string) => void }) {
   const router = useRouter();
   return (
     <div role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
@@ -1014,7 +1016,7 @@ export function SuggestionsCard({ options, pending, error, onContinuer }: { opti
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           <Bulle de="mobiiz" label="Message de MOBIIZ">
-            <TexteMobiiz>J&apos;ai lu ton devis. Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+            <TexteMobiiz>{devisLu ? "J'ai lu ton devis." : "J'ai ta liste."} Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
           </Bulle>
           <CasesSuggestions options={options} pending={pending} error={error} onContinuer={onContinuer} />
         </section>
@@ -1112,7 +1114,7 @@ export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }:
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
   }, [commencee, aSuggerer, onSubmit]);
   if (!commencee) {
-    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
+    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} devisLu={takeoff.devisLu !== false} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
     return error ? <ErrorNotice error={error} /> : <CalculScreen />;
   }
   return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;

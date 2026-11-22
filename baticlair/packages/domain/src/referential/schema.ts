@@ -93,7 +93,7 @@ const slot = z.object({
   charsFrom: z.string().optional(),
   formOf: z.string().optional(),
   indissociable: z.literal(true).optional(),
-  suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional(), unlessWorks: z.array(str).min(1).optional(), onlyOnMeasuredWork: z.literal(true).optional() }).strict().optional(),
+  suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional(), unlessWorks: z.array(str).min(1).optional(), onlyOnMeasuredWork: z.literal(true).optional(), onlyWith: z.array(str).min(1).optional() }).strict().optional(),
   piecesFrom: z.object({ count: str, length: str, piece: z.object({ one: str, many: str }).optional() }).optional(),
   citedBy: z.array(str).optional(),
 });
@@ -113,7 +113,7 @@ const workItem = z.object({
   points: z.record(str, points).optional(),
   needs: z.array(need).min(1),
 });
-const wasteRule = z.object({ ...provenance, family: str, product: z.string().optional(), workItem: z.string().optional(), rate: z.string().regex(/^\d+(\.\d+)?$/) });
+const wasteRule = z.object({ ...provenance, family: str, product: z.string().optional(), workItem: z.string().optional(), slot: z.string().optional(), rate: z.string().regex(/^\d+(\.\d+)?$/) });
 const countedWork = z.object({ key: str, label: z.object({ one: str, many: str }), keywords: z.array(str).min(1) });
 
 export const referentialSchema = z.object({
