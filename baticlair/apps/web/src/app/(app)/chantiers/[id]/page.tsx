@@ -1,5 +1,7 @@
 "use client";
 
+import { titreCourt } from "@/lib/titres";
+
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { MapPin, MoreHorizontal } from "lucide-react";
 import { Suspense, useCallback, useRef, useState } from "react";
@@ -186,11 +188,11 @@ function Header({
         {/* Le nom lu dans le devis ; un tap rouvre le devis (§50.4). Il se renomme par « Modifier le chantier ». */}
         <h1 className="flex min-w-0 grow text-[22px] leading-tight font-extrabold tracking-[-0.02em]">
           {quote ? (
-            <button type="button" onClick={() => void openDocument(quote.id, quote.name, quote.name)} aria-label={`Ouvrir le devis : ${project.name}`} className="min-h-11 min-w-0 truncate text-left">
-              {project.name}
+            <button type="button" onClick={() => void openDocument(quote.id, quote.name, quote.name)} aria-label={`Ouvrir le devis : ${project.name}`} className="line-clamp-2 min-h-11 min-w-0 text-left break-words">
+              {titreCourt(project.name, 48)}
             </button>
           ) : (
-            <span className="flex min-h-11 min-w-0 items-center truncate">{project.name}</span>
+            <span className="line-clamp-2 flex min-h-11 min-w-0 items-center break-words">{titreCourt(project.name, 48)}</span>
           )}
         </h1>
         <button

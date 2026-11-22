@@ -23,7 +23,7 @@ export function EcranTitre({ titre, retour }: { titre: string; retour: string })
       <button type="button" onClick={back} aria-label="Retour" className="pressable flex size-11 shrink-0 items-center justify-center rounded-full text-ink">
         <ChevronLeft size={26} aria-hidden="true" />
       </button>
-      <p className="truncate text-[17px] font-extrabold">{titre}</p>
+      <p className="line-clamp-2 min-w-0 text-[17px] font-extrabold break-words">{titre}</p>
     </div>
   );
 }
