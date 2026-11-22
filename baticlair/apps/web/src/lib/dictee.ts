@@ -84,8 +84,17 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void, opt
         let texte = "";
         let final = false;
         for (let i = continu ? 0 : e.resultIndex; i < e.results.length; i++) {
-          texte += e.results[i]![0]!.transcript;
+          const morceau = e.results[i]![0]!.transcript;
           final = e.results[i]!.isFinal;
+          if (!continu) {
+            texte += morceau;
+            continue;
+          }
+          // Chrome sur Android, en écoute continue, redonne parfois TOUT ce qui a été dit dans chaque résultat : un
+          // morceau qui reprend le début déjà entendu le remplace au lieu de s'ajouter (jamais une phrase en double).
+          const t = morceau.trim();
+          const deja = texte.trim();
+          texte = deja && t.toLowerCase().startsWith(deja.toLowerCase()) ? t : deja ? `${deja} ${t}` : t;
         }
         rappel.current(texte, final);
       };

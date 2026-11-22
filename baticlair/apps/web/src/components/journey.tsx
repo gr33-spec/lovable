@@ -582,6 +582,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   // le message part comme une bulle, qui se rouvre d'un toucher pour être corrigée. Le reste du parcours ne change pas.
   const voix = useRef("");
   const annulee = useRef(false);
+  const numeroMessage = useRef(0);
   const dictee = useDictee(
     useCallback((t: string) => {
       voix.current = t;
@@ -628,20 +629,6 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setMessages((liste) => [...liste.map((x) => (x.id === m.id ? { ...x, cles: [] } : x)), { de: "mobiiz", texte: "D'accord, corrige ta réponse et renvoie-la." }]);
     champ.setSaisie(m.texte);
   };
-  // À l'arrêt de la dictée (pas sur « Annuler ») : ce qui a été dit part comme un message.
-  const ecoutait = useRef(false);
-  useEffect(() => {
-    if (dictee.ecoute) {
-      ecoutait.current = true;
-      return;
-    }
-    if (!ecoutait.current) return;
-    ecoutait.current = false;
-    const dit = voix.current.trim();
-    voix.current = "";
-    if (!annulee.current && dit) void envoyer(dit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dictee.ecoute]);
   /** Toucher une de ses réponses la rouvre : la question revient dans le fil. */
   const reprendre = (cle: string) => {
     setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== cle)));
@@ -655,7 +642,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     if (dit === undefined) dictee.arreter();
     champ.setSaisie("");
     setAutre(false);
-    const id = `m${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+    const id = `m${(numeroMessage.current += 1)}`;
     setMessages((m) => [...m, { de: "moi", texte, id }]);
     const posees = restantes.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.simple.texte, options: q.simple.options, unite: q.unit, libre: q.options.length === 0 && !q.free ? (q.numeric || (q.unit && q.unit !== "u") ? ("number" as const) : ("written" as const)) : q.free, numerique: q.numeric }));
     // Greg, 17 novembre 2026 : « Je veux les 6 comprises ». Ce qui est DÉJÀ CONNU (l'habitude dite dans le fil : « Comme
@@ -717,6 +704,21 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
         : (premiere?.raison ?? "Je n'ai pas compris. Touche un bouton ou redis-le autrement.");
     setMessages((m) => [...m, { de: "mobiiz", texte: suite }]);
   };
+
+  // À l'arrêt de la dictée (pas sur « Annuler ») : ce qui a été dit part comme un message.
+  const ecoutait = useRef(false);
+  useEffect(() => {
+    if (dictee.ecoute) {
+      ecoutait.current = true;
+      return;
+    }
+    if (!ecoutait.current) return;
+    ecoutait.current = false;
+    const dit = voix.current.trim();
+    voix.current = "";
+    if (!annulee.current && dit) void envoyer(dit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dictee.ecoute]);
 
   const calculer = () => {
     // Ce qui est déjà parti au serveur ne repart pas.

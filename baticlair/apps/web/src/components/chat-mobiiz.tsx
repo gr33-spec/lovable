@@ -240,7 +240,7 @@ export function BarreSaisie({
   probleme: string | null;
   onDicter: () => void;
   onArreter: () => void;
-  /** Gardé pour les appelants : il n'y a plus de bouton « Annuler » pendant la dictée (le carré rouge arrête). */
+  /** « Annuler » de la dictée en bulle (quantitatif, 22 novembre 2026) ; ailleurs, pas d'« Annuler » (le carré rouge arrête). */
   onAnnulerDictee?: () => void;
   /** Ce qui se pose juste au-dessus de la barre (« Annuler la dernière modification »). */
   avant?: React.ReactNode;
