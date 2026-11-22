@@ -72,6 +72,29 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
+## RÉPONSES DE GREG DU 22 NOVEMBRE (nuit) — À APPLIQUER
+- « OUI, pousse ce lot sur le site de test » : le lot annoncé prêt = fiche -74 (commit ce07225d, chaîne verte). En cours :
+  dossier à part `/home/user/lot-pousse` (branche locale `lot-a-pousser`), ce07225d + fusion de la pointe de la branche de
+  test (300dd4ab) = f5277c18 ; chaîne complète relancée dessus (bases `baticlair_test_lot`, `baticlair_e2e_lot`). Si verte :
+  `git push origin lot-a-pousser:claude/saas-achat-artisans-prompt-1lyihx`, puis vérifier que site et API servent ce commit.
+  La fiche -75 n'en fait PAS partie (sa règle des liteaux est corrigée ci-dessous).
+- 2. Arêtier en bande zinc : 0,50 m² par mètre, comme la noue (avant : 0,66).
+- 3. Sortie de ventilation écrite sur tuile : tuile à douille + lanterne, validé.
+- 4. Liteaux : 10 % de chute AU TOTAL, pas 10 % en plus des 5 % (corriger la -75).
+- 5. Crochets : devis muet → « Agrafe ou pointe ? ». En pose à agrafe, ajouter quelques crochets à pointe (ceux qui tombent
+  sur les chevrons) : chercher le ratio, deux sources minimum, l'écrire dans la fiche. Boîtes de 500 (agrafe), 700 (pointe),
+  nombre de pièces sur la ligne.
+- 6. Gouttière zinc : on garde 3 cm de croisure par jonction (19,90 ou 20 m → 6 longueurs de 4 m). Sous la flèche : « 5
+  longueurs couvrent 19,88 m », pour repasser à 5 d'un toucher.
+- 7. Fibres-ciment : « Quelle faîtière ? » validé (déjà fait en -75).
+- 8. Jouées de lucarne : pas de question d'égout.
+- Abergement zinc : le calculateur de feuilles (développé + pièces de 1 ou 2 m).
+- À CORRIGER : Suggestions sans limite à 5, rangées PAR CATÉGORIE (ex. Couverture, Zinguerie, Fixations, Ventilation), petit
+  titre et nombre de cases, les plus importantes en haut, une vingtaine au plus, chaque catégorie repliable.
+- À CORRIGER : « Pointes pour liteaux » seulement s'il y a des liteaux dans la liste.
+- À CORRIGER : « J'ai lu ton devis » seulement s'il y a vraiment un devis ; sinon une phrase adaptée.
+- ENSUITE : le lot de la flèche (détail du calcul), puis l'étape 3 (nouvelle lecture des devis). Rapport court après chaque lot.
+
 ## DERNIER ÉTAT (22 novembre, soir) : fiche `roofing-2026.11.22-75`
 - **Banc : 98 sur 99 (99 %)** : entraînement 63/64, examen 35/35. Reste faux : feuilles de zinc de l'abergement (C05, 3
   contre 4) ; crochets à pointe de C11 hors compte (« incertain »).
