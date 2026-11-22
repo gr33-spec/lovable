@@ -7,7 +7,7 @@ import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } f
 import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
 import { Check, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -518,7 +518,7 @@ function cardErrors(error: ApiError | null, sent: readonly string[]): Map<string
   return out;
 }
 
-type MessageQuestions = { de: "mobiiz" | "moi"; texte: string; cle?: string };
+type MessageQuestions = { de: "mobiiz" | "moi"; texte: string; cle?: string; /** Un message libre (écrit ou dicté) : son repère et les questions qu'il a réglées, pour le rouvrir d'un toucher. */ id?: string; cles?: string[] };
 
 /** Les morceaux d'une réponse écrite (même découpe que le moteur) : pour savoir s'il reste du texte que le code n'a pas rangé. */
 const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m) => m.trim()).filter(Boolean).length;
@@ -577,7 +577,17 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   const [listeOuverte, setListeOuverte] = useState(false);
   const articles = takeoff.purchase.toBuy;
   const champ = useChampDicte();
-  const dictee = useDictee(champ.surVoix);
+  // LA DICTÉE EN BULLE (Greg, 22 novembre 2026). RÈGLE CHANGÉE : avant, le texte dicté s'écrivait dans la case et
+  // attendait « Envoyer » → pendant la dictée, aucun texte (une onde, un chrono, « Arrêter », « Annuler ») ; à l'arrêt,
+  // le message part comme une bulle, qui se rouvre d'un toucher pour être corrigée. Le reste du parcours ne change pas.
+  const voix = useRef("");
+  const annulee = useRef(false);
+  const dictee = useDictee(
+    useCallback((t: string) => {
+      voix.current = t;
+    }, []),
+    { continu: true },
+  );
   const restantes = ordonnees.filter((q) => !given[q.key] && !retired.has(q.key));
   const courante = restantes[0] ?? null;
   // Catalogue métier (Greg, 31 octobre 2026) : sur une question de modèle, ce qui se tape propose ses références.
@@ -610,6 +620,28 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setRetired((prev) => new Set(prev).add(q.key));
     setMessages((m) => [...m, { de: "moi", texte: "Je ne sais pas", cle: q.key }, { de: "mobiiz", texte: "Pas de souci : la ligne restera à vérifier dans ta liste." }]);
   };
+  /** Toucher un message libre (écrit ou dicté) : ses questions se rouvrent et son texte revient dans la case, à corriger. */
+  const corriger = (m: MessageQuestions) => {
+    const cles = new Set(m.cles ?? []);
+    setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => !cles.has(k))));
+    setRetired((prev) => new Set([...prev].filter((k) => !cles.has(k))));
+    setMessages((liste) => [...liste.map((x) => (x.id === m.id ? { ...x, cles: [] } : x)), { de: "mobiiz", texte: "D'accord, corrige ta réponse et renvoie-la." }]);
+    champ.setSaisie(m.texte);
+  };
+  // À l'arrêt de la dictée (pas sur « Annuler ») : ce qui a été dit part comme un message.
+  const ecoutait = useRef(false);
+  useEffect(() => {
+    if (dictee.ecoute) {
+      ecoutait.current = true;
+      return;
+    }
+    if (!ecoutait.current) return;
+    ecoutait.current = false;
+    const dit = voix.current.trim();
+    voix.current = "";
+    if (!annulee.current && dit) void envoyer(dit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dictee.ecoute]);
   /** Toucher une de ses réponses la rouvre : la question revient dans le fil. */
   const reprendre = (cle: string) => {
     setGiven((prev) => Object.fromEntries(Object.entries(prev).filter(([k]) => k !== cle)));
@@ -617,13 +649,14 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setMessages((m) => [...m, { de: "mobiiz", texte: "D'accord, on reprend cette question." }]);
   };
 
-  const envoyer = async () => {
-    const texte = champ.saisie.trim();
+  const envoyer = async (dit?: string) => {
+    const texte = (dit ?? champ.saisie).trim();
     if (!texte || reflexion || pending || restantes.length === 0) return;
-    dictee.arreter();
+    if (dit === undefined) dictee.arreter();
     champ.setSaisie("");
     setAutre(false);
-    setMessages((m) => [...m, { de: "moi", texte }]);
+    const id = `m${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+    setMessages((m) => [...m, { de: "moi", texte, id }]);
     const posees = restantes.map((q, i) => ({ numero: i + 1, cle: q.key, texte: q.simple.texte, options: q.simple.options, unite: q.unit, libre: q.options.length === 0 && !q.free ? (q.numeric || (q.unit && q.unit !== "u") ? ("number" as const) : ("written" as const)) : q.free, numerique: q.numeric }));
     // Greg, 17 novembre 2026 : « Je veux les 6 comprises ». Ce qui est DÉJÀ CONNU (l'habitude dite dans le fil : « Comme
     // d'habitude : 0,65 mm ») et ce que ce devis ne demande pas (la pose des crochets) : jamais posé, mais confirmé, ou
@@ -670,6 +703,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     if (dites.length) setMemoire((m) => [...m.filter((q) => !dites.some((d) => d.key === q.key)), ...dites]);
     if (Object.keys(prises).length) setGiven((prev) => ({ ...prev, ...prises }));
     if (laissees.length) setRetired((prev) => new Set([...prev, ...laissees]));
+    // Le message garde les questions qu'il a réglées : le toucher les rouvre, avec son texte à corriger.
+    const reglees = [...Object.keys(prises), ...laissees];
+    if (reglees.length) setMessages((m) => m.map((x) => (x.id === id ? { ...x, cles: reglees } : x)));
     // UNE ligne : ce qui est compris ; sinon, pourquoi la question posée revient. Jamais la liste de tout.
     // Dans l'ordre où l'artisan les a dites, autant que possible : les questions posées, puis ce qu'il a ajouté.
     const notee = phraseNotee(Object.values(prises).map((g) => g.label));
@@ -770,6 +806,10 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
               <Bulle key={i} de="mobiiz" label="Message de MOBIIZ">
                 <TexteMobiiz>{m.texte}</TexteMobiiz>
               </Bulle>
+            ) : m.cles?.length && m.cles.some((k) => given[k] || retired.has(k)) && !pending ? (
+              <button key={i} type="button" onClick={() => corriger(m)} aria-label={`Corriger mon message : ${m.texte}`} className="pressable max-w-[82%] self-end rounded-[22px] rounded-br-md px-4 py-2.5 text-left text-[16px] leading-snug whitespace-pre-line text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+                {m.texte}
+              </button>
             ) : m.cle && (given[m.cle] || retired.has(m.cle)) && !pending && messages.findLastIndex((x) => x.cle === m.cle) === i ? (
               <button key={i} type="button" onClick={() => reprendre(m.cle!)} aria-label={`Modifier ma réponse : ${m.texte}`} className="pressable max-w-[82%] self-end rounded-[22px] rounded-br-md px-4 py-2.5 text-left text-[16px] leading-snug whitespace-pre-line text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
                 {m.texte}
@@ -857,14 +897,16 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
                 />
               ) : null
             }
+            dicteeEnBulle
             onDicter={() => {
-              champ.avantDictee();
+              voix.current = "";
+              annulee.current = false;
               dictee.demarrer();
             }}
             onArreter={dictee.arreter}
             onAnnulerDictee={() => {
+              annulee.current = true;
               dictee.annuler();
-              champ.rendre();
             }}
           />
         </div>
