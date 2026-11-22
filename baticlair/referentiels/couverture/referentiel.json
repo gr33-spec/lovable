@@ -6411,7 +6411,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -6764,7 +6765,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -7541,7 +7543,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -9687,7 +9690,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -16157,7 +16161,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -16802,7 +16807,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],
@@ -17916,7 +17922,8 @@
             "label": "Sortie de ventilation (VMC, extraction d'air)",
             "unlessWorks": [
               "sortie-de-toit"
-            ]
+            ],
+            "onlyOnMeasuredWork": true
           }
         }
       ],

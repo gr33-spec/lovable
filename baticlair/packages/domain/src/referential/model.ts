@@ -388,7 +388,7 @@ export interface Slot {
    * l'ouvrage est écrit et que celui-ci ne l'est pas, il est PROPOSÉ une fois, dans une carte à cases, avec ces mots ;
    * coché, il vaut un article écrit (ses questions se posent alors) ; non coché, il n'existe pas. Jamais ajouté d'office.
    */
-  suggested?: { label: string; /** Pas proposé quand le devis a déjà l'un de ces ouvrages (une sortie de toit écrite). */ unlessWorks?: string[] };
+  suggested?: { label: string; /** Pas proposé quand le devis a déjà l'un de ces ouvrages (une sortie de toit écrite). */ unlessWorks?: string[]; /** Seulement quand l'article principal de l'ouvrage est écrit avec sa mesure (une couverture en m²), pas pour un accessoire seul ni pour des pièces listées à la main. */ onlyOnMeasuredWork?: true };
   /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.

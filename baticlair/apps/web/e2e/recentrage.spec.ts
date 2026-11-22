@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { continuerSansSuggestionParApi } from "./discussion";
 
 /**
  * RECENTRAGE (Greg, 25 octobre 2026) : la demande perso, « Mes prix », les regroupements, gratuit et payant. Les quinze
@@ -109,8 +110,11 @@ async function couvreur(page: Page, zone: string, lignes: { libelle: string; qua
   await expect(page.getByRole("heading", { name: /^Bonjour Jean/ }).or(page.getByRole("dialog", { name: "Guide" })).first()).toBeVisible();
   expect((await apiJson(page, "PATCH", "/v1/company/profile", { name: entreprise, address: adresse(zone), siret: "73282932000074", phone: null, email: null })).status).toBe(200);
   expect((await apiJson(page, "POST", "/v1/groupe/siret")).status).toBe(200);
-  const q = await apiJson<{ projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
+  const q = await apiJson<{ id: string; projetId: string }>(page, "POST", "/v1/quantitatifs", { lignes });
   expect(q.status).toBe(201);
+  // Règle changée (Greg, 21 novembre 2026) : une couverture sans sortie de toit écrite propose la case « Sortie de ventilation
+  // (VMC, extraction d'air) » ; rien de coché, la liste reste telle qu'écrite (avant : aucune étape « Suggestions » ici).
+  await continuerSansSuggestionParApi(page, q.body.id);
   expect((await apiJson(page, "PATCH", `/v1/projects/${q.body.projetId}`, { address: adresse(zone, 8) })).status).toBe(200);
   return { email, projectId: q.body.projetId };
 }

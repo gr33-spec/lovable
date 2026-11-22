@@ -63,6 +63,16 @@ describe("suggestion « Sortie de ventilation »", () => {
     expect(ligne(e, /ventilation/i)).toMatchObject({ label: "Sortie de ventilation pour ardoise", quantity: "1 pièce" });
   });
 
+  it("pas proposée pour un accessoire seul : « 36 m de liteaux » dictés ne sont pas une réfection de toiture", () => {
+    const seuls = {
+      ...lecture("C12"),
+      lignes: [{ ref: "1", designation: "Liteaux", quantite: "36", unite: "m", role: "fourniture", fournitures: [{ nom: "Liteaux", quantite: "36", unite: "m", ouvrage: "couverture-tuiles-emboitement", emplacement: "liteau", donnees: {}, attend: [], aPreciser: [], precision: null }] }],
+      questions: [],
+    } as ReturnType<typeof lecture>;
+    const e = ecranDeLecture({ ref, lecture: seuls, answers: {}, preferences: {} });
+    expect(e.suggestions.map((x) => x.label)).not.toContain("Sortie de ventilation (VMC, extraction d'air)");
+  });
+
   it("pas proposée quand le devis écrit déjà une sortie de toit (C12) ; sur tuile, la sortie écrite est une tuile à douille et sa lanterne", () => {
     const e = ecran("C12");
     expect(e.suggestions.map((s) => s.label)).not.toContain("Sortie de ventilation (VMC, extraction d'air)");

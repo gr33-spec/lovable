@@ -1370,7 +1370,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
       ...w,
       slots: [
         ...w.slots,
-        { key: "sortie_ventilation", family: "outlet_vent", label: "Sortie de ventilation", usual: { text: "Une sortie de ventilation adaptée à la couverture.", source: F, productId }, suggested: { label: SORTIE_VENTILATION_LABEL, unlessWorks: ["sortie-de-toit"] } },
+        { key: "sortie_ventilation", family: "outlet_vent", label: "Sortie de ventilation", usual: { text: "Une sortie de ventilation adaptée à la couverture.", source: F, productId }, suggested: { label: SORTIE_VENTILATION_LABEL, unlessWorks: ["sortie-de-toit"], onlyOnMeasuredWork: true } },
       ],
       needs: [
         ...w.needs,
