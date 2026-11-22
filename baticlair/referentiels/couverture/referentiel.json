@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-74",
+  "version": "roofing-2026.11.22-75",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -6747,6 +6747,20 @@
         }
       ],
       "constants": {
+        "chute_aboutage_liteaux": {
+          "kind": "installation_condition",
+          "value": "0.10",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "10 % de chute d'aboutage des liteaux (Greg, 22 novembre 2026 ; liteaux de 4 m sur chevrons à 60 cm)."
+        },
         "liteau_vendu": {
           "kind": "installation_condition",
           "value": "4",
@@ -6835,7 +6849,7 @@
         {
           "id": "liteaux",
           "slot": "liteau",
-          "formula": "surface / pureau",
+          "formula": "(surface / pureau) * (1 + regle.chute_aboutage_liteaux)",
           "unit": "ml",
           "precision": "lattage {surface|m2}, une file tous les {pureau|cm}",
           "core": true,
@@ -7133,6 +7147,20 @@
         }
       ],
       "constants": {
+        "chute_aboutage_liteaux": {
+          "kind": "installation_condition",
+          "value": "0.10",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "10 % de chute d'aboutage des liteaux (Greg, 22 novembre 2026 ; liteaux de 4 m sur chevrons à 60 cm)."
+        },
         "couvert_et_courant": {
           "kind": "installation_condition",
           "value": "2",
@@ -7237,7 +7265,7 @@
         {
           "id": "liteaux-canal",
           "slot": "liteau",
-          "formula": "surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))",
+          "formula": "(surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))) * (1 + regle.chute_aboutage_liteaux)",
           "unit": "ml",
           "core": false,
           "exclusions": "Pose sur liteaux seulement (la tuile canal se pose aussi sur plaques support) ; hors liteau d'égout doublé.",
@@ -7924,6 +7952,20 @@
         }
       ],
       "constants": {
+        "chute_aboutage_liteaux": {
+          "kind": "installation_condition",
+          "value": "0.10",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "10 % de chute d'aboutage des liteaux (Greg, 22 novembre 2026 ; liteaux de 4 m sur chevrons à 60 cm)."
+        },
         "liteau_vendu": {
           "kind": "installation_condition",
           "value": "4",
@@ -9768,7 +9810,7 @@
         {
           "id": "liteaux-ardoise",
           "slot": "liteau",
-          "formula": "surface / pureau",
+          "formula": "(surface / pureau) * (1 + regle.chute_aboutage_liteaux)",
           "unit": "ml",
           "precision": "lattage {surface|m2}, une file tous les {pureau|cm}",
           "core": true,
@@ -10103,6 +10145,20 @@
         }
       ],
       "constants": {
+        "chute_aboutage_liteaux": {
+          "kind": "installation_condition",
+          "value": "0.10",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "10 % de chute d'aboutage des liteaux (Greg, 22 novembre 2026 ; liteaux de 4 m sur chevrons à 60 cm)."
+        },
         "seuil_pente_ecran": {
           "kind": "installation_condition",
           "value": "16.7",
@@ -10228,7 +10284,7 @@
         {
           "id": "liteaux-ardoise",
           "slot": "liteau",
-          "formula": "surface * ardoise.liteaux_par_m2",
+          "formula": "(surface * ardoise.liteaux_par_m2) * (1 + regle.chute_aboutage_liteaux)",
           "unit": "ml",
           "precision": "lattage {surface|m2}",
           "core": true,
@@ -10341,6 +10397,87 @@
             "version": 1,
             "note": "pas une HP 10"
           }
+        },
+        {
+          "key": "faitage_sur_fc",
+          "label": "Faîtage sur ardoises fibres-ciment",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le faîtage est-il sur des ardoises fibres-ciment ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "fromWorks": [
+            {
+              "value": "1",
+              "workItems": [
+                "couverture-ardoises-fibres-ciment"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pas de fibres-ciment au devis"
+          }
+        },
+        {
+          "key": "faitiere_fc",
+          "label": "Faîtière fibres-ciment",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Quelle faîtière ?",
+          "choices": [
+            {
+              "label": "Demi-ronde",
+              "value": "1"
+            },
+            {
+              "label": "Angulaire",
+              "value": "2"
+            },
+            {
+              "label": "D'aération",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "demi ronde",
+                "demi-ronde",
+                "ronde"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "angulaire",
+                "bords plats"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "aeration",
+                "d aeration",
+                "ventilee",
+                "ventilation"
+              ]
+            }
+          ],
+          "display": {
+            "1": "demi-ronde",
+            "2": "angulaire",
+            "3": "d'aération"
+          }
         }
       ],
       "slots": [
@@ -10403,6 +10540,48 @@
         }
       ],
       "constants": {
+        "utile_fc_demi_ronde": {
+          "kind": "installation_condition",
+          "value": "0.33",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Faîtière demi-ronde fibres-ciment : longueur utile 330 mm (Cedral)."
+        },
+        "utile_fc_angulaire": {
+          "kind": "installation_condition",
+          "value": "1.10",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Faîtière angulaire fibres-ciment : longueur utile 1 100 mm (Cedral)."
+        },
+        "utile_fc_aeration": {
+          "kind": "installation_condition",
+          "value": "0.49",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Faîtière d'aération fibres-ciment : longueur utile 490 mm (Cedral)."
+        },
         "mortier_faitage_par_ml": {
           "kind": "installation_condition",
           "value": "7.5",
@@ -10436,6 +10615,7 @@
         {
           "id": "faitieres",
           "slot": "faitiere",
+          "when": "faitage_sur_fc < 1",
           "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
@@ -10445,6 +10625,27 @@
             "status": "verified",
             "verifiedAt": "2026-10-01",
             "verifiedBy": "BatiClair (définition d'un ratio au mètre)"
+          },
+          "version": 1
+        },
+        {
+          "id": "faitieres-fibres-ciment",
+          "slot": "faitiere",
+          "when": "faitage_sur_fc > 0",
+          "formula": "arrondi_sup(longueur_faitage / si(faitiere_fc < 2, regle.utile_fc_demi_ronde, si(faitiere_fc < 3, regle.utile_fc_angulaire, regle.utile_fc_aeration)))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Faîtières fibres-ciment au modèle choisi ; recouvrement compris dans la longueur utile.",
+          "designation": "Faîtières fibres-ciment {faitiere_fc}",
+          "precisionRequires": [
+            "faitiere_fc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
@@ -10467,6 +10668,7 @@
         {
           "id": "crochets-faitiere",
           "slot": "fixation_faitiere",
+          "when": "faitage_sur_fc < 1",
           "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,

@@ -858,6 +858,43 @@ const OUVRAGES_AU_METRE_ARDOISE: ParamDef[] = [
     askOnlyAfter: { param: "egout_compris", value: "2" },
   },
 ];
+/** Greg, 22 novembre 2026 : 10 % de chute d'aboutage sur les liteaux (en plus des 5 % de casse et de coupes). */
+const CHUTE_ABOUTAGE_LITEAUX = condition("0.10", "u", F, FOUNDER_DOC, "10 % de chute d'aboutage des liteaux (Greg, 22 novembre 2026 ; liteaux de 4 m sur chevrons à 60 cm).");
+/**
+ * FAÎTIÈRE D'UN TOIT EN ARDOISES FIBRES-CIMENT (Greg, 22 novembre 2026 : « oui, pose Quelle faîtière ? avec des boutons
+ * (demi-ronde, angulaire, d'aération) »). Le faîtage est sur fibres-ciment quand le devis a cette couverture (lu par le
+ * code sur les autres ouvrages) ; jamais demandé. Longueurs utiles : manuel de pose Cedral du 15 avril 2026 et fiche Cedral
+ * (`recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`) : demi-ronde 330 mm, angulaire 1 100 mm, d'aération 490 mm.
+ */
+const FAITAGE_SUR_FC_PARAM: ParamDef = {
+  key: "faitage_sur_fc",
+  label: "Faîtage sur ardoises fibres-ciment",
+  unit: "u",
+  kind: "site_data",
+  question: "Le faîtage est-il sur des ardoises fibres-ciment ?",
+  neverAsk: true,
+  silentDefault: true,
+  fromWorks: [{ value: "1", workItems: ["couverture-ardoises-fibres-ciment"] }],
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "pas de fibres-ciment au devis" },
+};
+const FAITIERE_FC_PARAM: ParamDef = {
+  key: "faitiere_fc",
+  label: "Faîtière fibres-ciment",
+  unit: "u",
+  kind: "site_data",
+  question: "Quelle faîtière ?",
+  choices: [
+    { label: "Demi-ronde", value: "1" },
+    { label: "Angulaire", value: "2" },
+    { label: "D'aération", value: "3" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["demi ronde", "demi-ronde", "ronde"] },
+    { value: "2", keywords: ["angulaire", "bords plats"] },
+    { value: "3", keywords: ["aeration", "d aeration", "ventilee", "ventilation"] },
+  ],
+  display: { "1": "demi-ronde", "2": "angulaire", "3": "d'aération" },
+};
 const ARETIER_PARAM: ParamDef = {
   key: "aretier_matiere",
   label: "Arêtier",
@@ -1398,7 +1435,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.22-74",
+  version: "roofing-2026.11.22-75",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2375,6 +2412,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "rive_droite", family: "verge_tile", label: "Tuiles de rive droites", usual: { text: "Tuile de rive droite du modèle de tuile posé.", source: F, productId: "tuile-rive-droite-standard" }, formOf: "rive" },
       ],
       constants: {
+        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
         liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
@@ -2395,7 +2433,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux",
           slot: "liteau",
-          formula: "surface / pureau",
+          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
+          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
+          formula: "(surface / pureau) * (1 + regle.chute_aboutage_liteaux)",
           unit: "ml",
           precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
           core: true,
@@ -2504,6 +2544,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "rive_droite", family: "verge_tile", label: "Bardelis droits", usual: { text: "Bardelis droit du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-droit-standard" }, formOf: "rive" },
       ],
       constants: {
+        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         couvert_et_courant: condition("2", "u", "edilians-canal", FOUNDER_DOC, "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."),
         r150: condition("150", "mm", "edilians-canal", FOUNDER_DOC),
         r160: condition("160", "mm", "edilians-canal", FOUNDER_DOC),
@@ -2536,7 +2577,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux-canal",
           slot: "liteau",
-          formula: "surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))",
+          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
+          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
+          formula: "(surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))) * (1 + regle.chute_aboutage_liteaux)",
           unit: "ml",
           core: false,
           exclusions: "Pose sur liteaux seulement (la tuile canal se pose aussi sur plaques support) ; hors liteau d'égout doublé.",
@@ -2690,6 +2733,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (NF DTU 40.11).", source: RECH_FIXATIONS, productId: "pointes-liteau-28x60" }, suggested: { label: "Pointes pour liteaux" } },
       ],
       constants: {
+        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
         liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
@@ -2788,7 +2832,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux-ardoise",
           slot: "liteau",
-          formula: "surface / pureau",
+          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
+          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
+          formula: "(surface / pureau) * (1 + regle.chute_aboutage_liteaux)",
           unit: "ml",
           precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
           core: true,
@@ -2858,6 +2904,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
       ],
       constants: {
+        chute_aboutage_liteaux: CHUTE_ABOUTAGE_LITEAUX,
         ...ECRAN_CONSTANTS,
         clous_par_ardoise: condition("2.1", "u", F, FOUNDER_DOC, "« commander clous = 2,1 × ardoises » (§4)."),
         antivents_par_ardoise: condition("1.05", "u", F, FOUNDER_DOC, "« antivents = 1,05 × ardoises » (§4)."),
@@ -2881,7 +2928,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "liteaux-ardoise",
           slot: "liteau",
-          formula: "surface * ardoise.liteaux_par_m2",
+          // Greg, 22 novembre 2026 : « 10 % de chute d'aboutage, validé » (liteaux de 4 m sur chevrons à 60 cm), en plus des
+          // 5 % de casse et de coupes de la famille. Avant : 5 % seulement.
+          formula: "(surface * ardoise.liteaux_par_m2) * (1 + regle.chute_aboutage_liteaux)",
           unit: "ml",
           precision: "lattage {surface|m2}",
           core: true,
@@ -2920,7 +2969,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       trade: "roofing",
       label: "Faîtage (faîtières, closoir, abouts, fixations)",
       triggers: ["ridge_tile"],
-      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }, TUILE_HP10_PARAM],
+      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }, TUILE_HP10_PARAM, FAITAGE_SUR_FC_PARAM, FAITIERE_FC_PARAM],
       slots: [
         { key: "faitiere", family: "ridge_tile", label: "Faîtières", usual: { text: "Faîtière courante (40 à 42 cm) : le modèle suit la tuile ou l'ardoise posée.", source: F, productId: "faitiere-standard" } },
         { key: "closoir", family: "ridge_closure", label: "Closoir", usual: { text: "Closoir ventilé en rouleau de 5 m.", source: F, productId: "closoir-standard-5m" } },
@@ -2930,6 +2979,9 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       ],
       constants: {
         // Greg, 21 novembre 2026 (soir) : « 7,5 kg au mètre par défaut, en sacs, modifiable. » Weber et VPI : 5 à 10 kg au mètre.
+        utile_fc_demi_ronde: condition("0.33", "m", F, FOUNDER_DOC, "Faîtière demi-ronde fibres-ciment : longueur utile 330 mm (Cedral)."),
+        utile_fc_angulaire: condition("1.10", "m", F, FOUNDER_DOC, "Faîtière angulaire fibres-ciment : longueur utile 1 100 mm (Cedral)."),
+        utile_fc_aeration: condition("0.49", "m", F, FOUNDER_DOC, "Faîtière d'aération fibres-ciment : longueur utile 490 mm (Cedral)."),
         mortier_faitage_par_ml: condition("7.5", "kg/m", F, FOUNDER_DOC, "7,5 kg de mortier par mètre de faîtage scellé (Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg)."),
         abouts_par_faitage: condition("2", "u", F, FOUNDER_DOC, "Deux extrémités libres par ligne de faîtage (une seule ligne supposée)."),
       },
@@ -2937,6 +2989,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "faitieres",
           slot: "faitiere",
+          when: "faitage_sur_fc < 1",
           // Le ratio « pièces au mètre » du fabricant, appliqué à la longueur : c'est sa définition.
           formula: "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           unit: "u",
@@ -2944,6 +2997,21 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           exclusions: "Hors abouts (comptés à part) et rencontres d'arêtiers.",
           source: "definition",
           verification: { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "BatiClair (définition d'un ratio au mètre)" },
+          version: 1,
+        },
+        {
+          id: "faitieres-fibres-ciment",
+          slot: "faitiere",
+          when: "faitage_sur_fc > 0",
+          // Sur fibres-ciment : la longueur du faîtage ÷ la longueur utile du modèle choisi, arrondi à la pièce au-dessus.
+          formula: "arrondi_sup(longueur_faitage / si(faitiere_fc < 2, regle.utile_fc_demi_ronde, si(faitiere_fc < 3, regle.utile_fc_angulaire, regle.utile_fc_aeration)))",
+          unit: "u",
+          core: true,
+          exclusions: "Faîtières fibres-ciment au modèle choisi ; recouvrement compris dans la longueur utile.",
+          designation: "Faîtières fibres-ciment {faitiere_fc}",
+          precisionRequires: ["faitiere_fc"],
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -2960,6 +3028,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         {
           id: "crochets-faitiere",
           slot: "fixation_faitiere",
+          when: "faitage_sur_fc < 1",
           formula: "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           unit: "u",
           core: true,

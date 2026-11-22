@@ -2,7 +2,7 @@
  "C01": {
   "lignes": {
    "Écran HPV": "juste",
-   "Liteaux 18×40": "quantite",
+   "Liteaux 18×40": "juste",
    "Ardoises 32×22": "juste",
    "Crochets d'ardoise": "juste",
    "Feuilles de zinc (faîtage)": "juste",
@@ -105,7 +105,7 @@
    "Écran HPV": "juste",
    "Liteaux 18×40": "juste",
    "Ardoises fibres-ciment 40×24": "juste",
-   "Faîtières fibres-ciment": "quantite",
+   "Faîtières fibres-ciment": "juste",
    "Feuilles de zinc (rives)": "juste",
    "Gouttière PVC de 25": "juste",
    "Tubes de descente PVC Ø80": "juste",

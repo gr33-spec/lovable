@@ -1,5 +1,18 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-75 — Liteaux : 10 % de chute d'aboutage ; faîtière fibres-ciment demandée (Greg, 2026-11-22)
+
+Le banc du calcul passe de 96 à 98 lignes justes sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Liteaux (tuiles, tuile canal, ardoises, fibres-ciment) | besoin + 5 % de casse et de coupes | besoin × 1,10 (chute d'aboutage) × 1,05 | Greg, 22 novembre 2026 (« 10 % de chute d'aboutage, validé ») |
+| Exemple : 110 m² de fibres-ciment 40×24 | 771 ml | 848 ml | 110 × 6,67 × 1,10 × 1,05 |
+| Contre-liteaux | 5 % | inchangé : 5 % | à trancher par Greg |
+| Faîtage sur ardoises fibres-ciment, modèle non écrit | 3 faîtières de tuile au mètre (10 m : 30) | question « Quelle faîtière ? » (Demi-ronde, Angulaire, D'aération), puis longueur ÷ longueur utile, à la pièce au-dessus (10 m angulaire : 10) | Greg, 22 novembre 2026 ; longueurs utiles Cedral : 330, 1 100, 490 mm |
+
+- Une ligne écrite en mètres dont l'article se compte en pièces (« Faîtage, 10 ml ») n'affiche plus « 10 ml » comme quantité tant que la réponse manque : sans quantité, « 10 ml au devis » en précision.
+
 ## roofing-2026.11.22-74 — Fusion de la branche de test (suggestions sans limite, pointes de liteaux, fixations) dans le banc du calcul (2026-11-22)
 
 - Réunit la fiche `roofing-2026.11.22-73` (banc du calcul) et la fiche `roofing-2026.11.20-63` de la branche de test : leurs

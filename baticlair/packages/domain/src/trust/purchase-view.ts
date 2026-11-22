@@ -709,7 +709,10 @@ export function purchaseView(
     // Le nombre écrit compte des OUVRAGES, pas des articles (« 1 descente », dont la hauteur fait le nombre de tubes) : il
     // n'est jamais montré comme un nombre de pièces ; il se lit dans la précision (banc du calcul, C08, 21 novembre 2026).
     const compteDesOuvrages = work!.params.some((p) => p.fromLineQuantity && p.unit === "u" && p.forSlots?.includes(planned.slot));
-    const measure = compteDesOuvrages || (/^(m2|m²)$/i.test((o.read.unit ?? "").trim()) && supplierTest(label, o.read.unit) !== null);
+    // Une mesure (10 ml de faîtage) dont l'article se compte en pièces (des faîtières) n'est jamais une quantité à commander :
+    // elle se lit dans la précision tant que la réponse manque (banc du calcul, C10, 22 novembre 2026 ; « zéro ligne fausse »).
+    const enPieces = own.some((n) => work!.needs.find((r) => r.id === n.needId)?.unit === "u") && /^(m|ml|m2|m²)$/i.test((o.read.unit ?? "").trim());
+    const measure = compteDesOuvrages || enPieces || (/^(m2|m²)$/i.test((o.read.unit ?? "").trim()) && supplierTest(label, o.read.unit) !== null);
     const written = o.read.quantity && !measure ? writtenQuantity(o.read.quantity, o.read.unit) : null;
     const said = [o.read.quantity, o.read.unit === "m2" ? "m²" : o.read.unit].filter(Boolean).join(" ");
     toBuy.push({
