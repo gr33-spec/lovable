@@ -72,7 +72,18 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## 22 NOVEMBRE (fin d'après-midi) — EN COURS
+## EN LIGNE (vérifié par /version) : `b90a279e`, 22 novembre, 16 h 45 UTC
+- Contenu : fiche -74 (banc 96/99, ce qui était déjà en ligne avec 9ceac7d0) + `/version` site et API + tests. Les deux
+  `/version` donnent b90a279e, environnement « test ». Méthode dans CLAUDE.md (Règles de travail).
+- Chaîne avant poussée : moteur 1331, serveur 927 (+ test d'isolation corrigé et relancé), parcours 361 sur 394 passés en
+  entier, puis les 4 parcours retouchés relancés 3 fois sur les deux écrans (33/33). Seuls des tests avaient changé.
+
+## SUR MA BRANCHE, PAS ENCORE EN LIGNE : fiches -75 à -77 (banc 100/101)
+- Liteaux 10 % au total ; contre-liteaux 5 % (validé) ; arêtier zinc 0,50 / fermé 0,66 ; jouées sans égout ; pointes avec
+  les liteaux ; faîtière fibres-ciment ; « J'ai ta liste » ; crochets « Agrafe ou pointe ? » (1/5 à pointe, UNE source).
+- Moteur 1333 vert. Serveur et parcours PAS encore rejoués sur -77 : à faire avant de proposer de pousser.
+
+## 22 NOVEMBRE (fin d'après-midi) — historique
 - Greg : contre-liteaux 5 %, validé. « Vérifier la mise en ligne, c'est à toi » → adresse `/version` (site :
   `apps/web/src/app/version/route.ts` ; API : `apps/api/src/modules/health/http/version.controller.ts`, aussi `/v1/version`),
   méthode écrite dans `CLAUDE.md` (Règles de travail). Après chaque poussée : attendre que les DEUX `/version` donnent le
