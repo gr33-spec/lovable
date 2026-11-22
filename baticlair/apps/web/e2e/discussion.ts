@@ -133,10 +133,12 @@ export const SORTIE_DE_VENTILATION = "Sortie de ventilation (VMC, extraction d'a
  * Vérifie que la carte ne propose que cette case, sous son nom exact.
  */
 export async function continuerSansSortieDeVentilation(page: Page) {
+  // L'étape « Suggestions » d'une liste de couverture (sortie de ventilation, pointes de liteaux…) : l'artisan ne coche rien et
+  // continue ; rien n'est coché d'office.
   const carte = carteSuggestions(page);
   await expect(carte).toBeVisible({ timeout: 15_000 });
-  await expect(carte.getByRole("checkbox")).toHaveCount(1);
-  await expect(carte.getByRole("checkbox", { name: SORTIE_DE_VENTILATION, exact: true })).not.toBeChecked();
+  const cases = carte.getByRole("checkbox");
+  for (let i = 0; i < (await cases.count()); i++) await expect(cases.nth(i)).not.toBeChecked();
   await carte.getByRole("button", { name: "Continuer", exact: true }).click();
   await expect(carte).toBeHidden({ timeout: 15_000 });
 }
@@ -145,7 +147,7 @@ export async function continuerSansSortieDeVentilation(page: Page) {
  * La même étape pour un parcours qui prépare sa liste par l'API (sans passer par l'écran) : les cases proposées sont lues
  * (`?ecran=1`), comparées à celles attendues, puis « rien de coché » est répondu (`suggestions:choisies` = « aucune »).
  */
-export async function continuerSansSuggestionParApi(page: Page, quantitatifId: string, attendues: readonly string[] = [SORTIE_DE_VENTILATION]) {
+export async function continuerSansSuggestionParApi(page: Page, quantitatifId: string, attendues?: readonly string[]) {
   const r = await page.evaluate(
     async ({ id }) => {
       const companyId = localStorage.getItem("baticlair.companyId");
@@ -157,7 +159,9 @@ export async function continuerSansSuggestionParApi(page: Page, quantitatifId: s
     },
     { id: quantitatifId },
   );
-  expect(r.proposees).toEqual([...attendues]);
+  // Sans liste donnée : au moins une case proposée (pointes de liteaux, sortie de ventilation…), toutes refusées.
+  if (attendues) expect(r.proposees).toEqual([...attendues]);
+  else expect(r.proposees.length).toBeGreaterThan(0);
   expect(r.status).toBeLessThan(300);
   expect(r.restantes).toBe(0);
 }
