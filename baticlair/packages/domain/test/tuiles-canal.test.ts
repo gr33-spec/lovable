@@ -45,10 +45,11 @@ describe("la tuile canal est reconnue, même quand la ligne commence par « Tuil
 
 describe("le calcul canal (§35.3)", () => {
   // + 3 % de casse et de coupe (fiche couverture, 2026-11-20, tuile.perte_canal ; avant 0 %).
-  it("Canal Gironde 50 à R 150 sur 100 m² : 2 617 tuiles (12,7 × 2 + 3 %), 307 ml de liteaux 27×40 (2,92 + 5 %), 54 bardelis (20 m × 2,7)", () => {
+  it("Canal Gironde 50 à R 150 sur 100 m² : 2 617 tuiles (12,7 × 2 + 3 %), 338 ml de liteaux 27×40 (2,92 × 1,10 d'aboutage + 5 %), 54 bardelis (20 m × 2,7)", () => {
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 307 → 338 ml (100 × 2,92 × 1,10 × 1,05 = 337,3 → 338).
     const v = readQuote(DEVIS, A({ "product:tuile": "edilians-canal-gironde-50", "param:recouvrement_canal": { value: "150", unit: "mm" } }));
     const q = Object.fromEntries(v.toBuy.map((b) => [b.needIds[0], b.quantity]));
-    expect(q).toMatchObject({ "tuiles-canal-courants": "1 309 pièces", "tuiles-canal-couverts": "1 309 pièces", "liteaux-canal": "307 ml", "bardelis-gauches": "27 pièces", "bardelis-droits": "27 pièces" }); // deux lignes, gauches et droites (Greg, 21 novembre 2026 ; avant une ligne de 54)
+    expect(q).toMatchObject({ "tuiles-canal-courants": "1 309 pièces", "tuiles-canal-couverts": "1 309 pièces", "liteaux-canal": "338 ml", "bardelis-gauches": "27 pièces", "bardelis-droits": "27 pièces" }); // deux lignes, gauches et droites (Greg, 21 novembre 2026 ; avant une ligne de 54)
     expect(v.toQuote).toEqual([]);
     expect(v.questions).toEqual([]);
   });

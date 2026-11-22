@@ -116,8 +116,11 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
       ["Crochets de gouttière Havraise", "20 pièces"],
       // Le nom des feuilles ne dit plus leur usage (Greg, 17 novembre 2026) : il est dans le détail de la ligne.
       ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "1 pièce"],
-      ["Faîtage en bande zinc, dév. 25 cm", "8 ml"],
-      ["Bande porte-solin zinc", "4 ml"],
+      // Règle changée (Greg, 22 novembre 2026) : une ligne écrite en mètres dont l'article se compte en pièces et qui attend
+      // sa réponse (le pliage) n'affiche plus sa mesure comme quantité (avant « 8 ml » et « 4 ml » ; « 8 m au devis » et
+      // « 4 m au devis » en précision, vérifiés plus bas).
+      ["Faîtage en bande zinc, dév. 25 cm", null],
+      ["Bande porte-solin zinc", null],
       // Le mortier n'est plus renommé « mortier d'étanchéité » (Greg, 17 novembre 2026 : « ne transforme pas mes mots »).
       ["Mortier de ciment pour solin", "1 sac de 25 kg"],
       ["Tuyau de descente zinc diam. 80mm", "2 tubes de 3 m"],
@@ -126,6 +129,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     ]);
     expect(v.toQuote).toEqual([]);
     expect(v.suggestions).toEqual([]);
+    expect(v.toBuy.find((b) => b.label.startsWith("Faîtage en bande zinc"))?.precision).toBe("8 m au devis");
+    expect(v.toBuy.find((b) => b.label.startsWith("Bande porte-solin zinc"))?.precision).toBe("4 m au devis");
   });
 
   it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = un par ardoise", () => {

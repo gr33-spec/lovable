@@ -106,8 +106,13 @@ describe("référentiel couverture", () => {
     // Démonstration complète : docs/demonstration-regles-tuiles-liteaux.md.
     // La fiche donne 2 décimales (tronquées à 310 et 343 mm, arrondies à 376 mm) : écart toléré < 0,01 ml/m².
     const FICHE_LITEAUX = [["31", 3.22], ["34.3", 2.91], ["37.6", 2.66]] as const;
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux. La fiche du fabricant donne le
+    // besoin posé, sans chute : on compare au fabricant le besoin SANS l'aboutage (÷ 1,10), puis on vérifie à part que
+    // l'aboutage est bien appliqué (besoin calculé = surface ÷ pureau × 1,10).
     for (const [pureau, fiche] of FICHE_LITEAUX) {
-      expect(Math.abs(Number(need(r(pureau), "liteaux").quantity!.value) - fiche)).toBeLessThan(0.01);
+      const calcule = Number(need(r(pureau), "liteaux").quantity!.value);
+      expect(Math.abs(calcule / 1.1 - fiche)).toBeLessThan(0.01);
+      expect(Math.abs(calcule - (1 / (Number(pureau) / 100)) * 1.1)).toBeLessThan(0.01);
     }
     // Tuiles : la fiche annonce 9,9 à 12 tuiles/m² (1 décimale) ; le calcul donne 9,92 et 12,04.
     const FICHE_TUILES = [["31", 12], ["37.6", 9.9]] as const;
@@ -176,8 +181,9 @@ describe("moteur : ouvrage → besoins → achat", () => {
       purchase: { order: { count: "1306", unit: { many: "pièces" } } },
       provisional: false,
     });
-    // 120 m² ÷ 0,343 m = 349,85 ml, commandés au mètre (350 ml) ; la botte de 50 ml donne l'ordre de grandeur.
-    expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, origin: "explicit", purchase: { order: { count: "350", unit: { many: "ml" } }, approx: [{ count: "7" }] } });
+    // 120 m² ÷ 0,343 m = 349,85 ml, × 1,10 d'aboutage = 384,84 ml, commandés au mètre (385 ml) ; la botte de 50 ml donne l'ordre de grandeur (7,7 → 8).
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 349,85 → 384,84 ml (120 ÷ 0,343 × 1,10), commande 350 → 385 ml, bottes 7 → 8.
+    expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "384.84", unit: "ml" }, origin: "explicit", purchase: { order: { count: "385", unit: { many: "ml" } }, approx: [{ count: "8" }] } });
     // 120 m² ÷ 0,60 m = 200 ml ; absent du devis mais cœur de l'ouvrage (le support n'est jamais oublié) : déduit.
     expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, origin: "deduced" });
     // Pente 45 % > 30 % : surface + 10 % (fiche couverture, 2026-11-19) → 120 × 1,10 = 132 m² → 2 rouleaux de 75 m².
@@ -224,7 +230,8 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const noUnits: Referential = structuredClone(ref);
     noUnits.products.find((p) => p.id === "liteau-sapin-27x40")!.sellingUnits = [];
     const r = computeWorkItem(noUnits, CASE);
-    expect(need(r, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "349.85", unit: "ml" } });
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 349,85 → 384,84 ml (120 ÷ 0,343 × 1,10).
+    expect(need(r, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "384.84", unit: "ml" } });
     expect(need(r, "liteaux").purchaseUnavailable).toBe("Conditionnement à confirmer : aucune unité de vente vérifiée pour Liteaux 27×40.");
     // Même chose quand l'unité de vente existe mais n'est pas vérifiée.
     const pending: Referential = structuredClone(ref);
@@ -240,7 +247,8 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const r = computeWorkItem(ref, { ...CASE, preferences: { waste: { roof_tile: "5" } } });
     // 1 305,43 × 1,05 = 1 370,70 → 1 371 pièces.
     expect(need(r, "tuiles")).toMatchObject({ quantity: { value: "1370.7" }, purchase: { order: { count: "1371" } } });
-    expect(need(r, "liteaux").quantity?.value).toBe("349.85");
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 349,85 → 384,84 ml (120 ÷ 0,343 × 1,10, marge des tuiles sans effet).
+    expect(need(r, "liteaux").quantity?.value).toBe("384.84");
   });
 
   it("prend la marge la plus précise : réglage artisan (produit, puis famille), sinon règle sourcée (produit, puis famille)", () => {

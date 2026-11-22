@@ -62,6 +62,9 @@ const COMPTOIR: Record<string, string> = {
   egout_a_ajouter: "« quelle longueur d'égout ? », seulement après « Non » à la question d'avant",
   ardoises_a_prevoir: "« tu vas remanier : je te prévois des ardoises ? combien ? » (ça dépend de l'état de la toiture)",
   surface_remaniee: "la surface du remaniage, celle de sa ligne (lue, jamais demandée : elle n'entre dans aucune quantité)",
+  // Greg, 22 novembre 2026 : le faîtage sur ardoises fibres-ciment.
+  faitiere_fc: "« quelle faîtière : demi-ronde, angulaire ou d'aération ? » (faîtage sur ardoises fibres-ciment)",
+  faitage_sur_fc: "le faîtage est-il sur une couverture fibres-ciment (lu au devis, jamais demandé)",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];

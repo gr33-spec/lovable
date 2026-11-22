@@ -118,7 +118,8 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     // Crochets = un par ardoise commandée, 9 408 (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 597).
     // Greg, 21 novembre 2026 : les crochets se commandent en boîtes de 500, le nombre de pièces reste écrit (9 408 → 19 boîtes).
     expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "19" } } });
-    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2100" } });
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 2 100 → 2 310 ml (200 ÷ 0,10 × 1,10 × 1,05 ; la marge des liteaux reste 5 %).
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2310" } });
   });
 
   it("sans ces hypothèses, le moteur redemande : la règle produit tient aux données, pas à un contournement", () => {

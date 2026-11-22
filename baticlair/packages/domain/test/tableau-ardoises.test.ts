@@ -60,10 +60,11 @@ describe("le tableau des ardoises : format + crochet → pureau, ardoises au m²
   it("l'exemple de Greg : 32×22, crochets de 11 → recouvrement 10,5 cm, pureau 10,75 cm, 42,09 ardoises au m²", () => {
     const g = lignes.find((x) => x.format === "32×22" && x.crochet === 11)!;
     expect(g).toMatchObject({ recouvrement: 105, pureau: 10.75, ardoisesM2: "42,09", source: "formule" });
-    // Pour 100 m² : 42,09 × 100 + 5 % de chutes = 4 420 ardoises ; un crochet par ardoise ; un liteau par rang + 5 %.
+    // Pour 100 m² : 42,09 × 100 + 5 % de chutes = 4 420 ardoises ; un crochet par ardoise ; un liteau par rang × 1,10 (aboutage) + 5 %.
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute d'aboutage sur les liteaux ; avant 977 → 1 074 ml (100 ÷ 0,1075 × 1,10 × 1,05 = 1 074,4).
     expect(g.ardoises).toBe(4420);
     expect(g.crochets).toBe(4420);
-    expect(Math.round(g.liteaux)).toBe(977);
+    expect(Math.round(g.liteaux)).toBe(1074);
   });
 
   it("chaque format et chaque crochet se calculent, sans rien demander ; plus le crochet est long, plus il faut d'ardoises", () => {
@@ -89,7 +90,7 @@ describe("le tableau des ardoises : format + crochet → pureau, ardoises au m²
       "- Ardoises au m² : la valeur de la table des fabricants (Cupa) quand elle existe pour ce format et ce recouvrement ; sinon la formule 1 ÷ (pureau × (largeur + épaisseur du crochet)).",
       "- Ardoises à commander = surface × ardoises au m² + **5 % de chutes**.",
       "- Crochets = un par ardoise commandée.",
-      "- Liteaux = un rang par pureau (surface ÷ pureau) + **5 %**.",
+      "- Liteaux = un rang par pureau (surface ÷ pureau) + **10 % de chute d'aboutage** (Greg, 22 novembre 2026), puis + **5 %**.",
       "",
       "## Le tableau (quantités pour 100 m² de toiture)",
       "",

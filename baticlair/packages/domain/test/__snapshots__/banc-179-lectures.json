@@ -280,8 +280,8 @@
    },
    {
     "designation": "Isolant PIR ep 100 mm, épaisseur d'isolant",
-    "quantite": "48 m²",
-    "unite": "m²",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Format à préciser"
    }
@@ -827,15 +827,15 @@
    },
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande de rive zinc quartz dév. 200",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -887,8 +887,8 @@
    },
    {
     "designation": "Noue zinc",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -912,7 +912,7 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "1 991 ml",
+    "quantite": "2 190 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -1191,8 +1191,8 @@
   "lignes": [
    {
     "designation": "Bande zinc de rive",
-    "quantite": "35 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1223,8 +1223,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -1250,8 +1250,8 @@
   "lignes": [
    {
     "designation": "Bandes cuivre, dév. 400 mm",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1331,8 +1331,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -1535,8 +1535,8 @@
   "lignes": [
    {
     "designation": "Noue zinc",
-    "quantite": "12 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1591,8 +1591,8 @@
   "lignes": [
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1706,7 +1706,7 @@
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "1 991 ml",
+    "quantite": "2 190 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -2105,8 +2105,8 @@
   "lignes": [
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -2130,7 +2130,7 @@
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "1 991 ml",
+    "quantite": "2 190 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -2206,15 +2206,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2298,15 +2298,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2553,8 +2553,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2772,15 +2772,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2881,15 +2881,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2998,29 +2998,29 @@
   "lignes": [
    {
     "designation": "Bande de solin zinc naturel dév. 25",
-    "quantite": "5 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande de rive zinc dév. 33",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Faîtage en bande zinc, dév. 330 mm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3141,7 +3141,7 @@
   "lignes": [
    {
     "designation": "Liteaux 18×40",
-    "quantite": "3 982 ml",
+    "quantite": "4 380 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -3155,8 +3155,8 @@
    },
    {
     "designation": "Faîtage en bande zinc",
-    "quantite": "17 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -3311,8 +3311,8 @@
   "lignes": [
    {
     "designation": "Bande zinc de rive",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3343,7 +3343,7 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "484 ml",
+    "quantite": "518 ml",
     "unite": "ml",
     "etat": "check",
     "raison": "Valeur par défaut à confirmer"
@@ -3540,8 +3540,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -3692,15 +3692,15 @@
   "lignes": [
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Habillage de rive en zinc quartz, dév. 200 mm",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3732,8 +3732,8 @@
   "lignes": [
    {
     "designation": "Bandes cuivre, dév. 330 mm",
-    "quantite": "12 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3910,8 +3910,8 @@
   "lignes": [
    {
     "designation": "Arêtier",
-    "quantite": "9 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Arêtier à préciser"
    }
@@ -4237,15 +4237,15 @@
   "lignes": [
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Habillage de rive en zinc quartz, dév. 20 cm",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -4269,8 +4269,8 @@
    },
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4388,8 +4388,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4573,8 +4573,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4607,8 +4607,8 @@
   "lignes": [
    {
     "designation": "Noue zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -4696,15 +4696,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4818,15 +4818,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4917,8 +4917,8 @@
   "lignes": [
    {
     "designation": "Noue zinc",
-    "quantite": "12 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -4969,15 +4969,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -5078,15 +5078,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -5335,8 +5335,8 @@
    },
    {
     "designation": "Noue zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },

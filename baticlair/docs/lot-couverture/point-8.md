@@ -47,7 +47,7 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Bandes cuivre, dév. 330 mm | 12 ml | Façonnage à préciser |
+| Bandes cuivre, dév. 330 mm | — | Façonnage à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 

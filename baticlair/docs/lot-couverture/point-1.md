@@ -29,7 +29,7 @@ Questions du comptoir :
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
 | Tuiles HP10 | 1 283 pièces | Valeur par défaut à confirmer |
-| Noue zinc | 8 ml | Façonnage à préciser |
+| Noue zinc | — | Façonnage à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
@@ -59,7 +59,7 @@ Questions du comptoir :
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
 | Ardoises naturelles 30×22 | — | Qualité à préciser |
-| Noue zinc | 4 ml | Façonnage à préciser |
+| Noue zinc | — | Façonnage à préciser |
 
 Lignes grises (le fournisseur chiffre) :
 - Arêtiers (Arêtier zinc dév. 33) · 10 ml — Pas encore calculé : le fournisseur proposera pour la mesure du devis.
