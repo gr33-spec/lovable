@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-81",
+  "version": "roofing-2026.11.23-84",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -136,12 +136,20 @@
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
     },
     {
+      "id": "recherche-abergement-cheminee-2026-11-23",
+      "kind": "trade_practice",
+      "title": "Abergement de souche en zinc : minimums des règles de l'art (NF DTU 40.11, 40.21, 40.211, 40.41 ; guides du ministère de la Culture ; Le Plomb Français)",
+      "documentRef": "referentiels/couverture/recherche/abergement-cheminee-2026-11-23.md",
+      "retrievedAt": "2026-11-23",
+      "note": "Aucune source ne chiffre la consommation de zinc ni le développé complet d'une pièce. Devant L + 10 à 12 cm de chaque côté, relevé 90 mm min. ; derrière L + 12 à 15 cm de chaque côté, relevé 90 mm min. ; couloir latéral 10 cm min., relevé 9 cm ; noquets un tous les deux rangs. Développés déduits, à confirmer."
+    },
+    {
       "id": "recherche-accessoires-tuiles-2026-11-20",
       "kind": "manufacturer",
       "title": "Chatières : section par modèle (Edilians, Monier, Koramic, Terreal) et section de ventilation à atteindre (NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink)",
       "documentRef": "referentiels/couverture/recherche/accessoires-tuiles.json",
       "retrievedAt": "2026-11-20",
-      "note": "1/5000 de la surface projetée (comble perdu ou au-dessus d'un écran, 2 cm² par m²) ; 1/3000 sans écran (3,3 cm² par m²). HP 10 et PV 10 : 50 cm² ; Signy 33 ; Actua 26 ; Alpha 10 : 19 ; Romane Canal 18."
+      "note": "1/5000 de la surface projetée (comble perdu ou au-dessus d'un écran, 2 cm² par m²) ; 1/3000 sans écran (3,3 cm² par m²). HP 10 et PV 10 : 50 cm² ; Signy 33 ; Actua 26 ; Alpha 10 : 19 ; Romane Canal 18 ; Volnay PV (613 VPV) : 35 cm² avec grille (catalogue Terreal, DTA CSTB 5.1/17-2546_V3), recherche du 23/11/2026 (`recherche/chatiere-volnay-et-clous-2026-11-23.md`)."
     },
     {
       "id": "recherche-fixations-2026-11-20",
@@ -1383,6 +1391,13 @@
     {
       "code": "batten_nail",
       "label": "Pointes de liteaux",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "tile_clip",
+      "label": "Crochet de fixation de tuile",
       "needUnit": "u",
       "attributes": [],
       "keyAttributes": []
@@ -3999,6 +4014,19 @@
             "note": "Page et version exactes à compléter à réception du PDF."
           },
           "version": 1
+        },
+        "section_chatiere": {
+          "kind": "manufacturer_spec",
+          "value": "35",
+          "unit": "cm2",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "Chatière 613 VPV : 35 cm² avec grille (Terreal ; DTA CSTB 5.1/17-2546_V3)."
         }
       },
       "sellingUnits": [
@@ -5220,6 +5248,38 @@
       ]
     },
     {
+      "id": "clou-ardoise-galva-27x30",
+      "family": "slate_nail",
+      "label": "Clous galvanisés 2,7 × 30 pour ardoise, boîte de 1 kg",
+      "shortLabel": "Clous galva 2,7 × 30",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "653",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "Galva 2,7 × 30 : ≈ 653 clous au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "clou-ardoise-cuivre-3x30",
       "family": "slate_nail",
       "label": "Clous cuivre 3 × 30 pour ardoise, boîte de 1 kg",
@@ -5246,6 +5306,38 @@
             },
             "version": 1,
             "note": "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "crochet-fixation-tuile",
+      "family": "tile_clip",
+      "label": "Crochets de fixation de tuile (modèle de la tuile posée), boîte de 400",
+      "shortLabel": "Crochets de fixation de tuiles",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 400",
+            "many": "boîtes de 400"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "400",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "Boîtes de 400 (Dimos, Frénéhard)."
           },
           "primary": true
         }
@@ -6725,6 +6817,46 @@
           ]
         },
         {
+          "key": "zone_vent",
+          "label": "Zone de vent",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zone de vent ?",
+          "neverAsk": true
+        },
+        {
+          "key": "situation",
+          "label": "Situation du chantier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le chantier est-il en situation exposée (bord de mer à moins de 5 km, île, falaise) ?",
+          "default": {
+            "value": "1",
+            "source": "fiche-couverture",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+            },
+            "version": 1,
+            "note": "situation normale, à défaut de commune au bord de mer"
+          },
+          "choices": [
+            {
+              "label": "Normale",
+              "value": "1"
+            },
+            {
+              "label": "Exposée (bord de mer, île)",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "normale",
+            "2": "exposée"
+          }
+        },
+        {
           "key": "ecran_sous_toiture",
           "label": "Écran sous toiture",
           "unit": "u",
@@ -6869,6 +7001,20 @@
           }
         },
         {
+          "key": "fixation",
+          "family": "tile_clip",
+          "label": "Crochets de fixation des tuiles",
+          "usual": {
+            "text": "Crochet de fixation de tuile (boîtes de 400).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "crochet-fixation-tuile"
+          },
+          "suggested": {
+            "label": "Fixation des tuiles (crochets)",
+            "onlyOnMeasuredWork": true
+          }
+        },
+        {
           "key": "chatiere",
           "family": "vent_tile",
           "label": "Chatières",
@@ -6942,6 +7088,32 @@
         }
       ],
       "constants": {
+        "pente_100": {
+          "kind": "installation_condition",
+          "value": "45",
+          "unit": "°",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "Pente de 100 % = 45°."
+        },
+        "pente_175": {
+          "kind": "installation_condition",
+          "value": "60.26",
+          "unit": "°",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "Pente de 175 % ≈ 60,26°."
+        },
         "ventilation_avec_ecran": {
           "kind": "installation_condition",
           "value": "0.0002",
@@ -7099,6 +7271,39 @@
             "status": "verified",
             "verifiedAt": "2026-11-20",
             "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1
+        },
+        {
+          "id": "fixation-tuiles",
+          "slot": "fixation",
+          "formula": "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5)))))) + surface / longueur_rampant / tuile.largeur_utile + longueur_rives / pureau",
+          "postes": [
+            {
+              "id": "courante",
+              "libelle": "Partie courante : {= arrondi_sup(surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile)} tuiles, fixées selon le vent, l'écran et la pente",
+              "formule": "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5))))))"
+            },
+            {
+              "id": "egout",
+              "libelle": "1er rang d'égout : toutes",
+              "formule": "surface / longueur_rampant / tuile.largeur_utile"
+            },
+            {
+              "id": "rives",
+              "libelle": "Rives {longueur_rives|ml} : toutes",
+              "formule": "longueur_rives / pureau",
+              "cle": "longueur_rives"
+            }
+          ],
+          "unit": "u",
+          "core": false,
+          "precision": "égout et rives toujours fixés ; partie courante selon la zone de vent, l'écran et la pente (NF DTU 40.21)",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
           },
           "version": 1
         },
@@ -8273,9 +8478,9 @@
           "family": "slate_nail",
           "label": "Clous d'ardoise",
           "usual": {
-            "text": "Clous cuivre 3 × 30 (clous apparents : inox ou cuivre, NF DTU 40.11 2020).",
+            "text": "Clous galvanisés 2,7 × 30 (un clou apparent : inox ou cuivre, NF DTU 40.11 2020, annexe B).",
             "source": "recherche-fixations-2026-11-20",
-            "productId": "clou-ardoise-cuivre-3x30"
+            "productId": "clou-ardoise-galva-27x30"
           },
           "suggested": {
             "label": "Clous d'ardoise (égout, rives, faîtage)"
@@ -11267,6 +11472,34 @@
           ]
         },
         {
+          "key": "feuilles_faitage",
+          "label": "Feuilles de zinc pour le faîtage",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Pour le faîtage, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
+            }
+          ]
+        },
+        {
           "key": "longueur_faitage",
           "label": "Longueur du faîtage",
           "unit": "m",
@@ -11867,14 +12100,20 @@
           "id": "feuilles-faitage-zinc",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(arrondi_sup(longueur_faitage / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+          "formula": "si(developpe / regle.largeur_feuille > 1, feuilles_faitage, si(developpe / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_faitage / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe)), feuilles_faitage))",
           "partage": true,
           "postes": [
             {
               "id": "pieces",
               "libelle": "{= arrondi_sup(longueur_faitage / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_faitage|ml}), développé {developpe|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(longueur_faitage / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+              "formule": "si(developpe / regle.largeur_feuille > 1, 0, si(developpe / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_faitage / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe)), 0))",
               "cle": "longueur_faitage"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_faitage} feuilles",
+              "formule": "si(developpe / regle.largeur_feuille > 1, feuilles_faitage, si(developpe / regle.largeur_feuille > 0, 0, feuilles_faitage))",
+              "cle": "feuilles_faitage"
             }
           ],
           "unit": "u",
@@ -11970,6 +12209,34 @@
                 "pieces de 2 m",
                 "elements de 2 m"
               ]
+            }
+          ]
+        },
+        {
+          "key": "feuilles_noue",
+          "label": "Feuilles de zinc pour la noue",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Pour la noue, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
             }
           ]
         },
@@ -12619,14 +12886,20 @@
           "id": "feuilles-noue",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(arrondi_sup(longueur_noue / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))",
+          "formula": "si(developpe_noue / regle.largeur_feuille > 1, feuilles_noue, si(developpe_noue / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_noue / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_noue)), feuilles_noue))",
           "partage": true,
           "postes": [
             {
               "id": "pieces",
               "libelle": "{= arrondi_sup(longueur_noue / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_noue|ml}), développé {developpe_noue|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(longueur_noue / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))",
+              "formule": "si(developpe_noue / regle.largeur_feuille > 1, 0, si(developpe_noue / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_noue / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_noue)), 0))",
               "cle": "longueur_noue"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_noue} feuilles",
+              "formule": "si(developpe_noue / regle.largeur_feuille > 1, feuilles_noue, si(developpe_noue / regle.largeur_feuille > 0, 0, feuilles_noue))",
+              "cle": "feuilles_noue"
             }
           ],
           "unit": "u",
@@ -12706,6 +12979,34 @@
                 "pieces de 2 m",
                 "elements de 2 m"
               ]
+            }
+          ]
+        },
+        {
+          "key": "feuilles_aretier",
+          "label": "Feuilles de zinc pour l'arêtier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Pour l'arêtier, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
             }
           ]
         },
@@ -13511,14 +13812,20 @@
           "id": "feuilles-aretier-zinc",
           "slot": "feuille",
           "when": "si(aretier_matiere < 2, 9, faconnage) < 2",
-          "formula": "arrondi_sup(arrondi_sup(longueur_aretier / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))",
+          "formula": "si(developpe_aretier / regle.largeur_feuille > 1, feuilles_aretier, si(developpe_aretier / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_aretier / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier)), feuilles_aretier))",
           "partage": true,
           "postes": [
             {
               "id": "pieces",
               "libelle": "{= arrondi_sup(longueur_aretier / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_aretier|ml}), développé {developpe_aretier|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(longueur_aretier / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))",
+              "formule": "si(developpe_aretier / regle.largeur_feuille > 1, 0, si(developpe_aretier / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_aretier / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier)), 0))",
               "cle": "longueur_aretier"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_aretier} feuilles",
+              "formule": "si(developpe_aretier / regle.largeur_feuille > 1, feuilles_aretier, si(developpe_aretier / regle.largeur_feuille > 0, 0, feuilles_aretier))",
+              "cle": "feuilles_aretier"
             }
           ],
           "unit": "u",
@@ -14105,6 +14412,34 @@
                 "pieces de 2 m",
                 "elements de 2 m"
               ]
+            }
+          ]
+        },
+        {
+          "key": "feuilles_bande",
+          "label": "Feuilles de zinc pour cette bande",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Pour cette bande, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
             }
           ]
         },
@@ -14809,14 +15144,20 @@
           "id": "feuilles-bandes",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+          "formula": "si(developpe / regle.largeur_feuille > 1, feuilles_bande, si(developpe / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe)), feuilles_bande))",
           "partage": true,
           "postes": [
             {
               "id": "pieces",
               "libelle": "{= arrondi_sup(longueur_bande / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_bande|ml}), développé {developpe|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+              "formule": "si(developpe / regle.largeur_feuille > 1, 0, si(developpe / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe)), 0))",
               "cle": "longueur_bande"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_bande} feuilles",
+              "formule": "si(developpe / regle.largeur_feuille > 1, feuilles_bande, si(developpe / regle.largeur_feuille > 0, 0, feuilles_bande))",
+              "cle": "feuilles_bande"
             }
           ],
           "unit": "u",
@@ -14947,6 +15288,34 @@
                 "pieces de 2 m",
                 "elements de 2 m"
               ]
+            }
+          ]
+        },
+        {
+          "key": "feuilles_porte_solin",
+          "label": "Feuilles de zinc pour le porte-solin",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Pour le porte-solin, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
             }
           ]
         },
@@ -15576,14 +15945,20 @@
           "id": "feuilles-porte-solin",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+          "formula": "si(developpe / regle.largeur_feuille > 1, feuilles_porte_solin, si(developpe / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe)), feuilles_porte_solin))",
           "partage": true,
           "postes": [
             {
               "id": "pieces",
               "libelle": "{= arrondi_sup(longueur_bande / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_bande|ml}), développé {developpe|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+              "formule": "si(developpe / regle.largeur_feuille > 1, 0, si(developpe / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe)), 0))",
               "cle": "longueur_bande"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_porte_solin} feuilles",
+              "formule": "si(developpe / regle.largeur_feuille > 1, feuilles_porte_solin, si(developpe / regle.largeur_feuille > 0, 0, feuilles_porte_solin))",
+              "cle": "feuilles_porte_solin"
             }
           ],
           "unit": "u",
@@ -15930,6 +16305,34 @@
                 "pieces de 2 m",
                 "elements de 2 m"
               ]
+            }
+          ]
+        },
+        {
+          "key": "feuilles_cuivre",
+          "label": "Feuilles de zinc pour le cuivre",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Pour le cuivre, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
             }
           ]
         },
@@ -16365,14 +16768,20 @@
           "id": "feuilles-cuivre",
           "slot": "feuille",
           "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
-          "formula": "arrondi_sup(arrondi_sup(ml_cuivre / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))",
+          "formula": "si(developpe_cuivre / regle.largeur_feuille > 1, feuilles_cuivre, si(developpe_cuivre / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(ml_cuivre / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre)), feuilles_cuivre))",
           "partage": true,
           "postes": [
             {
               "id": "pieces",
               "libelle": "{= arrondi_sup(ml_cuivre / longueur_pieces)} pièces de {longueur_pieces|m} ({ml_cuivre|ml}), développé {developpe_cuivre|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(ml_cuivre / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))",
+              "formule": "si(developpe_cuivre / regle.largeur_feuille > 1, 0, si(developpe_cuivre / regle.largeur_feuille > 0, arrondi_sup(arrondi_sup(ml_cuivre / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre)), 0))",
               "cle": "ml_cuivre"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_cuivre} feuilles",
+              "formule": "si(developpe_cuivre / regle.largeur_feuille > 1, feuilles_cuivre, si(developpe_cuivre / regle.largeur_feuille > 0, 0, feuilles_cuivre))",
+              "cle": "feuilles_cuivre"
             }
           ],
           "unit": "u",
@@ -16471,14 +16880,43 @@
           ]
         },
         {
-          "key": "developpe_abergement",
-          "label": "Développé de l'abergement",
-          "unit": "mm",
+          "key": "feuilles_cheminee",
+          "label": "Feuilles de zinc pour l'entourage de ta cheminée",
+          "unit": "u",
           "kind": "site_data",
-          "question": "Abergement : bande de 25, de 33 ou de 40 ?",
-          "hint": "Le développé : la largeur de la feuille avant façonnage.",
+          "question": "Pour l'entourage de ta cheminée, combien de feuilles de zinc te faut-il ?",
+          "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+          "ownOnly": true,
+          "toujoursDemandee": true,
+          "choices": [
+            {
+              "label": "1",
+              "value": "1"
+            },
+            {
+              "label": "2",
+              "value": "2"
+            },
+            {
+              "label": "3",
+              "value": "3"
+            },
+            {
+              "label": "4",
+              "value": "4"
+            }
+          ]
+        },
+        {
+          "key": "largeur_cheminee",
+          "label": "Largeur de la cheminée",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Largeur de la cheminée ?",
+          "neverAsk": true,
+          "silentDefault": true,
           "default": {
-            "value": "330",
+            "value": "0",
             "source": "fondateur-referentiel-2026-10-03",
             "verification": {
               "status": "verified",
@@ -16487,48 +16925,29 @@
               "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
             },
             "version": 1,
-            "note": "« dév. 33 à 40 cm » (§7) : 33 retenu"
-          },
-          "choices": [
-            {
-              "label": "De 25",
-              "value": "250"
+            "note": "le devis n'en parle pas"
+          }
+        },
+        {
+          "key": "profondeur_cheminee",
+          "label": "Profondeur de la cheminée",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Profondeur de la cheminée ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
             },
-            {
-              "label": "De 33",
-              "value": "330"
-            },
-            {
-              "label": "De 40",
-              "value": "400"
-            }
-          ],
-          "textValues": [
-            {
-              "value": "250",
-              "keywords": [
-                "dev 25",
-                "dev. 25",
-                "developpe 25"
-              ]
-            },
-            {
-              "value": "330",
-              "keywords": [
-                "dev 33",
-                "dev. 33",
-                "developpe 33"
-              ]
-            },
-            {
-              "value": "400",
-              "keywords": [
-                "dev 40",
-                "dev. 40",
-                "developpe 40"
-              ]
-            }
-          ]
+            "version": 1,
+            "note": "le devis n'en parle pas"
+          }
         },
         {
           "key": "nb_cheminees",
@@ -17075,6 +17494,84 @@
           "version": 1,
           "note": "« périmètre cheminée × 1,3 en ml de zinc » (§7)."
         },
+        "retour_devant": {
+          "kind": "installation_condition",
+          "value": "0.11",
+          "unit": "m",
+          "source": "recherche-abergement-cheminee-2026-11-23",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-23",
+            "verifiedBy": "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg"
+          },
+          "version": 1,
+          "note": "Devant : largeur de la souche + 10 à 12 cm de chaque côté (guides du ministère de la Culture, ardoises et tuiles plates)."
+        },
+        "retour_derriere": {
+          "kind": "installation_condition",
+          "value": "0.135",
+          "unit": "m",
+          "source": "recherche-abergement-cheminee-2026-11-23",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-23",
+            "verifiedBy": "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg"
+          },
+          "version": 1,
+          "note": "Derrière : largeur de la souche + 12 à 15 cm de chaque côté (guides du ministère de la Culture)."
+        },
+        "developpe_devant": {
+          "kind": "installation_condition",
+          "value": "300",
+          "unit": "mm",
+          "source": "recherche-abergement-cheminee-2026-11-23",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-23",
+            "verifiedBy": "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg"
+          },
+          "version": 1,
+          "note": "Relevé 9 à 10 cm (NF DTU 40.11, 40.41) + bavette 15 à 20 cm sur la couverture : environ 30 cm (déduit)."
+        },
+        "developpe_derriere": {
+          "kind": "installation_condition",
+          "value": "500",
+          "unit": "mm",
+          "source": "recherche-abergement-cheminee-2026-11-23",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-23",
+            "verifiedBy": "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg"
+          },
+          "version": 1,
+          "note": "Relevé 10 à 15 cm + fond de 3 à 4 pureaux + recouvrement 6 cm : environ 50 cm (déduit ; Le Plomb Français : coupé ≈ 500 mm)."
+        },
+        "developpe_cote": {
+          "kind": "installation_condition",
+          "value": "250",
+          "unit": "mm",
+          "source": "recherche-abergement-cheminee-2026-11-23",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-23",
+            "verifiedBy": "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg"
+          },
+          "version": 1,
+          "note": "Côté : couloir de 10 cm + relevé de 9 cm + pince (NF DTU 40.211 §5.5.8.1.1), ou noquets découpés dans une bande de 25 : environ 25 cm (déduit)."
+        },
+        "allonge_cote": {
+          "kind": "installation_condition",
+          "value": "0.2",
+          "unit": "m",
+          "source": "recherche-abergement-cheminee-2026-11-23",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-23",
+            "verifiedBy": "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg"
+          },
+          "version": 1,
+          "note": "Côté : profondeur de la souche + recouvrement de la bavette en bas + retour de la besace en haut (déduit)."
+        },
         "developpe_abergement": {
           "kind": "installation_condition",
           "value": "330",
@@ -17189,20 +17686,38 @@
           "id": "feuilles-abergement",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(arrondi_sup(ml_zinc / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_abergement))",
+          "formula": "si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, nb_cheminees * arrondi_sup((largeur_cheminee + 2 * regle.retour_devant) / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_devant)) + nb_cheminees * arrondi_sup((largeur_cheminee + 2 * regle.retour_derriere) / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_derriere)) + nb_cheminees * 2 * arrondi_sup((profondeur_cheminee + regle.allonge_cote) / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_cote)), feuilles_cheminee), feuilles_cheminee)",
           "partage": true,
           "postes": [
             {
-              "id": "pieces",
-              "libelle": "{= arrondi_sup(ml_zinc / longueur_pieces)} pièces de {longueur_pieces|m} ({ml_zinc|ml}), développé {developpe_abergement|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_abergement))} par feuille",
-              "formule": "arrondi_sup(arrondi_sup(ml_zinc / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_abergement))",
-              "cle": "ml_zinc"
+              "id": "devant",
+              "libelle": "Devant : {largeur_cheminee|m} + 2 retours de 11 cm, bande de 30 cm",
+              "formule": "si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, nb_cheminees * arrondi_sup((largeur_cheminee + 2 * regle.retour_devant) / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_devant)), 0), 0)",
+              "cle": "largeur_cheminee"
+            },
+            {
+              "id": "derriere",
+              "libelle": "Derrière : {largeur_cheminee|m} + 2 retours de 13,5 cm, bande de 50 cm",
+              "formule": "si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, nb_cheminees * arrondi_sup((largeur_cheminee + 2 * regle.retour_derriere) / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_derriere)), 0), 0)"
+            },
+            {
+              "id": "cotes",
+              "libelle": "Côtés : 2 × ({profondeur_cheminee|m} + 20 cm), bandes de 25 cm",
+              "formule": "si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, nb_cheminees * 2 * arrondi_sup((profondeur_cheminee + regle.allonge_cote) / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_cote)), 0), 0)",
+              "cle": "profondeur_cheminee"
+            },
+            {
+              "id": "dites",
+              "libelle": "Ta réponse : {= feuilles_cheminee} feuilles",
+              "formule": "si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, 0, feuilles_cheminee), feuilles_cheminee)",
+              "cle": "feuilles_cheminee"
             }
           ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          "precision": "pour façonner l'abergement de cheminée, développé 33 cm",
+          "precision": "pour façonner l'entourage de la cheminée (devant, derrière, côtés)",
+          "estimate": "Estimation d'après les minimums des règles de l'art : ajuste selon ton façonnage",
           "designation": "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           "precisionRequires": [
             "aspect_zinc"

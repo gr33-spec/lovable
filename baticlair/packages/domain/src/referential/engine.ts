@@ -1141,6 +1141,9 @@ function computeNeed(
           // Une qualité écrite sous « Autre » (« Ardoise d'Angers ») : telle quelle.
           const written = input.params[name]?.text;
           if (written) return written;
+          // Une donnée inconnue (« Je ne sais pas », `inconnu`) ne s'écrit jamais « dév. 0 cm » : un « ? », que la phrase retire.
+          const defInconnu = work.params.find((x) => x.key === name)?.inconnu;
+          if (defInconnu && input.params[name]?.evidence === "Je ne sais pas" && input.params[name]?.value === defInconnu.valeur) return "?";
           const v = valueOf(name);
           // « {nb_descentes|pluriel:descente:descentes} » : le nombre et son nom accordé (« 1 descente », « 2 descentes »).
           if (unitSpec?.startsWith("pluriel:")) {

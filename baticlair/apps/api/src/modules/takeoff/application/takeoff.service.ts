@@ -1552,6 +1552,13 @@ export class TakeoffService {
     if (commune?.exposee) {
       extraFacts.push({ key: "situation", value: "2", unit: "u", evidence: `Commune du chantier au bord de mer (${postalCodeIn(address)}) : situation exposée`, origin: "document" });
     }
+    // Fixation des tuiles (A-INTEGRER §2 ; Greg, 23 novembre 2026 : « la Bretagne d'abord ») : la zone de vent du NF DTU 40.21
+    // par département (22, 29, 56 : vent 3 ; 35 : vent 2) ; ailleurs, rien (la fixation reste « à chiffrer »).
+    const ventBretagne: Record<string, string> = { "22": "3", "29": "3", "56": "3", "35": "2" };
+    const departementVent = postalCodeIn(address)?.slice(0, 2);
+    if (departementVent && ventBretagne[departementVent]) {
+      extraFacts.push({ key: "zone_vent", value: ventBretagne[departementVent]!, unit: "u", evidence: `Département du chantier (${departementVent}) : zone de vent ${ventBretagne[departementVent]} (NF DTU 40.21)`, origin: "document" });
+    }
     if (isCoastal(postalCodeIn(address))) {
       extraFacts.push({ key: "diametre_crochet", value: "2.7", unit: "mm", evidence: `Département littoral (${postalCodeIn(address)}) : crochet inox 2,7 mm`, origin: "document" });
     }

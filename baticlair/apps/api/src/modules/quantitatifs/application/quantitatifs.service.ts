@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -287,6 +287,16 @@ export class QuantitatifsService {
         const text = r.valeur?.trim() ?? null;
         if (text !== null && (text === "" || text.length > 300)) throw validationFailed("Written answer must be 1 to 300 characters", [{ path: `reponses.${i}.valeur`, message: r.question }]);
         reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, preciserKey, text);
+        continue;
+      }
+      // Un doute d'orthographe (Greg, 22 novembre 2026) : « Tu as écrit "…", c'est bien … ? ». La réponse est un des mots
+      // proposés, ou le mot tel qu'écrit ; elle remplace le mot dans la ligne du devis.
+      const orthographeKey = r.question.replace(/^engine:/, "");
+      if (orthographeKey.startsWith(ORTHOGRAPHE_KEY)) {
+        const proposes = (q?.options ?? []).map((o) => o.value);
+        const choisi = r.valeur?.trim() ?? "";
+        if (!q || !proposes.includes(choisi)) throw validationFailed("Choose one of the proposed words", [{ path: `reponses.${i}.valeur`, message: r.question }]);
+        reviewed = await this.takeoffs.answer(tenant, reviewed.takeoff.id, orthographeKey, choisi);
         continue;
       }
       // L'apprentissage (Greg, 24 octobre 2026) : « Annuler » sur une ligne « Ajusté selon tes habitudes ».

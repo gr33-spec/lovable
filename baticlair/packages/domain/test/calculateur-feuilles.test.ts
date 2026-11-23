@@ -43,3 +43,35 @@ describe("le calculateur de feuilles", () => {
     expect(noue.partage).toBe("1");
   });
 });
+
+describe("« Combien de feuilles ? » (Greg, 23 novembre 2026)", () => {
+  const C01 = parseLecture(JSON.parse(readFileSync(new URL("./banc-couverture/C01.json", import.meta.url), "utf8")).lecture)!;
+  const ecran = (answers: Record<string, EngineAnswer>) => ecranDeLecture({ ref, lecture: C01, answers, preferences: {} });
+  const feuilles = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.find((b) => /^Feuilles .*2 × 1 m/.test(b.label));
+
+  it("« Je ne sais pas » au développé : la ligne attend son développé, sans question de plus (pas encore branché, 23 novembre 2026)", () => {
+    const base = { ...PLIE, "param:type_crochet@crochets-ardoise": { value: "1", unit: "u" } } as Record<string, EngineAnswer>;
+    const dev = ecran(base).questions.find((q) => /^param:developpe\b/.test(q.key))!;
+    const e = ecran({ ...base, [dev.key]: null });
+    expect(e.questions.some((x) => /feuilles_faitage/.test(x.key))).toBe(false);
+  });
+
+  it("le nombre de feuilles dit par l'artisan remplace le calcul, dit sous la flèche", () => {
+    const base = { ...PLIE, "param:type_crochet@crochets-ardoise": { value: "1", unit: "u" } } as Record<string, EngineAnswer>;
+    const dev = ecran(base).questions.find((q) => /^param:developpe\b/.test(q.key))!;
+    const e = ecran({ ...base, [dev.key]: { value: "1200", unit: "mm" } });
+    const q = e.questions.find((x) => /feuilles_faitage/.test(x.key))!;
+    expect(q.text).toBe("Pour le faîtage, combien de feuilles de zinc te faut-il ?");
+    expect(q.options?.map((o) => o.label)).toEqual(["1", "2", "3", "4"]);
+    const f = feuilles(ecran({ ...base, [dev.key]: { value: "1200", unit: "mm" }, [q.key]: { value: "3", unit: "u" } }))!;
+    expect(f.quantity).toBe("3 pièces");
+    expect(f.postes?.map((x) => x.texte)).toEqual(["Ta réponse : 3 feuilles"]);
+  });
+
+  it("un développé plus large que la feuille (« Autre » : 120 cm) : la même question", () => {
+    const base = { ...PLIE, "param:type_crochet@crochets-ardoise": { value: "1", unit: "u" } } as Record<string, EngineAnswer>;
+    const dev = ecran(base).questions.find((q) => /^param:developpe\b/.test(q.key))!;
+    const e = ecran({ ...base, [dev.key]: { value: "1200", unit: "mm" } });
+    expect(e.questions.some((x) => /feuilles_faitage/.test(x.key))).toBe(true);
+  });
+});

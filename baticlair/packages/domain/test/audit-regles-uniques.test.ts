@@ -167,7 +167,8 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
     // garde sa règle propre, écrite au §25.2 : « recouvrement 150 mm entre éléments → longueur utile 1,85 m pour 2 m ».
     expect(needs.filter((n) => /\/\s*regle\.longueur_(?!bande_2m|feuille|profil|barre|utile_noue)/.test(n.formula)).map((n) => n.id)).toEqual([]);
     // Toute feuille se compte en bandes découpées dans le mètre de largeur.
-    const feuilles = needs.filter((n) => /^feuilles-/.test(n.id));
+    // L'abergement de cheminée (Greg, 23 novembre 2026) est du sur-mesure : devant, derrière, côtés, ou le nombre dit.
+    const feuilles = needs.filter((n) => /^feuilles-/.test(n.id) && n.id !== "feuilles-abergement");
     expect(feuilles.length).toBeGreaterThan(0);
     // Calculateur de feuilles (Greg, 22 novembre 2026) : une part de feuille, la même formule partout (`partDeFeuille`).
     expect(feuilles.filter((n) => !/arrondi_inf\(regle\.longueur_feuille \/ longueur_pieces\)\)\) \/ max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula) || !n.partage).map((n) => n.id)).toEqual([]);

@@ -73,6 +73,8 @@ const param = z.object({
   textValues: z.array(z.object({ value: str, keywords: z.array(str).min(1) })).optional(),
   fromWorks: z.array(z.object({ value: str, workItems: z.array(str).min(1) })).optional(),
   askOnlyAfter: z.object({ param: str, value: str }).optional(),
+  toujoursDemandee: z.literal(true).optional(),
+  inconnu: z.object({ valeur: str, si: z.object({ param: str, value: str }).optional() }).optional(),
   silentDefault: z.literal(true).optional(),
   onlyFromPrincipal: z.literal(true).optional(),
   ownOnly: z.literal(true).optional(),

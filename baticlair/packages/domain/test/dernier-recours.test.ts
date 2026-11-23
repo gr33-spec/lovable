@@ -104,11 +104,13 @@ describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes 
         nb_cheminees: { value: "2", unit: "u", origin: "devis", evidence: "Devis" },
         perimetre_cheminee: { value: "3", unit: "m", origin: "artisan", evidence: "Réponse" },
         faconnage: { value: "1", unit: "u", origin: "artisan", evidence: "Réponse" },
+        // Règle changée (Greg, 23 novembre 2026) : sans la taille de la souche, l'artisan dit le nombre de feuilles (avant :
+        // 7,8 m de zinc au développé de 33 cm, 3 bandes de 2 m par feuille → 2 feuilles).
+        feuilles_cheminee: { value: "2", unit: "u", origin: "artisan", evidence: "Réponse" },
       },
       products: {},
       mentioned: ["abergement"],
     });
-    // Façonné sur place (§48.6) : 7,8 m de zinc au développé de 33 cm, 3 bandes de 2 m par feuille → 2 feuilles 2 × 1 m.
     expect(order(bobine, "feuilles-abergement")).toBe(2);
     expect(bobine.needs.some((n) => /bobineau/i.test(n.label))).toBe(false);
   });

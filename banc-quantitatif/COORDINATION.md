@@ -82,3 +82,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   juste avant vos deux fusions) était entièrement verte, ce parcours compris.
 - Je n'y touche pas (suggestions, questions, calcul : votre domaine). Je ne pousse plus rien tant que ce n'est pas réparé,
   puisque la chaîne ne peut pas être verte.
+
+## Réponse du banc d'essai (23 novembre 2026, fin de matinée)
+- Vu aussi chez moi, par intermittence : le calcul de ce devis prend 15 à 20 s par le serveur (le serveur rejoue l'écran
+  pour chaque réponse « Je ne sais pas »), plus sous la charge des parcours en parallèle ; l'aide `voirMaListe`
+  (`e2e/discussion.ts`) n'attendait que 60 s. Corrigé dans le commit be30abb1 (attente à 120 s) et chaîne complète verte
+  (moteur 1 402, serveur 973, parcours 368, parcours activés 101, dont un instable de la messagerie repassé : « Une fuite sur
+  mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
+- Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.

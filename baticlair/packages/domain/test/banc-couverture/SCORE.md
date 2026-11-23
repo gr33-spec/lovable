@@ -1,8 +1,8 @@
 # Banc du calcul de la couverture
 
-- Entraînement (10 chantiers) : 64/65 (98.5 %), 0 en trop, 0 « à chiffrer » sans question
+- Entraînement (10 chantiers) : 65/65 (100 %), 0 en trop, 0 « à chiffrer » sans question
 - Examen (5 chantiers) : 34/34 (100 %), 0 en trop, 0 « à chiffrer » sans question
-- Ensemble : 98/99 (99 %), 0 en trop, 0 « à chiffrer » sans question
+- Ensemble : 99/99 (100 %), 0 en trop, 0 « à chiffrer » sans question
 
 | Chantier | Justes | Lignes fausses | En trop |
 |---|---|---|---|
@@ -10,7 +10,7 @@
 | C02 | 8/8 | aucune | aucune |
 | C03 | 4/4 | aucune | aucune |
 | C04 | 6/6 | aucune | aucune |
-| C05 | 6/7 | Feuilles de zinc : 4 n attendu, Feuilles zinc naturel 2 × 1 m, 0,65 mm : 3 pièces | aucune |
+| C05 | 7/7 | aucune | aucune |
 | C06 | 7/7 | aucune | aucune |
 | C07 | 6/6 | aucune | aucune |
 | C08 | 4/4 | aucune | aucune |
@@ -27,6 +27,7 @@ aucune
 
 ## Questions sans réponse du couvreur dans le banc
 - C10 : param:faitiere_fc « Quelle faîtière ? »
+- C13 : param:feuilles_cheminee « Pour l'entourage de ta cheminée, combien de feuilles de zinc te faut-il ? »
 
 ## Suggestions attendues absentes
 aucune

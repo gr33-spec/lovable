@@ -40,8 +40,10 @@ describe("§48.6 : une pièce façonnée sur place = des feuilles 2 × 1 m, jama
     expect(v.questions.map((q) => q.key)).toContain("engine:param:developpe");
   });
 
-  it("abergement de cheminée : 2 × 4 m × 1,3 = 10,4 ml de zinc, développé 33 cm → 2 feuilles", () => {
-    const v = readQuote([{ ref: "1", designation: "Abergement de cheminée zinc", quantity: "2", unit: "u" }], { "param:faconnage": u("1"), "param:perimetre_cheminee": u("4", "m") });
+  // Règle changée (Greg, 23 novembre 2026) : avant, périmètre × 1,3 en ml de zinc → feuilles ; l'abergement est du
+  // sur-mesure : sans la taille de la souche, « combien de feuilles ? » (ici 2), jamais de bobineau.
+  it("abergement de cheminée sans taille de souche : le nombre de feuilles dit par l'artisan, jamais un bobineau", () => {
+    const v = readQuote([{ ref: "1", designation: "Abergement de cheminée zinc", quantity: "2", unit: "u" }], { "param:faconnage": u("1"), "param:feuilles_cheminee": u("2") });
     expect(zinc(v).map(([label, quantity]) => [label, quantity])).toEqual([["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "2 pièces"]]);
   });
 });
