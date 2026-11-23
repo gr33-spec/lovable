@@ -510,6 +510,10 @@
   "param:qualite_ardoise@couverture-ardoises-crochet__4": {
    "bouton": "Espagne 1er choix"
   },
+  "param:feuilles_cheminee": {
+   "valeur": "2",
+   "unite": "u"
+  },
   "param:type_crochet@crochets-ardoise": {
    "bouton": "À pointe"
   },

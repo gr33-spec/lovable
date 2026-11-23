@@ -25,9 +25,9 @@ describe("les clous d'ardoise", () => {
     const q = coche.questions.find((x) => /longueur_rives/.test(x.key));
     expect(q?.text).toBe("Longueur totale de tes rives (en mètres) ?");
     const e = lire({ [SUGGESTIONS_KEY]: CASE, [q!.key]: { value: "28", unit: "m" } });
-    const clous = e.purchase.toBuy.find((b) => /^Clous cuivre/.test(b.label))!;
+    const clous = e.purchase.toBuy.find((b) => /^Clous galva/.test(b.label))!;
     // C01 : ardoise 32×22. Égout 16 m (la gouttière) : 2 × 2 × 16 ÷ 0,22 = 290,9 ; faîtage 8 m : 2 × 8 ÷ 0,22 = 72,7 ;
-    // rives 28 m au pureau du chantier : 2 × 28 ÷ pureau. Vendus en boîtes de 1 kg (≈ 418 clous).
+    // rives 28 m au pureau du chantier : 2 × 28 ÷ pureau. Vendus en boîtes de 1 kg (≈ 653 clous galva ; Greg, 23 novembre 2026 : galva par défaut).
     expect(clous.quantity).toMatch(/^\d+ boîtes? de 1 kg$/);
     expect(clous.postes?.map((x) => x.texte)).toEqual(["Égout : 2 rangs × 2 clous", "Faîtage 8 ml : dernier rang × 2 clous", expect.stringMatching(/^Rives 28 ml × 2 clous$/)]);
   });

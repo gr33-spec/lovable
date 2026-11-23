@@ -58,7 +58,9 @@ const REPONSES_EN_PLUS = {
   C01: { "param:type_crochet@crochets-ardoise": { bouton: "À agrafe" } }, // la fiche vérité et le contrôleur : crochets à agrafe sur liteaux
   // Greg, 21 novembre soir : sans gouttière écrite, « Tes m² d'ardoise comprennent déjà l'égout et les coupes ? ». La fiche
   // vérité de C05 : doublis d'ardoise à l'égout sur 20 m (non, 20 m) ; les jouées de lucarne n'ont pas d'égout (oui).
-  C05: { "param:type_crochet@crochets-ardoise": { bouton: "À pointe" }, "param:egout_compris@couverture-ardoises-crochet__4": { bouton: "Non" }, "param:egout_a_ajouter@couverture-ardoises-crochet__4": { valeur: "20", unite: "m" }, "param:egout_compris@couverture-ardoises-crochet__5": { bouton: "Oui" } },
+  // Greg, 23 novembre 2026 : l'abergement de cheminée est du sur-mesure ; sans la taille de la souche (C05 n'écrit que le
+  // périmètre), on demande « combien de feuilles ? » : 2 (noues 2 + cheminée 2 = les 4 feuilles de la vérité de C05).
+  C05: { "param:feuilles_cheminee": { valeur: "2", unite: "u" }, "param:type_crochet@crochets-ardoise": { bouton: "À pointe" }, "param:egout_compris@couverture-ardoises-crochet__4": { bouton: "Non" }, "param:egout_a_ajouter@couverture-ardoises-crochet__4": { valeur: "20", unite: "m" }, "param:egout_compris@couverture-ardoises-crochet__5": { bouton: "Oui" } },
   C06: { "product:tuile": { valeur: "edilians-canal-50" } }, // la fiche vérité : Edilians Canal 50 ; 85 m² × 11,1 au m² (recouvrement 150) + 3 % = 972 courants et 972 couverts
   C08: { "product:ardoise": { valeur: "ardoise-32x22" }, "param:qualite_ardoise": { bouton: "Espagne 1er choix" }, "param:ardoises_a_prevoir": { valeur: "170" } }, // remaniage : « environ 170 ardoises neuves » (fiche vérité) ; // la fiche vérité : ardoise naturelle d'Espagne 32×22
   C07: { "param:nb_descentes": { bouton: "2" }, "param:hauteur_descente": { valeur: "4", unite: "m" } },

@@ -40,3 +40,18 @@ describe("les chatières", () => {
     expect(e.questions.some((q) => /chatiere/.test(q.key))).toBe(false);
   });
 });
+
+describe("la chatière de la Volnay PV (Greg, 23 novembre 2026)", () => {
+  it("C15 (Volnay PV) : 35 cm² avec grille, le nombre se calcule (avant : sans section, pas de nombre)", () => {
+    const l = lecture("C15");
+    const CASE_C15 = "couverture-tuiles-emboitement/chatiere";
+    // La tuile du devis C15 est la Volnay PV (réponse du couvreur du banc).
+    const answers: Record<string, EngineAnswer> = { [SUGGESTIONS_KEY]: CASE_C15, "product:tuile": "terreal-volnay-pv" };
+    let e = ecranDeLecture({ ref, lecture: l, answers, preferences: {} });
+    const q = e.questions.find((x) => /ecran_sous_toiture/.test(x.key));
+    if (q) answers[q.key] = { value: "1", unit: "u" };
+    e = ecranDeLecture({ ref, lecture: l, answers, preferences: {} });
+    const chat = e.purchase.toBuy.find((b) => /^Chatières/.test(b.label));
+    expect(Number(chat!.quantity!.split(" ")[0]) % 2).toBe(0);
+  });
+});

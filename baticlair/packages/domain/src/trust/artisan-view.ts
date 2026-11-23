@@ -621,6 +621,15 @@ export function computeWithAnswers(
       if (def.kind !== "artisan_preference" || !habit || params[def.key] || answers[`param:${def.key}`] !== undefined || answers[scopedKey(def.key, input.workItemId)] !== undefined || (def.groupe && answers[scopedKey(def.key, def.groupe.id)] !== undefined)) continue;
       params[def.key] = { value: habit, unit: def.unit, origin: "artisan", evidence: "Habitude de votre entreprise" };
     }
+    // « Je ne sais pas » (réponse vide) à une donnée qui dit quoi valoir alors (`inconnu`) : elle prend cette valeur ; la
+    // fiche du métier en tire la suite (« Combien de feuilles ? » pour un développé inconnu).
+    for (const def of work.params) {
+      if (def.inconnu === undefined || params[def.key]?.origin === "devis") continue;
+      // Seulement dans le cas dit (un développé inconnu ne vaut « Combien de feuilles ? » que si l'artisan plie lui-même).
+      if (def.inconnu.si && params[def.inconnu.si.param]?.value !== def.inconnu.si.value) continue;
+      const cles = [`param:${def.key}`, scopedKey(def.key, input.workItemId), ...(def.groupe ? [scopedKey(def.key, def.groupe.id)] : [])];
+      if (cles.some((k) => k in answers && answers[k] === null) && !cles.some((k) => answers[k])) params[def.key] = { value: def.inconnu.valeur, unit: def.unit, origin: "artisan", evidence: "Je ne sais pas" };
+    }
     // §49.1 point 4 : la question consommables vaut pour tout le chantier ; l'habitude de l'artisan (« comme d'habitude ? »)
     // vaut réponse tant que ce chantier n'en a pas donné d'autre.
     const consumables = answers[`param:${CONSUMABLES_KEY}`];

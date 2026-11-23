@@ -283,6 +283,11 @@ export interface ParamDef {
    * après « Non » à « Tes m² comprennent déjà l'égout ? ») : jamais avant, jamais dans une liste de questions d'avance.
    */
   askOnlyAfter?: { param: string; value: string };
+  /**
+   * La valeur que prend la donnée quand l'artisan répond « Je ne sais pas » (Greg, 23 novembre 2026 : un développé inconnu
+   * fait demander « Combien de feuilles ? »). Absente : « Je ne sais pas » laisse la donnée inconnue, comme avant.
+   */
+  inconnu?: { valeur: string; /** Seulement quand une autre donnée de l'ouvrage a cette valeur (« je plie »). */ si?: { param: string; value: string } };
   /** La valeur par défaut ne dit rien à l'artisan (0 m d'arêtier quand le devis n'en a pas) : jamais listée en hypothèse. */
   silentDefault?: true;
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */

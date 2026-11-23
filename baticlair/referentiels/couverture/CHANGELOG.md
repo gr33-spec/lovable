@@ -1,5 +1,17 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.23-83 — Réponses de Greg du 23 novembre 2026
+
+Banc du calcul : 99 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Abergement de cheminée (je plie) | périmètre × 1,3 en ml de zinc, développé 33 → feuilles | sur mesure : sans la taille de la souche, « Pour l'entourage de ta cheminée, combien de feuilles de zinc te faut-il ? » (1, 2, 3, 4, Autre) ; avec la taille, devant (L + 2 × 11 cm, bande de 30) + derrière (L + 2 × 13,5 cm, bande de 50) + côtés (2 × (P + 20 cm), bandes de 25), détail sous la flèche, estimation modifiable | Greg ; cotes déduites des minimums (`recherche/abergement-cheminee-2026-11-23.md`) |
+| Développé inconnu ou plus large que la feuille (je plie) | ligne en attente du développé | « Pour …, combien de feuilles de zinc te faut-il ? » (une question propre à chaque pièce) | Greg, 23 novembre 2026 |
+| Chatière Volnay PV | sans section, pas de nombre | 35 cm² avec grille (613 VPV) | catalogue Terreal, DTA CSTB 5.1/17-2546_V3 |
+| Clous d'ardoise | cuivre 3 × 30 | galvanisé 2,7 × 30 par défaut (≈ 653 au kg) ; un clou apparent doit être inox ou cuivre (DTU 40.11, annexe B), dit à Greg | Greg, 23 novembre 2026 |
+| Moteur | — | « Je ne sais pas » peut valoir une valeur dite par la fiche (`inconnu`) ; `si(...)` ne calcule que la branche retenue | — |
+
 ## roofing-2026.11.22-81 — Chatières calculées d'après le modèle et la surface (A-INTEGRER §1, Greg, 2026-11-22)
 
 | Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |

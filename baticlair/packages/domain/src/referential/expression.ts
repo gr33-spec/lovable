@@ -253,11 +253,10 @@ export function evaluate(expr: Expr, valueOf: (name: string) => DimValue): DimVa
     }
     case "call": {
       if (expr.fn === "si") {
+        // Seule la branche retenue se calcule (une division par un développé nul dans l'autre branche ne casse rien) ; les
+        // dimensions des deux branches sont contrôlées au chargement du référentiel (inferDim).
         const cond = evaluate(expr.args[0]!, valueOf);
-        const yes = evaluate(expr.args[1]!, valueOf);
-        const no = evaluate(expr.args[2]!, valueOf);
-        callDim("si", [cond.dim, yes.dim, no.dim]);
-        return cond.value.isZero() ? no : yes;
+        return cond.value.isZero() ? evaluate(expr.args[2]!, valueOf) : evaluate(expr.args[1]!, valueOf);
       }
       const args = expr.args.map((a) => evaluate(a, valueOf));
       const dim = callDim(

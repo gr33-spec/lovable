@@ -36,6 +36,13 @@ const COMPTOIR: Record<string, string> = {
   fixation_crochet: "« crochets à queue ou bandeau ? »",
   // Greg, 22 novembre 2026 : une fois pour tout le devis, quand il ne le dit pas.
   type_crochet: "« tes crochets d'ardoise : à agrafe ou à pointe ? » quand le devis ne le dit pas",
+  feuilles_noue: "« pour la noue, combien de feuilles de zinc te faut-il ? » quand le développé dépasse la feuille ou n'est pas connu (Greg, 23 novembre 2026)",
+  feuilles_faitage: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
+  feuilles_aretier: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
+  feuilles_bande: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
+  feuilles_porte_solin: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
+  feuilles_cuivre: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
+  feuilles_cheminee: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
   ecran_sous_toiture: "« écran sous toiture ? » pour compter les chatières, quand le devis ne le dit pas (A-INTEGRER §1, 22 novembre 2026)",
   nb_descentes: "le nombre de naissances et de descentes",
   diametre_descente: "« descente de 80 ou de 100 ? »",

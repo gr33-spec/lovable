@@ -942,6 +942,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:feuilles_cheminee",
    "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
@@ -1309,6 +1310,7 @@
    }
   ],
   "questions": [
+   "param:feuilles_cheminee",
    "param:perimetre_cheminee",
    "param:faconnage@pieces-pliees"
   ],
@@ -1743,6 +1745,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:feuilles_cheminee",
    "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
@@ -2171,6 +2174,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:feuilles_cheminee",
    "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
@@ -3216,6 +3220,7 @@
   "questions": [
    "param:perimetre_cheminee",
    "param:developpe",
+   "param:feuilles_cheminee",
    "param:faconnage@pieces-pliees"
   ],
   "aChiffrer": [
