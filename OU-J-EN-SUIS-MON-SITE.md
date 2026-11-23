@@ -37,6 +37,13 @@ Mis à jour : 22 novembre 2026, soir. Session : https://claude.ai/code/session_0
 - Captures : scratchpad `captures-dictee/` (Pixel 7 et ordinateur, clair et sombre). Reste : petit iPhone.
 - RESTE : l'essai de Greg sur son iPhone (Safari peut couper l'écoute après un long silence). Les trois parties sont faites.
 
+## 23 novembre 2026 : EN LIGNE (commit c04c278a, chaîne 130 verte, /version vérifié)
+- Image de Greg sur « Nouveau quantitatif » (titre sous l'image).
+- E-mail pas confirmé : la vraie phrase et « Renvoyer le lien de confirmation » (avant : « Un champ n'est pas correctement rempli »).
+- Site de test : les e-mails de compte (inscription, connexion, mot de passe) partent à la personne elle-même ; le reste
+  (négoces d'abord) reste détourné vers Greg.
+- En attente de Greg : mettre à jour ou retirer l'ancien guide « Revoir le guide » ; essai de la dictée sur son iPhone.
+
 ## Règles en cours (Greg)
 - Jamais main ni production ; aucun e-mail réel à un négoce ; aucun paiement ; aucun appel IA payant hors site de test
   dans `BUDGET_IA_JOUR` ; e-mails réels seulement vers les adresses de Greg ; Stripe test seulement.
