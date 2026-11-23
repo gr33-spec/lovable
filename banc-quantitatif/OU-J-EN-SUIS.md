@@ -2,7 +2,13 @@
 
 Mis à jour : 22 novembre 2026, soir. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
 
-## 23 NOVEMBRE (réponses de Greg du matin) — lot fait sur ma branche, chaîne en cours (cb979f7f)
+## 23 NOVEMBRE (réponses de Greg du matin) — POUSSÉ e121e90e (chaîne verte sur be30abb1), en ligne NON VÉRIFIÉ
+- /version refusé depuis cette machine par le pare-feu de Vercel (`x-vercel-mitigated: deny`), l'API de Vercel illisible :
+  Greg doit regarder /version (site et API = e121e90e) ou lever la règle du pare-feu.
+- « Je ne sais pas » au développé → « Combien de feuilles ? » : DÉBRANCHÉ (la question naît au calcul, l'écran reste sur
+  « Je calcule ta liste… ») ; « Combien de feuilles ? » marche pour un développé plus large que la feuille (« Autre »).
+- Calcul lent : 6 s par le serveur, 15 à 20 s avec des « Je ne sais pas » (l'écran est rejoué pour chaque réponse) ; à
+  accélérer. Parcours : attente portée à 120 s.
 1. Abergement de cheminée sur mesure (-83) : sans la taille de la souche, « Pour l'entourage de ta cheminée, combien de
    feuilles de zinc te faut-il ? » (1 à 4, Autre) ; avec la taille (largeur, profondeur lues au devis), devant + derrière +
    côtés, détail sous la flèche, estimation modifiable. Cotes DÉDUITES des minimums (aucune source ne chiffre la
