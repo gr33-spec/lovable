@@ -1941,6 +1941,30 @@ test("la discussion des questions tient dans l'écran (Greg, 16 novembre 2026) :
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test("e-mail pas encore confirmé (ami de Greg, 23 novembre 2026) : la vraie phrase et « Renvoyer le lien », jamais « Un champ n'est pas correctement rempli »", async ({ page }) => {
+  // Le serveur refuse la lecture tant que l'adresse n'est pas confirmée (garde-fou du 15 novembre) : on simule ce refus, tel
+  // qu'il part en ligne, et l'envoi du lien (rien ne part vraiment).
+  await page.route("**/v1/quantitatifs?ecran=1", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: { code: "validation_failed", details: { reason: "email_non_verifie", phrase: "Confirme d'abord ton adresse e-mail : on t'a envoyé un lien à l'inscription. Ensuite, tu pourras faire analyser tes documents." } } }) });
+  });
+  let lienDemande = false;
+  await page.route("**/v1/auth/send-verification-email", async (route) => {
+    lienDemande = true;
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ status: true }) });
+  });
+  await signUp(page);
+  await createProject(page, "Toiture Le Goff", "M. Le Goff", "3 rue du Port, Lorient");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const lecture = page.getByRole("region", { name: "Lecture du devis" });
+  await expect(lecture.getByRole("alert")).toHaveText(/^Confirme d'abord ton adresse e-mail/, { timeout: 30_000 });
+  await expect(page.getByText("Un champ n'est pas correctement rempli.")).toHaveCount(0);
+  await lecture.getByRole("button", { name: "Renvoyer le lien de confirmation" }).click();
+  await expect(lecture.getByRole("status")).toContainText("C'est envoyé.");
+  expect(lienDemande).toBe(true);
+  await expect(lecture.getByRole("button", { name: "Réessayer" })).toBeVisible();
+});
+
 test("Autre : quand la bonne réponse n'est pas dans les boutons, elle s'écrit dans la barre (une pente de 38°)", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
