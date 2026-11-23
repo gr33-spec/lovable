@@ -4482,6 +4482,76 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   expect(q0.fiche.find((f) => f.cle === "modele_de_la_tuile")).toMatchObject({ valeur: "Tuile H 14 Huguenot, réf. 204 (Edilians)", origine: "reponse" });
 });
 
+test("la dictée du quantitatif (Greg, 22 novembre 2026) : aucun texte pendant qu'on parle, l'onde, le chrono, Arrêter ou Annuler, puis le message en bulle, corrigeable d'un toucher", async ({ page }) => {
+  // Une reconnaissance vocale simulée, en écoute continue : deux morceaux, comme une vraie phrase ; elle ne finit que sur stop().
+  await page.addInitScript(() => {
+    class FausseDictee {
+      lang = "";
+      interimResults = false;
+      continuous = false;
+      onresult: ((e: unknown) => void) | null = null;
+      onerror: ((e: unknown) => void) | null = null;
+      onend: (() => void) | null = null;
+      start() {
+        const w = window as unknown as { dicteeEntendue?: boolean };
+        w.dicteeEntendue = false;
+        setTimeout(() => this.onresult?.({ resultIndex: 0, results: [Object.assign([{ transcript: "j'achète" }], { isFinal: true })] }), 50);
+        setTimeout(() => {
+          this.onresult?.({ resultIndex: 1, results: [Object.assign([{ transcript: "j'achète" }], { isFinal: true }), Object.assign([{ transcript: " tout fait" }], { isFinal: true })] });
+          w.dicteeEntendue = true;
+        }, 120);
+      }
+      stop() {
+        setTimeout(() => this.onend?.(), 20);
+      }
+      abort() {
+        this.onerror?.({ error: "aborted" });
+        this.onend?.();
+      }
+    }
+    (window as unknown as { webkitSpeechRecognition: unknown }).webkitSpeechRecognition = FausseDictee;
+    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FausseDictee;
+  });
+  await signUp(page);
+  await createProject(page, "Toiture Kerbrat", "M. Kerbrat", "4 rue du Port, Lorient");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
+  const questions = zoneDesQuestions(page);
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  await passerLesSuggestions(page);
+  const discussion = page.getByRole("dialog", { name: "Questions de Mobiiz" });
+  const mesMessages = discussion.getByRole("button", { name: /^Corriger mon message : / });
+  const avant = await mesMessages.count();
+
+  // Pendant la dictée : l'onde, le chrono, « Annuler », le gros bouton rouge ; ni case ni texte dicté.
+  await discussion.getByRole("button", { name: "Dicter" }).click();
+  const ecoute = discussion.getByRole("group", { name: "Dictée en cours" });
+  await expect(ecoute).toBeVisible();
+  await expect(ecoute.getByLabel(/^Durée \d+:\d\d$/)).toBeVisible();
+  await expect(ecoute.getByRole("button", { name: "Arrêter la dictée" })).toBeVisible();
+  await expect(discussion.getByRole("textbox")).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { dicteeEntendue?: boolean }).dicteeEntendue)).toBe(true);
+  await expect(discussion.getByText("tout fait")).toHaveCount(0);
+
+  // « Annuler » : rien ne part, la case revient vide.
+  await ecoute.getByRole("button", { name: "Annuler", exact: true }).click();
+  await expect(ecoute).toHaveCount(0);
+  await expect(discussion.getByRole("textbox")).toHaveValue("");
+  await expect(mesMessages).toHaveCount(avant);
+
+  // « Arrêter » : la phrase part comme un message, une seule fois (jamais « j'achète j'achète »), et Mobiiz la comprend.
+  await discussion.getByRole("button", { name: "Dicter" }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { dicteeEntendue?: boolean }).dicteeEntendue)).toBe(true);
+  await ecoute.getByRole("button", { name: "Arrêter la dictée" }).click();
+  const bulle = discussion.getByRole("button", { name: "Corriger mon message : j'achète tout fait", exact: true });
+  await expect(bulle).toBeVisible();
+  await expect(questions.getByText(/^Noté : Je commande façonné/)).toBeVisible();
+
+  // Un toucher sur la bulle : la réponse se rouvre, le texte revient dans la case pour être corrigé.
+  await bulle.click();
+  await expect(discussion.getByRole("textbox")).toHaveValue("j'achète tout fait");
+  await expect(questions.getByText("D'accord, corrige ta réponse et renvoie-la.")).toBeVisible();
+});
+
 test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une réponse écrite va à SA question, confirmée en une ligne, jamais reposée", async ({ page }) => {
   await signUp(page);
   await createProject(page, "Toiture Kervella", "M. Kervella", "2 rue du Port, Lorient");

@@ -49,7 +49,12 @@ export function aideMicro(ua: string): AideMicro {
   return { titre: "Autoriser le micro", etapes: ["Clique sur le cadenas à gauche de l'adresse.", "Micro : choisis « Autoriser ».", "Clique sur « Réessayer » ci-dessous."] };
 }
 
-export function useDictee(surTexte: (texte: string, final: boolean) => void) {
+/**
+ * `continu` (dictée du quantitatif, Greg, 22 novembre 2026) : l'écoute ne s'arrête pas à la première pause, seulement sur
+ * « Arrêter » ; le texte rendu est TOUT ce qui a été dit depuis le début.
+ */
+export function useDictee(surTexte: (texte: string, final: boolean) => void, options: { continu?: boolean } = {}) {
+  const continu = options.continu === true;
   const [ecoute, setEcoute] = useState(false);
   const [probleme, setProbleme] = useState<string | null>(null);
   const rec = useRef<Reconnaissance | null>(null);
@@ -74,13 +79,22 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void) {
       const r = new F();
       r.lang = "fr-FR";
       r.interimResults = true;
-      r.continuous = false;
+      r.continuous = continu;
       r.onresult = (e) => {
         let texte = "";
         let final = false;
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          texte += e.results[i]![0]!.transcript;
+        for (let i = continu ? 0 : e.resultIndex; i < e.results.length; i++) {
+          const morceau = e.results[i]![0]!.transcript;
           final = e.results[i]!.isFinal;
+          if (!continu) {
+            texte += morceau;
+            continue;
+          }
+          // Chrome sur Android, en écoute continue, redonne parfois TOUT ce qui a été dit dans chaque résultat : un
+          // morceau qui reprend le début déjà entendu le remplace au lieu de s'ajouter (jamais une phrase en double).
+          const t = morceau.trim();
+          const deja = texte.trim();
+          texte = deja && t.toLowerCase().startsWith(deja.toLowerCase()) ? t : deja ? `${deja} ${t}` : t;
         }
         rappel.current(texte, final);
       };
@@ -97,7 +111,7 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void) {
       setProbleme(PHRASES_DICTEE.erreur);
       setEcoute(false);
     }
-  }, []);
+  }, [continu]);
 
   /** Annuler : la dictée s'arrête et ce qu'elle avait écrit est retiré par l'appelant (il garde le texte d'avant). */
   const annuler = useCallback(() => {

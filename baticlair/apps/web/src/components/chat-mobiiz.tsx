@@ -229,6 +229,8 @@ export function BarreSaisie({
   avant,
   onPlus,
   invite,
+  onAnnulerDictee,
+  dicteeEnBulle = false,
 }: {
   valeur: string;
   onChange: (v: string) => void;
@@ -238,7 +240,7 @@ export function BarreSaisie({
   probleme: string | null;
   onDicter: () => void;
   onArreter: () => void;
-  /** Gardé pour les appelants : il n'y a plus de bouton « Annuler » pendant la dictée (le carré rouge arrête). */
+  /** « Annuler » de la dictée en bulle (quantitatif, 22 novembre 2026) ; ailleurs, pas d'« Annuler » (le carré rouge arrête). */
   onAnnulerDictee?: () => void;
   /** Ce qui se pose juste au-dessus de la barre (« Annuler la dernière modification »). */
   avant?: React.ReactNode;
@@ -246,6 +248,12 @@ export function BarreSaisie({
   onPlus?: () => void;
   /** Le texte d'attente de la case (« Décris ton besoin… »). */
   invite?: string;
+  /**
+   * LA DICTÉE EN BULLE (quantitatif, Greg, 22 novembre 2026) : pendant que l'artisan parle, aucun texte, mais une onde
+   * jaune qui suit sa voix, un chrono, un gros bouton « Arrêter » et « Annuler » ; à l'arrêt, son message part comme
+   * une bulle (c'est l'appelant qui l'envoie).
+   */
+  dicteeEnBulle?: boolean;
 }) {
   const champ = useRef<HTMLTextAreaElement>(null);
   const ajuster = useCallback(() => {
@@ -275,6 +283,9 @@ export function BarreSaisie({
           Je t&apos;écoute… tu pourras corriger avant d&apos;envoyer.
         </p>
       ) : null}
+      {ecoute && dicteeEnBulle ? (
+        <EcouteEnCours onArreter={onArreter} onAnnuler={onAnnulerDictee ?? onArreter} />
+      ) : (
       <form
         className="flex items-end gap-2 rounded-[28px] p-1.5"
         style={{ backgroundColor: "var(--chat-carte)" }}
@@ -326,6 +337,86 @@ export function BarreSaisie({
           <ArrowUp size={21} strokeWidth={2.4} aria-hidden="true" />
         </button>
       </form>
+      )}
+    </div>
+  );
+}
+
+const BARRES = 28;
+
+/**
+ * L'ÉCOUTE (Greg, 22 novembre 2026) : une onde jaune qui bouge avec la vraie voix (le niveau du micro, lu par le
+ * navigateur, rien n'est enregistré ni envoyé), un petit chrono, un gros bouton « Arrêter » et « Annuler ». Si le
+ * navigateur refuse de donner le niveau, l'onde respire doucement : la dictée, elle, continue.
+ */
+export function EcouteEnCours({ onArreter, onAnnuler }: { onArreter: () => void; onAnnuler: () => void }) {
+  const [secondes, setSecondes] = useState(0);
+  const [niveaux, setNiveaux] = useState<number[]>(() => Array.from({ length: BARRES }, () => 0.15));
+  useEffect(() => {
+    const debut = Date.now();
+    const t = window.setInterval(() => setSecondes(Math.floor((Date.now() - debut) / 1000)), 250);
+    return () => window.clearInterval(t);
+  }, []);
+  useEffect(() => {
+    let fin = false;
+    let image = 0;
+    let flux: MediaStream | null = null;
+    let contexte: AudioContext | null = null;
+    const respirer = () => {
+      const t = Date.now() / 400;
+      setNiveaux(Array.from({ length: BARRES }, (_, i) => 0.18 + 0.12 * (1 + Math.sin(t + i / 2)) / 2));
+      if (!fin) image = requestAnimationFrame(respirer);
+    };
+    (async () => {
+      try {
+        flux = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (fin) return flux.getTracks().forEach((p) => p.stop());
+        const C = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        contexte = new C();
+        const analyse = contexte.createAnalyser();
+        analyse.fftSize = 64;
+        contexte.createMediaStreamSource(flux).connect(analyse);
+        const donnees = new Uint8Array(analyse.frequencyBinCount);
+        const dessiner = () => {
+          analyse.getByteFrequencyData(donnees);
+          setNiveaux(Array.from({ length: BARRES }, (_, i) => Math.max(0.12, Math.min(1, (donnees[Math.min(donnees.length - 1, Math.floor((i / BARRES) * donnees.length * 0.8))] ?? 0) / 200))));
+          if (!fin) image = requestAnimationFrame(dessiner);
+        };
+        dessiner();
+      } catch {
+        respirer();
+      }
+    })();
+    return () => {
+      fin = true;
+      cancelAnimationFrame(image);
+      flux?.getTracks().forEach((p) => p.stop());
+      void contexte?.close().catch(() => undefined);
+    };
+  }, []);
+  const chrono = `${Math.floor(secondes / 60)}:${String(secondes % 60).padStart(2, "0")}`;
+  return (
+    <div role="group" aria-label="Dictée en cours" className="flex flex-col items-center gap-3 rounded-[28px] px-4 py-4" style={{ backgroundColor: "var(--chat-carte)" }}>
+      <p role="status" className="sr-only">
+        Je t&apos;écoute. Touche « Arrêter » quand tu as fini.
+      </p>
+      <div aria-hidden="true" className="flex h-12 w-full items-center justify-center gap-[3px]">
+        {niveaux.map((n, i) => (
+          <span key={i} className="w-[5px] rounded-full transition-[height] duration-75" style={{ height: `${Math.round(n * 48)}px`, backgroundColor: COULEURS_CHAT.jaune }} />
+        ))}
+      </div>
+      <p className="text-[15px] font-semibold tabular-nums text-[#111111]/70" aria-label={`Durée ${chrono}`}>
+        {chrono}
+      </p>
+      <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center">
+        <button type="button" onClick={onAnnuler} className="pressable min-h-12 min-w-20 justify-self-start rounded-full px-4 text-[16px] font-semibold text-[#111111]/75">
+          Annuler
+        </button>
+        <button type="button" onClick={onArreter} aria-label="Arrêter la dictée" className="pressable flex size-16 items-center justify-center rounded-full bg-[#FF5A3C] text-white shadow-card">
+          <Square size={24} fill="currentColor" aria-hidden="true" />
+        </button>
+        <span aria-hidden="true" />
+      </div>
     </div>
   );
 }

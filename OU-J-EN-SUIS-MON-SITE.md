@@ -30,11 +30,12 @@ Mis à jour : 22 novembre 2026, soir. Session : https://claude.ai/code/session_0
   et ordinateur clair/sombre, chaîne complète, fusion de la branche de test, push, vérifier /version, CLAUDE.md, rapport court.
 - Notifications : une réponse de négoce rattachée allume déjà la cloche ; la pastille de l'onglet Messages compte les non-lus.
 
-## Ensuite : PARTIE 3, la dictée du quantitatif (pas commencée)
-- Pendant la dictée, aucun texte : onde jaune qui suit la vraie voix, petit chrono, gros bouton stop, « Annuler ».
-- À l'arrêt : le message apparaît comme une bulle normale, corrigeable d'un toucher. Le reste du parcours ne change pas.
-- Code existant : `apps/web/src/lib/dictee.ts` (Web Speech API), `components/chat-mobiiz.tsx` (barre « Réponds ici… »,
-  micro), utilisé par `journey.tsx` (questions du quantitatif). Pas de dépendance nouvelle (onde : Web Audio API).
+## PARTIE 3, la dictée du quantitatif : EN LIGNE (commit c216fe0f, chaîne 126 verte, /version vérifié)
+- Fait : `lib/dictee.ts` (écoute continue, pas de doublon Android), `chat-mobiiz.tsx` (`EcouteEnCours` : onde jaune
+  Web Audio, chrono, Annuler, gros bouton rouge centré), `journey.tsx` (à l'arrêt, le message part en bulle ; toucher la
+  bulle la rouvre). Test e2e « la dictée du quantitatif » (téléphone + ordinateur) vert ; assistant inchangé (vert).
+- Captures : scratchpad `captures-dictee/` (Pixel 7 et ordinateur, clair et sombre). Reste : petit iPhone.
+- RESTE : l'essai de Greg sur son iPhone (Safari peut couper l'écoute après un long silence). Les trois parties sont faites.
 
 ## Règles en cours (Greg)
 - Jamais main ni production ; aucun e-mail réel à un négoce ; aucun paiement ; aucun appel IA payant hors site de test
