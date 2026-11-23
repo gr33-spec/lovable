@@ -19,7 +19,11 @@ Fait sur ma branche, dans l'ordre de Greg :
 6. Orthographe (00dfa339) : `lecture/orthographe.ts`, devis remis au propre par le son des mots du métier, doutes en
    questions `orthographe:<mot>` ; 6 chantiers du banc écrits avec des fautes = même liste.
 Banc : 98/99 (C05 feuilles 3 contre 4, à trancher). Points à trancher : `A-TRANCHER.md`, section « NUIT ».
-Chaîne complète lancée sur 7786bf0e (tout sauf l'orthographe) : moteur 1 383 vert ; la suite dans b3ly2a7kz.
+EN LIGNE (vérifié par /version, site ET API) : `96edfa17`, 23 novembre, 2 h 54. Il contient tout ce qui précède, plus la
+messagerie et la dictée des autres discussions (fusionnées). Chaîne verte sur ce commit : moteur 1 393, serveur 972, site
+construit, parcours 368, parcours activés 101, zéro échec.
+Le test serveur du doute d'orthographe a été retiré (le petit devis de test ne passait pas par la lecture) ; le doute est
+testé dans le moteur, par le vrai chemin de lecture. Le chemin complet par le serveur reste à prouver sur un vrai devis.
 
 ## Score
 - Banc du calcul : **98 sur 99** (fiche `roofing-2026.11.22-75`). Objectif de Greg (95 %) atteint.
