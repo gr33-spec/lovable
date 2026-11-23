@@ -1195,7 +1195,13 @@ export function ecranDeLecture(input: {
   const complet = oubliees.length === 0 ? final : { ...final, toQuote: [...final.toQuote, ...oubliees.map((l) => ({ key: `line:${l.id}`, label: l.designation.trim(), measure: mesureDe(l), reason: LIGNE_NON_CHIFFREE, lineIds: [l.id] }))] };
   const dites = new Set(oubliees.map((l) => l.id));
   const sansFourniture = lignes.filter((l) => !l.fourniture && !dites.has(l.id)).map((l) => ({ lineId: l.id, label: l.designation.trim(), measure: mesureDe(l) || null }));
-  return { plan, validation, roles, view, purchase: complet, questions, lignes, sansFourniture, suggestions };
+  // Les doutes d'orthographe (Greg, 22 novembre 2026) sont des questions de la liste aussi : le serveur, l'écran et l'envoi
+  // les voient ; tant qu'ils attendent leur réponse, rien ne part.
+  const doutesDeLaListe = doutesOrthographe
+    .filter((q) => !complet.questions.some((d) => d.key === q.key))
+    .map((q) => ({ key: q.key, state: "missing" as const, title: q.text, text: q.text, lineIds: [] as string[], primary: null, secondary: [], question: q }));
+  const avecDoutes = doutesDeLaListe.length === 0 ? complet : { ...complet, questions: [...doutesDeLaListe, ...complet.questions], canValidate: false };
+  return { plan, validation, roles, view, purchase: avecDoutes, questions, lignes, sansFourniture, suggestions };
 }
 
 interface Asked {
