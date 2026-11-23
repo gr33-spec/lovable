@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../src/platform/config/config.js";
 import { EmailSortantSender } from "../src/platform/email/email-sortant.sender.js";
 import { CapturingEmailSender } from "../src/platform/email/capturing-email.sender.js";
+import { magicLinkEmail, resetPasswordEmail, verificationEmail } from "../src/modules/identity/infrastructure/emails.js";
 import { garder, lienDesabonnement, miseEnPage, PHRASE_REPONSES, PIED_LEGAL } from "../src/platform/email/mise-en-page.js";
 import type { AppLogger } from "../src/platform/logging/logger.js";
 import { ARDOISE, couvreurAvecListe, tacheDuMois } from "./support/cycle.js";
@@ -45,6 +46,15 @@ describe("la liste blanche", () => {
     expect(garder(garde, mail("vrai@negoce.fr"))).toEqual({ to: "greg@exemple.fr", subject: "[TEST → vrai@negoce.fr] Ta commande", text: "Bonjour" });
     expect(garder({ autorises: ["@demo.fr"], redirigerVers: null }, mail("vrai@negoce.fr"))).toBeNull();
     expect(garder(null, mail("vrai@negoce.fr"))).toEqual(mail("vrai@negoce.fr"));
+  });
+  it("RÈGLE CHANGÉE (Greg, 23 novembre 2026) : un e-mail de compte part à la personne elle-même ; une adresse de test et tout autre e-mail restent détournés", () => {
+    const compte = { ...mail("ami.artisan@gmail.com"), compte: true };
+    expect(garder(garde, compte)).toEqual(compte);
+    expect(garder(garde, { ...mail("x@example.fr"), compte: true })?.to).toBe("greg@exemple.fr");
+    expect(garder(garde, { ...mail("y@test"), compte: true })?.to).toBe("greg@exemple.fr");
+    // Un e-mail qui n'est pas de compte (demande de prix, commande) ne part jamais chez un vrai négoce.
+    expect(garder(garde, mail("vrai@negoce.fr"))?.to).toBe("greg@exemple.fr");
+    for (const e of [verificationEmail("a@b.fr", "", "https://x"), resetPasswordEmail("a@b.fr", "", "https://x"), magicLinkEmail("a@b.fr", "https://x")]) expect(e.compte).toBe(true);
   });
   it("le décorateur applique la garde puis la mise en page", async () => {
     const inner = new CapturingEmailSender();

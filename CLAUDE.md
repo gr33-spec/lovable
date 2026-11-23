@@ -416,6 +416,11 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Code : `lib/dictee.ts` (`continu`), `components/chat-mobiiz.tsx` (`EcouteEnCours`, `dicteeEnBulle`), `components/journey.tsx`. Test : `e2e/parcours-artisan.spec.ts`, « la dictée du quantitatif ».
 - À vérifier par Greg sur son iPhone : Safari peut couper l'écoute seul après un long silence (le message part alors tout seul) ; l'onde et la dictée utilisent le micro en même temps.
 
+## Décisions du 23 novembre 2026 : tester comme le jour du lancement
+
+- RÈGLE CHANGÉE (Greg, 23 novembre 2026) : sur le site de test, les e-mails DE COMPTE (validation de l'inscription, lien de connexion, mot de passe oublié) partent à la vraie adresse de la personne, pour qu'un ami qui a le lien valide son inscription tout seul. Avant : détournés vers Greg (« [TEST → …] ») comme tous les autres, et l'ami ne pouvait jamais valider son adresse. Tous les autres e-mails restent détournés vers Greg, ceux des négoces d'abord (jamais d'e-mail réel à un négoce pendant un test). Une adresse réservée aux tests (example.*, exemple.*, .test, .invalid) reste détournée. Code : `TransactionalEmail.compte`, `garder` (`platform/email/mise-en-page.ts`) ; test `apps/api/test/emails-reels.test.ts`.
+- Lecture refusée pour un e-mail pas encore confirmé : l'écran dit la vraie phrase (« Confirme d'abord ton adresse e-mail… ») et propose « Renvoyer le lien de confirmation ». Avant : « Un champ n'est pas correctement rempli » (capture de l'ami de Greg). Parcours `e2e/parcours-artisan.spec.ts`, « e-mail pas encore confirmé ».
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

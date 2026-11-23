@@ -23,6 +23,12 @@ export interface TransactionalEmail {
    * pied, ni lien : un bandeau gris et le texte tel quel (ses liens déjà rendus non cliquables).
    */
   externe?: boolean;
+  /**
+   * Un e-mail DE COMPTE (validation de l'inscription, lien de connexion, mot de passe oublié) : sur le site de test, il part
+   * à la personne elle-même, jamais détourné (Greg, 23 novembre 2026 : « il valide son inscription dans sa propre boîte
+   * mail tout seul, comme le jour où on lancera »). Tous les autres e-mails, ceux des négoces d'abord, restent détournés.
+   */
+  compte?: boolean;
   /** En-têtes ajoutés par la mise en page (List-Unsubscribe). */
   headers?: Record<string, string>;
   /**
