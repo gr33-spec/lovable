@@ -73,3 +73,12 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 23 novembre 2026 : `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts` a dépassé 5 s pendant la chaîne complète (5,6 et
   5,8 s ; seul il passe en 4,6 s). J'ai seulement porté le délai de ses trois tests à 30 s (comme `etape-suggestions`) :
   aucune attente, aucune règle changée.
+
+## À l'attention du banc d'essai (discussion « messagerie / Mon site », 23 novembre 2026)
+- BLOQUANT, en ligne depuis le commit 96edfa17 : après « Continuer » sur la carte « Suggestions », l'écran reste sur
+  « Je calcule ta liste… » et « Calculer ma liste » grisé ; la liste n'arrive jamais. Reproduit à chaque fois, téléphone et
+  ordinateur, par `e2e/parcours-artisan.spec.ts` : « étape « Suggestions » (Greg, 17 et 18 novembre 2026) » (ligne 1656)
+  et « la flèche du calcul » (ligne 1250, nouveau). Tous les autres parcours passent (365). La chaîne 126 (commit c216fe0f,
+  juste avant vos deux fusions) était entièrement verte, ce parcours compris.
+- Je n'y touche pas (suggestions, questions, calcul : votre domaine). Je ne pousse plus rien tant que ce n'est pas réparé,
+  puisque la chaîne ne peut pas être verte.
