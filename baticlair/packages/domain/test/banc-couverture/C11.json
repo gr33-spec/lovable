@@ -388,6 +388,9 @@
    "valeur": "11",
    "unite": "cm"
   },
+  "param:type_crochet@crochets-ardoise": {
+   "bouton": "À agrafe"
+  },
   "param:qualite_ardoise": {
    "bouton": "Espagne 1er choix"
   },
@@ -403,58 +406,37 @@
     "ardoise",
     "!crochet"
    ],
-   "quantite": 6294,
+   "quantite": 6132,
    "unite": "n"
   },
   {
    "article": "Crochets à agrafe",
    "mots": [
     "crochet",
-    "!pointe",
+    "agrafe",
     "!gouttiere"
    ],
-   "quantite": 13,
+   "quantite": 10,
    "unite": "bt"
   },
   {
    "article": "Crochets à pointe",
    "mots": [
     "crochet",
-    "pointe"
+    "pointe",
+    "!gouttiere"
    ],
    "quantite": 2,
-   "unite": "bt",
-   "incertain": "agrafe ou pointe : question pas encore tranchée par Greg (fiche : 20 % de crochets à pointe, boîtes de 700)"
+   "unite": "bt"
   },
   {
-   "article": "Feuilles de zinc (arêtiers)",
+   "article": "Feuilles de zinc (arêtiers, faîtage, noues)",
    "mots": [
     "feuille",
     "zinc"
    ],
-   "quantite": 6,
-   "unite": "n",
-   "groupe": "feuilles"
-  },
-  {
-   "article": "Feuilles de zinc (faîtage)",
-   "mots": [
-    "feuille",
-    "zinc"
-   ],
-   "quantite": 1,
-   "unite": "n",
-   "groupe": "feuilles"
-  },
-  {
-   "article": "Feuilles de zinc (noues)",
-   "mots": [
-    "feuille",
-    "zinc"
-   ],
-   "quantite": 1,
-   "unite": "n",
-   "groupe": "feuilles"
+   "quantite": 7,
+   "unite": "n"
   },
   {
    "article": "Gouttière de 25",

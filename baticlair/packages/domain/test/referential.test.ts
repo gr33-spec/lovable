@@ -81,7 +81,8 @@ describe("référentiel couverture", () => {
   it("règles de calcul validées par le fondateur : tracées (qui, quand) et calculées pour l'artisan", () => {
     expect(REFERENTIEL_COMPLET.products[0]!.attributes.largeur_utile!.verification.status).toBe("verified");
     // Les pointes de liteaux (Suggestion) viennent de la recherche du 20/11/2026 (DTU 40.21, Koramic), pas du fondateur.
-    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs.filter((x) => x.id !== "pointes-liteaux")) {
+    // Les chatières (A-INTEGRER §1, 22 novembre 2026) viennent de la recherche (accessoires-tuiles.json), pas du fondateur.
+    for (const n of REFERENTIEL_COMPLET.workItems[0]!.needs.filter((x) => x.id !== "pointes-liteaux" && x.id !== "chatieres")) {
       expect(n.verification).toMatchObject({ status: "verified", verifiedBy: "Fondateur (couvreur)" });
       expect(n.verification.verifiedAt).toMatch(/^2026-10-0[23]$/);
     }
@@ -106,9 +107,20 @@ describe("référentiel couverture", () => {
     // Démonstration complète : docs/demonstration-regles-tuiles-liteaux.md.
     // La fiche donne 2 décimales (tronquées à 310 et 343 mm, arrondies à 376 mm) : écart toléré < 0,01 ml/m².
     const FICHE_LITEAUX = [["31", 3.22], ["34.3", 2.91], ["37.6", 2.66]] as const;
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier)
+    // le besoin était multiplié par 1,10 (aboutage) → la chute est maintenant la marge propre aux liteaux. Le besoin
+    // (surface ÷ pureau) se compare donc de nouveau directement à la fiche du fabricant.
     for (const [pureau, fiche] of FICHE_LITEAUX) {
-      expect(Math.abs(Number(need(r(pureau), "liteaux").quantity!.value) - fiche)).toBeLessThan(0.01);
+      const calcule = Number(need(r(pureau), "liteaux").quantity!.value);
+      expect(Math.abs(calcule - fiche)).toBeLessThan(0.01);
     }
+    // La commande porte les 10 % de chute (marge de l'emplacement « liteau » de la fiche, gardée ici) :
+    // 100 m² au pureau de 31 cm : 100 ÷ 0,31 = 322,58 ml ; × 1,10 = 354,84 → 355 ml.
+    const avecMarges = computeWorkItem(allVerified(REFERENTIEL_COMPLET), { ...CASE, params: { ...CASE.params, surface: { value: "100", unit: "m2", origin: "devis" }, pureau: { value: "31", unit: "cm", origin: "artisan" } } });
+    expect(need(avecMarges, "liteaux")).toMatchObject({ quantity: { value: "354.84" }, purchase: { order: { count: "355" } } });
+    expect(need(avecMarges, "liteaux").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "10", unit: "%" });
+    // Les contre-liteaux gardent la marge de la famille (5 %).
+    expect(need(avecMarges, "contre-liteaux").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5" });
     // Tuiles : la fiche annonce 9,9 à 12 tuiles/m² (1 décimale) ; le calcul donne 9,92 et 12,04.
     const FICHE_TUILES = [["31", 12], ["37.6", 9.9]] as const;
     for (const [pureau, fiche] of FICHE_TUILES) {
@@ -176,7 +188,9 @@ describe("moteur : ouvrage → besoins → achat", () => {
       purchase: { order: { count: "1306", unit: { many: "pièces" } } },
       provisional: false,
     });
-    // 120 m² ÷ 0,343 m = 349,85 ml, commandés au mètre (350 ml) ; la botte de 50 ml donne l'ordre de grandeur.
+    // 120 m² ÷ 0,343 m = 349,85 ml, commandés au mètre (350 ml) ; la botte de 50 ml donne l'ordre de grandeur (7,0 → 7).
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 384,84 → 349,85 ml,
+    // commande 385 → 350, bottes 8 → 7 : la chute est une marge de la fiche, retirée ici (`sansHypotheses`, aucune marge).
     expect(need(r, "liteaux")).toMatchObject({ quantity: { value: "349.85", unit: "ml" }, origin: "explicit", purchase: { order: { count: "350", unit: { many: "ml" } }, approx: [{ count: "7" }] } });
     // 120 m² ÷ 0,60 m = 200 ml ; absent du devis mais cœur de l'ouvrage (le support n'est jamais oublié) : déduit.
     expect(need(r, "contre-liteaux")).toMatchObject({ quantity: { value: "200", unit: "ml" }, origin: "deduced" });
@@ -224,6 +238,8 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const noUnits: Referential = structuredClone(ref);
     noUnits.products.find((p) => p.id === "liteau-sapin-27x40")!.sellingUnits = [];
     const r = computeWorkItem(noUnits, CASE);
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 384,84 → 349,85 ml
+    // (120 ÷ 0,343 = 349,85 ; la chute est une marge de la fiche, retirée ici par `sansHypotheses`).
     expect(need(r, "liteaux")).toMatchObject({ status: "calculated", quantity: { value: "349.85", unit: "ml" } });
     expect(need(r, "liteaux").purchaseUnavailable).toBe("Conditionnement à confirmer : aucune unité de vente vérifiée pour Liteaux 27×40.");
     // Même chose quand l'unité de vente existe mais n'est pas vérifiée.
@@ -240,7 +256,14 @@ describe("moteur : ouvrage → besoins → achat", () => {
     const r = computeWorkItem(ref, { ...CASE, preferences: { waste: { roof_tile: "5" } } });
     // 1 305,43 × 1,05 = 1 370,70 → 1 371 pièces.
     expect(need(r, "tuiles")).toMatchObject({ quantity: { value: "1370.7" }, purchase: { order: { count: "1371" } } });
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 384,84 → 349,85 ml
+    // (120 ÷ 0,343 = 349,85 ; la marge des tuiles est sans effet sur les liteaux).
     expect(need(r, "liteaux").quantity?.value).toBe("349.85");
+    // La marge réglée par l'artisan passe avant la règle de la fiche (10 % sur l'emplacement « liteau ») :
+    // 120 ÷ 0,343 = 349,854 ml × 1,03 = 360,35 ml (et non × 1,10 = 384,84).
+    const fiche = computeWorkItem(allVerified(REFERENTIEL_COMPLET), { ...CASE, preferences: { waste: { batten: "3" } } });
+    expect(need(fiche, "liteaux").quantity?.value).toBe("360.35");
+    expect(need(fiche, "liteaux").trace.find((t) => t.label === "Marge (votre réglage)")).toMatchObject({ value: "3", origin: "company" });
   });
 
   it("prend la marge la plus précise : réglage artisan (produit, puis famille), sinon règle sourcée (produit, puis famille)", () => {

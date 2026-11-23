@@ -188,6 +188,11 @@ export interface ParamDefault extends Provenance {
   /** Pourquoi, en mots d'artisan (« Pente moyenne d'une toiture »). */
   note?: string;
   /**
+   * Valeur VALIDÉE par le fondateur (les tubes de 2 m) : dite, modifiable, mais elle ne rend pas la ligne « à vérifier »
+   * (Greg, 22 novembre 2026). Sans ce mot, une valeur par défaut est une hypothèse à vérifier.
+   */
+  sur?: true;
+  /**
    * Le devis nomme la chose sans la préciser (« zinc prépatiné » : quartz ou anthra ?) : l'hypothèse ne vaut plus,
    * on demande (règle du comptoir, §47.8). Mots cherchés dans les lignes de l'ouvrage.
    */
@@ -359,7 +364,7 @@ export interface Slot {
    * utilisée sans question, dite à l'artisan dans les hypothèses et modifiable.
    * Elle s'efface dès que le devis nomme un produit.
    */
-  usual?: { text: string; source: string; productShort?: string; productId?: string };
+  usual?: { text: string; source: string; productShort?: string; productId?: string; /** Article par défaut validé (voir `ParamDefault.sur`). */ sur?: true };
   /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
   measureOnly?: true;
   /**
@@ -394,7 +399,7 @@ export interface Slot {
    * `unlessWorks` : pas proposée quand le devis a déjà l'un de ces ouvrages (une sortie de toit écrite).
    * `onlyOnMeasuredWork` : seulement quand l'article principal de l'ouvrage est écrit avec sa surface (une couverture en m²).
    */
-  suggested?: { label: string; vaut?: Record<string, string>; unlessWorks?: string[]; onlyOnMeasuredWork?: true };
+  suggested?: { label: string; vaut?: Record<string, string>; unlessWorks?: string[]; onlyOnMeasuredWork?: true; /** Seulement quand l'un de ces emplacements de l'ouvrage est écrit (les pointes de liteaux : avec les liteaux). */ onlyWith?: string[] };
   /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
@@ -452,6 +457,12 @@ export interface NeedRule extends Provenance {
    */
   precision?: string;
   /**
+   * LE DÉTAIL DU CALCUL, POSTE PAR POSTE (Greg, 22 novembre 2026 : « Surface 150 m² × 39,5 = 5 925 · Arêtiers 12 m × 26 =
+   * 312 · … · Perte 5 % »). Chaque poste : un libellé en mots simples (gabarit comme `precision`), sa formule, et la donnée
+   * qui le règle d'un toucher (`cle`). Leur somme est le besoin avant la perte : le moteur le vérifie. Un poste nul ne se dit pas.
+   */
+  postes?: { id: string; libelle: string; formule: string; cle?: string; /** Dit pour aider, hors du total (« 5 longueurs couvrent 19,88 m »). */ info?: true }[];
+  /**
    * L'unité de vente d'une pièce dont la longueur est une donnée du chantier (Greg, 18 novembre 2026 : « 2 tubes de 3 m »,
    * jamais « 2 pièces ») : deux gabarits, au singulier et au pluriel (« tube de {longueur_tube|m} »).
    */
@@ -484,6 +495,11 @@ export interface NeedRule extends Provenance {
    * Condition d'existence (« faconnage < 2 ») : le besoin n'existe que si elle est vraie. Tant que
    * ses données ne sont pas connues, le besoin existe et pose sa question (« tu façonnes ? »).
    */
+  /**
+   * La ligne reste visible, orange, tant que la donnée de sa condition attend sa réponse (les crochets d'ardoise avant
+   * « Agrafe ou pointe ? ») : seulement si cette donnée ne fait que l'article (`precisionRequires`).
+   */
+  ligneEnAttente?: true;
   when?: string;
   /**
    * §49.1 point 4 : consommable de pose (pointes, vis, pattes, étain, silicone). Il ne sort que si l'artisan a dit OUI à
@@ -497,6 +513,12 @@ export interface NeedRule extends Provenance {
    * phrase (« ajuste selon ton façonnage », §49.6), jusqu'au « C'est bon » de l'artisan.
    */
   estimate?: string;
+  /**
+   * Calculateur de feuilles (Greg, 22 novembre 2026) : le besoin est une PART de feuille (bandes ÷ bandes par feuille), pas
+   * encore arrondie. La liste additionne les parts de toutes les pièces du même article et n'arrondit qu'une fois : les
+   * pièces de plusieurs ouvrages partagent les mêmes feuilles.
+   */
+  partage?: true;
 }
 
 export interface WorkItemType {
@@ -544,6 +566,8 @@ export interface WasteRule extends Provenance {
   family: string;
   product?: string;
   workItem?: string;
+  /** Un seul emplacement de l'ouvrage (les liteaux, pas les contre-liteaux, même s'ils sont de la même famille). */
+  slot?: string;
   /** En pourcentage (« 5 » = 5 %). */
   rate: string;
 }

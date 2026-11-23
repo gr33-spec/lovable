@@ -56,10 +56,15 @@ describe("la liste des fournitures, une couleur par ligne", () => {
   it("une réponse fait passer ses lignes au vert ; la question suivante d'un ouvrage (le développé) vient après", () => {
     // Je façonne, 13 ml : des feuilles 2 × 1 m estimées d'après le développé (§48.6), qui vient alors.
     const apres = readQuote(TEST, { "param:faconnage": u("1") });
+    // Règle changée (Greg, 22 novembre 2026) : une ligne écrite en mètres (13 ml) dont l'article se compte en pièces (les
+    // feuilles) et qui attend une réponse (le développé) n'affiche plus sa mesure comme quantité : elle reste orange avec la
+    // question du développé (avant : elle sortait de l'orange dès le façonnage répondu).
     expect(rows(apres).filter((r) => r.status === "check").map((r) => [label(apres, r), r.decisionKey])).toEqual([
+      ["Bande zinc d'égout", "engine:param:developpe"],
       ["Gouttière zinc demi-ronde", "engine:param:developpe_gouttiere"],
       ["Naissances", "engine:param:nb_descentes"],
     ]);
+    expect(apres.questions.map((d) => d.key)).toContain("engine:param:developpe");
     const tout = readQuote(TEST, TOUT);
     expect(rows(tout).filter((r) => r.status === "check").map((r) => label(tout, r))).toEqual([]);
     expect(rows(tout).filter((r) => r.status === "ok").map((r) => label(tout, r))).toContain("Bobine Quartz-Zinc 0,65 mm, largeur 500 mm");

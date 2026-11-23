@@ -305,7 +305,8 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   // quand une seule ligne la dit ; un nombre lu sur la ligne (« bacs de 4 m ») ne vaut que pour elle.
   const donnees: Record<string, string> = {};
   // Jamais une qualité qui se nomme (l'aspect du zinc d'une bande n'est pas celui de la couverture).
-  for (const p of w.params.filter((x) => x.textValues?.length && !x.named)) {
+  // Ni une donnée propre à sa ligne (`ownOnly` : l'égout d'une jouée n'est pas celui du toit).
+  for (const p of w.params.filter((x) => x.textValues?.length && !x.named && !x.ownOnly)) {
     const ailleurs = toutes.filter((o) => o.ref !== l.ref).map((o) => donneesEcrites([p], o.designation)[p.key]).filter((v): v is string => v !== undefined);
     if (new Set(ailleurs).size === 1) donnees[p.key] = ailleurs[0]!;
   }

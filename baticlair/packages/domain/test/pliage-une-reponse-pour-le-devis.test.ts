@@ -67,8 +67,10 @@ describe("le pliage : une seule réponse pour tout le devis", () => {
     const feuilles = v.toBuy.filter((b) => /^Feuilles .*2 × 1 m/.test(b.label));
     expect(feuilles.map((b) => b.label).sort()).toEqual(["Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", "Feuilles zinc naturel 2 × 1 m, 0,65 mm"]);
     const naturel = feuilles.find((b) => /zinc naturel/.test(b.label))!;
-    // Compté pièce par pièce, puis additionné (chutes non réemployées) : solin 5 ml dév. 25 → 1 ; rive 14 ml dév. 33 → 3 ; faîtage 8 ml dév. 33 → 2.
-    expect(naturel.quantity).toBe("6 pièces");
+    // Règle changée (Greg, 22 novembre 2026, calculateur de feuilles) : les pièces partagent les feuilles, un seul arrondi.
+    // Rive 14 ml + faîtage 8 ml en dév. 33 : 7 + 4 = 11 bandes de 2 m, 3 par feuille (3,67) ; solin 5 ml en dév. 25 : 3 bandes,
+    // 4 par feuille (0,75) ; 4,42 → 5 feuilles. Avant, chaque pièce arrondie à part : 1 + 3 + 2 = 6.
+    expect(naturel.quantity).toBe("5 pièces");
     for (const usage of [/5 ml de bande, développé 25 cm/, /14 ml de bande, développé 33 cm/, /8 ml de faîtage, développé 33 cm/]) expect(naturel.precision, naturel.precision).toMatch(usage);
   });
 

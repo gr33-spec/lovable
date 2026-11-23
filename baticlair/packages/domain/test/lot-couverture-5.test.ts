@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ROOFING_REFERENTIAL } from "../src/index.js";
+import { computeWorkItem, ROOFING_REFERENTIAL } from "../src/index.js";
 import { describeLot, type Metier } from "./support/paquet.js";
 import { readQuote } from "./support/read-quote.js";
-import { readQuoteComplet } from "./support/complet.js";
+import { readQuoteComplet, REFERENTIEL_COMPLET } from "./support/complet.js";
 
 /**
  * LOT COUVERTURE, POINT 5 : ardoise fibres-ciment (§4). Le même calcul que l'ardoise naturelle (ardoises au m² du
@@ -41,14 +41,15 @@ describeLot({
 });
 
 describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous et ses antivents", () => {
-  it("100 m² de 40 × 24 : 2 846 ardoises (27,1/m² + 5 % ; Cedral et Cembrit, avant 27,8 : 2 919), 5 977 clous (× 2,1), 2 989 antivents (× 1,05), 701 ml de liteaux (6,67/m² + 5 %)", () => {
+  it("100 m² de 40 × 24 : 2 846 ardoises (27,1/m² + 5 % ; Cedral et Cembrit, avant 27,8 : 2 919), 5 977 clous (× 2,1), 2 989 antivents (× 1,05), 734 ml de liteaux (6,67/m² + 10 % de chute)", () => {
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 771 → 734 ml (100 × 6,67 × 1,10 = 733,7 → 734).
     const v = readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises fibres-ciment 40x24 bleu-noir", quantity: "100", unit: "m²" }]);
     expect(v.questions).toEqual([]);
     expect(Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]))).toMatchObject({
       "Ardoises fibres-ciment bleu-noir 40×24": "2 846 pièces",
       "Clous inox d'ardoise": "5 977 pièces",
       "Crochets d'antivent": "2 989 pièces",
-      "Liteaux 18×40": "701 ml",
+      "Liteaux 18×40": "734 ml",
     });
   });
 
@@ -60,5 +61,41 @@ describe("ardoise fibres-ciment : le moteur de l'ardoise, ses formats, ses clous
     // Une ardoise naturelle reste une ardoise naturelle (Brest).
     const naturelle = readQuoteComplet([{ ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]);
     expect(naturelle.toBuy.some((b) => /fibres-ciment|antivent/i.test(b.label))).toBe(false);
+  });
+});
+
+describe("règles changées (Greg, 22 novembre 2026) : 10 % de chute sur les liteaux, faîtière fibres-ciment", () => {
+  const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id);
+  it("110 m² de 40 × 24 : 110 × 6,67 × 1,10 = 807,1 → 808 ml de liteaux (hier 848) ; contre-liteaux inchangés", () => {
+    const r = computeWorkItem(REFERENTIEL_COMPLET, {
+      workItemId: "couverture-ardoises-fibres-ciment",
+      params: { surface: { value: "110", unit: "m2", origin: "devis" }, teinte_fc: { value: "1", unit: "u", origin: "devis" } },
+      products: { ardoise: { productId: "ardoise-fc-40x24", origin: "devis" } },
+      mentioned: ["ardoise"],
+    });
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 848 → 808.
+    // Besoin : 110 × 6,67 = 733,7 ml ; + 10 % propres aux liteaux = 807,07 → 808 ml commandés.
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ purchase: { order: { count: "808" } } });
+    expect(Number(need(r, "liteaux-ardoise")!.quantity!.value)).toBeCloseTo(807.07, 1);
+  });
+
+  it("faîtage sur fibres-ciment : « Quelle faîtière ? » puis longueur ÷ longueur utile, arrondi au-dessus ; jamais de crochets de faîtière", () => {
+    const faitage = (extra: Record<string, { value: string; unit: string; origin: "artisan" | "devis" }>) =>
+      computeWorkItem(REFERENTIEL_COMPLET, {
+        workItemId: "faitage",
+        params: { longueur_faitage: { value: "10", unit: "m", origin: "devis" }, faitage_sur_fc: { value: "1", unit: "u", origin: "devis" }, ...extra },
+        products: {},
+        mentioned: ["faitiere"],
+      });
+    const attend = faitage({});
+    expect(need(attend, "faitieres-fibres-ciment")?.status).toBe("question");
+    expect(attend.nextQuestion).toMatchObject({ key: "param:faitiere_fc", text: "Quelle faîtière ?" });
+    // 10 m ÷ 0,33 = 30,3 → 31 ; ÷ 1,10 = 9,1 → 10 ; ÷ 0,49 = 20,4 → 21.
+    for (const [modele, pieces] of [["1", "31"], ["2", "10"], ["3", "21"]] as const) {
+      const r = faitage({ faitiere_fc: { value: modele, unit: "u", origin: "artisan" } });
+      expect(need(r, "faitieres-fibres-ciment"), modele).toMatchObject({ status: "calculated", quantity: { value: pieces } });
+      expect(need(r, "faitieres"), modele).toBeUndefined();
+      expect(need(r, "crochets-faitiere"), modele).toBeUndefined();
+    }
   });
 });

@@ -58,6 +58,8 @@ export interface PurchaseItem {
   rules?: RuleToConfirm[];
   /** §47.3 : les règles encore à confirmer sur ce chantier : la ligne est orange, « Quantité à confirmer : … ». */
   toConfirm?: RuleToConfirm[];
+  /** Le détail du calcul sous la flèche, poste par poste (`NeedResult.postes`) ; jamais dans le PDF ni l'e-mail. */
+  postes?: NonNullable<OwnedNeed["postes"]>;
   /** §49.2.5 « Info manquante » : les questions dont la réponse manque à cette ligne (elle est orange, un tap ouvre la question). */
   waitsOn?: string[];
   /**
@@ -399,6 +401,7 @@ export function supplierTest(designation: string, unit: string | null): string |
  */
 /** Défauts affichés, jamais demandés (§49.4.3 : zone climatique, entraxe, taux de perte, pureau ; situation exposée, lue à la commune). */
 const SHOWN_ONLY = new Set(["param:zone", "param:region_ardoise", "param:entraxe", "param:pureau", "param:situation"]);
+export const DEFAUTS_AFFICHES: ReadonlySet<string> = SHOWN_ONLY;
 
 function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
   const out: RuleToConfirm[] = [];
@@ -411,7 +414,7 @@ function lineRules(key: string, group: readonly OwnedNeed[]): RuleToConfirm[] {
     ...new Map(
       group
         .flatMap((n) => n.assumptions)
-        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key) && !a.shownOnly)
+        .filter((a) => a.key.startsWith("param:") && !a.fromQuote && !a.computed && !a.sur && (a.choices?.length ?? 0) > 1 && !SHOWN_ONLY.has(a.key) && !a.shownOnly)
         .map((a) => [a.key, a]),
     ).values(),
   ];
@@ -456,7 +459,9 @@ function aggregate(
       // pièces (« boîte de 200 »), le compte se refait sur le besoin additionné (108 vis = 1 boîte, pas 1 + 1).
       const contenance = /\bde (\d+)\b/.exec(orders[0].unit.one)?.[1];
       const pieces = group.length > 1 && contenance && quantities.every((q) => q && q.unit === "u") ? quantities.reduce((sum, q) => sum.plus(q!.value), new Decimal(0)) : null;
-      const count = pieces ? pieces.dividedBy(Number(contenance)).toDecimalPlaces(6).ceil() : orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
+      // Les parts de feuille (calculateur de feuilles, Greg, 22 novembre 2026) : additionnées, puis UN arrondi.
+      const parts = group.length > 1 && group.every((n) => n.partage !== undefined) ? group.reduce((sum, n) => sum.plus(n.partage!), new Decimal(0)) : null;
+      const count = parts ? parts.toDecimalPlaces(4).ceil() : pieces ? pieces.dividedBy(Number(contenance)).toDecimalPlaces(6).ceil() : orders.reduce((sum, o) => sum.plus(o!.count), new Decimal(0));
       quantity = unitText(count, orders[0].unit);
       order = { count: count.toFixed(), unit: count.equals(1) ? orders[0].unit.one : orders[0].unit.many };
       // Un article vendu en boîtes dit aussi son nombre de pièces (« 8 boîtes de 500 (3 992 pièces) », Greg, 21 novembre 2026).
@@ -526,6 +531,7 @@ function aggregate(
       lineIds: [...new Set(group.flatMap(owner))],
       state: "ready",
       assumptionKeys: [...new Set(group.flatMap((n) => n.assumptions.map((a) => a.key)))],
+      ...(group.some((n) => n.postes?.length) ? { postes: group.flatMap((n) => n.postes ?? []) } : {}),
       ...(() => {
         const rules = [...group.flatMap((n) => n.toConfirm ?? []), ...lineRules(key, group)].filter((r, i, all) => all.findIndex((x) => x.key === r.key) === i);
         return rules.length > 0 ? { rules } : {};
@@ -709,7 +715,10 @@ export function purchaseView(
     // Le nombre écrit compte des OUVRAGES, pas des articles (« 1 descente », dont la hauteur fait le nombre de tubes) : il
     // n'est jamais montré comme un nombre de pièces ; il se lit dans la précision (banc du calcul, C08, 21 novembre 2026).
     const compteDesOuvrages = work!.params.some((p) => p.fromLineQuantity && p.unit === "u" && p.forSlots?.includes(planned.slot));
-    const measure = compteDesOuvrages || (/^(m2|m²)$/i.test((o.read.unit ?? "").trim()) && supplierTest(label, o.read.unit) !== null);
+    // Une mesure (10 ml de faîtage) dont l'article se compte en pièces (des faîtières) n'est jamais une quantité à commander :
+    // elle se lit dans la précision tant que la réponse manque (banc du calcul, C10, 22 novembre 2026 ; « zéro ligne fausse »).
+    const enPieces = own.some((n) => work!.needs.find((r) => r.id === n.needId)?.unit === "u") && /^(m|ml|m2|m²)$/i.test((o.read.unit ?? "").trim());
+    const measure = compteDesOuvrages || enPieces || (/^(m2|m²)$/i.test((o.read.unit ?? "").trim()) && supplierTest(label, o.read.unit) !== null);
     const written = o.read.quantity && !measure ? writtenQuantity(o.read.quantity, o.read.unit) : null;
     const said = [o.read.quantity, o.read.unit === "m2" ? "m²" : o.read.unit].filter(Boolean).join(" ");
     toBuy.push({

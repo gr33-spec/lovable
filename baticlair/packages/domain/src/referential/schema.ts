@@ -64,7 +64,7 @@ const param = z.object({
   labelGap: z.number().int().min(1).max(6).optional(),
   textRange: z.object({ min: str, max: str }).optional(),
   bareNumber: z.literal(true).optional(),
-  default: z.object({ ...provenance, value: z.string().optional(), formula: z.string().optional(), unlessText: z.array(str).optional(), whenGiven: z.object({ param: str, formula: str, note: str }).optional() }).optional(),
+  default: z.object({ ...provenance, value: z.string().optional(), formula: z.string().optional(), sur: z.literal(true).optional(), unlessText: z.array(str).optional(), whenGiven: z.object({ param: str, formula: str, note: str }).optional() }).optional(),
   choices: z.array(choice).optional(),
   estimate: z.string().optional(),
   display: z.record(str, str).optional(),
@@ -87,17 +87,17 @@ const slot = z.object({
   label: str,
   keywords: z.array(str).optional(),
   ask: z.string().optional(),
-  usual: z.object({ text: str, source: str, productShort: z.string().optional(), productId: z.string().optional() }).optional(),
+  usual: z.object({ text: str, source: str, productShort: z.string().optional(), productId: z.string().optional(), sur: z.literal(true).optional() }).optional(),
   measureOnly: z.literal(true).optional(),
   orderedAsWritten: z.literal(true).optional(),
   charsFrom: z.string().optional(),
   formOf: z.string().optional(),
   indissociable: z.literal(true).optional(),
-  suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional(), unlessWorks: z.array(str).min(1).optional(), onlyOnMeasuredWork: z.literal(true).optional() }).strict().optional(),
+  suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional(), unlessWorks: z.array(str).min(1).optional(), onlyOnMeasuredWork: z.literal(true).optional(), onlyWith: z.array(str).min(1).optional() }).strict().optional(),
   piecesFrom: z.object({ count: str, length: str, piece: z.object({ one: str, many: str }).optional() }).optional(),
   citedBy: z.array(str).optional(),
 });
-const need = z.object({ ...provenance, id: str, slot: str, short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), covers: z.string().optional(), precision: z.string().optional(), pieceUnit: z.object({ one: str, many: str }).strict().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional(), consumable: z.literal(true).optional(), consumableFor: z.string().optional(), estimate: z.string().optional() });
+const need = z.object({ ...provenance, id: str, slot: str, ligneEnAttente: z.literal(true).optional(), postes: z.array(z.object({ id: str, libelle: str, formule: str, cle: z.string().optional(), info: z.literal(true).optional() }).strict()).optional(), short: z.string().optional(), formula: str, unit: str, core: z.boolean(), exclusions: z.string().optional(), covers: z.string().optional(), precision: z.string().optional(), pieceUnit: z.object({ one: str, many: str }).strict().optional(), basis: z.string().optional(), precisionRequires: z.array(str).optional(), designation: z.string().optional(), offer: z.object({ unlessQuoteSays: z.array(str).optional() }).optional(), requires: z.array(str).optional(), when: z.string().optional(), consumable: z.literal(true).optional(), consumableFor: z.string().optional(), estimate: z.string().optional(), partage: z.literal(true).optional() });
 const workItem = z.object({
   id: str,
   trade: str,
@@ -113,7 +113,7 @@ const workItem = z.object({
   points: z.record(str, points).optional(),
   needs: z.array(need).min(1),
 });
-const wasteRule = z.object({ ...provenance, family: str, product: z.string().optional(), workItem: z.string().optional(), rate: z.string().regex(/^\d+(\.\d+)?$/) });
+const wasteRule = z.object({ ...provenance, family: str, product: z.string().optional(), workItem: z.string().optional(), slot: z.string().optional(), rate: z.string().regex(/^\d+(\.\d+)?$/) });
 const countedWork = z.object({ key: str, label: z.object({ one: str, many: str }), keywords: z.array(str).min(1) });
 
 export const referentialSchema = z.object({

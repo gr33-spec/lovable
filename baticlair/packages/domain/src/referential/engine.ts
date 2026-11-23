@@ -62,6 +62,8 @@ export interface Assumption {
   computed?: true;
   /** Donnée que la fiche interdit de demander (`neverAsk` : le pureau, la largeur de bobine) : un défaut affiché, jamais à confirmer. */
   shownOnly?: true;
+  /** Valeur par défaut validée par le fondateur (`ParamDefault.sur`, `usual.sur`) : jamais « à vérifier » à elle seule. */
+  sur?: true;
 }
 
 /**
@@ -292,6 +294,10 @@ export interface NeedResult {
   exclusions?: string;
   /** Colonne « précision » de la demande de devis (§45.3). */
   precision?: string;
+  /** Le détail du calcul, poste par poste, puis la perte (voir `NeedRule.postes`). */
+  /** Une part de feuille, à additionner avec les autres pièces du même article avant l'arrondi (`NeedRule.partage`). */
+  partage?: string;
+  postes?: { id: string; texte: string; valeur: string; unite: string; cle?: string; perte?: true; info?: true; /** La mesure que le poste utilise, à corriger d'un toucher. */ mesure?: { valeur: string; unite: string }; /** Mesure réécrite par l'artisan : « modifié par toi ». */ modifie?: true }[];
   /** Comment la quantité se compte (« pour 10 ml de gouttière, un tous les 50 cm + 1 en bout »), pour dire un écart avec le devis. */
   basis?: string;
   /** Cité par une ligne de pose sans être chiffré (le mot qui le cite : « fixation ») : la ligne sort orange (§49.6). */
@@ -677,7 +683,7 @@ function computeNeed(
       if (o === "default") {
         const usual = slot.usual!;
         trace.push({ label: "Produit", value: product.shortLabel, unit: "", from: `Par défaut : ${usual.text}`, origin: "assumption", verified: true });
-        assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text });
+        assume({ key: `product:${slot.key}`, label: slot.label, value: product.shortLabel, unit: "", note: usual.text, ...(usual.sur ? { sur: true as const } : {}) });
       } else if (o === "declined") {
         // Pas d'hypothèse à re-poser : l'artisan a déjà dit qu'aucun modèle proposé ne convenait.
         trace.push({ label: "Produit", value: `${product.shortLabel} (modèle à préciser)`, unit: "", from: "Aucun des modèles proposés ne convient : le fournisseur propose le sien pour cette quantité", origin: "project", verified: true });
@@ -861,7 +867,7 @@ function computeNeed(
       // Une valeur par défaut qui ne dit rien (« le devis n'en parle pas » : 0 m d'arêtier) n'est ni tracée ni dite en hypothèse.
       if (!def.silentDefault) {
         trace.push({ label: def.label, value, unit: def.unit, ...displayed(def, d.value), ...(def.estimate ? { estimation: true } : {}), from: `Hypothèse${note ? ` : ${note}` : ""} (${prov.from})`, verified: prov.verified, ...(prov.url ? { url: prov.url } : {}), origin: "assumption" });
-        assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
+        assume({ key: `param:${def.key}`, label: def.label, value: displayed(def, d.value).shown ?? value, unit: def.unit, ...(note ? { note } : {}), ...(def.choices ? { choices: def.choices } : {}), ...(def.named ? { named: true as const } : {}), ...(def.neverAsk ? { shownOnly: true as const } : {}), ...(d.sur ? { sur: true as const } : {}), ...(from ? { fromQuote: true as const } : !from && d.formula ? { computed: true as const } : {}) });
       }
       return v;
     }
@@ -1031,7 +1037,10 @@ function computeNeed(
       // le rampant fait 5,5 m) n'est pas un manque : elle ne doit ni s'afficher « inconnue » ni devenir une question.
       const missingBefore = missing.length;
       const w = evaluateInterval(parseFormula(rule.when), valueOf);
-      if (!isPoint(w) && missing[0]) throw new Stop({ status: "question", question: missing[0].question });
+      // Sauf pour la ligne « en attente » (calcul de la quantité seule) d'un besoin dont la donnée indécise ne fait que son
+      // article (`precisionRequires`) : la ligne reste, orange, avec sa question (les crochets avant « Agrafe ou pointe ? »).
+      const articleSeul = options.quantityOnly === true && rule.ligneEnAttente === true && missing[0] !== undefined && (rule.precisionRequires ?? []).includes(missing[0].key);
+      if (!isPoint(w) && missing[0] && !articleSeul) throw new Stop({ status: "question", question: missing[0].question });
       missing.splice(missingBefore);
     }
     const raw = evaluateInterval(expr, valueOf);
@@ -1049,9 +1058,10 @@ function computeNeed(
           w.family === slot.family &&
           (w.product === undefined || w.product === product?.id) &&
           (w.workItem === undefined || w.workItem === work.id) &&
+          (w.slot === undefined || w.slot === slot.key) &&
           (w.verification.status === "verified" || options.acceptDraft),
       )
-      .sort((a, b) => Number(b.product !== undefined) * 2 + Number(b.workItem !== undefined) - (Number(a.product !== undefined) * 2 + Number(a.workItem !== undefined)))[0];
+      .sort((a, b) => Number(b.product !== undefined) * 4 + Number(b.slot !== undefined) * 2 + Number(b.workItem !== undefined) - (Number(a.product !== undefined) * 4 + Number(a.slot !== undefined) * 2 + Number(a.workItem !== undefined)))[0];
     let factor = new Decimal(1);
     if (companyRate !== undefined) {
       factor = new Decimal(companyRate).dividedBy(100).plus(1);
@@ -1168,6 +1178,52 @@ function computeNeed(
     // Greg, 18 novembre 2026 : jamais « développé ? » dans une ligne ; la donnée qui manque se demande, elle ne s'écrit pas.
     const precision = rule.precision ? render(rule.precision, unknownParams.length > 0, true)?.replace(/,\s*[^,;]*\s\?(?=\s*(?:;|$))/g, "") : undefined;
     const basis = rule.basis ? render(rule.basis, false, true) : undefined;
+    // La mesure d'un poste (sa donnée) : la valeur lue, répondue ou par défaut, pour la corriger d'un toucher.
+    const mesureDe = (cle: string | undefined): { mesure?: { valeur: string; unite: string }; modifie?: true } => {
+      if (!cle) return {};
+      const def = work.params.find((x) => x.key === cle);
+      const given = input.params[cle];
+      const valeur = given?.value ?? (input.askInstead?.includes(cle) ? undefined : def?.default?.value);
+      if (!def || valeur === undefined) return {};
+      return { mesure: { valeur, unite: given?.unit ?? def.unit }, ...(given?.origin === "artisan" ? { modifie: true as const } : {}) };
+    };
+    // Le détail du calcul (`postes`) : calculé seulement quand le besoin est exact ; leur somme doit faire le besoin.
+    const postes = (() => {
+      if (!exact) return undefined;
+      const out: NonNullable<NeedResult["postes"]> = [];
+      // Sans postes écrits dans la fiche : un seul poste, la précision de la ligne (le même affichage partout).
+      if (!rule.postes) {
+        const besoin = raw.lo.dividedBy(needUnit.factor);
+        out.push({ id: "calcul", texte: (precision ?? basis ?? rule.exclusions ?? rule.slot).replace(/\s*\+\s*[\d,]+\s*%\s*de marge\s*$/, ""), valeur: besoin.toDecimalPlaces(2).toFixed(), unite: rule.unit });
+        if (!factor.equals(1)) out.push({ id: "perte", texte: `Perte ${fr(factor.minus(1).times(100))} %`, valeur: besoin.times(factor.minus(1)).toDecimalPlaces(2).toFixed(), unite: rule.unit, perte: true });
+        return out;
+      }
+      let somme = new Decimal(0);
+      for (const p of rule.postes) {
+        const [tl, ml, al] = [trace.length, missing.length, assumptions.length];
+        try {
+          const v = evaluateInterval(parseFormula(p.formule), valueOf);
+          if (!isPoint(v)) return undefined;
+          const val = v.lo.dividedBy(needUnit.factor);
+          if (!p.info) somme = somme.plus(val);
+          // « {= formule} » dans un libellé : un petit calcul dit en chiffres (« {= nombre de longueurs - 1} longueurs »).
+          const libelle = p.libelle.replace(/\{=\s*([^}]+)\}/g, (_m, f: string) => {
+            const x = evaluateInterval(parseFormula(f), valueOf);
+            return isPoint(x) ? fr(x.lo) : "?";
+          });
+          if (!val.isZero()) out.push({ id: p.id, texte: (render(libelle, true, true) ?? libelle).replace(/\s+\?(?=\s|,|$)/g, ""), valeur: val.toDecimalPlaces(2).toFixed(), unite: rule.unit, ...(p.cle ? { cle: `param:${p.cle}@${input.workItemId}` } : {}), ...(p.info ? { info: true as const } : {}), ...mesureDe(p.cle) });
+        } catch {
+          return undefined;
+        } finally {
+          trace.splice(tl);
+          missing.splice(ml);
+          assumptions.splice(al);
+        }
+      }
+      if (somme.minus(raw.lo.dividedBy(needUnit.factor)).abs().greaterThan("0.01")) throw new FormulaError(`Les postes du besoin ${rule.id} ne font pas son total`);
+      if (!factor.equals(1)) out.push({ id: "perte", texte: `Perte ${fr(factor.minus(1).times(100))} %`, valeur: raw.lo.dividedBy(needUnit.factor).times(factor.minus(1)).toDecimalPlaces(2).toFixed(), unite: rule.unit, perte: true });
+      return out;
+    })();
     // Une désignation calculée (« Bobineau 500 × 17 m, 0,65 ») remplace le nom du produit générique.
     // Elle s'écrit dès que SES données sont connues (le développé inconnu ne change pas un bobineau de 500 mm).
     const designation = rule.designation ? render(rule.designation, options.blankUnknown === true && options.quantityOnly === true) : undefined;
@@ -1185,6 +1241,8 @@ function computeNeed(
       ...(withQuote ? { labelWithQuote: withQuote } : {}),
       ...(precision !== undefined ? { precision } : {}),
       ...(basis !== undefined ? { basis } : {}),
+      ...(postes ? { postes } : {}),
+      ...(rule.partage && exact ? { partage: need.lo.toDecimalPlaces(6).toFixed() } : {}),
       ...(unknownParams.length > 0 ? { unknownParams } : {}),
       status: "calculated",
       ...(exact

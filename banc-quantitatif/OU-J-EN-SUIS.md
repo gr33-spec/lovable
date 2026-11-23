@@ -1,13 +1,31 @@
 # Où j'en suis (banc du calcul) — à lire en premier à chaque reprise
 
-Mis à jour : 21 novembre 2026, soir. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
+Mis à jour : 22 novembre 2026, soir. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
+
+## NUIT DU 22 AU 23 NOVEMBRE (Greg : « enchaîne les lots, pousse si toute la chaîne est verte et /version bon »)
+Fait sur ma branche, dans l'ordre de Greg :
+1. Crochets agrafe / pointe : déjà fait (-77), tests serveur mis à jour par l'agent (5 fichiers verts).
+2. Calculateur de feuilles de zinc (-79) : longueur des pièces 1 m / 2 m (une question pour le devis, 2 m par défaut),
+   part de feuille additionnée sur la liste puis UN arrondi (pièces partagées), développé de l'abergement (25/33/40),
+   détail sous la flèche. C11 : 7 feuilles (avant 6+1+1). D-2026-020 : 2 feuilles (avant 3).
+3. Suggestions par catégorie (Couverture, Zinguerie, Fixations, Ventilation, Fenêtres de toit, Autres), 20 au plus, titres
+   et comptes repliables dans la carte.
+4. A-INTEGRER §3 clous d'ardoise en Suggestion (-80) ; §1 chatières (-81, `cos_deg` et cm² au moteur) ; §2 fixation des
+   tuiles PAS faite (A-TRANCHER n° 10).
+5. Flèche (déjà faite) + apparence d'après la maquette de Greg (`maquettes/fournitures-greg-2026-11-22.png`) : lignes
+   plates, point et quantité à droite, crayon carré, « Voir le calcul » et « Valider / Préciser » sous la ligne, bandeau
+   « Quantités à vérifier », « Aperçu » et « Demander les prix ». Coordination : `COORDINATION.md` (la messagerie ne touche
+   pas la liste).
+6. Orthographe (00dfa339) : `lecture/orthographe.ts`, devis remis au propre par le son des mots du métier, doutes en
+   questions `orthographe:<mot>` ; 6 chantiers du banc écrits avec des fautes = même liste.
+Banc : 98/99 (C05 feuilles 3 contre 4, à trancher). Points à trancher : `A-TRANCHER.md`, section « NUIT ».
+Chaîne complète lancée sur 7786bf0e (tout sauf l'orthographe) : moteur 1 383 vert ; la suite dans b3ly2a7kz.
 
 ## Score
-- Banc du calcul : **88 sur 100** (fiche `roofing-2026.11.21-70`, poussée sur ma branche) : entraînement 54/64, examen 34/36,
-  0 en trop. Objectif : 95 %.
+- Banc du calcul : **98 sur 99** (fiche `roofing-2026.11.22-75`). Objectif de Greg (95 %) atteint.
 - Rejouer : `cd baticlair/packages/domain && npx vitest run test/banc-couverture.test.ts` ; enregistrer : `BANC_MAJ=1 …` ;
   voir un chantier : `BANC_VOIR=C05 … --reporter=verbose`. La liste juste : `cd banc-quantitatif && node outils/exporter-banc.mjs`.
-- Dernière chaîne complète verte (fiche -68) : moteur 1305, serveur 921, site construit, parcours 350 (2 mis à jour).
+- Dernière chaîne complète verte : fiche -74 (fusion), moteur 1331, serveur 921, parcours 359 (22 novembre).
 
 ## Consignes en cours (Greg)
 - RIEN sur la branche de test ni sur test.mobiiz.fr sans son accord : rapport d'abord. Pousser sur
@@ -84,7 +102,137 @@ recouvrement avec la note ; crochets en boîtes avec le nombre de pièces ; rive
   de « l'article s'adapte au matériau » : à dire à Greg) ; la Suggestion « Sortie de ventilation » (AJOUT 1) reste à faire.
   Moteur 1305 verts ; serveur et parcours PAS rejoués depuis la fiche -69.
 
-## DERNIER ÉTAT (22 novembre, après-midi) : fiche `roofing-2026.11.22-74` (fusion de la branche de test)
+## LOT DE LA FLÈCHE (Greg, 22 novembre au soir) — FAIT SUR MA BRANCHE, chaîne en cours
+Consignes de Greg (à faire ENSEMBLE) :
+1. « À vérifier » seulement si la ligne repose sur une valeur par défaut ou une hypothèse incertaine, et la flèche dit
+   laquelle ; une ligne calculée avec des règles validées et les infos du devis : « Calculé ». (Aujourd'hui tout est « à
+   vérifier », même tasseaux et couvre-joints.) La branche de test n'avait pas encore la note de l'autre discussion le
+   22 novembre à 17 h : travaillé d'après le message de Greg.
+2. Écran « Fournitures » d'après la maquette de Greg (NON reçue par cette discussion : fait d'après sa description) : ligne
+   compacte (nom en gras, précision dessous, point de couleur, quantité, crayon) ; « Autres fournitures » repliées en bas ;
+   en bas « Aperçu » et « Demander les prix » ; le crayon ouvre une feuille du bas : « Modifier la quantité », nom, quantité
+   et unité, « Calcul proposé » (le détail de la flèche, chaque poste corrigeable), « Enregistrer ». Rien ne disparaît :
+   « Envoyer une partie », valider une ligne, la retirer, changer son nom, ajouter un article, « N lignes à vérifier », la
+   bulle de première utilisation, « modifié par toi ». Captures petit iPhone + ordinateur, clair + sombre, AVANT de pousser.
+3. Le détail (AJOUT 2) : postes en mots simples, chaque poste corrigeable, total recalculé, « modifié par toi », valeurs par
+   défaut signalées, lucarnes = réponse de l'artisan, ardoise et tuile plate d'abord puis toutes les lignes ; gouttière :
+   « 5 longueurs couvrent 19,88 m ». Jamais dans le PDF ni l'e-mail.
+Plan : (a) moteur : `postes` sur un besoin (fiche), calculés et vérifiés (somme = besoin), + la perte ; (b) état
+« calcule » / « a_verifier » par ligne avec ses raisons ; (c) API : postes et état dans la vue ; (d) écran ; (e) captures ;
+(f) chaîne complète ; (g) rapport à Greg, il valide seul ce qui part.
+FAIT sur ma branche (commits a0e75817 → 7fa232e3, fiche -78) :
+- (a)(b)(c) moteur, état, API : faits. Clé d'un poste = `param:<donnée>@<ouvrage>` (une correction ne vaut que pour son
+  ouvrage). Un produit pris par défaut dont le format est écrit sur la ligne (« Ardoises naturelles 32×22 ») n'est pas un
+  défaut ; un autre se dit « Ardoises 32×22 : modèle par défaut ».
+- (d) écran (`supply-list.tsx`) : point de couleur (vert, orange, jaune = modifié par toi) à la place de la bordure ; petite
+  flèche « Voir le calcul : … » qui déroule les postes (« Surface 48 m² × 42,09 au m² = 2 020 », « Perte 5 % = 105 ») et les
+  raisons ; bulle « Touche la flèche pour voir le calcul » une seule fois (appareil, `mobiiz.bulle-calcul`) ; crayon → feuille
+  du bas (« Modifier la quantité », nom, précision, − / + et unité, « Calcul proposé » avec une case par donnée, la question
+  de la ligne, nom, précision, croquis, retirer, « Enregistrer ») ; « Autres fournitures » (consommables et divers) repliées
+  en bas, jamais une ligne orange ni une ligne déjà partie à part ; « Modifié par toi » aussi sur une ligne orange.
+  Règle changée : une ligne « Calculé » / « Dit par toi » ne porte plus en plus « à vérifier » (point 31 du 27 octobre).
+  Gardé : « Demander les prix à mes négoces » (pas « Demander les prix ») : mot validé le 28 octobre, à confirmer par Greg.
+- Parcours : « la flèche du calcul » (nouveau), §49.8 « Enregistrer » au lieu de « Fermer », feuille dans l'écran, suggestions
+  8 cases (pas de liteaux dans D-2026-020), aide `continuerSansSuggestionParApi` sans case = rien à répondre.
+- Serveur : l'agent a mis les tests à jour (crochets agrafe / pointe, 8 cases), 5 fichiers verts.
+- (e) captures : scratchpad/captures (iPhone 375 et ordinateur, clair et sombre). (f) chaîne complète lancée (b155sn0tb).
+- Défaut vu sur les captures, à traiter : la ligne d'attente des crochets dit « Crochets d'ardoise inox de 11 standard,
+  longueur cm » (mots du devis mal recollés) ; « Une réponse est attendue » ne nomme pas la question.
+
+## EN LIGNE (vérifié par /version) : `b90a279e`, 22 novembre, 16 h 45 UTC
+- Contenu : fiche -74 (banc 96/99, ce qui était déjà en ligne avec 9ceac7d0) + `/version` site et API + tests. Les deux
+  `/version` donnent b90a279e, environnement « test ». Méthode dans CLAUDE.md (Règles de travail).
+- Chaîne avant poussée : moteur 1331, serveur 927 (+ test d'isolation corrigé et relancé), parcours 361 sur 394 passés en
+  entier, puis les 4 parcours retouchés relancés 3 fois sur les deux écrans (33/33). Seuls des tests avaient changé.
+
+## SUR MA BRANCHE, PAS ENCORE EN LIGNE : fiches -75 à -77 (banc 100/101)
+- Liteaux 10 % au total ; contre-liteaux 5 % (validé) ; arêtier zinc 0,50 / fermé 0,66 ; jouées sans égout ; pointes avec
+  les liteaux ; faîtière fibres-ciment ; « J'ai ta liste » ; crochets « Agrafe ou pointe ? » (1/5 à pointe, UNE source).
+- Moteur 1333 vert. Serveur et parcours PAS encore rejoués sur -77 : à faire avant de proposer de pousser.
+
+## 22 NOVEMBRE (fin d'après-midi) — historique
+- Greg : contre-liteaux 5 %, validé. « Vérifier la mise en ligne, c'est à toi » → adresse `/version` (site :
+  `apps/web/src/app/version/route.ts` ; API : `apps/api/src/modules/health/http/version.controller.ts`, aussi `/v1/version`),
+  méthode écrite dans `CLAUDE.md` (Règles de travail). Après chaque poussée : attendre que les DEUX `/version` donnent le
+  commit poussé avant de dire « c'est en ligne ».
+- Les autres discussions avaient les numéros de déploiement Vercel (`dpl_…`, docs/REPRISE.md) : elles avaient un accès Vercel
+  que cette discussion n'a pas.
+- Poussée de `/version` seule en préparation : dossier `/home/user/lot-pousse`, branche locale `version-a-pousser` =
+  9ceac7d0 (en ligne) + d05484b9 (cherry-pick de cbd514b5). Chaîne complète en cours (bases `_lot`). Si verte : pousser,
+  puis attendre les deux `/version`.
+- Lot en cours dans le dossier habituel (fiche à passer en -76) : liteaux 10 % au total (marge par emplacement `slot`,
+  nouveau champ des marges, dans le cœur et générique), arêtier zinc 0,50 / fermé 0,66 (`aretier_ferme`), jouées sans
+  égout (`ownOnly`), pointes seulement avec des liteaux (`suggested.onlyWith`), « J'ai ta liste » sans devis (`devisLu`).
+  Banc 98/99. Tests du moteur confiés à un agent ; recherche crochets à pointe confiée à un agent.
+
+## POUSSÉ SUR LA BRANCHE DE TEST (accord de Greg du 22 novembre, nuit)
+- 22 novembre vers 14 h 10 (UTC) : commit `9ceac7d0` poussé sur `claude/saas-achat-artisans-prompt-1lyihx` = fiche -74 (banc
+  96/99) + pointe de la branche de test (300dd4ab, puis 842c39b2 : documents seulement). Chaîne sur ce code : moteur 1331,
+  serveur 926, site construit, parcours 360 (ordinateur + téléphone), 0 échec. Premier envoi de ma discussion sur cette branche.
+- Vérification : API de test « ok », base « ok », site 200. Le commit servi n'est PAS prouvé (ni l'API ni le site ne disent
+  leur commit ; pas d'accès à Vercel) : à vérifier par Greg dans Vercel (déploiement « Ready » sur 9ceac7d0).
+- Ma branche a fusionné 9ceac7d0 ensuite (bc76f30f).
+
+## À INTÉGRER, confié par la base couverture (`banc-quantitatif/A-INTEGRER.md`, 22 novembre)
+- 1. Chatières : section à atteindre (2 cm²/m² comble perdu ou au-dessus d'un écran ; 3,3 cm²/m² sous l'écran), surface
+  projetée = surface × cos(pente), nombre arrondi au-dessus puis au pair, section par modèle (HP 10 : 50 cm²…) ; modèle
+  inconnu → à chiffrer avec sa question.
+- 2. Fixation des tuiles (en Suggestion) : zone et exposition par la commune, une seule question « Écran sous toiture ? »,
+  tableau NF DTU 40.21 §5.4 pour la partie courante, toujours fixées égout, rives, faîtières, arêtières ; boîtes de 400.
+- 3. Clous d'ardoise (en Suggestion) : 2 clous au doublis, 1er rang, rives, dernier rang sous le faîtage ; au kg.
+
+## RÉPONSES DE GREG DU 22 NOVEMBRE (nuit) — À APPLIQUER
+- « OUI, pousse ce lot sur le site de test » : le lot annoncé prêt = fiche -74 (commit ce07225d, chaîne verte). En cours :
+  dossier à part `/home/user/lot-pousse` (branche locale `lot-a-pousser`), ce07225d + fusion de la pointe de la branche de
+  test (300dd4ab) = f5277c18 ; chaîne complète relancée dessus (bases `baticlair_test_lot`, `baticlair_e2e_lot`). Si verte :
+  `git push origin lot-a-pousser:claude/saas-achat-artisans-prompt-1lyihx`, puis vérifier que site et API servent ce commit.
+  La fiche -75 n'en fait PAS partie (sa règle des liteaux est corrigée ci-dessous).
+- 2. Arêtier en bande zinc : 0,50 m² par mètre, comme la noue (avant : 0,66).
+- 3. Sortie de ventilation écrite sur tuile : tuile à douille + lanterne, validé.
+- 4. Liteaux : 10 % de chute AU TOTAL, pas 10 % en plus des 5 % (corriger la -75).
+- 5. Crochets : devis muet → « Agrafe ou pointe ? ». En pose à agrafe, ajouter quelques crochets à pointe (ceux qui tombent
+  sur les chevrons) : chercher le ratio, deux sources minimum, l'écrire dans la fiche. Boîtes de 500 (agrafe), 700 (pointe),
+  nombre de pièces sur la ligne.
+- 6. Gouttière zinc : on garde 3 cm de croisure par jonction (19,90 ou 20 m → 6 longueurs de 4 m). Sous la flèche : « 5
+  longueurs couvrent 19,88 m », pour repasser à 5 d'un toucher.
+- 7. Fibres-ciment : « Quelle faîtière ? » validé (déjà fait en -75).
+- 8. Jouées de lucarne : pas de question d'égout.
+- Abergement zinc : le calculateur de feuilles (développé + pièces de 1 ou 2 m).
+- À CORRIGER : Suggestions sans limite à 5, rangées PAR CATÉGORIE (ex. Couverture, Zinguerie, Fixations, Ventilation), petit
+  titre et nombre de cases, les plus importantes en haut, une vingtaine au plus, chaque catégorie repliable.
+- À CORRIGER : « Pointes pour liteaux » seulement s'il y a des liteaux dans la liste.
+- À CORRIGER : « J'ai lu ton devis » seulement s'il y a vraiment un devis ; sinon une phrase adaptée.
+- ENSUITE : le lot de la flèche (détail du calcul), puis l'étape 3 (nouvelle lecture des devis). Rapport court après chaque lot.
+
+## DERNIER ÉTAT (22 novembre, soir) : fiche `roofing-2026.11.22-75`
+- **Banc : 98 sur 99 (99 %)** : entraînement 63/64, examen 35/35. Reste faux : feuilles de zinc de l'abergement (C05, 3
+  contre 4) ; crochets à pointe de C11 hors compte (« incertain »).
+- Fait (-75) : liteaux × 1,10 (aboutage) × 1,05 ; faîtière fibres-ciment « Quelle faîtière ? » (Demi-ronde, Angulaire,
+  D'aération ; longueurs utiles Cedral) ; une mesure en mètres d'un article en pièces n'est jamais une quantité.
+- Tests du moteur et du serveur à adapter : confiés à un agent (il ne touche qu'aux tests). Puis : parcours de l'écran
+  COMPLETS (ordinateur + téléphone) AVANT de proposer de pousser (exigence de Greg du 22 novembre).
+
+## Consignes de Greg du 22 novembre (soir)
+- Ne fusionner RIEN dans la branche de test sans son accord. Avant de proposer de pousser : moteur, serveur ET parcours.
+- Vérifié le 22 novembre : AUCUN commit de ma discussion sur la branche de test ; ma branche n'y est pas. La case « Pointes
+  pour liteaux » vient d'une autre discussion (session …eSR2whwoenEzNd4TQZ, commits d03ce052 et 41834731 du 20 novembre,
+  fusion 1f798072 du 21 novembre). L'autre discussion adapte ses 40 parcours ; ne pas m'en occuper.
+- Contre-liteaux : Greg demande s'ils doivent suivre les 10 % d'aboutage → mon avis à lui donner.
+
+## PROCHAIN LOT : calculateur de feuilles de zinc (Greg, 22 novembre), dans la FICHE, pas dans le cœur
+- Zinguerie sur mesure (abergements, bandes, solins, habillages). Par pièce, deux questions à boutons : développé (20, 25,
+  33, 40 cm, « autre ») et longueur des pièces (1 m ou 2 m). La longueur en ml vient du devis.
+- Feuilles de 2 × 1 m : pièces = ml ÷ longueur, arrondi au-dessus ; bandes par feuille = 100 cm ÷ développé, arrondi en
+  dessous ; feuilles = pièces ÷ bandes par feuille, arrondi au-dessus. Ex. 10 ml, pièces de 2 m, dév. 20 → 5 pièces, 5 bandes
+  par feuille → 1 feuille.
+- Regrouper les pièces de même longueur sur les mêmes feuilles quand ça réduit le total.
+- Calcul affiché sous la flèche (« 5 pièces de 2 m × 20 cm = 1 feuille 2 × 1 m »), quantité modifiable.
+- Pas de recouvrement ajouté. Développé > largeur de feuille, ou « je ne sais pas » → « Combien de feuilles ? ».
+- Règle changée à dire : avant, le développé ne se demandait jamais pour des feuilles (Greg, 10 octobre).
+- Idée de mise en œuvre : la fiche dit la feuille (2 × 1 m) et les deux questions ; le cœur n'a qu'un rangement générique
+  de bandes dans des feuilles (aucun mot de couverture). Pour 1 m : deux pièces par bande de 2 m (à vérifier avec Greg).
+
+## État précédent (22 novembre, après-midi) : fiche `roofing-2026.11.22-74` (fusion de la branche de test)
 - Avant fusion, chaîne COMPLÈTE VERTE sur la -73 : moteur 1313, serveur 921, site construit, parcours 354 (ordinateur +
   téléphone), 0 échec.
 - Fusion de `claude/saas-achat-artisans-prompt-1lyihx` (23 commits : suggestions sans limite, pointes de liteaux, fixations,

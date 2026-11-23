@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARRELAGE_REFERENTIAL, PEINTURE_REFERENTIAL } from "../src/index.js";
-import { readQuote } from "./support/read-quote.js";
+import { CROCHETS_A_AGRAFE, readQuote } from "./support/read-quote.js";
 import { readTradeQuote } from "./support/read-trade.js";
 
 /**
@@ -21,13 +21,23 @@ describe("l'envoi attend une liste pleine et sans question", () => {
     expect(p.canValidate).toBe(false);
   });
 
-  it("couverture : Brest attend ses trois réponses avant de partir (qualité d'ardoise, nombre et Ø des descentes de sa naissance)", () => {
+  it("couverture : Brest attend ses quatre réponses avant de partir (qualité d'ardoise, type de crochet, nombre et Ø des descentes de sa naissance)", () => {
     const brest = readQuote([
       { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
       { ref: "2", designation: "Gouttière demi-ronde zinc développé 33", quantity: "24", unit: "ml" },
     ], {}, [], {});
     // Règle numéro un : ni crochets de gouttière ni liteaux non écrits, donc plus leurs questions.
-    expect(brest.questions.filter((q) => q.question)).toHaveLength(3);
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise) : quatre réponses attendues.
+    expect(brest.questions.filter((q) => q.question)).toHaveLength(4);
+    expect(brest.questions.filter((q) => q.question).map((q) => q.question!.key)).toContain("param:type_crochet@crochets-ardoise");
     expect(brest.canValidate).toBe(false);
+    // Les crochets répondus : les trois réponses d'avant attendent toujours.
+    const crochetsRepondus = readQuote([
+      { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" },
+      { ref: "2", designation: "Gouttière demi-ronde zinc développé 33", quantity: "24", unit: "ml" },
+    ], CROCHETS_A_AGRAFE, [], {});
+    expect(crochetsRepondus.questions.filter((q) => q.question)).toHaveLength(3);
+    expect(crochetsRepondus.canValidate).toBe(false);
   });
 });

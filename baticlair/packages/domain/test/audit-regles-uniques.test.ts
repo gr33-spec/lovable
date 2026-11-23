@@ -30,6 +30,9 @@ const MEME_VALEUR_AUTRE_REGLE: Record<string, string> = {
   "650 mm": "Bobineau 650 (bandes) et bobine 650 du joint debout (bacs).",
   "3 u/m": "Pattes de bande zinc (§1, §3) et vis de rive du bac acier (§8).",
   "4 m": "Barre de gouttière zinc (§25.2) et profil PVC ou alu (§15).",
+  // Greg, 22 novembre 2026 : l'arêtier en bande zinc est « compté comme la noue » (0,50 m²/m), mais ce sont deux ouvrages :
+  // l'un peut changer sans l'autre (l'arêtier fermé en ardoises garde 0,66).
+  "0.5 m2/m": "Ardoise de l'arêtier en bande zinc et ardoise de la noue (0,50 m² par mètre, Greg, 22 novembre 2026) : deux ouvrages.",
 };
 /** Noms retirés par l'audit : une seule règle reste (le nom de droite). */
 const RETIRES: Record<string, string> = {
@@ -166,7 +169,8 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
     // Toute feuille se compte en bandes découpées dans le mètre de largeur.
     const feuilles = needs.filter((n) => /^feuilles-/.test(n.id));
     expect(feuilles.length).toBeGreaterThan(0);
-    expect(feuilles.filter((n) => !/regle\.longueur_feuille \* max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula)).map((n) => n.id)).toEqual([]);
+    // Calculateur de feuilles (Greg, 22 novembre 2026) : une part de feuille, la même formule partout (`partDeFeuille`).
+    expect(feuilles.filter((n) => !/arrondi_inf\(regle\.longueur_feuille \/ longueur_pieces\)\)\) \/ max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula) || !n.partage).map((n) => n.id)).toEqual([]);
   });
 
   it("chaque règle cite sa section, et le tableau règle / section / test est à jour", async () => {

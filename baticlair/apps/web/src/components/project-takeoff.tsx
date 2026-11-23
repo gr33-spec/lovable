@@ -276,7 +276,7 @@ export function ProjectTakeoff({
   const suggestions = takeoff.status === "draft" && !archived && phase !== "calcul" && !lotsAConfirmer(takeoff) ? suggestionsAProposer(takeoff) : null;
   // Pendant les questions, c'est la discussion qui montre les cases (sans jamais se fermer) ; ici, seulement une liste déjà
   // calculée dont l'étape n'est pas passée.
-  if (suggestions && phase !== "questions") return <SuggestionsCard options={suggestions} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
+  if (suggestions && phase !== "questions") return <SuggestionsCard options={suggestions} devisLu={takeoff.devisLu !== false} pending={pending} error={actionError} onContinuer={(valeur) => void repondre([{ question: CLE_SUGGESTIONS, valeur }])} />;
   if (phase === "questions" && takeoff.status === "draft" && !archived) {
     // §52 : un devis de plus d'un lot passe d'abord par la carte « Lots repérés » ; « C'est bon » ouvre les questions.
     if (lotsAConfirmer(takeoff)) {

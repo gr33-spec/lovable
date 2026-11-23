@@ -1,5 +1,91 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.22-81 — Chatières calculées d'après le modèle et la surface (A-INTEGRER §1, Greg, 2026-11-22)
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Chatières (tuiles à emboîtement) | rien | case « Chatières (ventilation de la toiture) » (Ventilation) ; cochée ou écrite : surface × cos(pente) × 1/5000 (écran) ou 1/3000 (sans écran) ÷ section de la chatière du modèle, au nombre pair au-dessus ; jamais demandées | NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink ; sections Edilians (`recherche/accessoires-tuiles.json`) |
+| Écran sous toiture | — | « Écran sous toiture ? » (Oui / Non), seulement si le devis n'en dit rien | Greg, 22 novembre 2026 |
+| Section de chatière | — | HP 10 : 50 cm² ; autres modèles du catalogue (Volnay PV) : inconnue, pas de nombre | fiches Edilians 2025-2026 |
+| Moteur | — | fonction `cos_deg` (cosinus d'un angle de 0 à 90°) et unité cm² | — |
+
+## roofing-2026.11.22-80 — Clous d'ardoise naturelle en Suggestion (A-INTEGRER §3, Greg, 2026-11-22)
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Clous d'ardoise naturelle | rien | case « Clous d'ardoise (égout, rives, faîtage) » (Fixations) ; cochée : 2 clous par ardoise au doublis et au 1er rang d'égout, aux rives et au dernier rang du faîtage ; longueurs du devis, la longueur des rives demandée seulement si elle manque | NF DTU 40.11 P1-1 2020 §5.1.3, ministère de la Culture, CAPEB (`recherche/fixations.json`) |
+| Clous au faîtage | 1 par ardoise (skill) | 2 au dernier rang (DTU) | Greg, 22 novembre 2026 |
+| Conditionnement | — | clous cuivre 3 × 30, boîtes de 1 kg (≈ 418 au kg) | Alsafix, ArcelorMittal |
+
+## roofing-2026.11.22-79 — Calculateur de feuilles de zinc (Greg, 2026-11-22)
+
+Banc du calcul : 98 sur 99 (C11 : les trois lignes de feuilles deviennent une, juste ; C05 reste à trancher, voir A-TRANCHER).
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Feuilles 2 × 1 m de plusieurs pièces | chaque pièce arrondie à part, puis additionnées (D-2026-020 : 1 + 1 + 1 = 3) | chaque pièce compte sa part de feuille, la liste additionne et arrondit une fois (16 ml en dév. 25 : 2 feuilles) | Greg, 22 novembre 2026 |
+| Longueur des pièces pliées | toujours 2 m | question « Tes pièces pliées : en longueurs de 2 m ou de 1 m ? » (une fois pour le devis, 2 m par défaut, posée quand elle change la commande) ; 1 m = deux pièces par bande | Greg, 22 novembre 2026 |
+| Développé de l'abergement | 33 cm fixe | donnée « De 25 / De 33 / De 40 », 33 par défaut (§7 « dév. 33 à 40 cm ») | §7, Greg |
+| Détail du calcul des feuilles | une phrase | « 15 pièces de 2 m (30 ml), développé 33 cm, 3 par feuille », la longueur se corrige | Greg, 22 novembre 2026 |
+
+Pas fait (prudence) : « Combien de feuilles ? » quand le développé dépasse 1 m ou est inconnu : la ligne reste « à préciser », avec − / +.
+
+## roofing-2026.11.22-78 — Le détail du calcul et « À vérifier » seulement sur une vraie hypothèse (Greg, 2026-11-22)
+
+Le banc du calcul ne bouge pas (100 sur 101) : rien ne change dans les quantités.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| « À vérifier » sur une ligne calculée | toute ligne qui portait une valeur par défaut, même déduite du devis ou validée | seulement une vraie hypothèse (valeur par défaut non validée), une règle non vérifiée, une estimation ou une réponse attendue ; la raison est dite ; sinon « Calculé » | Greg, 22 novembre 2026 |
+| Valeurs par défaut validées (`sur`) | — | tubes de 2 m, liteaux 18×40, bobine de 650 : dites, modifiables, jamais « à vérifier » à elles seules | Greg (19, 21 et 22 novembre 2026) |
+| Détail du calcul (`postes`) | une phrase | poste par poste : ardoises (surface, arêtiers, noues, faîtage, égout, perte) ; gouttière zinc (longueur, croisures, « 5 longueurs couvriraient 19,88 m ») ; un poste par défaut ailleurs | Greg, 22 novembre 2026 |
+
+## roofing-2026.11.22-77 — Crochets d'ardoise : à agrafe ou à pointe (Greg, 2026-11-22)
+
+Le banc du calcul passe à 100 lignes justes sur 101 (99 %) ; examen 36 sur 36.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Type de crochet non écrit au devis | aucune question ; un crochet par ardoise, boîtes de 500 | une question pour tout le devis : « Tes crochets d'ardoise : à agrafe ou à pointe ? » | Greg, 22 novembre 2026 |
+| Pose à agrafe | — | 4 ardoises sur 5 au crochet à agrafe (boîtes de 500) + 1 sur 5 au crochet à pointe, au droit des chevrons (boîtes de 700) | Greg, 22 novembre 2026 ; manuel du CAP couvreur, ch. 21 (« 4/5 de crochets-agrafes ; 1/5 de crochets-pointes ») : UNE seule source chiffrée |
+| Pose à pointe | — | un crochet à pointe par ardoise, boîtes de 700 | Greg ; Chausson, Frénéhard (boîtes de 700, Ø 2,7, 7 à 14 cm) |
+| Exemple : 4 107 ardoises, à agrafe | 9 boîtes de 500 | 3 286 agrafes (7 boîtes de 500) + 822 pointes (2 boîtes de 700) | |
+
+- Tant que la question attend : une ligne « Crochets d'ardoise », un par ardoise, orange, avec sa question (jamais de ligne disparue).
+- Mots du devis reconnus : « agrafe », « à agrafer », « pression », « ressort » ; « à pointe », « à piquer », « passe-chevron »,
+  « pour volige », « crochet double » (recherche `recherche/crochets-pointe-et-agrafe-2026-11-22.md`).
+- Cœur : une ligne peut rester visible en attente de sa condition (`ligneEnAttente`), seulement si la donnée ne fait que son
+  article ; une question posée une fois pour le devis n'apparaît plus en double sous son nom simple.
+
+## roofing-2026.11.22-76 — Réponses de Greg du 22 novembre (nuit) : liteaux, arêtier zinc, jouées, pointes (2026-11-22)
+
+Le banc du calcul reste à 98 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Liteaux | besoin × 1,10 × 1,05 (fiche -75) | besoin × 1,10 : « 10 % de chute au total, pas 10 % en plus des 5 % » | Greg, 22 novembre 2026 |
+| Exemple : 110 m² de fibres-ciment 40×24 | 848 ml | 808 ml | 110 × 6,67 × 1,10 |
+| Contre-liteaux | 5 % | inchangé : 5 % | Greg, 22 novembre 2026 (« d'accord, 5 % ») |
+| Ardoises : arêtier en bande zinc | 0,66 m² par mètre | 0,50 m² par mètre, comme la noue ; arêtier fermé en ardoises (« biaises », « fermé » écrits) : 0,66 | Greg, 22 novembre 2026 ; manuel du CAP couvreur |
+| Jouées de lucarne en ardoise | question « Tes m² comprennent déjà l'égout ? » | aucune question d'égout (le mot « jouée » sur la ligne) | Greg, 22 novembre 2026 |
+| « Pointes pour liteaux » (Suggestions) | sur toute couverture | seulement si des liteaux sont écrits | Greg, 22 novembre 2026 |
+
+- Cœur (générique) : une marge peut viser un seul emplacement (`slot` dans `wasteRules`) ; une donnée « propre à sa ligne » (`ownOnly`) n'est plus prêtée par les mots d'une autre ligne ; une suggestion peut exiger un article écrit (`suggested.onlyWith`).
+- Écran : la carte des suggestions et la discussion disent « J'ai ta liste » quand aucun devis n'a été lu (avant : « J'ai lu ton devis » toujours).
+
+## roofing-2026.11.22-75 — Liteaux : 10 % de chute d'aboutage ; faîtière fibres-ciment demandée (Greg, 2026-11-22)
+
+Le banc du calcul passe de 96 à 98 lignes justes sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Liteaux (tuiles, tuile canal, ardoises, fibres-ciment) | besoin + 5 % de casse et de coupes | besoin × 1,10 (chute d'aboutage) × 1,05 | Greg, 22 novembre 2026 (« 10 % de chute d'aboutage, validé ») |
+| Exemple : 110 m² de fibres-ciment 40×24 | 771 ml | 848 ml | 110 × 6,67 × 1,10 × 1,05 |
+| Contre-liteaux | 5 % | inchangé : 5 % | à trancher par Greg |
+| Faîtage sur ardoises fibres-ciment, modèle non écrit | 3 faîtières de tuile au mètre (10 m : 30) | question « Quelle faîtière ? » (Demi-ronde, Angulaire, D'aération), puis longueur ÷ longueur utile, à la pièce au-dessus (10 m angulaire : 10) | Greg, 22 novembre 2026 ; longueurs utiles Cedral : 330, 1 100, 490 mm |
+
+- Une ligne écrite en mètres dont l'article se compte en pièces (« Faîtage, 10 ml ») n'affiche plus « 10 ml » comme quantité tant que la réponse manque : sans quantité, « 10 ml au devis » en précision.
+
 ## roofing-2026.11.22-74 — Fusion de la branche de test (suggestions sans limite, pointes de liteaux, fixations) dans le banc du calcul (2026-11-22)
 
 - Réunit la fiche `roofing-2026.11.22-73` (banc du calcul) et la fiche `roofing-2026.11.20-63` de la branche de test : leurs

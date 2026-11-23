@@ -20,7 +20,7 @@ beforeEach(async () => {
   ctx.emails.clear();
 });
 
-type Ecran = { suggestions: { key: string; label: string }[]; purchase: { toBuy: { label: string }[] } };
+type Ecran = { suggestions: { key: string; label: string; categorie?: string }[]; purchase: { toBuy: { label: string }[] } };
 async function chantier(agent: Agent) {
   const res = await agent.post("/v1/quantitatifs").field("reference", "Extension ardoise").field("adresse", "3 rue du Port, 22620 Ploubazlanec").attach("file", Buffer.from(await D2026_020_PDF()), { filename: "devis.pdf", contentType: "application/pdf" });
   expect(res.status, JSON.stringify(res.body).slice(0, 300)).toBe(201);
@@ -34,34 +34,36 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
     const { projetId } = await chantier(agent);
     const e = await ecran(agent, projetId);
+    // Règle changée (Greg, 22 novembre 2026) : rangées par catégorie (Couverture, Zinguerie, Fixations, Ventilation…), une
+    // vingtaine au plus (avant : l'ordre de la fiche). « Pointes pour liteaux » : seulement s'il y a des liteaux (ce devis
+    // n'en écrit pas). Les clous d'ardoise en case (A-INTEGRER §3, 22 novembre 2026).
     expect(e.suggestions).toEqual([
-      // Skill du fondateur : « Pointes pour liteaux… : en Suggestion » (une par croisement, fixations.json).
-      { key: "couverture-ardoises-crochet/pointe", label: "Pointes pour liteaux" },
-      // Greg, 21 novembre 2026 (soir) : sur toute couverture écrite avec sa surface et sans sortie de toit au devis.
-      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)" },
-      { key: "gouttiere/naissance", label: "Naissances de gouttière" },
-      { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)" },
-      { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)" },
-      // Skill du fondateur : « Dauphin, cuvette, jonctions : en Suggestion » (le devis n'en dit rien).
-      { key: "descente/dauphin", label: "Dauphins (pied de descente)" },
-      // Greg, 18 novembre 2026 : les consommables en cases (plus jamais d'office, plus de question oui / non).
-      { key: "bandes-zinc/mastic+bande-porte-solin/mastic", label: "Cartouches de silicone zinc" },
-      { key: "bandes-zinc/vis", label: "Vis inox 4 × 40" },
-      { key: "faitage-zinc/patte", label: "Pattes de fixation" },
+      // Zinguerie ; skill du fondateur : dauphin en Suggestion ; Greg, 18 novembre 2026 : les consommables en cases.
+      { key: "gouttiere/naissance", label: "Naissances de gouttière", categorie: "Zinguerie" },
+      { key: "gouttiere/talon", label: "Talons de gouttière (si tu ne les fabriques pas)", categorie: "Zinguerie" },
+      { key: "gouttiere/angle", label: "Angles de gouttière (si tu ne les fabriques pas)", categorie: "Zinguerie" },
+      { key: "descente/dauphin", label: "Dauphins (pied de descente)", categorie: "Zinguerie" },
+      { key: "bandes-zinc/mastic+bande-porte-solin/mastic", label: "Cartouches de silicone zinc", categorie: "Zinguerie" },
+      // Fixations
+      { key: "couverture-ardoises-crochet/clou", label: "Clous d'ardoise (égout, rives, faîtage)", categorie: "Fixations" },
+      { key: "bandes-zinc/vis", label: "Vis inox 4 × 40", categorie: "Fixations" },
+      { key: "faitage-zinc/patte", label: "Pattes de fixation", categorie: "Fixations" },
+      // Ventilation (Greg, 21 novembre 2026, soir : sur toute couverture écrite avec sa surface, sans sortie de toit au devis)
+      { key: "couverture-ardoises-crochet/sortie_ventilation", label: "Sortie de ventilation (VMC, extraction d'air)", categorie: "Ventilation" },
     ]);
     expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle|silicone|vis inox|pattes/i);
     // Plus de question oui / non sur les consommables.
     const q = (await agent.get(`/v1/quantitatifs/${(await chantier(agent)).id}`)).body as { questions: { id: string; texte: string }[] };
     expect(q.questions.map((x) => `${x.id} ${x.texte}`).join(" | ")).not.toMatch(/consommables/i);
-  }, 30_000);
+  }, 60000); // Lecture du PDF D-2026-020 : plus de 5 s quand la machine est chargée (même limite que commande-claire-negoce).
 
   it("une case qui n'a pas été proposée est refusée ; rien ne change", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
     const { id, projetId } = await chantier(agent);
     expect((await repondre(agent, id, "gouttiere/etain")).status).toBe(400);
     expect((await repondre(agent, id, "couverture-ardoise/liteau")).status).toBe(400);
-    expect((await ecran(agent, projetId)).suggestions).toHaveLength(9); // Greg, 21 novembre 2026 : la sortie de ventilation en plus (avant 8).
-  });
+    expect((await ecran(agent, projetId)).suggestions).toHaveLength(9); // Greg, 22 novembre 2026 : les clous d'ardoise en plus (avant 8) ; Greg, 21 novembre 2026 : la sortie de ventilation en plus (avant 8) ; Greg, 22 novembre 2026 : « Pointes pour liteaux » seulement s'il y a des liteaux dans la liste (avant 9).
+  }, 60000); // Lecture du PDF D-2026-020 : plus de 5 s quand la machine est chargée (même limite que commande-claire-negoce).
 
   it("naissances cochées : elles entrent dans la liste, l'étape est close ; talons et angles n'existent pas", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
@@ -74,7 +76,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     expect(noms).not.toMatch(/talon|angle/i);
     // Répondue une fois : l'étape ne se rouvre pas.
     expect((await repondre(agent, id, "gouttiere/talon")).status).toBe(400);
-  });
+  }, 60000); // Lecture du PDF D-2026-020 : plus de 5 s quand la machine est chargée (même limite que commande-claire-negoce).
 
   it("le silicone coché (une case pour deux pièces) entre dans la liste, sur une ligne ; les vis, non cochées, n'existent pas", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
@@ -86,7 +88,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     expect(noms.filter((n) => /silicone/i.test(n))).toHaveLength(1);
     expect(noms.join(" | ")).toMatch(/Naissances/);
     expect(noms.join(" | ")).not.toMatch(/vis inox|pattes/i);
-  });
+  }, 60000); // Lecture du PDF D-2026-020 : plus de 5 s quand la machine est chargée (même limite que commande-claire-negoce).
 
   it("« aucune » : la liste reste telle que le devis la dit, et l'étape est close", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "BATI INVEST");
@@ -95,7 +97,7 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const e = await ecran(agent, projetId);
     expect(e.suggestions).toEqual([]);
     expect(e.purchase.toBuy.map((b) => b.label).join(" | ")).not.toMatch(/naissance|talon|angle/i);
-  });
+  }, 60000); // Lecture du PDF D-2026-020 : plus de 5 s quand la machine est chargée (même limite que commande-claire-negoce).
 
   it("naissance cochée, puis « je ne sais pas » au nombre de descentes : la ligne garde ses boutons, jamais orange sans réglage (§51.6)", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
@@ -117,5 +119,5 @@ describe("l'étape « Suggestions » : proposée par la fiche, répondue une foi
     const b = await signUpWithCompany(ctx.app, "b@example.fr", "Toitures Martin");
     const { id } = await chantier(a.agent);
     expect((await repondre(b.agent, id, "gouttiere/naissance")).status).toBe(404);
-  });
+  }, 60000); // Lecture du PDF D-2026-020 : plus de 5 s quand la machine est chargée (même limite que commande-claire-negoce).
 });

@@ -16,22 +16,29 @@ const ARDOISE_SANS_REPONSE: WorkItemInput = {
   params: {
     surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 2" },
     qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" },
+    // Les clous d'ardoise (A-INTEGRER §3, 22 novembre 2026), calculés ici avec tous les articles : la longueur des rives
+    // est lue au devis (sinon elle se demande, case cochée).
+    longueur_rives: { value: "20", unit: "m", origin: "devis", evidence: "Devis, ligne 3" },
   },
   products: { ardoise: { productId: "ardoise-30x22", origin: "devis" } },
   mentioned: ["ardoise", "liteau"],
 };
 // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
 // Répondu « Oui » (les m² comprennent déjà l'égout et les coupes) : rien n'est ajouté, les quantités d'avant restent.
-const ARDOISE: WorkItemInput = { ...ARDOISE_SANS_REPONSE, params: { ...ARDOISE_SANS_REPONSE.params, egout_compris: { value: "1", unit: "u", origin: "artisan" } } };
+// Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+// crochet par ardoise). Répondu « À agrafe ».
+const ARDOISE: WorkItemInput = { ...ARDOISE_SANS_REPONSE, params: { ...ARDOISE_SANS_REPONSE.params, egout_compris: { value: "1", unit: "u", origin: "artisan" }, type_crochet: { value: "1", unit: "u", origin: "artisan" } } };
 
 describe("hypothèses par défaut : utilisées sans question, dites, modifiables", () => {
   it("pente 45°, zone littorale, rampant ≤ 5,5 m, entraxe 60 cm : le devis ne dit rien, tout se calcule quand même", () => {
     // Règle changée (Greg, 21 novembre 2026) : avant, aucune question → l'égout se demande quand aucune gouttière n'est écrite.
     const ouverture = computeWorkItem(REFERENTIEL_COMPLET, ARDOISE_SANS_REPONSE);
     expect(ouverture.nextQuestion).toMatchObject({ key: "param:egout_compris", text: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", options: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }] });
-    // La seule question : tout ce qui attend, attend elle.
-    expect([...new Set(ouverture.needs.filter((n) => n.status !== "calculated").map((n) => n.question?.key))]).toEqual(["param:egout_compris"]);
-    // « Oui » : tout se calcule comme avant.
+    // Deux questions : tout ce qui attend, attend l'une ou l'autre. Règle changée (Greg, 22 novembre 2026) : sans type de
+    // crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un crochet par ardoise).
+    expect([...new Set(ouverture.needs.filter((n) => n.status !== "calculated").map((n) => n.question?.key))]).toEqual(["param:egout_compris", "param:type_crochet"]);
+    expect(ouverture.needs.find((n) => n.question?.key === "param:type_crochet")!.question).toMatchObject({ options: [{ label: "À agrafe", value: "1" }, { label: "À pointe", value: "2" }] });
+    // « Oui » et « À agrafe » : tout se calcule.
     const r = computeWorkItem(REFERENTIEL_COMPLET, ARDOISE);
     expect(r.nextQuestion).toBeNull();
     for (const n of r.needs) expect(n.status).toBe("calculated");
@@ -100,7 +107,8 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
       products: { tuile: { productId: "edilians-hp10-huguenot", origin: "artisan" } },
       mentioned: ["tuile"],
     };
-    expect(computeWorkItem(REFERENTIEL_COMPLET, tuiles).needs.map((n) => n.needId)).toEqual(["tuiles", "liteaux", "pointes-liteaux", "contre-liteaux", "ecran"]);
+    // Les chatières (A-INTEGRER §1, 22 novembre 2026) : elles ont leurs données (surface, pente, modèle) ; seules les rives manquent.
+    expect(computeWorkItem(REFERENTIEL_COMPLET, tuiles).needs.map((n) => n.needId)).toEqual(["tuiles", "liteaux", "pointes-liteaux", "chatieres", "contre-liteaux", "ecran"]);
     const withRives = computeWorkItem(REFERENTIEL_COMPLET, { ...tuiles, params: { ...tuiles.params, longueur_rives: { value: "24", unit: "m", origin: "devis" } } });
     // Pureau : rampant 5,5 m (hypothèse) partagé en 15 rangs entiers au pureau maxi de 0,376 m → 0,3667 m (fiche couverture,
     // 2026-11-19 ; avant : pureau mini 0,31 m en zone littorale). 24 m / 0,3667 m = 65,45 tuiles de rive → 66 (avant 78).
@@ -109,7 +117,7 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(withRives, "tuiles-de-rive-droites")).toMatchObject({ status: "calculated", purchase: { order: { count: "33" } } });
   });
 
-  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 5 %, dites dans le calcul", () => {
+  it("pertes du référentiel du fondateur : ardoise 5 %, crochets 0 % (un par ardoise), tuile 3 %, liteaux 10 %, dites dans le calcul", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, { ...ARDOISE, params: { ...ARDOISE.params, pureau: { value: "10", unit: "cm", origin: "artisan" } } });
     // Pureau 100 mm sur 30×22 = recouvrement 100 mm : la table Cupa fait foi (44,8/m²) → 8 960 ardoises.
     expect(need(r, "ardoises").trace.find((t) => t.label === "Besoin calculé")!.value).toBe("8 960");
@@ -117,8 +125,15 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     expect(need(r, "ardoises").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "5", unit: "%" });
     // Crochets = un par ardoise commandée, 9 408 (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 597).
     // Greg, 21 novembre 2026 : les crochets se commandent en boîtes de 500, le nombre de pièces reste écrit (9 408 → 19 boîtes).
-    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "9408" }, purchase: { order: { count: "19" } } });
-    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2100" } });
+    // Règle changée (Greg, 22 novembre 2026), pose à agrafe : 9 408 × 0,8 = 7 526,4 → 7 527 agrafes, 7 527 / 500 = 15,05 → 16
+    // boîtes de 500 ; 9 408 × 0,2 = 1 881,6 → 1 882 pointes, 1 882 / 700 = 2,69 → 3 boîtes de 700 (avant : 9 408, 19 boîtes de 500).
+    // Toujours un crochet au moins par ardoise : 7 527 + 1 882 = 9 409 ≥ 9 408.
+    expect(need(r, "crochets-ardoise")).toMatchObject({ quantity: { value: "7527" }, purchase: { order: { count: "16" } } });
+    expect(need(r, "crochets-ardoise-pointe")).toMatchObject({ quantity: { value: "1882" }, purchase: { order: { count: "3" } } });
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 2 310 → 2 200 ml
+    // (200 ÷ 0,10 = 2 000 ml × 1,10 = 2 200).
+    expect(need(r, "liteaux-ardoise")).toMatchObject({ quantity: { value: "2200" } });
+    expect(need(r, "liteaux-ardoise").trace.find((t) => t.label === "Marge recommandée")).toMatchObject({ value: "10", unit: "%" });
   });
 
   it("sans ces hypothèses, le moteur redemande : la règle produit tient aux données, pas à un contournement", () => {
@@ -126,7 +141,9 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
     // Les longueurs des ouvrages au mètre (Greg, 21 novembre 2026) se lisent au devis, zéro quand il n'en parle pas : ce devis
     // n'en écrit aucun. Ce ne sont pas des hypothèses de calcul ; celle qui manque ici est le pureau.
     const aucun = { value: "0", unit: "m", origin: "devis" as const };
-    const r = computeWorkItem(bare, { ...ARDOISE, params: { ...ARDOISE.params, longueur_aretier: aucun, longueur_noue: aucun, longueur_faitage: aucun, longueur_gouttiere: aucun } });
+    // L'arêtier fermé ou en zinc (Greg, 22 novembre 2026) se lit aussi sur la ligne de l'arêtier : donnée du devis, pas une hypothèse.
+    const enZinc = { value: "0", unit: "u", origin: "devis" as const };
+    const r = computeWorkItem(bare, { ...ARDOISE, params: { ...ARDOISE.params, longueur_aretier: aucun, longueur_noue: aucun, longueur_faitage: aucun, longueur_gouttiere: aucun, aretier_ferme: enZinc } });
     expect(need(r, "ardoises").status).toBe("question");
     expect(r.nextQuestion?.key).toBe("param:pureau");
   });

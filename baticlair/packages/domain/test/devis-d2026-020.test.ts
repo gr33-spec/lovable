@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyRuleConfirmations, ROOFING_REFERENTIAL, type QuoteLineReading, type SiteFact } from "../src/index.js";
 import { planOf } from "./support/plan-of.js";
 import { D2026_020_LINES } from "./devis-reels/d2026-020.js";
-import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
+import { CROCHETS_A_AGRAFE, EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * DEVIS D-2026-020 (BATI INVEST, ardoises 32×22 + zinguerie), retour du fondateur 2026-10-06 : « 8 coudes au lieu de
@@ -16,6 +16,11 @@ import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 const ZONE_1: SiteFact[] = [{ key: "zone", value: "1", unit: "u", origin: "devis", evidence: "code postal" }];
 const ardoises = (designation: string) => ({ ref: "1", designation, quantity: "48", unit: "m²" });
 const crochets = (v: ReturnType<typeof readQuote>) => v.toBuy.find((b) => b.needIds.includes("crochets-ardoise"));
+const pointes = (v: ReturnType<typeof readQuote>) => v.toBuy.find((b) => b.needIds.includes("crochets-ardoise-pointe"));
+// Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+// crochet par ardoise). Ces tests mesurent la longueur du crochet : l'artisan a répondu « À agrafe » ; la longueur vaut pour
+// les deux lignes (agrafes et pointes).
+const REPONDU = { ...EGOUT_COMPRIS_OUI, ...CROCHETS_A_AGRAFE };
 const slates = (v: ReturnType<typeof readQuote>) => v.toBuy.find((b) => b.needIds.includes("ardoises"));
 
 describe("D-2026-020 : les coudes du devis sont des coudes, pas des descentes", () => {
@@ -56,15 +61,17 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
   // répondu « Oui » (les m² le comprennent déjà) : rien n'est ajouté.
   // NF DTU 40.11 (fiche couverture) : zone 1, 45° → recouvrement 73 mm → crochet 73 + 3 = 76 mm, soit 8 cm (avant 9).
   it("sans longueur écrite : calculée (zone 1, 45° → recouvrement 73 mm → crochet 8 cm)", () => {
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], EGOUT_COMPRIS_OUI, ZONE_1);
-    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 8 cm");
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], REPONDU, ZONE_1);
+    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox à agrafe standard, longueur 8 cm");
+    expect(pointes(v)?.label).toBe("Crochets d'ardoise inox à pointe standard, longueur 8 cm");
   });
   // Règle du fondateur, confirmée le 2026-11-19 (fiche couverture, ardoise.jeu_de_tete_crochet) : recouvrement = crochet − 5 mm,
   // pureau = (320 − 105) ÷ 2 = 107,5 mm. Avant : crochet − 1 cm, pureau 11 cm.
   it("« crochet inox de 11 cm » : crochets de 11 cm, recouvrement 10,5 cm, pureau 10,75 cm, ardoises recomptées", () => {
-    const sans = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], EGOUT_COMPRIS_OUI, ZONE_1);
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 posées au crochet inox de 11 cm")], EGOUT_COMPRIS_OUI, ZONE_1);
-    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox standard, longueur 11 cm");
+    const sans = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet")], REPONDU, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 posées au crochet inox de 11 cm")], REPONDU, ZONE_1);
+    expect(crochets(v)?.label).toBe("Crochets d'ardoise inox à agrafe standard, longueur 11 cm");
+    expect(pointes(v)?.label).toBe("Crochets d'ardoise inox à pointe standard, longueur 11 cm");
     expect(v.assumptions.find((a) => a.key === "param:pureau")?.value).toBe("10,75");
     // Plus de recouvrement, plus d'ardoises : la liste reste cohérente avec le crochet commandé.
     expect(Number(slates(v)!.quantity!.replace(/\D/g, ""))).toBeGreaterThan(Number(slates(sans)!.quantity!.replace(/\D/g, "")));
@@ -72,12 +79,14 @@ describe("D-2026-020 : la longueur de crochet écrite au devis fait foi, et le r
     expect(slates(v)?.label).toBe("Ardoises naturelles Espagne 1er choix 32×22");
   });
   it("sur une ligne de crochets à part (« 110 mm ») : lue aussi", () => {
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22"), { ref: "2", designation: "Crochets d'ardoise inox teintés noirs 110 mm", quantity: "1", unit: "lot" }], EGOUT_COMPRIS_OUI, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22"), { ref: "2", designation: "Crochets d'ardoise inox teintés noirs 110 mm", quantity: "1", unit: "lot" }], REPONDU, ZONE_1);
     expect(crochets(v)?.label).toMatch(/longueur 11 cm/);
+    expect(pointes(v)?.label).toMatch(/longueur 11 cm/);
   });
   it("« Ø 2,7 mm » n'est pas une longueur de crochet", () => {
-    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], EGOUT_COMPRIS_OUI, ZONE_1);
+    const v = readQuote([ardoises("Couverture en ardoises naturelles 32x22 au crochet inox 2,7 mm")], REPONDU, ZONE_1);
     expect(crochets(v)?.label).toMatch(/longueur 8 cm/);
+    expect(pointes(v)?.label).toMatch(/longueur 8 cm/);
   });
 });
 
@@ -116,8 +125,11 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
       ["Crochets de gouttière Havraise", "20 pièces"],
       // Le nom des feuilles ne dit plus leur usage (Greg, 17 novembre 2026) : il est dans le détail de la ligne.
       ["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "1 pièce"],
-      ["Faîtage en bande zinc, dév. 25 cm", "8 ml"],
-      ["Bande porte-solin zinc", "4 ml"],
+      // Règle changée (Greg, 22 novembre 2026) : une ligne écrite en mètres dont l'article se compte en pièces et qui attend
+      // sa réponse (le pliage) n'affiche plus sa mesure comme quantité (avant « 8 ml » et « 4 ml » ; « 8 m au devis » et
+      // « 4 m au devis » en précision, vérifiés plus bas).
+      ["Faîtage en bande zinc, dév. 25 cm", null],
+      ["Bande porte-solin zinc", null],
       // Le mortier n'est plus renommé « mortier d'étanchéité » (Greg, 17 novembre 2026 : « ne transforme pas mes mots »).
       ["Mortier de ciment pour solin", "1 sac de 25 kg"],
       ["Tuyau de descente zinc diam. 80mm", "2 tubes de 3 m"],
@@ -126,6 +138,8 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     ]);
     expect(v.toQuote).toEqual([]);
     expect(v.suggestions).toEqual([]);
+    expect(v.toBuy.find((b) => b.label.startsWith("Faîtage en bande zinc"))?.precision).toBe("8 m au devis");
+    expect(v.toBuy.find((b) => b.label.startsWith("Bande porte-solin zinc"))?.precision).toBe("4 m au devis");
   });
 
   it("ardoises : pièces d'après 48 m², crochet 11, pente 30°, la marge écrite ; crochets inox 11 cm = un par ardoise", () => {
@@ -133,6 +147,18 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     // Greg, 21 novembre 2026 : la précision détaille les ouvrages au mètre (avant : « … (crochet 11 cm, pente 30°) + 5 % de marge »).
     expect(ardoises.precision).toBe("48 m² × 42,09 ardoises/m² (crochet 11 cm, pente 30°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge");
     expect(v.toBuy[1]!.precision).toBe("un par ardoise commandée");
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise). Tant qu'elle attend : la ligne sans le type, un par ardoise, orange, avec sa question.
+    expect(row(v.toBuy[1]!.key)).toMatchObject({ status: "check", decisionKey: "engine:param:type_crochet@crochets-ardoise" });
+    expect(v.toBuy[1]!.asks).toEqual([{ key: "param:type_crochet@crochets-ardoise", text: "Tes crochets d'ardoise : à agrafe ou à pointe", unit: "u", options: [{ label: "À agrafe", value: "1" }, { label: "À pointe", value: "2" }] }]);
+    // « À agrafe » : 2 208 × 0,8 = 1 766,4 → 1 767 agrafes, 1 767 / 500 = 3,53 → 4 boîtes de 500 ; 2 208 × 0,2 = 441,6 → 442
+    // pointes, 1 boîte de 700 (1 767 + 442 = 2 209 ≥ 2 208).
+    const agrafe = read(CROCHETS_A_AGRAFE);
+    expect(liste(agrafe).slice(1, 3)).toEqual([
+      ["Crochets d'ardoise inox à agrafe standard, longueur 11 cm", "4 boîtes de 500"],
+      ["Crochets d'ardoise inox à pointe standard, longueur 11 cm", "1 boîte de 700"],
+    ]);
+    expect(agrafe.toBuy.slice(1, 3).map((b) => b.approx)).toEqual(["1 767 pièces", "442 pièces"]);
     expect(plan.inputs.find((i) => i.workItemId === "couverture-ardoises-crochet")?.params.pente?.value).toBe("30");
   });
 
@@ -166,7 +192,9 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
     // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : une seule ligne par article identique, avec le total (1 + 1 + 1 feuille,
     // chaque pièce comptée à part, chutes non réemployées). Avant : trois lignes de feuilles, une par pièce.
     expect(repondu.toBuy.filter((b) => b.label.startsWith("Feuilles")).map((b) => [b.lineIds, b.quantity, b.precision])).toEqual([
-      [["6", "8", "10"], "3 pièces", "pour 4 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 25 cm"],
+      // Règle changée (Greg, 22 novembre 2026, calculateur de feuilles) : les pièces partagent les feuilles, un seul arrondi :
+      // 4 + 8 + 4 = 16 ml, 8 pièces de 2 m de dév. 25, 4 par feuille = 2 feuilles (avant : 1 + 1 + 1 = 3).
+      [["6", "8", "10"], "2 pièces", "pour 4 ml de bande, développé 25 cm ; pour 8 ml de faîtage, développé 25 cm ; pour 4 ml de porte-solin, développé 25 cm"],
     ]);
     // Commandé tout fait : des longueurs, pas des feuilles.
     const achete = read({ ...REPONSES, "param:faconnage@faitage-zinc": u("2") });
@@ -250,7 +278,7 @@ describe("§49.6 D-2026-020 : la liste, ligne par ligne, dans l'ordre du devis",
   });
 
   it("répondu et confirmé : rien ne reste orange, la liste peut partir", () => {
-    const base = { ...REPONSES, "param:consommables": u("0"), "param:diametre_crochet": u("1", "mm"), "param:aspect_zinc": u("1"), "param:epaisseur_zinc": u("0.65", "mm") };
+    const base = { ...REPONSES, ...CROCHETS_A_AGRAFE, "param:consommables": u("0"), "param:diametre_crochet": u("1", "mm"), "param:aspect_zinc": u("1"), "param:epaisseur_zinc": u("0.65", "mm") };
     let tout = read(base);
     const ok = Object.fromEntries(tout.questions.filter((q) => q.key.startsWith("ratio:")).map((q) => [q.key, "ok"]));
     tout = read({ ...base, ...ok });

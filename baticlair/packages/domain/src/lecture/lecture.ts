@@ -1,3 +1,4 @@
+import { devisAuPropre, ORTHOGRAPHE_KEY } from "./orthographe.js";
 import { Decimal } from "../shared/decimal.js";
 import { parseUnit, type UnitCode } from "../quantity/unit.js";
 import { paramsFromContext, type ChantierContext, type SiteFact } from "../referential/context.js";
@@ -625,7 +626,7 @@ export interface EcranDeLecture {
   /** §49.9 : les lignes sans fourniture, dans l'ordre du devis. */
   sansFourniture: { lineId: string; label: string; measure: string | null }[];
   /** Étape « Suggestions » : les oublis probables à proposer en cases, tant que l'artisan n'y a pas répondu ; vide : pas d'étape. */
-  suggestions: { key: string; label: string }[];
+  suggestions: { key: string; label: string; categorie: string }[];
 }
 
 /** La validation d'une ligne issue de la lecture : rien à relire, le modèle a lu le devis entier. */
@@ -706,8 +707,32 @@ export function suggestionsChoisies(reponse: unknown): ReadonlySet<string> {
  * NOMBRE (skill regles-metier du fondateur, 18/11/2026 : « toutes les cases décochées au départ, sans limite de nombre »).
  * Avant : cinq au plus (les pattes de fixation du D-2026-020 n'étaient pas proposées).
  */
-export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: string; label: string }[] {
-  const out: { key: string; label: string }[] = [];
+/**
+ * SUGGESTIONS PAR CATÉGORIE (Greg, 22 novembre 2026) : « Range-les par catégorie (Couverture, Zinguerie, Fixations,
+ * Ventilation…) avec un petit titre ; les plus importantes d'abord ; une vingtaine au plus. » La catégorie vient de la
+ * famille de l'article (aucun mot de l'IA) ; dans une catégorie, l'ordre de la fiche.
+ */
+export const CATEGORIES_DE_SUGGESTIONS = ["Couverture", "Zinguerie", "Fixations", "Ventilation", "Fenêtres de toit", "Autres"] as const;
+export const SUGGESTIONS_AU_PLUS = 20;
+export function categorieDeSuggestion(family: string): (typeof CATEGORIES_DE_SUGGESTIONS)[number] {
+  if (/^roof_window/.test(family)) return "Fenêtres de toit";
+  if (/nail|screw|clip|fixing|staple|^slate_hook/.test(family)) return "Fixations";
+  if (/gutter|downpipe|solin|solder|flux|sealant|zinc|flashing|copper|lead/.test(family)) return "Zinguerie";
+  if (/vent|outlet/.test(family)) return "Ventilation";
+  if (/tile|slate|ridge|verge|hip|underlay|batten|closure/.test(family)) return "Couverture";
+  return "Autres";
+}
+/** Les catégories dans l'ordre de Greg, l'ordre de la fiche dans chacune ; une vingtaine au plus. */
+export function rangerLesSuggestions<T extends { categorie: string }>(liste: readonly T[]): T[] {
+  const rang = (c: string) => {
+    const i = (CATEGORIES_DE_SUGGESTIONS as readonly string[]).indexOf(c);
+    return i < 0 ? CATEGORIES_DE_SUGGESTIONS.length : i;
+  };
+  return liste.map((x, i) => ({ x, i })).sort((a, b) => rang(a.x.categorie) - rang(b.x.categorie) || a.i - b.i).map((y) => y.x).slice(0, SUGGESTIONS_AU_PLUS);
+}
+
+export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: string; label: string; categorie: string }[] {
+  const out: { key: string; label: string; categorie: string }[] = [];
   for (const input of plan.inputs) {
     const work = ref.workItems.find((w) => w.id === baseOf(input.workItemId));
     // Seulement autour d'un article ÉCRIT : un ouvrage seulement cité par une ligne de pose ne propose rien.
@@ -717,11 +742,13 @@ export function suggestionsDuPlan(ref: Referential, plan: QuotePlan): { key: str
       if (!slot.suggested || input.mentioned.includes(slot.key) || out.some((o) => o.key === key || o.label === slot.suggested!.label)) continue;
       // Une réfection de toiture, pas un accessoire seul : la couverture elle-même est écrite, avec sa surface (« 36 m de
       // liteaux » dictés, ou des ardoises listées en pièces, ne proposent rien).
+      // Greg, 22 novembre 2026 : « Pointes pour liteaux : seulement s'il y a des liteaux dans la liste. »
+      if (slot.suggested.onlyWith && !slot.suggested.onlyWith.some((k) => input.mentioned.includes(k))) continue;
       const surfaceConnue = work.params.some((p) => p.fromLineQuantity && /^m ?(?:2|²)$/.test(p.unit) && input.params[p.key] !== undefined);
       if (slot.suggested.onlyOnMeasuredWork && !(input.mentioned.includes(work.slots[0]?.key ?? "") && surfaceConnue)) continue;
       // Le devis en parle déjà ailleurs (une sortie de toit écrite) : rien à proposer.
       if (slot.suggested.unlessWorks?.some((id) => plan.inputs.some((i) => baseOf(i.workItemId) === id))) continue;
-      out.push({ key, label: slot.suggested.label });
+      out.push({ key, label: slot.suggested.label, categorie: categorieDeSuggestion(slot.family) });
     }
   }
   return out;
@@ -753,7 +780,9 @@ export function ecranDeLecture(input: {
   // Greg, 20 novembre 2026 : le même devis donne toujours la même liste et les mêmes questions ; l'ouvrage, les articles et
   // les données d'une ligne sont décidés par le code d'après la fiche du métier, les questions par le calcul.
   const { ref } = input;
-  const lecture = lectureParLeCode(ref, input.lecture);
+  // Greg, 22 novembre 2026 : le devis remis au propre (fautes d'orthographe) avant tout calcul ; les doutes sont des questions.
+  const auPropre = devisAuPropre(ref, input.lecture, input.answers ?? {});
+  const lecture = lectureParLeCode(ref, auPropre.lecture);
   const answers = input.answers ?? {};
   const lignes = lignesDeLecture(lecture, input.ids).map((l) => {
     const edited = input.lines?.get(l.id);
@@ -1105,7 +1134,25 @@ export function ecranDeLecture(input: {
     return { ...q, text: nom ? questionDePiece(nom, `param:${piece.name}`, propre.question) : propre.question, ...(propre.choices ? { options: propre.choices } : {}) };
   };
   for (const a of live) a.question = aSonNom(a.question);
-  const questions = live.filter((a) => !answered(a)).map((a) => a.question);
+  // Une donnée posée une fois pour le devis (`groupe` : le pliage, le type de crochet) n'est jamais posée en plus sous son nom
+  // simple : « Je ne sais pas » à la question commune la laisse ouverte, une seule fois (banc du calcul, 22 novembre 2026).
+  const groupeDuNomSimple = (key: string) => {
+    const m = /^param:([a-z0-9_]+)$/.exec(key);
+    const g = m ? ref.workItems.flatMap((w) => w.params).find((p) => p.key === m[1] && p.groupe)?.groupe : undefined;
+    return m && g ? `param:${m[1]}@${g.id}` : null;
+  };
+  const doublon = (a: Asked) => {
+    const g = groupeDuNomSimple(a.key);
+    return g !== null && (answers[g] !== undefined || live.some((x) => x.key === g));
+  };
+  // Les vrais doutes d'orthographe (Greg, 22 novembre 2026) : « Tu as écrit "…", c'est bien … ? », d'abord.
+  const doutesOrthographe: Question[] = auPropre.doutes.map((d) => ({
+    key: `${ORTHOGRAPHE_KEY}${d.mot}`,
+    kind: "choose",
+    text: d.question,
+    options: [...d.candidats.map((c) => ({ label: c, value: c })), { label: `Non, c'est bien « ${d.mot} »`, value: d.mot }],
+  }));
+  const questions = [...doutesOrthographe, ...live.filter((a) => !answered(a) && !doublon(a)).map((a) => a.question)];
   const viewLines = generiques().map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantity, unit: l.unit, confirmed: input.lines?.get(l.id)?.confirmed ?? false, enteredByArtisan: input.lines?.get(l.id)?.enteredByArtisan ?? false }));
   const view = artisanView(viewLines, validation, { needs: engine.needs, questions, declined: engine.declined }, { plan, roles: roleOf, ref });
   const raw = purchaseView(view, { ...engine, questions }, { plan, roles: roleOf, ref, validation });
@@ -1121,19 +1168,21 @@ export function ecranDeLecture(input: {
   // n'est ajouté (« ce qui est coché s'ajoute, le reste est ignoré »).
   // Les consommables de pose liés à un article écrit (silicone, vis, pattes) : ceux que le calcul compterait sur un
   // « oui », proposés en cases, une case par article (le silicone de deux pièces : une seule case).
-  const consommables = (): { key: string; label: string }[] => {
+  const consommables = (): { key: string; label: string; categorie: string }[] => {
     if (fiche || plan.inputs.length === 0 || answers[`param:${CONSUMABLES_KEY}`] !== undefined) return [];
     const avec = computeWithAnswers(ref, plan, { ...answers, [`param:${CONSUMABLES_KEY}`]: { value: "1", unit: "u" } }, input.preferences ?? {}, options, given);
     const parNom = new Map<string, string[]>();
+    const familleDe = new Map<string, string>();
     for (const n of avec.needs) {
       if (!n.consumable) continue;
       const cle = `${baseOf(n.workItemId)}/${n.slot}`;
       const nom = n.label.replace(/\s*\?.*$/, "").trim() || n.slotLabel;
+      if (!familleDe.has(nom)) familleDe.set(nom, n.family);
       if (!parNom.get(nom)?.includes(cle)) parNom.set(nom, [...(parNom.get(nom) ?? []), cle]);
     }
-    return [...parNom].map(([label, cles]) => ({ key: cles.join("+"), label }));
+    return [...parNom].map(([label, cles]) => ({ key: cles.join("+"), label, categorie: categorieDeSuggestion(familleDe.get(label) ?? "") }));
   };
-  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? [...suggestionsDuPlan(ref, plan), ...consommables()] : [];
+  const suggestions = answers[SUGGESTIONS_KEY] === undefined ? rangerLesSuggestions([...suggestionsDuPlan(ref, plan), ...consommables()]) : [];
   // UN ARTICLE ÉCRIT NE DISPARAÎT JAMAIS (§49.1 ; retour de Greg du 18 novembre 2026, D-2026-024 : « tout ce qui fait partie
   // du devis doit être pris en considération, l'analyse doit être complète »). Une ligne que le devis dit « fourniture »
   // (ou « fourniture et pose ») et dont la lecture n'a tiré aucun article n'est pas une ligne « sans fourniture » : elle

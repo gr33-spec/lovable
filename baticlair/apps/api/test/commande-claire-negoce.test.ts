@@ -59,14 +59,20 @@ describe("ce qui part chez le négoce : une commande claire, rien d'autre", () =
     const { q, posees, projectId, id } = await chantierDeGreg(agent);
     // Point 12 : le pureau ne se demande jamais ; les ardoises et les crochets sont chiffrés d'après le format et les crochets.
     expect(posees.join(" | ")).not.toMatch(/pureau/i);
+    // Le devis écrit « crochet inox de 11 cm », sans type : la question des crochets est posée, une fois pour tout le devis.
+    expect(posees.filter((t) => t === "Tes crochets d'ardoise : à agrafe ou à pointe ?")).toHaveLength(1);
     const liste = (q.lignes as { libelle: string; texte: string | null }[]).map((l) => [l.libelle, l.texte]);
     expect(liste).toEqual([
       // Règle changée (Greg, 21 novembre 2026) : un rang d'ardoises au faîtage (8 m, la bande de faîtage du devis) et à l'égout (10 m, la
       // gouttière du devis), compté avant la perte : (8 + 10) ÷ 0,22 m de large = 81,82 ardoises, × 1,05 = 85,91 de plus.
       // Avant : 2 106 (soit entre 2 105 et 2 106 avant l'arrondi) ; + 85,91 = entre 2 190,91 et 2 191,91 → 2 192. Avant 2 106 → 2 192.
-      // Crochets : 2 192 ÷ 500 = 4,4 → 5 boîtes (inchangé).
       ["Ardoises naturelles Espagne 1er choix 32×22", "2 192 pièces"],
-      ["Crochets d'ardoise inox Ø 2,7, longueur 11 cm", "5 boîtes de 500"],
+      // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : un crochet par ardoise, sans
+      // question : 2 192 ÷ 500 = 4,4 → 5 boîtes de 500). Répondu « À agrafe » (premier bouton) : les crochets se partagent.
+      // À agrafe : ⌈2 192 × 0,8⌉ = 1 754 → 1 754 ÷ 500 = 3,5 → 4 boîtes de 500.
+      ["Crochets d'ardoise inox à agrafe Ø 2,7, longueur 11 cm", "4 boîtes de 500"],
+      // À pointe : ⌈2 192 × 0,2⌉ = 439 → 439 ÷ 700 = 0,6 → 1 boîte de 700.
+      ["Crochets d'ardoise inox à pointe Ø 2,7, longueur 11 cm", "1 boîte de 700"],
       ["Gouttière havraise zinc dév. 25", "3 longueurs de 4 m"],
       ["Naissances dév. 25 Ø80", "2 pièces"],
       ["Crochets de gouttière havraise, acier galvanisé ou zinc", "20 pièces"],
@@ -120,7 +126,8 @@ describe("ce qui part chez le négoce : une commande claire, rien d'autre", () =
     const mail = res.body.recipients[0].email.body as string;
     expect(mail.split("\n")).toEqual([
       "Bonjour,",
-      expect.stringMatching(/^Voici une demande de prix pour un chantier .*\(liste en pièce jointe, 9 articles\)\.$/),
+      // Greg, 22 novembre 2026 : les crochets se partagent (à agrafe, à pointe), une ligne de plus : 10 articles (avant 9).
+      expect.stringMatching(/^Voici une demande de prix pour un chantier .*\(liste en pièce jointe, 10 articles\)\.$/),
       "Pour répondre : répondez simplement à cet e-mail avec votre devis, ou chiffrez en ligne en 2 minutes :",
       "(votre lien personnel)",
       "Merci d'avance,",

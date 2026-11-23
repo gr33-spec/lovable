@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ROOFING_REFERENTIAL, supplierTest } from "../src/index.js";
-import { readQuote } from "./support/read-quote.js";
+import { CROCHETS_A_AGRAFE, readQuote } from "./support/read-quote.js";
 import { REFERENTIEL_COMPLET, readQuoteComplet } from "./support/complet.js";
 
 /**
@@ -34,6 +34,9 @@ const COMPTOIR: Record<string, string> = {
   longueur_cheneau: "les mètres de chéneau, quand le devis ne les donne pas",
   developpe_cheneau: "« ton chéneau fait quel développé ? » : la largeur du bobineau",
   fixation_crochet: "« crochets à queue ou bandeau ? »",
+  // Greg, 22 novembre 2026 : une fois pour tout le devis, quand il ne le dit pas.
+  type_crochet: "« tes crochets d'ardoise : à agrafe ou à pointe ? » quand le devis ne le dit pas",
+  ecran_sous_toiture: "« écran sous toiture ? » pour compter les chatières, quand le devis ne le dit pas (A-INTEGRER §1, 22 novembre 2026)",
   nb_descentes: "le nombre de naissances et de descentes",
   diametre_descente: "« descente de 80 ou de 100 ? »",
   hauteur_descente: "les mètres de tube",
@@ -62,6 +65,9 @@ const COMPTOIR: Record<string, string> = {
   egout_a_ajouter: "« quelle longueur d'égout ? », seulement après « Non » à la question d'avant",
   ardoises_a_prevoir: "« tu vas remanier : je te prévois des ardoises ? combien ? » (ça dépend de l'état de la toiture)",
   surface_remaniee: "la surface du remaniage, celle de sa ligne (lue, jamais demandée : elle n'entre dans aucune quantité)",
+  // Greg, 22 novembre 2026 : le faîtage sur ardoises fibres-ciment.
+  faitiere_fc: "« quelle faîtière : demi-ronde, angulaire ou d'aération ? » (faîtage sur ardoises fibres-ciment)",
+  faitage_sur_fc: "le faîtage est-il sur une couverture fibres-ciment (lu au devis, jamais demandé)",
 };
 /** Ce que le comptoir ne demande jamais : une hypothèse, dite et modifiable d'un tap. */
 const JAMAIS: readonly string[] = ["zone", "entraxe_supports", "pureau", "pente", "longueur_rampant", "epaisseur_zinc", "diametre_crochet", "coudes_par_descente"];
@@ -139,21 +145,24 @@ describe("la règle du comptoir (§47.8)", () => {
 
   it("chantier de Brest : la qualité d'ardoise, la pose des crochets, le Ø et le nombre de descentes ; le développé est lu au devis", () => {
     const v = readQuoteComplet(BREST, {}, [], {});
-    expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_angles", "param:nb_descentes", "param:qualite_ardoise"]);
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise).
+    expect(keys(v)).toEqual(["param:diametre_descente", "param:fixation_crochet", "param:nb_angles", "param:nb_descentes", "param:qualite_ardoise", "param:type_crochet@crochets-ardoise"]);
     // Un devis qui dit tout ne pose aucune question.
     const complet = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture en ardoises naturelles d'Espagne 1er choix 30x22 posées au crochet", quantity: "200", unit: "m²" },
         { ref: "2", designation: "Gouttière demi-ronde zinc développé 33, crochets bandeau, 2 descentes Ø80", quantity: "24", unit: "ml" },
       ],
-      // La fiche complète compte aussi les angles (aucun ici), que le devis ne dit pas.
-      { "param:nb_angles": u("0") },
+      // La fiche complète compte aussi les angles (aucun ici), que le devis ne dit pas ; ni le type de crochet (Greg, 22 novembre
+      // 2026) : répondu « À agrafe ».
+      { "param:nb_angles": u("0"), ...CROCHETS_A_AGRAFE },
       [],
       {},
     );
     expect(complet.questions).toEqual([]);
     expect(complet.toBuy.map((b) => b.label)).toEqual(
-      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox standard, longueur 10 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
+      expect.arrayContaining(["Ardoises naturelles Espagne 1er choix 30×22", "Crochets d'ardoise inox à agrafe standard, longueur 10 cm", "Crochets d'ardoise inox à pointe standard, longueur 10 cm", "Gouttière zinc demi-ronde dév. 33", "Naissances dév. 33 Ø80"]),
     );
   });
 

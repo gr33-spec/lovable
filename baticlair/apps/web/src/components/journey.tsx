@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { useDictee } from "@/lib/dictee";
 import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } from "../../../../packages/domain/src/assistant/reponses-libres-numerotees";
 import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
-import { Check, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
+import { Check, ChevronDown, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
@@ -567,7 +567,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   const [messages, setMessages] = useState<MessageQuestions[]>(() => {
     const habitudes = questions.filter((q) => q.kind === "habit" && q.usual !== null).map((q) => q.options.find((o) => o.value === q.usual)?.label).filter(Boolean);
     const aPoser = questions.length - habitudes.length;
-    const tete = aPoser > 1 ? "J'ai lu ton devis. Il me manque quelques réponses pour calculer ta liste." : aPoser === 1 ? "J'ai lu ton devis. Il me manque une réponse pour calculer ta liste." : "J'ai lu ton devis.";
+    // Greg, 22 novembre 2026 : « J'ai lu ton devis » seulement s'il y a vraiment un devis ; sinon, la liste de l'artisan.
+    const lu = takeoff.devisLu === false ? "J'ai ta liste." : "J'ai lu ton devis.";
+    const tete = aPoser > 1 ? `${lu} Il me manque quelques réponses pour calculer ta liste.` : aPoser === 1 ? `${lu} Il me manque une réponse pour calculer ta liste.` : lu;
     return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\nComme d'habitude : ${habitudes.join(", ")}.` : tete }];
   });
   const [reflexion, setReflexion] = useState(false);
@@ -980,13 +982,13 @@ export const CLE_SUGGESTIONS = "suggestions:choisies";
 const AUCUNE_SUGGESTION = "aucune";
 
 /** Les propositions de l'étape « Suggestions », quand le serveur l'ouvre (elle passe avant toute autre question). */
-export function suggestionsAProposer(takeoff: Takeoff): { label: string; value: string }[] | null {
+export function suggestionsAProposer(takeoff: Takeoff): { label: string; value: string; categorie?: string }[] | null {
   const s = takeoff.suggestions ?? [];
-  return s.length > 0 ? s.map((x) => ({ label: x.label, value: x.key })) : null;
+  return s.length > 0 ? s.map((x) => ({ label: x.label, value: x.key, ...(x.categorie ? { categorie: x.categorie } : {}) })) : null;
 }
 
 /** Les cases de l'étape « Suggestions » : dans la carte seule (aucune question) ou dans le fil, après la dernière question. */
-function CasesSuggestions({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+function CasesSuggestions({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string; categorie?: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
   const [cochees, setCochees] = useState<ReadonlySet<string>>(() => new Set());
   const basculer = (v: string) =>
     setCochees((prev) => {
@@ -996,6 +998,7 @@ function CasesSuggestions({ options, pending, error, onContinuer }: { options: r
       return next;
     });
   const n = cochees.size;
+  const groupes = [...options.reduce((m, o) => m.set(o.categorie ?? "", [...(m.get(o.categorie ?? "") ?? []), o]), new Map<string, (typeof options)[number][]>())];
   return (
     <fieldset aria-label="Suggestions" disabled={pending} className="ml-10 flex flex-col gap-3 rounded-[22px] border p-4" style={{ borderColor: COULEURS_CHAT.trait, backgroundColor: COULEURS_CHAT.bulle }}>
       <legend className="sr-only">Suggestions</legend>
@@ -1003,29 +1006,48 @@ function CasesSuggestions({ options, pending, error, onContinuer }: { options: r
         <p className="text-[18px] leading-tight font-extrabold tracking-[-0.01em]">Suggestions</p>
         <p className="text-[15px] leading-snug text-[var(--chat-texte)]/75">Coche ce qu&apos;il te faut, on l&apos;ajoute à ta liste.</p>
       </div>
-      <ul className="flex flex-col gap-2">
-        {options.map((o) => {
-          const on = cochees.has(o.value);
-          return (
-            <li key={o.value}>
-              <label
-                className="pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[16px] leading-snug font-semibold"
-                style={{ borderColor: on ? COULEURS_CHAT.jaune : COULEURS_CHAT.trait, backgroundColor: on ? "color-mix(in srgb, #FED206 14%, transparent)" : "var(--chat-voile)" }}
-              >
-                <input type="checkbox" checked={on} onChange={() => basculer(o.value)} className="peer sr-only" />
-                <span
-                  aria-hidden="true"
-                  className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
-                  style={{ borderColor: on ? COULEURS_CHAT.jaune : "color-mix(in srgb, var(--chat-texte) 45%, transparent)", backgroundColor: on ? COULEURS_CHAT.jaune : "transparent" }}
-                >
-                  {on ? <Check size={18} strokeWidth={3} className="text-[#111111]" /> : null}
-                </span>
-                <span className="min-w-0 grow break-words">{o.label}</span>
-              </label>
-            </li>
-          );
-        })}
-      </ul>
+      {/* Greg, 22 novembre 2026 : rangées par catégorie, un petit titre et le compte, repliables ; les plus importantes d'abord. */}
+      {groupes.map(([categorie, cases]) => {
+        const liste = (
+          <ul className="flex flex-col gap-2">
+            {cases.map((o) => {
+              const on = cochees.has(o.value);
+              return (
+                <li key={o.value}>
+                  <label
+                    className="pressable flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[16px] leading-snug font-semibold"
+                    style={{ borderColor: on ? COULEURS_CHAT.jaune : COULEURS_CHAT.trait, backgroundColor: on ? "color-mix(in srgb, #FED206 14%, transparent)" : "var(--chat-voile)" }}
+                  >
+                    <input type="checkbox" checked={on} onChange={() => basculer(o.value)} className="peer sr-only" />
+                    <span
+                      aria-hidden="true"
+                      className="flex size-7 shrink-0 items-center justify-center rounded-lg border-2 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2"
+                      style={{ borderColor: on ? COULEURS_CHAT.jaune : "color-mix(in srgb, var(--chat-texte) 45%, transparent)", backgroundColor: on ? COULEURS_CHAT.jaune : "transparent" }}
+                    >
+                      {on ? <Check size={18} strokeWidth={3} className="text-[#111111]" /> : null}
+                    </span>
+                    <span className="min-w-0 grow break-words">{o.label}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        );
+        return categorie ? (
+          <details key={categorie} open className="group flex flex-col gap-2">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-[15px] font-extrabold">
+              <span>{categorie}</span>
+              <span className="flex items-center gap-1.5 text-[13px] font-bold text-[var(--chat-texte)]/70">
+                {cases.length}
+                <ChevronDown size={16} aria-hidden="true" className="transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+            {liste}
+          </details>
+        ) : (
+          <div key="sans">{liste}</div>
+        );
+      })}
       <p aria-live="polite" className="text-[13px] text-[var(--chat-texte)]/70">
         {n === 0 ? "Rien de coché : ta liste reste telle que ton devis la dit." : n === 1 ? "1 article sera ajouté à ta liste." : `${n} articles seront ajoutés à ta liste.`}
       </p>
@@ -1050,7 +1072,7 @@ function CasesSuggestions({ options, pending, error, onContinuer }: { options: r
  * s'ajoute à la liste, le reste est ignoré, sans autre question. Les propositions viennent de la fiche du métier (le
  * serveur), sans limite de nombre (skill du fondateur) ; aucune proposition : pas d'étape.
  */
-export function SuggestionsCard({ options, pending, error, onContinuer }: { options: readonly { label: string; value: string }[]; pending: boolean; error: ApiError | null; onContinuer: (valeur: string) => void }) {
+export function SuggestionsCard({ options, pending, error, onContinuer, devisLu = true }: { options: readonly { label: string; value: string; categorie?: string }[]; pending: boolean; error: ApiError | null; devisLu?: boolean; onContinuer: (valeur: string) => void }) {
   const router = useRouter();
   return (
     <div role="dialog" aria-modal="true" aria-label="Questions de Mobiiz" className="fixed top-0 left-0 z-50 flex h-[100dvh] w-full flex-col text-[var(--chat-texte)]" style={{ backgroundColor: COULEURS_CHAT.fond }}>
@@ -1058,7 +1080,7 @@ export function SuggestionsCard({ options, pending, error, onContinuer }: { opti
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col">
         <section aria-label="Les questions" className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
           <Bulle de="mobiiz" label="Message de MOBIIZ">
-            <TexteMobiiz>J&apos;ai lu ton devis. Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
+            <TexteMobiiz>{devisLu ? "J'ai lu ton devis." : "J'ai ta liste."} Avant de calculer, un coup d&apos;œil à ce qu&apos;on oublie souvent.</TexteMobiiz>
           </Bulle>
           <CasesSuggestions options={options} pending={pending} error={error} onContinuer={onContinuer} />
         </section>
@@ -1156,7 +1178,7 @@ export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }:
     onSubmit({ reponses: [], ajouts: [], retraits: [] });
   }, [commencee, aSuggerer, onSubmit]);
   if (!commencee) {
-    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
+    if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} devisLu={takeoff.devisLu !== false} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
     return error ? <ErrorNotice error={error} /> : <CalculScreen />;
   }
   return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;

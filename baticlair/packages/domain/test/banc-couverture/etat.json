@@ -2,9 +2,10 @@
  "C01": {
   "lignes": {
    "Écran HPV": "juste",
-   "Liteaux 18×40": "quantite",
+   "Liteaux 18×40": "juste",
    "Ardoises 32×22": "juste",
-   "Crochets d'ardoise": "juste",
+   "Crochets à agrafe": "juste",
+   "Crochets à pointe": "juste",
    "Feuilles de zinc (faîtage)": "juste",
    "Gouttière de 25": "juste",
    "Tubes de descente Ø80": "juste",
@@ -48,7 +49,7 @@
  "C05": {
   "lignes": {
    "Ardoises 30×20": "juste",
-   "Crochets d'ardoise": "juste",
+   "Crochets à pointe": "juste",
    "Feuilles de zinc": "quantite",
    "Fenêtres GGL MK04": "juste",
    "Raccords MK04": "juste",
@@ -105,7 +106,7 @@
    "Écran HPV": "juste",
    "Liteaux 18×40": "juste",
    "Ardoises fibres-ciment 40×24": "juste",
-   "Faîtières fibres-ciment": "quantite",
+   "Faîtières fibres-ciment": "juste",
    "Feuilles de zinc (rives)": "juste",
    "Gouttière PVC de 25": "juste",
    "Tubes de descente PVC Ø80": "juste",
@@ -117,10 +118,8 @@
   "lignes": {
    "Ardoises 35×25": "juste",
    "Crochets à agrafe": "juste",
-   "Crochets à pointe": "incertain",
-   "Feuilles de zinc (arêtiers)": "juste",
-   "Feuilles de zinc (faîtage)": "juste",
-   "Feuilles de zinc (noues)": "juste",
+   "Crochets à pointe": "juste",
+   "Feuilles de zinc (arêtiers, faîtage, noues)": "juste",
    "Gouttière de 25": "juste",
    "Angles de gouttière": "juste",
    "Tubes de descente Ø80": "juste"

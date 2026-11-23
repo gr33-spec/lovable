@@ -395,8 +395,11 @@ export interface Takeoff {
   /** §52, la carte « Lots repérés » : les lots lus, ceux gardés ou ajoutés (null avant « C'est bon »), les métiers à ajouter. */
   lots?: { metier: string; libelle: string; lignes: number }[];
   lotsConfirmes?: string[] | null;
+  /** Un devis a vraiment été lu (Greg, 22 novembre 2026 : sinon, jamais « J'ai lu ton devis »). */
+  devisLu?: boolean;
   /** Étape « Suggestions » : les cases à proposer avant les questions ; vide ou absent : pas d'étape. */
-  suggestions?: { key: string; label: string }[];
+  /** Rangées par catégorie (Couverture, Zinguerie, Fixations, Ventilation…), Greg, 22 novembre 2026. */
+  suggestions?: { key: string; label: string; categorie?: string }[];
   metiersAjoutables?: { metier: string; libelle: string }[];
   /** Lecture lot par lot : « Je n'ai pas pu lire la partie …, ajoute-la à la main ou renvoie-la. » (un lot en échec). */
   lotsNonLus?: string[];
@@ -441,6 +444,13 @@ export interface SiteUnits {
 export interface PurchaseItem {
   key: string;
   label: string;
+  /**
+   * Greg, 22 novembre 2026 : « Calculé » ou « À vérifier », et pourquoi ; « Dit par toi », « Modifié par toi ». Absent d'un
+   * ancien serveur : l'écran retombe sur l'état de la ligne.
+   */
+  verification?: { etat: "calcule" | "a_verifier" | "dit" | "modifie"; raisons: string[] };
+  /** Le détail du calcul sous la flèche, poste par poste ; jamais dans le PDF ni l'e-mail. */
+  postes?: { id: string; texte: string; valeur: string; unite: string; cle: string | null; perte: boolean; info: boolean; mesure: { valeur: string; unite: string } | null; modifie: boolean }[];
   /** « 1 488 pièces », « 547 ml », « 2 rouleaux » ; null si la quantité n'est pas établie. */
   quantity: string | null;
   /** « ≈ 7 palettes », ou ce que la longueur couvre (« 13 ml à couvrir »). */

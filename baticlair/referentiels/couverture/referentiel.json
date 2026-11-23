@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.22-74",
+  "version": "roofing-2026.11.22-81",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -120,12 +120,28 @@
       "note": "Convention « longueur × largeur » (30×22 = 30 cm de long, 22 cm de large), confirmée par le fondateur le 2026-10-02."
     },
     {
+      "id": "greg-calculateur-feuilles-2026-11-22",
+      "kind": "trade_practice",
+      "title": "Calculateur de feuilles de zinc (Greg, couvreur)",
+      "documentRef": "Message de Greg dans la conversation du banc du calcul, 2026-11-22",
+      "retrievedAt": "2026-11-22",
+      "note": "Feuilles 2 × 1 m. Par pièce : développé (20, 25, 33, 40 cm, autre) et longueur des pièces (1 m ou 2 m). Pièces = ml ÷ longueur, arrondi au-dessus ; bandes par feuille = 100 cm ÷ développé, arrondi en dessous ; feuilles = pièces ÷ bandes par feuille, arrondi au-dessus ; pièces de même longueur regroupées sur les mêmes feuilles ; pas de recouvrement ajouté. Exemple : 10 ml, pièces de 2 m, dév. 20 → 5 pièces, 5 bandes par feuille → 1 feuille."
+    },
+    {
       "id": "fondateur-reponses-2026-10-04",
       "kind": "trade_practice",
       "title": "Réponses du fondateur (couvreur) aux partiels du référentiel",
       "documentRef": "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       "retrievedAt": "2026-10-04",
       "note": "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80."
+    },
+    {
+      "id": "recherche-accessoires-tuiles-2026-11-20",
+      "kind": "manufacturer",
+      "title": "Chatières : section par modèle (Edilians, Monier, Koramic, Terreal) et section de ventilation à atteindre (NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink)",
+      "documentRef": "referentiels/couverture/recherche/accessoires-tuiles.json",
+      "retrievedAt": "2026-11-20",
+      "note": "1/5000 de la surface projetée (comble perdu ou au-dessus d'un écran, 2 cm² par m²) ; 1/3000 sans écran (3,3 cm² par m²). HP 10 et PV 10 : 50 cm² ; Signy 33 ; Actua 26 ; Alpha 10 : 19 ; Romane Canal 18."
     },
     {
       "id": "recherche-fixations-2026-11-20",
@@ -740,6 +756,11 @@
           "key": "pureau_max",
           "label": "Pureau maximal",
           "unit": "m"
+        },
+        {
+          "key": "section_chatiere",
+          "label": "Section de la chatière du modèle",
+          "unit": "cm2"
         }
       ],
       "keyAttributes": [
@@ -981,6 +1002,19 @@
         "crochet galva ardoise",
         "crochet galvanise ardoise",
         "crochet teinte ardoise"
+      ]
+    },
+    {
+      "code": "slate_hook_pointe",
+      "label": "Crochet d'ardoise à pointe",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": [],
+      "keywords": [
+        "crochet a pointe",
+        "crochets a pointe",
+        "crochet pointe",
+        "crochets pointe"
       ]
     },
     {
@@ -1418,6 +1452,19 @@
             "note": "Page et version exactes à compléter à réception du PDF."
           },
           "version": 1
+        },
+        "section_chatiere": {
+          "kind": "manufacturer_spec",
+          "value": "50",
+          "unit": "cm2",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "Chatière 205.20 : 50 cm² (Edilians)."
         }
       },
       "sellingUnits": [
@@ -3835,6 +3882,39 @@
       ]
     },
     {
+      "id": "crochet-ardoise-pointe",
+      "family": "slate_hook_pointe",
+      "label": "Crochet d'ardoise inox à pointe",
+      "shortLabel": "Crochets d'ardoise à pointe",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 700",
+            "many": "boîtes de 700"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "700",
+            "unit": "u",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "Crochets à pointe en boîtes de 700 (Greg, 22 novembre 2026 ; Chausson, Frénéhard)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "crochet-ardoise-standard",
       "family": "slate_hook",
       "label": "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)",
@@ -5134,6 +5214,69 @@
             },
             "version": 1,
             "note": "2,8 × 60 : ≈ 335 pointes au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "clou-ardoise-cuivre-3x30",
+      "family": "slate_nail",
+      "label": "Clous cuivre 3 × 30 pour ardoise, boîte de 1 kg",
+      "shortLabel": "Clous cuivre 3 × 30",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 1 kg",
+            "many": "boîtes de 1 kg"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "418",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "chatiere-standard",
+      "family": "vent_tile",
+      "label": "Tuile chatière du modèle de tuile posé",
+      "shortLabel": "Chatières",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "piece",
+          "label": {
+            "one": "pièce",
+            "many": "pièces"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "1",
+            "unit": "u",
+            "source": "definition",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-01",
+              "verifiedBy": "BatiClair (définition)"
+            },
+            "version": 1
           },
           "primary": true
         }
@@ -6582,6 +6725,38 @@
           ]
         },
         {
+          "key": "ecran_sous_toiture",
+          "label": "Écran sous toiture",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Écran sous toiture ?",
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "ecran",
+                "hpv",
+                "sous toiture",
+                "sous-toiture"
+              ]
+            }
+          ],
+          "choices": [
+            {
+              "label": "Oui",
+              "value": "1"
+            },
+            {
+              "label": "Non",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "oui",
+            "2": "non"
+          }
+        },
+        {
           "key": "longueur_rampant",
           "label": "Longueur du rampant",
           "unit": "m",
@@ -6687,7 +6862,27 @@
             "productId": "pointes-liteau-31x70"
           },
           "suggested": {
-            "label": "Pointes pour liteaux"
+            "label": "Pointes pour liteaux",
+            "onlyWith": [
+              "liteau"
+            ]
+          }
+        },
+        {
+          "key": "chatiere",
+          "family": "vent_tile",
+          "label": "Chatières",
+          "keywords": [
+            "chatiere"
+          ],
+          "usual": {
+            "text": "Chatière du modèle de tuile posé.",
+            "source": "recherche-accessoires-tuiles-2026-11-20",
+            "productId": "chatiere-standard"
+          },
+          "suggested": {
+            "label": "Chatières (ventilation de la toiture)",
+            "onlyOnMeasuredWork": true
           }
         },
         {
@@ -6747,6 +6942,32 @@
         }
       ],
       "constants": {
+        "ventilation_avec_ecran": {
+          "kind": "installation_condition",
+          "value": "0.0002",
+          "unit": "u",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "1/5000 de la surface projetée, au-dessus d'un écran ou en comble perdu (NF DTU 40.11 §4.5.2) : 2 cm² par m²."
+        },
+        "ventilation_sans_ecran": {
+          "kind": "installation_condition",
+          "value": "0.000333",
+          "unit": "u",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1,
+          "note": "1/3000 de la surface projetée, sans écran (DTU 40.23 tableau 6) : 3,3 cm² par m²."
+        },
         "liteau_vendu": {
           "kind": "installation_condition",
           "value": "4",
@@ -6862,6 +7083,22 @@
             "status": "verified",
             "verifiedAt": "2026-11-20",
             "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1
+        },
+        {
+          "id": "chatieres",
+          "slot": "chatiere",
+          "formula": "2 * arrondi_sup(surface * cos_deg(pente) * si(ecran_sous_toiture < 2, regle.ventilation_avec_ecran, regle.ventilation_sans_ecran) / (2 * tuile.section_chatiere))",
+          "unit": "u",
+          "core": false,
+          "precision": "ventilation de la sous-face : surface projetée × section à atteindre ÷ section d'une chatière, en nombre pair",
+          "exclusions": "Moitié en partie basse, moitié près du faîtage.",
+          "source": "recherche-accessoires-tuiles-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
           },
           "version": 1
         },
@@ -7763,6 +8000,16 @@
           "unit": "u",
           "kind": "site_data",
           "question": "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?",
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "jouee",
+                "jouees"
+              ]
+            }
+          ],
+          "ownOnly": true,
           "choices": [
             {
               "label": "Oui",
@@ -7788,6 +8035,107 @@
             "param": "egout_compris",
             "value": "2"
           }
+        },
+        {
+          "key": "aretier_ferme",
+          "label": "Arêtier fermé en ardoises",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "L'arêtier est-il fermé en ardoises ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "biaise",
+                "biaises",
+                "ferme",
+                "aretier ferme"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "arêtier en bande zinc"
+          }
+        },
+        {
+          "key": "type_crochet",
+          "label": "Type de crochet",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Agrafe ou pointe ?",
+          "hint": "À agrafe : le crochet s'agrafe sur le liteau. À pointe : il se plante (volige, ou au droit des chevrons).",
+          "groupe": {
+            "id": "crochets-ardoise",
+            "question": "Tes crochets d'ardoise : à agrafe ou à pointe ?",
+            "hint": "À agrafe : on ajoute 1 crochet à pointe sur 5, pour ceux qui tombent sur les chevrons."
+          },
+          "choices": [
+            {
+              "label": "À agrafe",
+              "value": "1"
+            },
+            {
+              "label": "À pointe",
+              "value": "2"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "agrafe",
+                "a agrafe",
+                "a agrafer",
+                "tige agrafe",
+                "crochet agrafe",
+                "crochets agrafe",
+                "pression",
+                "ressort"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "a pointe",
+                "crochet pointe",
+                "crochets pointe",
+                "crochet a pointe",
+                "crochets a pointe",
+                "a piquer",
+                "a pic",
+                "passe chevron",
+                "pour volige",
+                "crochet double"
+              ]
+            }
+          ],
+          "display": {
+            "1": "à agrafe",
+            "2": "à pointe"
+          }
+        },
+        {
+          "key": "longueur_rives",
+          "label": "Longueur des rives",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Longueur totale de tes rives (en mètres) ?",
+          "textLabels": [
+            "rive",
+            "rives"
+          ],
+          "ownOnly": true
         },
         {
           "key": "longueur_rampant",
@@ -7851,6 +8199,17 @@
           }
         },
         {
+          "key": "crochet_pointe",
+          "family": "slate_hook_pointe",
+          "label": "Crochets d'ardoise à pointe",
+          "usual": {
+            "text": "Crochets à pointe : au droit des chevrons en pose à agrafe, tous sur volige.",
+            "source": "fondateur-referentiel-2026-10-03",
+            "productId": "crochet-ardoise-pointe"
+          },
+          "formOf": "crochet"
+        },
+        {
           "key": "liteau",
           "family": "batten",
           "label": "Liteaux",
@@ -7863,7 +8222,8 @@
             "text": "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).",
             "source": "fondateur-pratique-2026-10-02",
             "productShort": "Liteaux 18×40",
-            "productId": "liteau-sapin-18x40"
+            "productId": "liteau-sapin-18x40",
+            "sur": true
           }
         },
         {
@@ -7902,7 +8262,23 @@
             "productId": "pointes-liteau-28x60"
           },
           "suggested": {
-            "label": "Pointes pour liteaux"
+            "label": "Pointes pour liteaux",
+            "onlyWith": [
+              "liteau"
+            ]
+          }
+        },
+        {
+          "key": "clou",
+          "family": "slate_nail",
+          "label": "Clous d'ardoise",
+          "usual": {
+            "text": "Clous cuivre 3 × 30 (clous apparents : inox ou cuivre, NF DTU 40.11 2020).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "clou-ardoise-cuivre-3x30"
+          },
+          "suggested": {
+            "label": "Clous d'ardoise (égout, rives, faîtage)"
           }
         },
         {
@@ -8068,6 +8444,20 @@
           "version": 1,
           "note": "Jeu de tête : recouvrement obtenu = longueur du crochet − 5 mm. Règle du fondateur (interview du 18/11/2026), confirmée par la recherche du 19/11/2026 : manuel CAP (« jeu de tête 0,5 cm »), guide du ministère de la Culture, Cupa."
         },
+        "part_crochets_pointe": {
+          "kind": "installation_condition",
+          "value": "0.2",
+          "unit": "u",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Pose à agrafe : 1 crochet à pointe sur 5 (manuel du CAP couvreur, ch. 21 ; une seule source chiffrée)."
+        },
         "sans_gouttiere": {
           "kind": "installation_condition",
           "value": "0",
@@ -8080,6 +8470,46 @@
           },
           "version": 1,
           "note": "Aucune gouttière écrite au devis."
+        },
+        "clous_bord_ardoise": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "2 clous par ardoise au doublis, au 1er rang d'égout, aux rives et au dernier rang du faîtage (NF DTU 40.11 P1-1 2020 §5.1.3, ministère de la Culture, CAPEB)."
+        },
+        "rangs_egout_cloues": {
+          "kind": "installation_condition",
+          "value": "2",
+          "unit": "u",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "Doublis et 1er rang d'égout cloués (NF DTU 40.11 P1-1 2020 §5.1.3)."
+        },
+        "aretier_zinc_m2_par_ml": {
+          "kind": "installation_condition",
+          "value": "0.50",
+          "unit": "m2/m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Arêtier en bande zinc : 0,50 m² d'ardoise par mètre, comme la noue (Greg, 22 novembre 2026 ; deux tranchis biais, manuel du CAP couvreur)."
         },
         "aretier_m2_par_ml": {
           "kind": "installation_condition",
@@ -9729,10 +10159,48 @@
         {
           "id": "ardoises",
           "slot": "ardoise",
-          "formula": "(surface + regle.aretier_m2_par_ml * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
+          "formula": "(surface + si(aretier_ferme > 0, regle.aretier_m2_par_ml, regle.aretier_zinc_m2_par_ml) * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
           "unit": "u",
           "core": true,
           "exclusions": "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
+          "postes": [
+            {
+              "id": "surface",
+              "libelle": "Surface {surface|m2} × {points.ardoises_m2|u/m2#} au m²",
+              "formule": "surface * points.ardoises_m2",
+              "cle": "surface"
+            },
+            {
+              "id": "aretiers",
+              "libelle": "Arêtiers {longueur_aretier|ml}",
+              "formule": "si(aretier_ferme > 0, regle.aretier_m2_par_ml, regle.aretier_zinc_m2_par_ml) * longueur_aretier * points.ardoises_m2",
+              "cle": "longueur_aretier"
+            },
+            {
+              "id": "noues",
+              "libelle": "Noues {longueur_noue|ml}",
+              "formule": "regle.noue_m2_par_ml * longueur_noue * points.ardoises_m2",
+              "cle": "longueur_noue"
+            },
+            {
+              "id": "faitage",
+              "libelle": "Faîtage {longueur_faitage|ml}, 1 rang",
+              "formule": "longueur_faitage / ardoise.largeur",
+              "cle": "longueur_faitage"
+            },
+            {
+              "id": "egout-gouttiere",
+              "libelle": "Égout {longueur_gouttiere|ml} (la gouttière), 1 rang",
+              "formule": "si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, regle.sans_gouttiere) / ardoise.largeur",
+              "cle": "longueur_gouttiere"
+            },
+            {
+              "id": "egout-reponse",
+              "libelle": "Égout {egout_a_ajouter|ml} (ta réponse), 1 rang",
+              "formule": "si(longueur_gouttiere > regle.sans_gouttiere, regle.sans_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur",
+              "cle": "egout_a_ajouter"
+            }
+          ],
           "designation": "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
           "precision": "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}), arêtiers, noues, faîtage et égout du devis compris, + {marge} de marge",
           "precisionRequires": [
@@ -9750,18 +10218,59 @@
         {
           "id": "crochets-ardoise",
           "slot": "crochet",
-          "formula": "commande.ardoises",
+          "when": "type_crochet < 2",
+          "formula": "arrondi_sup(commande.ardoises * (1 - regle.part_crochets_pointe))",
           "unit": "u",
           "core": true,
-          "exclusions": "Un crochet par ardoise commandée (règle du fondateur) : jamais moins de crochets que d'ardoises.",
-          "precision": "un par ardoise commandée",
-          "designation": "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
+          "exclusions": "Un crochet par ardoise commandée (règle du fondateur) ; en pose à agrafe, 1 sur 5 à pointe au droit des chevrons.",
+          "precision": "4 ardoises sur 5 (la cinquième au crochet à pointe)",
+          "designation": "Crochets d'ardoise inox à agrafe {diametre_crochet}, longueur {longueur_crochet|cm}",
           "source": "baticlair-geometrie-ardoise",
           "verification": {
             "status": "verified",
             "verifiedAt": "2026-10-02",
             "verifiedBy": "Fondateur (couvreur)",
             "note": "Validée sur présentation de la formule et d'un exemple chiffré (D-2026-015)."
+          },
+          "version": 1
+        },
+        {
+          "id": "crochets-ardoise-a-preciser",
+          "slot": "crochet",
+          "when": "type_crochet < 1",
+          "ligneEnAttente": true,
+          "formula": "commande.ardoises",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Un crochet par ardoise commandée ; à agrafe ou à pointe selon la réponse.",
+          "precision": "un par ardoise commandée",
+          "designation": "Crochets d'ardoise inox {type_crochet} {diametre_crochet}, longueur {longueur_crochet|cm}",
+          "precisionRequires": [
+            "type_crochet"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1
+        },
+        {
+          "id": "crochets-ardoise-pointe",
+          "slot": "crochet_pointe",
+          "formula": "si(type_crochet < 2, arrondi_sup(commande.ardoises * regle.part_crochets_pointe), commande.ardoises)",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Pose à agrafe : 1 ardoise sur 5, au droit des chevrons ; pose à pointe : une par ardoise commandée.",
+          "designation": "Crochets d'ardoise inox à pointe {diametre_crochet}, longueur {longueur_crochet|cm}",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
@@ -9790,6 +10299,41 @@
           "core": false,
           "precision": "une pointe par croisement avec un chevron, plus une par bout de liteau",
           "exclusions": "Pointes de contre-liteaux et de voliges à part.",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1
+        },
+        {
+          "id": "clous-ardoise",
+          "slot": "clou",
+          "formula": "regle.clous_bord_ardoise * (regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur + longueur_faitage / ardoise.largeur + longueur_rives / pureau)",
+          "postes": [
+            {
+              "id": "egout",
+              "libelle": "Égout : 2 rangs × 2 clous",
+              "formule": "regle.clous_bord_ardoise * regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur"
+            },
+            {
+              "id": "faitage",
+              "libelle": "Faîtage {longueur_faitage|ml} : dernier rang × 2 clous",
+              "formule": "regle.clous_bord_ardoise * longueur_faitage / ardoise.largeur",
+              "cle": "longueur_faitage"
+            },
+            {
+              "id": "rives",
+              "libelle": "Rives {longueur_rives|ml} × 2 clous",
+              "formule": "regle.clous_bord_ardoise * longueur_rives / pureau",
+              "cle": "longueur_rives"
+            }
+          ],
+          "unit": "u",
+          "core": false,
+          "precision": "2 clous par ardoise : doublis et 1er rang d'égout, rives, dernier rang du faîtage",
+          "exclusions": "Pose au crochet : la partie courante n'est pas clouée.",
           "source": "recherche-fixations-2026-11-20",
           "verification": {
             "status": "verified",
@@ -10055,7 +10599,8 @@
             "text": "Section 18×40 par défaut, comme l'ardoise naturelle.",
             "source": "fondateur-pratique-2026-10-02",
             "productShort": "Liteaux 18×40",
-            "productId": "liteau-sapin-18x40"
+            "productId": "liteau-sapin-18x40",
+            "sur": true
           }
         },
         {
@@ -10341,6 +10886,87 @@
             "version": 1,
             "note": "pas une HP 10"
           }
+        },
+        {
+          "key": "faitage_sur_fc",
+          "label": "Faîtage sur ardoises fibres-ciment",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le faîtage est-il sur des ardoises fibres-ciment ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "fromWorks": [
+            {
+              "value": "1",
+              "workItems": [
+                "couverture-ardoises-fibres-ciment"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "pas de fibres-ciment au devis"
+          }
+        },
+        {
+          "key": "faitiere_fc",
+          "label": "Faîtière fibres-ciment",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Quelle faîtière ?",
+          "choices": [
+            {
+              "label": "Demi-ronde",
+              "value": "1"
+            },
+            {
+              "label": "Angulaire",
+              "value": "2"
+            },
+            {
+              "label": "D'aération",
+              "value": "3"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "demi ronde",
+                "demi-ronde",
+                "ronde"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "angulaire",
+                "bords plats"
+              ]
+            },
+            {
+              "value": "3",
+              "keywords": [
+                "aeration",
+                "d aeration",
+                "ventilee",
+                "ventilation"
+              ]
+            }
+          ],
+          "display": {
+            "1": "demi-ronde",
+            "2": "angulaire",
+            "3": "d'aération"
+          }
         }
       ],
       "slots": [
@@ -10403,6 +11029,48 @@
         }
       ],
       "constants": {
+        "utile_fc_demi_ronde": {
+          "kind": "installation_condition",
+          "value": "0.33",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Faîtière demi-ronde fibres-ciment : longueur utile 330 mm (Cedral)."
+        },
+        "utile_fc_angulaire": {
+          "kind": "installation_condition",
+          "value": "1.10",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Faîtière angulaire fibres-ciment : longueur utile 1 100 mm (Cedral)."
+        },
+        "utile_fc_aeration": {
+          "kind": "installation_condition",
+          "value": "0.49",
+          "unit": "m",
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+          },
+          "version": 1,
+          "note": "Faîtière d'aération fibres-ciment : longueur utile 490 mm (Cedral)."
+        },
         "mortier_faitage_par_ml": {
           "kind": "installation_condition",
           "value": "7.5",
@@ -10436,6 +11104,7 @@
         {
           "id": "faitieres",
           "slot": "faitiere",
+          "when": "faitage_sur_fc < 1",
           "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
@@ -10445,6 +11114,27 @@
             "status": "verified",
             "verifiedAt": "2026-10-01",
             "verifiedBy": "BatiClair (définition d'un ratio au mètre)"
+          },
+          "version": 1
+        },
+        {
+          "id": "faitieres-fibres-ciment",
+          "slot": "faitiere",
+          "when": "faitage_sur_fc > 0",
+          "formula": "arrondi_sup(longueur_faitage / si(faitiere_fc < 2, regle.utile_fc_demi_ronde, si(faitiere_fc < 3, regle.utile_fc_angulaire, regle.utile_fc_aeration)))",
+          "unit": "u",
+          "core": true,
+          "exclusions": "Faîtières fibres-ciment au modèle choisi ; recouvrement compris dans la longueur utile.",
+          "designation": "Faîtières fibres-ciment {faitiere_fc}",
+          "precisionRequires": [
+            "faitiere_fc"
+          ],
+          "source": "fondateur-referentiel-2026-10-03",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-10-03",
+            "verifiedBy": "Fondateur (couvreur)",
+            "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
           },
           "version": 1
         },
@@ -10467,6 +11157,7 @@
         {
           "id": "crochets-faitiere",
           "slot": "fixation_faitiere",
+          "when": "faitage_sur_fc < 1",
           "formula": "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           "unit": "u",
           "core": true,
@@ -10523,6 +11214,58 @@
         "zinc_ridge"
       ],
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
         {
           "key": "longueur_faitage",
           "label": "Longueur du faîtage",
@@ -11124,7 +11867,16 @@
           "id": "feuilles-faitage-zinc",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(longueur_faitage / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          "formula": "arrondi_sup(arrondi_sup(longueur_faitage / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(longueur_faitage / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_faitage|ml}), développé {developpe|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(longueur_faitage / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+              "cle": "longueur_faitage"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
@@ -11169,6 +11921,58 @@
         "valley"
       ],
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
         {
           "key": "longueur_noue",
           "label": "Longueur de noue",
@@ -11815,7 +12619,16 @@
           "id": "feuilles-noue",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(longueur_noue / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))))",
+          "formula": "arrondi_sup(arrondi_sup(longueur_noue / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(longueur_noue / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_noue|ml}), développé {developpe_noue|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(longueur_noue / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))",
+              "cle": "longueur_noue"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
@@ -11844,6 +12657,58 @@
         "hip"
       ],
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
         {
           "key": "longueur_aretier",
           "label": "Longueur d'arêtier",
@@ -11911,6 +12776,38 @@
           "display": {
             "1": "en tuiles",
             "2": "en zinc"
+          }
+        },
+        {
+          "key": "aretier_ferme",
+          "label": "Arêtier fermé en ardoises",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "L'arêtier est-il fermé en ardoises ?",
+          "neverAsk": true,
+          "silentDefault": true,
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "biaise",
+                "biaises",
+                "ferme",
+                "aretier ferme"
+              ]
+            }
+          ],
+          "default": {
+            "value": "0",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "arêtier en bande zinc"
           }
         },
         {
@@ -12614,7 +13511,16 @@
           "id": "feuilles-aretier-zinc",
           "slot": "feuille",
           "when": "si(aretier_matiere < 2, 9, faconnage) < 2",
-          "formula": "arrondi_sup(longueur_aretier / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))))",
+          "formula": "arrondi_sup(arrondi_sup(longueur_aretier / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(longueur_aretier / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_aretier|ml}), développé {developpe_aretier|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(longueur_aretier / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_aretier))",
+              "cle": "longueur_aretier"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
@@ -13150,6 +14056,58 @@
       ],
       "perLine": true,
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
         {
           "key": "longueur_bande",
           "label": "Longueur de bande",
@@ -13851,7 +14809,16 @@
           "id": "feuilles-bandes",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          "formula": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(longueur_bande / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_bande|ml}), développé {developpe|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+              "cle": "longueur_bande"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
@@ -13931,6 +14898,58 @@
         "solin_support"
       ],
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
         {
           "key": "longueur_bande",
           "label": "Longueur de bande",
@@ -14557,7 +15576,16 @@
           "id": "feuilles-porte-solin",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          "formula": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(longueur_bande / longueur_pieces)} pièces de {longueur_pieces|m} ({longueur_bande|ml}), développé {developpe|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(longueur_bande / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe))",
+              "cle": "longueur_bande"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
@@ -14853,6 +15881,58 @@
         "copper_strip"
       ],
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
         {
           "key": "longueur_bande",
           "label": "Longueur de bande",
@@ -15285,7 +16365,16 @@
           "id": "feuilles-cuivre",
           "slot": "feuille",
           "when": "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
-          "formula": "arrondi_sup(ml_cuivre / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))))",
+          "formula": "arrondi_sup(arrondi_sup(ml_cuivre / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(ml_cuivre / longueur_pieces)} pièces de {longueur_pieces|m} ({ml_cuivre|ml}), développé {developpe_cuivre|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(ml_cuivre / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))",
+              "cle": "ml_cuivre"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
@@ -15329,6 +16418,118 @@
         "chimney_flashing"
       ],
       "params": [
+        {
+          "key": "longueur_pieces",
+          "label": "Longueur des pièces pliées",
+          "unit": "m",
+          "kind": "site_data",
+          "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+          "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+          "groupe": {
+            "id": "longueur-pieces-pliees",
+            "question": "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+            "hint": "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m."
+          },
+          "default": {
+            "value": "2",
+            "source": "greg-calculateur-feuilles-2026-11-22",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-22",
+              "verifiedBy": "Greg (couvreur) : calculateur de feuilles"
+            },
+            "version": 1,
+            "note": "pièces de 2 m, la longueur de la feuille"
+          },
+          "choices": [
+            {
+              "label": "2 m",
+              "value": "2"
+            },
+            {
+              "label": "1 m",
+              "value": "1"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "1",
+              "keywords": [
+                "longueurs de 1 m",
+                "pieces de 1 m",
+                "elements de 1 m"
+              ]
+            },
+            {
+              "value": "2",
+              "keywords": [
+                "longueurs de 2 m",
+                "pieces de 2 m",
+                "elements de 2 m"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "developpe_abergement",
+          "label": "Développé de l'abergement",
+          "unit": "mm",
+          "kind": "site_data",
+          "question": "Abergement : bande de 25, de 33 ou de 40 ?",
+          "hint": "Le développé : la largeur de la feuille avant façonnage.",
+          "default": {
+            "value": "330",
+            "source": "fondateur-referentiel-2026-10-03",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-10-03",
+              "verifiedBy": "Fondateur (couvreur)",
+              "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+            },
+            "version": 1,
+            "note": "« dév. 33 à 40 cm » (§7) : 33 retenu"
+          },
+          "choices": [
+            {
+              "label": "De 25",
+              "value": "250"
+            },
+            {
+              "label": "De 33",
+              "value": "330"
+            },
+            {
+              "label": "De 40",
+              "value": "400"
+            }
+          ],
+          "textValues": [
+            {
+              "value": "250",
+              "keywords": [
+                "dev 25",
+                "dev. 25",
+                "developpe 25"
+              ]
+            },
+            {
+              "value": "330",
+              "keywords": [
+                "dev 33",
+                "dev. 33",
+                "developpe 33"
+              ]
+            },
+            {
+              "value": "400",
+              "keywords": [
+                "dev 40",
+                "dev. 40",
+                "developpe 40"
+              ]
+            }
+          ]
+        },
         {
           "key": "nb_cheminees",
           "label": "Nombre de cheminées",
@@ -15988,7 +17189,16 @@
           "id": "feuilles-abergement",
           "slot": "feuille",
           "when": "faconnage < 2",
-          "formula": "arrondi_sup(ml_zinc / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_abergement))))",
+          "formula": "arrondi_sup(arrondi_sup(ml_zinc / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_abergement))",
+          "partage": true,
+          "postes": [
+            {
+              "id": "pieces",
+              "libelle": "{= arrondi_sup(ml_zinc / longueur_pieces)} pièces de {longueur_pieces|m} ({ml_zinc|ml}), développé {developpe_abergement|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / developpe_abergement))} par feuille",
+              "formule": "arrondi_sup(arrondi_sup(ml_zinc / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / developpe_abergement))",
+              "cle": "ml_zinc"
+            }
+          ],
           "unit": "u",
           "core": true,
           "exclusions": "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
@@ -16695,7 +17905,8 @@
           "usual": {
             "text": "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.",
             "source": "fondateur-reponses-2026-11-18",
-            "productId": "bobine-zinc-standard"
+            "productId": "bobine-zinc-standard",
+            "sur": true
           },
           "formOf": "couverture"
         },
@@ -19867,6 +21078,25 @@
           "core": true,
           "exclusions": "Recouvrement des jonctions soudées compris (30 mm par jonction).",
           "covers": "longueur_gouttiere",
+          "postes": [
+            {
+              "id": "longueur",
+              "libelle": "Gouttière {longueur_gouttiere|ml}",
+              "formule": "longueur_gouttiere",
+              "cle": "longueur_gouttiere"
+            },
+            {
+              "id": "croisures",
+              "libelle": "Croisures : {= arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1} jonctions × 3 cm",
+              "formule": "regle.recouvrement_jonction * (arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1)"
+            },
+            {
+              "id": "une-de-moins",
+              "libelle": "{= arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1} longueurs couvriraient",
+              "formule": "(arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1) * (regle.longueur_barre_gouttiere - regle.recouvrement_jonction) + regle.recouvrement_jonction",
+              "info": true
+            }
+          ],
           "designation": "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
           "precisionRequires": [
             "developpe_gouttiere"
@@ -21002,6 +22232,7 @@
           "kind": "site_data",
           "question": "Tubes de descente en longueurs de 2 m ou de 4 m ?",
           "default": {
+            "sur": true,
             "value": "2",
             "source": "fiche-couverture",
             "verification": {
@@ -21440,7 +22671,21 @@
         "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
       },
       "version": 1,
-      "note": "Chutes de liteaux et contre-liteaux."
+      "note": "Chutes des contre-liteaux (et des liteaux d'un ouvrage sans règle propre)."
+    },
+    {
+      "family": "batten",
+      "slot": "liteau",
+      "rate": "10",
+      "source": "fondateur-referentiel-2026-10-03",
+      "verification": {
+        "status": "verified",
+        "verifiedAt": "2026-10-03",
+        "verifiedBy": "Fondateur (couvreur)",
+        "note": "Référentiel quantitatif couverture rédigé et validé par le fondateur."
+      },
+      "version": 1,
+      "note": "Liteaux : 10 % de chute au total, aboutage compris (Greg, 22 novembre 2026)."
     },
     {
       "family": "zinc_ridge",

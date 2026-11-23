@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { attendreLaQuestionDesCrochets, crochetsAAgrafe, QUESTION_CROCHETS } from "./support/crochets.js";
 import { attendreLaQuestionDeLEgout, egoutCompris, QUESTION_EGOUT } from "./support/egout.js";
 import { cocherLesNaissances } from "./support/suggestions.js";
 import { LECTURE_READER, type LectureReader, type LectureRequest } from "../src/modules/takeoff/application/lecture-reader.js";
@@ -251,11 +252,18 @@ describe("POST /v1/quantitatifs en PDF", () => {
     const res = await agent.post("/v1/quantitatifs").field("adresse", "29200 Brest").attach("file", Buffer.from(pdf), { filename: "devis.pdf", contentType: "application/pdf" });
     expect(res.status).toBe(201);
     // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
-    // Ce devis n'a que des ardoises : c'est la seule question (la pente, lue dans l'en-tête, ne se demande pas). « Oui » : rien n'est ajouté.
-    expect(res.body.questions.map((q: { id: string }) => q.id)).toEqual([QUESTION_EGOUT]);
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : un crochet par ardoise, sans question).
+    // Ce devis n'a que des ardoises : ce sont les deux seules questions (la pente, lue dans l'en-tête, ne se demande pas). « Oui » : rien n'est ajouté.
+    expect(res.body.questions.map((q: { id: string }) => q.id)).toEqual([QUESTION_EGOUT, QUESTION_CROCHETS]);
     attendreLaQuestionDeLEgout(res.body.questions);
+    attendreLaQuestionDesCrochets(res.body.questions);
     expect(ligne(res.body, "Ardoises naturelles Espagne 1er choix 30×22")).toBeUndefined();
-    const repondu = await egoutCompris<{ lignes: Ligne[]; hypotheses: { cle: string }[]; questions: { id: string }[] }>(agent, res.body.id);
+    await egoutCompris(agent, res.body.id);
+    const repondu = await crochetsAAgrafe<{ lignes: Ligne[]; hypotheses: { cle: string }[]; questions: { id: string }[] }>(agent, res.body.id);
+    // Les crochets se partagent (Greg, 22 novembre 2026), sur les 10 306 ardoises de ce devis : à agrafe ⌈10 306 × 0,8⌉ = 8 245
+    // → 8 245 ÷ 500 = 16,5 → 17 boîtes ; à pointe ⌈10 306 × 0,2⌉ = 2 062 → 2 062 ÷ 700 = 2,9 → 3 boîtes.
+    expect(ligne(repondu, "Crochets d'ardoise inox à agrafe Ø 2,7, longueur 12 cm").quantite).toBe(17);
+    expect(ligne(repondu, "Crochets d'ardoise inox à pointe Ø 2,7, longueur 12 cm").quantite).toBe(3);
     const ardoises = ligne(repondu, "Ardoises naturelles Espagne 1er choix 30×22");
     // À 35° le recouvrement passe de 95 à 105 mm (région III, §34) : plus d'ardoises qu'à 45°, sans question posée.
     expect(ardoises.quantite).toBeGreaterThan(9200);

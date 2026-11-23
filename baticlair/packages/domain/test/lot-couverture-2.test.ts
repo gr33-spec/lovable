@@ -33,7 +33,10 @@ const CAS: Metier[] = [
     // Règle changée (Greg, 21 novembre 2026) : avant, deux questions → l'égout se demande quand aucune gouttière n'est écrite.
     // Tant qu'elle attend, les ardoises n'ont pas de chiffre et la ligne des crochets (un par ardoise) n'est pas encore là :
     // 2 lignes orange au lieu de 3. Répondu « Oui » : 6 694 ardoises, comme avant.
-    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise). Répondu « À agrafe » (premier bouton) : 6 694 × 0,8 = 5 355,2 → 5 356 agrafes, / 500 = 10,7 → 11
+    // boîtes ; 6 694 × 0,2 = 1 338,8 → 1 339 pointes, / 700 = 1,91 → 2 boîtes (avant : 6 694 crochets, 14 boîtes de 500).
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes crochets d'ardoise : à agrafe ou à pointe ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
     couleurs: { vert: 0, orange: 2, gris: 0 },
   },
   {

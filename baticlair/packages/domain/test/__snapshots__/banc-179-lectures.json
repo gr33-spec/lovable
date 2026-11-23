@@ -280,8 +280,8 @@
    },
    {
     "designation": "Isolant PIR ep 100 mm, épaisseur d'isolant",
-    "quantite": "48 m²",
-    "unite": "m²",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Format à préciser"
    }
@@ -827,15 +827,15 @@
    },
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande de rive zinc quartz dév. 200",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -887,8 +887,8 @@
    },
    {
     "designation": "Noue zinc",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -912,7 +912,7 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "1 991 ml",
+    "quantite": "2 086 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -942,6 +942,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -1163,6 +1164,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1181,6 +1183,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1191,8 +1194,8 @@
   "lignes": [
    {
     "designation": "Bande zinc de rive",
-    "quantite": "35 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1223,8 +1226,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -1250,8 +1253,8 @@
   "lignes": [
    {
     "designation": "Bandes cuivre, dév. 400 mm",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1331,8 +1334,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -1387,6 +1390,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1406,6 +1410,7 @@
   "questions": [
    "param:pente",
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1525,6 +1530,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1535,8 +1541,8 @@
   "lignes": [
    {
     "designation": "Noue zinc",
-    "quantite": "12 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1591,8 +1597,8 @@
   "lignes": [
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -1617,6 +1623,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -1706,7 +1713,7 @@
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "1 991 ml",
+    "quantite": "2 086 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -1736,6 +1743,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -1917,6 +1925,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2002,6 +2011,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2059,6 +2069,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2105,8 +2116,8 @@
   "lignes": [
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -2130,7 +2141,7 @@
    },
    {
     "designation": "Liteaux 18×40",
-    "quantite": "1 991 ml",
+    "quantite": "2 086 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -2160,6 +2171,7 @@
   "questions": [
    "param:egout_compris",
    "param:perimetre_cheminee",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -2181,7 +2193,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Marque, qualité à préciser"
+    "raison": "Marque, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2206,15 +2218,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2248,6 +2260,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2273,7 +2286,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2298,15 +2311,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2340,6 +2353,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2425,6 +2439,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2496,6 +2511,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2553,8 +2569,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2602,6 +2618,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2650,6 +2667,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2669,8 +2687,8 @@
     "designation": "Crochets d'ardoise inox standard, longueur 10 cm",
     "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
-    "etat": "ok",
-    "raison": null
+    "etat": "check",
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde dév. 33",
@@ -2687,7 +2705,9 @@
     "raison": null
    }
   ],
-  "questions": [],
+  "questions": [
+   "param:type_crochet@crochets-ardoise"
+  ],
   "aChiffrer": []
  },
  {
@@ -2727,6 +2747,7 @@
    "param:egout_compris",
    "param:diametre_sortie",
    "param:usage_sortie",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2747,7 +2768,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2772,15 +2793,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2814,6 +2835,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2856,7 +2878,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -2881,15 +2903,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -2923,6 +2945,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -2966,6 +2989,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -2998,29 +3022,29 @@
   "lignes": [
    {
     "designation": "Bande de solin zinc naturel dév. 25",
-    "quantite": "5 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande de rive zinc dév. 33",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Faîtage en bande zinc, dév. 330 mm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3141,7 +3165,7 @@
   "lignes": [
    {
     "designation": "Liteaux 18×40",
-    "quantite": "3 982 ml",
+    "quantite": "4 171 ml",
     "unite": "ml",
     "etat": "ok",
     "raison": null
@@ -3155,8 +3179,8 @@
    },
    {
     "designation": "Faîtage en bande zinc",
-    "quantite": "17 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -3253,6 +3277,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3290,7 +3315,7 @@
     "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde dév. 33",
@@ -3301,6 +3326,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3311,8 +3337,8 @@
   "lignes": [
    {
     "designation": "Bande zinc de rive",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3343,7 +3369,7 @@
    },
    {
     "designation": "Liteaux 27×40",
-    "quantite": "484 ml",
+    "quantite": "500 ml",
     "unite": "ml",
     "etat": "check",
     "raison": "Valeur par défaut à confirmer"
@@ -3514,8 +3540,9 @@
    }
   ],
   "questions": [
-   "param:egout_compris",
    "param:surface",
+   "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3540,8 +3567,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -3652,7 +3679,7 @@
     "quantite": "19 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc demi-ronde dév. 33",
@@ -3663,6 +3690,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3682,6 +3710,7 @@
   "questions": [
    "param:pente",
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3692,15 +3721,15 @@
   "lignes": [
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Habillage de rive en zinc quartz, dév. 200 mm",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3732,8 +3761,8 @@
   "lignes": [
    {
     "designation": "Bandes cuivre, dév. 330 mm",
-    "quantite": "12 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -3764,6 +3793,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3900,6 +3930,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -3910,8 +3941,8 @@
   "lignes": [
    {
     "designation": "Arêtier",
-    "quantite": "9 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Arêtier à préciser"
    }
@@ -4061,6 +4092,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4226,6 +4258,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "product:tuile",
    "param:qualite_ardoise"
   ],
@@ -4237,15 +4270,15 @@
   "lignes": [
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Habillage de rive en zinc quartz, dév. 20 cm",
-    "quantite": "14 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -4269,8 +4302,8 @@
    },
    {
     "designation": "Bande de ventilation en Z en zinc quartz",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4388,8 +4421,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4463,6 +4496,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise",
    "fiche:fenetre_de_toit_quelle_taille"
   ],
@@ -4520,6 +4554,7 @@
    "param:egout_compris",
    "param:diametre_sortie",
    "param:usage_sortie",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4573,8 +4608,8 @@
    },
    {
     "designation": "Bande zinc d'égout",
-    "quantite": "13 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4607,8 +4642,8 @@
   "lignes": [
    {
     "designation": "Noue zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -4633,6 +4668,7 @@
   "questions": [
    "param:pente",
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4671,7 +4707,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -4696,15 +4732,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4738,6 +4774,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -4793,7 +4830,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -4818,15 +4855,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -4860,6 +4897,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -4882,6 +4920,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -4917,8 +4956,8 @@
   "lignes": [
    {
     "designation": "Noue zinc",
-    "quantite": "12 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    }
@@ -4944,7 +4983,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -4969,15 +5008,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -5011,6 +5050,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -5033,6 +5073,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5053,7 +5094,7 @@
     "quantite": "5 boîtes de 500",
     "unite": "boîtes de 500",
     "etat": "check",
-    "raison": "Qualité à préciser"
+    "raison": "Qualité, crochet à préciser"
    },
    {
     "designation": "Gouttière zinc Havraise",
@@ -5078,15 +5119,15 @@
    },
    {
     "designation": "Faîtage en bande zinc, dév. 25 cm",
-    "quantite": "8 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
    {
     "designation": "Bande porte-solin zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -5120,6 +5161,7 @@
    }
   ],
   "questions": [
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise",
    "param:developpe_gouttiere",
@@ -5267,6 +5309,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5300,6 +5343,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []
@@ -5335,8 +5379,8 @@
    },
    {
     "designation": "Noue zinc",
-    "quantite": "4 ml",
-    "unite": "ml",
+    "quantite": null,
+    "unite": null,
     "etat": "check",
     "raison": "Façonnage à préciser"
    },
@@ -5350,6 +5394,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:faconnage@pieces-pliees",
    "param:qualite_ardoise"
   ],
@@ -5386,6 +5431,7 @@
   ],
   "questions": [
    "param:egout_compris",
+   "param:type_crochet@crochets-ardoise",
    "param:qualite_ardoise"
   ],
   "aChiffrer": []

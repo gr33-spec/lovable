@@ -12,7 +12,17 @@ import { REFERENTIEL_COMPLET } from "./support/complet.js";
 const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find((n) => n.needId === id)!;
 // Le nombre de pièces à commander. Les crochets se commandent en boîtes de 500 (Greg, 21 novembre 2026) : leur nombre de
 // pièces est celui du besoin, écrit sur la ligne.
-const order = (r: ReturnType<typeof computeWorkItem>, id: string) => (id === "crochets-ardoise" ? Math.ceil(Number(need(r, id).quantity?.value)) : Number(need(r, id).purchase?.order.count));
+// Règle changée (Greg, 22 novembre 2026) : en pose à agrafe, 4 crochets sur 5 à agrafe et 1 sur 5 à pointe (deux lignes) ;
+// « crochets-ardoise » compte ici le TOTAL des deux lignes (avant : une seule ligne, un crochet par ardoise).
+const pieces = (r: ReturnType<typeof computeWorkItem>, id: string) => Math.ceil(Number(need(r, id).quantity?.value));
+const order = (r: ReturnType<typeof computeWorkItem>, id: string) =>
+  id === "crochets-ardoise" ? pieces(r, "crochets-ardoise") + pieces(r, "crochets-ardoise-pointe") : Number(need(r, id).purchase?.order.count);
+// Le partage 4/5, 1/5 d'une pose à agrafe : agrafes = arrondi sup (ardoises × 0,8), pointes = arrondi sup (ardoises × 0,2).
+const partage = (r: ReturnType<typeof computeWorkItem>) => {
+  const ardoises = order(r, "ardoises");
+  expect(pieces(r, "crochets-ardoise")).toBe(Math.ceil(ardoises * 0.8));
+  expect(pieces(r, "crochets-ardoise-pointe")).toBe(Math.ceil(ardoises * 0.2));
+};
 const input = (params: WorkItemInput["params"] = {}, format = "ardoise-30x22", waste?: Record<string, string>): WorkItemInput => ({
   workItemId: "couverture-ardoises-crochet",
   // La qualité de l'ardoise (question du comptoir, §47.8) : habitude de l'entreprise.
@@ -22,6 +32,9 @@ const input = (params: WorkItemInput["params"] = {}, format = "ardoise-30x22", w
     surface: { value: "200", unit: "m2", origin: "devis", evidence: "Devis, ligne 1" },
     qualite_ardoise: { value: "1", unit: "u", origin: "artisan", evidence: "Habitude de votre entreprise" },
     egout_compris: { value: "1", unit: "u", origin: "artisan" },
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise). Ici l'artisan a répondu « À agrafe ».
+    type_crochet: { value: "1", unit: "u", origin: "artisan" },
     ...params,
   },
   products: { ardoise: { productId: format, origin: "devis" } },
@@ -40,6 +53,9 @@ describe("recouvrement du NF DTU 40.11 (fiche couverture, 2026-11-19)", () => {
     expect(need(r, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (table Cupa Pizarras)", value: "42,5" }));
     // 200 × 42,5 = 8 500 + 5 % = 8 925 (avant, ancien tableau : recouvrement 95 mm, 9 271).
     expect(order(r, "ardoises")).toBe(8925);
+    // À agrafe : 8 925 × 0,8 = 7 140 agrafes, 8 925 × 0,2 = 1 785 pointes ; 7 140 + 1 785 = 8 925 crochets en tout.
+    expect(pieces(r, "crochets-ardoise")).toBe(7140);
+    expect(pieces(r, "crochets-ardoise-pointe")).toBe(1785);
     expect(order(r, "crochets-ardoise")).toBe(8925);
   });
 });
@@ -70,6 +86,9 @@ describe("formule Cupa (§34) : le diamètre du crochet compte", () => {
     // 200 / (0,1025 × 0,2227) = 8 761,65 ; + 5 % = 9 199,73.
     expect(order(r, "ardoises")).toBe(9200);
     // Un crochet par ardoise commandée (fiche couverture, 2026-11-19 ; avant × 1,02 = 9 384).
+    // À agrafe : 9 200 × 0,8 = 7 360 agrafes + 9 200 × 0,2 = 1 840 pointes = 9 200.
+    expect(pieces(r, "crochets-ardoise")).toBe(7360);
+    expect(pieces(r, "crochets-ardoise-pointe")).toBe(1840);
     expect(order(r, "crochets-ardoise")).toBe(9200);
     expect(need(r, "ardoises").trace).toContainEqual(expect.objectContaining({ label: "Diamètre du crochet", value: "2,7", unit: "mm", origin: "devis" }));
   });
@@ -151,8 +170,9 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
       { label: "Ardoises 30×22 (devis)", value: "ardoise-30x22" },
       { label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" },
     ]);
-    // Les crochets suivent.
+    // Les crochets suivent (agrafes + pointes).
     expect(order(r, "crochets-ardoise")).toBeGreaterThanOrEqual(order(r, "ardoises"));
+    partage(r);
   });
 
   it("format venu d'une habitude de l'entreprise (le devis ne le précise pas), hors plage : UNE question à boutons, le 40×22 conseillé", () => {
@@ -203,11 +223,18 @@ describe("jamais moins de crochets que d'ardoises", () => {
       .filter((c) => order(c.r, "crochets-ardoise") < order(c.r, "ardoises"))
       .map((c) => `${c.label} : ${order(c.r, "crochets-ardoise")} crochets < ${order(c.r, "ardoises")} ardoises`);
     expect(wrong).toEqual([]);
+    // Et le partage d'une pose à agrafe : 4/5 à agrafe, 1/5 à pointe, chacun arrondi au-dessus.
+    const malPartages = cases
+      .filter((c) => need(c.r, "ardoises").status === "calculated")
+      .filter((c) => pieces(c.r, "crochets-ardoise") !== Math.ceil(order(c.r, "ardoises") * 0.8) || pieces(c.r, "crochets-ardoise-pointe") !== Math.ceil(order(c.r, "ardoises") * 0.2))
+      .map((c) => c.label);
+    expect(malPartages).toEqual([]);
     expect(cases.filter((c) => need(c.r, "ardoises").status === "calculated").length).toBeGreaterThan(100);
   });
 
   it("les crochets suivent les ardoises : une question sur les ardoises est aussi celle des crochets", () => {
-    const sansSurface: WorkItemInput = { ...input(), params: {} };
+    // Le type de crochet répondu (« À agrafe ») : la seule question qui reste est celle des ardoises.
+    const sansSurface: WorkItemInput = { ...input(), params: { type_crochet: { value: "1", unit: "u", origin: "artisan" } } };
     const r = computeWorkItem(REFERENTIEL_COMPLET, sansSurface);
     expect(need(r, "ardoises").status).toBe("question");
     expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: need(r, "ardoises").question!.key } });
