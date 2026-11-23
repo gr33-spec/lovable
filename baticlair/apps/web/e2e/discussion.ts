@@ -130,7 +130,9 @@ export async function calculerEtVoirMaListe(page: Page) {
 /** Le récapitulatif, quand il arrive : « Voir ma liste ». */
 export async function voirMaListe(page: Page) {
   const voir = page.getByRole("button", { name: "Voir ma liste", exact: true });
-  await expect(voir.or(boutonsDeLaQuestion(page)).or(page.getByRole("region", { name: "Page des fournitures" })).first()).toBeVisible({ timeout: 60_000 });
+  // Le calcul peut prendre plus d'une minute quand les parcours tournent en parallèle (un « Je ne sais pas » au développé
+  // ouvre « Combien de feuilles ? », Greg, 23 novembre 2026 : le serveur rejoue l'écran pour chaque réponse).
+  await expect(voir.or(boutonsDeLaQuestion(page)).or(page.getByRole("region", { name: "Page des fournitures" })).first()).toBeVisible({ timeout: 120_000 });
   if (await voir.isVisible()) await voir.click();
 }
 

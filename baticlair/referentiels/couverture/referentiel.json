@@ -11479,6 +11479,7 @@
           "question": "Pour le faîtage, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",
@@ -11510,13 +11511,6 @@
           ]
         },
         {
-          "inconnu": {
-            "valeur": "0",
-            "si": {
-              "param": "faconnage",
-              "value": "1"
-            }
-          },
           "key": "developpe",
           "label": "Développé de la bande",
           "unit": "mm",
@@ -12226,6 +12220,7 @@
           "question": "Pour la noue, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",
@@ -12257,13 +12252,6 @@
           ]
         },
         {
-          "inconnu": {
-            "valeur": "0",
-            "si": {
-              "param": "faconnage",
-              "value": "1"
-            }
-          },
           "key": "developpe_noue",
           "label": "Développé de la noue",
           "unit": "mm",
@@ -13002,6 +12990,7 @@
           "question": "Pour l'arêtier, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",
@@ -13177,13 +13166,6 @@
           ]
         },
         {
-          "inconnu": {
-            "valeur": "0",
-            "si": {
-              "param": "faconnage",
-              "value": "1"
-            }
-          },
           "key": "developpe_aretier",
           "label": "Développé de l'arêtier zinc",
           "unit": "mm",
@@ -14441,6 +14423,7 @@
           "question": "Pour cette bande, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",
@@ -14469,13 +14452,6 @@
           "fromLineQuantity": true
         },
         {
-          "inconnu": {
-            "valeur": "0",
-            "si": {
-              "param": "faconnage",
-              "value": "1"
-            }
-          },
           "key": "developpe",
           "label": "Développé de la bande",
           "unit": "mm",
@@ -15323,6 +15299,7 @@
           "question": "Pour le porte-solin, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",
@@ -15352,13 +15329,6 @@
           "ownOnly": true
         },
         {
-          "inconnu": {
-            "valeur": "0",
-            "si": {
-              "param": "faconnage",
-              "value": "1"
-            }
-          },
           "key": "developpe",
           "label": "Développé de la bande",
           "unit": "mm",
@@ -16346,6 +16316,7 @@
           "question": "Pour le cuivre, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",
@@ -16374,13 +16345,6 @@
           "fromLineQuantity": true
         },
         {
-          "inconnu": {
-            "valeur": "0",
-            "si": {
-              "param": "faconnage",
-              "value": "1"
-            }
-          },
           "key": "developpe_cuivre",
           "label": "Développé de la bande cuivre",
           "unit": "mm",
@@ -16923,6 +16887,7 @@
           "question": "Pour l'entourage de ta cheminée, combien de feuilles de zinc te faut-il ?",
           "hint": "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
           "ownOnly": true,
+          "toujoursDemandee": true,
           "choices": [
             {
               "label": "1",

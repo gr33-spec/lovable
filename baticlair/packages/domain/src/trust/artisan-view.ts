@@ -743,6 +743,12 @@ export function computeWithAnswers(
   const levers = new Map<string, number>();
   let current = inputs;
   for (const q of [...questions]) {
+    // Une question « toujours posée » (`toujoursDemandee` : un nombre de feuilles) ne rejoue pas le calcul bouton par bouton.
+    const nom = /^param:([a-z0-9_]+)/.exec(q.key)?.[1];
+    if (nom && ref.workItems.some((w) => w.params.some((p) => p.key === nom && p.toujoursDemandee))) {
+      levers.set(q.key, Number.POSITIVE_INFINITY);
+      continue;
+    }
     const lever = questionLever(ref, current, q, questions.filter((x) => x !== q), run);
     if (lever === null) continue;
     if (lever.spread <= QUESTION_THRESHOLD && lever.option) {

@@ -744,8 +744,8 @@ const FACONNAGE_BANDES_PARAM: ParamDef = {
  * (faîtage). Pas de défaut : le développé change le poids et la pièce, on demande (ce n'est pas une quantité).
  */
 const DEVELOPPE_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu).
-  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
+  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
   key: "developpe",
   label: "Développé de la bande",
   unit: "mm",
@@ -783,8 +783,8 @@ const FACONNAGE_NOUE_PARAM: ParamDef = {
  * noue préformée de 50, dite et modifiable : c'est celle que le comptoir sert sans rien demander.
  */
 const DEVELOPPE_NOUE_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu).
-  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
+  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
   key: "developpe_noue",
   label: "Développé de la noue",
   unit: "mm",
@@ -996,8 +996,8 @@ const LONGUEUR_PIECES_PARAM: ParamDef = {
 };
 /** Développé de l'abergement (§7 : « dév. 33 à 40 cm ») : lu au devis, sinon 33, dit et modifiable (calculateur de feuilles). */
 const DEVELOPPE_ABERGEMENT_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu).
-  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
+  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
   key: "developpe_abergement",
   label: "Développé de l'abergement",
   unit: "mm",
@@ -1050,6 +1050,7 @@ const feuillesDites = (quoi: string, key: string): ParamDef => ({
   question: `Pour ${quoi}, combien de feuilles de zinc te faut-il ?`,
   hint: "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
   ownOnly: true,
+  toujoursDemandee: true,
   choices: [
     { label: "1", value: "1" },
     { label: "2", value: "2" },
@@ -1058,8 +1059,8 @@ const feuillesDites = (quoi: string, key: string): ParamDef => ({
   ],
 });
 const DEVELOPPE_ARETIER_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu).
-  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
+  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
   key: "developpe_aretier",
   label: "Développé de l'arêtier zinc",
   unit: "mm",

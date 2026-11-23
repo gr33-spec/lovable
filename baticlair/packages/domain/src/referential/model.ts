@@ -287,6 +287,11 @@ export interface ParamDef {
    * La valeur que prend la donnée quand l'artisan répond « Je ne sais pas » (Greg, 23 novembre 2026 : un développé inconnu
    * fait demander « Combien de feuilles ? »). Absente : « Je ne sais pas » laisse la donnée inconnue, comme avant.
    */
+  /**
+   * Une question dont chaque réponse change la commande (un nombre de feuilles) : toujours posée, sans rejouer le calcul
+   * avec chacun de ses boutons pour la règle des 3 % (§41). Absente : la règle des 3 % s'applique.
+   */
+  toujoursDemandee?: true;
   inconnu?: { valeur: string; /** Seulement quand une autre donnée de l'ouvrage a cette valeur (« je plie »). */ si?: { param: string; value: string } };
   /** La valeur par défaut ne dit rien à l'artisan (0 m d'arêtier quand le devis n'en a pas) : jamais listée en hypothèse. */
   silentDefault?: true;
