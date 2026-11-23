@@ -381,6 +381,8 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Analyses offertes sur le site de test : 60 (avant : 50), pour finir les lectures de D-2026-024.
 - Parcours de test (22 novembre 2026) : la carte « Suggestions » s'ouvre maintenant dans des listes qui n'en avaient pas (pointes de liteaux) ; les parcours qui ne la regardent pas touchent « Continuer » sans rien cocher (`continuerQuandLesSuggestionsSOuvrent`, `e2e/discussion.ts`). Tests seulement, rien du moteur.
 
+- Règle changée (Greg, 23 novembre 2026) : l'image de « Nouveau quantitatif » est celle de Greg, un devis qui entre dans la machine Mobiiz et ressort en quantitatif (avant : un artisan sur ses plans, gardée dans `baticlair/docs/photos-accueil-anciennes/`). Comme elle porte déjà ses mots, « Prépare ta liste de matériaux » passe SOUS l'image, à la couleur du thème (avant : en blanc sur la photo, avec un voile sombre).
+
 ## Décisions du 22 novembre 2026 : base couverture et banc d'essai
 
 - Partage du travail (Greg) : la session « base couverture » fait la recherche et la fiche, avec les sources ; tout ce qui touche au calcul, aux suggestions ou aux questions s'écrit dans `banc-quantitatif/A-INTEGRER.md`, et c'est le banc d'essai qui l'intègre.

@@ -6,7 +6,7 @@ Le code est dans `apps/web/src/lib/photos-accueil.ts`. Les fichiers sont dans `a
 
 | Fichier | Carte | Ce qu'elle montre | Cadrage gardé |
 |---|---|---|---|
-| `quantitatif-greg-*` | « Nouveau quantitatif » (tous les métiers) | Un artisan prépare sa liste sur ses plans : carnet, calculette, tablette | L'artisan et son carnet (`30% 45%`) |
+| `quantitatif-greg-*` | « Nouveau quantitatif » (tous les métiers) | Image de Greg du 23 novembre 2026 : un devis entre dans la machine Mobiiz et ressort en quantitatif (titre posé SOUS l'image, jamais dessus). Avant : un artisan sur ses plans (`docs/photos-accueil-anciennes/quantitatif-greg-artisan-plans-1280.webp`) | Le centre (`50% 50%`) |
 | `groupes-greg-*` | « Achats groupés » (grande carte et vignette « Sois le premier ») | Une vingtaine d'artisans réunis devant un dépôt | Les visages, en haut (`50% 28%`) |
 
 Poids : 18 à 58 Ko en AVIF pour la photo du haut, 25 à 79 Ko pour celle des achats groupés.

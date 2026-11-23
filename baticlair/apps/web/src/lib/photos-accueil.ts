@@ -3,8 +3,8 @@
  * aucun crédit à afficher. Fichiers dans `apps/web/public/accueil/` (AVIF puis WebP, 640 et 1280 px de large) ; les
  * anciennes (Wikimedia Commons) sont gardées dans `baticlair/docs/photos-accueil-anciennes/`. Pour en changer : déposer
  * les nouvelles aux mêmes noms, ou changer les chemins ci-dessous (`docs/photos-accueil.md`).
- * - « Nouveau quantitatif » : un artisan prépare sa liste sur ses plans, au calme, tablette à côté. Elle vaut pour tous
- *   les métiers (rien n'y est propre à la couverture).
+ * - « Nouveau quantitatif » (Greg, 23 novembre 2026) : un devis entre dans la machine Mobiiz et ressort en quantitatif.
+ *   Elle vaut pour tous les métiers. Avant : un artisan sur ses plans (gardée dans `docs/photos-accueil-anciennes/`).
  * - « Achats groupés » : des artisans réunis devant un dépôt.
  */
 export interface PhotoAccueil {
@@ -23,9 +23,9 @@ export const PHOTO_QUANTITATIF: PhotoAccueil = {
   tailles: accueil("quantitatif-greg"),
   largeur: 1280,
   hauteur: 640,
-  alt: "Un artisan prépare sa liste de matériaux sur ses plans, carnet, calculette et tablette à côté",
-  // L'artisan, son carnet et le plan restent dans le cadre, même recadré pour l'ordinateur.
-  cadrage: "30% 45%",
+  alt: "Un devis entre dans la machine Mobiiz et ressort en quantitatif, la liste des matériaux",
+  // L'image se montre en entier (2 pour 1, comme la carte) : le centre suffit.
+  cadrage: "50% 50%",
 };
 
 export const PHOTO_GROUPES: PhotoAccueil = {
