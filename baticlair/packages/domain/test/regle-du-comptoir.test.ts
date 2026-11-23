@@ -43,6 +43,7 @@ const COMPTOIR: Record<string, string> = {
   feuilles_porte_solin: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
   feuilles_cuivre: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
   feuilles_cheminee: "« combien de feuilles de zinc te faut-il ? » pour cette pièce (Greg, 23 novembre 2026)",
+  zone_vent: "jamais demandée : la zone de vent vient du département du chantier (A-INTEGRER §2, 23 novembre 2026)",
   ecran_sous_toiture: "« écran sous toiture ? » pour compter les chatières, quand le devis ne le dit pas (A-INTEGRER §1, 22 novembre 2026)",
   nb_descentes: "le nombre de naissances et de descentes",
   diametre_descente: "« descente de 80 ou de 100 ? »",

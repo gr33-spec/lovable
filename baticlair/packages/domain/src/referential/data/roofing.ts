@@ -1576,7 +1576,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.23-83",
+  version: "roofing-2026.11.23-84",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2106,6 +2106,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "roof_window_blind", label: "Store de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_lining", label: "Habillage intérieur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "batten_nail", label: "Pointes de liteaux", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "tile_clip", label: "Crochet de fixation de tuile", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_flashing", label: "Raccord d'étanchéité de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["raccord d'etancheite", "raccord etancheite"] },
   ],
   products: [
@@ -2462,6 +2463,10 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("418", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."), primary: true }],
     }),
     // A-INTEGRER §1 : la chatière du modèle de tuile posé (le comptoir la sert d'après la tuile).
+    // A-INTEGRER §2 : crochets de fixation de tuiles en boîtes de 400 (Dimos, Frénéhard ; une source chacun).
+    generic("crochet-fixation-tuile", "tile_clip", "Crochets de fixation de tuile (modèle de la tuile posée), boîte de 400", "Crochets de fixation de tuiles", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 400", many: "boîtes de 400" }, contains: packaging("400", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Boîtes de 400 (Dimos, Frénéhard)."), primary: true }],
+    }),
     generic("chatiere-standard", "vent_tile", "Tuile chatière du modèle de tuile posé", "Chatières"),
     generic("pointes-liteau-31x70", "batten_nail", "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg", "Pointes galva 3,1 × 70", {
       sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("230", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
@@ -2585,6 +2590,10 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         PENTE_PARAM,
         ZONE_PARAM,
         // A-INTEGRER §1 et §2 (Greg, 22 novembre 2026) : une seule question, et seulement si le devis ne le dit pas.
+        // A-INTEGRER §2 (Greg, 23 novembre 2026 : « la Bretagne d'abord ») : la zone de vent vient du département du chantier
+        // (22, 29, 56 : vent 3 ; 35 : vent 2), jamais demandée ; hors Bretagne, inconnue : la fixation reste « à chiffrer ».
+        { key: "zone_vent", label: "Zone de vent", unit: "u", kind: "site_data", question: "Zone de vent ?", neverAsk: true },
+        SITUATION_PARAM,
         { key: "ecran_sous_toiture", label: "Écran sous toiture", unit: "u", kind: "site_data", question: "Écran sous toiture ?", textValues: [{ value: "1", keywords: ["ecran", "hpv", "sous toiture", "sous-toiture"] }], choices: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }], display: { "1": "oui", "2": "non" } },
         RAMPANT_PARAM,
         { key: "longueur_rives", label: "Longueur de rives", unit: "m", kind: "site_data", question: "Longueur totale des rives ?", fromLineQuantity: true, forSlots: ["rive"] },
@@ -2596,6 +2605,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
         { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).", source: RECH_FIXATIONS, productId: "pointes-liteau-31x70" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
         // A-INTEGRER §1 : les chatières se comptent d'après le modèle et la surface, jamais demandées ; proposées en Suggestion.
+        { key: "fixation", family: "tile_clip", label: "Crochets de fixation des tuiles", usual: { text: "Crochet de fixation de tuile (boîtes de 400).", source: RECH_FIXATIONS, productId: "crochet-fixation-tuile" }, suggested: { label: "Fixation des tuiles (crochets)", onlyOnMeasuredWork: true } },
         { key: "chatiere", family: "vent_tile", label: "Chatières", keywords: ["chatiere"], usual: { text: "Chatière du modèle de tuile posé.", source: RECH_ACCESSOIRES_TUILES, productId: "chatiere-standard" }, suggested: { label: "Chatières (ventilation de la toiture)", onlyOnMeasuredWork: true } },
         { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
         // Greg, 21 novembre 2026 : « Tuiles de rive : deux lignes, gauches et droites » (ce ne sont pas les mêmes pièces).
@@ -2603,6 +2613,8 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
         { key: "rive_droite", family: "verge_tile", label: "Tuiles de rive droites", usual: { text: "Tuile de rive droite du modèle de tuile posé.", source: F, productId: "tuile-rive-droite-standard" }, formOf: "rive" },
       ],
       constants: {
+        pente_100: condition("45", "°", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Pente de 100 % = 45°."),
+        pente_175: condition("60.26", "°", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Pente de 175 % ≈ 60,26°."),
         ventilation_avec_ecran: condition("0.0002", "u", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "1/5000 de la surface projetée, au-dessus d'un écran ou en comble perdu (NF DTU 40.11 §4.5.2) : 2 cm² par m²."),
         ventilation_sans_ecran: condition("0.000333", "u", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "1/3000 de la surface projetée, sans écran (DTU 40.23 tableau 6) : 3,3 cm² par m²."),
         // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
@@ -2660,6 +2672,26 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
           exclusions: "Moitié en partie basse, moitié près du faîtage.",
           source: RECH_ACCESSOIRES_TUILES,
           verification: ACCESSOIRES_TUILES_VERIFIE,
+          version: 1,
+        },
+        {
+          // A-INTEGRER §2 : tuiles du 1er rang d'égout et tuiles de rive toujours fixées ; partie courante selon le tableau du
+          // NF DTU 40.21 §5.4 (Edilians, Koramic), Bretagne seulement : vent 3 (22, 29, 56) sans écran 1 sur 3 (pente ≤ 100 %) ou
+          // 1 sur 2 (100 à 175 %), toutes en site exposé, 1 sur 5 avec écran ; vent 2 (35) sans écran 1 sur 5 / 1 sur 3, avec
+          // écran aucune (site normal, ≤ 100 %) ou 1 sur 5 ; au-delà de 175 % toutes. Faîtières et arêtières : avec leur ouvrage.
+          id: "fixation-tuiles",
+          slot: "fixation",
+          formula: "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5)))))) + surface / longueur_rampant / tuile.largeur_utile + longueur_rives / pureau",
+          postes: [
+            { id: "courante", libelle: "Partie courante : {= arrondi_sup(surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile)} tuiles, fixées selon le vent, l'écran et la pente", formule: "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5))))))" },
+            { id: "egout", libelle: "1er rang d'égout : toutes", formule: "surface / longueur_rampant / tuile.largeur_utile" },
+            { id: "rives", libelle: "Rives {longueur_rives|ml} : toutes", formule: "longueur_rives / pureau", cle: "longueur_rives" },
+          ],
+          unit: "u",
+          core: false,
+          precision: "égout et rives toujours fixés ; partie courante selon la zone de vent, l'écran et la pente (NF DTU 40.21)",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
           version: 1,
         },
         {

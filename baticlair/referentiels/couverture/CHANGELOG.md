@@ -1,5 +1,12 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.23-84 — Fixation des tuiles, Bretagne d'abord (A-INTEGRER §2, Greg, 2026-11-23)
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Fixation des tuiles à emboîtement | rien | case « Fixation des tuiles (crochets) » (Fixations) ; cochée : 1er rang d'égout et rives toujours fixés, partie courante selon le NF DTU 40.21 §5.4 (vent 3 en 22, 29, 56 ; vent 2 en 35 ; site exposé par la commune ; « Écran sous toiture ? » ; pente) ; crochets en boîtes de 400 ; hors Bretagne, à chiffrer | `recherche/fixations.json` (Edilians, Koramic, AQC) ; Dimos, Frénéhard |
+| Faîtières et arêtières | — | non comptées ici (avec leur ouvrage) | — |
+
 ## roofing-2026.11.23-83 — Réponses de Greg du 23 novembre 2026
 
 Banc du calcul : 99 sur 99.

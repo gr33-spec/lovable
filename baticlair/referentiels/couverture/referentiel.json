@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.23-83",
+  "version": "roofing-2026.11.23-84",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -1391,6 +1391,13 @@
     {
       "code": "batten_nail",
       "label": "Pointes de liteaux",
+      "needUnit": "u",
+      "attributes": [],
+      "keyAttributes": []
+    },
+    {
+      "code": "tile_clip",
+      "label": "Crochet de fixation de tuile",
       "needUnit": "u",
       "attributes": [],
       "keyAttributes": []
@@ -5305,6 +5312,38 @@
       ]
     },
     {
+      "id": "crochet-fixation-tuile",
+      "family": "tile_clip",
+      "label": "Crochets de fixation de tuile (modèle de la tuile posée), boîte de 400",
+      "shortLabel": "Crochets de fixation de tuiles",
+      "aliases": [],
+      "generic": true,
+      "attributes": {},
+      "sellingUnits": [
+        {
+          "id": "boite",
+          "label": {
+            "one": "boîte de 400",
+            "many": "boîtes de 400"
+          },
+          "contains": {
+            "kind": "packaging",
+            "value": "400",
+            "unit": "u",
+            "source": "recherche-fixations-2026-11-20",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-20",
+              "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+            },
+            "version": 1,
+            "note": "Boîtes de 400 (Dimos, Frénéhard)."
+          },
+          "primary": true
+        }
+      ]
+    },
+    {
       "id": "chatiere-standard",
       "family": "vent_tile",
       "label": "Tuile chatière du modèle de tuile posé",
@@ -6778,6 +6817,46 @@
           ]
         },
         {
+          "key": "zone_vent",
+          "label": "Zone de vent",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Zone de vent ?",
+          "neverAsk": true
+        },
+        {
+          "key": "situation",
+          "label": "Situation du chantier",
+          "unit": "u",
+          "kind": "site_data",
+          "question": "Le chantier est-il en situation exposée (bord de mer à moins de 5 km, île, falaise) ?",
+          "default": {
+            "value": "1",
+            "source": "fiche-couverture",
+            "verification": {
+              "status": "verified",
+              "verifiedAt": "2026-11-19",
+              "verifiedBy": "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026"
+            },
+            "version": 1,
+            "note": "situation normale, à défaut de commune au bord de mer"
+          },
+          "choices": [
+            {
+              "label": "Normale",
+              "value": "1"
+            },
+            {
+              "label": "Exposée (bord de mer, île)",
+              "value": "2"
+            }
+          ],
+          "display": {
+            "1": "normale",
+            "2": "exposée"
+          }
+        },
+        {
           "key": "ecran_sous_toiture",
           "label": "Écran sous toiture",
           "unit": "u",
@@ -6922,6 +7001,20 @@
           }
         },
         {
+          "key": "fixation",
+          "family": "tile_clip",
+          "label": "Crochets de fixation des tuiles",
+          "usual": {
+            "text": "Crochet de fixation de tuile (boîtes de 400).",
+            "source": "recherche-fixations-2026-11-20",
+            "productId": "crochet-fixation-tuile"
+          },
+          "suggested": {
+            "label": "Fixation des tuiles (crochets)",
+            "onlyOnMeasuredWork": true
+          }
+        },
+        {
           "key": "chatiere",
           "family": "vent_tile",
           "label": "Chatières",
@@ -6995,6 +7088,32 @@
         }
       ],
       "constants": {
+        "pente_100": {
+          "kind": "installation_condition",
+          "value": "45",
+          "unit": "°",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "Pente de 100 % = 45°."
+        },
+        "pente_175": {
+          "kind": "installation_condition",
+          "value": "60.26",
+          "unit": "°",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
+          },
+          "version": 1,
+          "note": "Pente de 175 % ≈ 60,26°."
+        },
         "ventilation_avec_ecran": {
           "kind": "installation_condition",
           "value": "0.0002",
@@ -7152,6 +7271,39 @@
             "status": "verified",
             "verifiedAt": "2026-11-20",
             "verifiedBy": "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026"
+          },
+          "version": 1
+        },
+        {
+          "id": "fixation-tuiles",
+          "slot": "fixation",
+          "formula": "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5)))))) + surface / longueur_rampant / tuile.largeur_utile + longueur_rives / pureau",
+          "postes": [
+            {
+              "id": "courante",
+              "libelle": "Partie courante : {= arrondi_sup(surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile)} tuiles, fixées selon le vent, l'écran et la pente",
+              "formule": "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5))))))"
+            },
+            {
+              "id": "egout",
+              "libelle": "1er rang d'égout : toutes",
+              "formule": "surface / longueur_rampant / tuile.largeur_utile"
+            },
+            {
+              "id": "rives",
+              "libelle": "Rives {longueur_rives|ml} : toutes",
+              "formule": "longueur_rives / pureau",
+              "cle": "longueur_rives"
+            }
+          ],
+          "unit": "u",
+          "core": false,
+          "precision": "égout et rives toujours fixés ; partie courante selon la zone de vent, l'écran et la pente (NF DTU 40.21)",
+          "source": "recherche-fixations-2026-11-20",
+          "verification": {
+            "status": "verified",
+            "verifiedAt": "2026-11-20",
+            "verifiedBy": "Recherche base couverture (fixations.json) : deux sources indépendantes"
           },
           "version": 1
         },

@@ -108,7 +108,7 @@ describe("hypothèses par défaut : utilisées sans question, dites, modifiables
       mentioned: ["tuile"],
     };
     // Les chatières (A-INTEGRER §1, 22 novembre 2026) : elles ont leurs données (surface, pente, modèle) ; seules les rives manquent.
-    expect(computeWorkItem(REFERENTIEL_COMPLET, tuiles).needs.map((n) => n.needId)).toEqual(["tuiles", "liteaux", "pointes-liteaux", "chatieres", "contre-liteaux", "ecran"]);
+    expect(computeWorkItem(REFERENTIEL_COMPLET, tuiles).needs.map((n) => n.needId)).toEqual(["tuiles", "liteaux", "pointes-liteaux", "chatieres", "fixation-tuiles", "contre-liteaux", "ecran"]);
     const withRives = computeWorkItem(REFERENTIEL_COMPLET, { ...tuiles, params: { ...tuiles.params, longueur_rives: { value: "24", unit: "m", origin: "devis" } } });
     // Pureau : rampant 5,5 m (hypothèse) partagé en 15 rangs entiers au pureau maxi de 0,376 m → 0,3667 m (fiche couverture,
     // 2026-11-19 ; avant : pureau mini 0,31 m en zone littorale). 24 m / 0,3667 m = 65,45 tuiles de rive → 66 (avant 78).
