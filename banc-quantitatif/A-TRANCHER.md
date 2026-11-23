@@ -1,6 +1,12 @@
 # À trancher par Greg (banc du calcul)
 
-## NUIT DU 22 AU 23 NOVEMBRE 2026 — ce que tu dois trancher (option prudente prise en attendant)
+## 23 NOVEMBRE 2026 — ce qui reste à trancher
+- Abergement avec la taille de la souche : cotes déduites (devant L + 2 × 11 cm en bande de 30 ; derrière L + 2 × 13,5 cm en
+  bande de 50 ; côtés 2 × (P + 20 cm) en bandes de 25). Tes cotes à toi ?
+- Fixation des tuiles : faîtières et arêtières pas comptées ici (avec leur ouvrage) ; la longueur des rives se demande si la
+  case est cochée et que le devis ne la donne pas.
+
+## NUIT DU 22 AU 23 NOVEMBRE 2026 — tranché par Greg le 23 au matin (voir OU-J-EN-SUIS) (option prudente prise en attendant)
 
 1. **C05, feuilles de zinc : 3 ou 4 ?** Avec ta règle (pièces = ml ÷ longueur, bandes par feuille = 100 ÷ développé), les
    4 noues de 1,80 m (dév. 50) donnent 4 pièces → 2 feuilles, et l'abergement (périmètre 3 m × 1,3 = 3,9 ml, dév. 33) donne

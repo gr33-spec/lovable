@@ -2,6 +2,23 @@
 
 Mis à jour : 22 novembre 2026, soir. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
 
+## 23 NOVEMBRE (réponses de Greg du matin) — lot fait sur ma branche, chaîne en cours (cb979f7f)
+1. Abergement de cheminée sur mesure (-83) : sans la taille de la souche, « Pour l'entourage de ta cheminée, combien de
+   feuilles de zinc te faut-il ? » (1 à 4, Autre) ; avec la taille (largeur, profondeur lues au devis), devant + derrière +
+   côtés, détail sous la flèche, estimation modifiable. Cotes DÉDUITES des minimums (aucune source ne chiffre la
+   consommation) : `referentiels/couverture/recherche/abergement-cheminee-2026-11-23.md`. C05 : réponse 2 → 4 feuilles, juste.
+2. Longueur des pièces une fois pour le devis, 2 pièces de 1 m par bande : confirmés par Greg (rien à changer).
+3. « Combien de feuilles ? » quand le développé dépasse 1 m ou est inconnu (« Je ne sais pas », je plie seulement) : une
+   question propre à chaque pièce (`feuilles_faitage`, `feuilles_noue`…). Moteur : `inconnu` sur une donnée, `si` paresseux.
+4. Chatière Volnay PV : 35 cm² avec grille (613 VPV), deux sources (catalogue Terreal, DTA CSTB).
+5. Clous d'ardoise en galva par défaut (2,7 × 30, ≈ 653 au kg). À dire à Greg : un clou apparent doit être inox ou cuivre
+   (DTU 40.11 annexe B) ; seul cas écrit : dernier rang d'un faîtage à lignolet (guide du ministère de la Culture).
+6. Fixation des tuiles, Bretagne (-84) : case Fixations, égout et rives fixés, partie courante selon le DTU 40.21 §5.4 ; le
+   serveur pose la zone de vent d'après le code postal (22, 29, 56 : 3 ; 35 : 2).
+7. Doute d'orthographe de bout en bout par le serveur : la question sort dans la liste, la réponse est acceptée et
+   remplace le mot (`apps/api/test/orthographe-des-devis.test.ts`).
+Banc : 99/99.
+
 ## NUIT DU 22 AU 23 NOVEMBRE (Greg : « enchaîne les lots, pousse si toute la chaîne est verte et /version bon »)
 Fait sur ma branche, dans l'ordre de Greg :
 1. Crochets agrafe / pointe : déjà fait (-77), tests serveur mis à jour par l'agent (5 fichiers verts).
