@@ -376,7 +376,7 @@ export interface Takeoff {
   /** Nouveau cap (22 octobre) : la phrase de la pastille orange d'une ligne vague. */
   phrasePrecision?: string;
   /** « Comme d'habitude ? » : les habitudes établies de l'entreprise appliquées à ce chantier. */
-  habits?: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  habits?: { key: string; question: string; label?: string; unit: string; options: { label: string; value: string }[]; value: string }[];
   /** Les pièces d'un choix commun au devis (le pliage), chacune avec son choix : il se change pour une pièce au récapitulatif. */
   choixPieces?: { key: string; piece: string; value: string; unit: string; options: { label: string; value: string }[] }[];
   /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même : jamais posées, confirmées s'il les dit. */

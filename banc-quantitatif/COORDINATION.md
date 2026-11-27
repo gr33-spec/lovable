@@ -90,3 +90,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (moteur 1 402, serveur 973, parcours 368, parcours activés 101, dont un instable de la messagerie repassé : « Une fuite sur
   mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
 - Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.
+
+## Banc du calcul, 27 novembre 2026 : l'habitude nommée dans la discussion des questions
+- Retour de Greg (iPhone) : « Comme d'habitude : 0,65 mm. » seul après « J'ai lu ton devis… ». Corrigé par le banc :
+  chaque habitude est une ligne à son nom (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), qui se rouvre d'un toucher
+  (`components/journey.tsx`, messages de départ de `QuestionsScreen` ; le serveur envoie `habits[].label`).
+- La discussion des écrans N'Y TOUCHE PAS (questions du quantitatif : domaine du banc). Parcours :
+  « une habitude dit toujours ce qu'elle concerne » (`e2e/parcours-artisan.spec.ts`).
+- Je pousse sur la branche de test seulement après une chaîne verte, et je l'écris ici avant.

@@ -427,6 +427,11 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Vitesse (Greg : « moins de 2 secondes par réponse ») : seul ce qui change se recalcule, aucun résultat changé (banc 99 sur 99, sortie identique avant / après). Chantier D-2026-020 en local : calcul 8,7 s → 0,85 s ; tout « Je ne sais pas » d'un coup 12,2 s → 2,5 s. « Vérification des quantités… » s'affiche dès « Calculer ma liste ».
 - Règle changée : « Je ne sais pas » au développé d'une pièce que l'artisan plie → « Pour …, combien de feuilles de zinc te faut-il ? » dans la discussion (avant : la ligne attendait son développé). Pièce commandée toute faite : rien ne change.
 
+## Décisions du 27 novembre 2026 (suite) : l'habitude nommée, le prix d'un devis client
+
+- Règle changée (iPhone de Greg) : une habitude retenue nomme toujours ce qu'elle concerne (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), une ligne par habitude, et se rouvre d'un toucher. Avant : « Comme d'habitude : 0,65 mm. » seul. Le serveur envoie le nom (`habits[].label`). Parcours « une habitude dit toujours ce qu'elle concerne ».
+- Nouvelle règle (Greg) : le prix écrit sur un devis client est le prix de VENTE de l'artisan ; jamais un prix d'achat, jamais dans l'observatoire des prix ni dans « Mes prix », jamais montré à un négoce. Vérifié : seules les réponses des négoces (lien de chiffrage, offres groupées) alimentent l'observatoire et « Mes prix ». Test permanent `apps/api/test/prix-du-devis-client-jamais-un-prix-d-achat.test.ts`.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

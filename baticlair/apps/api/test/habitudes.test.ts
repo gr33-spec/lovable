@@ -92,6 +92,10 @@ describe("le pliage : une seule carte « Comme d'habitude ? » pour tout le devi
     const cards = q.ecran.habits.filter((h) => h.key.startsWith("param:faconnage"));
     expect(cards.map((h) => h.key)).toEqual(["param:faconnage@pieces-pliees"]);
     expect(cards.map((h) => h.question)).toEqual(["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?"]);
+    // Greg, 27 novembre 2026 (iPhone) : une habitude dit toujours ce qu'elle concerne (« Façonnage : … , comme d'habitude »),
+    // jamais une valeur seule (« Comme d'habitude : 0,65 mm. »).
+    expect((q.ecran.habits as { label?: string }[]).every((h) => typeof h.label === "string" && h.label.length > 0)).toBe(true);
+    expect(cards.map((h) => (h as { label?: string }).label)).toEqual(["Façonnage"]);
     // L'abergement est commandé façonné sur ce chantier (le choix d'UNE pièce) ; la noue reste « comme d'habitude » (je façonne).
     const res = await agent
       .post(`/v1/quantitatifs/${q.id}/reponses?ecran=1`)
