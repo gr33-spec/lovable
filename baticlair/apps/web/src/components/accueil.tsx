@@ -538,25 +538,21 @@ function ZoneQuantitatif({
       aria-label="Nouveau quantitatif"
       className="accueil-apparait overflow-hidden rounded-[20px] bg-surface shadow-card lg:flex lg:h-full lg:flex-col"
     >
-      <div className="relative">
-        <Photo
-          photo={photo}
-          prioritaire
-          tailles="(min-width: 1024px) 640px, 100vw"
-          className="aspect-[2/1] w-full object-cover lg:aspect-[16/10]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent"
-        />
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-4 lg:p-6">
-          <h2 className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.02em] text-white text-balance lg:text-[34px]">
-            Prépare ta liste de matériaux
-          </h2>
-          <p className="text-[15px] leading-snug text-white/90 lg:text-[17px]">
-            Prête pour tes négoces.
-          </p>
-        </div>
+      {/* L'image de Greg (23 novembre 2026) porte déjà ses mots (« DEVIS », « QUANTITATIF ») : rien n'est posé dessus,
+          le titre vient juste dessous. */}
+      <Photo
+        photo={photo}
+        prioritaire
+        tailles="(min-width: 1024px) 640px, 100vw"
+        className="aspect-[2/1] w-full object-cover"
+      />
+      <div className="flex flex-col gap-1 px-4 pt-4 lg:px-6 lg:pt-6">
+        <h2 className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.02em] text-ink text-balance lg:text-[30px]">
+          Prépare ta liste de matériaux
+        </h2>
+        <p className="text-[15px] leading-snug text-muted lg:text-[17px]">
+          Prête pour tes négoces.
+        </p>
       </div>
       <div className="flex flex-col gap-3 p-4 lg:flex-1 lg:justify-end lg:p-6">
         <Link

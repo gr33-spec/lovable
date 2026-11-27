@@ -242,11 +242,13 @@ export function ProjectTakeoff({
     const sentence = nothingRead
       ? "Je n'ai rien lu dans ce devis."
       : refused
-        ? (shown?.message ?? "Je n'ai pas pu lancer la lecture de ce devis.")
+        ? // La phrase du serveur d'abord (« Confirme d'abord ton adresse e-mail… »), jamais le message général de son code
+          // (ami de Greg, 23 novembre 2026 : « Un champ n'est pas correctement rempli » sur un e-mail pas encore confirmé).
+          (shown?.phrase ?? shown?.message ?? "Je n'ai pas pu lancer la lecture de ce devis.")
         : lost
           ? "Je n'ai plus de nouvelles de la lecture de ce devis."
           : "Je n'ai pas réussi à lire ce devis jusqu'au bout.";
-    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : () => prepare()} />;
+    return <ReadFailure sentence={sentence} disabled={archived} onRetry={lost ? reload : () => prepare()} renvoyerLien={refused && actionError?.reason === "email_non_verifie"} />;
   }
 
   // §48 ÉTAPE 3 : les questions de comptoir, toutes d'un coup, AVANT le calcul. Puis ÉTAPE 4 : le calcul.
@@ -727,18 +729,43 @@ function LineForm({
 }
 
 /** §50.1 : un échec de lecture se dit en une phrase, avec « Réessayer ». Rien d'autre. */
-function ReadFailure({ sentence, onRetry, disabled }: { sentence: string; onRetry?: () => void; disabled: boolean }) {
+function ReadFailure({ sentence, onRetry, disabled, renvoyerLien = false }: { sentence: string; onRetry?: () => void; disabled: boolean; renvoyerLien?: boolean }) {
   return (
     <section id="materiaux" aria-label="Lecture du devis" className="flex scroll-mt-4 flex-col gap-3 rounded-xl bg-surface p-5 shadow-card">
       <p role="alert" className="text-[17px] leading-snug font-bold">
         {sentence}
       </p>
+      {renvoyerLien ? <RenvoyerLeLien /> : null}
       {onRetry ? (
         <Button className="min-h-14 w-full text-[17px]" disabled={disabled} onClick={onRetry}>
           Réessayer
         </Button>
       ) : null}
     </section>
+  );
+}
+
+/** L'e-mail pas encore confirmé : renvoyer le lien d'un toucher, puis « Réessayer » une fois le lien ouvert. */
+function RenvoyerLeLien() {
+  const [etat, setEtat] = useState<"pret" | "envoi" | "envoye" | "echec">("pret");
+  async function renvoyer() {
+    setEtat("envoi");
+    try {
+      const me = await api<{ user: { email: string } }>("/v1/me");
+      await api("/v1/auth/send-verification-email", { method: "POST", body: { email: me.user.email, callbackURL: window.location.href } });
+      setEtat("envoye");
+    } catch {
+      setEtat("echec");
+    }
+  }
+  if (etat === "envoye") return <p role="status" className="text-[15px] leading-snug text-muted">C&apos;est envoyé. Ouvre le lien reçu par e-mail (regarde aussi dans les indésirables), puis touche « Réessayer ».</p>;
+  return (
+    <>
+      <Button variant="secondary" className="min-h-12 w-full" pending={etat === "envoi"} onClick={() => void renvoyer()}>
+        Renvoyer le lien de confirmation
+      </Button>
+      {etat === "echec" ? <p role="alert" className="text-[15px] text-muted">Le lien n&apos;est pas parti. Réessaie dans un instant.</p> : null}
+    </>
   );
 }
 

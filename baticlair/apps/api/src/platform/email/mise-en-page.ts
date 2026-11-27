@@ -70,9 +70,18 @@ export function autorise(garde: GardeEnvoi, to: string): boolean {
   return garde.autorises.some((x) => (x.startsWith("@") ? a.endsWith(x) : a === x));
 }
 
-/** L'e-mail après la garde : tel quel, redirigé vers l'adresse de test, ou null (il ne part pas). */
+/** Les domaines réservés aux exemples et aux tests (RFC 2606, et leurs équivalents français) : jamais un vrai envoi. */
+const DOMAINE_DE_TEST = /@([a-z0-9-]+\.)*(example\.(com|org|net|fr)|exemple\.(com|org|net|fr)|test|invalid|localhost)$/i;
+export const adresseDeTest = (to: string): boolean => DOMAINE_DE_TEST.test(to.trim());
+
+/**
+ * L'e-mail après la garde : tel quel, redirigé vers l'adresse de test, ou null (il ne part pas). RÈGLE CHANGÉE (Greg,
+ * 23 novembre 2026) : un e-mail de compte (`compte`) part à son vrai destinataire, sauf vers une adresse réservée aux
+ * tests ; avant, il était détourné comme les autres et l'ami qui s'inscrivait ne pouvait jamais valider son adresse.
+ */
 export function garder(garde: GardeEnvoi | null, email: TransactionalEmail): TransactionalEmail | null {
   if (!garde || autorise(garde, email.to)) return email;
+  if (email.compte && !adresseDeTest(email.to)) return email;
   if (!garde.redirigerVers) return null;
   return { ...email, to: garde.redirigerVers, subject: `[TEST → ${email.to}] ${email.subject}` };
 }

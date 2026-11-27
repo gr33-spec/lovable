@@ -14,6 +14,7 @@ const bonjour = (name: string | null | undefined) => (name?.trim() ? `Bonjour ${
 export function magicLinkEmail(to: string, url: string): TransactionalEmail {
   return {
     to,
+    compte: true,
     subject: "Ton lien de connexion Mobiiz",
     text: [
       "Bonjour,",
@@ -29,6 +30,7 @@ export function magicLinkEmail(to: string, url: string): TransactionalEmail {
 export function verificationEmail(to: string, name: string, url: string): TransactionalEmail {
   return {
     to,
+    compte: true,
     subject: "Confirme ton adresse e-mail",
     text: [
       bonjour(name),
@@ -44,6 +46,7 @@ export function verificationEmail(to: string, name: string, url: string): Transa
 export function resetPasswordEmail(to: string, name: string, url: string): TransactionalEmail {
   return {
     to,
+    compte: true,
     subject: "Ton nouveau mot de passe",
     text: [
       bonjour(name),

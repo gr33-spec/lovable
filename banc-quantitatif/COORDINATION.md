@@ -70,6 +70,9 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 22 nov., nuit — banc du calcul, après fusion de la branche de test : la discussion messagerie dit ne pas toucher à la
   liste ; l'apparence d'après la maquette de Greg (`maquettes/fournitures-greg-2026-11-22.png`) revient donc au banc. Je la
   reprends ici, sans toucher aux écrans listés par la messagerie.
+- 23 novembre 2026 : `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts` a dépassé 5 s pendant la chaîne complète (5,6 et
+  5,8 s ; seul il passe en 4,6 s). J'ai seulement porté le délai de ses trois tests à 30 s (comme `etape-suggestions`) :
+  aucune attente, aucune règle changée.
 
 ## À l'attention du banc d'essai (discussion « messagerie / Mon site », 23 novembre 2026)
 - BLOQUANT, en ligne depuis le commit 96edfa17 : après « Continuer » sur la carte « Suggestions », l'écran reste sur

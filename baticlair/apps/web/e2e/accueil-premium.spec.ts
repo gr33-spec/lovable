@@ -95,7 +95,7 @@ test("nouveau compte : les zones dès l'inscription, l'accompagnement en trois �
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Bonjour Greg", level: 1 })).toBeVisible();
   const a = page.getByRole("region", { name: "Nouveau quantitatif" });
-  await expect(a.getByRole("img")).toHaveAttribute("alt", /artisan prépare sa liste/i);
+  await expect(a.getByRole("img")).toHaveAttribute("alt", /devis entre dans la machine Mobiiz/i);
   const bouton = a.getByRole("link", { name: "Nouveau quantitatif" });
   await expect(bouton).toHaveAttribute("href", "/chantiers/nouveau");
   // Visible sans défiler, sans occuper tout l'écran.
@@ -160,15 +160,20 @@ test("Mon activité : un dossier une seule fois (« 1 réponse reçue », jamais
   await expect(page).toHaveURL(new RegExp(`/chantiers/${avecReponse}\\?onglet=offres`));
 });
 
-test("clair et sombre : les trois zones se lisent ; la photo a son voile ; le texte sur la photo reste blanc", async ({ page }) => {
+test("clair et sombre : les trois zones se lisent ; l'image du quantitatif est nette, son titre juste dessous (Greg, 23 novembre 2026)", async ({ page }) => {
   test.setTimeout(120_000);
   await inscrire(page);
   await apiJson(page, "POST", "/v1/me/guide/vu");
   for (const theme of ["clair", "sombre"] as const) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     await page.goto("/");
-    const titre = page.getByRole("region", { name: "Nouveau quantitatif" }).getByRole("heading", { name: "Prépare ta liste de matériaux" });
-    await expect(titre).toHaveCSS("color", "rgb(255, 255, 255)");
+    const zone = page.getByRole("region", { name: "Nouveau quantitatif" });
+    const titre = zone.getByRole("heading", { name: "Prépare ta liste de matériaux" });
+    await expect(titre).toBeVisible();
+    // Rien n'est posé sur l'image (elle porte déjà ses mots) : le titre commence sous elle, à la couleur du thème.
+    const image = (await zone.getByRole("img").boundingBox())!;
+    expect((await titre.boundingBox())!.y).toBeGreaterThanOrEqual(image.y + image.height - 1);
+    if (theme === "clair") await expect(titre).not.toHaveCSS("color", "rgb(255, 255, 255)");
     await capture(page, `theme-${theme}`);
   }
 });

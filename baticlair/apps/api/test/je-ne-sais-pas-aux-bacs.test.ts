@@ -45,6 +45,7 @@ async function chantier(rampant: string | null) {
   return (await agent.get(`/v1/quantitatifs/${q.id}?ecran=1`).expect(200)).body as Corps;
 }
 
+// Trois chantiers calculés de bout en bout par l'API : plus de 5 s quand la machine est chargée (chaîne complète).
 describe("la longueur des bacs laissée sans réponse", () => {
   it("« Je ne sais pas » : les ardoises sont chiffrées avec leur rampant courant ; les bacs restent à préciser", async () => {
     const b = await chantier(null);
@@ -54,7 +55,7 @@ describe("la longueur des bacs laissée sans réponse", () => {
     expect(bacs[1]).toBeNull();
     // La question reste sur la ligne des bacs : elle se règle dans la liste.
     expect(b.questions.map((x) => x.id)).toContain("engine:param:longueur_rampant");
-  });
+  }, 30_000);
 
   it("répondue (5 m) : les bacs sont comptés à cette longueur, les ardoises aussi", async () => {
     const b = await chantier("5");
@@ -63,7 +64,7 @@ describe("la longueur des bacs laissée sans réponse", () => {
       ["Ardoises naturelles Espagne 1er choix 32×22", "5 121 pièces"],
     ]);
     expect(b.questions.map((x) => x.id)).not.toContain("engine:param:longueur_rampant");
-  });
+  }, 30_000);
 
   it("les réponses de l'écran, envoyées d'un coup : une qualité écrite (« Ardoise d'Angers ») passe même après une réponse qui change l'état", async () => {
     // Parcours « Autre » du 18 novembre 2026 : le façonnage, répondu juste avant dans le même envoi, refermait la question de
@@ -87,5 +88,5 @@ describe("la longueur des bacs laissée sans réponse", () => {
     expect((await agent.post(`/v1/quantitatifs/${q.id}/calcul?ecran=1`).send({ reponses: [EGOUT_COMPRIS, { question: "engine:param:longueur_rampant", valeur: null }], ajouts: [], retraits: [] })).status).toBe(200);
     const b = (await agent.get(`/v1/quantitatifs/${q.id}?ecran=1`).expect(200)).body as Corps;
     expect(b.ecran.purchase.toBuy.map((x) => x.label).join(" | ")).toMatch(/Ardoise d'Angers/);
-  });
+  }, 30_000);
 });
