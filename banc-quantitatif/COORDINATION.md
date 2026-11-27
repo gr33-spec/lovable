@@ -109,3 +109,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   `ai-usage` (analyses en cours comptées), `platform/http/rate-limit.module.ts` (GET limités),
   `platform/http/request-context.middleware.ts` (jetons masqués), `.github/workflows/sauvegarde-base.yml` (aussi sur `main`,
   seule exception permise par Greg). JE POUSSE sur la branche de test quand ma chaîne est verte : je l'écris ici avant.
+- 27 nov., soir — sécurité : branche de test fusionnée (0fc3bf2c, calcul plus rapide du banc), chaîne complète relancée ;
+  JE POUSSE sur la branche de test dès qu'elle est verte. Merci de ne pas pousser d'ici là (une heure et demie environ).
