@@ -93,6 +93,13 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
 - Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.
 
+## Banc du calcul, 27 novembre 2026 : l'habitude nommée dans la discussion des questions
+- Retour de Greg (iPhone) : « Comme d'habitude : 0,65 mm. » seul après « J'ai lu ton devis… ». Corrigé par le banc :
+  chaque habitude est une ligne à son nom (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), qui se rouvre d'un toucher
+  (`components/journey.tsx`, messages de départ de `QuestionsScreen` ; le serveur envoie `habits[].nom`). Fusion du 27 novembre : la discussion des écrans avait fait la même correction (une ligne de texte) ; gardée la version du banc, qui se rouvre d'un toucher (« rester modifiable »), avec leur champ `nom`.
+- La discussion des écrans N'Y TOUCHE PAS (questions du quantitatif : domaine du banc). Parcours :
+  « une habitude dit toujours ce qu'elle concerne » (`e2e/parcours-artisan.spec.ts`).
+- Je pousse sur la branche de test seulement après une chaîne verte, et je l'écris ici avant.
 - 27 novembre 2026 (retour iPhone de Greg) : dans `components/journey.tsx`, la dictée des questions redevient la dictée dans
   la case (rien ne part avant « Envoyer ») et la ligne « comme d'habitude » dit le nom de la donnée (« Épaisseur du zinc :
   0,65 mm, comme d'habitude ») ; pour cela, `takeoff.service.ts` ajoute seulement `nom` (le libellé de la donnée de la

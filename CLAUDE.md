@@ -432,6 +432,10 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Vitesse (Greg : « moins de 2 secondes par réponse ») : seul ce qui change se recalcule, aucun résultat changé (banc 99 sur 99, sortie identique avant / après). Chantier D-2026-020 en local : calcul 8,7 s → 0,85 s ; tout « Je ne sais pas » d'un coup 12,2 s → 2,5 s. « Vérification des quantités… » s'affiche dès « Calculer ma liste ».
 - Règle changée : « Je ne sais pas » au développé d'une pièce que l'artisan plie → « Pour …, combien de feuilles de zinc te faut-il ? » dans la discussion (avant : la ligne attendait son développé). Pièce commandée toute faite : rien ne change.
 
+## Décisions du 27 novembre 2026 (suite) : l'habitude nommée, le prix d'un devis client
+
+- Règle changée (iPhone de Greg) : une habitude retenue nomme toujours ce qu'elle concerne (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), une ligne par habitude, et se rouvre d'un toucher. Avant : « Comme d'habitude : 0,65 mm. » seul. Le serveur envoie le nom (`habits[].nom`, champ commun avec la discussion des écrans, qui avait fait la même correction le même jour ; gardée : la version qui se touche). Parcours « une habitude dit toujours ce qu'elle concerne ».
+- Nouvelle règle (Greg) : le prix écrit sur un devis client est le prix de VENTE de l'artisan ; jamais un prix d'achat, jamais dans l'observatoire des prix ni dans « Mes prix », jamais montré à un négoce. Vérifié : seules les réponses des négoces (lien de chiffrage, offres groupées) alimentent l'observatoire et « Mes prix ». Test permanent `apps/api/test/prix-du-devis-client-jamais-un-prix-d-achat.test.ts`.
 ## Décisions du 27 novembre 2026 : retour de Greg sur la dictée (iPhone, Safari)
 
 - RÈGLE CHANGÉE : dans les questions du quantitatif, la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée → la dictée normale revient : le texte s'écrit dans la case pendant qu'on parle, rien ne part avant « Envoyer ». (On y répond surtout d'un toucher.)

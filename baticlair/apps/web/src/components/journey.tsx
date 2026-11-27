@@ -333,6 +333,8 @@ interface CounterQuestion {
    * (pente, entraxe, développé) ou un modèle (tuile) qui n'est pas dans les boutons s'écrit sous « Autre ».
    */
   free?: "number" | "text" | "written";
+  /** Le nom de la donnée d'une habitude (« Épaisseur du zinc ») : l'habitude dit toujours ce qu'elle concerne. */
+  nom?: string;
   /** La valeur prise sans réponse (hypothèse dite, habitude) : marquée sur son bouton. */
   usual: string | null;
 }
@@ -392,7 +394,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       };
     });
   const asked = new Set(decisions.map((d) => d.key.replace(/^engine:/, "")));
-  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }), ...(freeOf(h.key, null, h.unit, h.options) ? { free: freeOf(h.key, null, h.unit, h.options)! } : {}) }));
+  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, nom: h.nom ?? h.question.replace(/\s*\?\s*$/, ""), options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }), ...(freeOf(h.key, null, h.unit, h.options) ? { free: freeOf(h.key, null, h.unit, h.options)! } : {}) }));
   for (const h of habits) asked.add(h.key);
   // Les hypothèses à boutons (param ou produit) : « je pars sur 5,5 m de rampant », la valeur prise est marquée.
   const assumptions: CounterQuestion[] = takeoff.purchase.assumptions
@@ -565,23 +567,19 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   });
   const [retired, setRetired] = useState<ReadonlySet<string>>(() => new Set());
   const [messages, setMessages] = useState<MessageQuestions[]>(() => {
-    // Une habitude dit DE QUOI elle parle (Greg, 27 novembre 2026 : « Comme d'habitude : 0,65 mm. » seul ne disait rien) :
-    // « Épaisseur du zinc : 0,65 mm, comme d'habitude. »
-    const noms = new Map((takeoff.habits ?? []).map((h) => [h.key, h.nom ?? null]));
-    const habitudes = questions
-      .filter((q) => q.kind === "habit" && q.usual !== null)
-      .map((q) => {
-        const valeur = q.options.find((o) => o.value === q.usual)?.label;
-        if (!valeur) return null;
-        const nom = noms.get(q.key);
-        return nom ? `${nom} : ${valeur}, comme d'habitude.` : `Comme d'habitude : ${valeur}.`;
-      })
-      .filter((x): x is string => x !== null);
+    // Greg, 27 novembre 2026 (iPhone) : « Comme d'habitude : 0,65 mm. » seul ne disait pas de quoi il s'agit. Une habitude
+    // nomme toujours sa donnée (« Épaisseur du zinc : 0,65 mm, comme d'habitude ») et se change d'un toucher, comme une
+    // réponse. Avant : une seule ligne, les valeurs sans leur nom, rien à toucher.
+    const habitudes = questions.flatMap((q) => {
+      if (q.kind !== "habit" || q.usual === null) return [];
+      const valeur = q.options.find((o) => o.value === q.usual)?.label;
+      return valeur ? [{ cle: q.key, texte: `${q.nom ?? q.text.replace(/\s*\?\s*$/, "")} : ${valeur}, comme d'habitude` }] : [];
+    });
     const aPoser = questions.length - habitudes.length;
     // Greg, 22 novembre 2026 : « J'ai lu ton devis » seulement s'il y a vraiment un devis ; sinon, la liste de l'artisan.
     const lu = takeoff.devisLu === false ? "J'ai ta liste." : "J'ai lu ton devis.";
     const tete = aPoser > 1 ? `${lu} Il me manque quelques réponses pour calculer ta liste.` : aPoser === 1 ? `${lu} Il me manque une réponse pour calculer ta liste.` : lu;
-    return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\n${habitudes.join("\n")}` : tete }];
+    return [{ de: "mobiiz", texte: tete }, ...habitudes.map((h) => ({ de: "moi" as const, texte: h.texte, cle: h.cle }))];
   });
   const [reflexion, setReflexion] = useState(false);
   const [autre, setAutre] = useState(false);

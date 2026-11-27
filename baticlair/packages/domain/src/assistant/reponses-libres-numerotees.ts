@@ -24,7 +24,7 @@ export interface QuestionNumerotee {
   /** Une valeur chiffrée sans boutons. */
   numerique?: boolean;
   /**
-   * Une donnée DÉJÀ CONNUE (l'habitude de l'entreprise, dite dans le fil : « Comme d'habitude : 0,65 mm ») ou que ce devis
+   * Une donnée DÉJÀ CONNUE (l'habitude de l'entreprise, dite dans le fil : « Épaisseur du zinc : 0,65 mm, comme d'habitude ») ou que ce devis
    * ne demande pas (la pose des crochets quand ils ne sont pas écrits). Greg, 17 novembre 2026 : « Mon cas zinc : il manque
    * "0,65 mm" et "crochets sur chevrons". Je veux les 6 comprises et confirmées en une ligne. » Elle n'est jamais posée ni
    * reposée ; elle est confirmée (ou changée) seulement quand l'artisan en nomme un bouton.

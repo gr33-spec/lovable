@@ -2092,6 +2092,34 @@ test("« Je ne sais pas » au développé (Greg, 23 novembre 2026) : « Combien 
   await expect(liste.getByText(/Feuilles .*2 × 1 m/).first()).toBeVisible();
 });
 
+test("une habitude dit toujours ce qu'elle concerne (Greg, 27 novembre 2026, iPhone) : « Façonnage : …, comme d'habitude », et se change d'un toucher", async ({ page }) => {
+  // Avant : « Comme d'habitude : 0,65 mm. » seul, sans dire de quoi il s'agit. L'habitude s'établit au deuxième chantier.
+  await signUp(page);
+  const JOINT = { lignes: [{ libelle: "Couverture zinc joint debout", quantite: "40", unite: "m2" }] };
+  for (const n of [1, 2]) {
+    const q = (await (await page.request.post("/v1/quantitatifs", { data: { ...JOINT, reference: `Chantier ${n}` } })).json()) as { id: string };
+    expect((await page.request.post(`/v1/quantitatifs/${q.id}/reponses`, { data: { reponses: [{ question: "engine:param:faconnage", valeur: "1" }] } })).status()).toBeLessThan(300);
+  }
+  // Le troisième chantier : un devis déposé, comme l'artisan (la discussion des questions s'ouvre après la lecture).
+  const { makePdf } = await import("../../api/test/support/pdf-fixtures");
+  const pdf = Buffer.from(
+    await makePdf(["devis"], [["1", "Couverture en ardoise naturelle 32x22 au crochet", "40 m2", "95,00", "3 800,00"], ["2", "Noue zinc", "6 ml", "50,00", "300,00"], ["3", "Abergement de cheminée zinc", "1 u", "300,00", "300,00"]], "Total HT 4 400,00", "DEVIS"),
+  );
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles({ name: "devis.pdf", mimeType: "application/pdf", buffer: pdf });
+  const questions = zoneDesQuestions(page);
+  await expect(questions).toBeVisible({ timeout: 60_000 });
+  const habitude = questions.getByRole("button", { name: /^Modifier ma réponse : Façonnage : Je façonne.*, comme d'habitude$/ });
+  await expect(habitude).toBeVisible();
+  await expect(questions.getByText(/^Comme d'habitude :/)).toHaveCount(0);
+  // Un toucher la rouvre : la question revient dans la discussion, avec ses boutons.
+  await habitude.click();
+  await expect(questions.getByText("D'accord, on reprend cette question.")).toBeVisible();
+  await expect(habitude).toHaveCount(0);
+  const posees = await repondreAuxQuestions(page, () => null, true);
+  expect(posees.some((q) => /^Tes pièces pliées/.test(q))).toBe(true);
+});
+
 test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, consommables compris", async ({ page }) => {
   await signUp(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
