@@ -452,16 +452,22 @@ export class TakeoffService {
     const timeout = new Promise<"later">((resolve) => {
       timer = setTimeout(() => resolve("later"), wait);
     });
+    // Deux appuis au même instant (contre-vérification du 27 novembre 2026) : le second trouve la lecture déjà réservée sous
+    // verrou ; il répond « lecture en cours », comme un double appui, sans rien payer ni rien noter comme échec.
+    const dejaEnCours = (error: unknown) => error instanceof DomainError && error.code === "request_in_progress";
     try {
       const first = await Promise.race([work.then((result) => ({ result })), timeout]);
       if (first !== "later") return { state: "ready", result: first.result };
+    } catch (error) {
+      if (dejaEnCours(error)) return { state: "reading" };
+      throw error;
     } finally {
       clearTimeout(timer);
     }
     // Trop long pour une réponse : la lecture continue ; son échec éventuel est enregistré avec l'analyse.
     const background = work
       .then((result) => this.ready(tenant, { step: this.phaseOf(result.takeoff) === "resultat" ? "resultat" : "questions", projectId: result.takeoff.projectId }))
-      .catch((error: unknown) => this.onRecordFailure(error));
+      .catch((error: unknown) => (dejaEnCours(error) ? undefined : this.onRecordFailure(error)));
     (this.reading.keepAlive ?? (() => {}))(background);
     return { state: "reading" };
   }

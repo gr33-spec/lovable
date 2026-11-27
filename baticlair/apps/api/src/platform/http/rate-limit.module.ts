@@ -22,10 +22,12 @@ const THROTTLER_LIMIT = "THROTTLER:LIMIT";
 
 /** Une lecture qui fabrique un fichier ou qui ouvre une page par jeton : comptée comme une écriture. */
 export function lectureACompter(url: string): boolean {
-  const chemin = (url.split("?")[0] ?? "").toLowerCase();
-  if (/\.(pdf|xlsx|csv|zones)$/.test(chemin)) return true;
+  const chemin = (url.split("?")[0] ?? "").toLowerCase().replace(/\/+$/, "");
+  if (/\.(pdf|xlsx|csv|zones)$/.test(chemin) || /\/pdf$/.test(chemin)) return true;
   if (/^\/v1\/(me|negoce)\/export$/.test(chemin)) return true;
-  return /^\/v1\/(public|reponse|negoce|emails\/stop|fichiers-pro\/ouvrir|commande-du-mois|achat-groupe)\//.test(chemin);
+  // Seulement les pages ouvertes PAR JETON. Jamais les sites publics des artisans (`/v1/public/pages/…`) : le site web les lit
+  // depuis sa propre adresse, un compteur commun bloquerait tous les visiteurs (relecture du 27 novembre 2026).
+  return /^\/v1\/(public\/(chiffrer|achat-groupe)|reponse|negoce\/(connexion|invitation|opposition)|emails\/stop|fichiers-pro\/ouvrir)\//.test(chemin);
 }
 
 /**
@@ -77,7 +79,8 @@ export class ApiThrottlerGuard extends ThrottlerGuard {
     // portaient leur `@Throttle` (export PDF « 10 par heure » qui passait 14 fois). Une lecture est comptée quand sa route a
     // son propre plafond, ou quand elle fabrique un fichier (PDF, Excel, CSV) ou ouvre une page par jeton (négoces, liens
     // publics). Les autres lectures (écrans, suivi d'une lecture chaque seconde) restent libres : aucune écriture en base.
-    if (req.method !== "GET") return true;
+    // HEAD passe par la même route que GET (Express) et fabrique le même fichier : compté pareil (relecture du 27 novembre).
+    if (req.method === "OPTIONS") return true;
     const handler = context.getHandler();
     const classe = context.getClass();
     if (this.reflector.getAllAndOverride<number>(`${THROTTLER_LIMIT}default`, [handler, classe]) !== undefined) return false;

@@ -384,7 +384,9 @@ export class ReponsesRecuesService {
     if (r.supplier.archivedAt) throw validationFailed("Archived supplier", { reason: "negoce_retire", phrase: "Ce négoce est retiré de ton carnet : on ne lui écrit plus." });
     const figee = (r.instantane as { email?: unknown } | null)?.email;
     const adresseNegoce = typeof figee === "string" && figee.includes("@") ? figee : r.supplier.email;
-    if (!e.authentifie || !memeExpediteur(adresseNue(e.de), adresseNegoce)) {
+    // Le destinataire est déjà figé (l'adresse de l'envoi) : un petit négoce sans DMARC peut recevoir une réponse. Mais un
+    // message qui ne vient pas de son adresse (ou de son domaine privé) n'ouvre jamais « Répondre » (relecture du 27 novembre).
+    if (!memeExpediteur(adresseNue(e.de), adresseNegoce)) {
       throw validationFailed("Not from supplier", { reason: "expediteur_pas_le_negoce", phrase: "Ce message ne vient pas du négoce de la demande : Mobiiz n'y répond pas." });
     }
     await this.plafondDesReponses(tenant.companyId);
@@ -392,8 +394,10 @@ export class ReponsesRecuesService {
     if (!via || !this.mailer) throw validationFailed("No Mobiiz address", { reason: "adresse_absente", phrase: "Ton adresse Mobiiz n'est pas encore prête : réessaie dans un instant." });
     let etiquette = r.etiquette;
     if (!etiquette) {
-      etiquette = await this.adresses.etiquetteNeuve();
-      await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { etiquette } });
+      // Deux « Répondre » au même instant (contre-vérification du 27 novembre 2026) : le premier repère posé gagne, l'autre le relit.
+      const neuve = await this.adresses.etiquetteNeuve();
+      await this.prisma.priceRequestRecipient.updateMany({ where: { id: r.id, etiquette: null }, data: { etiquette: neuve } });
+      etiquette = (await this.prisma.priceRequestRecipient.findUnique({ where: { id: r.id }, select: { etiquette: true } }))?.etiquette ?? neuve;
     }
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
     // L'objet reçu, nettoyé : aucun retour à la ligne, aucun ancien repère (il rangerait la réponse dans un autre chantier).
@@ -401,7 +405,9 @@ export class ReponsesRecuesService {
     const objet = /^re\s*:/i.test(recu) ? recu : `Re: ${recu || "votre réponse"}`;
     const cite = (e.texte ?? "").split("\n").slice(0, 60).map((l) => `> ${l}`).join("\n");
     const quand = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" }).format(e.recuLe);
-    const text = [corps, "", c?.name ?? "", ...(cite ? ["", `Le ${quand}, ${r.supplier.name} a écrit :`, cite] : [])].join("\n");
+    // Un message non authentifié n'est jamais cité sous le nom du négoce : seulement sous son adresse d'expédition.
+    const auteur = e.authentifie ? r.supplier.name : adresseNue(e.de);
+    const text = [corps, "", c?.name ?? "", ...(cite ? ["", `Le ${quand}, ${auteur} a écrit :`, cite] : [])].join("\n");
     await this.mailer.send({
       to: adresseNegoce,
       subject: objetAvecRepere(objet.slice(0, 200), etiquette),
@@ -416,9 +422,16 @@ export class ReponsesRecuesService {
 
   /** Au plus REPONSES_PAR_HEURE réponses par entreprise sur une heure glissante, quelle que soit l'adresse IP. */
   private async plafondDesReponses(companyId: string): Promise<void> {
-    const depuis = new Date(this.now().getTime() - 60 * 60 * 1000);
-    const n = await this.prisma.messageEnvoye.count({ where: { companyId, sorte: "reponse", envoyeLe: { gte: depuis } } });
-    if (n >= REPONSES_PAR_HEURE) throw new DomainError("too_many_requests", "Too many replies", { reason: "trop_de_reponses", phrase: "Tu as envoyé beaucoup de réponses en une heure : réessaie un peu plus tard." });
+    // Compteur ATOMIQUE (relecture du 27 novembre 2026) : la même table et la même requête que la limite de débit ; trente
+    // réponses lancées au même instant ne voient jamais toutes « 0 ».
+    const rows = await this.prisma.$queryRaw<{ hits: number }[]>`
+      INSERT INTO "api_rate_limit" ("key", "hits", "expiresAt")
+      VALUES (${`repondre:${companyId}`}, 1, now() + interval '1 hour')
+      ON CONFLICT ("key") DO UPDATE SET
+        "hits" = CASE WHEN "api_rate_limit"."expiresAt" <= now() THEN 1 ELSE "api_rate_limit"."hits" + 1 END,
+        "expiresAt" = CASE WHEN "api_rate_limit"."expiresAt" <= now() THEN now() + interval '1 hour' ELSE "api_rate_limit"."expiresAt" END
+      RETURNING "hits"`;
+    if ((rows[0]?.hits ?? 0) > REPONSES_PAR_HEURE) throw new DomainError("too_many_requests", "Too many replies", { reason: "trop_de_reponses", phrase: "Tu as envoyé beaucoup de réponses en une heure : réessaie un peu plus tard." });
   }
 
   /**
@@ -494,14 +507,21 @@ export function dateLisible(texte: string | null | undefined, maintenant: Date):
  * ne devient jamais un en-tête), sans aucun repère « [réf. …] » déjà présent (seul celui de la demande est ajouté ensuite).
  */
 export function objetPropre(objet: string): string {
-  return [...objet].map((c) => (c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127 ? " " : c)).join("").replace(/\[r[ée]f\.?\s*[a-z2-9]{8}\]/gi, " ").replace(/\s+/g, " ").trim();
+  // Tout caractère de contrôle (C0, DEL, C1 dont U+0085) et tout séparateur de ligne Unicode devient une espace.
+  let propre = [...objet].map((c) => { const n = c.charCodeAt(0); return n < 32 || (n >= 127 && n <= 159) || n === 0x2028 || n === 0x2029 ? " " : c; }).join("");
+  // Les repères s'enlèvent jusqu'au dernier, même imbriqués (« [réf. [réf. aaaaaaaa]bcdefghj] »).
+  for (let avant = ""; avant !== propre; ) {
+    avant = propre;
+    propre = propre.replace(/\[\s*r[ée]f\.?\s*[a-z2-9]{8}\s*\]/gi, " ");
+  }
+  return propre.replace(/\s+/g, " ").trim();
 }
 
 /** Plafond par entreprise des réponses (saboteur, 27 novembre 2026) : en plus de la limite par adresse IP. */
 export const REPONSES_PAR_HEURE = 30;
 
 /** Même expéditeur que le négoce : même adresse, ou même domaine quand il n'est pas une messagerie grand public. */
-function memeExpediteur(expediteur: string, negoce: string): boolean {
+export function memeExpediteur(expediteur: string, negoce: string): boolean {
   const a = expediteur.trim().toLowerCase();
   const b = negoce.trim().toLowerCase();
   if (a === b) return true;

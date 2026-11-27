@@ -48,5 +48,8 @@ export interface AnalysisRepository {
 
 export const ANALYSIS_REPOSITORY = Symbol("ANALYSIS_REPOSITORY");
 
-/** Une analyse « en cours » compte dans le quota pendant 30 minutes ; au-delà, elle est tenue pour interrompue. */
-export const EN_COURS_COMPTEES_MS = 30 * 60 * 1000;
+/**
+ * Une analyse « en cours » compte dans le quota pendant 5 minutes, comme la lecture la tient pour interrompue
+ * (`STALE_READING_MS` du module takeoff, même valeur) : une lecture coupée par l'hébergeur rend vite sa place.
+ */
+export const EN_COURS_COMPTEES_MS = 5 * 60 * 1000;

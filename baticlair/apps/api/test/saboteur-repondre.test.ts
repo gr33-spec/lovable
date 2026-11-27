@@ -379,3 +379,26 @@ describe("F. rafale (limite de débit réelle, RATE_LIMIT=on)", () => {
     expect(partis).toBeLessThanOrEqual(30);
   });
 });
+
+describe("G. contre-vérification (relecture du 27 novembre 2026)", () => {
+  it("un vrai négoce sans DMARC, rattaché à la main : on lui répond, sans le citer sous son nom", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "artisan@example.fr", "Toitures Martin");
+    const d = await demande(ctx, agent);
+    const adresse = await adresseDe(agent);
+    recuSimule = { authentification: { spf: "none", dkim: "none", dmarc: "none" } };
+    const recu = (await webhook(ctx, `${adresse}@mobiiz.fr`, "Notre devis")).body;
+    await agent.post(`/v1/recus/${recu.id}/rattacher`).send({ recipientId: d.recipientId }).expect(200);
+    ctx.emails.sent.length = 0;
+    expect((await repondre(agent, recu.id)).status).toBe(200);
+    const parti = ctx.emails.sent.find((e) => e.to === "ventes@dupont.example");
+    expect(parti).toBeDefined();
+    expect(parti!.text).not.toMatch(/Négoce Dupont a écrit/);
+    expect(parti!.text).toMatch(/ventes@dupont\.example a écrit/);
+  });
+
+  it("40 réponses lancées au même instant depuis 40 adresses IP : 30 au plus partent (compteur atomique)", async () => {
+    const { agent, recuId } = await messageDuNegoce();
+    const r = await Promise.all(Array.from({ length: 40 }, (_, i) => agent.post(`/v1/recus/${recuId}/repondre`).set("x-forwarded-for", `203.0.113.${i + 1}`).send({ texte: `r${i}` })));
+    expect(r.filter((x) => x.status === 200).length).toBeLessThanOrEqual(30);
+  });
+});

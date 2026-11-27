@@ -38,12 +38,12 @@ export const hashApiKey = (key: string) => createHash("sha256").update(key).dige
  * Règle changée : avant, une clé valait une session de son auteur sur toutes les routes.
  */
 const ROUTES_DES_CLES: readonly { methodes: readonly string[]; chemin: RegExp }[] = [
-  { methodes: ["GET", "POST"], chemin: /^\/v1\/quantitatifs(\/[^/]+(\/(reponses|calcul|corrections|validation))?)?$/ },
+  { methodes: ["GET", "POST"], chemin: /^\/v1\/quantitatifs(\/[^/]+(\/(reponses|calcul|corrections|validation|reouverture))?)?$/ },
   { methodes: ["PUT"], chemin: /^\/v1\/projects\/[^/]+\/infos$/ },
   { methodes: ["POST"], chemin: /^\/v1\/projects\/[^/]+\/(infos\/croquis|liste)$/ },
   { methodes: ["PATCH", "DELETE"], chemin: /^\/v1\/takeoff-lines\/[^/]+$/ },
   { methodes: ["POST"], chemin: /^\/v1\/takeoffs\/[^/]+\/lines$/ },
-  { methodes: ["GET"], chemin: /^\/v1\/projects\/[^/]+\/demande-de-devis\.pdf$/ },
+  { methodes: ["GET"], chemin: /^\/v1\/projects\/[^/]+\/(demande-de-devis|commande)\.pdf$/ },
 ];
 
 export function routeOuverteAuxCles(methode: string, url: string): boolean {

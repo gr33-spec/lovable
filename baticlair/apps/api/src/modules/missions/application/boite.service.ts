@@ -1,4 +1,5 @@
-import { alertePropositionNegoce, REGLAGES_ALERTES_DEFAUT, type ElementBoite, type ReglagesAlertes } from "@baticlair/domain";
+import { adresseNue, alertePropositionNegoce, REGLAGES_ALERTES_DEFAUT, type ElementBoite, type ReglagesAlertes } from "@baticlair/domain";
+import { memeExpediteur } from "../../adresse-mobiiz/index.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { notFound } from "../../../platform/errors/domain-error.js";
 import { isUuid } from "../../../platform/validation/ids.js";
@@ -190,8 +191,9 @@ export class BoiteService {
     if (!r) throw notFound("Fil");
     // Un message rattaché à la main qui ne vient pas du négoce (saboteur, 27 novembre 2026) garde le nom de son VRAI expéditeur.
     const figee = (r.instantane as { email?: unknown } | null)?.email;
-    const adresseNegoce = (typeof figee === "string" && figee.includes("@") ? figee : r.supplier.email).trim().toLowerCase();
-    const duNegoce = (de: string, authentifie: boolean) => authentifie && (/<([^>]+)>/.exec(de)?.[1] ?? de).trim().toLowerCase() === adresseNegoce;
+    const adresseNegoce = typeof figee === "string" && figee.includes("@") ? figee : r.supplier.email;
+    // Même règle que « Répondre » : l'adresse ou le domaine privé du négoce ; un message non authentifié garde son expéditeur.
+    const duNegoce = (de: string, authentifie: boolean) => authentifie && memeExpediteur(adresseNue(de), adresseNegoce);
     const [recus, partis] = await Promise.all([
       this.prisma.emailRecuArtisan.findMany({ where: { companyId: t.companyId, recipientId, indesirable: false }, orderBy: { recuLe: "asc" }, take: 100, select: { id: true, de: true, authentifie: true, objet: true, texte: true, recuLe: true, fichiers: { select: { id: true, nom: true, type: true } } } }),
       this.prisma.messageEnvoye.findMany({ where: { companyId: t.companyId, recipientId }, orderBy: { envoyeLe: "asc" }, take: 100 }),

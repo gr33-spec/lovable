@@ -1,5 +1,6 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import { DomainError } from "../../../platform/errors/domain-error.js";
 import { EN_COURS_COMPTEES_MS, type AnalysisKind, type AnalysisRecord, type AnalysisRepository } from "../application/analysis.repository.js";
 
 const FIELDS = {
@@ -48,6 +49,10 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
       // Un verrou par entreprise, relâché en fin de transaction : deux réservations de la même entreprise passent l'une après l'autre.
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analyse:${data.companyId}`}::text))`;
       const depuis = new Date(Date.now() - EN_COURS_COMPTEES_MS);
+      // Relue SOUS le verrou (contre-vérification du 27 novembre 2026) : une lecture de ce document déjà en cours n'est jamais
+      // relancée une seconde fois, même par dix appuis au même instant (dix appels IA pour une analyse).
+      const actuelle = existante ? await tx.aiAnalysis.findUnique({ where: { id: existante.id }, select: { status: true, startedAt: true } }) : null;
+      if (actuelle?.status === "started" && actuelle.startedAt >= depuis) throw new DomainError("request_in_progress", "Reading already in progress", { raison: "lecture_en_cours" });
       const [total, duMois, enCours] = await Promise.all([
         tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, billable: true }, _sum: { poids: true } }),
         tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, billingMonth: mois, billable: true }, _sum: { poids: true } }),

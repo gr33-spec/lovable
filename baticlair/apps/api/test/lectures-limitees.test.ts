@@ -30,6 +30,12 @@ describe("limites de débit sur les lectures", () => {
     expect(statuts[10]).toBe(429);
   });
 
+  it("HEAD sur un PDF est compté comme GET (relecture du 27 novembre 2026)", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
+    for (let i = 0; i < 10; i++) await agent.head("/v1/me/export.pdf");
+    expect((await agent.get("/v1/me/export.pdf")).status).toBe(429);
+  });
+
   it("un écran ordinaire (liste des chantiers) n'est jamais compté, même lu 150 fois de suite", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     for (let i = 0; i < 150; i++) expect((await agent.get("/v1/projects")).status).toBe(200);
@@ -37,6 +43,6 @@ describe("limites de débit sur les lectures", () => {
 
   it("ce qui est compté : fichiers fabriqués et pages par jeton ; le reste non", () => {
     for (const u of ["/v1/projects/x/demande-de-devis.pdf", "/v1/public/achat-groupe/abc/demande.xlsx", "/v1/corrections/export.csv", "/v1/reponse/abc", "/v1/public/chiffrer/abc", "/v1/negoce/connexion/abc", "/v1/emails/stop/abc", "/v1/me/export"]) expect({ u, compte: lectureACompter(u) }).toEqual({ u, compte: true });
-    for (const u of ["/v1/projects", "/v1/quantitatifs/abc", "/v1/messagerie/recus", "/v1/notifications?x=1.pdf"]) expect({ u, compte: lectureACompter(u) }).toEqual({ u, compte: false });
+    for (const u of ["/v1/projects", "/v1/quantitatifs/abc", "/v1/messagerie/recus", "/v1/notifications?x=1.pdf", "/v1/public/pages/toitures-martin", "/v1/public/regroupements", "/v1/public/pages/toitures-martin/logo"]) expect({ u, compte: lectureACompter(u) }).toEqual({ u, compte: false });
   });
 });
