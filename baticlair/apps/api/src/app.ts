@@ -38,6 +38,9 @@ export function configureApp(app: INestApplication): void {
   express.disable("x-powered-by");
   express.set("trust proxy", 1);
   app.use(helmet());
+  // Référencement (Greg, 27 novembre 2026) : l'API n'est jamais une page à indexer (JSON, PDF de demande par lien à jeton,
+  // photos). Un en-tête et non robots.txt : un robots.txt empêcherait le robot de lire ce « noindex ».
+  app.use((_req: IncomingMessage, res: ServerResponse, next: () => void) => { res.setHeader("X-Robots-Tag", "noindex, nofollow"); next(); });
   app.enableCors({ origin: [...config.webAppOrigins, ...(config.previewOriginPattern ? [config.previewOriginPattern] : [])], credentials: true });
   app.use(requestContextMiddleware(logger));
   express.getHttpAdapter().getInstance().all(`${AUTH_BASE_PATH}/*splat`, toNodeHandler(auth));

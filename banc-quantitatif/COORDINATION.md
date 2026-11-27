@@ -125,3 +125,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   seule exception permise par Greg). JE POUSSE sur la branche de test quand ma chaîne est verte : je l'écris ici avant.
 - 27 nov., soir — sécurité : branche de test refusionnée (75111776, dictée et guide), chaîne complète relancée ;
   FAIT le 27 novembre 2026 : poussé (2b2d3c98), en ligne sur le site et l'API. Vous pouvez pousser de nouveau.
+
+## Discussion « référencement Google et IA » (session_01Pqq8eSNepgvjydzRNB4B4q), 27 novembre 2026
+- Branche : `claude/upbeat-tesla-blyocz` (partie de la branche de test). AUDIT : aucun écran, ni moteur, ni calcul touchés.
+- Seul code : `apps/api/src/app.ts` (en-tête `X-Robots-Tag: noindex, nofollow` sur toute l'API) et son test
+  `apps/api/test/api-hors-index.test.ts`. Documents : `baticlair/docs/referencement/audit-seo-ia-2026-11-27.md`,
+  `baticlair/docs/cahiers-chatgpt/` (PDF du cahier).
+- À la discussion des écrans, plus tard : titres, canonical, `robots.ts`, `sitemap.ts`, réglage d'indexation et sites des
+  artisans (liste au §3 étape 0 et §4 de l'audit). Je n'y touche pas.
