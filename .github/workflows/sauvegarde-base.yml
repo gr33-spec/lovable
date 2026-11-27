@@ -1,0 +1,134 @@
+name: Sauvegarde de la base (chaque nuit)
+
+# Greg, 26 octobre 2026 : « sauvegardes quotidiennes ». Greg, 27 novembre 2026 : ce fichier, et lui seul, est posé sur `main`
+# (seule exception permise à la règle « jamais main »), sans rien changer au code du site.
+#
+# Ce que fait chaque nuit ce workflow, gratuit :
+# 1. un export complet de la base (pg_dump, client PostgreSQL 18 comme Neon), relu (`pg_restore --list`) ;
+# 2. UN VRAI TEST DE RESTAURATION, chaque nuit : l'export est restauré dans une base JETABLE créée sur la machine de GitHub
+#    (jamais sur Neon, jamais sur le site de test), puis tables, migrations et lignes sont comparées à la base d'origine ;
+# 3. l'export est chiffré (AES-256, phrase de Greg), le fichier chiffré est déchiffré une fois pour vérifier qu'il se relit,
+#    puis gardé 30 jours comme artefact (dépôt privé : visible des seuls membres) ; le 1er du mois, une copie gardée 90 jours
+#    (le plus long permis par GitHub).
+#
+# Deux secrets, dans l'ENVIRONNEMENT GitHub « sauvegarde » réservé à `main`, posés par Greg lui-même, jamais écrits ailleurs :
+# - SAUVEGARDE_DATABASE_URL : l'adresse de connexion Neon DIRECTE (sans pooler) d'un rôle en LECTURE SEULE ;
+# - SAUVEGARDE_CLE : la phrase de chiffrement (longue, gardée hors de GitHub par Greg pour pouvoir déchiffrer).
+# Un secret absent fait ÉCHOUER le job : jamais de « vert » sans sauvegarde. GitHub prévient par e-mail à chaque échec.
+# Un horaire GitHub ne part que depuis la branche PAR DÉFAUT du dépôt : elle doit être `main`.
+# Restauration à la main : `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`, partie 4.
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sauvegarde:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: sauvegarde
+    services:
+      # La base jetable du test de restauration : elle n'existe que le temps du job, sur la machine de GitHub.
+      restauration:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: restauration
+          POSTGRES_DB: restauration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      SAUVEGARDE_DATABASE_URL: ${{ secrets.SAUVEGARDE_DATABASE_URL }}
+      SAUVEGARDE_CLE: ${{ secrets.SAUVEGARDE_CLE }}
+      RESTAURATION_URL: postgresql://postgres:restauration@localhost:5432/restauration
+    steps:
+      - name: Secrets posés ?
+        run: |
+          if [ -z "$SAUVEGARDE_DATABASE_URL" ] || [ -z "$SAUVEGARDE_CLE" ]; then
+            echo "::error::Secrets absents dans l'environnement « sauvegarde » : AUCUNE sauvegarde faite."
+            exit 1
+          fi
+          if [ "${#SAUVEGARDE_CLE}" -lt 20 ]; then
+            echo "::error::Phrase de chiffrement trop courte (20 caractères au moins) : AUCUNE sauvegarde faite."
+            exit 1
+          fi
+      - name: Client PostgreSQL 18
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y postgresql-common >/dev/null
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get -qq install -y postgresql-client-18 >/dev/null
+          /usr/lib/postgresql/18/bin/pg_dump --version
+      - name: Export et relecture
+        run: |
+          set -euo pipefail
+          PGBIN=/usr/lib/postgresql/18/bin
+          NOM="base-$(date -u +%Y-%m-%d).dump"
+          "$PGBIN/pg_dump" --format=custom --no-owner --no-privileges "$SAUVEGARDE_DATABASE_URL" > "$NOM"
+          "$PGBIN/pg_restore" --list "$NOM" > sommaire.txt
+          TABLES=$(grep -c " TABLE DATA " sommaire.txt || true)
+          grep -q "_prisma_migrations" sommaire.txt || { echo "::error::Export illisible ou incomplet."; exit 1; }
+          rm sommaire.txt
+          if [ "$TABLES" -lt 10 ]; then echo "::error::Export trop petit ($TABLES tables)."; exit 1; fi
+          echo "Tables exportées : $TABLES ; taille : $(stat -c %s "$NOM") octets."
+          echo "NOM=$NOM" >> "$GITHUB_ENV"
+      - name: Test de restauration (base jetable de GitHub)
+        run: |
+          set -euo pipefail
+          PGBIN=/usr/lib/postgresql/18/bin
+          "$PGBIN/pg_restore" --no-owner --no-privileges --exit-on-error -d "$RESTAURATION_URL" "$NOM"
+          # Les mêmes comptes des deux côtés : nombre de tables, de migrations, lignes de chaque table.
+          REQ="SELECT format('SELECT %L AS t, count(*) AS n FROM public.%I', tablename, tablename) FROM pg_tables WHERE schemaname='public' ORDER BY tablename"
+          compter() { "$PGBIN/psql" -X -At "$1" -c "$REQ" | awk 'NR>1 {printf " UNION ALL "} {printf "%s", $0} END {print ";"}' > requete.sql; "$PGBIN/psql" -X -At -F ' ' "$1" -f requete.sql | sort; }
+          compter "$RESTAURATION_URL" > restauree.txt
+          compter "$SAUVEGARDE_DATABASE_URL" > origine.txt
+          T_O=$(wc -l < origine.txt); T_R=$(wc -l < restauree.txt)
+          M_O=$(grep '^_prisma_migrations ' origine.txt | cut -d' ' -f2); M_R=$(grep '^_prisma_migrations ' restauree.txt | cut -d' ' -f2)
+          L_O=$(awk '{s+=$2} END {print s+0}' origine.txt); L_R=$(awk '{s+=$2} END {print s+0}' restauree.txt)
+          echo "Origine : $T_O tables, $M_O migrations, $L_O lignes. Restaurée : $T_R tables, $M_R migrations, $L_R lignes."
+          [ "$T_O" = "$T_R" ] || { echo "::error::Restauration : $T_R tables au lieu de $T_O."; exit 1; }
+          [ "$M_O" = "$M_R" ] || { echo "::error::Restauration : $M_R migrations au lieu de $M_O."; exit 1; }
+          # La base vit pendant l'export : un écart de quelques lignes (une inscription pendant la nuit) est dit, pas bloquant.
+          if ! diff -q origine.txt restauree.txt >/dev/null; then
+            echo "::warning::Écart de lignes (activité pendant l'export) :"; diff origine.txt restauree.txt | grep '^[<>]' | head -20 || true
+          fi
+          rm -f origine.txt restauree.txt requete.sql
+          echo "Restauration réussie."
+      - name: Chiffrement, puis déchiffrement de contrôle
+        run: |
+          set -euo pipefail
+          EMPREINTE=$(sha256sum "$NOM" | cut -d' ' -f1)
+          openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$NOM" -out "$NOM.enc" -pass env:SAUVEGARDE_CLE
+          rm "$NOM"
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in "$NOM.enc" -pass env:SAUVEGARDE_CLE | sha256sum | cut -d' ' -f1 > controle.txt
+          [ "$(cat controle.txt)" = "$EMPREINTE" ] || { echo "::error::Le fichier chiffré ne se relit pas."; exit 1; }
+          rm controle.txt
+          sha256sum "$NOM.enc" > "$NOM.enc.sha256"
+          cat "$NOM.enc.sha256"
+          echo "Déchiffrement de contrôle : identique."
+      - name: Garder 30 jours
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NOM }}.enc
+          path: |
+            ${{ env.NOM }}.enc
+            ${{ env.NOM }}.enc.sha256
+          retention-days: 30
+          if-no-files-found: error
+      - name: Le 1er du mois, une copie gardée 90 jours
+        if: ${{ endsWith(env.NOM, '-01.dump') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mensuelle-${{ env.NOM }}.enc
+          path: |
+            ${{ env.NOM }}.enc
+            ${{ env.NOM }}.enc.sha256
+          retention-days: 90
+          if-no-files-found: error
