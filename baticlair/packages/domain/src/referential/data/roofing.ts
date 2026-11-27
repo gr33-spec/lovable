@@ -744,8 +744,9 @@ const FACONNAGE_BANDES_PARAM: ParamDef = {
  * (faîtage). Pas de défaut : le développé change le poids et la pièce, on demande (ce n'est pas une quantité).
  */
 const DEVELOPPE_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
-  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe",
   label: "Développé de la bande",
   unit: "mm",
@@ -783,8 +784,9 @@ const FACONNAGE_NOUE_PARAM: ParamDef = {
  * noue préformée de 50, dite et modifiable : c'est celle que le comptoir sert sans rien demander.
  */
 const DEVELOPPE_NOUE_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
-  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe_noue",
   label: "Développé de la noue",
   unit: "mm",
@@ -996,8 +998,9 @@ const LONGUEUR_PIECES_PARAM: ParamDef = {
 };
 /** Développé de l'abergement (§7 : « dév. 33 à 40 cm ») : lu au devis, sinon 33, dit et modifiable (calculateur de feuilles). */
 const DEVELOPPE_ABERGEMENT_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
-  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe_abergement",
   label: "Développé de l'abergement",
   unit: "mm",
@@ -1059,8 +1062,9 @@ const feuillesDites = (quoi: string, key: string): ParamDef => ({
   ],
 });
 const DEVELOPPE_ARETIER_PARAM: ParamDef = {
-  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé devait mener à « Combien de feuilles ? » ; pas branché (la
-  // question naît au calcul et l'écran ne la repose pas) : la ligne attend son développé, avec − / +. À reprendre.
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe_aretier",
   label: "Développé de l'arêtier zinc",
   unit: "mm",
@@ -1577,7 +1581,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.23-84",
+  version: "roofing-2026.11.23-85",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],

@@ -3,7 +3,7 @@ import {
   COMMON_LABOR,
   computeWithAnswers,
   containsKeyword,
-  D2026_020_LECTURE,
+  BANC_C01_LECTURE, D2026_020_LECTURE,
   DE00000071_LECTURE,
   ficheDeCalcul,
   FICHE_PARAMS_CHANTIER,
@@ -40,6 +40,8 @@ const RECORDED: { marker: RegExp; lecture: LectureDevis }[] = [
   { marker: /\bDE0{4,8}71\b/, lecture: DE00000071_LECTURE },
   // Le chantier ardoise et zinguerie de Greg (17 novembre 2026), tel que le vrai modèle l'a lu : repère « JEU-D2026-020 ».
   { marker: /\bJEU-D2026-020\b/, lecture: D2026_020_LECTURE },
+  // Le cas C01 du banc d'essai (faîtage zinc sans développé) : « Je ne sais pas » au développé, puis « Combien de feuilles ? ».
+  { marker: /\bJEU-BANC-C01\b/, lecture: BANC_C01_LECTURE },
 ];
 
 export class FakeLectureReader implements LectureReader {

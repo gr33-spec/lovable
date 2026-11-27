@@ -425,6 +425,12 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - RÈGLE CHANGÉE (Greg, 23 novembre 2026) : sur le site de test, les e-mails DE COMPTE (validation de l'inscription, lien de connexion, mot de passe oublié) partent à la vraie adresse de la personne, pour qu'un ami qui a le lien valide son inscription tout seul. Avant : détournés vers Greg (« [TEST → …] ») comme tous les autres, et l'ami ne pouvait jamais valider son adresse. Tous les autres e-mails restent détournés vers Greg, ceux des négoces d'abord (jamais d'e-mail réel à un négoce pendant un test). Une adresse réservée aux tests (example.*, exemple.*, .test, .invalid) reste détournée. Code : `TransactionalEmail.compte`, `garder` (`platform/email/mise-en-page.ts`) ; test `apps/api/test/emails-reels.test.ts`.
 - Lecture refusée pour un e-mail pas encore confirmé : l'écran dit la vraie phrase (« Confirme d'abord ton adresse e-mail… ») et propose « Renvoyer le lien de confirmation ». Avant : « Un champ n'est pas correctement rempli » (capture de l'ami de Greg). Parcours `e2e/parcours-artisan.spec.ts`, « e-mail pas encore confirmé ».
 
+## Décisions du 27 novembre 2026 : vitesse du calcul, « Je ne sais pas » au développé
+
+- Abergement de cheminée : cotes validées par Greg (« approximativement »), valeurs par défaut marquées, montrées sous la flèche, modifiables ; sans la taille au devis, « Combien de feuilles ? » direct.
+- Vitesse (Greg : « moins de 2 secondes par réponse ») : seul ce qui change se recalcule, aucun résultat changé (banc 99 sur 99, sortie identique avant / après). Chantier D-2026-020 en local : calcul 8,7 s → 0,85 s ; tout « Je ne sais pas » d'un coup 12,2 s → 2,5 s. « Vérification des quantités… » s'affiche dès « Calculer ma liste ».
+- Règle changée : « Je ne sais pas » au développé d'une pièce que l'artisan plie → « Pour …, combien de feuilles de zinc te faut-il ? » dans la discussion (avant : la ligne attendait son développé). Pièce commandée toute faite : rien ne change.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

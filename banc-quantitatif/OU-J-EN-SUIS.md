@@ -1,6 +1,18 @@
 # Où j'en suis (banc du calcul) — à lire en premier à chaque reprise
 
-Mis à jour : 22 novembre 2026, soir. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
+Mis à jour : 27 novembre 2026. Lire d'abord « DERNIER ÉTAT » plus bas. Détail d'avant : `ETAT.md`, `A-TRANCHER.md`, `COMPTE-RENDU.md`.
+
+## 27 NOVEMBRE — VITESSE DU CALCUL (en ligne 0fc3bf2c, vérifié) puis « Je ne sais pas » au développé (fiche -85)
+- Greg : cotes de l'abergement validées « approximativement », gardées par défaut, modifiables ; priorité : la vitesse.
+- Vitesse (D-2026-020, en local, résultat identique au caractère près) : calcul 8,7 s → 0,85 s ; tout « Je ne sais pas »
+  d'un coup 12,2 s → 2,5 s ; recalcul 6,7 s → 0,3 s ; une réponse 0,2 à 0,7 s. Causes : la fiche du chantier rapprochait
+  les mêmes noms des milliers de fois (`paramOfDonnee`, `paramParNom` gardés en mémoire) ; l'écran d'un même état est gardé
+  (`apps/api/.../ecran-garde.ts`, test `calcul-garde-en-memoire`) ; les « Je ne sais pas » se ferment d'un coup
+  (`answerMany`). L'écran montre « Vérification des quantités… » dès « Calculer ma liste ».
+- « Je ne sais pas » au développé (je plie) → « Pour …, combien de feuilles de zinc te faut-il ? » : REBRANCHÉ. Le serveur
+  ramène l'écran des questions quand cette question naît des réponses envoyées au calcul (une fois). Tests : domaine
+  `calculateur-feuilles`, API `je-ne-sais-pas-au-developpe`, parcours « « Je ne sais pas » au développé » (C01 du banc,
+  repère `JEU-BANC-C01` du lecteur simulé).
 
 ## 23 NOVEMBRE (réponses de Greg du matin) — POUSSÉ e121e90e (chaîne verte sur be30abb1), en ligne NON VÉRIFIÉ
 - /version refusé depuis cette machine par le pare-feu de Vercel (`x-vercel-mitigated: deny`), l'API de Vercel illisible :

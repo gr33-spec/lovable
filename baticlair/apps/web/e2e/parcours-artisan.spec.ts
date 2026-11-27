@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, revenirAuxFeuilles, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1601,6 +1601,8 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   // « Dév. 200 » est écrit : jamais redemandé.
   expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
   await calculerMaListe(page).click();
+  // Le développé de la bande de ventilation n'est pas connu (« Je ne sais pas ») : « Combien de feuilles ? » revient d'abord.
+  await revenirAuxFeuilles(page);
   // « Il peut modifier ce choix pour une pièce dans le récapitulatif » : chaque pièce avec son choix (« Je façonne », la
   // réponse donnée pour tout le devis) ; la rive passe « commandé façonné », l'autre pièce ne bouge pas.
   const recap = page.getByRole("region", { name: "Récapitulatif" });
@@ -2067,6 +2069,27 @@ test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poub
   expect(body.reponses.filter((r) => r.valeur === null).length).toBeGreaterThanOrEqual(1);
   await voirMaListe(page);
   await expect(page.getByRole("region", { name: "Liste des fournitures" })).toBeVisible({ timeout: 60_000 });
+});
+
+test("« Je ne sais pas » au développé (Greg, 23 novembre 2026) : « Combien de feuilles ? » arrive dans la discussion, sans bloquer l'écran", async ({ page }) => {
+  // Le cas C01 du banc d'essai (faîtage zinc sans développé), lecture enregistrée (repère « JEU-BANC-C01 »).
+  await signUp(page);
+  await page.goto("/chantiers/nouveau?mode=assistant");
+  const { makePdf } = await import("../../api/test/support/pdf-fixtures");
+  const pdf = Buffer.from(await makePdf(["devis"], [["1", "Faîtage zinc", "8 ml", "40,00", "320,00"]], "Total HT 320,00", "DEVIS JEU-BANC-C01"));
+  await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles({ name: "devis.pdf", mimeType: "application/pdf", buffer: pdf });
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  // Je plie (« Je façonne »), et « Je ne sais pas » au développé du faîtage.
+  const avant = await repondreAuxQuestions(page);
+  expect(avant.some((q) => /[Dd]éveloppé/.test(q))).toBe(true);
+  await calculerMaListe(page).click();
+  // Le calcul ne part pas : la question des feuilles arrive dans le fil, avec ses boutons ; l'écran ne reste pas sur « Je calcule ta liste… ».
+  await expect(boutonsDeLaQuestion(page)).toHaveAttribute("aria-label", /^Pour le faîtage, combien de feuilles de zinc te faut-il \?/, { timeout: 60_000 });
+  await repondreAuxQuestions(page, (q) => (/combien de feuilles/.test(q) ? "3" : null));
+  await calculerEtVoirMaListe(page);
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 60_000 });
+  await expect(liste.getByText(/Feuilles .*2 × 1 m/).first()).toBeVisible();
 });
 
 test("temps deux (2026-10-12) : « Autre » partout où il y a des boutons, consommables compris", async ({ page }) => {

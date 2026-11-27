@@ -404,7 +404,9 @@ export class QuantitatifsService {
   ) {
     const row = await this.row(tenant, id);
     const obligatoires = (r: ReviewedTakeoff) => r.purchase.questions.filter((d) => d.question && isMandatoryQuestion(d.question.key));
-    const dejaPosees = new Set(reponses.length > 0 ? obligatoires(await this.ready(tenant, row)).map((d) => d.question!.key) : []);
+    const avantReponses = reponses.length > 0 ? await this.ready(tenant, row) : null;
+    const dejaPosees = new Set(avantReponses ? obligatoires(avantReponses).map((d) => d.question!.key) : []);
+    const ouvertesAvant = new Set(avantReponses ? avantReponses.purchase.questions.flatMap((d) => (d.question ? [d.question.key] : [])) : []);
     if (reponses.length > 0) await this.answer(tenant, id, reponses);
     // §49.4 : le façonnage d'une pièce de zinguerie écrite se répond à l'écran des questions, jamais clos en silence.
     const apres = await this.ready(tenant, row);
@@ -415,6 +417,14 @@ export class QuantitatifsService {
       // les réponses déjà enregistrées ne se renvoient pas. Une question obligatoire déjà posée et sautée reste refusée.
       if (reponses.length > 0 && mandatory.every((d) => !dejaPosees.has(d.question!.key))) return this.view(row, apres, rendu);
       throw validationFailed("Answer the forming questions first", { reason: "faconnage_required", questions: mandatory.map((d) => d.question!.key) });
+    }
+    // Greg, 23 novembre 2026 : « Je ne sais pas » au développé mène à « Combien de feuilles ? », sans bloquer l'écran. Cette
+    // question naît des réponses tout juste envoyées (« Je ne sais pas » ne part qu'au calcul) : l'écran des questions
+    // revient avec elle, AVANT le calcul, comme pour le façonnage né d'une réponse. Une seule fois : posée et laissée sans
+    // réponse, elle se ferme au calcul suivant (la ligne reste à préciser).
+    if (reponses.some((r) => r.valeur === null)) {
+      const nees = apres.purchase.questions.filter((d) => d.question && !ouvertesAvant.has(d.question.key) && donneeDeLaFiche(apres.takeoff.trade, d.question.key)?.toujoursDemandee === true);
+      if (nees.length > 0) return this.view(row, apres, rendu);
     }
     // §51.2 : une réponse « Autre » relue qui ouvre une donnée manquante pose UNE question de plus, AVANT de calculer :
     // l'écran des questions revient avec elle seule à régler.

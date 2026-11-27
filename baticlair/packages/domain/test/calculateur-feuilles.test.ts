@@ -49,11 +49,21 @@ describe("« Combien de feuilles ? » (Greg, 23 novembre 2026)", () => {
   const ecran = (answers: Record<string, EngineAnswer>) => ecranDeLecture({ ref, lecture: C01, answers, preferences: {} });
   const feuilles = (e: ReturnType<typeof ecran>) => e.purchase.toBuy.find((b) => /^Feuilles .*2 × 1 m/.test(b.label));
 
-  it("« Je ne sais pas » au développé : la ligne attend son développé, sans question de plus (pas encore branché, 23 novembre 2026)", () => {
+  it("« Je ne sais pas » au développé (je plie) : « Pour le faîtage, combien de feuilles de zinc te faut-il ? » (Greg, 23 novembre 2026)", () => {
     const base = { ...PLIE, "param:type_crochet@crochets-ardoise": { value: "1", unit: "u" } } as Record<string, EngineAnswer>;
     const dev = ecran(base).questions.find((q) => /^param:developpe\b/.test(q.key))!;
     const e = ecran({ ...base, [dev.key]: null });
-    expect(e.questions.some((x) => /feuilles_faitage/.test(x.key))).toBe(false);
+    const q = e.questions.find((x) => /feuilles_faitage/.test(x.key))!;
+    expect(q.text).toBe("Pour le faîtage, combien de feuilles de zinc te faut-il ?");
+    // Répondue : le nombre dit fait la ligne. « Je ne sais pas » encore : la ligne reste à préciser, rien n'est inventé.
+    expect(feuilles(ecran({ ...base, [dev.key]: null, [q.key]: { value: "2", unit: "u" } }))!.quantity).toBe("2 pièces");
+  });
+
+  it("« Je ne sais pas » au développé d'une pièce commandée toute faite : pas de question de feuilles", () => {
+    const base = { "param:faconnage@pieces-pliees": { value: "2", unit: "u" }, "param:type_crochet@crochets-ardoise": { value: "1", unit: "u" } } as Record<string, EngineAnswer>;
+    const dev = ecran(base).questions.find((q) => /^param:developpe\b/.test(q.key));
+    if (!dev) return;
+    expect(ecran({ ...base, [dev.key]: null }).questions.some((x) => /feuilles_/.test(x.key))).toBe(false);
   });
 
   it("le nombre de feuilles dit par l'artisan remplace le calcul, dit sous la flèche", () => {

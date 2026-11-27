@@ -1,5 +1,14 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.23-85 — « Je ne sais pas » au développé (Greg, 2026-11-23)
+
+Banc du calcul : 99 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Développé inconnu (« Je ne sais pas »), je plie (bande, noue, abergement, arêtier) | ligne en attente du développé | « Pour …, combien de feuilles de zinc te faut-il ? » (1, 2, 3, 4, Autre) ; le nombre dit fait la ligne ; « Je ne sais pas » encore : la ligne reste à préciser | Greg, 23 novembre 2026 |
+| Pièce commandée toute faite | — | inchangé : pas de question de feuilles | — |
+
 ## roofing-2026.11.23-84 — Fixation des tuiles, Bretagne d'abord (A-INTEGRER §2, Greg, 2026-11-23)
 
 | Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
