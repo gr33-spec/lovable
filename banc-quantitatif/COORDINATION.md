@@ -124,4 +124,4 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   `platform/http/request-context.middleware.ts` (jetons masqués), `.github/workflows/sauvegarde-base.yml` (aussi sur `main`,
   seule exception permise par Greg). JE POUSSE sur la branche de test quand ma chaîne est verte : je l'écris ici avant.
 - 27 nov., soir — sécurité : branche de test refusionnée (75111776, dictée et guide), chaîne complète relancée ;
-  JE POUSSE sur la branche de test dès qu'elle est verte. Merci de ne pas pousser d'ici là (une heure et demie environ).
+  FAIT le 27 novembre 2026 : poussé (2b2d3c98), en ligne sur le site et l'API. Vous pouvez pousser de nouveau.
