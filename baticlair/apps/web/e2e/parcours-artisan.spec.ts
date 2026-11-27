@@ -3084,7 +3084,7 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
   await expect(page.getByRole("button", { name: "Mon menu" })).toHaveCount(0);
   // RÈGLE CHANGÉE (Greg, 11 novembre 2026) : un écran par grand usage, jamais deux pour le même parcours. Missions
   // coupées ici : deux écrans, les deux services d'achat ; aucun mot des missions ; « Accéder à Mobiiz » mène à l'accueil.
-  await expect(guide.getByText("1 sur 2")).toBeVisible();
+  await expect(guide.getByText("1 sur 3")).toBeVisible();
   // Sur ordinateur (Greg, 11 novembre 2026), la fenêtre fait de 560 à 620 px de large ; sur téléphone, elle reste compacte.
   const largeurGuide = (await guide.locator("section").boundingBox())!.width;
   if (page.viewportSize()!.width >= 1024) {
@@ -3102,11 +3102,15 @@ test("Guide du premier lancement (Greg, 24 octobre 2026) : trois écrans une foi
     }
   };
   await photoGuide(1);
-  await expect(guide.getByText(/consulte jusqu'à 5 négoces et retrouve leurs réponses dans Mobiiz/)).toBeVisible();
+  // Textes à jour (Greg, 23 novembre 2026) : devis, photo ou dictée, Messages, puis « Mon site ».
+  await expect(guide.getByText(/dicte ta liste de matériaux, puis envoie-la jusqu'à 5 négoces\. Leurs réponses arrivent dans Messages/)).toBeVisible();
   await guide.getByRole("button", { name: "Suivant" }).click();
   await expect(guide.getByRole("heading", { name: "Achète en collectif" })).toBeVisible();
-  await expect(guide.getByText("2 sur 2")).toBeVisible();
+  await expect(guide.getByText("2 sur 3")).toBeVisible();
   await photoGuide(2);
+  await guide.getByRole("button", { name: "Suivant" }).click();
+  await expect(guide.getByRole("heading", { name: "Crée ton site" })).toBeVisible();
+  await expect(guide.getByText("3 sur 3")).toBeVisible();
   await expect(guide.getByText(/mission/i)).toHaveCount(0);
   await expect(guide.getByRole("button", { name: "Suivant" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
