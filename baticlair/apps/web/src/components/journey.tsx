@@ -872,6 +872,9 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
               <Bulle de="mobiiz" label="Message de MOBIIZ">
                 <TexteMobiiz>{pending ? "Je calcule ta liste…" : "J'ai tout ce qu'il me faut. Touche une de tes réponses pour la changer, sinon on y va."}</TexteMobiiz>
               </Bulle>
+              {/* Greg, 23 novembre 2026 : « affiche quelque chose tout de suite pendant le calcul », sinon l'artisan croit que ça a
+                  planté. L'étape du serveur s'affiche dès le toucher, comme pendant la lecture. */}
+              {pending ? <EtapesIa etapes={[{ cle: "calcul", titre: "Vérification des quantités…", detail: "Chaque quantité est calculée avec les règles du métier, à partir de ton document et de tes réponses." }]} fini={false} /> : null}
               <div className="pl-10">
                 <Button className="shadow-card!" pending={pending} onClick={calculer}>
                   Calculer ma liste

@@ -451,7 +451,17 @@ export class QuantitatifsService {
       const open = (await this.ready(tenant, row)).purchase.questions.filter((d) => d.question && !d.question.key.startsWith("role:"));
       if (open.length === 0) break;
       let closed = 0;
-      for (const d of open) {
+      // La vitesse (Greg, 23 novembre 2026) : les « Je ne sais pas » simples (une donnée, un produit) s'écrivent d'un coup et
+      // l'écran n'est recalculé qu'une fois ; avant, une fois par question. Les autres gardent leur chemin, une à une.
+      const simples = open.flatMap((d) => {
+        const cle = cleDeFermeture(d);
+        return cle ? [{ d, cle }] : [];
+      });
+      if (simples.length > 0) {
+        const reviewed = await this.ready(tenant, row);
+        closed += await this.takeoffs.answerMany(tenant, reviewed.takeoff.id, simples.map((x) => ({ key: x.cle, value: null }))).then(() => simples.length, () => 0);
+      }
+      for (const d of open.filter((x) => !simples.some((y) => y.d === x))) {
         // Une question que le calcul ne sait pas clore reste telle quelle : elle ne bloque jamais le calcul.
         closed += await this.answer(tenant, id, [{ question: d.key, valeur: null }]).then(() => 1, () => 0);
       }
@@ -653,4 +663,20 @@ function donneeDeLaFiche(trade: string, key: string) {
 }
 function uniteDeLaFiche(trade: string, key: string): string | undefined {
   return donneeDeLaFiche(trade, key)?.unit || undefined;
+}
+
+/**
+ * La clé sous laquelle `answer` enregistrerait « Je ne sais pas » (`valeur: null`) pour cette question, quand c'est une réponse
+ * simple (une donnée, un produit, une précision, une unité) ; `null` pour tout le reste (doutes, ratios, orthographe,
+ * habitudes, lignes « ok / non »), qui garde son chemin. Même règle que `answer`, branche par branche.
+ */
+function cleDeFermeture(d: { key: string; question?: { key: string } | null }): string | null {
+  const k = d.key.replace(/^engine:/, "");
+  if (k.startsWith(A_PRECISER) && /^a-preciser:[0-9a-f-]{36}$/.test(k)) return k;
+  if (k.startsWith(ORTHOGRAPHE_KEY) || /^habitude:/.test(k) || k === SUGGESTIONS_KEY) return null;
+  if (k.startsWith(UNITE_KEY)) return k;
+  if ([FORBIDDEN, AI_DOUBT, AI_ADDITION, MISSING_INFO, A_PRECISER, RATIO].some((p) => d.key.startsWith(p))) return null;
+  if (!d.question) return null;
+  const key = d.question.key;
+  return /^(?:product:[a-z0-9_]{1,40}|param:[a-z0-9_]{1,40}(?:@[a-z0-9_-]{1,60})?|precise:[0-9a-f-]{36}|comptoir:[0-9a-f-]{36}:\d{1,2}|fiche:[a-z0-9_]{1,60})$/.test(key) ? key : null;
 }

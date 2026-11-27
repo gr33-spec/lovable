@@ -1,3 +1,4 @@
+import { ecranGarde } from "./ecran-garde.js";
 import {
   baseOf,
   type SectionDuDevis,
@@ -1325,6 +1326,26 @@ export class TakeoffService {
     if (key === LOTS_KEY && (typeof value !== "string" || !/^[a-z0-9_-]{1,40}(,[a-z0-9_-]{1,40})*$/.test(value))) throw validationFailed("Answer the kept lots", { reason: "invalid_answer" });
     // Étape « Suggestions » : « aucune », ou des cases « ouvrage/emplacement » séparées par des virgules.
     if (key === SUGGESTIONS_KEY && (typeof value !== "string" || !(value === SUGGESTIONS_AUCUNE || /^[a-z0-9_/+-]{3,400}(,[a-z0-9_/+-]{3,400}){0,4}$/.test(value)))) throw validationFailed("Answer the ticked suggestions", { reason: "invalid_answer" });
+    await this.ecrire(tenant, takeoff, key, value, previous);
+    return this.reload(tenant, takeoff.id);
+  }
+
+  /**
+   * La vitesse (Greg, 23 novembre 2026 : « moins de 2 secondes par réponse ») : plusieurs réponses simples (une donnée, un
+   * produit, « Je ne sais pas ») écrites d'un coup, l'écran recalculé UNE fois à la fin. Avant : une fois par réponse.
+   * Même journal, même mémoire de l'entreprise que `answer`, réponse par réponse.
+   */
+  async answerMany(tenant: TenantContext, takeoffId: string, entries: readonly { key: string; value: EngineAnswer }[]): Promise<ReviewedTakeoff> {
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    for (const { key, value } of entries) {
+      if (!/^(?:param|product|fiche|role|precise|comptoir|a-preciser|unite):/.test(key)) throw validationFailed("Not a plain answer", { reason: "invalid_answer" });
+      await this.ecrire(tenant, takeoff, key, value, takeoff.answers[key]);
+    }
+    return this.reload(tenant, takeoff.id);
+  }
+
+  /** Une réponse simple enregistrée : la réponse, la mémoire de l'entreprise (habitudes), le journal. */
+  private async ecrire(tenant: TenantContext, takeoff: TakeoffRecord, key: string, value: EngineAnswer, previous: EngineAnswer | undefined): Promise<void> {
     await this.takeoffs.setAnswer(tenant, takeoff.id, key, value);
     // Mémoire de l'entreprise : un produit choisi, ou une réponse d'habitude (« je façonne », épaisseur du zinc),
     // compte pour SON entreprise ; établie au deuxième chantier différent, elle n'est plus demandée (dite, modifiable).
@@ -1344,7 +1365,6 @@ export class TakeoffService {
       // Une pièce écrite au devis (« faconnage@bandes-zinc__<ligne> ») fait l'habitude de son ouvrage, pas d'un chantier.
       if (def?.kind === "artisan_preference" || name === CONSUMABLES_KEY) await this.memory.recordChoice(tenant, { kind: "param", key: `param:${baseOf(scopedName)}`, value: value.value, projectId: takeoff.projectId });
     }
-    const after = await this.reload(tenant, takeoff.id);
     const text = (v: EngineAnswer | undefined) => (v === undefined ? null : v === null ? "aucun" : typeof v === "string" ? v : `${v.value} ${v.unit}`);
     await this.journal.record(tenant, {
       projectId: takeoff.projectId,
@@ -1356,7 +1376,6 @@ export class TakeoffService {
       documentExcerpt: [],
       context: { trade: takeoff.trade, promptVersion: takeoff.promptVersion },
     });
-    return after;
   }
 
   /**
@@ -1594,7 +1613,7 @@ export class TakeoffService {
     // §47.1 : une règle « à vérifier » sort orange (« Quantité à confirmer »), « C'est bon » la passe au vert ;
     // §47.4 : une règle validée par trois entreprises est verte partout ; l'écran est rejoué avec ces règles.
     // §52 : un devis à plusieurs lots se calcule lot par lot, chacun avec le tiroir de son métier (une section par lot).
-    const ecran = (v: ReadonlySet<string>) => (lue.lots.length > 1 ? ecranParLots({ ...input, validated: v, refDe: (m) => referentialFor(m) }) : ecranDeLecture({ ...input, validated: v }));
+    const ecran = (v: ReadonlySet<string>) => ecranGarde(ref, { ...input, validated: v }, () => (lue.lots.length > 1 ? ecranParLots({ ...input, validated: v, refDe: (m) => referentialFor(m) }) : ecranDeLecture({ ...input, validated: v })));
     let e = ecran(new Set<string>());
     const ruleKeys = [...new Set(e.purchase.toBuy.flatMap((b) => (b.rules ?? []).filter((r) => !r.local).map((r) => r.key)))];
     const validated = ruleKeys.length > 0 ? ((await this.reading.rules?.validated(ruleKeys)) ?? new Set<string>()) : new Set<string>();
@@ -1750,3 +1769,4 @@ export function metiersDesLots(lecture: LectureDevis, tradeDonne: string): strin
   if (donne === "general") return [];
   return [...new Set(lecture.lots.map((l) => tradeIdOf(l.metier)))].filter((m) => m !== donne && referentialFor(m)?.trade === m);
 }
+
