@@ -32,6 +32,27 @@ export const API_KEY_HEADER = "x-api-key";
 export const hashApiKey = (key: string) => createHash("sha256").update(key).digest("hex");
 
 /**
+ * CE QU'OUVRE UNE CLÉ PARTENAIRE (Greg, 27 novembre 2026) : les SEULS quantitatifs (la porte `/v1/quantitatifs` et ce qui
+ * construit ou lit la liste d'un chantier : note, croquis, « j'ai déjà ma liste », lignes, PDF de la liste). Jamais le
+ * compte, l'entreprise, l'export ou la suppression des données, les envois aux négoces, le paiement ni l'admin.
+ * Règle changée : avant, une clé valait une session de son auteur sur toutes les routes.
+ */
+const ROUTES_DES_CLES: readonly { methodes: readonly string[]; chemin: RegExp }[] = [
+  { methodes: ["GET", "POST"], chemin: /^\/v1\/quantitatifs(\/[^/]+(\/(reponses|calcul|corrections|validation))?)?$/ },
+  { methodes: ["PUT"], chemin: /^\/v1\/projects\/[^/]+\/infos$/ },
+  { methodes: ["POST"], chemin: /^\/v1\/projects\/[^/]+\/(infos\/croquis|liste)$/ },
+  { methodes: ["PATCH", "DELETE"], chemin: /^\/v1\/takeoff-lines\/[^/]+$/ },
+  { methodes: ["POST"], chemin: /^\/v1\/takeoffs\/[^/]+\/lines$/ },
+  { methodes: ["GET"], chemin: /^\/v1\/projects\/[^/]+\/demande-de-devis\.pdf$/ },
+];
+
+export function routeOuverteAuxCles(methode: string, url: string): boolean {
+  const chemin = (url.split("?")[0] ?? "").replace(/\/+$/, "");
+  const m = methode.toUpperCase();
+  return ROUTES_DES_CLES.some((r) => r.methodes.includes(m) && r.chemin.test(chemin));
+}
+
+/**
  * Garde global : toute route exige une session valide, sauf `@Public()`.
  * Sécurisé par défaut — oublier un garde ne peut pas exposer une route.
  */
@@ -68,6 +89,7 @@ export class SessionGuard implements CanActivate {
     if (apiKey) {
       const key = await this.prisma.partnerApiKey.findUnique({ where: { hash: hashApiKey(apiKey.trim()) }, select: { id: true, companyId: true, createdById: true, name: true, monthlyQuota: true, revokedAt: true } });
       if (!key || key.revokedAt) throw new DomainError("unauthenticated", "Unknown or revoked API key");
+      if (!routeOuverteAuxCles(req.method, req.originalUrl ?? req.url)) throw new DomainError("forbidden", "API keys only open quantitatifs", { raison: "cle_quantitatifs_seulement", phrase: "Une clé API ne sert qu'aux quantitatifs." });
       req.user = { userId: key.createdById, email: "", name: `Clé API ${key.name}`, emailVerified: true };
       req.apiKey = { id: key.id, companyId: key.companyId, monthlyQuota: key.monthlyQuota };
       enrichRequestContext({ userId: key.createdById });

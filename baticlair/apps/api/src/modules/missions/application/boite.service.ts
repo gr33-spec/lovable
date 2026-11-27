@@ -186,14 +186,18 @@ export class BoiteService {
   /** Le fil avec un négoce (comme une conversation Gmail) : ses messages reçus et ce qui lui est parti, dans l'ordre. */
   async fil(t: TenantContext, recipientId: string) {
     if (!isUuid(recipientId)) throw notFound("Fil");
-    const r = await this.prisma.priceRequestRecipient.findFirst({ where: { id: recipientId, priceRequest: { companyId: t.companyId } }, select: { id: true, supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } });
+    const r = await this.prisma.priceRequestRecipient.findFirst({ where: { id: recipientId, priceRequest: { companyId: t.companyId } }, select: { id: true, instantane: true, supplier: { select: { name: true, email: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } });
     if (!r) throw notFound("Fil");
+    // Un message rattaché à la main qui ne vient pas du négoce (saboteur, 27 novembre 2026) garde le nom de son VRAI expéditeur.
+    const figee = (r.instantane as { email?: unknown } | null)?.email;
+    const adresseNegoce = (typeof figee === "string" && figee.includes("@") ? figee : r.supplier.email).trim().toLowerCase();
+    const duNegoce = (de: string, authentifie: boolean) => authentifie && (/<([^>]+)>/.exec(de)?.[1] ?? de).trim().toLowerCase() === adresseNegoce;
     const [recus, partis] = await Promise.all([
-      this.prisma.emailRecuArtisan.findMany({ where: { companyId: t.companyId, recipientId, indesirable: false }, orderBy: { recuLe: "asc" }, take: 100, select: { id: true, objet: true, texte: true, recuLe: true, fichiers: { select: { id: true, nom: true, type: true } } } }),
+      this.prisma.emailRecuArtisan.findMany({ where: { companyId: t.companyId, recipientId, indesirable: false }, orderBy: { recuLe: "asc" }, take: 100, select: { id: true, de: true, authentifie: true, objet: true, texte: true, recuLe: true, fichiers: { select: { id: true, nom: true, type: true } } } }),
       this.prisma.messageEnvoye.findMany({ where: { companyId: t.companyId, recipientId }, orderBy: { envoyeLe: "asc" }, take: 100 }),
     ]);
     const items = [
-      ...recus.map((e) => ({ sens: "recu" as const, id: e.id, libelle: r.supplier.name, objet: e.objet, texte: e.texte ?? "", le: e.recuLe.toISOString(), fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type })) })),
+      ...recus.map((e) => ({ sens: "recu" as const, id: e.id, libelle: duNegoce(e.de, e.authentifie) ? r.supplier.name : nomExpediteur(e.de), objet: e.objet, texte: e.texte ?? "", le: e.recuLe.toISOString(), fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type })) })),
       ...partis.map((m) => ({ sens: "envoye" as const, id: m.id, libelle: LIBELLE_ENVOI[m.sorte] ?? "Envoyé", objet: m.objet, texte: m.texte, le: m.envoyeLe.toISOString(), fichiers: m.pieces.map((nom) => ({ id: null, nom, type: null })) })),
     ].sort((a, b) => a.le.localeCompare(b.le));
     return { recipientId: r.id, negoce: r.supplier.name, projectId: r.priceRequest.projectId, chantier: r.priceRequest.project.name, items };

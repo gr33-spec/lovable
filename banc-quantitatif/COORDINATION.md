@@ -102,3 +102,10 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 27 nov. — audit rendu (`baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`). Aucun fichier de code modifié. Les corrections
   proposées touchent `adresse-mobiiz/application/reponses-recues.service.ts` (Répondre), `identity/http/session.guard.ts`,
   `ai-usage`, `platform/http` : je les noterai ici AVANT d'y toucher, après l'accord de Greg.
+- 27 nov. (après-midi) — sécurité, ACCORD DE GREG. Je touche (serveur seulement, aucun écran, ni moteur, ni questions) :
+  `adresse-mobiiz/application/reponses-recues.service.ts` et `http/adresse-mobiiz.controller.ts` (Répondre),
+  `missions/application/boite.service.ts` (fil : nom du vrai expéditeur), `packages/domain/src/groupe/adresse-mobiiz.ts`
+  (`expediteurViaApp` guillemeté, objet nettoyé), `identity/http/session.guard.ts` (clé partenaire = quantitatifs seuls),
+  `ai-usage` (analyses en cours comptées), `platform/http/rate-limit.module.ts` (GET limités),
+  `platform/http/request-context.middleware.ts` (jetons masqués), `.github/workflows/sauvegarde-base.yml` (aussi sur `main`,
+  seule exception permise par Greg). JE POUSSE sur la branche de test quand ma chaîne est verte : je l'écris ici avant.

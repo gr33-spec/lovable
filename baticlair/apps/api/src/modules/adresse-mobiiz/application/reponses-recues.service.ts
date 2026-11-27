@@ -374,9 +374,20 @@ export class ReponsesRecuesService {
     if (!corps) throw validationFailed("Empty", { reason: "vide", phrase: "Écris ta réponse avant d'envoyer." });
     const r = await this.prisma.priceRequestRecipient.findFirst({
       where: { id: e.recipientId, priceRequest: { companyId: tenant.companyId } },
-      select: { id: true, etiquette: true, supplier: { select: { name: true, email: true } }, priceRequest: { select: { projectId: true } } },
+      select: { id: true, etiquette: true, sentAt: true, instantane: true, supplier: { select: { name: true, email: true, archivedAt: true } }, priceRequest: { select: { projectId: true } } },
     });
     if (!r) throw notFound("Recipient");
+    // SÉCURITÉ (Greg, 27 novembre 2026) : « Répondre » n'existe que sur une demande DÉJÀ ENVOYÉE, et seulement au négoce de
+    // cette demande, à l'adresse où elle est partie (l'instantané de l'envoi, jamais le carnet d'aujourd'hui). Le message doit
+    // venir de ce négoce, authentifié : sinon « Répondre » servirait à écrire à n'importe qui depuis mobiiz.fr.
+    if (!r.sentAt) throw validationFailed("Not sent", { reason: "demande_non_envoyee", phrase: "Cette demande n'est pas encore partie chez le négoce : on ne peut pas lui répondre." });
+    if (r.supplier.archivedAt) throw validationFailed("Archived supplier", { reason: "negoce_retire", phrase: "Ce négoce est retiré de ton carnet : on ne lui écrit plus." });
+    const figee = (r.instantane as { email?: unknown } | null)?.email;
+    const adresseNegoce = typeof figee === "string" && figee.includes("@") ? figee : r.supplier.email;
+    if (!e.authentifie || !memeExpediteur(adresseNue(e.de), adresseNegoce)) {
+      throw validationFailed("Not from supplier", { reason: "expediteur_pas_le_negoce", phrase: "Ce message ne vient pas du négoce de la demande : Mobiiz n'y répond pas." });
+    }
+    await this.plafondDesReponses(tenant.companyId);
     const via = await this.adresses.expediteur(tenant.companyId);
     if (!via || !this.mailer) throw validationFailed("No Mobiiz address", { reason: "adresse_absente", phrase: "Ton adresse Mobiiz n'est pas encore prête : réessaie dans un instant." });
     let etiquette = r.etiquette;
@@ -385,12 +396,14 @@ export class ReponsesRecuesService {
       await this.prisma.priceRequestRecipient.update({ where: { id: r.id }, data: { etiquette } });
     }
     const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
-    const objet = /^re\s*:/i.test(e.objet.trim()) ? e.objet.trim() : `Re: ${e.objet.trim() || "votre réponse"}`;
+    // L'objet reçu, nettoyé : aucun retour à la ligne, aucun ancien repère (il rangerait la réponse dans un autre chantier).
+    const recu = objetPropre(e.objet);
+    const objet = /^re\s*:/i.test(recu) ? recu : `Re: ${recu || "votre réponse"}`;
     const cite = (e.texte ?? "").split("\n").slice(0, 60).map((l) => `> ${l}`).join("\n");
     const quand = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" }).format(e.recuLe);
     const text = [corps, "", c?.name ?? "", ...(cite ? ["", `Le ${quand}, ${r.supplier.name} a écrit :`, cite] : [])].join("\n");
     await this.mailer.send({
-      to: r.supplier.email,
+      to: adresseNegoce,
       subject: objetAvecRepere(objet.slice(0, 200), etiquette),
       text,
       from: via.from,
@@ -399,6 +412,13 @@ export class ReponsesRecuesService {
       envoi: { companyId: tenant.companyId, sorte: "reponse", projectId: r.priceRequest.projectId, recipientId: r.id, repondA: e.id, destinataire: r.supplier.name },
     });
     return { envoye: true };
+  }
+
+  /** Au plus REPONSES_PAR_HEURE réponses par entreprise sur une heure glissante, quelle que soit l'adresse IP. */
+  private async plafondDesReponses(companyId: string): Promise<void> {
+    const depuis = new Date(this.now().getTime() - 60 * 60 * 1000);
+    const n = await this.prisma.messageEnvoye.count({ where: { companyId, sorte: "reponse", envoyeLe: { gte: depuis } } });
+    if (n >= REPONSES_PAR_HEURE) throw new DomainError("too_many_requests", "Too many replies", { reason: "trop_de_reponses", phrase: "Tu as envoyé beaucoup de réponses en une heure : réessaie un peu plus tard." });
   }
 
   /**
@@ -468,6 +488,17 @@ export function dateLisible(texte: string | null | undefined, maintenant: Date):
   const d = texte ? new Date(texte) : null;
   return d && !Number.isNaN(d.getTime()) ? d : maintenant;
 }
+
+/**
+ * L'objet d'un e-mail reçu, repris dans une réponse (saboteur, 27 novembre 2026) : une seule ligne (un retour à la ligne
+ * ne devient jamais un en-tête), sans aucun repère « [réf. …] » déjà présent (seul celui de la demande est ajouté ensuite).
+ */
+export function objetPropre(objet: string): string {
+  return [...objet].map((c) => (c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127 ? " " : c)).join("").replace(/\[r[ée]f\.?\s*[a-z2-9]{8}\]/gi, " ").replace(/\s+/g, " ").trim();
+}
+
+/** Plafond par entreprise des réponses (saboteur, 27 novembre 2026) : en plus de la limite par adresse IP. */
+export const REPONSES_PAR_HEURE = 30;
 
 /** Même expéditeur que le négoce : même adresse, ou même domaine quand il n'est pas une messagerie grand public. */
 function memeExpediteur(expediteur: string, negoce: string): boolean {

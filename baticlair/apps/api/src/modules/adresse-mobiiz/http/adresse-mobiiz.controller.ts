@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Res, StreamableFile, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
+import { IdentiteConfirmeeGuard } from "../../../platform/http/identite-confirmee.guard.js";
 import type { Response } from "express";
 import { z } from "zod";
 import { ZodPipe } from "../../../platform/http/zod.js";
@@ -90,6 +91,8 @@ export class AdresseMobiizController {
   @Post("recus/:id/repondre")
   @HttpCode(200)
   @Throttle({ default: HOURLY(30) })
+  // Comme l'envoi d'une demande : rien ne part chez un négoce tant que l'identité de l'entreprise n'est pas confirmée.
+  @UseGuards(IdentiteConfirmeeGuard)
   repondre(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(repondreBody)) body: z.infer<typeof repondreBody>) {
     return this.recus.repondre(tenant, id, body.texte);
   }

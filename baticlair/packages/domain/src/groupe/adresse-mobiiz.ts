@@ -80,8 +80,11 @@ export function etiquetteDepuis(octets: Uint8Array): string {
 
 /** L'adresse de réponse d'une demande : `nom+r<étiquette>@domaine`. */
 export const adresseReponseArtisan = (adresse: string, etiquette: string, domaine: string): string => `${adresse}+r${etiquette}@${domaine}`;
-/** L'expéditeur affiché chez le négoce : « Toitures Martin via Mobiiz <toitures-martin@mobiiz.fr> ». */
-export const expediteurViaApp = (nomEntreprise: string, adresse: string, domaine: string, nomApp: string): string => `${nomEntreprise.replace(/[<>"\r\n]/g, " ").replace(/\s+/g, " ").trim()} via ${nomApp} <${adresse}@${domaine}>`;
+/**
+ * L'expéditeur affiché chez le négoce : « Toitures Martin via Mobiiz <toitures-martin@mobiiz.fr> ». Le nom perd tout signe
+ * qui ferait lire une seconde adresse (« , », « @ », « ; », « : », chevrons, guillemets ; saboteur, 27 novembre 2026).
+ */
+export const expediteurViaApp = (nomEntreprise: string, adresse: string, domaine: string, nomApp: string): string => `${nomEntreprise.replace(/[<>"\r\n,;:@\\()[\]]/g, " ").replace(/\s+/g, " ").trim()} via ${nomApp} <${adresse}@${domaine}>`;
 /** Le repère ajouté à l'objet de la demande : un négoce qui répond depuis un autre outil le garde. */
 export const repereObjet = (etiquette: string): string => `[réf. ${etiquette}]`;
 export const objetAvecRepere = (objet: string, etiquette: string): string => `${objet} ${repereObjet(etiquette)}`;

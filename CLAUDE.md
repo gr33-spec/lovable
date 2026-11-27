@@ -430,3 +430,13 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 ## À faire avant l'ouverture d'un nouveau métier
 
 - Un bouton admin « Prévenir les inscrits de ce métier », qui envoie un e-mail à tous les inscrits de ce métier (entreprises du métier et ancienne liste d'attente). Pas encore codé (Greg, 20 novembre 2026).
+
+## Décisions du 27 novembre 2026 : sécurité, sauvegardes (audit `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`)
+
+- Vercel : l'équipe gr33-spec est en **Pro** (actif, aucune suspension), pour les deux projets (baticlair, baticlair-api). mobiiz.fr n'est rattaché à aucun projet pour l'instant.
+- Sauvegarde nocturne : `.github/workflows/sauvegarde-base.yml` posé SEUL sur `main` (seule exception permise par Greg à « jamais main ») ; les deux mises en ligne de production lancées par Vercel ont été annulées, la production reste au commit b7654ab0. Chaque nuit : export, VRAI test de restauration dans une base jetable de GitHub, chiffrement puis déchiffrement de contrôle, 30 jours (90 pour celle du 1er du mois). Elle vise la base du SITE DE TEST tant qu'il n'y a pas de production. Elle ne part qu'une fois la branche par défaut passée à `main` et les deux secrets posés (Greg).
+- RÈGLE CHANGÉE : une clé API partenaire n'ouvre plus que les quantitatifs (`routeOuverteAuxCles`, `identity/http/session.guard.ts`). Avant : toutes les routes du compte, suppression comprise.
+- RÈGLE CHANGÉE : « Répondre » seulement sur une demande déjà envoyée, au négoce de la demande, à l'adresse figée à l'envoi, quand le message vient de ce négoce authentifié ; objet nettoyé, nom d'expéditeur sans signe d'adresse, identité confirmée, 30 réponses par heure et par entreprise. Test `apps/api/test/saboteur-repondre.test.ts` (26 attaques).
+- RÈGLE CHANGÉE : les analyses en cours comptent dans les 3 analyses offertes (réservation sous verrou par entreprise) ; avant, dix lectures lancées d'un coup passaient toutes.
+- RÈGLE CHANGÉE : les lectures qui coûtent sont limitées (route avec son `@Throttle`, PDF, Excel, CSV, pages par jeton) ; avant, aucune lecture n'était comptée. Les jetons du chemin ne sont plus écrits dans les journaux (`cheminJournalise`).
+- Dépôt privé : AVANT de le passer en privé, les commits qui partent sur Vercel doivent avoir pour AUTEUR le compte GitHub de Greg (gr33-spec), seul membre de l'équipe Vercel ; sinon Vercel bloque la mise en ligne (« commit author is not a member of the team »).

@@ -26,6 +26,17 @@ export interface AnalysisRepository {
   countBillable(companyId: string, billingMonth: string | null): Promise<number>;
   create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids?: number }): Promise<AnalysisRecord>;
   restart(id: string, userId: string | null, poids?: number): Promise<AnalysisRecord>;
+  /**
+   * RÉSERVER UNE ANALYSE (audit du 27 novembre 2026) : sous un verrou par entreprise, compte les analyses décomptées ET celles
+   * EN COURS (lancées depuis moins de `EN_COURS_COMPTEES_MS`, hors ce document), laisse `verifier` refuser, puis crée ou relance
+   * l'analyse. Dix lectures lancées au même instant ne passent donc plus toutes sous le quota.
+   */
+  reserver(
+    data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids: number },
+    existante: AnalysisRecord | null,
+    mois: string,
+    verifier: (prises: { total: number; mois: number }) => void,
+  ): Promise<AnalysisRecord>;
   /** Réussite : décomptée dans le mois donné (sauf si elle l'était déjà). */
   /** `billable: false` : lecture faite dans un lot déjà décompté (devis fournisseurs lus ensemble). */
   complete(id: string, billingMonth: string, at: Date, billable?: boolean): Promise<AnalysisRecord>;
@@ -36,3 +47,6 @@ export interface AnalysisRepository {
 }
 
 export const ANALYSIS_REPOSITORY = Symbol("ANALYSIS_REPOSITORY");
+
+/** Une analyse « en cours » compte dans le quota pendant 30 minutes ; au-delà, elle est tenue pour interrompue. */
+export const EN_COURS_COMPTEES_MS = 30 * 60 * 1000;

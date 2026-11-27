@@ -94,22 +94,23 @@ export class AnalysisMeter {
     await this.plafondPermis(input.companyId);
     const gratuit = await this.limiteGratuite(input.companyId);
     const poids = input.poids ?? 1;
-    if (gratuit) {
-      const used = gratuit.total ? await this.analyses.countBillable(input.companyId, null) : await this.analyses.countBillable(input.companyId, month);
-      if (used >= gratuit.limite) throw new DomainError("abonnement_requis", "Free plan reading limit reached", { action: "lecture", refus: "lectures", phrase: gratuit.phrase(gratuit.limite) });
-      // Un gros devis (2 analyses) quand il n'en reste qu'une : rien n'est dépensé, la phrase le dit.
-      if (used + poids > gratuit.limite) throw new DomainError("abonnement_requis", "Not enough readings left for a large quote", { action: "lecture", refus: "lectures", phrase: PHRASE_GROS_DEVIS_SANS_CREDIT });
-    }
     const limit = await this.analyses.monthlyLimit(input.companyId);
-    if (limit !== null) {
-      const used = await this.analyses.countBillable(input.companyId, month);
-      if (used >= limit) {
-        throw new DomainError("analysis_quota_reached", "Monthly analysis limit reached", { limit, used, month });
-      }
-    }
-    const analysis = existing
-      ? await this.analyses.restart(existing.id, input.userId, poids)
-      : await this.analyses.create({ ...input, poids });
+    // Le décompte et la création se font d'un bloc, sous verrou, en comptant les lectures EN COURS (audit du 27 novembre 2026) :
+    // avant, seules les lectures terminées comptaient, et dix lectures lancées ensemble passaient toutes sous la limite gratuite.
+    const analysis = await this.analyses.reserver(
+      { companyId: input.companyId, userId: input.userId, projectId: input.projectId, documentId: input.documentId, kind: input.kind, poids },
+      existing,
+      month,
+      (prises) => {
+        if (gratuit) {
+          const used = gratuit.total ? prises.total : prises.mois;
+          if (used >= gratuit.limite) throw new DomainError("abonnement_requis", "Free plan reading limit reached", { action: "lecture", refus: "lectures", phrase: gratuit.phrase(gratuit.limite) });
+          // Un gros devis (2 analyses) quand il n'en reste qu'une : rien n'est dépensé, la phrase le dit.
+          if (used + poids > gratuit.limite) throw new DomainError("abonnement_requis", "Not enough readings left for a large quote", { action: "lecture", refus: "lectures", phrase: PHRASE_GROS_DEVIS_SANS_CREDIT });
+        }
+        if (limit !== null && prises.mois >= limit) throw new DomainError("analysis_quota_reached", "Monthly analysis limit reached", { limit, used: prises.mois, month });
+      },
+    );
     return { status: "go", analysis };
   }
 

@@ -1,6 +1,6 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
-import type { AnalysisKind, AnalysisRecord, AnalysisRepository } from "../application/analysis.repository.js";
+import { EN_COURS_COMPTEES_MS, type AnalysisKind, type AnalysisRecord, type AnalysisRepository } from "../application/analysis.repository.js";
 
 const FIELDS = {
   id: true,
@@ -36,6 +36,29 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
 
   create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids?: number }): Promise<AnalysisRecord> {
     return this.prisma.aiAnalysis.create({ data: { ...data, status: "started" }, select: FIELDS });
+  }
+
+  async reserver(
+    data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids: number },
+    existante: AnalysisRecord | null,
+    mois: string,
+    verifier: (prises: { total: number; mois: number }) => void,
+  ): Promise<AnalysisRecord> {
+    return this.prisma.$transaction(async (tx) => {
+      // Un verrou par entreprise, relâché en fin de transaction : deux réservations de la même entreprise passent l'une après l'autre.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analyse:${data.companyId}`}::text))`;
+      const depuis = new Date(Date.now() - EN_COURS_COMPTEES_MS);
+      const [total, duMois, enCours] = await Promise.all([
+        tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, billable: true }, _sum: { poids: true } }),
+        tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, billingMonth: mois, billable: true }, _sum: { poids: true } }),
+        tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, status: "started", startedAt: { gte: depuis }, ...(existante ? { id: { not: existante.id } } : {}) }, _sum: { poids: true } }),
+      ]);
+      const enCoursPoids = enCours._sum.poids ?? 0;
+      verifier({ total: (total._sum.poids ?? 0) + enCoursPoids, mois: (duMois._sum.poids ?? 0) + enCoursPoids });
+      return existante
+        ? tx.aiAnalysis.update({ where: { id: existante.id }, data: { status: "started", userId: data.userId, completedAt: null, startedAt: new Date(), poids: data.poids }, select: FIELDS })
+        : tx.aiAnalysis.create({ data: { ...data, status: "started" }, select: FIELDS });
+    });
   }
 
   restart(id: string, userId: string | null, poids?: number): Promise<AnalysisRecord> {
