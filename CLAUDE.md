@@ -4,7 +4,7 @@
 
 > **Toute nouvelle discussion crée sa branche depuis `claude/saas-achat-artisans-prompt-1lyihx`, jamais depuis `main`, même si `main` est la branche par défaut.** (Greg, 27 novembre 2026)
 >
-> **Auteur des commits : le compte GitHub de Greg** (`gr33-spec`, `234254365+gr33-spec@users.noreply.github.com`), posé par le hook de démarrage `.claude/settings.json` ; sans lui, Vercel refuse la mise en ligne quand le dépôt est privé. Vérifier avant le premier commit : `git config user.email`.
+> **Auteur des commits : le compte GitHub de Greg** (`gr33-spec`, `234254365+gr33-spec@users.noreply.github.com`) ; le committer reste Claude (signature). Posé par le hook de démarrage `.claude/settings.json` (`git config author.name` / `author.email`) ; sans lui, Vercel refuse la mise en ligne quand le dépôt est privé. Vérifier avant le premier commit : `git config author.email`.
 
 Fiche lue par chaque nouvelle session. Le détail des règles produit est dans `baticlair/CLAUDE.md` (à lire avant de toucher au code) ; l'état d'avancement dans `baticlair/docs/SUIVI.md`, les décisions dans `baticlair/docs/DECISIONS.md`, la reprise dans `baticlair/docs/REPRISE.md`.
 

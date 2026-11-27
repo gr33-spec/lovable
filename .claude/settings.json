@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "git -C \"$CLAUDE_PROJECT_DIR\" config user.name \"gr33-spec\" && git -C \"$CLAUDE_PROJECT_DIR\" config user.email \"234254365+gr33-spec@users.noreply.github.com\""
+            "command": "git -C \"$CLAUDE_PROJECT_DIR\" config author.name \"gr33-spec\" && git -C \"$CLAUDE_PROJECT_DIR\" config author.email \"234254365+gr33-spec@users.noreply.github.com\""
           }
         ]
       }
