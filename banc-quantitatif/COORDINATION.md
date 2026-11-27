@@ -90,3 +90,12 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (moteur 1 402, serveur 973, parcours 368, parcours activés 101, dont un instable de la messagerie repassé : « Une fuite sur
   mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
 - Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.
+
+## Discussion « sécurité, sauvegardes, coûts » (session_01Pqq8eRsWNdQEBSRxcKPpzH), 27 novembre 2026
+- Branche : `claude/nice-babbage-62c21g` (partie de la branche de test). AUDIT D'ABORD : je ne corrige rien de grave sans
+  l'accord de Greg.
+- Je ne touche NI au moteur, NI aux suggestions, NI aux questions, NI aux écrans (aucun fichier de `apps/web/src/components`).
+- Ce que je touche (documents et ajouts seulement) : `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md` (nouveau),
+  `.github/workflows/sauvegarde-base.yml` (lecture ; toute modification sera proposée à Greg avant), tests d'attaque
+  nouveaux dans `apps/api/test/` (fichiers à moi, préfixe `audit-`). Si je dois toucher un fichier serveur partagé
+  (`missions/boite.service.ts`, `platform/email`, état de santé de l'admin), je l'écris ici AVANT.
