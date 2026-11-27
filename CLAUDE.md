@@ -422,6 +422,12 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Guide « Revoir le guide » (Greg, 23 novembre 2026 : « les textes à jour ») : un écran par grande fonction. « Compare tes négoces » (devis, photo ou dictée, jusqu'à 5 négoces, réponses dans Messages rangées par chantier), « Achète en collectif » (son métier, son département, « plus on est, moins on paie »), NOUVEL écran « Crée ton site » (« Mon site »), puis « Publie ou trouve une mission » si Mission est ouverte. Règle changée : avant, deux écrans (trois avec Mission), sans « Mon site ». Il ne s'ouvre toujours pas à l'inscription `/commencer` : seulement par « Revoir le guide ».
 - Lecture refusée pour un e-mail pas encore confirmé : l'écran dit la vraie phrase (« Confirme d'abord ton adresse e-mail… ») et propose « Renvoyer le lien de confirmation ». Avant : « Un champ n'est pas correctement rempli » (capture de l'ami de Greg). Parcours `e2e/parcours-artisan.spec.ts`, « e-mail pas encore confirmé ».
 
+## Décisions du 27 novembre 2026 : vitesse du calcul, « Je ne sais pas » au développé
+
+- Abergement de cheminée : cotes validées par Greg (« approximativement »), valeurs par défaut marquées, montrées sous la flèche, modifiables ; sans la taille au devis, « Combien de feuilles ? » direct.
+- Vitesse (Greg : « moins de 2 secondes par réponse ») : seul ce qui change se recalcule, aucun résultat changé (banc 99 sur 99, sortie identique avant / après). Chantier D-2026-020 en local : calcul 8,7 s → 0,85 s ; tout « Je ne sais pas » d'un coup 12,2 s → 2,5 s. « Vérification des quantités… » s'affiche dès « Calculer ma liste ».
+- Règle changée : « Je ne sais pas » au développé d'une pièce que l'artisan plie → « Pour …, combien de feuilles de zinc te faut-il ? » dans la discussion (avant : la ligne attendait son développé). Pièce commandée toute faite : rien ne change.
+
 ## Décisions du 27 novembre 2026 : retour de Greg sur la dictée (iPhone, Safari)
 
 - RÈGLE CHANGÉE : dans les questions du quantitatif, la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée → la dictée normale revient : le texte s'écrit dans la case pendant qu'on parle, rien ne part avant « Envoyer ». (On y répond surtout d'un toucher.)
