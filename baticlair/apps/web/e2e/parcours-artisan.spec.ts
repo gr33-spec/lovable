@@ -3551,6 +3551,9 @@ test("« Importer un document » (Greg, 1er novembre 2026) : avant toute analyse
 test("« Ma liste de matériaux » sur téléphone : rien sous la barre du bas, ni l'écran ni le bouton de « Saisir ma liste »", async ({ page }, info) => {
   test.skip(info.project.name !== "telephone", "la barre du bas n'existe que sur téléphone");
   await signUp(page);
+  // Le guide s'ouvre quand la réponse du serveur arrive : s'il tombe pendant la mesure, c'est lui qu'on touche (« Suivant »).
+  // Ce test regarde la barre du bas, pas le guide : il est noté vu avant (comme dans les parcours de l'accueil).
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   await page.goto("/chantiers/nouveau?mode=assistant");
   // Deux parcours reliés (Greg, 7 novembre 2026) : la conversation prend tout l'écran ; sa barre reste dans l'écran.
   const plus = page.getByRole("button", { name: "Ajouter : photo ou document" });
