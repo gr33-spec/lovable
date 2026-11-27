@@ -93,6 +93,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
 - Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.
 
+- 27 novembre 2026 (retour iPhone de Greg) : dans `components/journey.tsx`, la dictée des questions redevient la dictée dans
+  la case (rien ne part avant « Envoyer ») et la ligne « comme d'habitude » dit le nom de la donnée (« Épaisseur du zinc :
+  0,65 mm, comme d'habitude ») ; pour cela, `takeoff.service.ts` ajoute seulement `nom` (le libellé de la donnée de la
+  fiche) à chaque habitude envoyée à l'écran. Aucun calcul, aucune question, aucune suggestion changés.
+
 ## Discussion « sécurité, sauvegardes, coûts » (session_01Pqq8eRsWNdQEBSRxcKPpzH), 27 novembre 2026
 - Branche : `claude/nice-babbage-62c21g` (partie de la branche de test). AUDIT D'ABORD : je ne corrige rien de grave sans
   l'accord de Greg.
@@ -111,5 +116,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   `ai-usage` (analyses en cours comptées), `platform/http/rate-limit.module.ts` (GET limités),
   `platform/http/request-context.middleware.ts` (jetons masqués), `.github/workflows/sauvegarde-base.yml` (aussi sur `main`,
   seule exception permise par Greg). JE POUSSE sur la branche de test quand ma chaîne est verte : je l'écris ici avant.
-- 27 nov., soir — sécurité : branche de test fusionnée (0fc3bf2c, calcul plus rapide du banc), chaîne complète relancée ;
+- 27 nov., soir — sécurité : branche de test refusionnée (75111776, dictée et guide), chaîne complète relancée ;
   JE POUSSE sur la branche de test dès qu'elle est verte. Merci de ne pas pousser d'ici là (une heure et demie environ).

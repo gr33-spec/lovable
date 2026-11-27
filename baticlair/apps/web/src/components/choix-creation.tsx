@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, PencilLine, Sparkles } from "lucide-react";
+import { ClipboardList, Mic, PencilLine, Sparkles } from "lucide-react";
 import { useCallback } from "react";
 import { api } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
@@ -35,6 +35,8 @@ export function ChoixCreation({ pour = null }: { /** Venu de « Publier un besoi
         ) : null}
         <CarteLien remplace jaune href={`${base}?mode=manuel`} icone={PencilLine} titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
         <CarteLien remplace href={`${base}?mode=assistant`} icone={Sparkles} titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
+        {/* « À la voix » (Greg, 27 novembre 2026) : décrire son chantier en parlant, à côté de la photo et du texte. */}
+        <CarteLien remplace href={`${base}?mode=assistant&entree=voix`} icone={Mic} titre="À la voix" sous="Je décris mon chantier en parlant. Je relis le texte avant de l'envoyer." />
       </div>
       <p className="text-[13px] leading-relaxed text-muted">Tu peux changer en cours de route : l&apos;aide de Mobiiz reste disponible depuis ta liste, et rien n&apos;est ajouté sans ton accord.</p>
     </div>

@@ -7,7 +7,7 @@ import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } f
 import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
 import { Check, ChevronDown, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -565,12 +565,23 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   });
   const [retired, setRetired] = useState<ReadonlySet<string>>(() => new Set());
   const [messages, setMessages] = useState<MessageQuestions[]>(() => {
-    const habitudes = questions.filter((q) => q.kind === "habit" && q.usual !== null).map((q) => q.options.find((o) => o.value === q.usual)?.label).filter(Boolean);
+    // Une habitude dit DE QUOI elle parle (Greg, 27 novembre 2026 : « Comme d'habitude : 0,65 mm. » seul ne disait rien) :
+    // « Épaisseur du zinc : 0,65 mm, comme d'habitude. »
+    const noms = new Map((takeoff.habits ?? []).map((h) => [h.key, h.nom ?? null]));
+    const habitudes = questions
+      .filter((q) => q.kind === "habit" && q.usual !== null)
+      .map((q) => {
+        const valeur = q.options.find((o) => o.value === q.usual)?.label;
+        if (!valeur) return null;
+        const nom = noms.get(q.key);
+        return nom ? `${nom} : ${valeur}, comme d'habitude.` : `Comme d'habitude : ${valeur}.`;
+      })
+      .filter((x): x is string => x !== null);
     const aPoser = questions.length - habitudes.length;
     // Greg, 22 novembre 2026 : « J'ai lu ton devis » seulement s'il y a vraiment un devis ; sinon, la liste de l'artisan.
     const lu = takeoff.devisLu === false ? "J'ai ta liste." : "J'ai lu ton devis.";
     const tete = aPoser > 1 ? `${lu} Il me manque quelques réponses pour calculer ta liste.` : aPoser === 1 ? `${lu} Il me manque une réponse pour calculer ta liste.` : lu;
-    return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\nComme d'habitude : ${habitudes.join(", ")}.` : tete }];
+    return [{ de: "mobiiz", texte: habitudes.length ? `${tete}\n${habitudes.join("\n")}` : tete }];
   });
   const [reflexion, setReflexion] = useState(false);
   const [autre, setAutre] = useState(false);
@@ -579,18 +590,11 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   const [listeOuverte, setListeOuverte] = useState(false);
   const articles = takeoff.purchase.toBuy;
   const champ = useChampDicte();
-  // LA DICTÉE EN BULLE (Greg, 22 novembre 2026). RÈGLE CHANGÉE : avant, le texte dicté s'écrivait dans la case et
-  // attendait « Envoyer » → pendant la dictée, aucun texte (une onde, un chrono, « Arrêter », « Annuler ») ; à l'arrêt,
-  // le message part comme une bulle, qui se rouvre d'un toucher pour être corrigée. Le reste du parcours ne change pas.
-  const voix = useRef("");
-  const annulee = useRef(false);
+  // LA DICTÉE DANS LA CASE (Greg, 27 novembre 2026, essai sur iPhone : « on répond aux questions en un toucher ») :
+  // RÈGLE CHANGÉE : la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée des questions ; le texte
+  // s'écrit dans la case pendant qu'on parle, et rien ne part avant « Envoyer ». L'onde vit au départ d'un quantitatif.
+  const dictee = useDictee(champ.surVoix);
   const numeroMessage = useRef(0);
-  const dictee = useDictee(
-    useCallback((t: string) => {
-      voix.current = t;
-    }, []),
-    { continu: true },
-  );
   const restantes = ordonnees.filter((q) => !given[q.key] && !retired.has(q.key));
   const courante = restantes[0] ?? null;
   // Catalogue métier (Greg, 31 octobre 2026) : sur une question de modèle, ce qui se tape propose ses références.
@@ -707,20 +711,6 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setMessages((m) => [...m, { de: "mobiiz", texte: suite }]);
   };
 
-  // À l'arrêt de la dictée (pas sur « Annuler ») : ce qui a été dit part comme un message.
-  const ecoutait = useRef(false);
-  useEffect(() => {
-    if (dictee.ecoute) {
-      ecoutait.current = true;
-      return;
-    }
-    if (!ecoutait.current) return;
-    ecoutait.current = false;
-    const dit = voix.current.trim();
-    voix.current = "";
-    if (!annulee.current && dit) void envoyer(dit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dictee.ecoute]);
 
   const calculer = () => {
     // Ce qui est déjà parti au serveur ne repart pas.
@@ -904,16 +894,14 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
                 />
               ) : null
             }
-            dicteeEnBulle
             onDicter={() => {
-              voix.current = "";
-              annulee.current = false;
+              champ.avantDictee();
               dictee.demarrer();
             }}
             onArreter={dictee.arreter}
             onAnnulerDictee={() => {
-              annulee.current = true;
               dictee.annuler();
+              champ.rendre();
             }}
           />
         </div>

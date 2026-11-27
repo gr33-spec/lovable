@@ -1,9 +1,9 @@
 "use client";
 
-import { Camera, ChevronRight, ClipboardList, FileText, Layers, PencilLine, Tag, Package, X } from "lucide-react";
+import { Camera, ChevronRight, ClipboardList, FileText, Layers, Mic, PencilLine, Tag, Package, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { lireDescription, type LigneDecrite } from "../../../../packages/domain/src/assistant/assistant";
 import { choisirProduit, choisirValeur, confirmer, designationFinale, etapeSuivante, laisserAPreciser, refuser, type ArticleCompris } from "../../../../packages/domain/src/assistant/article-compris";
 import { precisionsLisibles } from "../../../../packages/domain/src/groupe/precisions-lisibles";
@@ -12,11 +12,11 @@ import { texteDuPdf } from "@/components/pdf-pages";
 import { SaisirMaListe } from "@/components/saisir-ma-liste";
 import { InfoAnalyse } from "@/components/coup-de-main-ia";
 import { api, ApiError, apiEnDirect, MAX_DOCUMENT_BYTES, messageErreur, newActionKey, type Project, type Quantitatif } from "@/lib/api";
-import { useDictee } from "@/lib/dictee";
+import { PHRASES_DICTEE, useDictee } from "@/lib/dictee";
 import { NEW_PROJECT_NAME } from "@/lib/project-name";
 import { useSession } from "@/lib/session";
 import { attachFile } from "@/lib/upload";
-import { AuFil, BarreSaisie, Bulle, COULEURS_CHAT, EnTeteChat, EtapesIa, TexteMobiiz, useChampDicte, useFil, useZoneVisible, type EtapeIa } from "./chat-mobiiz";
+import { AuFil, BarreSaisie, Bulle, COULEURS_CHAT, EcouteEnCours, EnTeteChat, EtapesIa, TexteMobiiz, useChampDicte, useFil, useZoneVisible, type EtapeIa } from "./chat-mobiiz";
 
 /**
  * NOUVEAU QUANTITATIF, UNE SEULE PORTE (Greg, 7 novembre 2026, captures « Mobiiz | Assistant » : « deux parcours distincts
@@ -120,6 +120,8 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
   const [liste, setListe] = useState<{ id: string; projetId: string; n: number } | null>(null);
   const [occupe, setOccupe] = useState(false);
   const [feuille, setFeuille] = useState(() => entree === "devis" || entree === "photo");
+  // « À LA VOIX » (Greg, 27 novembre 2026) : décrire son chantier en parlant, dès le départ d'un nouveau quantitatif.
+  const [aLaVoix, setALaVoix] = useState(() => !surAjout && (entree === "voix" || entree === "dictee"));
   const [catalogue, setCatalogue] = useState(reprise);
   const [aConfirmer, setAConfirmer] = useState<{ fichiers: File[]; nature: "devis" | "liste" } | null>(null);
   const [lecture, setLecture] = useState(false);
@@ -130,15 +132,6 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
   const compteur = useRef(0);
   const ids = { photo: useId(), galerie: useId(), document: useId() };
   const cleDepot = useRef(newActionKey());
-  const entreeFaite = useRef(false);
-  useEffect(() => {
-    if (entreeFaite.current || surAjout) return;
-    entreeFaite.current = true;
-    if (entree === "dictee") {
-      champ.avantDictee();
-      dictee.demarrer();
-    }
-  }, [entree, surAjout, champ, dictee]);
   // Plein écran par-dessus l'app : l'en-tête et le menu derrière deviennent inertes (ni touchés, ni lus) tant qu'elle est ouverte.
   useEffect(() => {
     // ouvert à côté d'une liste (ordinateur), il ne fige pas la liste, qui reste lisible et modifiable.
@@ -500,6 +493,16 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
           )}
           {lecture ? <p className="pl-10 text-[14px] text-[var(--chat-texte)]/70">J&apos;envoie ton document… la lecture continue sur ta liste.</p> : null}
         </div>
+        {aLaVoix ? (
+          <ALaVoix
+            occupe={occupe || lecture}
+            onEnvoyer={(texte) => {
+              setALaVoix(false);
+              void envoyer(texte);
+            }}
+            onEcrire={() => setALaVoix(false)}
+          />
+        ) : (
         <BarreSaisie
           valeur={champ.saisie}
           onChange={champ.setSaisie}
@@ -530,6 +533,7 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
             ) : undefined
           }
         />
+        )}
       </div>
       {feuille ? <FeuilleAjouter liste={liste !== null} ids={ids} onListe={liste ? () => router.push(versListe(liste.projetId)) : undefined} onFermer={() => setFeuille(false)} /> : null}
       {aConfirmer ? (
@@ -545,6 +549,96 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
           }}
         />
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * « À LA VOIX » (Greg, 27 novembre 2026) : l'artisan décrit son chantier en parlant. Un toucher sur « Parler » ; pendant
+ * qu'il parle, l'onde jaune au rythme de sa voix, le chrono, le gros bouton rouge et « Annuler » ; aucun texte. À l'arrêt,
+ * ce qu'il a dit arrive dans une bulle qu'il corrige, puis « Envoyer à l'analyse ». Rien ne part tout seul : ni au silence
+ * (Safari coupe l'écoute, elle repart et garde tout), ni à l'arrêt. « Annuler » efface ce qui a été dit.
+ */
+function ALaVoix({ occupe, onEnvoyer, onEcrire }: { occupe: boolean; onEnvoyer: (texte: string) => void; onEcrire: () => void }) {
+  const [etape, setEtape] = useState<"pret" | "ecoute" | "relire">("pret");
+  const [texte, setTexte] = useState("");
+  const dit = useRef("");
+  const annulee = useRef(false);
+  const dictee = useDictee(
+    useCallback((t: string) => {
+      dit.current = t;
+    }, []),
+    { continu: true },
+  );
+  const ecoutait = useRef(false);
+  useEffect(() => {
+    if (dictee.ecoute) {
+      ecoutait.current = true;
+      return;
+    }
+    if (!ecoutait.current) return;
+    ecoutait.current = false;
+    if (annulee.current) return;
+    setTexte(dit.current.trim());
+    setEtape("relire");
+  }, [dictee.ecoute]);
+  const parler = () => {
+    dit.current = "";
+    annulee.current = false;
+    setEtape("ecoute");
+    dictee.demarrer();
+  };
+  const probleme = dictee.probleme && dictee.probleme !== PHRASES_DICTEE.rien ? dictee.probleme : null;
+  return (
+    <div className="shrink-0 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),10px)] lg:px-6" style={{ backgroundColor: COULEURS_CHAT.fond }}>
+      {probleme ? (
+        <p role="alert" className="px-2 pb-2 text-[14px] font-semibold text-[#FF8A6B]">
+          {probleme}
+        </p>
+      ) : null}
+      {etape === "ecoute" && dictee.ecoute ? (
+        <EcouteEnCours
+          activite={dictee.activite}
+          onArreter={dictee.arreter}
+          onAnnuler={() => {
+            annulee.current = true;
+            dit.current = "";
+            dictee.annuler();
+            setEtape("pret");
+          }}
+        />
+      ) : etape === "relire" ? (
+        <section aria-label="Ce que tu as dit" className="flex flex-col gap-2 rounded-[28px] p-3" style={{ backgroundColor: "var(--chat-carte)" }}>
+          {texte ? (
+            <>
+              <label className="px-1 text-[14px] font-semibold text-[#111111]/70" htmlFor="ce-que-tu-as-dit">
+                Relis et corrige si besoin :
+              </label>
+              <textarea id="ce-que-tu-as-dit" value={texte} onChange={(e) => setTexte(e.target.value)} rows={4} className="w-full resize-none rounded-[20px] px-4 py-3 text-[16px] leading-snug text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }} />
+              <button type="button" disabled={occupe || !texte.trim()} onClick={() => onEnvoyer(texte.trim())} className="pressable min-h-12 rounded-full bg-[#111111] px-5 text-[16px] font-extrabold text-white disabled:opacity-50">
+                Envoyer à l&apos;analyse
+              </button>
+            </>
+          ) : (
+            <p role="status" className="px-1 text-[15px] text-[#111111]/80">
+              Je n&apos;ai rien entendu. Réessaie en parlant près du téléphone.
+            </p>
+          )}
+          <button type="button" onClick={parler} className="pressable min-h-11 rounded-full px-4 text-[15px] font-semibold text-[#111111]/75">
+            Recommencer
+          </button>
+        </section>
+      ) : (
+        <section aria-label="À la voix" className="flex flex-col items-center gap-3 rounded-[28px] px-4 py-4" style={{ backgroundColor: "var(--chat-carte)" }}>
+          <p className="text-center text-[15px] leading-snug text-[#111111]/80">Décris ton chantier à voix haute : les matériaux, les quantités, les mesures.</p>
+          <button type="button" onClick={parler} aria-label="Parler" className="pressable flex size-16 items-center justify-center rounded-full text-[#111111] shadow-card" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
+            <Mic size={28} aria-hidden="true" />
+          </button>
+          <button type="button" onClick={onEcrire} className="pressable min-h-11 rounded-full px-4 text-[15px] font-semibold text-[#111111]/75">
+            Écrire plutôt
+          </button>
+        </section>
+      )}
     </div>
   );
 }
