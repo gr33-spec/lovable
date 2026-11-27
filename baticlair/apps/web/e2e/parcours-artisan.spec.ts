@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, revenirAuxFeuilles, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1601,6 +1601,8 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   // « Dév. 200 » est écrit : jamais redemandé.
   expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
   await calculerMaListe(page).click();
+  // Le développé de la bande de ventilation n'est pas connu (« Je ne sais pas ») : « Combien de feuilles ? » revient d'abord.
+  await revenirAuxFeuilles(page);
   // « Il peut modifier ce choix pour une pièce dans le récapitulatif » : chaque pièce avec son choix (« Je façonne », la
   // réponse donnée pour tout le devis) ; la rive passe « commandé façonné », l'autre pièce ne bouge pas.
   const recap = page.getByRole("region", { name: "Récapitulatif" });

@@ -99,6 +99,13 @@ export async function repondreAuxQuestions(
       await expect(reponses).toHaveCount(avant + 1);
       continue;
     }
+    // Greg, 23 novembre 2026 : « Je ne sais pas » au développé fait demander « Combien de feuilles ? » ; sans choix du
+    // parcours, l'artisan dit un nombre (2), pour que la liste ait ses feuilles.
+    if (!voulu && /combien de feuilles de zinc/.test(question)) {
+      await boutons.getByRole("button", { name: "2", exact: true }).click();
+      await expect(reponses).toHaveCount(avant + 1);
+      continue;
+    }
     const faconne = boutons.getByRole("button", { name: /^Je façonne/ });
     const defaut = boutons.getByRole("button", { name: /par défaut$/ });
     const bouton = voulu && typeof voulu === "object" && "click" in voulu ? voulu : voulu ? boutons.getByRole("button", { name: voulu as string | RegExp }).first() : (await faconne.count()) > 0 ? faconne.first() : (await defaut.count()) > 0 ? defaut.first() : boutons.getByRole("button", { name: "Je ne sais pas", exact: true });
@@ -124,7 +131,20 @@ export async function calculerEtVoirMaListe(page: Page) {
   // Sans aucune question posée, le calcul est parti tout seul après l'étape « Suggestions » : il n'y a rien à toucher.
   await expect(calculerMaListe(page).or(listePrete(page)).first()).toBeVisible({ timeout: 60_000 });
   if (await calculerMaListe(page).isVisible()) await calculerMaListe(page).click();
+  // Greg, 23 novembre 2026 : un « Je ne sais pas » au développé fait revenir « Combien de feuilles ? » au calcul ; on y
+  // répond, puis on recalcule (une fois).
+  await revenirAuxFeuilles(page);
   await voirMaListe(page);
+}
+
+/** Après « Calculer ma liste » : si « Combien de feuilles ? » revient, on y répond (2) et on relance le calcul. */
+export async function revenirAuxFeuilles(page: Page) {
+  const voir = page.getByRole("button", { name: "Voir ma liste", exact: true });
+  const boutons = boutonsDeLaQuestion(page);
+  await expect(voir.or(boutons).or(page.getByRole("region", { name: "Récapitulatif" })).or(page.getByRole("region", { name: "Page des fournitures" })).first()).toBeVisible({ timeout: 120_000 });
+  if (!(await boutons.isVisible()) || !/combien de feuilles de zinc/.test((await boutons.getAttribute("aria-label")) ?? "")) return;
+  await repondreAuxQuestions(page);
+  await calculerMaListe(page).click();
 }
 
 /** Le récapitulatif, quand il arrive : « Voir ma liste ». */
