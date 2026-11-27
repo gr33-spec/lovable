@@ -90,3 +90,8 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (moteur 1 402, serveur 973, parcours 368, parcours activés 101, dont un instable de la messagerie repassé : « Une fuite sur
   mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
 - Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.
+
+- 27 novembre 2026 (retour iPhone de Greg) : dans `components/journey.tsx`, la dictée des questions redevient la dictée dans
+  la case (rien ne part avant « Envoyer ») et la ligne « comme d'habitude » dit le nom de la donnée (« Épaisseur du zinc :
+  0,65 mm, comme d'habitude ») ; pour cela, `takeoff.service.ts` ajoute seulement `nom` (le libellé de la donnée de la
+  fiche) à chaque habitude envoyée à l'écran. Aucun calcul, aucune question, aucune suggestion changés.

@@ -530,7 +530,7 @@ function ZoneQuantitatif({
         }
       : null,
     dictee
-      ? { id: "dictee", icone: Mic, texte: "Dicter", label: "Dicter ma liste" }
+      ? { id: "voix", icone: Mic, texte: "À la voix", label: "Décrire mon chantier à la voix" }
       : null,
   ].filter((a): a is NonNullable<typeof a> => a !== null);
   return (

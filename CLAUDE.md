@@ -422,6 +422,15 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Guide « Revoir le guide » (Greg, 23 novembre 2026 : « les textes à jour ») : un écran par grande fonction. « Compare tes négoces » (devis, photo ou dictée, jusqu'à 5 négoces, réponses dans Messages rangées par chantier), « Achète en collectif » (son métier, son département, « plus on est, moins on paie »), NOUVEL écran « Crée ton site » (« Mon site »), puis « Publie ou trouve une mission » si Mission est ouverte. Règle changée : avant, deux écrans (trois avec Mission), sans « Mon site ». Il ne s'ouvre toujours pas à l'inscription `/commencer` : seulement par « Revoir le guide ».
 - Lecture refusée pour un e-mail pas encore confirmé : l'écran dit la vraie phrase (« Confirme d'abord ton adresse e-mail… ») et propose « Renvoyer le lien de confirmation ». Avant : « Un champ n'est pas correctement rempli » (capture de l'ami de Greg). Parcours `e2e/parcours-artisan.spec.ts`, « e-mail pas encore confirmé ».
 
+## Décisions du 27 novembre 2026 : retour de Greg sur la dictée (iPhone, Safari)
+
+- RÈGLE CHANGÉE : dans les questions du quantitatif, la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée → la dictée normale revient : le texte s'écrit dans la case pendant qu'on parle, rien ne part avant « Envoyer ». (On y répond surtout d'un toucher.)
+- NOUVEAU « À la voix » au départ d'un nouveau quantitatif (carte de « Nouveau quantitatif », et bouton de l'accueil, avant « Dicter ») : « Parler », puis l'onde jaune au rythme de la voix, le chrono, le gros bouton rouge et « Annuler » ; à l'arrêt, le texte dans une bulle à corriger (« Relis et corrige si besoin »), puis « Envoyer à l'analyse » (ou « Recommencer »). Rien ne part tout seul. Code : `ALaVoix` (`components/nouveau-quantitatif.tsx`, `entree=voix`), `EcouteEnCours` (`chat-mobiiz.tsx`).
+- Coupure de Safari après un silence : l'écoute continue repart toute seule et garde tout ce qui a été dit, tant que l'artisan n'a pas touché « Arrêter » ou « Annuler » (`useDictee` continu, `lib/dictee.ts`).
+- Sur téléphone, l'onde suit les mots reconnus (chaque résultat de la dictée la relance) ; le micro n'est plus ouvert une seconde fois à côté de la dictée (sur iPhone, l'onde restait plate et le texte ne revenait pas). Sur ordinateur, elle suit le son du micro.
+- « Comme d'habitude : 0,65 mm. » seul ne disait rien → chaque habitude dit son nom : « Épaisseur du zinc : 0,65 mm, comme d'habitude. » (nom de la donnée de la fiche, `habits[].nom`).
+- Tests : `e2e/parcours-artisan.spec.ts` (« la dictée des questions », « À la voix », coupure de Safari simulée), `apps/api/test/habitudes.test.ts`. PAS ESSAYÉ SUR UN VRAI IPHONE (pas d'iPhone ni de Safari ici) : à confirmer par Greg.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

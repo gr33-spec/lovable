@@ -4513,36 +4513,54 @@ test("Catalogue métier (31 octobre 2026) : « Tuile rouge, 250 u » sans modèl
   expect(q0.fiche.find((f) => f.cle === "modele_de_la_tuile")).toMatchObject({ valeur: "Tuile H 14 Huguenot, réf. 204 (Edilians)", origine: "reponse" });
 });
 
-test("la dictée du quantitatif (Greg, 22 novembre 2026) : aucun texte pendant qu'on parle, l'onde, le chrono, Arrêter ou Annuler, puis le message en bulle, corrigeable d'un toucher", async ({ page }) => {
-  // Une reconnaissance vocale simulée, en écoute continue : deux morceaux, comme une vraie phrase ; elle ne finit que sur stop().
-  await page.addInitScript(() => {
-    class FausseDictee {
-      lang = "";
-      interimResults = false;
-      continuous = false;
-      onresult: ((e: unknown) => void) | null = null;
-      onerror: ((e: unknown) => void) | null = null;
-      onend: (() => void) | null = null;
-      start() {
-        const w = window as unknown as { dicteeEntendue?: boolean };
-        w.dicteeEntendue = false;
-        setTimeout(() => this.onresult?.({ resultIndex: 0, results: [Object.assign([{ transcript: "j'achète" }], { isFinal: true })] }), 50);
-        setTimeout(() => {
-          this.onresult?.({ resultIndex: 1, results: [Object.assign([{ transcript: "j'achète" }], { isFinal: true }), Object.assign([{ transcript: " tout fait" }], { isFinal: true })] });
-          w.dicteeEntendue = true;
-        }, 120);
+/** Une reconnaissance vocale simulée, en écoute continue ; `coupure` : elle s'arrête seule après le premier morceau (Safari après un silence). */
+async function fausseDicteeContinue(page: Page, morceaux: string[], coupure = false) {
+  await page.addInitScript(
+    ({ morceaux, coupure }) => {
+      const w = window as unknown as { dicteeEntendue?: boolean; dicteeLancees?: number };
+      w.dicteeLancees = 0;
+      class FausseDictee {
+        lang = "";
+        interimResults = false;
+        continuous = false;
+        onresult: ((e: unknown) => void) | null = null;
+        onerror: ((e: unknown) => void) | null = null;
+        onend: (() => void) | null = null;
+        start() {
+          const n = (w.dicteeLancees = (w.dicteeLancees ?? 0) + 1);
+          w.dicteeEntendue = false;
+          // Avec coupure : la 1re écoute dit le 1er morceau puis s'arrête seule ; la 2e (relancée) dit le reste.
+          const a_dire = coupure ? (n === 1 ? morceaux.slice(0, 1) : morceaux.slice(1)) : morceaux;
+          a_dire.forEach((m, k) =>
+            setTimeout(() => {
+              const results = a_dire.slice(0, k + 1).map((t) => Object.assign([{ transcript: t }], { isFinal: true }));
+              this.onresult?.({ resultIndex: k, results });
+              if (k === a_dire.length - 1) {
+                if (coupure && n === 1) setTimeout(() => this.onend?.(), 30);
+                else w.dicteeEntendue = true;
+              }
+            }, 60 * (k + 1)),
+          );
+        }
+        stop() {
+          setTimeout(() => this.onend?.(), 20);
+        }
+        abort() {
+          this.onerror?.({ error: "aborted" });
+          this.onend?.();
+        }
       }
-      stop() {
-        setTimeout(() => this.onend?.(), 20);
-      }
-      abort() {
-        this.onerror?.({ error: "aborted" });
-        this.onend?.();
-      }
-    }
-    (window as unknown as { webkitSpeechRecognition: unknown }).webkitSpeechRecognition = FausseDictee;
-    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FausseDictee;
-  });
+      (window as unknown as { webkitSpeechRecognition: unknown }).webkitSpeechRecognition = FausseDictee;
+      (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FausseDictee;
+    },
+    { morceaux, coupure },
+  );
+}
+const dicteeEntendue = (page: Page) => page.evaluate(() => (window as unknown as { dicteeEntendue?: boolean }).dicteeEntendue);
+
+test("la dictée des questions (Greg, 27 novembre 2026, essai sur iPhone) : le texte s'écrit dans la case pendant qu'on parle, rien ne part avant « Envoyer »", async ({ page }) => {
+  // RÈGLE CHANGÉE : la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée des questions.
+  await fausseDicteeContinue(page, ["j'achète tout fait"]);
   await signUp(page);
   await createProject(page, "Toiture Kerbrat", "M. Kerbrat", "4 rue du Port, Lorient");
   await page.getByLabel(/^(Déposer mon devis|Choisir un PDF ou un fichier)$/).setInputFiles(path.join(__dirname, "fixtures", "devis-questions-comptoir.pdf"));
@@ -4550,37 +4568,57 @@ test("la dictée du quantitatif (Greg, 22 novembre 2026) : aucun texte pendant q
   await expect(questions).toBeVisible({ timeout: 60_000 });
   await passerLesSuggestions(page);
   const discussion = page.getByRole("dialog", { name: "Questions de Mobiiz" });
-  const mesMessages = discussion.getByRole("button", { name: /^Corriger mon message : / });
-  const avant = await mesMessages.count();
-
-  // Pendant la dictée : l'onde, le chrono, « Annuler », le gros bouton rouge ; ni case ni texte dicté.
+  const moi = discussion.getByRole("button", { name: /^(Corriger mon message|Modifier ma réponse) : / });
+  const avant = await moi.count();
   await discussion.getByRole("button", { name: "Dicter" }).click();
-  const ecoute = discussion.getByRole("group", { name: "Dictée en cours" });
-  await expect(ecoute).toBeVisible();
-  await expect(ecoute.getByLabel(/^Durée \d+:\d\d$/)).toBeVisible();
-  await expect(ecoute.getByRole("button", { name: "Arrêter la dictée" })).toBeVisible();
-  await expect(discussion.getByRole("textbox")).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => (window as unknown as { dicteeEntendue?: boolean }).dicteeEntendue)).toBe(true);
-  await expect(discussion.getByText("tout fait")).toHaveCount(0);
+  // Ni onde ni chrono ici : le texte arrive dans la case, à la vue.
+  await expect(discussion.getByRole("group", { name: "Dictée en cours" })).toHaveCount(0);
+  await expect(discussion.getByRole("textbox")).toHaveValue("j'achète tout fait");
+  await expect.poll(() => dicteeEntendue(page)).toBe(true);
+  await discussion.getByRole("button", { name: "Arrêter la dictée" }).click();
+  // Rien n'est parti : ni à la fin de la parole, ni à l'arrêt.
+  await expect(discussion.getByRole("textbox")).toHaveValue("j'achète tout fait");
+  await expect(moi).toHaveCount(avant);
+  await discussion.getByRole("button", { name: "Envoyer le message" }).click();
+  await expect(questions.getByText(/^Noté : Je commande façonné/)).toBeVisible();
+});
 
-  // « Annuler » : rien ne part, la case revient vide.
+test("« À la voix » (Greg, 27 novembre 2026) : l'onde, le chrono, Arrêter et Annuler ; la coupure de Safari garde tout sans rien envoyer ; le texte dans une bulle à corriger, puis « Envoyer à l'analyse »", async ({ page }) => {
+  await fausseDicteeContinue(page, ["il me faut 12 m de gouttière zinc", "et 2 descentes de 3 m"], true);
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("link", { name: /^À la voix/ }).click();
+  const ecran = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  const voix = ecran.getByRole("region", { name: "À la voix" });
+  await expect(voix).toBeVisible();
+  // « Annuler » : rien ne reste, rien ne part.
+  await voix.getByRole("button", { name: "Parler" }).click();
+  const ecoute = ecran.getByRole("group", { name: "Dictée en cours" });
+  await expect(ecoute).toBeVisible();
   await ecoute.getByRole("button", { name: "Annuler", exact: true }).click();
   await expect(ecoute).toHaveCount(0);
-  await expect(discussion.getByRole("textbox")).toHaveValue("");
-  await expect(mesMessages).toHaveCount(avant);
-
-  // « Arrêter » : la phrase part comme un message, une seule fois (jamais « j'achète j'achète »), et Mobiiz la comprend.
-  await discussion.getByRole("button", { name: "Dicter" }).click();
-  await expect.poll(() => page.evaluate(() => (window as unknown as { dicteeEntendue?: boolean }).dicteeEntendue)).toBe(true);
+  await expect(voix).toBeVisible();
+  await expect(ecran.getByText("il me faut 12 m de gouttière zinc")).toHaveCount(0);
+  // Une vraie dictée : Safari coupe après le premier morceau, l'écoute repart seule et garde tout ; aucun texte à l'écran.
+  await page.evaluate(() => ((window as unknown as { dicteeLancees?: number }).dicteeLancees = 0));
+  await voix.getByRole("button", { name: "Parler" }).click();
+  await expect(ecoute).toBeVisible();
+  await expect(ecoute.getByLabel(/^Durée \d+:\d\d$/)).toBeVisible();
+  await expect.poll(() => dicteeEntendue(page)).toBe(true);
+  expect(await page.evaluate(() => (window as unknown as { dicteeLancees?: number }).dicteeLancees)).toBe(2);
+  await expect(ecoute).toBeVisible();
+  await expect(ecran.getByText(/gouttière/)).toHaveCount(0);
+  if (process.env.VOIX_CAPTURES) await page.screenshot({ path: `${process.env.VOIX_CAPTURES}/${test.info().project.name}-1-ecoute.png` });
   await ecoute.getByRole("button", { name: "Arrêter la dictée" }).click();
-  const bulle = discussion.getByRole("button", { name: "Corriger mon message : j'achète tout fait", exact: true });
-  await expect(bulle).toBeVisible();
-  await expect(questions.getByText(/^Noté : Je commande façonné/)).toBeVisible();
-
-  // Un toucher sur la bulle : la réponse se rouvre, le texte revient dans la case pour être corrigé.
-  await bulle.click();
-  await expect(discussion.getByRole("textbox")).toHaveValue("j'achète tout fait");
-  await expect(questions.getByText("D'accord, corrige ta réponse et renvoie-la.")).toBeVisible();
+  // La bulle à relire : tout ce qui a été dit, avant et après la coupure.
+  const relire = ecran.getByRole("region", { name: "Ce que tu as dit" });
+  const texte = relire.getByRole("textbox");
+  await expect(texte).toHaveValue("il me faut 12 m de gouttière zinc et 2 descentes de 3 m");
+  if (process.env.VOIX_CAPTURES) await page.screenshot({ path: `${process.env.VOIX_CAPTURES}/${test.info().project.name}-2-relire.png` });
+  await texte.fill("il me faut 12 m de gouttière zinc et 2 descentes de 4 m");
+  await relire.getByRole("button", { name: "Envoyer à l'analyse" }).click();
+  await expect(ecran.getByText("il me faut 12 m de gouttière zinc et 2 descentes de 4 m")).toBeVisible();
+  await expect(voix).toHaveCount(0);
 });
 
 test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une réponse écrite va à SA question, confirmée en une ligne, jamais reposée", async ({ page }) => {

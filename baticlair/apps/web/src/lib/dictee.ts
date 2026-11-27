@@ -64,15 +64,29 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void, opt
   }, [surTexte]);
   useEffect(() => () => rec.current?.abort(), []);
 
+  /**
+   * ÉCOUTE CONTINUE QUI TIENT (Greg, 27 novembre 2026 : « gère la coupure de Safari après un silence ») : Safari arrête la
+   * reconnaissance tout seul après un silence. Tant que l'artisan n'a pas touché « Arrêter » ou « Annuler » (`voulu`), une
+   * nouvelle écoute repart aussitôt, et ce qui a déjà été dit est GARDÉ (`base`) : rien n'est perdu, rien n'est envoyé seul.
+   */
+  const voulu = useRef(false);
+  const base = useRef("");
+  const derniere = useRef("");
+  const relances = useRef(0);
+  const [activite, setActivite] = useState(0);
+  /** La relance passe par une référence (une fonction ne s'appelle pas elle-même dans un rappel de React). */
+  const relancer = useRef<() => void>(() => undefined);
+
   const arreter = useCallback(() => {
+    voulu.current = false;
     rec.current?.stop();
   }, []);
 
-  const demarrer = useCallback(() => {
-    setProbleme(null);
+  const lancer = useCallback((): void => {
     const F = fabrique();
     if (!F) {
       setProbleme(PHRASES_DICTEE.indisponible);
+      setEcoute(false);
       return;
     }
     try {
@@ -96,28 +110,61 @@ export function useDictee(surTexte: (texte: string, final: boolean) => void, opt
           const deja = texte.trim();
           texte = deja && t.toLowerCase().startsWith(deja.toLowerCase()) ? t : deja ? `${deja} ${t}` : t;
         }
+        if (continu) {
+          texte = [base.current, texte].filter((x) => x.trim()).join(" ").trim();
+          derniere.current = texte;
+        }
+        // Chaque résultat qui arrive fait bouger l'onde (la voix est là), même sans accès au son du micro.
+        setActivite((n) => n + 1);
         rappel.current(texte, final);
       };
       r.onerror = (e) => {
+        // En écoute continue, le silence n'est pas une fin : la reconnaissance repart (onend) avec ce qui a été dit.
+        if (continu && voulu.current && (e.error === "no-speech" || e.error === "aborted")) return;
         // Refus, silence ou panne : la dictée est finie, « Je t'écoute » ne reste jamais affiché (capture iPhone de Greg).
+        voulu.current = false;
         setEcoute(false);
         setProbleme(e.error === "not-allowed" || e.error === "service-not-allowed" ? PHRASES_DICTEE.refuse : e.error === "no-speech" ? PHRASES_DICTEE.rien : e.error === "aborted" ? null : PHRASES_DICTEE.erreur);
       };
-      r.onend = () => setEcoute(false);
+      r.onend = () => {
+        if (continu && voulu.current && relances.current < 60) {
+          relances.current += 1;
+          base.current = derniere.current;
+          relancer.current();
+          return;
+        }
+        voulu.current = false;
+        setEcoute(false);
+      };
       rec.current = r;
       r.start();
       setEcoute(true);
     } catch {
+      voulu.current = false;
       setProbleme(PHRASES_DICTEE.erreur);
       setEcoute(false);
     }
   }, [continu]);
 
+  useEffect(() => {
+    relancer.current = lancer;
+  }, [lancer]);
+
+  const demarrer = useCallback(() => {
+    setProbleme(null);
+    voulu.current = true;
+    base.current = "";
+    derniere.current = "";
+    relances.current = 0;
+    lancer();
+  }, [lancer]);
+
   /** Annuler : la dictée s'arrête et ce qu'elle avait écrit est retiré par l'appelant (il garde le texte d'avant). */
   const annuler = useCallback(() => {
+    voulu.current = false;
     rec.current?.abort();
     setEcoute(false);
   }, []);
 
-  return { ecoute, probleme, demarrer, arreter, annuler, effacerProbleme: () => setProbleme(null) };
+  return { ecoute, probleme, activite, demarrer, arreter, annuler, effacerProbleme: () => setProbleme(null) };
 }

@@ -395,7 +395,7 @@ export interface ReviewedTakeoff {
    * Parcours §48 : les habitudes établies de l'entreprise appliquées à ce chantier (« je façonne »), reproposées sur
    * l'écran des questions en « Comme d'habitude ? » ; un tap les confirme ou les change pour ce chantier.
    */
-  habits: { key: string; question: string; unit: string; options: { label: string; value: string }[]; value: string }[];
+  habits: { key: string; question: string; nom?: string; unit: string; options: { label: string; value: string }[]; value: string }[];
   /** Les pièces d'un groupe « une seule réponse pour tout le devis », chacune avec son choix (modifiable pour elle seule). */
   choixPieces?: ChoixDePiece[];
   /** Les données à boutons que ce devis ne demande pas, mais que l'artisan peut dire de lui-même (jamais posées). */
@@ -1654,7 +1654,8 @@ export class TakeoffService {
             const usual = (g ? (preferences.params?.[`${d.key}@${g.id}`] ?? preferences.params?.[`${d.key}@${w.id}`]) : perLot ? preferences.params?.[`${d.key}@${w.id}`] : undefined) ?? preferences.params![d.key]!;
             const key = g ? scopedKey(d.key, g.id) : perLot ? scopedKey(d.key, w.id) : `param:${d.key}`;
             const question = g ? g.question : perLot ? `${lotLabel(w.label)} : tu façonnes toi-même ou tu commandes façonné ?` : d.question!;
-            return [key, { key, question, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
+            // Le nom de la donnée (« Épaisseur du zinc »), pour que la ligne « comme d'habitude » dise de quoi il s'agit (Greg, 27 novembre 2026).
+            return [key, { key, question, nom: d.label, unit: d.unit, options: d.choices!.map((c) => ({ label: c.label, value: c.value })), value: usual }] as const;
           })
           .filter(([key]) => takeoff.answers[key] === undefined),
       ).values(),
