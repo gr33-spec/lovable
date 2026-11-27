@@ -97,5 +97,8 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - Je ne touche NI au moteur, NI aux suggestions, NI aux questions, NI aux écrans (aucun fichier de `apps/web/src/components`).
 - Ce que je touche (documents et ajouts seulement) : `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md` (nouveau),
   `.github/workflows/sauvegarde-base.yml` (lecture ; toute modification sera proposée à Greg avant), tests d'attaque
-  nouveaux dans `apps/api/test/` (fichiers à moi, préfixe `audit-`). Si je dois toucher un fichier serveur partagé
+  de « Répondre » rangés hors de la chaîne dans `baticlair/docs/securite/attaques-repondre.test.ts` (9 rouges = failles). Si je dois toucher un fichier serveur partagé
   (`missions/boite.service.ts`, `platform/email`, état de santé de l'admin), je l'écris ici AVANT.
+- 27 nov. — audit rendu (`baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`). Aucun fichier de code modifié. Les corrections
+  proposées touchent `adresse-mobiiz/application/reponses-recues.service.ts` (Répondre), `identity/http/session.guard.ts`,
+  `ai-usage`, `platform/http` : je les noterai ici AVANT d'y toucher, après l'accord de Greg.
