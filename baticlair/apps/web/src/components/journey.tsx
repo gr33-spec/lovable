@@ -7,7 +7,7 @@ import { interpreterReponsesNumerotees, phraseNotee, type ReponseInterpretee } f
 import { questionEnMotsSimples } from "../../../../packages/domain/src/assistant/questions-simples";
 import { Check, ChevronDown, FileUp, ListChecks, Loader2, Pencil, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Button, ErrorNotice } from "@/components/ui";
 import { QUESTION_DE_MODELE, ReferencesCatalogue, useReferencesCatalogue } from "@/components/references-catalogue";
 import type { ApiError, Takeoff } from "@/lib/api";
@@ -394,7 +394,7 @@ export function counterQuestions(takeoff: Takeoff): CounterQuestion[] {
       };
     });
   const asked = new Set(decisions.map((d) => d.key.replace(/^engine:/, "")));
-  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, nom: h.label ?? h.question.replace(/\s*\?\s*$/, ""), options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }), ...(freeOf(h.key, null, h.unit, h.options) ? { free: freeOf(h.key, null, h.unit, h.options)! } : {}) }));
+  const habits: CounterQuestion[] = (takeoff.habits ?? []).map((h) => ({ key: h.key, kind: "habit", text: h.question, nom: h.nom ?? h.question.replace(/\s*\?\s*$/, ""), options: h.options, unit: h.unit, about: null, hint: null, numeric: false, usual: h.value, group: groupOf({ key: h.key, lineIds: [] }), ...(freeOf(h.key, null, h.unit, h.options) ? { free: freeOf(h.key, null, h.unit, h.options)! } : {}) }));
   for (const h of habits) asked.add(h.key);
   // Les hypothèses à boutons (param ou produit) : « je pars sur 5,5 m de rampant », la valeur prise est marquée.
   const assumptions: CounterQuestion[] = takeoff.purchase.assumptions
@@ -588,18 +588,11 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   const [listeOuverte, setListeOuverte] = useState(false);
   const articles = takeoff.purchase.toBuy;
   const champ = useChampDicte();
-  // LA DICTÉE EN BULLE (Greg, 22 novembre 2026). RÈGLE CHANGÉE : avant, le texte dicté s'écrivait dans la case et
-  // attendait « Envoyer » → pendant la dictée, aucun texte (une onde, un chrono, « Arrêter », « Annuler ») ; à l'arrêt,
-  // le message part comme une bulle, qui se rouvre d'un toucher pour être corrigée. Le reste du parcours ne change pas.
-  const voix = useRef("");
-  const annulee = useRef(false);
+  // LA DICTÉE DANS LA CASE (Greg, 27 novembre 2026, essai sur iPhone : « on répond aux questions en un toucher ») :
+  // RÈGLE CHANGÉE : la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée des questions ; le texte
+  // s'écrit dans la case pendant qu'on parle, et rien ne part avant « Envoyer ». L'onde vit au départ d'un quantitatif.
+  const dictee = useDictee(champ.surVoix);
   const numeroMessage = useRef(0);
-  const dictee = useDictee(
-    useCallback((t: string) => {
-      voix.current = t;
-    }, []),
-    { continu: true },
-  );
   const restantes = ordonnees.filter((q) => !given[q.key] && !retired.has(q.key));
   const courante = restantes[0] ?? null;
   // Catalogue métier (Greg, 31 octobre 2026) : sur une question de modèle, ce qui se tape propose ses références.
@@ -716,20 +709,6 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setMessages((m) => [...m, { de: "mobiiz", texte: suite }]);
   };
 
-  // À l'arrêt de la dictée (pas sur « Annuler ») : ce qui a été dit part comme un message.
-  const ecoutait = useRef(false);
-  useEffect(() => {
-    if (dictee.ecoute) {
-      ecoutait.current = true;
-      return;
-    }
-    if (!ecoutait.current) return;
-    ecoutait.current = false;
-    const dit = voix.current.trim();
-    voix.current = "";
-    if (!annulee.current && dit) void envoyer(dit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dictee.ecoute]);
 
   const calculer = () => {
     // Ce qui est déjà parti au serveur ne repart pas.
@@ -913,16 +892,14 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
                 />
               ) : null
             }
-            dicteeEnBulle
             onDicter={() => {
-              voix.current = "";
-              annulee.current = false;
+              champ.avantDictee();
               dictee.demarrer();
             }}
             onArreter={dictee.arreter}
             onAnnulerDictee={() => {
-              annulee.current = true;
               dictee.annuler();
+              champ.rendre();
             }}
           />
         </div>

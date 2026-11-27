@@ -1,11 +1,10 @@
 "use client";
 
-import { Briefcase, CalendarClock, ClipboardList, Users } from "lucide-react";
+import { Briefcase, CalendarClock, ClipboardList, Globe, Users } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { api } from "@/lib/api";
-import { NOM_APP } from "@/lib/nom";
 import { useSession } from "@/lib/session";
 import { useProchaineCommande } from "./commande-du-mois";
 import { useAncienMode } from "@/components/negocie";
@@ -29,8 +28,10 @@ const dejaVuIci = (userId: string) => {
  * ouvertes : sans elles, le guide tient en deux écrans, les deux services d'achat.
  */
 const etapesDuGuide = (missions: boolean) => [
-  { titre: "Compare tes négoces", texte: `Prépare ton quantitatif, consulte jusqu'à 5 négoces et retrouve leurs réponses dans ${NOM_APP}.`, Icone: ClipboardList },
-  { titre: "Achète en collectif", texte: "Ajoute les matériaux concernés aux achats groupés de ton métier et de ton secteur.", Icone: Users },
+  // Textes à jour (Greg, 23 novembre 2026) : le devis, la photo ou la dictée, Messages, « Mon site ».
+  { titre: "Compare tes négoces", texte: "Donne ton devis, une photo ou dicte ta liste de matériaux, puis envoie-la jusqu'à 5 négoces. Leurs réponses arrivent dans Messages, rangées par chantier.", Icone: ClipboardList },
+  { titre: "Achète en collectif", texte: "Rejoins les achats groupés de ton métier dans ton département, ou lance le tien. Plus on est, moins on paie.", Icone: Users },
+  { titre: "Crée ton site", texte: "Avec « Mon site », la page de ton entreprise se prépare en quelques touches. Tu la partages ensuite à tes clients.", Icone: Globe },
   ...(missions ? [{ titre: "Publie ou trouve une mission", texte: "Recherche une entreprise ou indique tes disponibilités et ton tarif indicatif.", Icone: Briefcase }] : []),
 ];
 

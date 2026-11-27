@@ -419,6 +419,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 ## Décisions du 23 novembre 2026 : tester comme le jour du lancement
 
 - RÈGLE CHANGÉE (Greg, 23 novembre 2026) : sur le site de test, les e-mails DE COMPTE (validation de l'inscription, lien de connexion, mot de passe oublié) partent à la vraie adresse de la personne, pour qu'un ami qui a le lien valide son inscription tout seul. Avant : détournés vers Greg (« [TEST → …] ») comme tous les autres, et l'ami ne pouvait jamais valider son adresse. Tous les autres e-mails restent détournés vers Greg, ceux des négoces d'abord (jamais d'e-mail réel à un négoce pendant un test). Une adresse réservée aux tests (example.*, exemple.*, .test, .invalid) reste détournée. Code : `TransactionalEmail.compte`, `garder` (`platform/email/mise-en-page.ts`) ; test `apps/api/test/emails-reels.test.ts`.
+- Guide « Revoir le guide » (Greg, 23 novembre 2026 : « les textes à jour ») : un écran par grande fonction. « Compare tes négoces » (devis, photo ou dictée, jusqu'à 5 négoces, réponses dans Messages rangées par chantier), « Achète en collectif » (son métier, son département, « plus on est, moins on paie »), NOUVEL écran « Crée ton site » (« Mon site »), puis « Publie ou trouve une mission » si Mission est ouverte. Règle changée : avant, deux écrans (trois avec Mission), sans « Mon site ». Il ne s'ouvre toujours pas à l'inscription `/commencer` : seulement par « Revoir le guide ».
 - Lecture refusée pour un e-mail pas encore confirmé : l'écran dit la vraie phrase (« Confirme d'abord ton adresse e-mail… ») et propose « Renvoyer le lien de confirmation ». Avant : « Un champ n'est pas correctement rempli » (capture de l'ami de Greg). Parcours `e2e/parcours-artisan.spec.ts`, « e-mail pas encore confirmé ».
 
 ## Décisions du 27 novembre 2026 : vitesse du calcul, « Je ne sais pas » au développé
@@ -429,8 +430,16 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 ## Décisions du 27 novembre 2026 (suite) : l'habitude nommée, le prix d'un devis client
 
-- Règle changée (iPhone de Greg) : une habitude retenue nomme toujours ce qu'elle concerne (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), une ligne par habitude, et se rouvre d'un toucher. Avant : « Comme d'habitude : 0,65 mm. » seul. Le serveur envoie le nom (`habits[].label`). Parcours « une habitude dit toujours ce qu'elle concerne ».
+- Règle changée (iPhone de Greg) : une habitude retenue nomme toujours ce qu'elle concerne (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), une ligne par habitude, et se rouvre d'un toucher. Avant : « Comme d'habitude : 0,65 mm. » seul. Le serveur envoie le nom (`habits[].nom`, champ commun avec la discussion des écrans, qui avait fait la même correction le même jour ; gardée : la version qui se touche). Parcours « une habitude dit toujours ce qu'elle concerne ».
 - Nouvelle règle (Greg) : le prix écrit sur un devis client est le prix de VENTE de l'artisan ; jamais un prix d'achat, jamais dans l'observatoire des prix ni dans « Mes prix », jamais montré à un négoce. Vérifié : seules les réponses des négoces (lien de chiffrage, offres groupées) alimentent l'observatoire et « Mes prix ». Test permanent `apps/api/test/prix-du-devis-client-jamais-un-prix-d-achat.test.ts`.
+## Décisions du 27 novembre 2026 : retour de Greg sur la dictée (iPhone, Safari)
+
+- RÈGLE CHANGÉE : dans les questions du quantitatif, la dictée en bulle du 22 novembre (onde, chrono, envoi à l'arrêt) est retirée → la dictée normale revient : le texte s'écrit dans la case pendant qu'on parle, rien ne part avant « Envoyer ». (On y répond surtout d'un toucher.)
+- NOUVEAU « À la voix » au départ d'un nouveau quantitatif (carte de « Nouveau quantitatif », et bouton de l'accueil, avant « Dicter ») : « Parler », puis l'onde jaune au rythme de la voix, le chrono, le gros bouton rouge et « Annuler » ; à l'arrêt, le texte dans une bulle à corriger (« Relis et corrige si besoin »), puis « Envoyer à l'analyse » (ou « Recommencer »). Rien ne part tout seul. Code : `ALaVoix` (`components/nouveau-quantitatif.tsx`, `entree=voix`), `EcouteEnCours` (`chat-mobiiz.tsx`).
+- Coupure de Safari après un silence : l'écoute continue repart toute seule et garde tout ce qui a été dit, tant que l'artisan n'a pas touché « Arrêter » ou « Annuler » (`useDictee` continu, `lib/dictee.ts`).
+- Sur téléphone, l'onde suit les mots reconnus (chaque résultat de la dictée la relance) ; le micro n'est plus ouvert une seconde fois à côté de la dictée (sur iPhone, l'onde restait plate et le texte ne revenait pas). Sur ordinateur, elle suit le son du micro.
+- « Comme d'habitude : 0,65 mm. » seul ne disait rien → chaque habitude dit son nom : « Épaisseur du zinc : 0,65 mm, comme d'habitude. » (nom de la donnée de la fiche, `habits[].nom`).
+- Tests : `e2e/parcours-artisan.spec.ts` (« la dictée des questions », « À la voix », coupure de Safari simulée), `apps/api/test/habitudes.test.ts`. PAS ESSAYÉ SUR UN VRAI IPHONE (pas d'iPhone ni de Safari ici) : à confirmer par Greg.
 
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 

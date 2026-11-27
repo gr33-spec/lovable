@@ -458,7 +458,7 @@ test("page publique, missions ouvertes : la section « Missions » à part enti�
   await page.screenshot({ path: `${CAPTURES}/${info.project.name}/landing-entier.png`, fullPage: true });
 });
 
-test("guide d'accueil, missions ouvertes : trois écrans, un par usage (négoces, collectif, missions), « Accéder à Mobiiz »", async ({ page }, info) => {
+test("guide d'accueil, missions ouvertes : quatre écrans, un par usage (négoces, collectif, site, missions), « Accéder à Mobiiz »", async ({ page }, info) => {
   // Ici, le guide se regarde : les autres parcours le passent d'office.
   await page.removeLocatorHandler(page.getByRole("dialog", { name: "Guide" }));
   await page.goto("/inscription");
@@ -472,17 +472,18 @@ test("guide d'accueil, missions ouvertes : trois écrans, un par usage (négoces
   await page.getByRole("button", { name: "C'est compris" }).click();
   const guide = page.getByRole("dialog", { name: "Guide" });
   const ecrans: [string, RegExp][] = [
-    ["Compare tes négoces", /Prépare ton quantitatif, consulte jusqu'à 5 négoces et retrouve leurs réponses dans Mobiiz\./],
-    ["Achète en collectif", /Ajoute les matériaux concernés aux achats groupés de ton métier et de ton secteur\./],
+    ["Compare tes négoces", /Donne ton devis, une photo ou dicte ta liste de matériaux, puis envoie-la jusqu'à 5 négoces\./],
+    ["Achète en collectif", /Rejoins les achats groupés de ton métier dans ton département, ou lance le tien\./],
+    ["Crée ton site", /Avec « Mon site », la page de ton entreprise se prépare en quelques touches\./],
     ["Publie ou trouve une mission", /Recherche une entreprise ou indique tes disponibilités et ton tarif indicatif\./],
   ];
   for (const [i, [titre, texte]] of ecrans.entries()) {
     await expect(guide.getByRole("heading", { name: titre, exact: true })).toBeVisible();
     await expect(guide.getByText(texte)).toBeVisible();
-    await expect(guide.getByText(`${i + 1} sur 3`)).toBeVisible();
+    await expect(guide.getByText(`${i + 1} sur ${ecrans.length}`)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
     await page.screenshot({ path: `${CAPTURES}/${info.project.name}/guide-${i + 1}.png` });
-    if (i < 2) await guide.getByRole("button", { name: "Suivant" }).click();
+    if (i < ecrans.length - 1) await guide.getByRole("button", { name: "Suivant" }).click();
   }
   await guide.getByRole("link", { name: "Accéder à Mobiiz" }).click();
   await expect(guide).toHaveCount(0);

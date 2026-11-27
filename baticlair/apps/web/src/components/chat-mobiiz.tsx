@@ -349,9 +349,14 @@ const BARRES = 28;
  * navigateur, rien n'est enregistré ni envoyé), un petit chrono, un gros bouton « Arrêter » et « Annuler ». Si le
  * navigateur refuse de donner le niveau, l'onde respire doucement : la dictée, elle, continue.
  */
-export function EcouteEnCours({ onArreter, onAnnuler }: { onArreter: () => void; onAnnuler: () => void }) {
+export function EcouteEnCours({ onArreter, onAnnuler, activite = 0 }: { onArreter: () => void; onAnnuler: () => void; /** Chaque résultat de la reconnaissance vocale : il fait bouger l'onde au rythme de la voix. */ activite?: number }) {
   const [secondes, setSecondes] = useState(0);
   const [niveaux, setNiveaux] = useState<number[]>(() => Array.from({ length: BARRES }, () => 0.15));
+  // L'énergie de la voix : relancée à chaque mot reconnu, elle retombe doucement entre deux mots.
+  const energie = useRef(0);
+  useEffect(() => {
+    if (activite > 0) energie.current = 1;
+  }, [activite]);
   useEffect(() => {
     const debut = Date.now();
     const t = window.setInterval(() => setSecondes(Math.floor((Date.now() - debut) / 1000)), 250);
@@ -362,11 +367,25 @@ export function EcouteEnCours({ onArreter, onAnnuler }: { onArreter: () => void;
     let image = 0;
     let flux: MediaStream | null = null;
     let contexte: AudioContext | null = null;
-    const respirer = () => {
-      const t = Date.now() / 400;
-      setNiveaux(Array.from({ length: BARRES }, (_, i) => 0.18 + 0.12 * (1 + Math.sin(t + i / 2)) / 2));
-      if (!fin) image = requestAnimationFrame(respirer);
+    // SUR TÉLÉPHONE (essai de Greg sur iPhone, 27 novembre 2026 : l'onde restait plate et le texte ne revenait pas) : on
+    // n'ouvre PAS le micro une seconde fois à côté de la dictée (Safari ne le partage pas) ; l'onde suit les mots reconnus.
+    const ua = navigator.userAgent;
+    const telephone = /iPhone|iPad|iPod|Android/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+    const auRythmeDesMots = () => {
+      energie.current *= 0.94;
+      const e = energie.current;
+      const t = Date.now() / 110;
+      // Entre deux mots, elle respire doucement : on voit que l'écoute continue.
+      setNiveaux(Array.from({ length: BARRES }, (_, i) => Math.min(1, 0.14 + 0.05 * (1 + Math.sin(t / 4 + i / 2)) + e * (0.3 + 0.6 * Math.abs(Math.sin(t + i * 0.9) * Math.sin(t / 2.3 + i * 0.37))))));
+      if (!fin) image = requestAnimationFrame(auRythmeDesMots);
     };
+    if (telephone || !navigator.mediaDevices?.getUserMedia) {
+      auRythmeDesMots();
+      return () => {
+        fin = true;
+        cancelAnimationFrame(image);
+      };
+    }
     (async () => {
       try {
         flux = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -384,7 +403,8 @@ export function EcouteEnCours({ onArreter, onAnnuler }: { onArreter: () => void;
         };
         dessiner();
       } catch {
-        respirer();
+        // Sans accès au son : l'onde suit les mots reconnus.
+        auRythmeDesMots();
       }
     })();
     return () => {
