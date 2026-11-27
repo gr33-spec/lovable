@@ -133,3 +133,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   `baticlair/docs/cahiers-chatgpt/` (PDF du cahier).
 - À la discussion des écrans, plus tard : titres, canonical, `robots.ts`, `sitemap.ts`, réglage d'indexation et sites des
   artisans (liste au §3 étape 0 et §4 de l'audit). Je n'y touche pas.
+- 27 nov., nuit — référencement : chaîne de l'API verte (202 fichiers, 1044 tests), JE POUSSE sur la branche de test
+  (en-tête noindex de l'API, audit). Rien d'autre ne change ; la branche est libre dès que /version donne ce commit.
