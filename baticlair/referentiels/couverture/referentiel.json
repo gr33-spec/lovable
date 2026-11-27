@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.23-84",
+  "version": "roofing-2026.11.23-85",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -11511,6 +11511,13 @@
           ]
         },
         {
+          "inconnu": {
+            "valeur": "0",
+            "si": {
+              "param": "faconnage",
+              "value": "1"
+            }
+          },
           "key": "developpe",
           "label": "Développé de la bande",
           "unit": "mm",
@@ -12252,6 +12259,13 @@
           ]
         },
         {
+          "inconnu": {
+            "valeur": "0",
+            "si": {
+              "param": "faconnage",
+              "value": "1"
+            }
+          },
           "key": "developpe_noue",
           "label": "Développé de la noue",
           "unit": "mm",
@@ -13166,6 +13180,13 @@
           ]
         },
         {
+          "inconnu": {
+            "valeur": "0",
+            "si": {
+              "param": "faconnage",
+              "value": "1"
+            }
+          },
           "key": "developpe_aretier",
           "label": "Développé de l'arêtier zinc",
           "unit": "mm",
@@ -14452,6 +14473,13 @@
           "fromLineQuantity": true
         },
         {
+          "inconnu": {
+            "valeur": "0",
+            "si": {
+              "param": "faconnage",
+              "value": "1"
+            }
+          },
           "key": "developpe",
           "label": "Développé de la bande",
           "unit": "mm",
@@ -15329,6 +15357,13 @@
           "ownOnly": true
         },
         {
+          "inconnu": {
+            "valeur": "0",
+            "si": {
+              "param": "faconnage",
+              "value": "1"
+            }
+          },
           "key": "developpe",
           "label": "Développé de la bande",
           "unit": "mm",
@@ -16345,6 +16380,13 @@
           "fromLineQuantity": true
         },
         {
+          "inconnu": {
+            "valeur": "0",
+            "si": {
+              "param": "faconnage",
+              "value": "1"
+            }
+          },
           "key": "developpe_cuivre",
           "label": "Développé de la bande cuivre",
           "unit": "mm",

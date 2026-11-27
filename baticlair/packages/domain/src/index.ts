@@ -57,6 +57,7 @@ export * from "./lecture/lots.js";
 export * from "./lecture/par-lots.js";
 export { DE00000071_LECTURE } from "./lecture/exemples/de00000071.js";
 export { D2026_020_LECTURE } from "./lecture/exemples/d2026-020.js";
+export { BANC_C01_LECTURE } from "./lecture/exemples/banc-c01.js";
 export { exportPourLecture } from "./lecture/export.js";
 export * from "./lecture/electricite.js";
 export * from "./groupe/groupe.js";
