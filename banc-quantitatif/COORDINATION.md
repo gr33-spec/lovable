@@ -159,3 +159,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., matin — référencement : POUSSÉ et EN LIGNE (site et API = 9b9704e1, puis 27a4ec14 avec le workflow) ;
   essai de l'alerte de la sauvegarde réussi (run 46128279724 : échec volontaire, « Prévenir Mobiiz » vert, API
   « enregistre: true »). Le workflow n'est PAS encore sur main (attend l'accord de Greg). Branche rendue.
+- 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
+  main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
