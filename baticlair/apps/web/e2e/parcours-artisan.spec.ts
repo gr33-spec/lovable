@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, revenirAuxFeuilles, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, revenirAuxFeuilles, calculerMaListe, lancerLeCalcul, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1606,7 +1606,7 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   expect(posees.filter((q) => /Bandes zinc \(solin/.test(q))).toHaveLength(0);
   // « Dév. 200 » est écrit : jamais redemandé.
   expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   // Le développé de la bande de ventilation n'est pas connu (« Je ne sais pas ») : « Combien de feuilles ? » revient d'abord.
   await revenirAuxFeuilles(page);
   // « Il peut modifier ce choix pour une pièce dans le récapitulatif » : chaque pièce avec son choix (« Je façonne », la
@@ -1716,7 +1716,6 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   // Point 16 : après « Continuer », seulement ce qu'une case cochée demande (rien pour les angles, non cochés), puis
   // « Calculer ma liste ».
   const posees = await repondreAuxQuestions(page);
-  await expect(calculerMaListe(page)).toBeVisible();
   expect(posees.join(" | ")).not.toMatch(/angle|talon|consommable/i);
   await calculerEtVoirMaListe(page);
   for (let i = 0; i < 3 && (await boutonsDeLaQuestion(page).count()) > 0; i++) {
@@ -2071,7 +2070,7 @@ test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poub
   });
   expect(reprise).toBe(true);
   const sent = page.waitForRequest((r) => r.url().includes("/calcul") && r.method() === "POST");
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   const body = (await sent).postDataJSON() as { reponses: { question: string; valeur: string | null }[] };
   expect(body.reponses.filter((r) => r.valeur === null).length).toBeGreaterThanOrEqual(1);
   await voirMaListe(page);
@@ -2089,7 +2088,7 @@ test("« Je ne sais pas » au développé (Greg, 23 novembre 2026) : « Combien 
   // Je plie (« Je façonne »), et « Je ne sais pas » au développé du faîtage.
   const avant = await repondreAuxQuestions(page);
   expect(avant.some((q) => /[Dd]éveloppé/.test(q))).toBe(true);
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   // Le calcul ne part pas : la question des feuilles arrive dans le fil, avec ses boutons ; l'écran ne reste pas sur « Je calcule ta liste… ».
   await expect(boutonsDeLaQuestion(page)).toHaveAttribute("aria-label", /^Pour le faîtage, combien de feuilles de zinc te faut-il \?/, { timeout: 60_000 });
   await repondreAuxQuestions(page, (q) => (/combien de feuilles/.test(q) ? "3" : null));
