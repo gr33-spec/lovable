@@ -14,52 +14,55 @@ Sources : les candidates précédentes (`docs/groupe/CGU-candidate-2026-11-16.md
 `conditions-negoces-candidate-2026-11-21.md`), le registre RGPD, la liste des sous-traitants, la page Confidentialité
 en ligne, CLAUDE.md, et le code (vérifications notées dans chaque fichier).
 
-## Questions pour Greg (à trancher avant publication)
+## Réponses de Greg (28 novembre 2026), reportées dans les textes
 
-1. **Commission des négoces.** Tu écris que « les commissions des négoces passent par BATI INVEST ». Or, depuis le
-   14 novembre :
-   - les conditions négoces ne prévoient aucune commission ;
-   - le code ne facture rien aux négoces (`FACTURATION_NEGOCE=off`) ;
-   - les CGU disaient « rien n'est facturé aux négoces ».
+1. **Commission des négoces** : aucune au lancement. La clause « pourra être introduite plus tard, avec contrat » est à
+   l'article 4.5 des CGU.
+2. **Plafond de responsabilité** : 100 € pour un compte gratuit ; pour un compte payant, ce qu'il a payé sur les
+   12 derniers mois (CGU 18.4).
+3. **Téléphone** : le portable de Greg, dans les mentions légales seulement. Repère [À COMPLÉTER], à remplir le jour de
+   la publication.
+4. **Adresse** : gardée dans les mentions légales pour le lancement.
+5. **IA** : une seule mention discrète à l'écran, « Assistant automatique (IA) : vérifie toujours ta liste ». Les CGU et
+   la politique de confidentialité nomment le prestataire, sobrement.
+6. **Missions** : données gardées tant que le compte existe, effacées après 3 ans d'inactivité.
+7. **Changement de formule** : à la façon de Stripe. Une montée est immédiate, au prorata ; une descente prend effet à
+   la fin de la période payée (CGU 15.2).
+8. **FONDATEUR** : la remise se reporte sur la formule qui remplacerait Pro (annexe A.5).
+9. **Sites des artisans** : un lien « Mentions légales » en pied de page, avec les informations de l'artisan
+   (CGU 10.4).
+10. **Boîte des alertes** : Hotmail (Microsoft), ajoutée aux destinataires.
+11. **Tutoiement** dans l'application et les e-mails, vouvoiement dans les textes juridiques.
+12. **Correction** : les participants d'un achat groupé restent ANONYMES entre eux (CGU 7.6 et 8.1, confidentialité
+    section 6, textes courts section 8).
 
-   Il faut trancher quatre choses :
-   - **le principe** : y a-t-il une commission dès le lancement ?
-   - **le périmètre** : sur les achats groupés seulement ?
-   - **le taux** ;
-   - **l'affichage** : la commission change-t-elle l'ordre des offres ? (le texte dit que non)
+## Ce qui reste ouvert
 
-   Si oui, les conditions négoces doivent changer aussi : c'est une version majeure, que chaque négoce réaccepte. Il
-   faudra aussi un contrat et une facture de commission.
-2. **Plafond de responsabilité pour un compte gratuit** (CGU 18.4) : quel montant fixe ? Il ne peut pas être zéro, la
-   clause tomberait.
-3. **Téléphone de l'éditeur** (mentions légales) : la loi l'exige pour une société. Quel numéro afficher ?
-4. **Adresse du siège** : la loi oblige à l'écrire dans les mentions légales et sur les factures. Pour qu'elle
-   disparaisse complètement, il faut une domiciliation. On la garde ainsi pour le lancement ?
-5. **Mot « intelligence artificielle »** : le règlement européen sur l'IA demande de dire à l'utilisateur qu'il parle à
-   une IA (l'assistant). Les textes juridiques et la phrase de l'assistant l'écrivent, en exception à la règle de ton
-   « jamais IA ». D'accord ?
-6. **Durée de conservation des missions** (annonces, messages, documents) : « tant que le compte existe », comme le
-   reste ?
-7. **Changement de formule** : le retour de Pro Max à Pro et le passage du mois à l'année, tels que l'application les
-   permet (CGU 15.2).
-8. **Code FONDATEUR si la formule Pro disparaît un jour** : reporter la remise sur la formule qui la remplace (annexe
-   A.5) ?
-9. **Identification légale de l'artisan sur son site** : la loi demande que le site d'une entreprise dise qui l'édite.
-   Où l'afficher, compte tenu du travail en cours sur la discrétion (CGU 10.4) ?
-10. **Hébergeur de la boîte d'alerte** (domaine investisseurdugoelo.fr) : à ajouter aux destinataires. Chez qui
-    est-elle ?
-11. **Tutoiement ou vouvoiement des e-mails de compte** : l'e-mail de retrait du site vouvoie, l'application tutoie.
+1. **ÉCART AVEC LE CODE (bloquant avant de publier) : les noms dans les achats groupés.** L'application affiche
+   aujourd'hui les noms des participants, avec une case « rester anonyme ». C'est la règle du 16 novembre au soir,
+   écrite dans CLAUDE.md et dans `participantsVisiblesV1`. Les textes suivent ta décision du 28 novembre. Il faut donc
+   corriger l'application (une autre discussion, avec ton accord).
+2. **Les quantitatifs après la suppression d'un compte.** Aujourd'hui, le code les efface avec le compte. Seuls restent
+   les prix de l'observatoire (sans nom) et les règles communes de correction. Les textes disent ce que fait le code.
+   Garder aussi les listes, anonymisées, serait un changement de code.
+3. **La boîte Hotmail** est une boîte personnelle gratuite : pas de contrat de sous-traitance possible. Une boîte
+   professionnelle serait plus propre, quand tu pourras.
+4. **Les e-mails aux négoces** : ils vouvoient aujourd'hui. Ils restent ainsi, ou on les passe aussi au tutoiement ?
+5. **Le lien « Mentions légales » des sites** : il est à coder. Il doit rester cohérent avec le travail en cours sur la
+   discrétion des informations société.
 
 ## Points juridiques sensibles à surveiller
 
-1. **Commission et statut d'intermédiaire.** Avec une commission payée par les négoces, Mobiiz se rapproche d'un
-   apporteur d'affaires, voire d'une centrale de référencement. Il faut alors :
-   - le dire aux artisans (c'est fait, CGU 4.5) ;
+1. **Commission plus tard.** Le jour où une commission est introduite, Mobiiz se rapproche d'un apporteur d'affaires.
+   Il faudra alors :
    - un contrat écrit avec chaque négoce ;
    - une facture conforme ;
+   - un préavis de 30 jours aux artisans ;
    - un ordre d'affichage des offres qui ne dépend pas de la commission.
-2. **Droit de la concurrence dans les achats groupés.** Les noms des participants sont visibles, mais jamais les
-   quantités, et rien n'est affiché sous trois entreprises. Les repères de prix ne doivent jamais montrer un prix isolé
+
+   Ce sera aussi une version majeure des conditions négoces.
+2. **Droit de la concurrence dans les achats groupés.** Les participants sont anonymes entre eux, jamais une quantité
+   n'est montrée, et rien n'est affiché sous trois entreprises. Les repères de prix ne doivent jamais montrer un prix isolé
    ni une offre en cours. L'article 8 interdit les ententes. C'est le premier point à faire voir à l'avocat.
 3. **Missions : faux salariat et prêt de main-d'œuvre.** Mobiiz ne fait que la mise en relation, et l'article 11
    interdit l'emploi salarié et la mise à disposition. Mais des libellés comme « tarif journalier / personne » ou « CV »
@@ -95,9 +98,10 @@ en ligne, CLAUDE.md, et le code (vérifications notées dans chaque fichier).
 
 ## Ce qu'il faudra faire pour publier (plus tard, avec ton accord)
 
-1. Retirer tous les repères **[À CONFIRMER]** et **[À COMPLÉTER]**.
-2. Remplacer le texte des pages `/cgu`, `/confidentialite` et `/mentions-legales` par ces versions, avec les prix lus
+1. Corriger l'application sur l'anonymat des achats groupés, et coder le lien « Mentions légales » des sites.
+2. Remplir le téléphone des mentions légales et ceux des hébergeurs (les seuls repères **[À COMPLÉTER]** restants).
+3. Remplacer le texte des pages `/cgu`, `/confidentialite` et `/mentions-legales` par ces versions, avec les prix lus
    dans le code.
-3. Monter la version des CGU (`apps/web/src/lib/legal.ts` et côté serveur) : chaque compte accepte la nouvelle version.
-4. Retirer l'adresse partout ailleurs que dans les mentions légales (travail de la discussion « discrétion »).
-5. Mettre à jour le registre RGPD et la liste des sous-traitants avec les nouvelles lignes.
+4. Monter la version des CGU (`apps/web/src/lib/legal.ts` et côté serveur) : chaque compte accepte la nouvelle version.
+5. Retirer l'adresse partout ailleurs que dans les mentions légales (travail de la discussion « discrétion »).
+6. Mettre à jour le registre RGPD et la liste des sous-traitants avec les nouvelles lignes.

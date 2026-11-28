@@ -505,3 +505,13 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Carte « Santé » de l'admin (à faire) : lire `GET /v1/admin/sauvegarde` (dernière nuit, dernière réussite, retard, dernier essai). Code : `baticlair/apps/api/src/modules/sauvegarde/`, test `apps/api/test/sauvegarde-alerte.test.ts`.
 - Le workflow de la sauvegarde est posé sur `main` (accord de Greg du 28 novembre 2026, ce fichier seul) ; les deux constructions de production lancées par Vercel ont été annulées, la production reste au commit b7654ab0.
 - Search Console et Bing : faits par Greg au lancement (procédure et contrôle de la protection anti-robots de Vercel dans `baticlair/docs/groupe/MISE-EN-PROD.md`, section 0). P1 reste un brouillon jusqu'à l'ouverture des achats groupés en production ; zinc plus tard.
+
+## Décisions du 28 novembre 2026 : documents légaux du MVP (`baticlair/docs/legal/`, candidats, rien de publié)
+
+- Quatre textes candidats, sans avocat, relus par Greg : mentions légales, CGU / CGV entre pros, politique de confidentialité, textes courts (cases, bandeaux). Index et points ouverts : `baticlair/docs/legal/README.md`.
+- Discrétion : l'adresse du siège, le RCS, le capital, la TVA et le portable de Greg n'apparaissent QUE dans les mentions légales ; ailleurs, « Mobiiz » et contact@mobiiz.fr.
+- Commission des négoces : aucune au lancement ; clause « pourra être introduite plus tard, avec contrat ». Responsabilité : 100 € pour un compte gratuit, ce qui a été payé sur 12 mois pour un compte payant. Changement de formule à la façon de Stripe (montée immédiate au prorata, descente en fin de période). FONDATEUR : la remise se reporte sur la formule qui remplacerait Pro. Missions : données effacées après 3 ans d'inactivité.
+- IA : une seule mention discrète à l'écran, « Assistant automatique (IA) : vérifie toujours ta liste ».
+- Sites des artisans : un lien « Mentions légales » en pied de page, avec les informations de l'artisan (à coder).
+- Tutoiement dans l'application et les e-mails ; vouvoiement dans les textes juridiques. Boîte des alertes : Hotmail (Microsoft).
+- RÈGLE CHANGÉE (Greg, 28 novembre 2026 : « ERREUR À CORRIGER ») : avant, les noms des entreprises d'un achat groupé étaient visibles, avec « rester anonyme » (règle du 16 novembre au soir, `participantsVisiblesV1`) → les participants restent ANONYMES entre eux, jamais un nom. Les textes suivent la nouvelle règle ; le CODE N'EST PAS ENCORE CORRIGÉ (à faire avant de publier les CGU).

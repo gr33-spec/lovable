@@ -3,6 +3,17 @@
 Rédigées pour le lancement du MVP, sans avocat, à relire par Greg. **Rien n'est publié** : la page `/cgu` affiche
 toujours la version du 27/10/2026. Aucun fichier du code n'est touché.
 
+**Mise à jour du 28 novembre 2026 (réponses de Greg aux 11 questions)** :
+- aucune commission au lancement ;
+- plafond de responsabilité de 100 € pour un compte gratuit ;
+- les participants d'un achat groupé restent anonymes entre eux ;
+- « Mentions légales » de l'artisan en pied de chaque site ;
+- changement de formule à la façon de Stripe ;
+- report de la remise FONDATEUR ;
+- données gardées jusqu'à 3 ans d'inactivité.
+
+Il ne reste aucun repère **[À CONFIRMER]**.
+
 **Point de départ** : la candidate du 16 novembre (`docs/groupe/CGU-candidate-2026-11-16.md`), mise à jour avec les
 décisions prises depuis :
 - visibilité des achats groupés du 16 novembre au soir ;
@@ -18,20 +29,19 @@ décisions prises depuis :
    (article 13).
 2. **Discrétion.** Plus d'adresse, de RCS, de SIRET ni de capital. Seulement « Mobiiz, nom commercial de BATI INVEST »,
    avec un renvoi aux mentions légales.
-3. **Achats groupés.** Les noms des entreprises participantes sont visibles, sauf si elles choisissent « rester
-   anonyme ». Jamais la quantité de chacune. Sous trois entreprises : « En cours de regroupement ». La candidate du 16
-   disait l'inverse (règle du 15 novembre).
-4. **Commission des négoces** sur les achats groupés (article 4.5), selon les faits donnés par Greg le 28 novembre.
-   C'est un **changement** par rapport à la règle « rien n'est facturé aux négoces » : voir les questions.
+3. **Achats groupés : les participants restent anonymes entre eux** (Greg, 28 novembre 2026). Jamais un nom, jamais
+   la quantité d'une entreprise. Seulement le volume total, le nombre d'entreprises, la zone et « Entreprises
+   vérifiées ». Sous trois entreprises : « En cours de regroupement ».
+4. **Commission des négoces** : aucune au lancement. Une commission pourra être introduite plus tard, par contrat avec
+   chaque négoce et avec un préavis aux artisans (article 4.5).
 5. **Nouveaux articles.** « Mon site » (article 10), la fin d'abonnement et le sort du site (article 15), l'observatoire
    des prix (article 8.6).
-6. **L'outil d'analyse est appelé par son nom** : « intelligence artificielle », comme l'exige le règlement européen
-   sur l'IA pour un assistant qui parle à l'utilisateur. C'est une exception à la règle de ton « jamais IA sur une page
-   publique » : à trancher par Greg.
+6. **L'IA est nommée une seule fois**, sobrement (article 5.2), comme le demande le règlement européen sur l'IA. À
+   l'écran, une seule mention discrète : « Assistant automatique (IA) : vérifie toujours ta liste » (Greg, 28 novembre
+   2026).
 7. **Tribunal.** La clause d'attribution de compétence ne vaut qu'entre commerçants ; or un artisan inscrit seulement au
    registre des métiers n'est pas commerçant. L'article 22 le prend en compte.
 
-**Repères** : **[À CONFIRMER]** = une décision de Greg. Le texte ne se publie pas avec un repère.
 
 ---
 
@@ -113,11 +123,12 @@ n'encaisse aucun paiement de matériaux.
 
 4.5. **Comment Mobiiz est rémunéré.**
 - Par l'abonnement des artisans (Pro et Pro Max, article 12).
-- Dans les achats groupés seulement, par une commission payée par le négoce dont vous acceptez l'offre, quand ses
-  conditions négoces le prévoient. Cette commission est à la charge du négoce : vous ne payez à Mobiiz rien de plus que
-  votre abonnement. Elle ne change pas l'ordre dans lequel les offres vous sont présentées.
-  **[À CONFIRMER par Greg : principe, taux, et ordre d'affichage des offres (par prix ?) ; voir les questions.]**
-- Mobiiz ne perçoit rien sur vos demandes de prix individuelles, ni sur les missions.
+- Aucune commission n'est perçue, ni sur vos commandes, ni auprès des négoces. Rien n'est facturé aux négoces.
+- Mobiiz pourra plus tard introduire une commission payée par les négoces sur les commandes des achats groupés, par un
+  contrat écrit avec chaque négoce. Dans ce cas :
+  - vous en serez informé au moins 30 jours avant (article 21) ;
+  - elle resterait à la charge du négoce : vous ne paieriez à Mobiiz rien de plus que votre abonnement ;
+  - elle ne changerait pas l'ordre dans lequel les offres vous sont présentées.
 
 4.6. **« Vérifié »** sur une entreprise ou un négoce veut dire seulement que son immatriculation a été contrôlée. Cela
 ne dit rien de sa solvabilité, de ses assurances, de ses qualifications ni de la qualité de son travail.
@@ -130,6 +141,7 @@ formules.
 5.2. **L'analyse de vos documents.** Mobiiz peut lire un devis, une photo ou une liste pour vous proposer une liste de
 matériaux, et un assistant peut vous aider à la compléter. Cette lecture utilise un outil d'intelligence artificielle
 fourni par un prestataire (article 17) ; les quantités sont ensuite calculées par des règles de métier écrites.
+L'application le rappelle par une mention : « Assistant automatique (IA) : vérifie toujours ta liste ».
 
 5.3. **Le résultat peut contenir des erreurs** : une ligne mal lue, un article oublié, une unité ou une quantité
 fausse. Le quantitatif est une aide à la préparation de votre liste. Il ne remplace ni votre métré, ni votre étude, ni
@@ -151,7 +163,7 @@ reste. Le fichier d'origine est effacé après 30 jours. Ce retrait ne peut pas 
 page scannée ou d'une photo.
 
 5.8. **L'assistant.** Ce que vous écrivez, dictez ou photographiez pour l'assistant est transmis tel quel au
-prestataire d'intelligence artificielle. N'y mettez ni le nom, ni l'adresse, ni le téléphone d'un client.
+prestataire d'analyse. N'y mettez ni le nom, ni l'adresse, ni le téléphone d'un client.
 
 5.9. **Le prix écrit sur votre devis client** est votre prix de vente. Mobiiz ne le traite jamais comme un prix
 d'achat : il n'entre ni dans « Mes prix », ni dans les statistiques de prix (article 8.6), et il n'est jamais montré à
@@ -217,10 +229,15 @@ ou « Non merci ». Refuser est toujours possible, gratuit, sans motif, et ne vo
 - Chaque entreprise reçoit sa facture du négoce et le paie directement.
 - Le négoce reste libre de maintenir ou non son offre si le volume commandé est plus faible que le volume annoncé.
 
-7.6. **Ce que voient les autres participants.**
-- Le nom des entreprises participantes, sauf celles qui ont coché « rester anonyme ».
-- Le volume total, jamais la quantité d'une entreprise.
-- Tant qu'il y a moins de trois entreprises : « En cours de regroupement », au lieu du volume.
+7.6. **Les participants restent anonymes entre eux.** Vous ne voyez jamais le nom d'une autre entreprise, ni avant ni
+après votre participation, ni sa quantité. Vous voyez seulement :
+- le volume total ;
+- le nombre d'entreprises ;
+- la zone ;
+- la mention « Entreprises vérifiées ».
+
+Tant qu'il y a moins de trois entreprises : « En cours de regroupement », au lieu du volume. Les autres voient la même
+chose de vous.
 
 7.7. **Selon votre formule.**
 - Publier et rejoindre sont gratuits, dans toutes les formules.
@@ -241,7 +258,8 @@ votre négoce habituel.
 ## Article 8. Concurrence, confidentialité et statistiques de prix
 
 8.1. **Ce qui reste privé.**
-- Vos quantités, vos chantiers et vos prix ne sont jamais montrés aux autres artisans.
+- Votre nom, vos quantités, vos chantiers et vos prix ne sont jamais montrés aux autres artisans, dans les demandes de
+  prix comme dans les achats groupés.
 - Un négoce ne voit jamais les prix ni les offres d'un autre négoce.
 
 8.2. **L'équipe de Mobiiz** peut voir l'identité des participants d'un achat groupé, pour faire fonctionner le service.
@@ -253,7 +271,7 @@ concurrentes sur leurs prix de vente, leurs marges, leurs clients ou leurs march
 8.4. **Vous vous interdisez :**
 - de vous entendre, par Mobiiz, avec d'autres entreprises sur des prix de vente, des tarifs de pose, un partage de
   clients, de chantiers ou de zones, ou des réponses à des appels d'offres ;
-- de chercher à identifier une entreprise restée anonyme, ou à contourner un masquage ;
+- de chercher à identifier les autres participants d'un achat groupé, ou à contourner un masquage ;
 - de faire pression sur un négoce pour qu'il refuse de vendre à une autre entreprise ;
 - de transmettre à un négoce l'offre d'un autre négoce reçue dans un achat groupé.
 
@@ -294,10 +312,12 @@ exacte n'apparaît que si vous cochez « Afficher mon adresse ».
   cochez, et vous engage envers vos clients.
 - Les textes proposés par Mobiiz ne sont que des suggestions : relisez-les et adaptez-les avant de publier.
 
-10.4. **Vos obligations envers vos clients.** Votre site s'adresse au public, souvent à des particuliers. Vous restez
-tenu des obligations de votre métier envers eux : votre identification, vos assurances quand la loi l'impose, vos
-devis, vos prix. **[À CONFIRMER par Greg avec la discussion « discrétion des infos société » : où le site affiche
-l'identification légale de l'artisan.]**
+10.4. **Les mentions légales de votre site.**
+- Chaque site a, en pied de page, un lien « Mentions légales ». Il ouvre les informations de votre entreprise que la
+  loi demande : nom ou raison sociale, adresse, numéro d'immatriculation, téléphone, e-mail, et l'hébergeur (Mobiiz).
+- Elles sont lues dans votre profil : vous les tenez exactes et à jour.
+- Votre site s'adresse au public, souvent à des particuliers. Vous restez tenu des obligations de votre métier envers
+  vos clients : vos assurances quand la loi l'impose, vos devis, vos prix.
 
 10.5. **Les photos proposées par Mobiiz** sont sous licence libre ; leur crédit s'affiche quand la licence l'exige. Ne
 le retirez pas.
@@ -426,9 +446,11 @@ tiers), Mobiiz peut suspendre les analyses du compte, après vous avoir prévenu
 - Il se renouvelle à chaque échéance pour la même durée, au prix alors en vigueur, sauf si vous résiliez avant.
 - Pour l'abonnement à l'année, un e-mail vous rappelle la date et le montant 30 jours avant l'échéance.
 
-15.2. **Changer de formule.** De Pro à Pro Max, à tout moment, au prorata : la part non utilisée de Pro est déduite.
-**[À CONFIRMER par Greg : le retour de Pro Max à Pro, et le passage du mois à l'année, tels que l'application les
-permet.]**
+15.2. **Changer de formule.**
+- **Vers une formule plus chère** (de Pro à Pro Max, ou du mois à l'année) : le changement est immédiat. La part non
+  utilisée de la période déjà payée est déduite au prorata.
+- **Vers une formule moins chère** (de Pro Max à Pro, ou de l'année au mois) : le changement prend effet à la fin de la
+  période déjà payée, sans remboursement.
 
 15.3. **Résilier.**
 - **Quand.** À tout moment, depuis « Mon abonnement », sans motif ni frais.
@@ -440,12 +462,13 @@ permet.]**
   retrait, puis il est retiré de la ligne.
 - **Vos données.** Les textes, les photos et l'adresse de votre site sont gardés, comme le reste de votre compte. Si vous
   vous réabonnez, vous republiez votre site en un geste.
+- **Sans connexion pendant 3 ans**, le compte et ses données sont effacés, selon la politique de confidentialité.
 
 15.4. **Changement de prix.** Tout changement de prix vous est annoncé par e-mail au moins 30 jours avant. Il
 s'applique à l'échéance suivante. Vous pouvez résilier avant, sans frais.
 
 15.5. **Pas de droit de rétractation.** Le service est souscrit par un professionnel pour son activité : le délai de
-rétractation des consommateurs ne s'applique pas. **[Point à surveiller : voir les questions.]**
+rétractation des consommateurs ne s'applique pas.
 
 15.6. **Supprimer votre compte.** À tout moment, dans « Compte », « Mes données ». La suppression met fin à
 l'abonnement, sans remboursement de la période commencée, et efface vos données, sauf ce que la loi oblige à garder
@@ -519,8 +542,8 @@ directs et prévisibles causés par sa faute prouvée. Sont exclus :
 - l'atteinte à l'image.
 
 18.4. **Plafond.** Tous dommages confondus, la responsabilité de Mobiiz est limitée au montant hors taxes que vous lui
-avez payé pendant les douze mois qui précèdent le fait en cause, et, pour un compte qui n'a rien payé, à
-**[À CONFIRMER par Greg : un montant fixe]**.
+avez payé pendant les douze mois qui précèdent le fait en cause, et, pour un compte qui n'a rien payé pendant cette
+période, à 100 €.
 
 18.5. **Ce que ces limites n'écartent jamais** : la faute lourde ou intentionnelle de Mobiiz, un dommage corporel, et
 l'engagement essentiel de Mobiiz : vous fournir le service décrit et protéger vos données.
@@ -601,8 +624,8 @@ A.4. **« À vie » veut dire :**
   Max, ou si le compte est fermé ;
 - elle ne revient pas ensuite.
 
-A.5. **Si la formule Pro disparaît**, vous êtes prévenu au moins 30 jours avant et la remise est reportée sur la
-formule qui la remplace. **[À CONFIRMER par Greg.]**
+A.5. **Si la formule Pro disparaît**, vous êtes prévenu au moins 30 jours avant et la remise de 30 % est reportée sur
+la formule qui la remplace.
 
 A.6. Un usage frauduleux (comptes multiples, fausse identité) fait perdre l'avantage.
 
@@ -622,5 +645,6 @@ A.6. Un usage frauduleux (comptes multiples, fausse identité) fait perdre l'ava
    - le rappel 30 jours avant l'échéance annuelle, Pro et Pro Max compris (`rappelsAnnuels`) ;
    - la mise en ligne du site réservée à l'abonnement (`publication_reservee`) ;
    - le retrait du site 30 jours après, avec l'e-mail à 7 jours (`sitesApresFinAbonnement`) ;
-   - la visibilité des noms dans les achats groupés, avec « rester anonyme » et le seuil de trois entreprises
-     (`participantsVisiblesV1`).
+   - **ÉCART** : le code affiche aujourd'hui les noms des participants d'un achat groupé, avec la case « rester
+     anonyme » (`participantsVisiblesV1`, règle du 16 novembre). L'article 7.6 suit la décision de Greg du 28 novembre
+     (anonymes entre eux). L'application doit être corrigée avant de publier ce texte.

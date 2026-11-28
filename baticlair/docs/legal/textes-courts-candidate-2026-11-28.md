@@ -4,6 +4,12 @@ Les textes courts qui accompagnent les CGU / CGV et la politique de confidential
 n'est branché** : aucun écran n'est touché (une autre discussion travaille sur les écrans). Ils tutoient, comme
 l'application ; les documents juridiques vouvoient.
 
+**Mise à jour du 28 novembre 2026 (réponses de Greg)** :
+- une seule mention de l'IA ;
+- participants des achats groupés anonymes ;
+- lien « Mentions légales » sur chaque site ;
+- tutoiement de tous les e-mails.
+
 Pour chaque texte : où il va, le texte, et ce qu'il remplace quand il existe déjà.
 
 Règles suivies :
@@ -68,6 +74,11 @@ Règles suivies :
 
 > On te rappelle la date et le montant par e-mail 30 jours avant le renouvellement.
 
+**Changer de formule** (sous le choix de formule, dans « Mon abonnement ») :
+
+> Monter en gamme, c'est tout de suite : on déduit ce qui reste de ta période payée. Descendre, c'est à la fin de ta
+> période payée.
+
 **Avec le code FONDATEUR** (case du code, Pro au mois seulement) :
 
 > 6 mois de Pro offerts, puis 30 % de remise tant que ton abonnement Pro au mois continue. Passer à Pro Max ou résilier
@@ -86,15 +97,17 @@ Règles suivies :
 >
 > [Résilier] [Garder mon abonnement]
 
-**L'e-mail 7 jours avant le retrait du site** (déjà en place, à garder ou à aligner) :
+**L'e-mail 7 jours avant le retrait du site** (à passer au tutoiement) :
 
 > Objet : Ton site Mobiiz sera retiré le [date]
 >
 > Ton abonnement Mobiiz est terminé. Ton site reste en ligne jusqu'au [date], puis il sera retiré. Tes textes et tes
 > photos sont gardés : réabonne-toi pour le garder en ligne.
 
-**Remarque** : l'e-mail actuel vouvoie (« Votre site Mobiiz sera retiré ») alors que l'application tutoie. Choisir l'un
-des deux pour tous les e-mails de compte.
+**Décision de Greg (28 novembre 2026)** : tutoiement dans l'application et dans tous les e-mails, vouvoiement dans les
+seuls textes juridiques. L'e-mail actuel vouvoie (« Votre site Mobiiz sera retiré ») : à corriger, comme tout e-mail
+qui vouvoie encore. Seuls les e-mails aux négoces restent au vouvoiement (ce ne sont pas nos utilisateurs artisans).
+**[Point à confirmer par Greg : les négoces aussi au tutoiement ?]**
 
 ## 5. Dépôt d'un devis ou d'une photo
 
@@ -107,12 +120,14 @@ des deux pour tous les e-mails de compte.
 
 **Où** : sous la barre de saisie de l'assistant, la première fois qu'il s'ouvre (puis dans l'aide).
 
-> Tu parles à un assistant d'intelligence artificielle. N'écris pas le nom, l'adresse ni le téléphone de ton client.
-> Rien n'est ajouté à ta liste sans ton accord.
+> Assistant automatique (IA) : vérifie toujours ta liste.
 
-**Pourquoi** : le règlement européen sur l'IA demande de dire à l'utilisateur qu'il parle à une IA. C'est une exception à
-la règle « jamais IA » : elle vaut pour les pages publiques, pas pour l'assistant dans l'application. **À trancher par
-Greg.**
+**La seule mention de l'IA à l'écran** (décision de Greg du 28 novembre 2026). Discrète : petite, grise, sans icône.
+Elle répond au règlement européen sur l'IA (dire à l'utilisateur qu'il parle à une IA).
+
+**L'avertissement sur les données du client** reste, sans redire « IA » :
+
+> N'écris pas le nom, l'adresse ni le téléphone de ton client.
 
 ## 7. Avant d'envoyer aux négoces ou de commander
 
@@ -127,9 +142,11 @@ Greg.**
 
 **Où** : l'écran de publication et l'écran « Rejoindre », près de la quantité.
 
-> Ton nom d'entreprise est visible des autres participants, jamais ta quantité.
->
-> ☐ Rester anonyme
+> Les autres participants ne voient ni ton nom ni ta quantité : seulement le total.
+
+**Décision de Greg (28 novembre 2026)** : les participants restent anonymes entre eux. La case « Rester anonyme » du code
+actuel (règle du 16 novembre, noms visibles par défaut) disparaît, puisque tout le monde est anonyme. C'est un
+changement de code à faire avant de publier les CGU.
 
 > Publier ou rejoindre ne t'engage à rien. Tu décides quand l'offre arrive.
 
@@ -149,8 +166,13 @@ Greg.**
 > Ta demande est envoyée à [nom de l'entreprise] pour qu'elle te réponde. Elle est gardée 12 mois.
 > [Confidentialité](/confidentialite)
 
-**Bas de chaque site** (déjà en place) : « Créé avec MOBIIZ », avec le lien vers la politique de confidentialité et le
-crédit des photos libres quand il y en a.
+**Bas de chaque site** : « Créé avec MOBIIZ » (déjà en place), plus deux liens :
+- **« Mentions légales »** (décision de Greg du 28 novembre 2026). Il ouvre les informations de l'artisan, lues dans son
+  profil : nom ou raison sociale, adresse, numéro d'immatriculation, téléphone, e-mail. L'hébergeur y est aussi : « Site
+  hébergé par Mobiiz, contact@mobiiz.fr ».
+- **« Confidentialité »**.
+
+Le crédit des photos libres s'y ajoute quand il y en a.
 
 ## 10. Missions (quand elles ouvrent)
 

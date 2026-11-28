@@ -10,7 +10,7 @@ sous-traitants (`docs/groupe/RGPD-SOUS-TRAITANTS.md`), les durées appliquées c
 **Ce qui change par rapport à la page en ligne** :
 1. **Vouvoiement**, comme les CGU (la page en ligne tutoie).
 2. **Discrétion.** Plus d'adresse ni de SIREN : « Mobiiz » et contact@mobiiz.fr. Renvoi aux mentions légales.
-3. **Sections ajoutées** : missions, « Mon site » et ses visiteurs, achats groupés (noms visibles, « rester anonyme »),
+3. **Sections ajoutées** : missions, « Mon site » et ses visiteurs, achats groupés (participants anonymes entre eux),
    observatoire des prix (12 mois et 3 ans), prix d'un devis client, fin d'abonnement, connexion par lien, dictée,
    outil d'intelligence artificielle.
 4. **Sous-traitants vérifiés dans le code le 28 novembre 2026** : Vercel (hébergement, et stockage des photos par
@@ -23,7 +23,11 @@ sous-traitants (`docs/groupe/RGPD-SOUS-TRAITANTS.md`), les durées appliquées c
 5. **Correction** : la ligne « statistiques publiées au-delà de 5 entreprises » est remplacée par la règle actuelle
    (rien n'est montré aux artisans pour l'instant).
 
-Repères : **[À CONFIRMER]** = une décision ou une vérification de Greg.
+**Mise à jour du 28 novembre 2026 (réponses de Greg)** :
+- participants d'un achat groupé anonymes entre eux ;
+- données des missions jusqu'à 3 ans d'inactivité ;
+- boîte des alertes chez Microsoft (Hotmail) ;
+- ce qui reste, sans nom, pour l'observatoire après la suppression d'un compte.
 
 ---
 
@@ -68,10 +72,10 @@ y travaillent.
 | Vos demandes de prix et vos commandes | Liste envoyée, négoces choisis, réponses et prix reçus, bons de commande, date de livraison souhaitée | Le contrat | Tant que le compte existe ; bons de commande : 10 ans, sans votre nom une fois le compte supprimé |
 | Votre adresse Mobiiz et vos messages | E-mails reçus des négoces (expéditeur, objet, texte, pièces jointes), vos réponses, les messages envoyés en votre nom | Le contrat | Tant que le compte existe |
 | « Mes prix » | Prix reçus de vos négoces, par article | Le contrat | Tant que le compte existe |
-| Les achats groupés | Vos besoins, quantités, date, département, participation, choix « rester anonyme », offres reçues, commandes | Le contrat | Tant que le compte existe ; bons de commande : 10 ans, sans votre nom après suppression |
+| Les achats groupés | Vos besoins, quantités, date, département, participation, offres reçues, commandes | Le contrat | Tant que le compte existe ; bons de commande : 10 ans, sans votre nom après suppression |
 | Les coordonnées transmises à un négoce pour ouvrir un compte | Nom, entreprise, téléphone, e-mail, SIRET, date de l'envoi | Votre accord, donné par une case à chaque fois | La date de l'envoi : 3 ans après le dernier achat groupé |
 | Votre site (« Mon site ») | Textes, photos (sans leurs informations cachées : lieu, appareil, date), choix de mise en page, adresse du site, lien de votre fiche Google | Le contrat | Tant que le compte existe, même après la fin de l'abonnement (le site est alors retiré de la ligne, mais gardé pour une réactivation) |
-| Les missions (quand elles sont ouvertes) | Annonces, disponibilités, compétences et diplômes **déclarés**, messages, documents que vous choisissez d'envoyer dans une discussion | Le contrat | Tant que le compte existe **[À CONFIRMER par Greg]** |
+| Les missions (quand elles sont ouvertes) | Annonces, disponibilités, compétences et diplômes **déclarés**, messages, documents que vous choisissez d'envoyer dans une discussion | Le contrat | Tant que le compte existe, puis effacé 3 ans après la dernière connexion |
 | L'abonnement et ses factures | Raison sociale, SIRET, adresse de facturation, n° de TVA, formule, montants, dates, état du paiement ; **jamais le numéro de carte** (gardé par Stripe seul) | Le contrat ; la loi pour les factures | Factures : 10 ans, même après la suppression du compte ; le reste : tant que le compte existe |
 | La preuve de votre accord aux conditions | Version, date, empreinte chiffrée de l'e-mail | Notre intérêt légitime (prouver l'accord) | 5 ans après la fin du compte |
 | La sécurité et le bon fonctionnement | Connexions, e-mails envoyés (destinataire, objet, date), erreurs, journaux techniques | Notre intérêt légitime (sécurité, preuve d'envoi) | 1 an |
@@ -117,9 +121,9 @@ Mobiiz.
 - **Vous**, et les personnes de votre compte.
 - **Les négoces que vous choisissez** : ce qu'il faut pour chiffrer et livrer (lignes, quantités, commune). Votre nom
   et vos coordonnées partent quand vous envoyez une demande à votre nom ou une commande.
-- **Dans un achat groupé, les autres participants** voient :
-  - le nom de votre entreprise, sauf si vous avez coché « rester anonyme » ;
-  - jamais votre quantité, seulement le total.
+- **Dans un achat groupé, les autres participants** ne voient ni le nom de votre entreprise, ni votre quantité. Ils
+  voient seulement le volume total, le nombre d'entreprises et la zone. Seule l'équipe de Mobiiz connaît les
+  participants.
 - **Dans les missions**, l'autre entreprise voit vos coordonnées seulement après votre accord à tous les deux. Avant,
   elles sont masquées.
 - **Les visiteurs de votre site** voient ce que vous y publiez.
@@ -142,6 +146,10 @@ Nous ne vendons ni ne louons aucune donnée.
 **Services publics consultés**, sans transfert hors de France :
 - l'INSEE (registre Sirene) et l'annuaire des entreprises de l'État, pour vérifier un SIRET (le numéro seul) ;
 - l'API Adresse et le découpage administratif de l'État, pour une commune ou une distance de livraison.
+
+**Boîte de l'équipe** : les alertes, les signalements et les e-mails écrits à contact@mobiiz.fr sont renvoyés vers la
+boîte de l'équipe, chez Microsoft (Outlook.com). Les serveurs sont dans l'Union européenne et aux États-Unis ; la
+garantie est le Data Privacy Framework.
 
 **Notifications** : si vous les activez, Apple ou Google les acheminent jusqu'à votre téléphone, sans les garder.
 
@@ -196,6 +204,11 @@ son peut être traité par son fabricant (Google, Apple), selon ses propres règ
   - la preuve de votre accord, 5 ans.
 - **Votre adresse de site** reste réservée, sans aucune autre donnée, pour qu'elle ne soit jamais redonnée à une autre
   entreprise.
+- **Restent aussi, parce qu'elles ne disent plus qui vous êtes** :
+  - les lignes de prix de l'observatoire, gardées selon leurs durées (section 3 : 12 mois pour l'empreinte de l'origine,
+    3 ans pour la ligne) ;
+  - les corrections de lignes déjà validées comme règles communes, sans nom d'entreprise.
+- **Après 3 ans sans connexion**, le compte est effacé de la même façon.
 
 ## 13. Vos droits
 
@@ -228,9 +241,17 @@ l'application avant de s'appliquer. La date de version est en haut de la page.
    - la durée des sessions de connexion, à inscrire au registre ;
    - la durée de conservation chez Anthropic (contrat de l'API) ;
    - la durée de conservation des journaux chez Resend et Vercel.
-3. **Adresse d'alerte de l'équipe** : elle est sur une boîte du domaine investisseurdugoelo.fr. Son hébergeur est un
-   destinataire à ajouter au tableau de la section 7 (nom, pays, garantie).
+3. **Boîte des alertes** (Greg, 28 novembre 2026) : Hotmail, chez Microsoft. C'est une boîte personnelle gratuite,
+   sans contrat de sous-traitance (DPA) possible. Une boîte professionnelle (Microsoft 365, par exemple) apporterait ce
+   contrat. À changer quand ce sera possible ; le registre parlait encore d'une boîte du domaine investisseurdugoelo.fr.
 4. **Registre** : ajouter les lignes « Mon site » (textes, photos, visiteurs, signalement), « Missions » et la connexion
    par lien, avec les durées de cette page.
-5. **Adresse de la CNIL** : celle de son courrier (TSA 80715). L'adresse « 3 place de Fontenoy, 75007 Paris » de la page
+5. **Quantitatifs après suppression** : Greg a écrit que « les prix et quantitatifs anonymisés restent pour
+   l'observatoire ». Aujourd'hui, le code efface les listes avec le compte ; seuls les prix de l'observatoire (sans nom)
+   et les règles communes restent. La page dit ce que fait le code. Garder aussi les listes anonymisées serait un
+   changement de code, à décider.
+6. **Achats groupés** : le code affiche aujourd'hui les noms des participants, avec la case « rester anonyme » (règle du
+   16 novembre). Cette page suit la décision du 28 novembre (anonymes entre eux) : l'application doit être corrigée
+   avant de la publier.
+7. **Adresse de la CNIL** : celle de son courrier (TSA 80715). L'adresse « 3 place de Fontenoy, 75007 Paris » de la page
    en ligne est celle de l'accueil.

@@ -28,7 +28,7 @@ Mobiiz est un service édité par BATI INVEST, société à responsabilité limi
 - Siège social : 6 impasse du Ouipoure, 22620 Ploubazlanec.
 - RCS de Saint-Brieuc : 910 796 325.
 - Numéro de TVA intracommunautaire : FR61910796325.
-- Téléphone : **[À COMPLÉTER : un numéro qui répond, de préférence professionnel]**.
+- Téléphone : **[À COMPLÉTER : le portable de Greg]** (décision de Greg du 28 novembre 2026 : sur cette page seulement).
 - E-mail : contact@mobiiz.fr.
 
 Mobiiz est le nom commercial de BATI INVEST.
@@ -68,11 +68,10 @@ Conditions générales d'utilisation et de vente (CGU / CGV), politique de confi
 
 ## Notes pour Greg (à ne pas publier)
 
-1. **Votre adresse personnelle est le siège.** La loi oblige à l'écrire ici. Pour ne plus l'afficher du tout, la seule
-   voie est de transférer le siège chez une société de domiciliation (quelques dizaines d'euros par mois, transfert
-   déclaré au greffe). Sinon, elle reste ici, et seulement ici.
-2. **Le téléphone est obligatoire** pour une société. Un numéro professionnel (ligne virtuelle, second numéro) évite de
-   publier votre portable.
+1. **Adresse du siège** (décision de Greg du 28 novembre 2026) : gardée ici pour le lancement, et seulement ici. Pour
+   ne plus l'afficher du tout plus tard, il faudrait une domiciliation.
+2. **Téléphone** (décision de Greg du 28 novembre 2026) : son portable, sur cette page seulement. Le numéro n'est écrit
+   dans aucun autre document ni dans le dépôt tant que la page n'est pas publiée.
 3. **Les factures d'abonnement** doivent porter l'adresse du siège, le SIREN et le numéro de TVA (code de commerce) :
    ce sont les seuls autres endroits où ces informations apparaissent, et c'est imposé par la loi.
 4. Aujourd'hui, le code affiche l'adresse ailleurs que sur cette page (page Confidentialité, contact par courrier, pied
