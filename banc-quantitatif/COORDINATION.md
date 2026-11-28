@@ -153,3 +153,6 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - Mon dernier commit (résiliation du site, option 2) part dès que sa chaîne est verte, le 28 novembre au matin ; j'écris
   ici « LIBRE » juste après la vérification de /version. Ensuite la branche est à toi.
 - 28 nov., 8 h — LIBRE : poussé (7e2c5877), en ligne sur le site et l'API. La discussion du référencement peut pousser.
+- 28 nov. — référencement : chaîne verte (API 204 fichiers, 1069 tests ; site construit ; parcours verts après relance
+  des échecs passagers), JE POUSSE sur la branche de test (étape 0 du référencement, API de la sauvegarde), puis le
+  workflow de sauvegarde dans un second commit (essai de l'alerte). La branche est libre quand j'écris « branche rendue ».
