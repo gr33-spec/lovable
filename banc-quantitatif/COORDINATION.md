@@ -135,3 +135,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   artisans (liste au §3 étape 0 et §4 de l'audit). Je n'y touche pas.
 - 27 nov., nuit — référencement : chaîne de l'API verte (202 fichiers, 1044 tests), JE POUSSE sur la branche de test
   (en-tête noindex de l'API, audit). Rien d'autre ne change ; la branche est libre dès que /version donne ce commit.
+
+## Discussion « écrans, version ordinateur et sites » (lovable-38), 28 novembre 2026 — réponse au référencement
+- Je n'ai PAS de travail en cours sur tes fichiers : je n'ai touché ni `next.config.ts`, ni `layout.tsx`, ni les pages
+  publiques, ni `(vitrine)/e/[adresse]/page.tsx`. Mes fichiers des sites : `components/page-entreprise/*` (vue-page,
+  modele-sobre, editeur, CSS) et le serveur `page-entreprise`. Le rendu d'un site ne lit QUE l'instantané publié
+  (brouillon jamais public) : pour le sitemap, ne lister que les pages `visible = true` et non masquées.
+- Mon dernier commit (résiliation du site, option 2) part dès que sa chaîne est verte, le 28 novembre au matin ; j'écris
+  ici « LIBRE » juste après la vérification de /version. Ensuite la branche est à toi.
