@@ -48,7 +48,7 @@ const dans = (jours: number) => new Date(Date.now() + jours * 86_400_000).toISOS
 const artisan = (n: number, lignes = [{ libelle: A3222, quantite: "1800", unite: "pièces" }], adresse = "3 rue des Ajoncs, 22300 Lannion") => couvreurAvecListe(ctx, `artisan${n}@toitures.fr`, `Toitures ${n}`, adresse, lignes);
 
 async function chasseur() {
-  const c = await couvreurAvecListe(ctx, "chasseur@mobiiz.fr", "Mobiiz", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+  const c = await couvreurAvecListe(ctx, "chasseur@mobiiz.fr", "Mobiiz", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
   await c.agent.get("/v1/chasseur/regroupements").expect(403);
   await doubleAuthentification(ctx, c.agent, "chasseur@mobiiz.fr");
   return c;
@@ -186,13 +186,13 @@ describe("business model final : le regroupement négocié par un humain", { tim
     expect(lot.text).not.toContain("Toitures 2");
     expect((await a.agent.get("/v1/negocie").expect(200)).body.besoins[0].regroupement.statut).toBe("commande");
     // Les hypothèses : formés, pris en charge, avec offre, commandés, taux d'acceptation, commission du mois.
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     expect((await greg.agent.get("/v1/admin/pilotage/hypotheses").expect(200)).body.negocie).toMatchObject({ formes: 1, prisEnCharge: 1, avecOffre: 1, commandes: 1, tauxAcceptation: 0.667, commissionHt: 43.2 });
   });
 
   it("l'observatoire : chaque réponse notée sans identifiant ; moyenne du secteur affichée à partir de 5 réponses ; export CSV sans nom", async () => {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
     const prix = [1.05, 1.1, 1.15, 1.0, 1.2];
     for (const [i, p] of prix.entries()) {
       const x = await artisan(10 + i);
@@ -228,7 +228,7 @@ describe("business model final : le regroupement négocié par un humain", { tim
     await inscrireNegoce(ctx, "agence@pointp.fr", { depot: "ZA de Kerverzot, 22300 Lannion", departements: ["22"], siret: "44444444400004" });
     expect((await ctx.prisma.compteNegoce.findUniqueOrThrow({ where: { email: "pointp.lannion@gmail.com" } })).verification).toBe("a_verifier");
     expect((await ctx.prisma.compteNegoce.findUniqueOrThrow({ where: { email: "agence@pointp.fr" } })).verification).toBe("valide");
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const liste = (await greg.agent.get("/v1/admin/pilotage/negoces-a-verifier").expect(200)).body.negoces;
     const gmail = liste.find((n: { email: string }) => n.email === "pointp.lannion@gmail.com");
@@ -257,7 +257,7 @@ describe("business model final : le regroupement négocié par un humain", { tim
 
   it("l'interrupteur admin : en « mois », la consultation par cycles revient (27 octobre 2026 : « automatique » = l'achat groupé) ; le mode humain ferme la déclaration de besoins", async () => {
     const a = await artisan(1);
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
     await greg.agent.put("/v1/admin/pilotage/mode-regroupement").send({ mode: "automatique" }).expect(403);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     await greg.agent.put("/v1/admin/pilotage/mode-regroupement").send({ mode: "mois" }).expect(200);

@@ -956,15 +956,14 @@ function computeNeed(
       const what = (work.derived?.find((d) => d.key === variable)?.label ?? work.params.find((p) => p.key === variable)?.label ?? variable.replace(/_/g, " ")).toLowerCase();
       const publisher = sources.get(pts.source)?.publisher ?? "fabricant";
       const plage = `${what} ${fr(target, 0)} ${unit}, ${bound} pour ce format (${publisher})`;
-      const options = candidates.map((c, i) => ({ label: i === 0 ? `${c.p.shortLabel} (conseillé)` : c.p.shortLabel, value: c.p.id }));
+      // Greg, 28 novembre 2026 : « Aucun format inventé ; jamais de "conseillé" sans raison réelle », et « ne jamais redemander
+      // ce qui est déjà connu ». Les formats admis sont listés du plus proche au plus éloigné, sans étiquette.
+      const options = candidates.map((c) => ({ label: c.p.shortLabel, value: c.p.id }));
       if (fromQuote && current) {
-        // Le devis fait foi : calcul par la formule, dit comme estimation ; le voisin n'est qu'un conseil.
-        const conseil = candidates[0] ? ` Format conseillé : ${candidates[0].p.shortLabel}.` : "";
-        const texte = `${what.charAt(0).toUpperCase()}${what.slice(1)} ${fr(target, 0)} ${unit} hors table ${publisher} (${bound} pour ce format).${conseil}`;
+        // Le devis (ou l'artisan) fait foi : le format est gardé, calcul par la formule, dit comme estimation sous la flèche.
+        // Avant : une hypothèse à boutons « (devis) / (conseillé) », que l'écran posait comme une question « Ardoises ? ».
+        const texte = `${what.charAt(0).toUpperCase()}${what.slice(1)} ${fr(target, 0)} ${unit} hors table ${publisher} (${bound} pour ce format).`;
         trace.push({ label: "Estimation", value: texte, unit: "", from: `Format écrit sur le devis, gardé`, origin: "referential", estimation: true, verified: true, ...(provenanceLine(pts, sources).url ? { url: provenanceLine(pts, sources).url } : {}) });
-        if (options.length > 0) {
-          assume({ key: `product:${slotKey}`, label: slotDef.label, value: current.shortLabel, unit: "", note: `Recouvrement hors table ${publisher} pour ce format.${conseil}`, choices: [{ label: `${current.shortLabel} (devis)`, value: current.id }, ...options] });
-        }
         return;
       }
       const reason = `${name} non admis ici : ${plage}.`;

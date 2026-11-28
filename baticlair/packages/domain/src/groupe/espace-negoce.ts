@@ -115,7 +115,7 @@ export function mailInvitationNegoce(m: { lien: string; departement: string | nu
       "Bonjour,",
       "",
       // RGPD (24 octobre 2026) : qui écrit, pourquoi, et comment ne plus jamais être contacté.
-      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour ${leNom()}.`,
+      `Ce message vous est envoyé par ${NOM_APP} pour ${leNom()}.`,
       `Pourquoi ce message ? Un artisan de votre secteur${secteur} vous a ajouté ${auNom()} : les artisans d'un même département regroupent leurs commandes de matériaux, une grille unique vous est envoyée toutes les deux semaines et vous faites votre prix.`,
       "Créez votre accès en une minute (votre e-mail, vos dépôts, vos conditions de livraison) :",
       m.lien,
@@ -144,7 +144,7 @@ export function mailClotureSansCompte(m: { mois: Mois; departement: string; lien
     texte: [
       "Bonjour,",
       "",
-      `Ce message vous est envoyé par BATI INVEST (${NOM_APP}) pour ${leNom()}, parce qu'un artisan de votre secteur vous y a ajouté.`,
+      `Ce message vous est envoyé par ${NOM_APP} pour ${leNom()}, parce qu'un artisan de votre secteur vous y a ajouté.`,
       `Les artisans du département ${m.departement} ont regroupé leurs commandes ${deMois(m.mois)}. Pour voir la grille et faire votre prix, créez votre accès (une minute) :`,
       m.lien,
       "",

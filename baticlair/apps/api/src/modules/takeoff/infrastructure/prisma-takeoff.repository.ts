@@ -1,3 +1,4 @@
+import type { LectureDevis } from "@baticlair/domain";
 import type { Prisma } from "../../../generated/prisma/client.js";
 import { parseLecture, type CompletionRecord, type FicheChantier, type LineRole, type QuoteLineReading } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
@@ -252,6 +253,19 @@ export class PrismaTakeoffRepository implements TakeoffRepository {
     await this.prisma.$transaction(async (tx) => {
       const last = await tx.takeoffLine.aggregate({ where: { takeoffId, takeoff: { companyId: tenant.companyId } }, _max: { position: true } });
       await tx.takeoffLine.create({ data: { ...fields, takeoffId, origin: "manual", position: (last._max.position ?? 0) + 1 } });
+    });
+  }
+
+  async ajouterLignesLues(tenant: TenantContext, takeoffId: string, lecture: LectureDevis, lines: readonly { designation: string; quantityRaw: string | null; unitRaw: string | null; sourceRef: string }[]): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const { count } = await tx.takeoff.updateMany({ where: { id: takeoffId, companyId: tenant.companyId }, data: { lecture: JSON.parse(JSON.stringify(lecture)), calculStartedAt: null, calculatedAt: null } });
+      if (count !== 1) return;
+      const last = await tx.takeoffLine.aggregate({ where: { takeoffId }, _max: { position: true } });
+      let position = last._max.position ?? 0;
+      for (const l of lines) {
+        position += 1;
+        await tx.takeoffLine.create({ data: { takeoffId, position, designation: l.designation, quantityRaw: l.quantityRaw, unitRaw: l.unitRaw, reference: null, sourceRefs: [l.sourceRef], sourcePages: [], section: [], aiDoubt: null, origin: "partner" } });
+      }
     });
   }
 

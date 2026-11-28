@@ -2,7 +2,7 @@ import { createHmac } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
-import { boutonsDeLaQuestion, calculerEtVoirMaListe, revenirAuxFeuilles, calculerMaListe, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
+import { boutonsDeLaQuestion, calculerEtVoirMaListe, revenirAuxFeuilles, calculerMaListe, lancerLeCalcul, carteSuggestions, ecrireDansLaDiscussion, passerLesSuggestions, continuerSansSuggestionParApi, repondreAuxQuestions, SORTIE_DE_VENTILATION, voirMaListe, zoneDesQuestions, continuerQuandLesSuggestionsSOuvrent } from "./discussion";
 import { confirmerAnalyseDoffice, garderFenetreAnalyse } from "./confirmer-analyse";
 
 test.beforeEach(async ({ page }) => {
@@ -1283,7 +1283,8 @@ test("la flèche du calcul (Greg, 21 et 22 novembre 2026) : elle déroule les po
   await expect(feuille).toHaveCount(0);
   await settle(page);
   await expect.poll(() => ligne.innerText()).not.toBe(avant);
-  await expect(ligne.getByText("Modifié par toi")).toBeVisible();
+  // Règle changée (Greg, 28 novembre 2026) : une ligne modifiée par l'artisan dit « Dit par toi » (avant : « Modifié par toi »).
+  await expect(ligne.getByText("Dit par toi")).toBeVisible();
   await list.getByRole("button", { name: `Voir le calcul : ${nom}` }).click();
   await expect(detail.getByText(/^Surface 50 m²/)).toBeVisible();
   await expect(detail.getByText("modifié par toi")).toBeVisible();
@@ -1605,7 +1606,7 @@ test("zinguerie : une seule question de pliage pour le devis, une pièce se chan
   expect(posees.filter((q) => /Bandes zinc \(solin/.test(q))).toHaveLength(0);
   // « Dév. 200 » est écrit : jamais redemandé.
   expect(posees.filter((q) => /^Bande de rive .*développé/.test(q))).toHaveLength(0);
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   // Le développé de la bande de ventilation n'est pas connu (« Je ne sais pas ») : « Combien de feuilles ? » revient d'abord.
   await revenirAuxFeuilles(page);
   // « Il peut modifier ce choix pour une pièce dans le récapitulatif » : chaque pièce avec son choix (« Je façonne », la
@@ -1643,11 +1644,12 @@ test("feuilles de zinc : le nombre, une estimation, s'ajuste d'un toucher dans l
   await passQuestions(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
-  // Sur la ligne fermée des feuilles : « − », le nombre, « + ». Les autres lignes n'ont pas ces boutons tant qu'elles sont fermées.
+  // Sur la ligne fermée des feuilles : « − », le nombre, « + ». Règle changée (Greg, 28 novembre 2026) : toutes les lignes ont
+  // leur « − / + » (le pas : le plus petit conditionnement vendu) ; avant, seulement les quantités « estimation ».
   const reglage = list.getByRole("group", { name: /^Quantité : Feuilles/ }).first();
   await expect(reglage).toBeVisible();
   await expect(list.getByRole("group", { name: /^Ligne ouverte/ })).toHaveCount(0);
-  expect(await list.getByRole("group", { name: /^Quantité : / }).count()).toBe(await list.getByRole("group", { name: /^Quantité : Feuilles/ }).count());
+  expect(await list.getByRole("group", { name: /^Quantité : / }).count()).toBeGreaterThan(await list.getByRole("group", { name: /^Quantité : Feuilles/ }).count());
   const nombre = reglage.locator("[aria-live]");
   const avant = Number((await nombre.innerText()).trim());
   expect(avant).toBeGreaterThan(0);
@@ -1714,7 +1716,6 @@ test("étape « Suggestions » (Greg, 17 et 18 novembre 2026) : une carte à cas
   // Point 16 : après « Continuer », seulement ce qu'une case cochée demande (rien pour les angles, non cochés), puis
   // « Calculer ma liste ».
   const posees = await repondreAuxQuestions(page);
-  await expect(calculerMaListe(page)).toBeVisible();
   expect(posees.join(" | ")).not.toMatch(/angle|talon|consommable/i);
   await calculerEtVoirMaListe(page);
   for (let i = 0; i < 3 && (await boutonsDeLaQuestion(page).count()) > 0; i++) {
@@ -2069,7 +2070,7 @@ test("« Je ne sais pas » (RÈGLE CHANGÉE le 16 novembre 2026, avant : la poub
   });
   expect(reprise).toBe(true);
   const sent = page.waitForRequest((r) => r.url().includes("/calcul") && r.method() === "POST");
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   const body = (await sent).postDataJSON() as { reponses: { question: string; valeur: string | null }[] };
   expect(body.reponses.filter((r) => r.valeur === null).length).toBeGreaterThanOrEqual(1);
   await voirMaListe(page);
@@ -2087,7 +2088,7 @@ test("« Je ne sais pas » au développé (Greg, 23 novembre 2026) : « Combien 
   // Je plie (« Je façonne »), et « Je ne sais pas » au développé du faîtage.
   const avant = await repondreAuxQuestions(page);
   expect(avant.some((q) => /[Dd]éveloppé/.test(q))).toBe(true);
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   // Le calcul ne part pas : la question des feuilles arrive dans le fil, avec ses boutons ; l'écran ne reste pas sur « Je calcule ta liste… ».
   await expect(boutonsDeLaQuestion(page)).toHaveAttribute("aria-label", /^Pour le faîtage, combien de feuilles de zinc te faut-il \?/, { timeout: 60_000 });
   await repondreAuxQuestions(page, (q) => (/combien de feuilles/.test(q) ? "3" : null));
@@ -2776,7 +2777,7 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
 test("Pages légales : mentions légales, CGU, conditions négoce et confidentialité, lisibles sans compte ; l'acceptation des CGU est gardée", async ({ page }) => {
   await page.goto("/mentions-legales");
   await expect(page.getByRole("heading", { name: "Mentions légales" })).toBeVisible();
-  await expect(page.getByText(/édité par BATI INVEST, SARL au capital de .* SIRET 910 796 325 00017, dont le siège est situé 6 impasse du Ouipoure, 22620 Ploubazlanec/)).toBeVisible();
+  await expect(page.getByText(/édité par BATI INVEST, SARL au capital de .* SIRET 910 796 325 00017, dont le siège est situé .+, \d{5} /)).toBeVisible();
   await expect(page.getByText(/TVA intracommunautaire FR61910796325/)).toBeVisible();
   await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
   // Greg, 26 octobre 2026 : le Kbis complet, le directeur de la publication, contact@mobiiz.fr, Neon ; plus aucun repère.
@@ -3312,7 +3313,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   const pied = page.getByRole("navigation", { name: "Informations et liens légaux" });
   for (const [nom, href] of <[string, string][]>[["Tarifs", "/tarifs"], ["Mentions légales", "/mentions-legales"], ["CGU", "/cgu"], ["Conditions négoces", "/conditions-negoce"], ["Confidentialité", "/confidentialite"], ["Contact", "/mentions-legales#contact"], ["Accès négoce", "/negoce/connexion"]])
     await expect(pied.getByRole("link", { name: nom })).toHaveAttribute("href", href);
-  await expect(page.getByText(/BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017/)).toBeVisible();
+  // DISCRÉTION (Greg, 28 novembre 2026 ; RÈGLE CHANGÉE : avant, le bloc légal complet en pied de la landing) : « Mobiiz »,
+  // le contact et le lien des mentions légales ; ni l'adresse, ni le SIRET, ni le RCS, ni le capital.
+  await expect(page.locator("footer")).toContainText("Mobiiz · contact@mobiiz.fr · Mentions légales");
+  await expect(page.locator("footer")).not.toContainText(/SIRET|RCS|capital|Ouipoure|BATI INVEST/);
   // Sur téléphone : le menu s'ouvre et mène à sa section ; le bouton fixe n'apparaît qu'une fois celui de l'accroche passé,
   // et s'efface devant celui du bas.
   const taille = page.viewportSize();
@@ -4672,9 +4676,49 @@ test("« À la voix » (Greg, 27 novembre 2026) : l'onde, le chrono, Arrêter et
   await expect(texte).toHaveValue("il me faut 12 m de gouttière zinc et 2 descentes de 3 m");
   if (process.env.VOIX_CAPTURES) await page.screenshot({ path: `${process.env.VOIX_CAPTURES}/${test.info().project.name}-2-relire.png` });
   await texte.fill("il me faut 12 m de gouttière zinc et 2 descentes de 4 m");
-  await relire.getByRole("button", { name: "Envoyer à l'analyse" }).click();
-  await expect(ecran.getByText("il me faut 12 m de gouttière zinc et 2 descentes de 4 m")).toBeVisible();
-  await expect(voix).toHaveCount(0);
+  // Greg, 28 novembre 2026 : la dictée qui nomme un ouvrage passe par le moteur, comme un devis : les questions s'ouvrent.
+  await relire.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+});
+
+test("le quantitatif à la voix (Greg, 28 novembre 2026, sa phrase exacte) : « châtia » remis au propre, puis questions, calcul, suggestions et une liste sans aucun m²", async ({ page }) => {
+  await fausseDicteeContinue(page, ["je dois environ 50 m² d'ardoise 32x22, j'ai une gouttière bandeau avec les crochets, gouttière bandeau de 25, et je dois prévoir également deux châtia"]);
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("link", { name: /^À la voix/ }).click();
+  const ecran = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  const voix = ecran.getByRole("region", { name: "À la voix" });
+  await expect(voix.getByRole("heading", { name: "Décris ton chantier" })).toBeVisible();
+  await voix.getByRole("button", { name: "Parler" }).click();
+  await expect.poll(() => dicteeEntendue(page)).toBe(true);
+  await ecran.getByRole("group", { name: "Dictée en cours" }).getByRole("button", { name: "Arrêter la dictée" }).click();
+  // La bulle : le texte remis au propre avec les mots du métier, corrigeable avant l'envoi.
+  const relire = ecran.getByRole("region", { name: "Ce que tu as dit" });
+  await expect(relire.getByRole("textbox")).toHaveValue(/deux chatières$/);
+  await relire.getByRole("button", { name: "Envoyer", exact: true }).click();
+  // Le même parcours qu'un devis : les questions, puis le calcul, l'étape « Suggestions », la liste.
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  const posees = await repondreAuxQuestions(page, async (q) => {
+    if (/Longueur de gouttière/.test(q)) {
+      await ecrireDansLaDiscussion(page, "12 m");
+      return true;
+    }
+    // La qualité de l'ardoise n'a pas été dite : « Je ne sais pas » ne fait rien inventer.
+    if (/Quelle ardoise/.test(q)) return "Je ne sais pas";
+    return null;
+  });
+  expect(posees.join(" | ")).toMatch(/agrafe ou à pointe/);
+  expect(posees.join(" | ")).not.toMatch(/Gouttière de 25, de 28|sur les chevrons ou en façade/);
+  await calculerEtVoirMaListe(page);
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 60_000 });
+  await expect(liste.getByText(/^Ardoises naturelles .*32×22/).first()).toBeVisible();
+  await expect(liste.getByText(/^Crochets d'ardoise/).first()).toBeVisible();
+  await expect(liste.getByText(/^Chatières/).first()).toBeVisible();
+  // Aucune QUANTITÉ en m² (l'explication du calcul, « 50 m² × 38,8 ardoises/m² », reste dans l'appli).
+  await expect(liste.getByText(/^[\d  ,]+ m²$/)).toHaveCount(0);
+  await expect(liste.getByText(/Espagne/)).toHaveCount(0);
+  if (process.env.VOIX_CAPTURES) await page.screenshot({ path: `${process.env.VOIX_CAPTURES}/${test.info().project.name}-liste-voix.png`, fullPage: true });
 });
 
 test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une réponse écrite va à SA question, confirmée en une ligne, jamais reposée", async ({ page }) => {

@@ -238,7 +238,7 @@ export function CalculScreen() {
  * liste" qui ouvre l'écran de liste habituel (le même que la saisie à la main) »). Toujours la même discussion : combien
  * d'articles, d'où ils viennent (dits, calculés, à vérifier), et un seul bouton. Rien n'est envoyé d'ici.
  */
-export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { takeoff: Takeoff; onVoir: () => void; onChoix?: (key: string, value: string, unit: string) => void; pending?: boolean }) {
+export function RecapScreen({ takeoff, onVoir, onChoix, pending = false, onDire }: { takeoff: Takeoff; onVoir: () => void; onChoix?: (key: string, value: string, unit: string) => void; pending?: boolean; /** « Ajoute un Velux » après le calcul (Greg, 28 novembre 2026) : la barre reste ouverte. */ onDire?: (texte: string) => Promise<string | null> }) {
   const router = useRouter();
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -248,6 +248,21 @@ export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { tak
     };
   }, []);
   const articles = takeoff.purchase.toBuy;
+  const champ = useChampDicte();
+  const dictee = useDictee(champ.surVoix);
+  const [echanges, setEchanges] = useState<{ de: "moi" | "mobiiz"; texte: string }[]>([]);
+  const [occupeDire, setOccupeDire] = useState(false);
+  const dire = async () => {
+    const texte = champ.saisie.trim();
+    if (!texte || !onDire || occupeDire) return;
+    dictee.arreter();
+    champ.setSaisie("");
+    setEchanges((e) => [...e, { de: "moi", texte }]);
+    setOccupeDire(true);
+    const fait = await onDire(texte).catch(() => null);
+    setOccupeDire(false);
+    setEchanges((e) => [...e, { de: "mobiiz", texte: fait ?? "Je n'ai pas pu le faire. Réessaie dans un instant." }]);
+  };
   const compte = (o: ReturnType<typeof origineDeLaLigne>) => articles.filter((a) => origineDeLaLigne(a) === o).length;
   const [dits, calcules, aVerifier] = [compte("Dit par toi"), compte("Calculé"), compte("À vérifier")];
   const detail = [dits ? `${dits} dit${dits > 1 ? "s" : ""} par toi` : null, calcules ? `${calcules} calculé${calcules > 1 ? "s" : ""}` : null, aVerifier ? `${aVerifier} à vérifier` : null].filter(Boolean).join(", ");
@@ -257,7 +272,7 @@ export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { tak
       <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
         <Bulle de="mobiiz" label="Message de MOBIIZ">
           <TexteMobiiz>
-            {`Ta liste est prête : ${articles.length} article${articles.length > 1 ? "s" : ""}${detail ? ` (${detail})` : ""}.\n${aVerifier ? "Les lignes à vérifier sont en haut de ta liste." : "Vérifie-la, corrige ce que tu veux, puis envoie-la à tes négoces."}`}
+            {`Ta liste est prête : ${articles.length} article${articles.length > 1 ? "s" : ""}${detail ? ` (${detail})` : ""}.${feuillesDeZinc(articles)}\n${aVerifier ? "Les lignes à vérifier sont en haut de ta liste." : "Vérifie-la, corrige ce que tu veux, puis envoie-la à tes négoces."}`}
           </TexteMobiiz>
         </Bulle>
         {/* Greg, 17 novembre 2026 : « une seule réponse pour tout le devis ; il peut modifier ce choix pour une pièce dans le
@@ -296,7 +311,34 @@ export function RecapScreen({ takeoff, onVoir, onChoix, pending = false }: { tak
             Voir ma liste
           </Button>
         </div>
+        {echanges.map((m, i) =>
+          m.de === "mobiiz" ? (
+            <Bulle key={i} de="mobiiz" label="Message de MOBIIZ">
+              <TexteMobiiz>{m.texte}</TexteMobiiz>
+            </Bulle>
+          ) : (
+            <Bulle key={i} de="moi">
+              {m.texte}
+            </Bulle>
+          ),
+        )}
       </div>
+      {onDire ? (
+        <BarreSaisie
+          valeur={champ.saisie}
+          onChange={champ.setSaisie}
+          onEnvoyer={() => void dire()}
+          occupe={occupeDire || pending}
+          ecoute={dictee.ecoute}
+          probleme={dictee.probleme}
+          onDicter={() => {
+            champ.avantDictee();
+            dictee.demarrer();
+          }}
+          onArreter={dictee.arreter}
+          invite="Ajoute, retire ou change un article…"
+        />
+      ) : null}
     </section>
   );
 }
@@ -520,6 +562,24 @@ function cardErrors(error: ApiError | null, sent: readonly string[]): Map<string
   return out;
 }
 
+/** « Environ 7 feuilles de zinc 2 × 1 m » au récapitulatif (Greg, 28 novembre 2026), quand la liste en compte. */
+function feuillesDeZinc(articles: readonly { label: string; quantity: string | null }[]): string {
+  const f = articles.find((a) => /^Feuilles .*zinc|^Feuilles zinc/i.test(a.label));
+  const n = f?.quantity ? /^(\d+)/.exec(f.quantity)?.[1] : undefined;
+  return n ? `\nZinc : environ ${n} feuille${Number(n) > 1 ? "s" : ""} de 2 × 1 m, ajustable${Number(n) > 1 ? "s" : ""} d'un toucher dans la liste.` : "";
+}
+
+/**
+ * ON DOIT TOUJOURS SAVOIR OÙ ON EN EST (Greg, 28 novembre 2026 : « après Valider, il restait des questions, je ne les ai pas
+ * vues ») : ce qui reste se dit, avec l'ouvrage concerné : « Il me manque 2 infos pour tes bandes de rive, ensuite ta liste. »
+ */
+function ceQuiReste(restantes: readonly { group: string }[]): string {
+  const n = restantes.length;
+  const ouvrages = [...new Set(restantes.map((q) => q.group).filter((g) => g && g !== SITE_GROUP && g !== CONSUMABLES_GROUP))];
+  const pour = ouvrages.length === 1 ? ` pour ${ouvrages[0]!.charAt(0).toLowerCase()}${ouvrages[0]!.slice(1)}` : ouvrages.length > 1 ? ` (${ouvrages.map((o) => o.toLowerCase()).join(", ")})` : "";
+  return `Il me manque ${n > 1 ? `${n} infos` : "une info"}${pour}, ensuite ta liste.`;
+}
+
 type MessageQuestions = { de: "mobiiz" | "moi"; texte: string; cle?: string; /** Un message libre (écrit ou dicté) : son repère et les questions qu'il a réglées, pour le rouvrir d'un toucher. */ id?: string; cles?: string[] };
 
 /** Les morceaux d'une réponse écrite (même découpe que le moteur) : pour savoir s'il reste du texte que le code n'a pas rangé. */
@@ -534,7 +594,7 @@ const morceauxDe = (texte: string) => texte.split(/\n|;|,(?!\d)|\bet\b/).map((m)
  * serveur et son IA pour ce qui reste) ; Mobiiz confirme en UNE ligne et ne pose que ce qui manque. Quand tout est
  * répondu, « Calculer ma liste » est proposé dans le fil. Le serveur revalide tout au calcul.
  */
-export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
+export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses, onDire }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void; /** « Ajoute un Velux », « retire les chatières » : à tout moment (Greg, 28 novembre 2026). Rend la phrase de ce qui est fait. */ onDire?: (texte: string) => Promise<string | null> }) {
   const router = useRouter();
   const duServeur = useMemo(() => counterQuestions(takeoff), [takeoff]);
   // Une question déjà répondue et partie au serveur n'est plus dans sa liste : on la garde ici, pour que « toucher une de
@@ -642,6 +702,22 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
 
   const envoyer = async (dit?: string) => {
     const texte = (dit ?? champ.saisie).trim();
+    // UNE VRAIE CONVERSATION, TOUJOURS OUVERTE (Greg, 28 novembre 2026 : « Ajoute un Velux » en fin de parcours ne partait
+    // pas) : quand plus rien n'attend de réponse, ou que le message est une consigne (« ajoute », « retire », « mets »),
+    // il part au serveur, qui range l'article par le moteur ; ses questions arrivent dans le fil. Avant : le bouton ne
+    // faisait rien sans question en attente.
+    const consigne = /^(?:\+|ajoute|rajoute|ajouter|rajouter|retire|enl[eè]ve|supprime|vire|mets|met|passe|il me faut|il faut aussi)\b/i.test(texte);
+    if (texte && onDire && !reflexion && !pending && (restantes.length === 0 || consigne)) {
+      if (dit === undefined) dictee.arreter();
+      champ.setSaisie("");
+      setAutre(false);
+      setMessages((m) => [...m, { de: "moi", texte }]);
+      setReflexion(true);
+      const fait = await onDire(texte).catch(() => null);
+      setReflexion(false);
+      setMessages((m) => [...m, { de: "mobiiz", texte: fait ?? "Je n'ai pas pu le faire. Réessaie dans un instant." }]);
+      return;
+    }
     if (!texte || reflexion || pending || restantes.length === 0) return;
     if (dit === undefined) dictee.arreter();
     champ.setSaisie("");
@@ -717,6 +793,21 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
     setSent(answers.reponses.map((r) => r.question));
     onSubmit(answers);
   };
+  // ZINGUERIE ANNONCÉE ET GUIDÉE (Greg, 28 novembre 2026) : avant la première question du zinc (pliage, développé, feuilles),
+  // une phrase : « Je vais calculer tes feuilles de zinc, pièce par pièce. » Une seule fois.
+  const [zincAnnonce, setZincAnnonce] = useState(false);
+  if (!zincAnnonce && courante && /faconnage@pieces-pliees|developpe|feuilles_/.test(courante.key)) {
+    setZincAnnonce(true);
+    setMessages((m) => [...m, { de: "mobiiz", texte: "Je vais calculer tes feuilles de zinc, pièce par pièce." }]);
+  }
+  // Greg, 28 novembre 2026 : « Si rien ne manque, la liste s'ouvre directement. » Les cases « Suggestions » passées et plus
+  // aucune question : le calcul part tout seul (avant : il fallait encore toucher « Calculer ma liste »).
+  const suggereAvant = useRef(Boolean(aSuggerer));
+  useEffect(() => {
+    const avait = suggereAvant.current;
+    suggereAvant.current = Boolean(aSuggerer);
+    if (avait && !aSuggerer && restantes.length === 0 && !pending && !reflexion && !error) calculer();
+  });
   // « Quand tout est répondu, elle réfléchit, pose d'éventuelles dernières questions de la même façon, puis propose
   // "Calculer ma liste" » (Greg, 16 novembre 2026). Recette en ligne du même jour : une réponse peut faire naître une
   // question du calcul (le nombre de descentes, le façonnage d'une autre pièce). Dès que tout est répondu, les réponses
@@ -745,7 +836,7 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses 
   // La vérification finie : s'il reste une question, elle se dit en une ligne ; sinon « Calculer ma liste » arrive.
   if (verification && !pending) {
     setVerification(false);
-    if (!error && courante) setMessages((m) => [...m, { de: "mobiiz", texte: restantes.length > 1 ? "Encore quelques précisions avant de calculer." : "Encore une précision avant de calculer." }]);
+    if (!error && courante) setMessages((m) => [...m, { de: "mobiiz", texte: ceQuiReste(restantes) }]);
   }
   const invite = courante ? (autre ? "Écris ta réponse…" : courante.options.length === 0 ? `Écris ta réponse${courante.unit && courante.unit !== "u" ? ` (${courante.unit === "m2" ? "m²" : courante.unit})` : ""}…` : "Réponds ici…") : "Réponds ici…";
 
@@ -1151,7 +1242,7 @@ export function LotsCard({ takeoff, pending, error, onConfirm }: { takeoff: Take
 }
 
 /** L'étape des questions : sans aucune question à poser, le calcul part tout seul (rien à valider pour rien). */
-export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void }) {
+export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses, onDire }: { takeoff: Takeoff; pending: boolean; error: ApiError | null; onSubmit: (answers: CounterAnswers) => void; onReponses?: (reponses: NonNullable<CounterAnswers["reponses"]>) => void; onDire?: (texte: string) => Promise<string | null> }) {
   // Décidé à l'ouverture : une discussion commencée reste ouverte quand ses réponses, enregistrées, ne laissent plus de
   // question (« Calculer ma liste » y est proposé, jamais lancé tout seul). Elle n'est jamais démontée en route : ses
   // réponses écrites et ses « Je ne sais pas » vivent en elle jusqu'au calcul.
@@ -1170,5 +1261,5 @@ export function QuestionsStep({ takeoff, pending, error, onSubmit, onReponses }:
     if (aSuggerer && onReponses) return <SuggestionsCard options={aSuggerer} devisLu={takeoff.devisLu !== false} pending={pending} error={error} onContinuer={(valeur) => onReponses([{ question: CLE_SUGGESTIONS, valeur }])} />;
     return error ? <ErrorNotice error={error} /> : <CalculScreen />;
   }
-  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} />;
+  return <QuestionsScreen takeoff={takeoff} pending={pending} error={error} onSubmit={onSubmit} {...(onReponses ? { onReponses } : {})} {...(onDire ? { onDire } : {})} />;
 }

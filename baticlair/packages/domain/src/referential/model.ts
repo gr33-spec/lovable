@@ -364,6 +364,11 @@ export interface Slot {
   key: string;
   family: string;
   label: string;
+  /**
+   * Dans une DICTÉE (Greg, 28 novembre 2026), l'article suit son ouvrage même s'il n'est pas dit : « 1 crochet par ardoise,
+   * partout » (règles du fondateur, skill `regles-metier`). Un devis écrit garde la règle numéro un (rien d'absent du devis).
+   */
+  dicteAvec?: true;
   /** Départage deux emplacements d'une même famille (« contre-lattage » ≠ « lattage »). */
   keywords?: string[];
   /** La question du comptoir quand le devis ne nomme pas le produit (« Parpaings de 20, de 15 ou de 10 ? »). */

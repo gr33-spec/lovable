@@ -250,6 +250,10 @@ model Company {
   signalementsPage          SignalementPage[]
   contactsPage              ContactPage[]
   messagesSite              MessageSite[]
+  listesAttente             ListeAttenteMetier[]
+  invitation                InvitationArtisan?
+  invitesParMoi             InvitationSuivi[]  @relation("Inviteur")
+  inviteePar                InvitationSuivi?   @relation("Invite")
 
   @@map("company")
 }
@@ -3297,11 +3301,86 @@ model ListeAttenteMetier {
   source      String?
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  /// CHANTIER 05 (Greg, 28 novembre 2026) : l'entreprise Mobiiz de l'inscrit, s'il a un compte.
+  companyId           String?   @map("company_id") @db.Uuid
+  company             Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// Le jeton du lien de désinscription en un clic (imprévisible, un par inscription).
+  jeton               String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Le choix explicite de recevoir l'e-mail d'ouverture, et la version du texte accepté.
+  consentementLe      DateTime? @map("consentement_le") @db.Timestamptz(3)
+  consentementVersion String?   @map("consentement_version")
+  /// Désinscrit : plus jamais prévenu (la ligne est gardée pour ne pas le réinscrire sans un nouveau choix).
+  desinscritLe        DateTime? @map("desinscrit_le") @db.Timestamptz(3)
+  /// Prévenu de l'ouverture : une seule fois.
+  prevenuLe           DateTime? @map("prevenu_le") @db.Timestamptz(3)
+  envoi               AnnonceEnvoi?
 
   @@unique([email, metier])
+  @@index([companyId])
   @@index([metier])
   @@index([departement])
   @@map("liste_attente_metier")
+}
+
+/// CHANTIER 05 : une annonce d'ouverture d'un métier dans un ou plusieurs départements, confirmée par l'admin. Elle ouvre
+/// le couple métier et département (`estOuvert`) et prévient ses inscrits, une fois chacun, par petits lots.
+model AnnonceOuverture {
+  id           String         @id @default(uuid(7)) @db.Uuid
+  metier       String
+  departements String[]
+  /// L'admin qui a confirmé (son e-mail : c'est le journal de l'admin).
+  auteur       String
+  /// Le nombre d'inscrits à prévenir au moment de la confirmation.
+  total        Int
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  termineeLe   DateTime?      @map("terminee_le") @db.Timestamptz(3)
+  envois       AnnonceEnvoi[]
+
+  @@index([metier])
+  @@map("annonce_ouverture")
+}
+
+/// CHANTIER 05 : le journal des e-mails d'une annonce, une ligne par inscrit (unique : jamais prévenu deux fois).
+/// statut : a_envoyer | en_cours | envoye | echec | annule (désinscrit entre-temps).
+model AnnonceEnvoi {
+  id             String             @id @default(uuid(7)) @db.Uuid
+  annonceId      String             @map("annonce_id") @db.Uuid
+  annonce        AnnonceOuverture   @relation(fields: [annonceId], references: [id], onDelete: Cascade)
+  listeAttenteId String             @unique @map("liste_attente_id") @db.Uuid
+  listeAttente   ListeAttenteMetier @relation(fields: [listeAttenteId], references: [id], onDelete: Cascade)
+  statut         String             @default("a_envoyer")
+  erreur         String?
+  envoyeLe       DateTime?          @map("envoye_le") @db.Timestamptz(3)
+  createdAt      DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([annonceId, statut])
+  @@map("annonce_envoi")
+}
+
+/// CHANTIER 05 : le lien d'invitation personnel d'une entreprise (un code par entreprise, créé à la première demande).
+model InvitationArtisan {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  companyId String   @unique @map("company_id") @db.Uuid
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  code      String   @unique
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("invitation_artisan")
+}
+
+/// CHANTIER 05 : qui a invité qui (une entreprise n'est invitée qu'une fois). Aucune récompense : le suivi seul, prêt pour
+/// un futur branchement (Flouzeo).
+model InvitationSuivi {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  inviteurId String   @map("inviteur_id") @db.Uuid
+  inviteur   Company  @relation("Inviteur", fields: [inviteurId], references: [id], onDelete: Cascade)
+  inviteId   String   @unique @map("invite_id") @db.Uuid
+  invite     Company  @relation("Invite", fields: [inviteId], references: [id], onDelete: Cascade)
+  code       String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([inviteurId])
+  @@map("invitation_suivi")
 }
 
 /// Le journal des e-mails entrants (Greg, 22 novembre 2026) : chaque message reçu sur contact@ ou une adresse Mobiiz,

@@ -30,8 +30,7 @@ const besoinBody = z.object({
   articleKey: z.string().min(1).max(200).nullable().optional(),
   dejaEnvoyeConfirme: z.boolean().optional(),
 });
-const confirmerBody = z.object({ besoins: z.array(besoinBody).min(1).max(30), confirmation: z.boolean(), cleIdempotence: z.string().min(8).max(80), anonyme: z.boolean().optional() });
-const anonymatBody = z.object({ anonyme: z.boolean() });
+const confirmerBody = z.object({ besoins: z.array(besoinBody).min(1).max(30), confirmation: z.boolean(), cleIdempotence: z.string().min(8).max(80) });
 const quantiteBody = z.object({ quantite: z.number().positive().max(10_000_000), parUnite: z.number().positive().max(1_000_000).nullable().optional(), conversionConfirmee: z.boolean().optional() });
 const dateBody = z.object({ dateBesoin: jour });
 const retraitBody = z.object({ motif: z.enum(["annule", "autrement", "autre"]), precision: z.string().trim().max(300).nullable().optional() });
@@ -88,7 +87,6 @@ export class AchatsGroupesV1Controller {
     return this.ag.confirmer(t, {
       confirmation: b.confirmation,
       cleIdempotence: b.cleIdempotence,
-      anonyme: b.anonyme === true,
       besoins: b.besoins.map((x) => ({ ...x, dateBesoin: x.dateBesoin!, parUnite: x.parUnite ?? null, conversionConfirmee: x.conversionConfirmee === true, contraintes: x.contraintes ?? null, achatId: x.achatId ?? null, projectId: x.projectId ?? null, articleKey: x.articleKey ?? null })),
     });
   }
@@ -115,12 +113,6 @@ export class AchatsGroupesV1Controller {
   @Idempotent()
   quantite(@Tenant() t: TenantContext, @Param("id") id: string, @Body(new ZodPipe(quantiteBody)) b: z.infer<typeof quantiteBody>) {
     return this.ag.modifierQuantite(t, id, { quantite: b.quantite, parUnite: b.parUnite ?? null, conversionConfirmee: b.conversionConfirmee === true });
-  }
-
-  @Post("besoins/:id/anonymat")
-  @HttpCode(200)
-  anonymat(@Tenant() t: TenantContext, @Param("id") id: string, @Body(new ZodPipe(anonymatBody)) b: z.infer<typeof anonymatBody>) {
-    return this.ag.choisirAnonymat(t, id, b.anonyme);
   }
 
   @Post("besoins/:id/date")

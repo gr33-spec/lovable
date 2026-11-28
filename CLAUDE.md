@@ -2,6 +2,8 @@
 
 # Mobiiz — contexte
 
+> **PRENDS LES INITIATIVES QUI ONT DU SENS (Greg, 28 novembre 2026, pour toutes les discussions).** Pense chaque fonctionnalité de bout en bout, comme un vrai produit : si quelque chose manque pour qu'un artisan s'y retrouve (un onglet, un bouton, un retour en arrière, un message clair), ajoute-le sans attendre que Greg le demande, puis signale-le dans ton compte rendu. Exemple : un choix de modèle de site doit avoir son propre onglet « Modèles », pas être caché dans « Couleurs ». Limites : pas d'initiative sur les prix, les tarifs, les règles de calcul du quantitatif, la sécurité, la prod ou les dépenses. Là, tu proposes et Greg arbitre.
+
 > **Toute nouvelle discussion crée sa branche depuis `claude/saas-achat-artisans-prompt-1lyihx`, jamais depuis `main`, même si `main` est la branche par défaut.** (Greg, 27 novembre 2026)
 >
 > **Auteur des commits : le compte GitHub de Greg** (`gr33-spec`, `234254365+gr33-spec@users.noreply.github.com`) ; le committer reste Claude (signature). Posé par le hook de démarrage `.claude/settings.json` (`git config author.name` / `author.email`) ; sans lui, Vercel refuse la mise en ligne quand le dépôt est privé. Vérifier avant le premier commit : `git config author.email`.
@@ -150,9 +152,9 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Mots simples : « Ton chantier est où ? » (« Bord de mer », « Intérieur des terres », « Montagne », « Entre les deux »), jamais « Zone climatique ». Seuls les mots changent, pas le calcul.
 - FONDATEUR sur le Pro au mois seulement, date de besoin à 7 jours, essence du liteau facultative : confirmés par Greg.
 - Tarifs : « Y a-t-il une limite d'analyses ? » (plus le mot « illimitées »).
-- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication.
+- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication. **REMPLACÉ le 28 novembre 2026 : anonymes par défaut, voir plus bas.**
 
-- Les besoins déjà publiés avant ce changement restent anonymes ; seuls les nouveaux montrent le nom de l'entreprise. « +N depuis ta publication » ne dit une quantité qu'à partir de deux nouvelles entreprises.
+- Les besoins déjà publiés avant ce changement restent anonymes ; seuls les nouveaux montrent le nom de l'entreprise. « +N depuis ta publication » ne dit une quantité qu'à partir de deux nouvelles entreprises. (Remplacé le 28 novembre 2026 : plus aucun nom.)
 - Peinture en achat groupé : deux produits, « Peinture murs et plafonds » et « Peinture façade », tirés du catalogue, sans marque. Comptés en litres ; le pot de 15 L est proposé, l'artisan le confirme. Seuil « recommandé » posé à 150 L : à valider par Greg.
 
 ## Décisions du 16 novembre 2026 (soir) : « Mon site » et « Entre pros »
@@ -467,6 +469,13 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Résiliation (Greg, 28 novembre 2026, option 2) : le site reste en ligne 30 jours après la fin de l'abonnement, un e-mail et une alerte 7 jours avant le retrait, puis retiré chaque nuit ; textes, photos et adresse gardés, republication en un toucher après réabonnement (`etatDuSiteApresFin`, `sitesApresFinAbonnement`, colonne additive `retrait_prevenu_le`). N'agit que quand la publication réservée est allumée. Écrit pour l'avocat dans `docs/groupe/CGU-candidate-2026-11-16.md` (points indispensables).
 - Coûts estimés pour 100, 1 000 et 10 000 sites (stockage et bande passante Vercel Blob) ; aucun service payant ajouté.
 
+## Décisions du 28 novembre 2026 : le quantitatif à la voix passe par le moteur
+
+- Règle générale (Greg) : ne jamais lui poser une question dont la réponse est dans le dépôt (ses règles de couvreur, DEFAUTS.md, le manuel). 42 ardoises au m² pour du 32×22 : vérifié dans le tableau des ardoises (crochet de 11 : 42,09 au m²).
+- RÈGLE CHANGÉE : avant, une dictée (« À la voix », Assistant) passait par l'assistant de description, qui recopiait les lignes (« 50 m² » envoyés tels quels, « Espagne 1er choix » tiré de l'exemple) → une dictée qui nomme un ouvrage passe par le MOTEUR, comme un devis : texte remis au propre avec les mots du métier (code seul, sans IA), lignes rangées par le code, questions, calcul, suggestions, liste. Un vrai doute sur un mot : des boutons. Code : `packages/domain/src/lecture/dictee.ts`, `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre`, `ALaVoix`.
+- Dans une dictée, les crochets d'ardoise suivent les ardoises (« 1 crochet par ardoise, partout », règles du fondateur) ; « agrafe ou pointe ? » se demande. La taille du crochet se déduit de la pente et de la zone (fiche couverture), jamais demandée. Un devis écrit garde la règle numéro un.
+- Tests : domaine `quantitatif-a-la-voix` (la phrase de Greg et 5 dictées avec des mots mal entendus), API `quantitatif-a-la-voix`, parcours « le quantitatif à la voix ». Banc 99 sur 99.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.
@@ -475,7 +484,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 ## À faire avant l'ouverture d'un nouveau métier
 
-- Un bouton admin « Prévenir les inscrits de ce métier », qui envoie un e-mail à tous les inscrits de ce métier (entreprises du métier et ancienne liste d'attente). Pas encore codé (Greg, 20 novembre 2026).
+- Le bouton admin « Prévenir les inscrits » existe (chantier 05, 28 novembre 2026, voir plus bas) : seuls les inscrits qui l'ont choisi sont prévenus, jamais toutes les entreprises du métier.
 
 ## Décisions du 27 novembre 2026 : sécurité, sauvegardes (audit `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`)
 
@@ -486,6 +495,15 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - RÈGLE CHANGÉE : les analyses en cours comptent dans les 3 analyses offertes (réservation sous verrou par entreprise) ; avant, dix lectures lancées d'un coup passaient toutes.
 - RÈGLE CHANGÉE : les lectures qui coûtent sont limitées (route avec son `@Throttle`, PDF, Excel, CSV, pages par jeton) ; avant, aucune lecture n'était comptée. Les jetons du chemin ne sont plus écrits dans les journaux (`cheminJournalise`).
 - Dépôt privé : AVANT de le passer en privé, les commits qui partent sur Vercel doivent avoir pour AUTEUR le compte GitHub de Greg (gr33-spec), seul membre de l'équipe Vercel ; sinon Vercel bloque la mise en ligne (« commit author is not a member of the team »).
+
+## Décisions du 28 novembre 2026 : chantier 05, liste d'attente et invitations
+
+- Cahier `baticlair/docs/cahiers-chatgpt/05_Admin_Stripe_parrainage.pdf`, partie 2 seulement ; compte rendu : `baticlair/docs/chantier-05-liste-attente-invitations.md`.
+- Ouvert au lancement : les couvreurs des Côtes-d'Armor (`OUVERTURES_DE_DEPART`). Un couple métier et département s'ouvre quand l'admin « prévient les inscrits » (confirmation = décision d'ouverture) ; ouvrir ne bloque personne et ne change aucune règle d'achat groupé.
+- Liste d'attente : case « Préviens-moi » à l'inscription (`/commencer`) et sur l'accueil, jamais cochée d'office, choix noté avec sa version ; « Tu es sur la liste. On t'écrit dès que Mobiiz ouvre pour les plaquistes du 22. » ; une ligne par e-mail et métier ; désinscription en un clic (lien de l'e-mail, ou l'accueil).
+- Admin › « Prévenir les inscrits » (`/admin/prevenir`) : métier, départements, nombre, aperçu de l'e-mail, confirmation sur ce nombre ; lots de 20 ; une fois par inscrit ; journal (adresses masquées). Admin › « Invitations » : qui a invité qui.
+- « Invite d'autres artisans » sur l'accueil (fermable) : lien personnel `/invitation/<code>` partagé par l'artisan (SMS, WhatsApp, e-mail, copier) ; aucune récompense ; suivi seul (`invitation_suivi`), prêt pour Flouzeo plus tard.
+- Migration additive `20261128120000_liste_attente_invitations`. Registre RGPD lignes 24 et 25. À valider par Greg : les durées de conservation proposées (ligne 24), pas encore appliquées.
 
 ## Décisions du 28 novembre 2026 : référencement Google et IA (audit `baticlair/docs/referencement/audit-seo-ia-2026-11-27.md`)
 
@@ -505,6 +523,26 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Carte « Santé » de l'admin (à faire) : lire `GET /v1/admin/sauvegarde` (dernière nuit, dernière réussite, retard, dernier essai). Code : `baticlair/apps/api/src/modules/sauvegarde/`, test `apps/api/test/sauvegarde-alerte.test.ts`.
 - Le workflow de la sauvegarde est posé sur `main` (accord de Greg du 28 novembre 2026, ce fichier seul) ; les deux constructions de production lancées par Vercel ont été annulées, la production reste au commit b7654ab0.
 - Search Console et Bing : faits par Greg au lancement (procédure et contrôle de la protection anti-robots de Vercel dans `baticlair/docs/groupe/MISE-EN-PROD.md`, section 0). P1 reste un brouillon jusqu'à l'ouverture des achats groupés en production ; zinc plus tard.
+
+## Décisions du 28 novembre 2026 : les manques évidents, repris sans attendre
+
+- « Mon site » : un onglet « Modèles », le premier (dessin de chaque modèle aux couleurs choisies, « Choisi », « Revenir au modèle … ») ; avant, le choix était caché dans « Couleurs ». Sur ordinateur, l'éditeur s'ouvre sur « Modèles ».
+- « Mon site » dit la date de retrait d'un site dont l'abonnement est fini (la même que l'e-mail et l'alerte, `publication.retraitLe`) avec « Reprendre l'abonnement » ; « Publier » refusé faute d'abonnement mène à l'abonnement. N'agit que quand `SITE_PUBLICATION_PAYANTE=on`.
+- Profil › « Inviter des artisans » (`/compte/inviter`) : le lien d'invitation et la liste d'attente, pour les retrouver après avoir fermé l'encart de l'accueil (qui le dit). Admin › liste d'attente : lien « Qui a invité qui ».
+
+## Décisions du 28 novembre 2026 : achats groupés, anonymes par défaut
+
+- RÈGLE CHANGÉE (Greg, 28 novembre 2026 ; remplace la règle du 16 novembre) : avant, les noms des entreprises participantes se voyaient, sauf case « rester anonyme » → les participants sont ANONYMES entre eux : jamais un nom d'entreprise, seulement le volume total (à partir de 3 entreprises), le nombre d'artisans et la zone. La case « Rester anonyme » et sa route (`POST /v1/ag/besoins/:id/anonymat`) sont retirées ; l'admin voit toujours qui participe. La colonne `besoin_groupe_v1.anonyme` reste en base, sans usage (rien n'est effacé). Le négoce, lui, reçoit toujours le nom de ses clients pour la commande. Tests : `apps/api/test/achats-groupes-v1.test.ts`, `e2e-ag-v1/achats-groupes-v1.spec.ts`.
+
+## Décisions du 28 novembre 2026 : discrétion des infos société (Greg : « décide le plus logique, comme le marché »)
+
+- Mobiiz reste au nom de BATI INVEST. RÈGLE CHANGÉE : avant, le bloc légal complet (adresse du siège, SIRET, RCS, capital, TVA) en pied de la landing, des pages publiques et de chaque e-mail → seulement « Mobiiz · contact@mobiiz.fr » et le lien « Mentions légales » (comme Wix, Malt, Lovable). L'adresse, le SIRET, le RCS et le capital ne sont QUE sur `/mentions-legales` et sur les factures d'abonnement (obligation légale).
+- E-mails aux négoces : « envoyé par Mobiiz » (avant : « par BATI INVEST (Mobiiz) »). Page de réponse d'un négoce : plus « édité par BATI INVEST SARL ».
+- Sites des artisans : « Hébergement : Mobiiz, contact@mobiiz.fr (coordonnées complètes : mentions légales de Mobiiz) ; serveurs Vercel Inc. » (comme Wix ou Jimdo) ; avant, l'adresse du siège. À faire valider par l'avocat (`MISE-EN-PROD.md`, section 0).
+- Politique de confidentialité (version du 28/11/2026) : le responsable du traitement renvoie aux mentions légales pour l'adresse ; contact@mobiiz.fr.
+- RÈGLE CHANGÉE : `/mentions-legales` n'est plus ouverte aux moteurs (retirée de `PAGES_INDEXABLES`, `noindex` en en-tête et en balise). Pas de ligne dans robots.txt, choix assumé : Google doit pouvoir lire le `noindex` ; une page interdite dans robots.txt peut rester dans les résultats sous forme de lien.
+- Les tests n'utilisent plus l'adresse de Greg (adresse fictive « 1 rue des Ardoisiers, 22500 Paimpol »). Test permanent `apps/web/scripts/discretion.test.mjs` : refuse adresse, SIRET, RCS, capital ailleurs que dans les mentions légales.
+- Le seul moyen de ne plus montrer l'adresse personnelle au registre (societe.com, Infogreffe) : domicilier le siège (environ 15 à 30 € par mois et une modification du Kbis) ; à décider par Greg.
 
 ## Décisions du 28 novembre 2026 : documents légaux du MVP (`baticlair/docs/legal/`, candidats, rien de publié)
 

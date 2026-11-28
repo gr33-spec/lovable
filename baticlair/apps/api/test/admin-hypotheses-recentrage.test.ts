@@ -31,7 +31,7 @@ beforeEach(async () => {
 
 describe("admin du recentrage", () => {
   it("hypothèses : taux de réponse perso et demandes commandées, par zone ; « Vos résultats » du négoce", { timeout: 60_000 }, async () => {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const d = (await a.agent.post(`/v1/projects/${a.projectId}/demandes-perso`).send({ but: "commander", accord: true, articles: a.articles, negoces: [{ nom: "Négoce X", email: "x@negoce.fr" }, { nom: "Négoce Y", email: "y@negoce.fr" }] }).expect(201)).body;
     const jeton = /\/chiffrer\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, "x@negoce.fr").at(-1)!.text)![1]!;
@@ -51,7 +51,7 @@ describe("admin du recentrage", () => {
   });
 
   it("le coût IA d'un compte gratuit au-delà de 3 $ est signalé ; l'interrupteur coupe les inscriptions", async () => {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     const a = await couvreurAvecListe(ctx, "a@toitures.fr", "Toitures A", "3 rue des Ajoncs, 22300 Lannion", [{ libelle: ARDOISE, quantite: "1000", unite: "pièces" }]);
     await ctx.prisma.parametreGroupe.create({ data: { cle: "zone:22:seuil_franchi", valeur: "2026-01-01T00:00:00.000Z" } });
     await ctx.app.get(AbonnementService).finirEssai(a.companyId);

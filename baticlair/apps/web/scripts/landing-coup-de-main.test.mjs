@@ -65,7 +65,9 @@ test("la landing premium V3 : conditions en vigueur, aucun mot interdit, aucun l
   assert.ok(landing.includes("Gratuit, pour tous les artisans"));
   assert.doesNotMatch(landing, /premier achat groupé est offert|Sur abonnement/);
   assert.ok(landing.includes("TARIFS.question.r"));
-  assert.ok(landing.includes("BLOC_LEGAL") && landing.includes("PAGES_LEGALES"));
+  // Discrétion (Greg, 28 novembre 2026) : le pied dit « Mobiiz · contact@mobiiz.fr » et mène aux mentions légales ; plus de
+  // bloc légal complet (adresse, SIRET, RCS, capital) en dehors de la page des mentions.
+  assert.ok(landing.includes("PAGES_LEGALES") && landing.includes('href="/mentions-legales"') && !landing.includes("BLOC_LEGAL"));
   assert.match(client, /EXEMPLE FICTIF/);
   assert.match(client, /Aucun prix ni pourcentage d’économie garanti/);
 });

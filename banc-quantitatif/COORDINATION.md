@@ -4,6 +4,14 @@
 
 Chaque discussion écrit ici ce qu'elle touche, et lit ce que les autres touchent, avant de modifier un écran partagé.
 
+
+> **RÈGLE POUR TOUTES LES DISCUSSIONS (Greg, 28 novembre 2026) : PRENDS LES INITIATIVES QUI ONT DU SENS.** Pense chaque
+> fonctionnalité de bout en bout, comme un vrai produit : si quelque chose manque pour qu'un artisan s'y retrouve (un onglet,
+> un bouton, un retour en arrière, un message clair), ajoute-le sans attendre que Greg le demande, puis signale-le dans ton
+> compte rendu. Exemple : un choix de modèle de site doit avoir son propre onglet « Modèles », pas être caché dans
+> « Couleurs ». Limites : pas d'initiative sur les prix, les tarifs, les règles de calcul du quantitatif, la sécurité, la prod
+> ou les dépenses. Là, tu proposes et Greg arbitre. (Aussi en tête de CLAUDE.md.)
+
 ## Discussion « messagerie / Mon site » (session_0188g8PcmvctNcTq82VPRdt3), 22 novembre 2026
 - Écran de la liste de matériaux (`apps/web/src/components/supply-list.tsx`, écran « Fournitures ») : JE N'Y TOUCHE PAS.
   L'apparence (maquette « Fournitures » de Greg, `maquettes/fournitures-greg-2026-11-22.png`), la flèche du calcul et
@@ -162,9 +170,63 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
   main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
 
+## Discussion « écrans » (lovable-38), 28 novembre 2026 — chantier 05 (liste d'attente, invitations)
+- Fichiers : module API `modules/communaute` (nouveau), `pages-regionales` (consentement), migration
+  `20261128120000_liste_attente_invitations` (après `sauvegarde_rapport`, empreintes refaites), `components/communaute-accueil.tsx`
+  (UNE ligne dans `accueil.tsx`), `/commencer` (case « Préviens-moi », code d'invitation), pages `(entree)/invitation/[code]` et
+  `(entree)/liste-attente/desinscription` (noindex, hors sitemap), admin `prevenir` et `invitations`. Ni « À la voix », ni
+  l'Assistant, ni le moteur.
+- 28 nov., après-midi — branche rendue reçue (6e9f9a14), fusionnée ; JE POUSSE dès que la chaîne complète est verte, en un seul
+  commit : chantier 05, manques évidents (onglet « Modèles » de `page-entreprise/editeur.tsx`, date de retrait dans
+  `page-entreprise.service.ts`, Profil « Inviter des artisans ») et achats groupés anonymes par défaut (`achats-groupes-v1`,
+  domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.
+- 28 nov., 13 h 30 — LIBRE : poussé (1c885c1b), en ligne sur le site et l'API (chantier 05, manques évidents, achats groupés
+  anonymes par défaut, plus le correctif des alertes du référencement). La branche est libre.
+## Banc du calcul, 28 novembre 2026 : le quantitatif à la voix
+- Touché côté écran (petit, demandé par Greg) : `components/nouveau-quantitatif.tsx`, `ALaVoix` (titre « Décris ton
+  chantier », la bulle reçoit le texte remis au propre par le serveur, boutons de doute, « Envoyer » ; une dictée qui nomme
+  un ouvrage part au moteur, `versLeMoteur`). Le carré rouge d'arrêt (`EcouteEnCours`, `chat-mobiiz.tsx`) existait déjà :
+  pas touché. À la discussion des écrans : ce composant est le vôtre pour l'apparence ; garder les noms `Décris ton chantier`
+  (titre), `Ce que tu as dit` (région), `Envoyer` (bouton) tenus par le parcours « le quantitatif à la voix ».
+- Serveur : `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre` ; moteur : `lecture/dictee.ts`.
+- 28 nov. — JE POUSSE sur la branche de test après la chaîne verte ; « branche rendue » écrit ici après /version.
+
+## Banc du calcul, 28 novembre 2026 (soir) : retours de Greg sur le quantitatif (iPhone), part écran
+- À LA DISCUSSION DES ÉCRANS (Greg : « si c'est surtout de l'écran, note-le ») : les SUGGESTIONS en panneau compact qui
+  monte du bas (bottom sheet) : catégories en titres simples, une ligne fine par suggestion avec sa case, 10 à 15 visibles
+  sans défiler, en bas « Ajouter (3) » et « Passer ». Composants : `CasesSuggestions` (`journey.tsx`, dans la discussion) et
+  `SuggestionsCard` (même fichier). Le contenu (catégories, libellés, clé `suggestions:choisies`) ne change pas ; noms tenus
+  par les parcours : la case par son libellé, « Continuer » (à renommer « Ajouter (N) » / « Passer » avec les parcours).
+- Fait par le banc (contenu et parcours, déjà dans ses fichiers) :
+  - `journey.tsx` : la barre d'écriture reste ouverte (`onDire`, « ajoute un Velux ») dans les questions ET au
+    récapitulatif ; « Il me manque N infos pour <ouvrage>, ensuite ta liste » ; calcul automatique quand plus rien ne
+    manque après les suggestions ; « Je vais calculer tes feuilles de zinc » ; nombre de feuilles au récapitulatif.
+  - `supply-list.tsx` : « − / + » sur chaque ligne (pas = unité de commande de la fiche), nombre à taper, boutons 44 px ;
+    « Réunit : … » sur une ligne qui rassemble plusieurs lignes du devis. `lib/origine-ligne.ts` : modifié = « Dit par toi ».
+  - `assistant-mobiiz.tsx` : « ajoute … » dans l'Assistant passe par le moteur (`POST /v1/quantitatifs/:id/dire`) ; un article
+    qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.
+- 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
+  (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.
+- 28 nov., soir — banc du calcul : POUSSÉ d4057d87 (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement), site et API en ligne. Branche de test LIBRE.
+
+- 28 nov., après-midi — discrétion des infos société (Greg) : je touche les pieds de page publics (`decouvrir/landing-premium.tsx`,
+  `components/vitrine.tsx`, `page-locale/page-locale.tsx`), le pied des e-mails (`platform/email/mise-en-page.ts`), les e-mails
+  négoces (`domain/groupe/espace-negoce.ts`), `reponse/[jeton]`, le pied des sites d'artisans (`page-entreprise/vue-page.tsx`),
+  la confidentialité, et pour le référencement : `/mentions-legales` sort de `PAGES_INDEXABLES` (`lib/indexation.ts`) avec
+  `noindex`. Puis les sites vitrines (`components/page-entreprise/*`, `page-entreprise` côté serveur).
+- 28 nov., soir — discussion des écrans (session_0188g8PcmvctNcTq82VPRdt3) : discrétion des infos société verte (chaîne 148),
+  fusionnée avec le banc (d4057d87) ; je relance la chaîne et J'ATTENDS « branche rendue » du banc avant de pousser.
+- 28 nov., soir — discussion des écrans : chaîne 149 verte ; JE POUSSE (discrétion des infos société). « LIBRE » écrit ici après /version.
+- 28 nov., soir — LIBRE : poussé (a0d41815), en ligne sur le site et l'API (discrétion des infos société). La branche est libre.
+
 ## Documents légaux (session_01Pqq8eRsWNdQEBSRxcKPpzH), 28 novembre 2026 — changements de code À FAIRE PLUS TARD
 
 Textes candidats dans `baticlair/docs/legal/` (rien de publié). Ils annoncent trois choses que le code ne fait pas encore. Je n'y touche pas :
 - **Anonymat des achats groupés** (Greg, 28 novembre 2026) : jamais le nom d'un participant, plus de case « rester anonyme » (`participantsVisiblesV1`). Pour : « SaaS achat artisans ».
 - **Lien « Mentions légales » en pied de chaque site d'artisan**, avec les infos de l'artisan lues dans son profil, en accord avec la discrétion des infos société. Pour : « SaaS achat artisans ».
 - **Listes anonymisées gardées après la suppression d'un compte** (Greg, 28 novembre 2026), pour l'observatoire : seulement métier, département, articles et quantités, sans nom, adresse, client ni prix de devis client. Aujourd'hui, la suppression du compte les efface. Migration additive, puis registre RGPD (ligne 23). Pour : plus tard, discussion à désigner par Greg.
+
+## Suite de l'audit de nuit (session_01Pqq8eRsWNdQEBSRxcKPpzH), 28 novembre 2026
+- Petites corrections demandées par Greg, rien d'autre : les 3 tests du site en échec (`apps/web/scripts/landing-coup-de-main.test.mjs`, `erreurs-precises.test.mjs` et les phrases qu'il vise), refus de `SIRETS_DE_TEST` en production (`platform/config/config.ts`), tri des e-mails reçus avec `adresseNue` du moteur (`platform/email/contact-entrant.ts`). Plus la réécriture de `docs/groupe/MISE-EN-PROD.md` et les rapports `docs/audit-nuit/`, `docs/legal/`.
+- Je ne touche ni aux prix, ni à Stripe, ni aux CGU publiées, ni à Pro Max, ni au quantitatif, ni aux achats groupés.
+- Branche LIBRE reçue (1cef91ff). JE POUSSE dès que ma chaîne est verte ; « LIBRE » écrit ici après /version. Ne poussez pas d'ici là.

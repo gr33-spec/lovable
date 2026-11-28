@@ -77,7 +77,8 @@ export async function repondreAuxQuestions(
     if (await calculer.isVisible()) return posees;
     // Règle changée (Greg, 21 novembre 2026) : un devis sans question peut avoir l'étape « Suggestions » seule (la sortie de
     // ventilation) ; après « Continuer », le calcul part tout seul et le récapitulatif arrive, sans « Calculer ma liste ».
-    if (posees.length === 0 && (await listePrete(page).first().isVisible())) return posees;
+    // Règle changée (Greg, 28 novembre 2026) : de même après la dernière réponse, quand plus rien ne manque.
+    if ((await listePrete(page).first().isVisible()) && !(await boutons.isVisible())) return posees;
     // Entre deux états (la dernière réponse part, « Calculer ma liste » arrive) il n'y a plus de question à lire : on
     // regarde à nouveau l'écran au lieu d'attendre une question qui ne viendra pas (cause trouvée le 18 novembre 2026).
     const lue = await boutons.getAttribute("aria-label", { timeout: 2_000 }).catch(() => null);
@@ -110,8 +111,9 @@ export async function repondreAuxQuestions(
     const defaut = boutons.getByRole("button", { name: /par défaut$/ });
     const bouton = voulu && typeof voulu === "object" && "click" in voulu ? voulu : voulu ? boutons.getByRole("button", { name: voulu as string | RegExp }).first() : (await faconne.count()) > 0 ? faconne.first() : (await defaut.count()) > 0 ? defaut.first() : boutons.getByRole("button", { name: "Je ne sais pas", exact: true });
     await bouton.click();
-    // La réponse devient un message de l'artisan ; la question suivante (ou « Calculer ma liste ») arrive.
-    await expect(reponses).toHaveCount(avant + 1);
+    // La réponse devient un message de l'artisan ; la question suivante (ou « Calculer ma liste ») arrive. Quand rien ne
+    // manque plus, la liste s'ouvre seule (Greg, 28 novembre 2026) : la discussion se ferme.
+    await expect.poll(async () => (await reponses.count()) === avant + 1 || (await listePrete(page).first().isVisible()), { timeout: 15_000 }).toBe(true);
   }
   throw new Error("La discussion ne finit pas : plus de 60 questions.");
 }
@@ -130,7 +132,7 @@ export async function ecrireDansLaDiscussion(page: Page, texte: string) {
 export async function calculerEtVoirMaListe(page: Page) {
   // Sans aucune question posée, le calcul est parti tout seul après l'étape « Suggestions » : il n'y a rien à toucher.
   await expect(calculerMaListe(page).or(listePrete(page)).first()).toBeVisible({ timeout: 60_000 });
-  if (await calculerMaListe(page).isVisible()) await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
   // Greg, 23 novembre 2026 : un « Je ne sais pas » au développé fait revenir « Combien de feuilles ? » au calcul ; on y
   // répond, puis on recalcule (une fois).
   await revenirAuxFeuilles(page);
@@ -144,7 +146,18 @@ export async function revenirAuxFeuilles(page: Page) {
   await expect(voir.or(boutons).or(page.getByRole("region", { name: "Récapitulatif" })).or(page.getByRole("region", { name: "Page des fournitures" })).first()).toBeVisible({ timeout: 120_000 });
   if (!(await boutons.isVisible()) || !/combien de feuilles de zinc/.test((await boutons.getAttribute("aria-label")) ?? "")) return;
   await repondreAuxQuestions(page);
-  await calculerMaListe(page).click();
+  await lancerLeCalcul(page);
+}
+
+/**
+ * « Calculer ma liste » quand il est là. Règle changée (Greg, 28 novembre 2026 : « si rien ne manque, la liste s'ouvre
+ * directement ») : les cases « Suggestions » passées et plus aucune question, le calcul part tout seul ; le bouton peut
+ * disparaître avant le toucher.
+ */
+export async function lancerLeCalcul(page: Page) {
+  const c = calculerMaListe(page);
+  if (!(await c.isVisible())) return;
+  await c.click({ timeout: 5_000 }).catch(() => undefined);
 }
 
 /** Le récapitulatif, quand il arrive : « Voir ma liste ». */

@@ -41,7 +41,7 @@ const publique = () => request(ctx.app.getHttpServer());
 const jetonPour = (email: string) => /\/chiffrer\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, email).at(-1)!.text)![1]!;
 
 async function admin() {
-  const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: ARDOISE, quantite: "10", unite: "pièces" }]);
+  const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: ARDOISE, quantite: "10", unite: "pièces" }]);
   await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
   return greg;
 }

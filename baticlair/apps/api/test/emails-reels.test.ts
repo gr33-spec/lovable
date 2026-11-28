@@ -71,7 +71,11 @@ describe("la mise en page", () => {
   it("logo, pied légal, lien de désabonnement de l'e-mail (en pied, une fois) et en-tête List-Unsubscribe", () => {
     const m = miseEnPage({ to: "a@b.fr", subject: "Grille", text: "Bonjour,\n\nVoici la grille : https://x.fr/grille/1\n\nSe désabonner : https://x.fr/stop/9" }, WEB_ORIGIN);
     expect(m.html).toContain('alt="Mobiiz"');
-    expect(m.html).toContain("BATI INVEST");
+    // DISCRÉTION (Greg, 28 novembre 2026) : ni le nom de la société, ni son adresse, ni son immatriculation ; « Mobiiz »,
+    // le contact et le lien des mentions légales.
+    expect(m.html + m.text).not.toMatch(/BATI INVEST|Ouipoure|Ploubazlanec|910 796|RCS|capital|SIRET/);
+    expect(m.html).toContain(`href="${WEB_ORIGIN}/mentions-legales"`);
+    expect(m.text).toContain(`Mobiiz · contact@mobiiz.fr · Mentions légales : ${WEB_ORIGIN}/mentions-legales`);
     expect(m.html).toContain('<a href="https://x.fr/grille/1"');
     expect(m.html).toContain('href="https://x.fr/stop/9"');
     expect(m.html).toContain("Ne plus recevoir ces e-mails");
@@ -80,10 +84,9 @@ describe("la mise en page", () => {
     // Lot 8 (prompt maître point 17) : la signature officielle en pied de chaque e-mail.
     expect(m.text).toContain("\n--\nMobiiz. Plus on est, moins on paie.\n");
     expect(m.html).toContain("Mobiiz. Plus on est, moins on paie.");
-    // Greg, 26 octobre 2026 : le bloc légal complet (capital, RCS, contact) et l'information sur les réponses reçues.
-    expect(m.text).toContain("BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017, TVA FR61910796325, 6 impasse du Ouipoure, 22620 Ploubazlanec. Contact : contact@mobiiz.fr.");
+    // L'information sur les réponses reçues (26 octobre 2026), sans le nom de la société depuis le 28 novembre.
     expect(m.text).toContain(PHRASE_REPONSES);
-    expect(m.html).toContain("peut être reçue par Mobiiz (BATI INVEST)");
+    expect(m.html).toContain("peut être reçue par Mobiiz pour être");
     expect(m.headers["List-Unsubscribe"]).toBe("<https://x.fr/stop/9>");
   });
   it("sans lien propre (un e-mail de compte), « Gérer tes e-mails » mène aux réglages ; le texte est échappé", () => {

@@ -296,11 +296,32 @@ export class PageEntrepriseService {
 
   /* ------------------------------------------------------------------------------------- Brouillon et publication */
 
-  private async etatPublication(page: PageRow): Promise<{ publieLe: string | null; changementsAPublier: boolean; autorisee: boolean }> {
+  private async etatPublication(page: PageRow): Promise<{ publieLe: string | null; changementsAPublier: boolean; autorisee: boolean; retraitLe: string | null }> {
     const publie = instantaneLu(page.publie);
     // Une page en ligne sans instantané (d'avant le brouillon) : ce qui est en ligne EST le brouillon.
     const changementsAPublier = page.visible ? (publie ? !memeInstantane(publie, await this.instantane(page)) : false) : false;
-    return { publieLe: (page.publieLe ?? (page.visible && !publie ? page.updatedAt : null))?.toISOString() ?? null, changementsAPublier, autorisee: await this.publicationAutorisee(page.companyId) };
+    const retrait = page.visible ? await this.retraitPrevu(page, this.now()) : null;
+    return {
+      publieLe: (page.publieLe ?? (page.visible && !publie ? page.updatedAt : null))?.toISOString() ?? null,
+      changementsAPublier,
+      autorisee: await this.publicationAutorisee(page.companyId),
+      // Le site en ligne d'un abonnement fini : la date où il sera retiré (« Mon site » le dit, avec le lien de l'abonnement).
+      retraitLe: retrait?.toISOString() ?? null,
+    };
+  }
+
+  /**
+   * La date de retrait d'un site en ligne dont l'abonnement est fini (publication réservée allumée), sinon rien. Le même
+   * calcul que le ménage de nuit (`sitesApresFinAbonnement`), pour que l'écran et l'e-mail disent la même date.
+   */
+  private async retraitPrevu(page: { companyId: string; publieLe: Date | null; createdAt: Date }, maintenant: Date): Promise<Date | null> {
+    const allume = process.env.SITE_PUBLICATION_PAYANTE === "on";
+    if (!allume) return null;
+    const depuis = process.env.SITE_PUBLICATION_PAYANTE_DEPUIS ? new Date(process.env.SITE_PUBLICATION_PAYANTE_DEPUIS) : null;
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId: page.companyId }, select: { statut: true, periodeFin: true } });
+    const abonne = publicationPermise(true, a, maintenant);
+    const finAcces = a?.periodeFin ?? (depuis && !Number.isNaN(depuis.getTime()) ? depuis : null) ?? page.publieLe ?? page.createdAt;
+    return etatDuSiteApresFin({ allume, abonne, finAcces }, maintenant).retraitLe;
   }
 
   /** L'état du brouillon, tel qu'il serait publié : les champs de la page, ses photos prêtes, ses chantiers. */

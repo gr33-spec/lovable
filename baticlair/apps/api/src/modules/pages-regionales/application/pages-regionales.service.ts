@@ -1,4 +1,4 @@
-import { departement as departementConnu, estLotV1, lotsComprisV1, metierInscriptionOuvert, PARCOURS_ESSAI, TRADES, zoneDuCodePostal, type LotV1 } from "@baticlair/domain";
+import { CONSENTEMENT_LISTE_ATTENTE, departement as departementConnu, estLotV1, lotsComprisV1, metierInscriptionOuvert, PARCOURS_ESSAI, TRADES, zoneDuCodePostal, type LotV1 } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 
 /** Les métiers qui peuvent s'inscrire en liste d'attente : tous ceux qui ne sont pas ouverts, « Autre métier » compris. */
@@ -45,14 +45,17 @@ export class PagesRegionalesService {
   }
 
   /** Inscrit (ou met à jour) l'e-mail pour un métier. Idempotent : la même adresse pour le même métier ne fait qu'une ligne. */
-  async rejoindreListeAttente(entree: { email: string; metier: string; departement?: string | null; source?: string | null }): Promise<void> {
+  async rejoindreListeAttente(entree: { email: string; metier: string; departement?: string | null; source?: string | null; consentement?: boolean }): Promise<void> {
     const email = entree.email.trim().toLowerCase();
     const departement = entree.departement ? (departementConnu(entree.departement)?.code ?? null) : null;
     const source = entree.source?.trim().slice(0, 60) || null;
+    // CHANTIER 05 (28 novembre 2026) : le choix explicite est noté avec la version du texte accepté, et lève une
+    // ancienne désinscription.
+    const choix = entree.consentement ? { consentementLe: this.now(), consentementVersion: CONSENTEMENT_LISTE_ATTENTE.version, desinscritLe: null } : {};
     await this.prisma.listeAttenteMetier.upsert({
       where: { email_metier: { email, metier: entree.metier } },
-      create: { email, metier: entree.metier, departement, source },
-      update: { ...(departement ? { departement } : {}), ...(source ? { source } : {}) },
+      create: { email, metier: entree.metier, departement, source, ...choix },
+      update: { ...(departement ? { departement } : {}), ...(source ? { source } : {}), ...choix },
     });
   }
 
@@ -92,7 +95,7 @@ export class PagesRegionalesService {
       total: await this.prisma.listeAttenteMetier.count(),
       parMetier: compter(lignes.map((l) => l.metier)).map(([metier, nombre]) => ({ metier, libelle: libelleMetier(metier), nombre })),
       parDepartement: compter(lignes.map((l) => l.departement ?? "")).map(([code, nombre]) => ({ code: code || null, nom: code ? (departementConnu(code)?.nom ?? code) : "Non indiqué", nombre })),
-      inscrits: lignes.slice(0, 500).map((l) => ({ id: l.id, email: l.email, metier: l.metier, libelle: libelleMetier(l.metier), departement: l.departement, nomDepartement: l.departement ? (departementConnu(l.departement)?.nom ?? l.departement) : null, source: l.source, le: l.createdAt.toISOString() })),
+      inscrits: lignes.slice(0, 500).map((l) => ({ id: l.id, email: l.email, metier: l.metier, libelle: libelleMetier(l.metier), departement: l.departement, nomDepartement: l.departement ? (departementConnu(l.departement)?.nom ?? l.departement) : null, source: l.source, le: l.createdAt.toISOString(), etat: l.desinscritLe ? "desinscrit" : l.prevenuLe ? "prevenu" : "inscrit", compte: !!l.companyId })),
     };
   }
 }

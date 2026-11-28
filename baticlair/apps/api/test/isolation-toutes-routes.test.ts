@@ -297,6 +297,8 @@ describe("isolation entre entreprises, toutes les routes", () => {
         [/\/pages-entreprises\/entreprise$/, companyId],
         [/\/admin\/pages-publiques$/, pageA.adresse],
         [/\/admin\/pages-publiques\/signalements$/, ids.signalementPage],
+        // Chantier 05 : une annonce d'ouverture (B n'est pas admin : 403).
+        [/\/admin\/annonces$/, ids.lot],
       ];
       const hit = byPrefix.find(([re]) => re.test(prefix));
       if (!hit) throw new Error(`Paramètre sans identifiant de A : ${path} (${param})`);

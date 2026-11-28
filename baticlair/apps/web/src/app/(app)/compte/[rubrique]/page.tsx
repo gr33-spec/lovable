@@ -12,6 +12,7 @@ import { DossierProfessionnel, GuideEtChantierFictif, OuLireLesReponses, ProfilP
 import { ButtonLink } from "@/components/ui";
 import { EnTeteRubrique } from "@/components/en-tete-rubrique";
 import { CarteIdentite } from "@/components/envoi-negoces";
+import { CommunauteProfil } from "@/components/communaute-accueil";
 import { NotificationsCard } from "@/components/notifications-card";
 import { PartnerKeysCard } from "@/components/partner-keys-card";
 import { PlanSummary } from "@/components/paywall";
@@ -93,6 +94,8 @@ function Contenu({ id }: { id: Exclude<RubriqueProfil, "apparence"> }) {
       return <DossierProfessionnel />;
     case "guide":
       return <GuideEtChantierFictif />;
+    case "inviter":
+      return <CommunauteProfil />;
     case "notifications":
       return (
         <>

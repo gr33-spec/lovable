@@ -721,23 +721,15 @@ export function statutAfficheV1(a: { statut: EtatAchatV1 }, b: { statut: EtatBes
 
 // RÈGLE CHANGÉE (Greg, 16 novembre 2026) : tant qu'il y a moins de 3 entreprises, « En cours de regroupement » à la
 // place du volume (à une ou deux, le total laisserait deviner la quantité de l'autre). Avant (15 novembre) : dès la
-// première publication ; avant encore : 5 entreprises. Le nombre d'entreprises et leurs noms se voient toujours.
+// première publication ; avant encore : 5 entreprises. Le nombre d'entreprises se voit toujours, jamais leurs noms (28 novembre 2026).
 export const SEUIL_ENTREPRISES_VOLUMES = 3;
 export const PHRASE_REGROUPEMENT = "En cours de regroupement";
 
 /**
- * QUI PARTICIPE (Greg, 16 novembre 2026 ; RÈGLE CHANGÉE : avant, jamais un nom entre artisans) : les noms des entreprises
- * sont visibles, JAMAIS la quantité de chacune (seulement le total) ; une entreprise qui a coché « rester anonyme » n'est
- * que comptée. Les noms sont rangés par ordre alphabétique : ni l'ordre d'arrivée ni la quantité ne se devinent.
+ * QUI PARTICIPE : ANONYMES PAR DÉFAUT (Greg, 28 novembre 2026 ; RÈGLE CHANGÉE : le 16 novembre, les noms se voyaient, sauf
+ * case « rester anonyme », retirée). Entre artisans, jamais un nom d'entreprise : le volume total, le nombre d'artisans et
+ * la zone. Seul l'admin voit qui participe.
  */
-export function participantsVisiblesV1(participants: readonly { companyId: string; nom: string; anonyme: boolean }[]): { noms: string[]; anonymes: number } {
-  const parEntreprise = new Map<string, { nom: string; anonyme: boolean }>();
-  // Une entreprise anonyme sur un seul de ses besoins l'est pour tout l'achat.
-  for (const p of participants) parEntreprise.set(p.companyId, { nom: p.nom.trim(), anonyme: p.anonyme || parEntreprise.get(p.companyId)?.anonyme === true });
-  const tous = [...parEntreprise.values()];
-  const noms = tous.filter((p) => !p.anonyme && p.nom).map((p) => p.nom).sort((a, b) => a.localeCompare(b, "fr"));
-  return { noms, anonymes: tous.length - noms.length };
-}
 
 export interface VolumesV1 {
   entreprises: number;

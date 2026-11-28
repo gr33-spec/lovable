@@ -540,16 +540,41 @@ function Stepper({ label, value, unit, pending, onChange }: { label: string; val
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void onChange(next), 1000);
   };
-  const btn = "flex size-9 items-center justify-center rounded-full bg-ground text-[19px] font-extrabold leading-none active:scale-90 disabled:opacity-40";
+  const [saisie, setSaisie] = useState<string | null>(null);
+  const valider = () => {
+    const v = Number((saisie ?? "").replace(",", "."));
+    setSaisie(null);
+    if (!Number.isFinite(v) || v < 0 || v === n) return;
+    setN(v);
+    if (timer.current) clearTimeout(timer.current);
+    void onChange(v);
+  };
+  const btn = "flex size-11 items-center justify-center rounded-full bg-ground text-[20px] font-extrabold leading-none active:scale-90 disabled:opacity-40";
   return (
     <span role="group" aria-label={`Quantité : ${label}`} className="flex min-w-0 items-center gap-2">
       <span className="flex shrink-0 items-center gap-1">
         <button type="button" className={btn} disabled={pending || n <= 0} onClick={() => bump(-1)} aria-label={`Moins : ${label}`}>
           −
         </button>
-        <span className="min-w-[2.6rem] text-center text-[15px] font-extrabold tabular-nums" aria-live="polite">
-          {shownNumber(n)}
-        </span>
+        {saisie !== null ? (
+          <input
+            autoFocus
+            inputMode="decimal"
+            aria-label={`Taper la quantité : ${label}`}
+            value={saisie}
+            onChange={(e) => setSaisie(e.target.value)}
+            onBlur={valider}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") valider();
+              if (e.key === "Escape") setSaisie(null);
+            }}
+            className="h-11 w-16 rounded-xl border border-line bg-surface text-center text-[16px] font-extrabold tabular-nums"
+          />
+        ) : (
+          <button type="button" onClick={() => setSaisie(String(n))} aria-label={`Taper la quantité : ${label}`} className="min-h-11 min-w-[2.75rem] rounded-xl text-center text-[16px] font-extrabold tabular-nums underline decoration-dotted underline-offset-4" aria-live="polite">
+            {shownNumber(n)}
+          </button>
+        )}
         <button type="button" className={btn} disabled={pending} onClick={() => bump(1)} aria-label={`Plus : ${label}`}>
           +
         </button>
@@ -799,7 +824,8 @@ function Row({
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
   const postes = !sentTo && item?.kind === "computed" ? (item.postes ?? []) : [];
   const origine = item ? origineDeLaLigne(item) : null;
-  const point = !dot.ok || origine === "À vérifier" ? "bg-mark-warn" : origine === "Modifié par toi" ? "bg-accent" : "bg-mark-ok";
+  const modifiee = item?.verification?.etat === "modifie" || (item?.postes?.some((x) => x.modifie) ?? false);
+  const point = !dot.ok || origine === "À vérifier" ? "bg-mark-warn" : modifiee ? "bg-accent" : "bg-mark-ok";
   const raisons = item?.verification?.etat === "a_verifier" ? item.verification.raisons : [];
   const voirLeCalcul = () => {
     setCalcul(!calcul);
@@ -868,6 +894,8 @@ function Row({
     setNaming(false);
   };
 
+  // Les lignes du devis qu'un article réunit (jamais une ligne de pose, qui ne fait que citer l'article).
+  const reunies = (it: PurchaseItem) => takeoff.lines.filter((l) => it.lineIds.includes(l.id) && !/^\s*(?:pose|repose|main)/i.test(l.designation)).map((l) => l.designation);
   const body = (
     <>
       {opens ? null : <StatusMark ok={dot.ok} label={dot.label} />}
@@ -882,11 +910,14 @@ function Row({
             {item.precision}
           </span>
         ) : null}
+        {/* AUCUNE LIGNE NE DISPARAÎT TOUTE SEULE (Greg, 28 novembre 2026 : « ma liste est passée de 11 à 9 articles ») : une ligne
+            qui réunit plusieurs lignes du devis (les pièces pliées, toutes en feuilles de zinc) le dit, avec leurs noms. */}
+        {item && reunies(item).length > 1 ? <span className="text-[13px] leading-snug text-muted">Réunit : {reunies(item).join(" ; ")}</span> : null}
         {/* L'ORIGINE DE LA LIGNE (Greg, 16 novembre 2026 : « dit par toi », « calculé » (avec la règle) ou « à vérifier ») :
             dite seulement quand la liste mêle des lignes écrites et des lignes calculées ; la règle du calcul est la
             précision au-dessus ; « À vérifier » reste l'étiquette orange de la ligne. */}
-        {item && !sentTo && (dot.ok || origine === "Modifié par toi") && takeoff.purchase.toBuy.some((x) => x.kind === "computed") ? (
-          <span className={`text-[12px] leading-snug ${origine === "Modifié par toi" ? "font-bold text-accent-text" : "text-muted"}`}>{origine}</span>
+        {item && !sentTo && (dot.ok || modifiee) && takeoff.purchase.toBuy.some((x) => x.kind === "computed") ? (
+          <span className={`text-[12px] leading-snug ${modifiee ? "font-bold text-accent-text" : "text-muted"}`}>{origine}</span>
         ) : null}
         {/* Greg, 7 novembre 2026 : la famille est le titre de la section ; un badge seulement quand elle est incertaine. */}
         {row.familleIncertaine ? <span className="self-start rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-bold text-warn">Famille à vérifier</span> : null}
@@ -1063,7 +1094,10 @@ function Row({
       {calcul && !open && postes.length > 0 ? <DetailDuCalcul label={label} postes={postes} raisons={raisons} /> : null}
       {/* Greg, 17 novembre 2026 : le nombre de feuilles de zinc est une estimation, il s'ajuste d'un toucher dans la liste,
           sans ouvrir la ligne. Vaut pour toute quantité que la fiche du métier marque comme une estimation. */}
-      {!open && stepper && item?.estimation ? (
+      {/* AJUSTER D'UN TOUCHER (Greg, 28 novembre 2026, tous métiers) : sur CHAQUE ligne, − et + avancent du plus petit
+          conditionnement vendu (la boîte, la longueur, la pièce : l'unité de commande de la fiche) ; toucher le nombre permet
+          de le taper. Avant : seulement sur les quantités marquées « estimation » (les feuilles de zinc). */}
+      {!open && stepper && item ? (
         <div className="pb-2 pl-5">
           <Stepper label={label} value={stepper.value} unit={stepper.unit} pending={pending} onChange={(n) => onEdit(item, { libelle: item.label, quantite: String(n), unite: stepper.unit || null })} />
         </div>

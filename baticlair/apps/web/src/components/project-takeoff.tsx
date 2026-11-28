@@ -261,6 +261,12 @@ export function ProjectTakeoff({
       throw e;
     });
   const repondre = (reponses: NonNullable<CounterAnswers["reponses"]>) => run(() => relu(api<Quantitatif>(`/v1/quantitatifs/${qid0}/reponses?ecran=1`, { method: "POST", body: { reponses } })), update);
+  // « Ajoute un Velux » à tout moment (Greg, 28 novembre 2026) : l'article passe par le moteur ; la phrase de ce qui est fait revient.
+  const dire = async (texte: string): Promise<string | null> => {
+    const q = await api<Quantitatif & { message?: string }>(`/v1/quantitatifs/${qid0}/dire?ecran=1`, { method: "POST", body: { texte } });
+    update(q);
+    return q.message ?? null;
+  };
   const calculate = (answers: CounterAnswers) =>
     run(() => relu(api<Quantitatif>(`/v1/quantitatifs/${qid0}/calcul?ecran=1`, { method: "POST", body: answers })), (q) => {
       update(q);
@@ -289,11 +295,11 @@ export function ProjectTakeoff({
         );
       return <LotsCard takeoff={takeoff} pending={pending} error={actionError} onConfirm={(m) => void confirmLots(m)} />;
     }
-    return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} onReponses={(r) => void repondre(r)} />;
+    return <QuestionsStep takeoff={takeoff} pending={pending} error={actionError} onSubmit={calculate} onReponses={(r) => void repondre(r)} onDire={dire} />;
   }
   if (phase === "calcul") return <CalculScreen />;
   if (recap && takeoff.purchase.toBuy.length > 0)
-    return <RecapScreen takeoff={takeoff} pending={pending} onVoir={() => setRecap(false)} onChoix={(key, value, unit) => void repondre([{ question: key, valeur: value, unite: unit }])} />;
+    return <RecapScreen takeoff={takeoff} pending={pending} onVoir={() => setRecap(false)} onChoix={(key, value, unit) => void repondre([{ question: key, valeur: value, unite: unit }])} onDire={dire} />;
 
   // Une liste lue avant la règle « rien ne part vide » et restée sans ligne : jamais de bouton d'envoi ; on repart du dépôt.
   if (takeoff.purchase.toBuy.length + takeoff.purchase.toQuote.length === 0 && takeoff.lines.length === 0) {

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
-import { BLOC_LEGAL } from "@/lib/nom";
+import { PAGES_LEGALES } from "@/lib/legal";
 import { CONTOUR_FRANCE, TRACES_DEPARTEMENTS } from "@/lib/regions/carte-france";
 import type { FichePageLocale, Photo } from "@/lib/regions/fiche";
 import { CarteRegion, CtaFixeLocal, EnteteLocale, LienCommencer, type TraceRegion } from "./carte-region";
@@ -520,10 +519,11 @@ export function PageLocale({ fiche, origine, nonce }: { fiche: FichePageLocale; 
             </nav>
           </div>
           <p className="footer-bottom" style={{ display: "block" }}>
-            Service édité par {BLOC_LEGAL} Hébergeur : {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
+            {/* Discrétion (Greg, 28 novembre 2026) : l'éditeur, son adresse et son immatriculation ne sont que dans les mentions légales. */}
+          Mobiiz · <a href="mailto:contact@mobiiz.fr">contact@mobiiz.fr</a> · <Link href="/mentions-legales">Mentions légales</Link>
           </p>
           <div className="footer-bottom">
-            <span>© Mobiiz · Un service de Bati Invest</span>
+            <span>© Mobiiz</span>
             <span>Tracés de la carte : IGN Admin Express, Licence ouverte.</span>
           </div>
         </div>

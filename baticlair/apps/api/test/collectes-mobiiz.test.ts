@@ -36,7 +36,7 @@ const CAMPAGNE = { famille: "couverture", departement: "22", libelle: "Ardoise 3
 
 describe("les collectes lancées par Mobiiz", () => {
   it("l'admin lance une collecte ; elle se voit dans Découvrir avant le premier besoin, marquée « campagne »", async () => {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: ARDOISE, quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: ARDOISE, quantite: "10", unite: "pièces" }]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const c = (await greg.agent.post("/v1/admin/pilotage/achats-groupes/campagnes").send(CAMPAGNE).expect(201)).body;
     expect(c).toMatchObject({ titre: CAMPAGNE.libelle, clotureLe: expect.any(String) });

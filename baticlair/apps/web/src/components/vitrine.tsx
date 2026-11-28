@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
-import { BLOC_LEGAL, NOM_APP, SLOGAN_APP } from "@/lib/nom";
+import { PAGES_LEGALES } from "@/lib/legal";
+import { NOM_APP, SLOGAN_APP } from "@/lib/nom";
 
 /**
  * L'en-tête et le pied des pages publiques « niveau studio » (Greg, 26 octobre 2026) : accueil, /couvreurs, la page négoce,
@@ -54,7 +54,8 @@ export function PiedVitrine({ sansEditeur = false }: { sansEditeur?: boolean }) 
       </div>
       {sansEditeur ? null : (
         <p style={{ maxWidth: "90ch" }}>
-          Service édité par {BLOC_LEGAL} Hébergeur : {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
+          {/* Discrétion (Greg, 28 novembre 2026) : l'éditeur, son adresse et son immatriculation ne sont que dans les mentions légales. */}
+          Mobiiz · <a href="mailto:contact@mobiiz.fr">contact@mobiiz.fr</a> · <Link href="/mentions-legales">Mentions légales</Link>
         </p>
       )}
     </footer>

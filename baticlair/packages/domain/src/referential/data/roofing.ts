@@ -1581,7 +1581,7 @@ function avecSortieDeVentilation(works: Referential["workItems"]): Referential["
 }
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.11.23-85",
+  version: "roofing-2026.11.28-86",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
@@ -2965,7 +2965,7 @@ generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (mo
       slots: [
         // Banc du calcul (C08, « ardoises identiques à l'existant ») : sans format écrit, le comptoir demande l'ardoise.
         { key: "ardoise", family: "roof_slate", label: "Ardoises", ask: "Quelle ardoise ? Donne son format." },
-        { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"], usual: { text: "Un crochet inox par ardoise.", source: F, productId: "crochet-ardoise-standard" } },
+        { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"], dicteAvec: true, usual: { text: "Un crochet inox par ardoise.", source: F, productId: "crochet-ardoise-standard" } },
         // Les crochets à pointe : une autre pièce au comptoir (boîtes de 700), forme d'achat des crochets écrits.
         { key: "crochet_pointe", family: "slate_hook_pointe", label: "Crochets d'ardoise à pointe", usual: { text: "Crochets à pointe : au droit des chevrons en pose à agrafe, tous sur volige.", source: F, productId: "crochet-ardoise-pointe" }, formOf: "crochet" },
         {

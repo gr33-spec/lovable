@@ -47,33 +47,19 @@ async function pret(page: Page) {
   await expect(page.getByRole("dialog", { name: "Guide" })).toHaveCount(0);
 }
 
-test("la phrase dictée de la capture : deux articles, la question du comptoir, la réponse complète la gouttière", async ({ page }) => {
+test("la phrase dictée de la capture : une surface à calculer, elle passe par le moteur comme un devis (jamais « 52 m² » recopiés)", async ({ page }) => {
   await inscrire(page);
   await page.goto("/chantiers/nouveau?mode=assistant");
   const chat = page.getByRole("dialog", { name: "Nouveau quantitatif" });
   await pret(page);
   await chat.getByRole("textbox", { name: "Ton message" }).fill(DICTEE);
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
-  const compris = chat.getByRole("region", { name: "J'ai compris" });
-  await expect(compris).toContainText("Mobiiz propose · 2 articles");
-  await expect(compris).toContainText("52 m²");
-  await expect(compris).toContainText(/Ardoise naturelle 32\s?×\s?22/);
-  await expect(compris).toContainText(/Gouttière havraise/);
-  // Jamais la phrase entière dans une désignation.
-  await expect(compris).not.toContainText("j'ai besoin");
-  // La question du comptoir, AVEC SA LIGNE dans la carte, avec ses boutons (direction A : jamais reposée en bulle).
-  const reponses = compris.getByRole("group", { name: /^Question de Mobiiz/ });
-  await expect(reponses).toContainText("En quelle matière ?");
-  await expect(reponses.getByRole("button", { name: "Zinc" })).toBeVisible();
-  await expect(reponses.getByRole("button", { name: "Cuivre" })).toBeVisible();
-  await expect(reponses.getByRole("button", { name: "PVC" })).toBeVisible();
-  await reponses.getByRole("button", { name: "Zinc" }).click();
-  // Une seule carte, à jour : la gouttière est en zinc, la question n'est plus posée.
-  await expect(chat.getByRole("region", { name: "J'ai compris" })).toHaveCount(1);
-  await expect(compris).toContainText(/Gouttière havraise zinc/i);
-  await expect(compris).toContainText("52 m²");
-  // Rien n'est dans la liste sans le bouton.
-  await expect(chat.getByRole("button", { name: /^Ma liste/ })).toHaveCount(0);
+  // RÈGLE CHANGÉE (Greg, 28 novembre 2026, test réel sur iPhone) : « on n'envoie JAMAIS des m² à un fournisseur ». Avant :
+  // la carte « Mobiiz propose · 2 articles » recopiait « 52 m² ». Maintenant : le quantitatif s'ouvre sur les questions du
+  // moteur (comme un devis), puis le calcul, les suggestions et la liste.
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  await expect(page.getByRole("region", { name: "Les questions" })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("52 m²")).toHaveCount(0);
 });
 
 test("une photo de chantier : ce que l'assistant voit, les matériaux à confirmer sans quantité, ses questions ; les mesures dites complètent", async ({ page }) => {
@@ -99,10 +85,9 @@ test("une photo de chantier : ce que l'assistant voit, les matériaux à confirm
   // L'artisan dit ses mesures : la carte se complète, toujours une seule.
   await chat.getByRole("textbox", { name: "Ton message" }).fill("85 m² en 32 22 et 14 mètres de gouttière");
   await chat.getByRole("button", { name: "Envoyer le message" }).click();
-  await expect(chat.getByRole("region", { name: "J'ai compris" })).toHaveCount(1);
-  await expect(compris).toContainText("85 m²");
-  await expect(compris).toContainText(/32\s?×\s?22/);
-  await expect(compris).toContainText("14 m");
+  // Les mesures dites : un quantitatif à calculer, par le moteur (Greg, 28 novembre 2026 ; avant : « 85 m² » recopiés).
+  await expect(page).toHaveURL(/\/chantiers\/[0-9a-f-]{36}/, { timeout: 60_000 });
+  await expect(page.getByRole("region", { name: "Les questions" })).toBeVisible({ timeout: 60_000 });
 });
 
 test("une photo d'une liste écrite : l'assistant la reconnaît et propose la lecture du document, comme avant", async ({ page }) => {
