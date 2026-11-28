@@ -1,6 +1,6 @@
 # Brouillon P1 : « Achats groupés couverture » (28 novembre 2026)
 
-**État : brouillon, NON publié, aucune page codée.** Greg relit tout avant publication. Aucune affirmation commerciale
+**État : brouillon, NON publié, aucune page codée.** Greg, 28 novembre 2026 : P1 reste un brouillon jusqu'à l'ouverture des achats groupés en production ; le zinc et la relecture du texte se feront à ce moment-là. Greg relit tout avant publication. Aucune affirmation commerciale
 sans son accord : chaque phrase qui en est une est listée en fin de document (« À valider par Greg »).
 
 Sources des faits : le code des achats groupés (`packages/domain/src/groupe/achats-groupes-v1.ts`, `tarifs.ts`), le

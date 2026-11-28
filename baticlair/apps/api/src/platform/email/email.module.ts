@@ -46,6 +46,12 @@ function envoyeur(config: AppConfig, logger: AppLogger, relais: RelaisEchecsEmai
   }
 }
 
+/**
+ * Où tourne l'API, dit dans chaque alerte (Greg, 28 novembre 2026). Sur Vercel, NODE_ENV vaut « production » même pour le
+ * site de test : on lit VERCEL_ENV (« preview » = le site de test), comme la route /version.
+ */
+export const lieuDesAlertes = (env: string, vercel: string | undefined = process.env.VERCEL_ENV): string => (vercel === "preview" ? "site de test" : env);
+
 @Global()
 @Module({
   providers: [
@@ -65,7 +71,7 @@ function envoyeur(config: AppConfig, logger: AppLogger, relais: RelaisEchecsEmai
       // Alertes de production (B5) : à côté des e-mails, qu'elles peuvent emprunter.
       provide: ALERTER,
       // L'adresse des alertes se règle dans l'admin (Greg, 14 novembre 2026) : lue en base à chaque alerte, sans redéploiement.
-      useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger, adresse: AdresseAlerte) => new ChannelAlerter({ ...config.alerts, env: config.env }, email, logger, fetch, () => Date.now(), () => adresse.actuelle(), () => adresse.connue()),
+      useFactory: (config: AppConfig, email: TransactionalEmailSender, logger: AppLogger, adresse: AdresseAlerte) => new ChannelAlerter({ ...config.alerts, env: lieuDesAlertes(config.env) }, email, logger, fetch, () => Date.now(), () => adresse.actuelle(), () => adresse.connue()),
       inject: [CONFIG, EMAIL_SENDER, LOGGER, AdresseAlerte],
     },
     // L'interrupteur des missions (admin › Réglages) : lu par la route de santé, les missions et la boîte.

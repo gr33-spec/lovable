@@ -159,6 +159,8 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., matin — référencement : POUSSÉ et EN LIGNE (site et API = 9b9704e1, puis 27a4ec14 avec le workflow) ;
   essai de l'alerte de la sauvegarde réussi (run 46128279724 : échec volontaire, « Prévenir Mobiiz » vert, API
   « enregistre: true »). Le workflow n'est PAS encore sur main (attend l'accord de Greg). Branche rendue.
+- 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
+  main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
 
 ## Banc du calcul, 28 novembre 2026 : le quantitatif à la voix
 - Touché côté écran (petit, demandé par Greg) : `components/nouveau-quantitatif.tsx`, `ALaVoix` (titre « Décris ton
@@ -181,4 +183,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
     manque après les suggestions ; « Je vais calculer tes feuilles de zinc » ; nombre de feuilles au récapitulatif.
   - `supply-list.tsx` : « − / + » sur chaque ligne (pas = unité de commande de la fiche), nombre à taper, boutons 44 px ;
     « Réunit : … » sur une ligne qui rassemble plusieurs lignes du devis. `lib/origine-ligne.ts` : modifié = « Dit par toi ».
-  - `assistant-mobiiz.tsx`, `project-takeoff.tsx` : « Ajouter un article » passe par le moteur (`POST /v1/quantitatifs/:id/dire`).
+  - `assistant-mobiiz.tsx` : « ajoute … » dans l'Assistant passe par le moteur (`POST /v1/quantitatifs/:id/dire`) ; un article
+    qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.

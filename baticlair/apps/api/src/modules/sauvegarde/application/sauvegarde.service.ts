@@ -47,11 +47,11 @@ export class SauvegardeService {
     const lien = lienExecution(jeton.runId);
     const etape = r.etape?.trim() || "étape inconnue";
     if (jeton.essai) {
-      const branche = jeton.ref.replace(/^refs\/heads\//, "");
-      this.alerter.alert("sauvegarde_info", r.statut === "echec" ? `ESSAI de l'alerte (branche ${branche}) : échec volontaire à l'étape « ${etape} ». L'alerte de la sauvegarde fonctionne ; rien à faire. Détail : ${lien}` : `ESSAI (branche ${branche}) : le compte rendu de la sauvegarde arrive bien. Rien à faire. Détail : ${lien}`);
+      // L'essai : des phrases simples, aucun lien ni nom technique (Greg, 28 novembre 2026 : arrivé dans les indésirables).
+      this.alerter.alert("sauvegarde_info", r.statut === "echec" ? "essai de l'alerte de la sauvegarde nocturne. Cet e-mail confirme que, si la sauvegarde échoue une nuit, tu en es prévenu ici. Rien à faire." : "essai du compte rendu de la sauvegarde nocturne : il arrive bien. Rien à faire.");
     } else if (r.statut === "echec") {
       const avant = reussieAvant ? `Dernière sauvegarde réussie : le ${quand(reussieAvant.recuLe)}.` : "Aucune sauvegarde réussie n'est encore connue.";
-      this.alerter.alert("sauvegarde_echec", `la sauvegarde de cette nuit a ÉCHOUÉ à l'étape « ${etape} ». Aucune nouvelle sauvegarde n'est gardée tant que ce n'est pas réglé. ${avant} Détail : ${lien}`);
+      this.alerter.alert("sauvegarde_echec", `la sauvegarde de cette nuit a échoué à l'étape « ${etape} ». Aucune nouvelle sauvegarde n'est gardée tant que ce n'est pas réglé. ${avant} Détail : ${lien}`);
     } else if (precedent?.statut === "echec") {
       const chiffres = [r.tables != null ? `${r.tables} tables` : null, r.lignes != null ? `${r.lignes} lignes` : null, r.octets != null ? taille(r.octets) : null].filter(Boolean).join(", ");
       this.alerter.alert("sauvegarde_info", `la sauvegarde est rétablie : celle-ci a réussi, test de restauration compris${chiffres ? ` (${chiffres})` : ""}. Détail : ${lien}`);
