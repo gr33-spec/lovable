@@ -824,7 +824,8 @@ function Row({
   const removable = editable && (row.itemKey !== undefined || row.lineIds.length > 0);
   const postes = !sentTo && item?.kind === "computed" ? (item.postes ?? []) : [];
   const origine = item ? origineDeLaLigne(item) : null;
-  const point = !dot.ok || origine === "À vérifier" ? "bg-mark-warn" : origine === "Modifié par toi" ? "bg-accent" : "bg-mark-ok";
+  const modifiee = item?.verification?.etat === "modifie" || (item?.postes?.some((x) => x.modifie) ?? false);
+  const point = !dot.ok || origine === "À vérifier" ? "bg-mark-warn" : modifiee ? "bg-accent" : "bg-mark-ok";
   const raisons = item?.verification?.etat === "a_verifier" ? item.verification.raisons : [];
   const voirLeCalcul = () => {
     setCalcul(!calcul);
@@ -915,8 +916,8 @@ function Row({
         {/* L'ORIGINE DE LA LIGNE (Greg, 16 novembre 2026 : « dit par toi », « calculé » (avec la règle) ou « à vérifier ») :
             dite seulement quand la liste mêle des lignes écrites et des lignes calculées ; la règle du calcul est la
             précision au-dessus ; « À vérifier » reste l'étiquette orange de la ligne. */}
-        {item && !sentTo && (dot.ok || origine === "Modifié par toi") && takeoff.purchase.toBuy.some((x) => x.kind === "computed") ? (
-          <span className={`text-[12px] leading-snug ${origine === "Modifié par toi" ? "font-bold text-accent-text" : "text-muted"}`}>{origine}</span>
+        {item && !sentTo && (dot.ok || modifiee) && takeoff.purchase.toBuy.some((x) => x.kind === "computed") ? (
+          <span className={`text-[12px] leading-snug ${modifiee ? "font-bold text-accent-text" : "text-muted"}`}>{origine}</span>
         ) : null}
         {/* Greg, 7 novembre 2026 : la famille est le titre de la section ; un badge seulement quand elle est incertaine. */}
         {row.familleIncertaine ? <span className="self-start rounded-full bg-warn-bg px-2 py-0.5 text-[12px] font-bold text-warn">Famille à vérifier</span> : null}

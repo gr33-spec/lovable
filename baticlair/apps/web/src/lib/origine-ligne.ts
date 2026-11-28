@@ -6,7 +6,7 @@ import type { PurchaseItem } from "@/lib/api";
  * hypothèse incertaine (le serveur le dit, avec la raison) ; une ligne calculée avec des règles validées et les infos du
  * devis : « Calculé ». Une quantité réécrite par l'artisan : « Modifié par toi ». Avant : tout état « à confirmer ».
  */
-export type Origine = "Dit par toi" | "Calculé" | "À vérifier" | "Modifié par toi";
+export type Origine = "Dit par toi" | "Calculé" | "À vérifier";
 export function origineDeLaLigne(item: Pick<PurchaseItem, "kind" | "state" | "verification"> & Partial<Pick<PurchaseItem, "postes">>): Origine {
   const v = item.verification?.etat;
   // Un poste du calcul corrigé dans « Calcul proposé » (Greg, 22 novembre 2026) : la ligne le dit aussi.
