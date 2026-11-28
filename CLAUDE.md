@@ -469,6 +469,13 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Résiliation (Greg, 28 novembre 2026, option 2) : le site reste en ligne 30 jours après la fin de l'abonnement, un e-mail et une alerte 7 jours avant le retrait, puis retiré chaque nuit ; textes, photos et adresse gardés, republication en un toucher après réabonnement (`etatDuSiteApresFin`, `sitesApresFinAbonnement`, colonne additive `retrait_prevenu_le`). N'agit que quand la publication réservée est allumée. Écrit pour l'avocat dans `docs/groupe/CGU-candidate-2026-11-16.md` (points indispensables).
 - Coûts estimés pour 100, 1 000 et 10 000 sites (stockage et bande passante Vercel Blob) ; aucun service payant ajouté.
 
+## Décisions du 28 novembre 2026 : le quantitatif à la voix passe par le moteur
+
+- Règle générale (Greg) : ne jamais lui poser une question dont la réponse est dans le dépôt (ses règles de couvreur, DEFAUTS.md, le manuel). 42 ardoises au m² pour du 32×22 : vérifié dans le tableau des ardoises (crochet de 11 : 42,09 au m²).
+- RÈGLE CHANGÉE : avant, une dictée (« À la voix », Assistant) passait par l'assistant de description, qui recopiait les lignes (« 50 m² » envoyés tels quels, « Espagne 1er choix » tiré de l'exemple) → une dictée qui nomme un ouvrage passe par le MOTEUR, comme un devis : texte remis au propre avec les mots du métier (code seul, sans IA), lignes rangées par le code, questions, calcul, suggestions, liste. Un vrai doute sur un mot : des boutons. Code : `packages/domain/src/lecture/dictee.ts`, `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre`, `ALaVoix`.
+- Dans une dictée, les crochets d'ardoise suivent les ardoises (« 1 crochet par ardoise, partout », règles du fondateur) ; « agrafe ou pointe ? » se demande. La taille du crochet se déduit de la pente et de la zone (fiche couverture), jamais demandée. Un devis écrit garde la règle numéro un.
+- Tests : domaine `quantitatif-a-la-voix` (la phrase de Greg et 5 dictées avec des mots mal entendus), API `quantitatif-a-la-voix`, parcours « le quantitatif à la voix ». Banc 99 sur 99.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

@@ -162,20 +162,16 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     expect(ardoises.trace).toContainEqual(expect.objectContaining({ label: "Ardoises au m² (formule Cupa Pizarras, hors table)" }));
     const estimation = ardoises.trace.find((t) => t.label === "Estimation")!;
     expect(estimation).toMatchObject({ estimation: true, from: "Format écrit sur le devis, gardé" });
-    expect(estimation.value).toBe("Recouvrement posé 119 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
-    // Le conseil : une hypothèse à boutons, le devis en premier, puis les formats admis du plus proche au plus éloigné.
-    const conseil = ardoises.assumptions.find((a) => a.key === "product:ardoise")!;
-    expect(conseil).toMatchObject({ value: "Ardoises 30×22", note: expect.stringMatching(/Format conseillé : Ardoises 40×22\./) });
-    expect(conseil.choices!.slice(0, 2)).toEqual([
-      { label: "Ardoises 30×22 (devis)", value: "ardoise-30x22" },
-      { label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" },
-    ]);
+    expect(estimation.value).toBe("Recouvrement posé 119 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format).");
+    // Greg, 28 novembre 2026 : le format écrit n'est jamais redemandé, aucun autre format « conseillé » (avant : une hypothèse
+    // à boutons « 30×22 (devis) / 40×22 (conseillé) », posée comme une question « Ardoises ? »).
+    expect(ardoises.assumptions.find((a) => a.key === "product:ardoise")).toBeUndefined();
     // Les crochets suivent (agrafes + pointes).
     expect(order(r, "crochets-ardoise")).toBeGreaterThanOrEqual(order(r, "ardoises"));
     partage(r);
   });
 
-  it("format venu d'une habitude de l'entreprise (le devis ne le précise pas), hors plage : UNE question à boutons, le 40×22 conseillé", () => {
+  it("format venu d'une habitude de l'entreprise (le devis ne le précise pas), hors plage : UNE question à boutons, les formats admis (le plus proche d'abord, sans « conseillé »)", () => {
     const r = computeWorkItem(REFERENTIEL_COMPLET, {
       ...input({ pente: { value: "30", unit: "°", origin: "artisan" }, zone: { value: "3", unit: "u", origin: "artisan" } }),
       products: {},
@@ -184,7 +180,7 @@ describe("table Cupa (§34) : elle fait foi, la formule ne sert que hors table",
     const ardoises = need(r, "ardoises");
     expect(ardoises).toMatchObject({ status: "question", question: { key: "product:ardoise", kind: "choose_product" } });
     expect(ardoises.question!.text).toBe("Ardoises 30×22 non admis ici : recouvrement posé 119 mm, au-delà du maximum de 100 mm pour ce format (Cupa Pizarras). Quel format ?");
-    expect(ardoises.question!.options![0]).toEqual({ label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" });
+    expect(ardoises.question!.options![0]).toEqual({ label: "Ardoises 40×22", value: "ardoise-40x22" });
     // Les crochets attendent la même réponse ; rien n'est inventé entre-temps.
     expect(need(r, "crochets-ardoise")).toMatchObject({ status: "question", question: { key: "product:ardoise" } });
     // L'artisan choisit : plus de question, et son choix est gardé même hors plage.

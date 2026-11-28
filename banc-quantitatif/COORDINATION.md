@@ -182,8 +182,36 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.
 - 28 nov., 13 h 30 — LIBRE : poussé (1c885c1b), en ligne sur le site et l'API (chantier 05, manques évidents, achats groupés
   anonymes par défaut, plus le correctif des alertes du référencement). La branche est libre.
+## Banc du calcul, 28 novembre 2026 : le quantitatif à la voix
+- Touché côté écran (petit, demandé par Greg) : `components/nouveau-quantitatif.tsx`, `ALaVoix` (titre « Décris ton
+  chantier », la bulle reçoit le texte remis au propre par le serveur, boutons de doute, « Envoyer » ; une dictée qui nomme
+  un ouvrage part au moteur, `versLeMoteur`). Le carré rouge d'arrêt (`EcouteEnCours`, `chat-mobiiz.tsx`) existait déjà :
+  pas touché. À la discussion des écrans : ce composant est le vôtre pour l'apparence ; garder les noms `Décris ton chantier`
+  (titre), `Ce que tu as dit` (région), `Envoyer` (bouton) tenus par le parcours « le quantitatif à la voix ».
+- Serveur : `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre` ; moteur : `lecture/dictee.ts`.
+- 28 nov. — JE POUSSE sur la branche de test après la chaîne verte ; « branche rendue » écrit ici après /version.
+
+## Banc du calcul, 28 novembre 2026 (soir) : retours de Greg sur le quantitatif (iPhone), part écran
+- À LA DISCUSSION DES ÉCRANS (Greg : « si c'est surtout de l'écran, note-le ») : les SUGGESTIONS en panneau compact qui
+  monte du bas (bottom sheet) : catégories en titres simples, une ligne fine par suggestion avec sa case, 10 à 15 visibles
+  sans défiler, en bas « Ajouter (3) » et « Passer ». Composants : `CasesSuggestions` (`journey.tsx`, dans la discussion) et
+  `SuggestionsCard` (même fichier). Le contenu (catégories, libellés, clé `suggestions:choisies`) ne change pas ; noms tenus
+  par les parcours : la case par son libellé, « Continuer » (à renommer « Ajouter (N) » / « Passer » avec les parcours).
+- Fait par le banc (contenu et parcours, déjà dans ses fichiers) :
+  - `journey.tsx` : la barre d'écriture reste ouverte (`onDire`, « ajoute un Velux ») dans les questions ET au
+    récapitulatif ; « Il me manque N infos pour <ouvrage>, ensuite ta liste » ; calcul automatique quand plus rien ne
+    manque après les suggestions ; « Je vais calculer tes feuilles de zinc » ; nombre de feuilles au récapitulatif.
+  - `supply-list.tsx` : « − / + » sur chaque ligne (pas = unité de commande de la fiche), nombre à taper, boutons 44 px ;
+    « Réunit : … » sur une ligne qui rassemble plusieurs lignes du devis. `lib/origine-ligne.ts` : modifié = « Dit par toi ».
+  - `assistant-mobiiz.tsx` : « ajoute … » dans l'Assistant passe par le moteur (`POST /v1/quantitatifs/:id/dire`) ; un article
+    qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.
+- 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
+  (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.
+
 - 28 nov., après-midi — discrétion des infos société (Greg) : je touche les pieds de page publics (`decouvrir/landing-premium.tsx`,
   `components/vitrine.tsx`, `page-locale/page-locale.tsx`), le pied des e-mails (`platform/email/mise-en-page.ts`), les e-mails
   négoces (`domain/groupe/espace-negoce.ts`), `reponse/[jeton]`, le pied des sites d'artisans (`page-entreprise/vue-page.tsx`),
   la confidentialité, et pour le référencement : `/mentions-legales` sort de `PAGES_INDEXABLES` (`lib/indexation.ts`) avec
   `noindex`. Puis les sites vitrines (`components/page-entreprise/*`, `page-entreprise` côté serveur).
+- 28 nov., soir — discussion des écrans (session_0188g8PcmvctNcTq82VPRdt3) : discrétion des infos société verte (chaîne 148),
+  fusionnée avec le banc (d4057d87) ; je relance la chaîne et J'ATTENDS « branche rendue » du banc avant de pousser.

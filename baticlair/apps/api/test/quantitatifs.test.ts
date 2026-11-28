@@ -156,19 +156,16 @@ describe("POST /v1/quantitatifs en lignes (Rappidos)", () => {
     const gouttiere = (b: { lignes: Ligne[] }) => b.lignes.find((l) => l.libelle.toLowerCase().includes("gouttière"));
     expect(gouttiere(res.body)?.quantite).toBe(gouttiere(before)?.quantite);
     // 30° en région III, Brest exposée : recouvrement 131 mm (NF DTU 40.11 : 119 + 10 %), au-delà du maximum Cupa du 30×22 (100 mm). Le devis fait foi
-    // sur le format : calcul par la formule, ligne marquée « estimation », le 40×22 proposé en conseil, pas en question.
+    // sur le format : calcul par la formule, ligne marquée « estimation » ; ni question, ni autre format « conseillé » (Greg,
+    // 28 novembre 2026 : avant, une hypothèse à boutons « 30×22 (devis) / 40×22 (conseillé) », posée comme une question).
     const steep = await agent.post(`/v1/quantitatifs/${before.id}/corrections`).send({ action: "modifier", cle: "param:pente", valeur: "30" });
     const estimated = ligne(steep.body, "Ardoises naturelles Espagne 1er choix 30×22");
     expect(estimated.quantite).toBeGreaterThan(9498);
-    expect(estimated.estimation).toBe("Recouvrement posé 131 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.");
-    expect(estimated.explication.morceaux).toContainEqual({ texte: "estimation : recouvrement posé 131 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format). Format conseillé : Ardoises 40×22.", confiance: "estimation" });
+    expect(estimated.estimation).toBe("Recouvrement posé 131 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format).");
+    expect(estimated.explication.morceaux).toContainEqual({ texte: "estimation : recouvrement posé 131 mm hors table Cupa Pizarras (au-delà du maximum de 100 mm pour ce format).", confiance: "estimation" });
     expect(steep.body.questions.some((q: { texte: string }) => /non admis|Quel format/.test(q.texte))).toBe(false);
-    const conseil = steep.body.hypotheses.find((h: { cle: string }) => h.cle === "product:ardoise");
-    expect(conseil.choix.slice(0, 2)).toEqual([
-      { label: "Ardoises 30×22 (devis)", value: "ardoise-30x22" },
-      { label: "Ardoises 40×22 (conseillé)", value: "ardoise-40x22" },
-    ]);
-    // Un tap sur le conseil : le format change, plus d'estimation.
+    expect(steep.body.hypotheses.find((h: { cle: string }) => h.cle === "product:ardoise")).toBeUndefined();
+    // L'artisan change le format lui-même (la flèche de la ligne) : le format change, plus d'estimation.
     const switched = await agent.post(`/v1/quantitatifs/${before.id}/reponses`).send({ reponses: [{ question: "product:ardoise", valeur: "ardoise-40x22" }] });
     expect(ligne(switched.body, "Ardoises naturelles Espagne 1er choix 40×22").estimation).toBeUndefined();
     await agent.post(`/v1/quantitatifs/${before.id}/reponses`).send({ reponses: [{ question: "product:ardoise", valeur: "ardoise-30x22" }] });

@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY, dicteeAuPropre, dicteeVaAuMoteur, interpreter, ouvrageNomme } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -184,6 +184,72 @@ export class QuantitatifsService {
       trade,
       lignes.map((l) => ({ designation: l.libelle, quantity: l.quantite, unit: l.unite, price: l.prix })),
     );
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
+    });
+    return this.view(row, reviewed, rendu);
+  }
+
+  /**
+   * LE QUANTITATIF À LA VOIX (Greg, 28 novembre 2026) : « Décris ton chantier ». Le texte dicté est remis au propre et devient
+   * des lignes rangées comme un devis, par le code (aucun appel IA, rien de décompté) ; le quantitatif s'ouvre sur les
+   * questions, puis le calcul, les suggestions et la liste, exactement comme un devis. Jamais des m² envoyés tels quels.
+   */
+  /**
+   * UNE VRAIE CONVERSATION, TOUJOURS OUVERTE (Greg, 28 novembre 2026 : « Ajoute un Velux » en fin de parcours, impossible à
+   * envoyer). À tout moment, l'artisan écrit ou dicte : « retire les chatières », « mets 3 descentes », « ajoute un Velux ».
+   * Retirer et changer une quantité : la ligne de la liste. Ajouter : l'article passe par le moteur comme une dictée (rangé,
+   * ses seules questions, puis le calcul). Rend l'écran et une phrase courte de ce qui est fait.
+   */
+  async dire(tenant: TenantContext, id: string, texte: string, rendu: Rendu = {}) {
+    const row = await this.row(tenant, id);
+    const reviewed = await this.ready(tenant, row);
+    const lignes = reviewed.purchase.toBuy.map((b) => ({ cle: b.key, libelle: b.label }));
+    const consignes = interpreter(texte, lignes);
+    const faits: string[] = [];
+    const doutes: string[] = [];
+    const aAjouter: string[] = [];
+    for (const c of consignes) {
+      if (c.type === "retirer") {
+        await this.correct(tenant, id, { action: "retirer_article", id: c.cle });
+        faits.push(`retiré « ${c.libelle} »`);
+      } else if (c.type === "quantite") {
+        const unite = c.unite ?? reviewed.purchase.toBuy.find((b) => b.key === c.cle)?.order?.unit ?? "u";
+        await this.correct(tenant, id, { action: "fixer_quantite", id: c.cle, quantite: c.quantite, unite });
+        faits.push(`« ${c.libelle} » passe à ${c.quantite} ${unite}`);
+      } else if (c.type === "ajouter") {
+        // Un article qui nomme un ouvrage du métier (un Velux, une gouttière) passe par le moteur ; les autres (10 sacs de
+        // colle) entrent tels qu'écrits, avec leur quantité et leur unité dites (rien à calculer).
+        const ref = referentialFor(reviewed.takeoff.trade) ?? referentialFor("roofing")!;
+        if (ouvrageNomme(ref, c.libelle)) aAjouter.push([c.quantite, c.unite, c.libelle].filter(Boolean).join(" "));
+        else {
+          await this.correct(tenant, id, { action: "ajouter", ligne: { libelle: c.libelle, quantite: c.quantite, unite: c.unite, reference: null, prix: null } });
+          faits.push(`ajouté « ${c.libelle} »${c.quantite ? `, ${c.quantite}${c.unite ? ` ${c.unite}` : ""}` : ""}`);
+        }
+      }
+      else if (c.type === "incompris") aAjouter.push(c.texte);
+      else if (c.type === "ambigu") doutes.push(`« ${c.texte} » : laquelle ? ${c.candidats.map((x) => x.libelle).join(" ou ")}`);
+    }
+    let ajoutees = 0;
+    if (aAjouter.length > 0) ajoutees = await this.takeoffs.ajouterUnArticleDit(tenant, reviewed.takeoff.id, aAjouter.join(", "));
+    if (ajoutees > 0) faits.push(ajoutees > 1 ? `ajouté ${ajoutees} articles` : "ajouté");
+    else if (aAjouter.length > 0) doutes.push(`je n'ai pas trouvé d'article dans « ${aAjouter.join(", ")} »`);
+    const message = [faits.length ? `C'est fait : ${faits.join(", ")}.` : "", doutes.length ? `${doutes.map((d) => d.charAt(0).toUpperCase() + d.slice(1)).join(". ")}. Dis-le autrement.` : ""].filter(Boolean).join(" ") || "C'est noté.";
+    return { ...(await this.view(row, await this.ready(tenant, row), rendu)), message };
+  }
+
+  /** La dictée remise au propre (mots du métier), ses doutes en boutons, et si elle part au moteur. */
+  dicteeAuPropre(tenant: TenantContext, texte: string) {
+    const ref = referentialFor(this.tradeFor(tenant, {})) ?? referentialFor("roofing")!;
+    const propre = dicteeAuPropre(ref, texte);
+    return { texte: propre.texte, doutes: propre.doutes.map((d) => ({ mot: d.mot, question: d.question, choix: d.candidats })), versLeMoteur: dicteeVaAuMoteur(ref, propre.texte) };
+  }
+
+  async fromDictee(tenant: TenantContext, texte: string, ctx: Contexte, rendu: Rendu = {}) {
+    const trade = this.tradeFor(tenant, ctx);
+    await this.assertQuota(tenant, ctx);
+    const projectId = await this.project(tenant, ctx);
+    const reviewed = await this.takeoffs.fromDictee(tenant, projectId, trade, texte);
     const row = await this.prisma.quantitatif.create({
       data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
     });

@@ -1,6 +1,6 @@
 {
   "id": "roofing",
-  "version": "roofing-2026.11.23-85",
+  "version": "roofing-2026.11.28-86",
   "writtenOnly": true,
   "withoutSupplyUnits": [
     "h",
@@ -8397,6 +8397,7 @@
           "keywords": [
             "crochet"
           ],
+          "dicteAvec": true,
           "usual": {
             "text": "Un crochet inox par ardoise.",
             "source": "fondateur-referentiel-2026-10-03",
