@@ -3138,6 +3138,8 @@ model PageEntreprise {
   /// L'instantané publié (`InstantanePublie`) : ce que lit le visiteur. Null : jamais publié depuis le 27 novembre 2026.
   publie           Json?
   publieLe         DateTime? @map("publie_le") @db.Timestamptz(3)
+  /// L'e-mail « ton site sera retiré dans 7 jours » (après une résiliation, publication réservée à l'abonnement) : envoyé une fois.
+  retraitPrevenuLe DateTime? @map("retrait_prevenu_le") @db.Timestamptz(3)
   accroche         String?
   presentation     String?
   telephone        String?

@@ -46,3 +46,16 @@ describe("sites des artisans : le socle", () => {
     expect(refusAdresse("toits-martin")).toBeNull();
   });
 });
+
+describe("le site après une résiliation (Greg, 28 novembre 2026, option 2)", () => {
+  it("30 jours en ligne après la fin, un e-mail 7 jours avant, puis retiré ; rien quand le réglage est coupé ou l'artisan abonné", async () => {
+    const { etatDuSiteApresFin } = await import("../src/page-entreprise/index.js");
+    const fin = new Date("2026-12-01T00:00:00Z");
+    const le = (j: number) => new Date(fin.getTime() + j * 86_400_000);
+    expect(etatDuSiteApresFin({ allume: false, abonne: false, finAcces: fin }, le(60)).etat).toBe("en-ligne");
+    expect(etatDuSiteApresFin({ allume: true, abonne: true, finAcces: fin }, le(60)).etat).toBe("en-ligne");
+    expect(etatDuSiteApresFin({ allume: true, abonne: false, finAcces: fin }, le(22)).etat).toBe("en-ligne");
+    expect(etatDuSiteApresFin({ allume: true, abonne: false, finAcces: fin }, le(23))).toEqual({ etat: "prevenir", retraitLe: le(30) });
+    expect(etatDuSiteApresFin({ allume: true, abonne: false, finAcces: fin }, le(30)).etat).toBe("retirer");
+  });
+});

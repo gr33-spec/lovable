@@ -125,6 +125,42 @@ describe("Brouillon et site publié", () => {
     delete process.env.SITE_PUBLICATION_PAYANTE;
   });
 
+  it("RÉSILIATION (Greg, 28 novembre 2026, option 2) : 30 jours en ligne après la fin, un e-mail 7 jours avant, puis retiré ; rien n'est effacé, il republie en un toucher une fois réabonné", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    await a.agent.patch("/v1/ma-page").send({ accroche: "Chez Martin" }).expect(200);
+    // Une période payée finie il y a 60 jours (dans le passé : republier sans abonnement doit être refusé).
+    const fin = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()) - 60 * 86_400_000);
+    await ctx.prisma.abonnement.create({ data: { companyId: a.companyId, statut: "resilie", fournisseur: "simule", formule: "pro", periodeFin: fin } });
+    process.env.SITE_PUBLICATION_PAYANTE = "on";
+    // Publié pendant l'abonnement (la ligne d'abonnement est déjà finie : on la pose en ligne directement).
+    await ctx.prisma.pageEntreprise.update({ where: { companyId: a.companyId }, data: { visible: true } });
+    const le = (j: number) => new Date(fin.getTime() + j * 86_400_000);
+    // Coupé : rien ne bouge, même longtemps après.
+    delete process.env.SITE_PUBLICATION_PAYANTE;
+    expect(await service.sitesApresFinAbonnement(le(60))).toEqual({ prevenus: 0, retires: 0 });
+    process.env.SITE_PUBLICATION_PAYANTE = "on";
+    // 22 jours après la fin : en ligne, rien.
+    expect(await service.sitesApresFinAbonnement(le(22))).toEqual({ prevenus: 0, retires: 0 });
+    // 23 jours : l'e-mail part, une seule fois.
+    ctx.emails.sent.length = 0;
+    expect(await service.sitesApresFinAbonnement(le(23))).toEqual({ prevenus: 1, retires: 0 });
+    expect(await service.sitesApresFinAbonnement(le(24))).toEqual({ prevenus: 0, retires: 0 });
+    const date = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long" }).format(le(30));
+    expect(ctx.emails.sent.map((m) => m.subject)).toEqual([`Votre site Mobiiz sera retiré le ${date}`]);
+    expect(ctx.emails.sent[0]!.text).toContain("gardés");
+    await lire();
+    // 30 jours : retiré de la ligne ; rien n'est effacé.
+    expect(await service.sitesApresFinAbonnement(le(30))).toEqual({ prevenus: 0, retires: 1 });
+    await anon().get("/v1/public/pages/toits-martin").expect(404);
+    expect((await a.agent.get("/v1/ma-page").expect(200)).body.reglages.accroche).toBe("Chez Martin");
+    // Sans abonnement : republier est refusé. Réabonné : un toucher.
+    await a.agent.post("/v1/ma-page/publication").expect(403);
+    await ctx.prisma.abonnement.update({ where: { companyId: a.companyId }, data: { statut: "actif", periodeFin: new Date(Date.now() + 30 * 86_400_000) } });
+    await a.agent.post("/v1/ma-page/publication").expect(201);
+    expect((await lire()).accroche).toBe("Chez Martin");
+    delete process.env.SITE_PUBLICATION_PAYANTE;
+  });
+
   it("deux artisans isolés : l'un ne publie, ne lit ni ne retire jamais le site de l'autre", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
     const b = await signUpWithCompany(ctx.app, "b@exemple.fr", "Peinture Le Goff", ["painting"]);
