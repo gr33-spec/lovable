@@ -180,10 +180,37 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
    */
   const conversation = useRef<{ echanges: { de: "artisan" | "assistant" | "photo"; texte: string }[]; carte: number | null }>({ echanges: [], carte: null });
 
+  /**
+   * LE QUANTITATIF À LA VOIX (Greg, 28 novembre 2026) : une description qui nomme un ouvrage (« 50 m² d'ardoise 32x22, une
+   * gouttière bandeau de 25… ») part au MOTEUR, comme un devis : le quantitatif s'ouvre sur les questions, puis le calcul,
+   * les suggestions et la liste. Jamais des m² recopiés dans une liste. Rend `false` quand la description ne nomme aucun
+   * ouvrage (des articles comptés : « 10 sacs de colle ») : la conversation habituelle les prend.
+   */
+  async function versLeMoteur(texte: string, dejaAuPropre?: boolean): Promise<boolean> {
+    if (surAjout) return false;
+    const propre = dejaAuPropre ? { texte, versLeMoteur: true } : await api<{ texte: string; versLeMoteur: boolean }>("/v1/quantitatifs/dictee/au-propre", { method: "POST", body: { texte } }).catch(() => null);
+    if (!propre?.versLeMoteur) return false;
+    setOccupe(true);
+    try {
+      const q = await api<Quantitatif>("/v1/quantitatifs?ecran=1", { method: "POST", body: { dictee: propre.texte }, idempotencyKey: newActionKey() });
+      router.push(versListe(q.projetId));
+      return true;
+    } catch (e) {
+      dire(`Rien n'est créé : ${messageErreur(e)}`);
+      return true;
+    } finally {
+      setOccupe(false);
+    }
+  }
+
   async function envoyer(dit?: string) {
     const texte = (dit ?? champ.saisie).trim();
     if (!texte || occupe) return;
     dictee.arreter();
+    if (!liste && (await versLeMoteur(texte))) {
+      champ.setSaisie("");
+      return;
+    }
     // Recette n° 2 du 14 novembre 2026 (G21) : sans réseau, on le dit et la case garde ce qui est écrit ; rien n'est
     // répondu à l'aveugle (avant : une réponse fausse, la case vidée, pas un mot sur la coupure).
     if (typeof navigator !== "undefined" && navigator.onLine === false) return void direUneFois(PAS_DE_RESEAU);
@@ -496,9 +523,9 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
         {aLaVoix ? (
           <ALaVoix
             occupe={occupe || lecture}
-            onEnvoyer={(texte) => {
+            onEnvoyer={(texte, auMoteur) => {
               setALaVoix(false);
-              void envoyer(texte);
+              void (auMoteur ? versLeMoteur(texte, true) : Promise.resolve(false)).then((parti) => (parti ? undefined : envoyer(texte)));
             }}
             onEcrire={() => setALaVoix(false)}
           />
@@ -559,9 +586,31 @@ export function NouveauQuantitatif({ onFermer, surAjout, existantes = [], versLi
  * ce qu'il a dit arrive dans une bulle qu'il corrige, puis « Envoyer à l'analyse ». Rien ne part tout seul : ni au silence
  * (Safari coupe l'écoute, elle repart et garde tout), ni à l'arrêt. « Annuler » efface ce qui a été dit.
  */
-function ALaVoix({ occupe, onEnvoyer, onEcrire }: { occupe: boolean; onEnvoyer: (texte: string) => void; onEcrire: () => void }) {
+function ALaVoix({ occupe, onEnvoyer, onEcrire }: { occupe: boolean; onEnvoyer: (texte: string, auMoteur: boolean) => void; onEcrire: () => void }) {
   const [etape, setEtape] = useState<"pret" | "ecoute" | "relire">("pret");
   const [texte, setTexte] = useState("");
+  // Greg, 28 novembre 2026 : la dictée recopie des sons (« châtia ») ; le texte est remis au propre avec les mots du métier
+  // AVANT d'arriver dans la bulle, et un vrai doute a ses boutons (« chatière », « châssis », Autre).
+  const [doutes, setDoutes] = useState<{ mot: string; question: string; choix: string[] }[]>([]);
+  const [auMoteur, setAuMoteur] = useState(false);
+  const caseTexte = useRef<HTMLTextAreaElement>(null);
+  const remettreAuPropre = useCallback((brut: string) => {
+    setTexte(brut);
+    setDoutes([]);
+    setAuMoteur(false);
+    if (!brut) return;
+    void api<{ texte: string; doutes: { mot: string; question: string; choix: string[] }[]; versLeMoteur: boolean }>("/v1/quantitatifs/dictee/au-propre", { method: "POST", body: { texte: brut } })
+      .then((r) => {
+        setTexte(r.texte);
+        setDoutes(r.doutes);
+        setAuMoteur(r.versLeMoteur);
+      })
+      .catch(() => undefined);
+  }, []);
+  const choisir = (mot: string, choix: string) => {
+    setTexte((t) => t.replace(new RegExp(`(^|[^\\p{L}])${mot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\p{L}])`, "u"), `$1${choix}`));
+    setDoutes((ds) => ds.filter((d) => d.mot !== mot));
+  };
   const dit = useRef("");
   const annulee = useRef(false);
   const dictee = useDictee(
@@ -579,9 +628,9 @@ function ALaVoix({ occupe, onEnvoyer, onEcrire }: { occupe: boolean; onEnvoyer: 
     if (!ecoutait.current) return;
     ecoutait.current = false;
     if (annulee.current) return;
-    setTexte(dit.current.trim());
+    remettreAuPropre(dit.current.trim());
     setEtape("relire");
-  }, [dictee.ecoute]);
+  }, [dictee.ecoute, remettreAuPropre]);
   const parler = () => {
     dit.current = "";
     annulee.current = false;
@@ -614,9 +663,24 @@ function ALaVoix({ occupe, onEnvoyer, onEcrire }: { occupe: boolean; onEnvoyer: 
               <label className="px-1 text-[14px] font-semibold text-[#111111]/70" htmlFor="ce-que-tu-as-dit">
                 Relis et corrige si besoin :
               </label>
-              <textarea id="ce-que-tu-as-dit" value={texte} onChange={(e) => setTexte(e.target.value)} rows={4} className="w-full resize-none rounded-[20px] px-4 py-3 text-[16px] leading-snug text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }} />
-              <button type="button" disabled={occupe || !texte.trim()} onClick={() => onEnvoyer(texte.trim())} className="pressable min-h-12 rounded-full bg-[#111111] px-5 text-[16px] font-extrabold text-white disabled:opacity-50">
-                Envoyer à l&apos;analyse
+              <textarea ref={caseTexte} id="ce-que-tu-as-dit" value={texte} onChange={(e) => setTexte(e.target.value)} rows={4} className="w-full resize-none rounded-[20px] px-4 py-3 text-[16px] leading-snug text-[#111111]" style={{ backgroundColor: COULEURS_CHAT.jaune }} />
+              {doutes.map((d) => (
+                <div key={d.mot} role="group" aria-label={d.question} className="flex flex-col gap-2 px-1">
+                  <p className="text-[15px] font-semibold text-[#111111]">{d.question}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {d.choix.map((c) => (
+                      <button key={c} type="button" onClick={() => choisir(d.mot, c)} className="pressable min-h-11 rounded-full border border-[#111111]/20 bg-white px-4 text-[15px] font-semibold text-[#111111]">
+                        {c.charAt(0).toUpperCase() + c.slice(1)}
+                      </button>
+                    ))}
+                    <button type="button" onClick={() => { setDoutes((ds) => ds.filter((x) => x.mot !== d.mot)); caseTexte.current?.focus(); }} className="pressable min-h-11 rounded-full border border-[#111111]/20 bg-white px-4 text-[15px] font-semibold text-[#111111]">
+                      Autre
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <button type="button" disabled={occupe || !texte.trim()} onClick={() => onEnvoyer(texte.trim(), auMoteur && doutes.length === 0)} className="pressable min-h-12 rounded-full bg-[#111111] px-5 text-[16px] font-extrabold text-white disabled:opacity-50">
+                Envoyer
               </button>
             </>
           ) : (
@@ -630,7 +694,8 @@ function ALaVoix({ occupe, onEnvoyer, onEcrire }: { occupe: boolean; onEnvoyer: 
         </section>
       ) : (
         <section aria-label="À la voix" className="flex flex-col items-center gap-3 rounded-[28px] px-4 py-4" style={{ backgroundColor: "var(--chat-carte)" }}>
-          <p className="text-center text-[15px] leading-snug text-[#111111]/80">Décris ton chantier à voix haute : les matériaux, les quantités, les mesures.</p>
+          <h2 className="text-center text-[20px] font-extrabold text-[#111111]">Décris ton chantier</h2>
+          <p className="text-center text-[15px] leading-snug text-[#111111]/80">Les matériaux, les quantités, les mesures, comme au comptoir.</p>
           <button type="button" onClick={parler} aria-label="Parler" className="pressable flex size-16 items-center justify-center rounded-full text-[#111111] shadow-card" style={{ backgroundColor: COULEURS_CHAT.jaune }}>
             <Mic size={28} aria-hidden="true" />
           </button>

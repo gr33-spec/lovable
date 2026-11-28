@@ -20,7 +20,7 @@ import type { LectureDevis, LectureFourniture, LectureLigne } from "./lecture.js
  */
 export function lectureParLeCode(ref: Referential, lecture: LectureDevis): LectureDevis {
   if (ref.workItems.length === 0) return lecture;
-  const lues = lecture.lignes.map((l) => motsJamaisDemandes(ref, sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes))));
+  const lues = lecture.lignes.map((l) => motsJamaisDemandes(ref, sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes, lecture.source === "dictee"))));
   const lignes = sansRediteDeLaQuantite(ref, donneesDesAutresOuvrages(ref, lues));
   return { ...lecture, lignes };
 }
@@ -108,6 +108,14 @@ export function donneesEcrites(params: readonly ParamDef[], texte: string): Reco
     for (const label of labels) {
       const re = new RegExp(`(?:^| )${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} (?:de |d |: |= )?(\\d+(?:[.,]\\d+)?) ?(ml|m|cm|mm)(?= |$|[,.;)])`, "g");
       for (const m of t.matchAll(re)) lus.add(`${m[1]!.replace(",", ".")} ${m[2] === "ml" ? "m" : m[2]}`);
+      // « crochets de 11 » : une donnée qui se dit sans son unité au comptoir (`bareNumber`), dans ses bornes (`textRange`).
+      if (p.bareNumber && p.textRange) {
+        const nu = new RegExp(`(?:^| )${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} (?:de |d )(\\d+(?:[.,]\\d+)?)(?= |$|[,.;)])`, "g");
+        for (const m of t.matchAll(nu)) {
+          const n = Number(m[1]!.replace(",", "."));
+          if (n >= Number(p.textRange.min) && n <= Number(p.textRange.max)) lus.add(`${m[1]!.replace(",", ".")} ${p.unit}`);
+        }
+      }
     }
     if (lus.size === 1) out[p.key] = [...lus][0]!;
   }
@@ -257,7 +265,7 @@ export function mesureDansLeTexte(l: LectureLigne): LectureLigne {
   return l;
 }
 
-function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly LectureLigne[]): LectureLigne {
+function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly LectureLigne[], dictee = false): LectureLigne {
   // Le titre et sa description, séparés par « : » (le modèle écrit parfois « — ») : une seule écriture.
   const l = mesureDansLeTexte({ ...l0, designation: l0.designation.replace(/\s+[—–]\s+/, " : ") });
   // Une ligne sans unité (« 10 » tôles, DE00000071) ne dit pas ce qu'elle mesure : elle garde la lecture, et son unité se
@@ -300,7 +308,8 @@ function ligneParLeCode(ref: Referential, l0: LectureLigne, toutes: readonly Lec
   const compteEnPieces = w.params.some((x) => x.fromLineQuantity && x.unit === "u");
   if (!mesure && principal.measureOnly && !compteEnPieces) return l;
   // Les autres articles écrits sur la ligne (« sur tasseaux bois et couvre-joints ») : cités, le calcul les compte.
-  const cites = w.slots.filter((s) => s.key !== principal.key && !s.formOf && motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(texte), k)));
+  // Une dictée : l'article qui suit toujours son ouvrage (`dicteAvec` : 1 crochet par ardoise) est cité même s'il n'est pas dit.
+  const cites = w.slots.filter((s) => s.key !== principal.key && !s.formOf && (motsDEmplacement(ref, w, s).some((k) => contient(sansLesExclus(texte), k)) || (dictee && s.dicteAvec === true && principal.key !== s.key)));
   // Une donnée dite sur une autre ligne par ses mots exacts (« bandes de rive pour les 2 côtés ») vaut pour l'ouvrage,
   // quand une seule ligne la dit ; un nombre lu sur la ligne (« bacs de 4 m ») ne vaut que pour elle.
   const donnees: Record<string, string> = {};

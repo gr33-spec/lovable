@@ -53,7 +53,8 @@ const contexte = {
  * Entrée « lignes » (Rappidos, §38) : le devis déjà découpé, sans IA. Entrée « documentId » (l'appli) :
  * un devis déjà déposé sur le chantier. Ni l'une ni l'autre en multipart (PDF).
  */
-const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional(), confirmeGros: z.boolean().optional() });
+// « Décris ton chantier » (Greg, 28 novembre 2026) : le texte dicté, remis au propre ; il passe par le moteur comme un devis.
+const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional(), confirmeGros: z.boolean().optional(), dictee: z.string().trim().min(3).max(2000).optional() });
 const rendu = z.object({ ecran: z.enum(["0", "1"]).optional(), projetId: z.string().optional() });
 
 /**
@@ -131,7 +132,7 @@ export class QuantitatifsController {
   ) {
     const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos, metier: body.metier, apiKey: req.apiKey ? { id: req.apiKey.id, monthlyQuota: req.apiKey.monthlyQuota } : undefined };
     const r = { ecran: query.ecran === "1" };
-    if ([file, body.lignes, body.documentId].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
+    if ([file, body.lignes, body.documentId, body.dictee].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
     let result;
     if (body.documentId) {
       // Greg, 30 octobre 2026 (décision 3) : à l'écran, un devis de plus de 150 lignes attend le « Lancer » de l'artisan.
@@ -151,11 +152,23 @@ export class QuantitatifsController {
       // « Écris ta liste » (Greg, 30 octobre 2026) : les intitulés de l'artisan nourrissent les suggestions ; jamais ceux
       // d'un partenaire (clé API), et une panne ici ne retient jamais la liste.
       if (!req.apiKey) await this.catalogue.noterLibelles(tenant.companyId, body.lignes).catch(() => undefined);
+    } else if (body.dictee) {
+      result = await this.quantitatifs.fromDictee(tenant, body.dictee, ctx, r);
     } else {
       throw validationFailed("Missing quote", [{ path: "file", message: "send a PDF (file) or lines (lignes)" }]);
     }
     res.status(result.etat === "en_cours" ? 202 : 201);
     return result;
+  }
+
+  /**
+   * « Décris ton chantier » (Greg, 28 novembre 2026) : le texte dicté remis au propre avec les mots du métier, ses vrais doutes
+   * (des boutons), et s'il nomme un ouvrage (il part alors au moteur, comme un devis). Rien n'est créé ; aucun appel IA.
+   */
+  @Post("dictee/au-propre")
+  @HttpCode(200)
+  auPropre(@Tenant() tenant: TenantContext, @Body(new ZodPipe(z.object({ texte: z.string().trim().min(1).max(2000) }))) body: { texte: string }) {
+    return this.quantitatifs.dicteeAuPropre(tenant, body.texte);
   }
 
   /** Le quantitatif le plus récent d'un chantier (`?projetId=`), et si la lecture IA est disponible. */

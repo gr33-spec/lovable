@@ -1,5 +1,15 @@
 # Référentiel couverture — CHANGELOG
 
+## roofing-2026.11.28-86 — Le quantitatif à la voix (Greg, 2026-11-28)
+
+Banc du calcul : 99 sur 99.
+
+| Quantité ou question | Ancienne valeur | Nouvelle valeur | Source |
+|---|---|---|---|
+| Crochets d'ardoise, dans une DICTÉE | absents tant qu'ils ne sont pas dits | suivent les ardoises (`dicteAvec`) ; « agrafe ou pointe ? » se demande | règles du fondateur : « 1 crochet par ardoise, partout » |
+| « crochets de 11 » écrit ou dit sans unité | lu seulement par le modèle | lu aussi par le code (donnée `bareNumber` dans ses bornes) | — |
+| Devis écrits | — | inchangés (la règle numéro un reste) | — |
+
 ## roofing-2026.11.23-85 — « Je ne sais pas » au développé (Greg, 2026-11-23)
 
 Banc du calcul : 99 sur 99.

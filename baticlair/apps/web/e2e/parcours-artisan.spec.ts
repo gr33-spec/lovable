@@ -4672,9 +4672,49 @@ test("« À la voix » (Greg, 27 novembre 2026) : l'onde, le chrono, Arrêter et
   await expect(texte).toHaveValue("il me faut 12 m de gouttière zinc et 2 descentes de 3 m");
   if (process.env.VOIX_CAPTURES) await page.screenshot({ path: `${process.env.VOIX_CAPTURES}/${test.info().project.name}-2-relire.png` });
   await texte.fill("il me faut 12 m de gouttière zinc et 2 descentes de 4 m");
-  await relire.getByRole("button", { name: "Envoyer à l'analyse" }).click();
-  await expect(ecran.getByText("il me faut 12 m de gouttière zinc et 2 descentes de 4 m")).toBeVisible();
-  await expect(voix).toHaveCount(0);
+  // Greg, 28 novembre 2026 : la dictée qui nomme un ouvrage passe par le moteur, comme un devis : les questions s'ouvrent.
+  await relire.getByRole("button", { name: "Envoyer", exact: true }).click();
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+});
+
+test("le quantitatif à la voix (Greg, 28 novembre 2026, sa phrase exacte) : « châtia » remis au propre, puis questions, calcul, suggestions et une liste sans aucun m²", async ({ page }) => {
+  await fausseDicteeContinue(page, ["je dois environ 50 m² d'ardoise 32x22, j'ai une gouttière bandeau avec les crochets, gouttière bandeau de 25, et je dois prévoir également deux châtia"]);
+  await signUp(page);
+  await page.goto("/chantiers/nouveau");
+  await page.getByRole("link", { name: /^À la voix/ }).click();
+  const ecran = page.getByRole("dialog", { name: "Nouveau quantitatif" });
+  const voix = ecran.getByRole("region", { name: "À la voix" });
+  await expect(voix.getByRole("heading", { name: "Décris ton chantier" })).toBeVisible();
+  await voix.getByRole("button", { name: "Parler" }).click();
+  await expect.poll(() => dicteeEntendue(page)).toBe(true);
+  await ecran.getByRole("group", { name: "Dictée en cours" }).getByRole("button", { name: "Arrêter la dictée" }).click();
+  // La bulle : le texte remis au propre avec les mots du métier, corrigeable avant l'envoi.
+  const relire = ecran.getByRole("region", { name: "Ce que tu as dit" });
+  await expect(relire.getByRole("textbox")).toHaveValue(/deux chatières$/);
+  await relire.getByRole("button", { name: "Envoyer", exact: true }).click();
+  // Le même parcours qu'un devis : les questions, puis le calcul, l'étape « Suggestions », la liste.
+  await expect(zoneDesQuestions(page)).toBeVisible({ timeout: 60_000 });
+  const posees = await repondreAuxQuestions(page, async (q) => {
+    if (/Longueur de gouttière/.test(q)) {
+      await ecrireDansLaDiscussion(page, "12 m");
+      return true;
+    }
+    // La qualité de l'ardoise n'a pas été dite : « Je ne sais pas » ne fait rien inventer.
+    if (/Quelle ardoise/.test(q)) return "Je ne sais pas";
+    return null;
+  });
+  expect(posees.join(" | ")).toMatch(/agrafe ou à pointe/);
+  expect(posees.join(" | ")).not.toMatch(/Gouttière de 25, de 28|sur les chevrons ou en façade/);
+  await calculerEtVoirMaListe(page);
+  const liste = page.getByRole("region", { name: "Liste des fournitures" });
+  await expect(liste).toBeVisible({ timeout: 60_000 });
+  await expect(liste.getByText(/^Ardoises naturelles .*32×22/).first()).toBeVisible();
+  await expect(liste.getByText(/^Crochets d'ardoise/).first()).toBeVisible();
+  await expect(liste.getByText(/^Chatières/).first()).toBeVisible();
+  // Aucune QUANTITÉ en m² (l'explication du calcul, « 50 m² × 38,8 ardoises/m² », reste dans l'appli).
+  await expect(liste.getByText(/^[\d  ,]+ m²$/)).toHaveCount(0);
+  await expect(liste.getByText(/Espagne/)).toHaveCount(0);
+  if (process.env.VOIX_CAPTURES) await page.screenshot({ path: `${process.env.VOIX_CAPTURES}/${test.info().project.name}-liste-voix.png`, fullPage: true });
 });
 
 test("la discussion (Greg, 16 novembre 2026) : une question à la fois, une réponse écrite va à SA question, confirmée en une ligne, jamais reposée", async ({ page }) => {

@@ -56,6 +56,8 @@ import {
   ficheAvecBref,
   lectureDepuisLignes,
   lignesDeLecture,
+  lectureDeLaDictee,
+  dicteeAuPropre,
   lotLabel,
   choixParPiece,
   donneesDicibles,
@@ -875,6 +877,46 @@ export class TakeoffService {
         section: [],
         aiDoubt: null,
         priceRaw: l.price?.trim() || null,
+        origin: "partner",
+      })),
+    });
+    return this.review(tenant, takeoff);
+  }
+
+  /**
+   * « Décris ton chantier » (Greg, 28 novembre 2026) : la dictée remise au propre, rangée en lignes par le code
+   * (`lectureDeLaDictee`), sans IA ; le quantitatif s'ouvre sur l'écran des questions (rien n'est calculé d'avance).
+   */
+  async fromDictee(tenant: TenantContext, projectId: string, trade: string, texte: string): Promise<ReviewedTakeoff> {
+    assertCanWrite(tenant);
+    const ref = referentialFor(trade) ?? ROOFING_REFERENTIAL;
+    await this.reading.referentials?.ensure(ref);
+    const lecture = lectureDeLaDictee(ref, dicteeAuPropre(ref, texte).texte);
+    if (lecture.lignes.length === 0) throw validationFailed("Nothing read in the dictation", { reason: "nothing_read" });
+    const takeoff = await this.takeoffs.create(tenant, {
+      projectId,
+      documentId: null,
+      source: "lignes",
+      referentialVersion: ref.version,
+      analysisId: null,
+      trade: referentialFor(trade) ? trade : "roofing",
+      calculated: false,
+      promptId: "dictee",
+      promptVersion: 1,
+      model: "aucun",
+      notes: [],
+      fiche: lecture.fiche,
+      lecture,
+      lines: lignesDeLecture(lecture).map((l) => ({
+        designation: l.designation,
+        quantityRaw: l.quantity,
+        unitRaw: l.unit,
+        reference: null,
+        sourceRefs: [l.id],
+        sourcePages: [],
+        section: [],
+        aiDoubt: null,
+        priceRaw: null,
         origin: "partner",
       })),
     });

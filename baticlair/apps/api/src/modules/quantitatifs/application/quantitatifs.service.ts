@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY, dicteeAuPropre, dicteeVaAuMoteur } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -184,6 +184,29 @@ export class QuantitatifsService {
       trade,
       lignes.map((l) => ({ designation: l.libelle, quantity: l.quantite, unit: l.unite, price: l.prix })),
     );
+    const row = await this.prisma.quantitatif.create({
+      data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
+    });
+    return this.view(row, reviewed, rendu);
+  }
+
+  /**
+   * LE QUANTITATIF À LA VOIX (Greg, 28 novembre 2026) : « Décris ton chantier ». Le texte dicté est remis au propre et devient
+   * des lignes rangées comme un devis, par le code (aucun appel IA, rien de décompté) ; le quantitatif s'ouvre sur les
+   * questions, puis le calcul, les suggestions et la liste, exactement comme un devis. Jamais des m² envoyés tels quels.
+   */
+  /** La dictée remise au propre (mots du métier), ses doutes en boutons, et si elle part au moteur. */
+  dicteeAuPropre(tenant: TenantContext, texte: string) {
+    const ref = referentialFor(this.tradeFor(tenant, {})) ?? referentialFor("roofing")!;
+    const propre = dicteeAuPropre(ref, texte);
+    return { texte: propre.texte, doutes: propre.doutes.map((d) => ({ mot: d.mot, question: d.question, choix: d.candidats })), versLeMoteur: dicteeVaAuMoteur(ref, propre.texte) };
+  }
+
+  async fromDictee(tenant: TenantContext, texte: string, ctx: Contexte, rendu: Rendu = {}) {
+    const trade = this.tradeFor(tenant, ctx);
+    await this.assertQuota(tenant, ctx);
+    const projectId = await this.project(tenant, ctx);
+    const reviewed = await this.takeoffs.fromDictee(tenant, projectId, trade, texte);
     const row = await this.prisma.quantitatif.create({
       data: { companyId: tenant.companyId, projectId, source: "lignes", takeoffId: reviewed.takeoff.id, reference: ctx.reference ?? null, apiKeyId: ctx.apiKey?.id ?? null },
     });

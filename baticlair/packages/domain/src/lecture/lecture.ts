@@ -86,6 +86,8 @@ export interface LectureLot {
 }
 
 export interface LectureDevis {
+  /** D'où vient la lecture : `dictee` quand l'artisan a décrit son chantier à la voix (Greg, 28 novembre 2026). */
+  source?: "dictee";
   /** Temps un : le métier du devis (identifiant du référentiel), ou null si le modèle ne l'a pas dit. */
   metier: string | null;
   /** Temps un : les lots quand le devis en a plusieurs (vide sinon). */
@@ -179,6 +181,7 @@ export function parseLecture(raw: unknown): LectureDevis | null {
     lots.push({ metier, libelle: str(lot.libelle, 80) ?? metier, lignes: list(lot.lignes).flatMap((r) => str(r, 20) ?? []) });
   }
   return {
+    ...(o.source === "dictee" ? { source: "dictee" as const } : {}),
     metier: str(o.metier, 40),
     lots,
     // La fiche du modèle (liste « donnee / valeur / origine »), ou la fiche déjà lue, relue depuis la base avec la lecture.
@@ -242,7 +245,10 @@ export function lignesDeLecture(lecture: LectureDevis, ids?: ReadonlyMap<string,
     const fournitures = seul ? [{ ...ligne.fournitures[0]!, quantite: ligne.quantite, unite: ligne.fournitures[0]!.unite ?? ligne.unite }, ...ligne.fournitures.slice(1)] : ligne.fournitures;
     const written = fournitures.filter((f) => f.quantite !== null);
     // Une ligne de pose qui ne fait que citer (« soudures » : l'étain) reste une ligne sans fourniture, avec ce qu'elle cite.
-    if (written.length === 0 && (ligne.role === "pose" || ligne.role === "fourniture_et_pose")) {
+    // Une DICTÉE (Greg, 28 novembre 2026) : « une gouttière bandeau de 25 », sans sa longueur, est un article dit, pas une
+    // pose : elle garde ses données (le développé, la pose en bandeau) et le moteur demande seulement la longueur.
+    const ditSansMesure = lecture.source === "dictee" && ligne.role === "fourniture_et_pose" && ligne.quantite === null && fournitures[0]?.ouvrage != null;
+    if (written.length === 0 && !ditSansMesure && (ligne.role === "pose" || ligne.role === "fourniture_et_pose")) {
       const id = ids?.get(ligne.ref) ?? ligne.ref;
       out.push({ id, ligne, fourniture: null, designation: ligne.designation, quantity: ligne.quantite, unit: ligne.unite, cites: ligne.fournitures });
       continue;

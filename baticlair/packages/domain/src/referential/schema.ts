@@ -95,6 +95,7 @@ const slot = z.object({
   charsFrom: z.string().optional(),
   formOf: z.string().optional(),
   indissociable: z.literal(true).optional(),
+  dicteAvec: z.literal(true).optional(),
   suggested: z.object({ label: str, vaut: z.record(z.string(), z.string()).optional(), unlessWorks: z.array(str).min(1).optional(), onlyOnMeasuredWork: z.literal(true).optional(), onlyWith: z.array(str).min(1).optional() }).strict().optional(),
   piecesFrom: z.object({ count: str, length: str, piece: z.object({ one: str, many: str }).optional() }).optional(),
   citedBy: z.array(str).optional(),
