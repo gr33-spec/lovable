@@ -402,10 +402,7 @@ export function ProjectTakeoff({
             startOpen
             pending={pending}
             onAdd={async (fields) => {
-              // Greg, 28 novembre 2026 : l'article ajouté à la main est compris et rangé par le moteur (« dire »), comme une
-              // dictée ; s'il ne nomme aucun ouvrage, il reste tel qu'écrit, dans sa ligne.
-              const texte = `ajoute ${[fields.quantity, fields.unit, fields.designation].filter(Boolean).join(" ")}`;
-              await run(() => api<Quantitatif>(`/v1/quantitatifs/${qid}/dire?ecran=1`, { method: "POST", body: { texte } }), update);
+              await call("corrections", { action: "ajouter", ligne: ligne(fields) });
               setShowList(false);
             }}
           />
