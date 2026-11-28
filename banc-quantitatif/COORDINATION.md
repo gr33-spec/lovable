@@ -156,3 +156,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov. — référencement : chaîne verte (API 204 fichiers, 1069 tests ; site construit ; parcours verts après relance
   des échecs passagers), JE POUSSE sur la branche de test (étape 0 du référencement, API de la sauvegarde), puis le
   workflow de sauvegarde dans un second commit (essai de l'alerte). La branche est libre quand j'écris « branche rendue ».
+
+## Discussion « écrans » (lovable-38), 28 novembre 2026 — chantier 05 (liste d'attente, invitations)
+- Fichiers : module API `modules/communaute` (nouveau), `pages-regionales` (consentement), migration
+  `20261128120000_liste_attente_invitations` (après `sauvegarde_rapport`, empreintes refaites), `components/communaute-accueil.tsx`
+  (UNE ligne dans `accueil.tsx`), `/commencer` (case « Préviens-moi », code d'invitation), pages `(entree)/invitation/[code]` et
+  `(entree)/liste-attente/desinscription` (noindex, hors sitemap), admin `prevenir` et `invitations`. Ni « À la voix », ni
+  l'Assistant, ni le moteur.
+- Branche de test fusionnée (64e66db3), chaîne complète en cours. J'ATTENDS « branche rendue » du référencement avant de pousser.
