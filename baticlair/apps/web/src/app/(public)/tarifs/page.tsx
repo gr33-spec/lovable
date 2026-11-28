@@ -5,9 +5,11 @@ import { ButtonLink } from "@/components/ui";
 import { NOM_APP } from "@/lib/nom";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
 
+// Référencement (Greg, 28 novembre 2026) : un titre qui dit les trois formules, sans « Mobiiz » en double ; adresse canonique.
 export const metadata: Metadata = {
-  title: `Tarifs — ${NOM_APP}`,
+  title: { absolute: `Tarifs : Gratuit, Pro et Pro Max · ${NOM_APP}` },
   description: TARIFS.enUneLigne,
+  alternates: { canonical: "/tarifs" },
 };
 
 /**

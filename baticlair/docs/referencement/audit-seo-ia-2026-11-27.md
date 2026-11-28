@@ -7,7 +7,23 @@ Les décisions de Greg du 27 novembre priment sur le PDF :
 - la landing nationale reste telle quelle ; la page « Couvreurs de Bretagne » reste abandonnée (non publiée, non indexée) ;
 - aucune offre « Premium » : Gratuit, Pro, Pro Max.
 
-Rien n'est publié. Aucune page n'est créée. Aucun outil (Search Console, Bing) n'est branché.
+Rien n'est publié. Aucune page n'est créée.
+
+## Suite du 28 novembre 2026 : décisions de Greg et étape 0 faite
+
+Décisions : robots « recherche oui, entraînement non » ; Search Console oui (Greg pose la ligne, `search-console-bing.md`) ;
+`/couvreurs` gardée non liée et non indexée, `/peintres` retirée ; pas de page Côtes-d'Armor avant de vrais couvreurs ;
+brouillons écrits par Claude d'après les règles de couvreur du dépôt, tout relu par Greg ; titre des sites artisans
+inchangé (« Couvreur à Saint-Brieuc – Dupont Couverture », le §4.1 plus bas ne s'applique plus).
+
+Étape 0 codée (`apps/web/src/lib/indexation.ts`, `robots.ts`, `sitemap.ts`, test `scripts/indexation.test.mjs`) :
+réglage `INDEXATION_SITE` (mobiiz.fr en production seulement), robots.txt, sitemap, canonical sur chaque page publique
+(toujours https://mobiiz.fr en production), titres sans « Mobiiz » en double, `Organization` et `WebSite` sur la
+landing, police inutile retirée (Bricolage Grotesque dans la mise en page racine). Laissés pour plus tard : la vitesse de
+`/negoce` (page de compte rendue dans le navigateur, gardée `noindex`), le sitemap des sites d'artisans (avec la
+discussion des écrans, quand Greg les ouvrira aux moteurs). Brouillon P1 : `brouillons/P1-achats-groupes-couverture.md`.
+
+ Aucun outil (Search Console, Bing) n'est branché.
 
 Mesures faites le 27 novembre 2026 au soir sur test.mobiiz.fr et api-test.mobiiz.fr (commit en ligne `730eea42`).
 Ce qui est « mesuré » l'est ici ; ce qui est « hypothèse » attend des données réelles.

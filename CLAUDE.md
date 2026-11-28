@@ -485,3 +485,13 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - RÈGLE CHANGÉE : les analyses en cours comptent dans les 3 analyses offertes (réservation sous verrou par entreprise) ; avant, dix lectures lancées d'un coup passaient toutes.
 - RÈGLE CHANGÉE : les lectures qui coûtent sont limitées (route avec son `@Throttle`, PDF, Excel, CSV, pages par jeton) ; avant, aucune lecture n'était comptée. Les jetons du chemin ne sont plus écrits dans les journaux (`cheminJournalise`).
 - Dépôt privé : AVANT de le passer en privé, les commits qui partent sur Vercel doivent avoir pour AUTEUR le compte GitHub de Greg (gr33-spec), seul membre de l'équipe Vercel ; sinon Vercel bloque la mise en ligne (« commit author is not a member of the team »).
+
+## Décisions du 28 novembre 2026 : référencement Google et IA (audit `baticlair/docs/referencement/audit-seo-ia-2026-11-27.md`)
+
+- Robots : « recherche oui, entraînement non ». `robots.txt` permet tous les robots de recherche (Googlebot, Bingbot, OAI-SearchBot, Claude-SearchBot…) et refuse les robots d'entraînement (GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot, meta-externalagent) : `apps/web/src/app/robots.ts`, liste dans `apps/web/src/lib/indexation.ts`.
+- RÈGLE CHANGÉE : seul mobiiz.fr en production s'ouvre aux moteurs (`INDEXATION_SITE=on` en Production ET hôte `mobiiz.fr`), et seulement la landing, les tarifs et les pages légales (`PAGES_INDEXABLES`) ; tout le reste dit `noindex` (en-tête), test.mobiiz.fr et les adresses Vercel compris. Avant : `noindex` partout, sauf les sites des artisans dès `PAGES_ENTREPRISES_INDEXEES=on` sur n'importe quel hôte ; maintenant ils demandent aussi mobiiz.fr en production. Test `apps/web/scripts/indexation.test.mjs`.
+- Une page entre dans le sitemap et s'ouvre aux moteurs en l'ajoutant à `PAGES_INDEXABLES`, jamais autrement. Adresse officielle (canonical) toujours `https://mobiiz.fr` en production (`origineCanonique`).
+- `/couvreurs` gardée, non liée, non indexée (base de la future page couverture) ; `/peintres` retirée.
+- Pas de page Côtes-d'Armor avant d'avoir de vrais couvreurs. Pas de pages villes en série. Chaque texte de page publique : brouillon dans `baticlair/docs/referencement/brouillons/`, relu par Greg, aucune affirmation commerciale sans son accord.
+- Titre des sites des artisans : on garde « Couvreur à Saint-Brieuc – Dupont Couverture ».
+- Search Console (propriété « Domaine ») : feu vert, Greg pose la ligne TXT dans Vercel (DNS de mobiiz.fr chez Vercel) : `baticlair/docs/referencement/search-console-bing.md`.

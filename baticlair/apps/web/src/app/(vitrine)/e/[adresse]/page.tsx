@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import { descriptionDeLaPage, donneesStructurees, photoAccueil, titreDeLaPage } from "@baticlair/domain/page-entreprise";
 import { LIBELLES, VuePage } from "@/components/page-entreprise/vue-page";
+import { sitesArtisansIndexes } from "@/lib/indexation";
 import { origineDuSite } from "@/lib/origine";
 import { absolue, lirePage } from "@/lib/page-entreprise";
 
@@ -10,10 +11,10 @@ import { absolue, lirePage } from "@/lib/page-entreprise";
  * MA PAGE MOBIIZ (Greg, 16 novembre 2026) : `mobiiz.fr/e/<adresse>`. Un visiteur sans compte voit la page, rien d'autre de
  * Mobiiz ; une page privée, masquée ou inconnue répond « Page introuvable » ; une ancienne adresse redirige (308). Titre
  * « Métier à Ville – Nom », description, données structurées LocalBusiness, image d'aperçu 1200 × 630 (photo de couverture,
- * sinon une image composée aux couleurs de la page). Indexée par Google seulement quand `PAGES_ENTREPRISES_INDEXEES=on`
- * (le site de test reste hors des moteurs).
+ * sinon une image composée aux couleurs de la page). Indexée seulement sur mobiiz.fr en production avec
+ * `PAGES_ENTREPRISES_INDEXEES=on` (`sitesArtisansIndexes`, `lib/indexation.ts`) : le site de test reste hors des moteurs.
  */
-const INDEXEES = process.env.PAGES_ENTREPRISES_INDEXEES === "on";
+const INDEXEES = sitesArtisansIndexes(process.env);
 
 type Props = { params: Promise<{ adresse: string }> };
 

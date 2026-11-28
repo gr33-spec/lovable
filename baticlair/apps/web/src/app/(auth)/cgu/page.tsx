@@ -14,7 +14,11 @@ const PRIX_MENSUEL = "49 €";
 const PRIX_ANNUEL = "348 €";
 
 
-export const metadata: Metadata = { title: `Conditions générales d'utilisation — ${NOM_APP}` };
+export const metadata: Metadata = {
+  title: { absolute: `Conditions générales d'utilisation · ${NOM_APP}` },
+  description: `Les conditions générales d'utilisation de ${NOM_APP}.`,
+  alternates: { canonical: "/cgu" },
+};
 
 /**
  * LES CGU ARTISAN (mise en conformité du 24 octobre 2026), en mots simples : un service entre professionnels, la commande
