@@ -207,6 +207,7 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
     qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.
 - 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
   (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.
+- 28 nov., soir — banc du calcul : POUSSÉ d4057d87 (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement), site et API en ligne. Branche de test LIBRE.
 
 - 28 nov., après-midi — discrétion des infos société (Greg) : je touche les pieds de page publics (`decouvrir/landing-premium.tsx`,
   `components/vitrine.tsx`, `page-locale/page-locale.tsx`), le pied des e-mails (`platform/email/mise-en-page.ts`), les e-mails
@@ -215,3 +216,4 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   `noindex`. Puis les sites vitrines (`components/page-entreprise/*`, `page-entreprise` côté serveur).
 - 28 nov., soir — discussion des écrans (session_0188g8PcmvctNcTq82VPRdt3) : discrétion des infos société verte (chaîne 148),
   fusionnée avec le banc (d4057d87) ; je relance la chaîne et J'ATTENDS « branche rendue » du banc avant de pousser.
+- 28 nov., soir — discussion des écrans : chaîne 149 verte ; JE POUSSE (discrétion des infos société). « LIBRE » écrit ici après /version.
