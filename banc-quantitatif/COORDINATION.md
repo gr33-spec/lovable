@@ -159,3 +159,12 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., matin — référencement : POUSSÉ et EN LIGNE (site et API = 9b9704e1, puis 27a4ec14 avec le workflow) ;
   essai de l'alerte de la sauvegarde réussi (run 46128279724 : échec volontaire, « Prévenir Mobiiz » vert, API
   « enregistre: true »). Le workflow n'est PAS encore sur main (attend l'accord de Greg). Branche rendue.
+
+## Banc du calcul, 28 novembre 2026 : le quantitatif à la voix
+- Touché côté écran (petit, demandé par Greg) : `components/nouveau-quantitatif.tsx`, `ALaVoix` (titre « Décris ton
+  chantier », la bulle reçoit le texte remis au propre par le serveur, boutons de doute, « Envoyer » ; une dictée qui nomme
+  un ouvrage part au moteur, `versLeMoteur`). Le carré rouge d'arrêt (`EcouteEnCours`, `chat-mobiiz.tsx`) existait déjà :
+  pas touché. À la discussion des écrans : ce composant est le vôtre pour l'apparence ; garder les noms `Décris ton chantier`
+  (titre), `Ce que tu as dit` (région), `Envoyer` (bouton) tenus par le parcours « le quantitatif à la voix ».
+- Serveur : `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre` ; moteur : `lecture/dictee.ts`.
+- 28 nov. — JE POUSSE sur la branche de test après la chaîne verte ; « branche rendue » écrit ici après /version.
