@@ -795,13 +795,11 @@ export function QuestionsScreen({ takeoff, pending, error, onSubmit, onReponses,
   };
   // ZINGUERIE ANNONCÉE ET GUIDÉE (Greg, 28 novembre 2026) : avant la première question du zinc (pliage, développé, feuilles),
   // une phrase : « Je vais calculer tes feuilles de zinc, pièce par pièce. » Une seule fois.
-  const zincAnnonce = useRef(false);
-  useEffect(() => {
-    if (zincAnnonce.current || !courante) return;
-    if (!/faconnage@pieces-pliees|developpe|feuilles_/.test(courante.key)) return;
-    zincAnnonce.current = true;
+  const [zincAnnonce, setZincAnnonce] = useState(false);
+  if (!zincAnnonce && courante && /faconnage@pieces-pliees|developpe|feuilles_/.test(courante.key)) {
+    setZincAnnonce(true);
     setMessages((m) => [...m, { de: "mobiiz", texte: "Je vais calculer tes feuilles de zinc, pièce par pièce." }]);
-  }, [courante]);
+  }
   // Greg, 28 novembre 2026 : « Si rien ne manque, la liste s'ouvre directement. » Les cases « Suggestions » passées et plus
   // aucune question : le calcul part tout seul (avant : il fallait encore toucher « Calculer ma liste »).
   const suggereAvant = useRef(Boolean(aSuggerer));

@@ -237,7 +237,7 @@ export function AssistantMobiiz({
           return { t, retour: null };
       }
     },
-    [corriger],
+    [corriger, onUpdated, qid],
   );
 
   /** Une réponse à une question du document : au moteur (clé, unité), ou écrite dans la désignation de la ligne. */
