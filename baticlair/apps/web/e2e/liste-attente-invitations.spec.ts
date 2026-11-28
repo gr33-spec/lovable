@@ -45,8 +45,14 @@ async function admin(browser: Browser) {
   const page = await ctx.newPage();
   await page.goto("/connexion");
   const email = "admin-groupe@example.fr";
-  const r = await page.request.post("/v1/auth/sign-in/email", { data: { email, password: "motdepasse-admin-solide" }, headers: { origin: "http://localhost:3000" } });
-  if (r.status() !== 200) await page.request.post("/v1/auth/sign-up/email", { data: { email, password: "motdepasse-admin-solide", name: "Admin Groupe" }, headers: { origin: "http://localhost:3000" } });
+  // Le compte admin est unique dans la base des parcours : déjà créé par un autre parcours (« motdepasse-solide » dans
+  // `parcours-artisan`, « motdepasse-admin-solide » dans les parcours activés), sinon créé ici.
+  let connecte = false;
+  for (const password of ["motdepasse-solide", "motdepasse-admin-solide"]) {
+    if (connecte) break;
+    connecte = (await page.request.post("/v1/auth/sign-in/email", { data: { email, password }, headers: { origin: "http://localhost:3000" } })).status() === 200;
+  }
+  if (!connecte) expect((await page.request.post("/v1/auth/sign-up/email", { data: { email, password: "motdepasse-solide", name: "Admin Groupe" }, headers: { origin: "http://localhost:3000" } })).status()).toBe(200);
   const me = (await (await page.request.get("/v1/me")).json()) as { companies: unknown[] };
   if (!me.companies.length) await page.request.post("/v1/companies", { data: { name: "Bati Invest", trades: ["roofing"], departement: "22" } });
   await page.request.post("/v1/admin/pilotage/code");
@@ -62,7 +68,23 @@ async function admin(browser: Browser) {
 test("invitation, liste d'attente, prévenir les inscrits : de bout en bout, une seule fois, sans fuite d'adresse", async ({ page, browser }) => {
   test.setTimeout(180_000);
   // Un département par appareil : les deux passes ne se mêlent jamais.
-  const dep = test.info().project.name === "telephone" ? { code: "56", nom: "Morbihan" } : { code: "35", nom: "Ille-et-Vilaine" };
+  // Un département où les plaquistes ne sont pas encore ouverts : la base des parcours garde les annonces d'une passe à
+  // l'autre quand les serveurs tournent déjà, et l'appareil d'avant en a peut-être ouvert un.
+  const a = await admin(browser);
+  const annonces = (await (await a.page.request.get("/v1/admin/annonces")).json()) as { annonces: { metier: string; departements: { code: string }[] }[] };
+  const ouverts = new Set(annonces.annonces.filter((x) => x.metier === "drywall").flatMap((x) => x.departements.map((d) => d.code)));
+  const CANDIDATS = [
+    { region: "53", code: "56", nom: "Morbihan" },
+    { region: "53", code: "35", nom: "Ille-et-Vilaine" },
+    { region: "53", code: "29", nom: "Finistère" },
+    { region: "52", code: "44", nom: "Loire-Atlantique" },
+    { region: "52", code: "49", nom: "Maine-et-Loire" },
+    { region: "52", code: "72", nom: "Sarthe" },
+    { region: "52", code: "85", nom: "Vendée" },
+  ];
+  const dep = CANDIDATS.find((c) => !ouverts.has(c.code));
+  test.skip(!dep, "Tous les départements candidats sont déjà ouverts aux plaquistes dans cette base : relancer avec une base vide.");
+  if (!dep) return;
   const parrain = await couvreurQuiInvite(browser);
 
   // 1. Le plaquiste ouvre le lien partagé : Mobiiz se présente, rien sur celui qui invite.
@@ -75,7 +97,7 @@ test("invitation, liste d'attente, prévenir les inscrits : de bout en bout, une
   await expect(page).toHaveURL(new RegExp(`/commencer\\?invitation=${parrain.code}$`));
 
   // 2. Il s'inscrit : la carte, « Plaquiste », puis la case « Préviens-moi », jamais cochée d'office.
-  await page.locator('path[data-region="53"]').click();
+  await page.locator(`path[data-region="${dep.region}"]`).click();
   await page.locator(`g[data-departement="${dep.code}"]`).waitFor();
   await page.locator(`g[data-departement="${dep.code}"]`).click();
   await page.getByRole("button", { name: "Continuer" }).click();
@@ -130,7 +152,6 @@ test("invitation, liste d'attente, prévenir les inscrits : de bout en bout, une
   await page.goto("/");
 
   // 4. L'admin : qui a invité qui ; puis « Prévenir les inscrits » (aperçu, confirmation, envoi par lots).
-  const a = await admin(browser);
   await a.page.goto("/admin/invitations");
   await expect(a.page.getByText(/Toitures du Trieux → /).first()).toBeVisible();
   await a.page.goto("/admin/prevenir");
