@@ -217,3 +217,4 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., soir — discussion des écrans (session_0188g8PcmvctNcTq82VPRdt3) : discrétion des infos société verte (chaîne 148),
   fusionnée avec le banc (d4057d87) ; je relance la chaîne et J'ATTENDS « branche rendue » du banc avant de pousser.
 - 28 nov., soir — discussion des écrans : chaîne 149 verte ; JE POUSSE (discrétion des infos société). « LIBRE » écrit ici après /version.
+- 28 nov., soir — LIBRE : poussé (a0d41815), en ligne sur le site et l'API (discrétion des infos société). La branche est libre.
