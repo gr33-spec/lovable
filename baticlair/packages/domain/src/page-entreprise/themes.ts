@@ -211,3 +211,17 @@ export function accrocheParDefaut(theme: ThemeMetier, zone: string | null | unde
 export function teinteDeLaPage(couleur: string | null | undefined, metier: string | null | undefined): (typeof TEINTES)[number] {
   return TEINTES.find((x) => x.hex.toLowerCase() === couleur?.toLowerCase() || x.id === couleur) ?? TEINTES.find((x) => x.id === themeDuMetier(metier).teinte)!;
 }
+
+/**
+ * LES MODÈLES DE SITE (Greg, 27 novembre 2026 : « mêmes données, habillages complètement différents, passage d'un modèle
+ * à l'autre en un clic sans rien perdre ; commence par rendre le modèle actuel impeccable »). Un modèle n'est qu'un
+ * habillage : il lit le même contenu (`ContenuPage`) et n'écrit rien. Changer de modèle ne change aucune donnée. Un seul
+ * modèle pour l'instant ; l'éditeur ne montre le choix qu'à partir de deux.
+ */
+export const MODELES_SITE = [{ id: "atelier", nom: "Atelier", description: "Grande photo d'accueil, prestations en cartes, réalisations en grand." }] as const;
+export type ModeleSiteId = (typeof MODELES_SITE)[number]["id"];
+
+/** Le modèle d'une page : celui choisi s'il existe encore, sinon le premier (jamais une page sans habillage). */
+export function modeleDe(modele: string | null | undefined): (typeof MODELES_SITE)[number] {
+  return MODELES_SITE.find((m) => m.id === modele) ?? MODELES_SITE[0];
+}

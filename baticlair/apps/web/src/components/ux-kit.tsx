@@ -55,8 +55,8 @@ export function Etiquette({ ton = "jaune", children }: { ton?: Ton; children: Re
 }
 
 /** Une grande carte cliquable : pastille d'icône, titre, sous-titre, chevron. `jaune` : l'action principale de l'écran. */
-export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = false, pastille, etiquette, label, remplace = false }: { /** Le lien remplace l'écran courant dans l'historique (un écran de choix ne se retrouve pas au retour arrière). */ remplace?: boolean; href?: string; onClick?: () => void; icone?: LucideIcon; titre: string; sous?: React.ReactNode; jaune?: boolean; pastille?: React.ReactNode; etiquette?: React.ReactNode; /** Le nom lu par un lecteur d'écran, quand il doit commencer par l'action et non par l'étiquette. */ label?: string }) {
-  const classe = `pressable flex w-full items-center gap-3 rounded-[20px] p-4 text-left shadow-card ${jaune ? JAUNE : "bg-surface text-ink"}`;
+export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = false, pastille, etiquette, label, remplace = false, colonne = false }: { /** Sur ordinateur, la carte se tient debout (une colonne d'une grille de choix) ; le téléphone ne change pas. */ colonne?: boolean; /** Le lien remplace l'écran courant dans l'historique (un écran de choix ne se retrouve pas au retour arrière). */ remplace?: boolean; href?: string; onClick?: () => void; icone?: LucideIcon; titre: string; sous?: React.ReactNode; jaune?: boolean; pastille?: React.ReactNode; etiquette?: React.ReactNode; /** Le nom lu par un lecteur d'écran, quand il doit commencer par l'action et non par l'étiquette. */ label?: string }) {
+  const classe = `pressable flex w-full items-center gap-3 rounded-[20px] p-4 text-left shadow-card ${colonne ? "lg:h-full lg:flex-col lg:items-start lg:gap-5 lg:p-7 " : ""}${jaune ? JAUNE : "bg-surface text-ink"}`;
   const contenu = (
     <>
       {Icone ? (
@@ -66,11 +66,11 @@ export function CarteLien({ href, onClick, icone: Icone, titre, sous, jaune = fa
       ) : null}
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         {etiquette}
-        <span className="text-[17px] leading-tight font-extrabold text-balance">{titre}</span>
-        {sous ? <span className={`text-[13px] leading-snug ${jaune ? "text-on-accent/85" : "text-[#5c5648]"}`}>{sous}</span> : null}
+        <span className={`text-[17px] leading-tight font-extrabold text-balance${colonne ? " lg:text-[21px]" : ""}`}>{titre}</span>
+        {sous ? <span className={`text-[13px] leading-snug ${colonne ? "lg:text-[15px] " : ""}${jaune ? "text-on-accent/85" : "text-[#5c5648]"}`}>{sous}</span> : null}
       </span>
       {pastille}
-      <ChevronRight size={20} aria-hidden="true" className="shrink-0" />
+      <ChevronRight size={20} aria-hidden="true" className={`shrink-0${colonne ? " lg:hidden" : ""}`} />
     </>
   );
   return href ? (

@@ -7,6 +7,8 @@ import {
   rubriquesVisibles,
   couleurBoutonsDe,
   couleurSurSombre,
+  modeleDe,
+  type ModeleSiteId,
   melange,
   teinteDe,
   texteSurCouleur,
@@ -65,7 +67,19 @@ export interface VuePageProps {
   annee?: number;
 }
 
-export function VuePage({ contenu: c, apercu = false, annee = new Date().getFullYear() }: VuePageProps) {
+/**
+ * LES MODÈLES DE SITE (Greg, 27 novembre 2026) : chaque modèle est un habillage qui lit le MÊME contenu ; changer de
+ * modèle ne touche à aucune donnée. Ajouter un modèle = une entrée de `MODELES_SITE` (domaine) et son composant ici.
+ */
+const RENDUS: Record<ModeleSiteId, (p: VuePageProps) => React.ReactElement> = { atelier: ModeleAtelier };
+
+export function VuePage(props: VuePageProps) {
+  const Rendu = RENDUS[modeleDe(props.contenu.modele).id];
+  return <Rendu {...props} />;
+}
+
+/** Le modèle « Atelier » : barre blanche, grande photo d'accueil, prestations en cartes, réalisations en grand. */
+function ModeleAtelier({ contenu: c, apercu = false, annee = new Date().getFullYear() }: VuePageProps) {
   const visibles = rubriquesVisibles(c);
   const menu = menuDeLaPage(c);
   const accueil = photoAccueil(c);
@@ -112,7 +126,7 @@ export function VuePage({ contenu: c, apercu = false, annee = new Date().getFull
   const lien = (href: string) => (apercu ? undefined : href);
 
   return (
-    <div className={`pe${accueil ? " pe-avec-photo" : ""}${apercu ? " pe-apercu" : ""}`} style={style}>
+    <div className={`pe${accueil ? " pe-avec-photo" : ""}${apercu ? " pe-apercu" : ""}`} data-modele="atelier" style={style}>
       <SuiviDefilement />
       {apercu ? null : <RetourMonSite />}
       <EnTeteSite nom={c.nom} activite={activite} logo={c.logo} initiales={initiales(c.nom)} telephone={c.telephone} menu={menu} />

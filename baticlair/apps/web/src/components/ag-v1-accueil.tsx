@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Plus, ChevronRight, Package, Search, Sparkles, Timer, X } from "lucide-react";
+import { Check, Plus, ChevronRight, Package, Search, Sparkles, Timer, Users, X } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -68,7 +68,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
   const trouves = [...(data?.achats ?? [])].sort((x, y) => x.ouvertJusquau.localeCompare(y.ouvertJusquau)).filter((a) => mots.every((m) => sansAccent(a.nom).includes(m)));
 
   return (
-    <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-[48rem] lg:pb-24">
+    <div className="flex flex-col gap-4 lg:w-full lg:pb-24">
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <PageTitle>Achats groupés</PageTitle>
@@ -131,8 +131,11 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         <p className={`${CARTE} p-4 text-[15px] text-muted`}>Aucun regroupement ouvert pour « {cherche.trim()} ». Publie ce besoin (<span className="lg:hidden">le ＋ en bas</span><span className="hidden lg:inline">« Publier un besoin »</span>) : d&apos;autres artisans te rejoindront.</p>
       ) : data.achats.length === 0 ? (
         // Revue UX (8 novembre 2026) : liste vide, l'action vit dans la carte (le bouton flottant recouvrait ce texte).
-        <div className={`${CARTE} flex flex-col items-start gap-3 p-4`}>
-          <p className="text-[15px] text-muted">Aucun regroupement ouvert{lot ? " pour ce métier" : ""} près de toi pour le moment. Sois le premier : <span className="lg:hidden">touche le ＋ en bas, « Besoin groupé »</span><span className="hidden lg:inline">touche « Publier un besoin »</span>. D&apos;autres artisans te rejoindront.</p>
+        <div className={`${CARTE} flex flex-col items-start gap-3 p-4 lg:items-center lg:gap-4 lg:px-10 lg:py-14 lg:text-center`}>
+          <span aria-hidden="true" className="hidden size-14 items-center justify-center rounded-full bg-accent text-on-accent lg:flex">
+            <Users size={26} />
+          </span>
+          <p className="text-[15px] text-muted lg:max-w-[38rem] lg:text-[16px]">Aucun regroupement ouvert{lot ? " pour ce métier" : ""} près de toi pour le moment. Sois le premier : <span className="lg:hidden">touche le ＋ en bas, « Besoin groupé »</span><span className="hidden lg:inline">touche « Publier un besoin »</span>. D&apos;autres artisans te rejoindront.</p>
         </div>
       ) : (
         // Greg, 12 novembre 2026 (dossier de corrections UX, point 8) : chaque achat groupé est une opportunité AUTONOME,
@@ -142,7 +145,7 @@ export function AccueilAchatsGroupesV1({ etat }: { etat: EtatV1 }) {
         // nom d'entreprise, aucune économie annoncée.
         // Greg, 18 novembre 2026 (onglet « Groupés ») : chaque carte dit en UNE phrase où ça en est (« 3 entreprises · 1 750
         // ardoises · clôture dans 5 jours ») et a UN bouton : « Rejoindre », ou « Voir » quand j'y suis déjà.
-        <ul aria-label="Achats groupés ouverts" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <ul aria-label="Achats groupés ouverts" className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
           {trouves.slice(0, tout ? undefined : ACHATS_VISIBLES).map((a) => {
             const phrase = `${a.resume && a.resume.entreprises > 0 ? ligneRegroupement(a.resume) : "Personne pour l'instant"} · ${clotureDans(a.ouvertJusquau)}`;
             const dedans = !!a.monBesoinId;

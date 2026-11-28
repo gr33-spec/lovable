@@ -430,7 +430,7 @@ export function AccueilMaquette() {
     : [];
 
   return (
-    <div className="flex flex-col gap-4 lg:mx-auto lg:w-full lg:max-w-[72rem] lg:gap-6">
+    <div className="flex flex-col gap-4 lg:w-full lg:gap-6">
       {/* Greg : seule retouche de l'en-tête de page, un « Bonjour » moins haut. */}
       <h1 className="font-display text-[22px] leading-tight font-extrabold tracking-[-0.02em] lg:text-[28px]">
         Bonjour {prenom}

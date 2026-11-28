@@ -268,7 +268,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
           <p className="sr-only" aria-live="polite">
             {items.length > 1 ? `${items.length} demandes` : "1 demande"}
           </p>
-          <ul className={`grid grid-cols-1 gap-2.5 lg:grid-cols-2 ${selection ? "pb-24" : ""}`}>
+          <ul className={`grid grid-cols-1 gap-2.5 lg:grid-cols-2 2xl:grid-cols-3 ${selection ? "pb-24" : ""}`}>
             {items.map((p) => (
               <li key={p.id}>
                 <CarteListe
@@ -312,7 +312,7 @@ export function MesListes({ integre = false }: { integre?: boolean } = {}) {
               ⌄
             </span>
           </summary>
-          <ul className="grid grid-cols-1 gap-2.5 px-3 pb-3 lg:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2.5 px-3 pb-3 lg:grid-cols-2 2xl:grid-cols-3">
             {brouillons.map((p) => (
               <li key={p.id}>
                 <CarteListe

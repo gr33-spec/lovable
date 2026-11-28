@@ -445,6 +445,17 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - « Comme d'habitude : 0,65 mm. » seul ne disait rien → chaque habitude dit son nom : « Épaisseur du zinc : 0,65 mm, comme d'habitude. » (nom de la donnée de la fiche, `habits[].nom`).
 - Tests : `e2e/parcours-artisan.spec.ts` (« la dictée des questions », « À la voix », coupure de Safari simulée), `apps/api/test/habitudes.test.ts`. PAS ESSAYÉ SUR UN VRAI IPHONE (pas d'iPhone ni de Safari ici) : à confirmer par Greg.
 
+## Décisions du 27 novembre 2026 : la version ordinateur (Greg : « pas pro aujourd'hui »)
+
+- Le téléphone ne bouge pas : chaque changement est en `lg:` (ou au-delà) ; captures téléphone comparées avant et après (seules l'heure et les adresses de test diffèrent).
+- Skill frontend-design d'Anthropic ajouté au projet (`.claude/skills/frontend-design`, licence Apache 2.0), à côté de taste-skill.
+- RÈGLE CHANGÉE : la colonne de l'ordinateur a « Messages » (avec ses non-lus) ; avant, la messagerie n'y avait pas de ligne et « Missions » s'allumait sur /messages (bug corrigé). Au-delà de 1536 px, le contenu va jusqu'à 100 rem (avant : 76 rem partout).
+- Messagerie sur ordinateur, comme Gmail : trois volets sur toute la hauteur (dossiers, liste, message ouvert) ; avant, une petite boîte à droite.
+- Nouveau quantitatif : les trois choix côte à côte en grandes cartes (`CarteLien colonne`). Achats groupés : toute la largeur, trois colonnes, état vide centré. Demandes : trois colonnes au-delà de 1536 px. L'accueil s'aligne sur l'en-tête.
+- Site artisan, grand écran (à partir de 1200 px de site) : contenu jusqu'à 1440 px, accueil sur toute la hauteur de l'écran, prestations en cartes avec leur texte entier, réalisations en grandes photos, rubriques aérées. Le téléphone et la tablette ne changent pas.
+- MODÈLES DE SITE : `MODELES_SITE` et `modeleDe` (domaine), colonne `page_entreprise.modele` (migration additive `20261127180000_page_modele`), registre `RENDUS` dans `vue-page.tsx` (`ModeleAtelier`). Un modèle est un habillage : il lit le même contenu, changer de modèle ne touche à aucune donnée (test « MODÈLES DE SITE », `apps/api/test/page-entreprise.test.ts`). Un seul modèle pour l'instant ; le choix apparaît dans l'onglet Couleurs dès qu'il y en a deux.
+- RÈGLE CHANGÉE : « Voir mon site » s'ouvre en version ordinateur sur ordinateur et en version téléphone sur téléphone (avant : toujours téléphone) ; le sélecteur reste. L'aperçu ordinateur se dessine sur 1440 px (avant : 1200), réduit en miniature entière sur un téléphone.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

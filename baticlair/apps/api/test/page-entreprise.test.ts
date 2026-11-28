@@ -97,6 +97,25 @@ describe("Ma page : réglages", () => {
     expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.telephone).toBe("06 22 22 22 22");
   });
 
+  it("MODÈLES DE SITE (Greg, 27 novembre 2026) : un habillage seulement ; un modèle inconnu est refusé ; changer de modèle ne touche à aucune donnée", async () => {
+    const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
+    await rendrePublique(a.agent);
+    await a.agent.patch("/v1/ma-page").send({ accroche: "Ardoise et zinc", couleur: "#1d3557" }).expect(200);
+    const p = (await a.agent.get("/v1/ma-page").expect(200)).body;
+    expect(p.choix.modeles.map((m: { id: string }) => m.id)).toEqual(["atelier"]);
+    expect(p.reglages.modele).toBe("atelier");
+    const avantChangement = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    expect(avantChangement.modele).toBe("atelier");
+    const refus = await a.agent.patch("/v1/ma-page").send({ modele: "inconnu" });
+    expect(refus.status).toBe(400);
+    await a.agent.patch("/v1/ma-page").send({ modele: "atelier" }).expect(200);
+    const apres = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    expect({ ...apres, majLe: null }).toEqual({ ...avantChangement, majLe: null });
+    // Retour au modèle par défaut : toujours le même contenu.
+    await a.agent.patch("/v1/ma-page").send({ modele: null }).expect(200);
+    expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu).toMatchObject({ modele: "atelier", accroche: "Ardoise et zinc", couleur: "#1D3557" });
+  });
+
   it("PHOTO PAR DÉFAUT : celle du métier, qui suit le métier ; la galerie la remplace ; crédit en pied de page ; la photo de l'artisan passe devant", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
     await rendrePublique(a.agent);

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChevronDown, FileText, Globe, Handshake, Mail, Truck } from "lucide-react";
+import { Bell, ChevronDown, FileText, Globe, Handshake, Inbox, Mail, MailOpen, Send, ShieldAlert, Truck } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { quandBoite, type ElementBoite } from "../../../../packages/domain/src/missions/missions";
@@ -153,31 +153,64 @@ export function Messagerie() {
     setDossier(d);
     setOuvert(null);
   };
+  /**
+   * ORDINATEUR (Greg, 27 novembre 2026 : « la liste à gauche et le détail à droite, comme Gmail ») : trois volets sur toute
+   * la hauteur, les dossiers, la liste, le message ouvert. Le téléphone ne change pas (les dossiers en puces, le message
+   * sur son écran).
+   */
   return (
-    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-8">
-      <div className="flex min-w-0 flex-col gap-4">
+    <div className="flex flex-col gap-4 lg:grid lg:h-[calc(100dvh-10rem)] lg:min-h-[34rem] lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-stretch lg:gap-6 xl:grid-cols-[12.5rem_minmax(0,26rem)_minmax(0,1fr)]">
+      <div className="hidden min-w-0 flex-col gap-5 xl:flex">
         <GrandTitre>Messages</GrandTitre>
-        <Puces label="Dossiers" choix={DOSSIERS} valeur={dossier} onChange={choisirDossier} entieres />
-        {!pret ? null : dossier === "recus" ? (
-          <Recus ouverts={ouverts} setOuverts={setOuverts} ouvrir={ouvrir} actif={ouvert} />
-        ) : dossier === "envoyes" ? (
-          <Envoyes ouvrir={ouvrir} actif={ouvert} />
-        ) : (
-          <Indesirables ouvrir={ouvrir} actif={ouvert} />
-        )}
+        <div role="group" aria-label="Dossiers" className="flex flex-col gap-1">
+          {DOSSIERS.map((d) => {
+            const Icone = d.id === "recus" ? Inbox : d.id === "envoyes" ? Send : ShieldAlert;
+            const actif = dossier === d.id;
+            return (
+              <button key={d.id} type="button" aria-pressed={actif} onClick={() => choisirDossier(d.id)} className={`pressable flex min-h-11 items-center gap-3 rounded-full px-4 text-left text-[15px] font-bold ${actif ? "bg-accent text-on-accent" : "text-ink/75 hover:bg-(--voile-1) hover:text-ink"}`}>
+                <Icone size={18} aria-hidden="true" className="shrink-0" />
+                {d.libelle}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="flex min-w-0 flex-col gap-4 lg:min-h-0">
+        <div className="contents xl:hidden">
+          <GrandTitre>Messages</GrandTitre>
+          <Puces label="Dossiers" choix={DOSSIERS} valeur={dossier} onChange={choisirDossier} entieres />
+        </div>
+        <div className="flex min-w-0 flex-col gap-4 lg:-mx-1 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:px-1 lg:pb-2">
+          {!pret ? null : dossier === "recus" ? (
+            <Recus ouverts={ouverts} setOuverts={setOuverts} ouvrir={ouvrir} actif={ouvert} />
+          ) : dossier === "envoyes" ? (
+            <Envoyes ouvrir={ouvrir} actif={ouvert} />
+          ) : (
+            <Indesirables ouvrir={ouvrir} actif={ouvert} />
+          )}
+        </div>
       </div>
       {ordi ? (
-        <section aria-label="Message ouvert" className="sticky top-6 hidden max-h-[calc(100dvh-3rem)] min-w-0 flex-col gap-4 overflow-y-auto rounded-[20px] border border-line bg-surface p-6 lg:flex">
+        <section aria-label="Message ouvert" className="hidden min-h-0 min-w-0 flex-col gap-4 overflow-y-auto rounded-[20px] border border-line bg-surface p-6 lg:flex xl:p-8">
           {ouvert === null ? (
-            <p className="py-16 text-center text-[16px] text-muted">Choisis un message pour le lire ici.</p>
-          ) : ouvert.sorte === "negoce" ? (
-            <ReponseNegoce key={ouvert.id} id={ouvert.id} panneau />
-          ) : ouvert.sorte === "envoye" ? (
-            <MessageEnvoye key={ouvert.id} id={ouvert.id} panneau />
-          ) : ouvert.sorte === "mission" ? (
-            <Conversation key={ouvert.id} id={ouvert.id} />
+            <div className="m-auto flex max-w-xs flex-col items-center gap-3 text-center">
+              <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-(--voile-2) text-muted">
+                <MailOpen size={26} />
+              </span>
+              <p className="text-[16px] text-muted">Choisis un message pour le lire ici.</p>
+            </div>
           ) : (
-            <MessageDuSite key={ouvert.id} id={ouvert.id} />
+            <div className="mx-auto flex w-full max-w-[46rem] flex-col gap-4">
+              {ouvert.sorte === "negoce" ? (
+                <ReponseNegoce key={ouvert.id} id={ouvert.id} panneau />
+              ) : ouvert.sorte === "envoye" ? (
+                <MessageEnvoye key={ouvert.id} id={ouvert.id} panneau />
+              ) : ouvert.sorte === "mission" ? (
+                <Conversation key={ouvert.id} id={ouvert.id} />
+              ) : (
+                <MessageDuSite key={ouvert.id} id={ouvert.id} />
+              )}
+            </div>
           )}
         </section>
       ) : null}

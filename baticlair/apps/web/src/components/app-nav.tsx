@@ -37,9 +37,10 @@ const listesItem: NavItem = {
 };
 const groupeItem: NavItem = { href: "/achats-groupes", label: fr.nav.groupe, icon: Users, match: (p: string) => p.startsWith("/achats-groupes") || p.startsWith("/regroupements") || p.startsWith("/groupe") };
 /** Missions entre entreprises (Greg, 10 novembre 2026) : le quatrième onglet, toujours présent ; les messages y vivent quand les missions sont ouvertes. */
-const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") || (p.startsWith("/messages") && !p.startsWith("/messages/negoce") && !p.startsWith("/messages/site")) };
+// Greg, 27 novembre 2026 : « Messages » a sa ligne dans la colonne de l'ordinateur ; Missions ne s'allume plus sur /messages.
+const missionsItem: NavItem = { href: "/missions", label: fr.nav.missions, icon: Briefcase, match: (p: string) => p.startsWith("/missions") };
 /** « Mon site » (Greg, 16 novembre 2026) : le site de l'entreprise, cinquième onglet ; seul chemin vers son éditeur. */
-const siteItem: NavItem = { href: "/mon-site", label: "Mon site", icon: Globe, match: (p: string) => p.startsWith("/mon-site") || p.startsWith("/messages/site") };
+const siteItem: NavItem = { href: "/mon-site", label: "Mon site", icon: Globe, match: (p: string) => p.startsWith("/mon-site") };
 /** Ordinateur seulement (Greg, 31 octobre 2026, soir : « on a de la place sur l'écran ») : « Mes négoces » à portée de clic. */
 const negocesItem: NavItem = { href: "/fournisseurs", label: "Mes négoces", icon: Truck, match: (p: string) => p.startsWith("/fournisseurs") };
 const profilItem: NavItem = { href: "/compte", label: fr.nav.profil, icon: UserRound, match: (p: string) => p.startsWith("/compte") || p.startsWith("/abonnement") || p.startsWith("/fournisseurs") || p.startsWith("/mes-prix") };
@@ -204,7 +205,8 @@ export function AppNav() {
         {link(listesItem, true)}
         {groupe ? link(groupeItem, true) : null}
         {groupe ? link(groupesTelItem, false, true) : null}
-        {link(messagesItem, false, true)}
+        {/* Ordinateur (Greg, 27 novembre 2026) : « Messages » dans la colonne aussi, avec ses non-lus, comme Gmail. */}
+        {link(messagesItem)}
         {/* Prompt maître (Greg, 10 novembre 2026) : quatre entrées fixes, Accueil, Quantitatifs, Achats groupés, Missions. */}
         {link(missionsItem, true)}
         {/* « Mon site » (Greg, 18 novembre 2026, RÈGLE CHANGÉE : avant, cinquième onglet de la barre du bas) : sur téléphone,

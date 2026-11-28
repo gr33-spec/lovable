@@ -22,21 +22,22 @@ export function ChoixCreation({ pour = null }: { /** Venu de « Publier un besoi
   );
   const enCours = data?.brouillon?.donnees.lignes?.length ?? 0;
   return (
-    <div className="flex flex-col gap-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:mx-auto lg:w-full lg:max-w-[40rem] lg:gap-5 lg:pb-0">
+    <div className="flex flex-col gap-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:w-full lg:max-w-[68rem] lg:gap-6 lg:pb-0">
       <BackButton fallback={pour ? "/achats-groupes" : "/chantiers"} />
       <div className="flex flex-col gap-1">
         {/* Sur petit téléphone, le titre tient sur une ligne : les deux choix restent entiers au-dessus du menu. */}
         <h1 className="font-display text-[28px] leading-[1.05] font-extrabold tracking-[-0.03em] min-[400px]:text-[36px]">{pour ? "Publier un besoin groupé" : "Nouveau quantitatif"}</h1>
         <p className="text-[15px] text-muted">{pour ? "Prépare les matériaux que tu souhaites acheter avec d'autres artisans. Tu vérifieras tout avant la publication." : "Comment veux-tu le préparer ?"}</p>
       </div>
-      <div className="flex flex-col gap-3">
+      {/* Ordinateur (Greg, 27 novembre 2026) : les choix côte à côte, en grandes cartes ; le téléphone garde sa colonne. */}
+      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-3 lg:gap-4">
         {enCours > 0 ? (
-          <CarteLien remplace href={`${base}?mode=manuel`} icone={ClipboardList} titre={`Reprendre ma liste en cours · ${enCours} matériau${enCours > 1 ? "x" : ""}`} sous="Tu la retrouves comme tu l'as laissée." />
+          <div className="lg:col-span-3"><CarteLien remplace href={`${base}?mode=manuel`} icone={ClipboardList} titre={`Reprendre ma liste en cours · ${enCours} matériau${enCours > 1 ? "x" : ""}`} sous="Tu la retrouves comme tu l'as laissée." /></div>
         ) : null}
-        <CarteLien remplace jaune href={`${base}?mode=manuel`} icone={PencilLine} titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
-        <CarteLien remplace href={`${base}?mode=assistant`} icone={Sparkles} titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
+        <CarteLien remplace jaune href={`${base}?mode=manuel`} icone={PencilLine} colonne titre="Je saisis ma liste" sous="Je choisis mes matériaux par métier et par famille, ou je les écris." />
+        <CarteLien remplace href={`${base}?mode=assistant`} icone={Sparkles} colonne titre="Mobiiz m'aide" sous="À partir d'une photo, d'un devis, d'un PDF, d'une liste ou de ce que je dis. Je vérifie tout." />
         {/* « À la voix » (Greg, 27 novembre 2026) : décrire son chantier en parlant, à côté de la photo et du texte. */}
-        <CarteLien remplace href={`${base}?mode=assistant&entree=voix`} icone={Mic} titre="À la voix" sous="Je décris mon chantier en parlant. Je relis le texte avant de l'envoyer." />
+        <CarteLien remplace href={`${base}?mode=assistant&entree=voix`} icone={Mic} colonne titre="À la voix" sous="Je décris mon chantier en parlant. Je relis le texte avant de l'envoyer." />
       </div>
       <p className="text-[13px] leading-relaxed text-muted">Tu peux changer en cours de route : l&apos;aide de Mobiiz reste disponible depuis ta liste, et rien n&apos;est ajouté sans ton accord.</p>
     </div>

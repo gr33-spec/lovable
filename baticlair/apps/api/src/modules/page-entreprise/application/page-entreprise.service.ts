@@ -7,6 +7,8 @@ import {
   refusAdresse,
   TEINTES,
   COULEURS_BOUTONS,
+  MODELES_SITE,
+  modeleDe,
   PHOTOS_DEFAUT,
   photoDefautDe,
   photoPubliqueDefaut,
@@ -59,6 +61,7 @@ export interface ModificationPage {
   visible?: boolean;
   couleur?: string | null;
   couleurBoutons?: string | null;
+  modele?: string | null;
   photoDefaut?: string | null;
   prestations?: Prestation[];
   accroche?: string | null;
@@ -204,6 +207,7 @@ export class PageEntrepriseService {
       siret: e.siret?.replace(/\s/g, "") || null,
       couleur: page.couleur,
       couleurBoutons: page.couleurBoutons,
+      modele: modeleDe(page.modele).id,
       photoDefaut: defaut ? photoPubliqueDefaut(defaut) : null,
       // Le crédit seulement quand la photo par défaut est à l'écran (pas de couverture à lui) et que la licence le demande.
       creditPhoto: !couverture && defaut ? defaut.credit : null,
@@ -235,6 +239,7 @@ export class PageEntrepriseService {
         adresseModifiable: !page.adresseChangeeLe,
         couleur: page.couleur,
         couleurBoutons: page.couleurBoutons,
+        modele: modeleDe(page.modele).id,
         photoDefaut: page.photoDefaut,
         prestations: prestationsDe(page.prestations),
         accroche: page.accroche,
@@ -258,6 +263,7 @@ export class PageEntrepriseService {
       choix: {
         teintes: TEINTES,
         couleursBoutons: COULEURS_BOUTONS,
+        modeles: MODELES_SITE,
         photosDefaut: PHOTOS_DEFAUT.map((p) => ({ id: p.id, nom: p.nom, metier: p.metier, vignette: vignetteDefaut(p) })),
         certifications: CERTIFICATIONS_SUGGEREES,
         engagements: ENGAGEMENTS,
@@ -288,6 +294,11 @@ export class PageEntrepriseService {
       const choix = m.couleurBoutons === null ? null : COULEURS_BOUTONS.find((x) => x.hex.toLowerCase() === m.couleurBoutons!.toLowerCase() || x.id === m.couleurBoutons);
       if (m.couleurBoutons !== null && !choix) throw refus("couleurBoutons", "Choisis une des couleurs proposées.", "couleurBoutons");
       d.couleurBoutons = choix?.hex ?? null;
+    }
+    // Le modèle de site (Greg, 27 novembre 2026) : un habillage seulement, aucune autre donnée ne change.
+    if (m.modele !== undefined) {
+      if (m.modele !== null && !MODELES_SITE.some((x) => x.id === m.modele)) throw refus("modele", "Choisis un des modèles proposés.", "modele");
+      d.modele = m.modele;
     }
     if (m.prestations !== undefined) {
       d.prestations = m.prestations

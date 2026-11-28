@@ -116,6 +116,8 @@ export interface ContenuPage {
   couleur: string | null;
   /** La couleur des boutons choisie (une de `COULEURS_BOUTONS`), sinon null : le jaune Mobiiz. */
   couleurBoutons: string | null;
+  /** Le modèle de site choisi (`MODELES_SITE`), sinon null : le premier. Un habillage, jamais le contenu. */
+  modele?: string | null;
   logo: string | null;
   couverture: PhotoPublique | null;
   /**

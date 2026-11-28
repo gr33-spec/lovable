@@ -554,7 +554,7 @@ test("le menu : cinq onglets (recentrage du 25 octobre 2026) ; fournisseurs et c
   // 16 novembre 2026 : l'onglet Missions est toujours là ; fonctions coupées, il porte la pastille « Bientôt ».
   // 16 novembre 2026 (soir) : cinquième onglet, « Mon site ». 18 novembre 2026 : sur téléphone, il passe dans l'en-tête (le
   // globe) et la barre du bas revient à quatre onglets ; sur ordinateur, il reste dans la colonne.
-  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", /Missions/, "Mon site", "Mes négoces", "Profil"] : ["Accueil", "Demandes", "Groupés", "Messages"]);
+  await expect(nav.getByRole("link")).toHaveText(ordinateur ? ["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", /Messages/, /Missions/, "Mon site", "Mes négoces", "Profil"] : ["Accueil", "Demandes", "Groupés", "Messages"]);
   if (!ordinateur) await expect(page.getByRole("main").getByRole("link", { name: "Mon site" })).toHaveAttribute("href", "/mon-site");
   if (ordinateur) await expect(nav.getByRole("link", { name: "Créer un quantitatif" })).toHaveAttribute("href", "/chantiers/nouveau");
   await menuArtisan(page, "Mon compte");

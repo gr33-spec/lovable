@@ -2010,3 +2010,166 @@ body:has(.pe:not(.pe-apercu)) {
 .pe .pe-nav a::after {
   bottom: 6px;
 }
+
+/* =====================================================================================================================
+ * GRAND ÉCRAN (Greg, 27 novembre 2026 : « pleine largeur sur ordinateur, photos en grand, sections bien aérées, un vrai
+ * site professionnel »). À partir de 1200 px de site seulement : le téléphone et la tablette ne bougent pas. Le contenu
+ * prend jusqu'à 1440 px, l'accueil occupe l'écran, les rubriques respirent, les réalisations passent en grand. Dernier
+ * bloc : il l'emporte.
+ * ================================================================================================================== */
+@container pe (min-width: 1200px) {
+  .pe {
+    --entete: 84px;
+  }
+  .pe .pe-cadre {
+    width: min(1440px, calc(100% - 160px));
+  }
+  .pe .pe-entete-ligne {
+    gap: 28px;
+  }
+  .pe .pe-nav {
+    gap: 34px;
+    font-size: 16px;
+  }
+  .pe-avec-photo .pe-accueil {
+    min-height: max(680px, min(calc(100svh - var(--entete)), 940px));
+    padding: 120px 0 150px;
+  }
+  .pe-accueil::after {
+    height: 80px;
+  }
+  .pe-accueil h1 {
+    font-size: clamp(84px, 7.2cqi, 124px);
+    max-width: 12ch;
+  }
+  .pe .pe-accueil-accroche {
+    font-size: 22px;
+    max-width: 40ch;
+  }
+  .pe .pe-accueil .pe-actions {
+    margin-top: 40px;
+  }
+  .pe .pe-accueil .pe-btn {
+    min-height: 62px;
+    padding: 0 34px;
+    font-size: 17px;
+  }
+  .pe .pe-preuves {
+    margin-top: 44px;
+  }
+  .pe .pe-preuves li {
+    font-size: 15.5px;
+    padding: 6px 22px;
+  }
+  .pe h2 {
+    font-size: clamp(44px, 3.6cqi, 60px);
+  }
+  .pe-section {
+    padding: 128px 0;
+  }
+  .pe-section-prestations {
+    padding-top: 96px;
+  }
+  /* Prestations : le titre au-dessus, les cartes sur trois colonnes, aérées, avec leur texte en entier ; la carte « À
+     propos » à droite sur toute la hauteur. */
+  .pe .pe-prestations-grille {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+    gap: 28px 32px;
+  }
+  .pe .pe-prestations-tete {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  .pe .pe-prestations-tete h2 {
+    margin-bottom: 0;
+  }
+  .pe .pe-sous-titre {
+    max-width: 46ch;
+    font-size: 18px;
+  }
+  .pe .pe-prestations {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .pe .pe-prestations:has(> li:nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+  }
+  .pe .pe-prestations li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 30px;
+    border-radius: 22px;
+  }
+  .pe .pe-prestations h3 {
+    font-size: 20px;
+  }
+  .pe .pe-prestation-texte {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+    font-size: 15.5px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+  .pe .pe-carte-apropos {
+    min-height: 420px;
+    border-radius: 26px;
+  }
+  .pe .pe-confiance {
+    margin-top: 40px;
+  }
+  /* Réalisations : de grandes photos. */
+  .pe .pe-chantiers,
+  .pe .pe-chantiers:has(> li:nth-child(3):last-child) {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+  .pe .pe-chantiers:has(> li:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pe .pe-chantiers:has(> li:nth-child(4):last-child) {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .pe .pe-chantiers:has(> li:only-child) {
+    grid-template-columns: minmax(0, 960px);
+  }
+  .pe .pe-chantier,
+  .pe .pe-chantier img {
+    border-radius: 24px;
+  }
+  .pe .pe-chantier img,
+  .pe .pe-chantiers > li:first-child:nth-last-child(odd):not(:only-child) img {
+    height: clamp(380px, 32cqi, 520px);
+  }
+  .pe .pe-chantier-legende {
+    padding: 96px 28px 26px;
+  }
+  .pe .pe-chantier-titre {
+    font-size: 24px;
+  }
+  .pe .pe-apropos {
+    gap: 72px;
+  }
+  .pe .pe-apropos-image img {
+    border-radius: 26px;
+  }
+  .pe .pe-texte {
+    font-size: 19px;
+  }
+  .pe .pe-contact {
+    padding: 128px 0;
+  }
+  .pe .pe-pied {
+    padding: 36px 0;
+  }
+}
+@container pe (min-width: 1200px) {
+  .pe .pe-prestations-grille:not(:has(> .pe-carte-apropos)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

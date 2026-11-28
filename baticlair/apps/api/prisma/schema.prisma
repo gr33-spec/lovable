@@ -3131,6 +3131,8 @@ model PageEntreprise {
   couleurBoutons   String?   @map("couleur_boutons")
   /// La photo par défaut choisie dans la galerie (Greg, 17 novembre 2026) ; null : celle du métier principal.
   photoDefaut      String?   @map("photo_defaut")
+  /// Le modèle de site (`MODELES_SITE`, Greg, 27 novembre 2026) : un habillage, jamais le contenu ; null : le modèle par défaut.
+  modele           String?
   accroche         String?
   presentation     String?
   telephone        String?

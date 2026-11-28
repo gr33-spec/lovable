@@ -104,7 +104,7 @@ test("Demandes (Négoces / Groupées), Groupés sans bouton flottant, Messages e
     await expect(nav.getByRole("link", { name: "Demandes" })).toHaveAttribute("aria-current", "page");
   } else {
     // Ordinateur : la colonne ne change pas.
-    await expect(nav.getByRole("link")).toHaveText(["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", /Missions/, "Mon site", "Mes négoces", "Profil"]);
+    await expect(nav.getByRole("link")).toHaveText(["Créer un quantitatif", "Accueil", "Quantitatifs", "Achats groupés", /Messages/, /Missions/, "Mon site", "Mes négoces", "Profil"]);
     await page.goto("/demandes");
   }
   const sortes = page.getByRole("tablist", { name: "Sorte de demandes" });

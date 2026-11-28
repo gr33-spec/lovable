@@ -58,6 +58,7 @@ interface Reglages {
   couleur: string | null;
   couleurBoutons: string | null;
   photoDefaut: string | null;
+  modele?: string | null;
   prestations: Prestation[];
   accroche: string | null;
   presentation: string | null;
@@ -88,6 +89,8 @@ interface MaPage {
   choix: {
     teintes: readonly { id: string; nom: string; hex: string }[];
     couleursBoutons: readonly { id: string; nom: string; hex: string }[];
+    /** Les modèles de site (Greg, 27 novembre 2026) ; le choix ne se montre qu'à partir de deux. */
+    modeles?: readonly { id: string; nom: string; description: string }[];
     photosDefaut: readonly PhotoGalerie[];
     certifications: readonly string[];
     engagements: readonly string[];
@@ -242,7 +245,9 @@ function CadreApercu({ contenu, ecran, hauteur = "100%", interactif = false, tes
     return () => ro.disconnect();
   }, []);
   const ordinateur = ecran === "ordinateur";
-  const echelle = ordinateur ? Math.min(1, largeur / 1200) : 1;
+  // Le site d'ordinateur se dessine sur 1440 px (Greg, 27 novembre 2026 : un écran d'ordinateur courant), puis se réduit ;
+  // sur un téléphone, c'est une miniature entière, jamais une page coupée.
+  const echelle = ordinateur ? Math.min(1, largeur / LARGEUR_ORDINATEUR) : 1;
   /** Un lien interne défile dans l'aperçu ; rien ne part. */
   const clic = (e: React.MouseEvent) => {
     const a = (e.target as HTMLElement).closest("a");
@@ -261,13 +266,16 @@ function CadreApercu({ contenu, ecran, hauteur = "100%", interactif = false, tes
             « Ordinateur » restait blanc un long moment). Avant : `transform: scale`, qui faisait de la page entière une
             image géante que Safari met du temps à peindre ; `zoom` se dessine comme une page normale, et le défilement
             suit la vraie hauteur. */}
-        <div style={ordinateur ? { width: 1200, zoom: echelle } : undefined} {...(interactif ? {} : { inert: true, "aria-hidden": true })}>
+        <div style={ordinateur ? { width: LARGEUR_ORDINATEUR, zoom: echelle } : undefined} {...(interactif ? {} : { inert: true, "aria-hidden": true })}>
           <VuePage contenu={contenu} apercu />
         </div>
       </div>
     </div>
   );
 }
+
+/** La largeur d'un écran d'ordinateur de référence pour l'aperçu. */
+const LARGEUR_ORDINATEUR = 1440;
 
 /** Largeur et hauteur d'un téléphone de référence : le site s'y dessine à sa vraie taille, puis le tout est réduit. */
 const TEL_L = 390;
@@ -379,7 +387,9 @@ function ChoixEcran({ ecran, onChange, sombre = false }: { ecran: "telephone" | 
 
 /** Le site en plein écran : il défile, on le parcourt (menu, « Voir plus ») ; « Retour » ou Échap ramène aux réglages. */
 function ApercuPlein({ contenu, onFermer }: { contenu: ContenuPage; onFermer: () => void }) {
-  const [ecran, setEcran] = useState<"telephone" | "ordinateur">("telephone");
+  // Greg, 27 novembre 2026 : sur ordinateur, l'aperçu s'ouvre en version ordinateur ; sur téléphone, en version téléphone.
+  // Le sélecteur bascule de l'un à l'autre.
+  const [ecran, setEcran] = useState<"telephone" | "ordinateur">(() => (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches ? "ordinateur" : "telephone"));
   useEffect(() => {
     const avant = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -778,6 +788,7 @@ export function EditeurMaPage() {
       ...data.contenu,
       couleur: r.couleur,
       couleurBoutons: r.couleurBoutons,
+      modele: r.modele ?? null,
       photoDefaut: defaut ? photoPubliqueDefaut(defaut) : null,
       creditPhoto: !data.contenu.couverture && defaut ? defaut.credit : null,
       prestations: r.prestations.filter((x) => x.titre.trim()),
@@ -836,6 +847,22 @@ export function EditeurMaPage() {
   const panneaux: Record<Onglet, React.ReactNode> = {
     couleurs: (
       <>
+        {/* Les modèles de site (Greg, 27 novembre 2026) : même contenu, autre habillage, un clic ; montré dès qu'il y en a deux. */}
+        {(data.choix.modeles?.length ?? 0) > 1 ? (
+          <Bloc titre="Modèle du site" aide="Ton contenu reste le même : seul l'habillage change.">
+            <div role="radiogroup" aria-label="Modèle du site" className="grid grid-cols-1 gap-2">
+              {data.choix.modeles!.map((m, i) => {
+                const choisi = (r.modele ?? data.choix.modeles![0]!.id) === m.id;
+                return (
+                  <button key={m.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("modele", i === 0 ? null : m.id)} className={`pressable flex min-h-14 flex-col items-start gap-0.5 rounded-2xl border-2 px-3 py-2 text-left text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
+                    <span className="text-[15px] font-extrabold">{m.nom}</span>
+                    <span className="text-[13px] text-muted">{m.description}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Bloc>
+        ) : null}
         <Bloc titre="Couleur des boutons" aide="« Appeler », « Demander un devis », les petits traits et la ville du titre.">
           <div role="radiogroup" aria-label="Couleur des boutons" className="grid grid-cols-3 gap-2">
             {data.choix.couleursBoutons.map((c, i) => {
