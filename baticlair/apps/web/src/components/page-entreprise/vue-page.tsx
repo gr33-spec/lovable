@@ -27,6 +27,7 @@ import { Photo } from "./photo";
 export { Photo };
 import { ContactPage, SignalerPage } from "./interactions";
 import { EntrePros } from "./entre-pros";
+import { ModeleSobre } from "./modele-sobre";
 import "./page-entreprise.css";
 
 /**
@@ -71,15 +72,18 @@ export interface VuePageProps {
  * LES MODÈLES DE SITE (Greg, 27 novembre 2026) : chaque modèle est un habillage qui lit le MÊME contenu ; changer de
  * modèle ne touche à aucune donnée. Ajouter un modèle = une entrée de `MODELES_SITE` (domaine) et son composant ici.
  */
-const RENDUS: Record<ModeleSiteId, (p: VuePageProps) => React.ReactElement> = { atelier: ModeleAtelier };
-
 export function VuePage(props: VuePageProps) {
+  // La table est lue au rendu (jamais au chargement du fichier) : chaque modèle vit dans son fichier.
+  const RENDUS: Record<ModeleSiteId, (p: VuePageProps) => React.ReactElement> = { atelier: ModeleAtelier, sobre: ModeleSobre };
   const Rendu = RENDUS[modeleDe(props.contenu.modele).id];
   return <Rendu {...props} />;
 }
 
-/** Le modèle « Atelier » : barre blanche, grande photo d'accueil, prestations en cartes, réalisations en grand. */
-function ModeleAtelier({ contenu: c, apercu = false, annee = new Date().getFullYear() }: VuePageProps) {
+/**
+ * Ce que tous les modèles lisent du contenu (Greg, 27 novembre 2026 : « tous les modèles partagent les mêmes données ») :
+ * le titre, les garanties, la barre de confiance, la présentation coupée, les couleurs. Calculé une fois, ici.
+ */
+export function preparerSite(c: ContenuPage, apercu: boolean, annee: number) {
   const visibles = rubriquesVisibles(c);
   const menu = menuDeLaPage(c);
   const accueil = photoAccueil(c);
@@ -124,6 +128,13 @@ function ModeleAtelier({ contenu: c, apercu = false, annee = new Date().getFullY
   for (const x of c.certifications) if (confiance.length < 4 && !dansLeBandeau.has(x.toLowerCase())) confiance.push({ etiquette: /assurance|d[ée]cennale/i.test(x) ? "Assurance déclarée" : "Certification déclarée", valeur: x, Icone: iconeDePreuve(x) });
   if (confiance.length < 4 && c.creeeEn && !garanties.some((g) => /ans d'exp/i.test(g.texte))) confiance.push({ etiquette: "Expérience", valeur: `Depuis ${c.creeeEn}`, Icone: CalendarDays });
   const lien = (href: string) => (apercu ? undefined : href);
+
+  return { visibles, menu, accueil, titreHaut, titreBas, activite, style, ville, garanties, premierePhrase, suitePresentation, zone, confiance, lien };
+}
+
+/** Le modèle « Atelier » : barre blanche, grande photo d'accueil, prestations en cartes, réalisations en grand. */
+function ModeleAtelier({ contenu: c, apercu = false, annee = new Date().getFullYear() }: VuePageProps) {
+  const { visibles, menu, accueil, titreHaut, titreBas, activite, style, ville, garanties, premierePhrase, suitePresentation, zone, confiance, lien } = preparerSite(c, apercu, annee);
 
   return (
     <div className={`pe${accueil ? " pe-avec-photo" : ""}${apercu ? " pe-apercu" : ""}`} data-modele="atelier" style={style}>
@@ -328,66 +339,78 @@ function ModeleAtelier({ contenu: c, apercu = false, annee = new Date().getFullY
         </section>
       </main>
 
-      <footer className="pe-pied">
-        <div className="pe-cadre pe-pied-grille">
-          <div className="pe-pied-marque">
-            {c.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={c.logo} alt="" className="pe-logo" width={40} height={40} />
-            ) : (
-              <span className="pe-initiales" aria-hidden="true">
-                {initiales(c.nom)}
-              </span>
-            )}
-            <div>
-              <p className="pe-pied-nom">{c.nom}</p>
-              {activite ? <p className="pe-pied-activite">{activite}</p> : null}
-              {c.siret ? <p>SIRET {c.siret.replace(/(\d{3})(\d{3})(\d{3})(\d{5})/, "$1 $2 $3 $4")}</p> : null}
-              {c.siteWeb ? (
-                <p>
-                  <a href={lien(c.siteWeb)} rel="noopener nofollow" target="_blank" className="pe-pied-site">
-                    <Globe size={16} aria-hidden="true" /> Voir mon site
-                  </a>
-                </p>
-              ) : null}
-            </div>
-          </div>
-          <div className="pe-pied-liens">
-            <details className="pe-mentions">
-              <summary>Mentions légales</summary>
-              <p>
-                Page éditée par {c.nom}
-                {c.siret ? ` (SIRET ${c.siret})` : ""}, responsable de son contenu, de ses photos et des informations déclarées.{" "}
-                {c.adressePostale ? `Adresse : ${c.adressePostale}. ` : zone ? `Zone : ${zone}. ` : ""}Contact : le formulaire de cette page{c.telephone ? ` ou le ${c.telephone}` : ""}. Responsable de la publication : le représentant légal de {c.nom}.
-              </p>
-              <p>
-                Hébergement : {EDITEUR.nom} ({EDITEUR.produit}), {EDITEUR.forme}, {EDITEUR.adresse}, {EDITEUR.contact} ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
-              </p>
-              <p>
-                Certifications et assurances : déclarées par l&apos;entreprise, non vérifiées par Mobiiz. « Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE, ce n&apos;est pas un label de qualité.
-              </p>
-            </details>
-            <span className="pe-pied-sep" aria-hidden="true">|</span>
-            <a href={lien("/confidentialite")} className="pe-pied-lien">
-              Politique de confidentialité
-            </a>
-            <span className="pe-pied-sep" aria-hidden="true">|</span>
-            <SignalerPage adresse={c.adresse} apercu={apercu} />
-          </div>
-          {c.creditPhoto ? <p className="pe-credit-photo">Photo d&apos;accueil : {c.creditPhoto}</p> : null}
-          <a href={lien("/")} className="pe-mobiiz">
-            Créé avec <strong>MOBIIZ</strong> <Heart size={15} strokeWidth={0} fill="currentColor" className="pe-coeur" aria-hidden="true" />
-          </a>
-        </div>
-      </footer>
+      <PiedSite c={c} activite={activite} zone={zone} lien={lien} apercu={apercu} />
 
-      {c.telephone ? (
-        <div className="pe-barre-appel">
-          <a href={lienAppel(c.telephone)} className="pe-btn pe-btn-appel">
-            <Phone size={19} strokeWidth={2.2} aria-hidden="true" /> Appeler le {c.telephone}
-          </a>
-        </div>
-      ) : null}
+      <BarreAppel telephone={c.telephone} />
     </div>
   );
+}
+
+/** Le pied de page, le même pour tous les modèles (mentions légales, confidentialité, signalement : obligatoires). */
+export function PiedSite({ c, activite, zone, lien, apercu }: { c: ContenuPage; activite: string | null; zone: string | null; lien: (href: string) => string | undefined; apercu: boolean }) {
+  return (
+    <footer className="pe-pied">
+      <div className="pe-cadre pe-pied-grille">
+        <div className="pe-pied-marque">
+          {c.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={c.logo} alt="" className="pe-logo" width={40} height={40} />
+          ) : (
+            <span className="pe-initiales" aria-hidden="true">
+              {initiales(c.nom)}
+            </span>
+          )}
+          <div>
+            <p className="pe-pied-nom">{c.nom}</p>
+            {activite ? <p className="pe-pied-activite">{activite}</p> : null}
+            {c.siret ? <p>SIRET {c.siret.replace(/(\d{3})(\d{3})(\d{3})(\d{5})/, "$1 $2 $3 $4")}</p> : null}
+            {c.siteWeb ? (
+              <p>
+                <a href={lien(c.siteWeb)} rel="noopener nofollow" target="_blank" className="pe-pied-site">
+                  <Globe size={16} aria-hidden="true" /> Voir mon site
+                </a>
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <div className="pe-pied-liens">
+          <details className="pe-mentions">
+            <summary>Mentions légales</summary>
+            <p>
+              Page éditée par {c.nom}
+              {c.siret ? ` (SIRET ${c.siret})` : ""}, responsable de son contenu, de ses photos et des informations déclarées.{" "}
+              {c.adressePostale ? `Adresse : ${c.adressePostale}. ` : zone ? `Zone : ${zone}. ` : ""}Contact : le formulaire de cette page{c.telephone ? ` ou le ${c.telephone}` : ""}. Responsable de la publication : le représentant légal de {c.nom}.
+            </p>
+            <p>
+              Hébergement : {EDITEUR.nom} ({EDITEUR.produit}), {EDITEUR.forme}, {EDITEUR.adresse}, {EDITEUR.contact} ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
+            </p>
+            <p>
+              Certifications et assurances : déclarées par l&apos;entreprise, non vérifiées par Mobiiz. « Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE, ce n&apos;est pas un label de qualité.
+            </p>
+          </details>
+          <span className="pe-pied-sep" aria-hidden="true">|</span>
+          <a href={lien("/confidentialite")} className="pe-pied-lien">
+            Politique de confidentialité
+          </a>
+          <span className="pe-pied-sep" aria-hidden="true">|</span>
+          <SignalerPage adresse={c.adresse} apercu={apercu} />
+        </div>
+        {c.creditPhoto ? <p className="pe-credit-photo">Photo d&apos;accueil : {c.creditPhoto}</p> : null}
+        <a href={lien("/")} className="pe-mobiiz">
+          Créé avec <strong>MOBIIZ</strong> <Heart size={15} strokeWidth={0} fill="currentColor" className="pe-coeur" aria-hidden="true" />
+        </a>
+      </div>
+    </footer>
+  );
+}
+
+/** La barre « Appeler » collée en bas sur téléphone, la même pour tous les modèles. */
+export function BarreAppel({ telephone }: { telephone: string | null }) {
+  return telephone ? (
+    <div className="pe-barre-appel">
+      <a href={lienAppel(telephone)} className="pe-btn pe-btn-appel">
+        <Phone size={19} strokeWidth={2.2} aria-hidden="true" /> Appeler le {telephone}
+      </a>
+    </div>
+  ) : null;
 }

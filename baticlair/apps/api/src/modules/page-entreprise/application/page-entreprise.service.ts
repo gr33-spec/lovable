@@ -9,6 +9,11 @@ import {
   COULEURS_BOUTONS,
   MODELES_SITE,
   modeleDe,
+  CHAMPS_PUBLIES,
+  instantaneLu,
+  memeInstantane,
+  publicationPermise,
+  type InstantanePublie,
   PHOTOS_DEFAUT,
   photoDefautDe,
   photoPubliqueDefaut,
@@ -171,15 +176,25 @@ export class PageEntrepriseService {
     return { id: p.id, legende: p.legende, largeur: p.largeur, hauteur: p.hauteur, variantes: (p.variantes as PhotoPublique["variantes"]) ?? [], partage: p.partage };
   }
 
-  /** Le contenu tel que la page l'affiche (tout ce qui vient du profil y est relu). */
-  private async contenu(page: PageRow): Promise<ContenuPage> {
+  /**
+   * Le contenu tel que la page l'affiche (tout ce qui vient du profil y est relu). Avec un instantané publié : les champs,
+   * les photos et les chantiers de l'instantané (le visiteur ne voit jamais le brouillon) ; sans : la page telle quelle
+   * (l'éditeur, et les pages en ligne d'avant le 27 novembre 2026 qui n'ont pas encore changé).
+   */
+  private async contenu(brouillon: PageRow, publie: InstantanePublie | null = null): Promise<ContenuPage> {
+    const page = publie ? ({ ...brouillon, ...publie.champs } as PageRow) : brouillon;
     const e = await this.entreprise(page.companyId);
-    const [photos, realisations, couverture, equipe] = await Promise.all([
-      this.prisma.photoPage.findMany({ where: { companyId: page.companyId, role: "galerie", statut: "prete" }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
+    const permises = publie ? { id: { in: publie.photos } } : {};
+    const [photos, realisationsBrutes, couverture, equipe] = await Promise.all([
+      this.prisma.photoPage.findMany({ where: { companyId: page.companyId, role: "galerie", statut: "prete", ...permises }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
       this.prisma.realisationPage.findMany({ where: { companyId: page.companyId }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }] }),
       page.couvertureId ? this.prisma.photoPage.findFirst({ where: { id: page.couvertureId, companyId: page.companyId, statut: "prete" } }) : null,
-      this.prisma.photoPage.findFirst({ where: { companyId: page.companyId, role: "equipe", statut: "prete" }, orderBy: { createdAt: "desc" } }),
+      this.prisma.photoPage.findFirst({ where: { companyId: page.companyId, role: "equipe", statut: "prete", ...permises }, orderBy: { createdAt: "desc" } }),
     ]);
+    // Publié : les chantiers de l'instantané, dans son ordre et sous leur titre publié (ceux supprimés depuis ne sont plus là).
+    const realisations = publie
+      ? publie.realisations.flatMap((r) => (realisationsBrutes.some((x) => x.id === r.id) ? [{ id: r.id, titre: r.titre }] : []))
+      : realisationsBrutes;
     const metiers = e.trades.filter((t) => LIBELLES_METIERS[t]);
     const defaut = photoDefautDe(page.photoDefaut, metiers);
     // Les chantiers dans leur ordre, chacun avec ses photos prêtes ; une photo sans chantier est un chantier à elle seule.
@@ -255,7 +270,10 @@ export class PageEntrepriseService {
         afficherAdresse: page.afficherAdresse,
         photosAccord: !!page.photosAccordLe,
         couvertureId: page.couvertureId,
+        modelePrecedent: page.modelePrecedent,
       },
+      // Brouillon et publié : la date de la dernière publication et s'il reste des changements à mettre en ligne.
+      publication: await this.etatPublication(page),
       profil: { nom: e.name, metiers: contenu.metiers, telephone: telephonePropre(e.phone), zone: e.profilPublic?.ville ?? villeDeLAdresse(e.address), adressePostale: e.address, siret: e.siret, verifiee: !!e.siretVerifieLe, logo: !!e.logoType },
       contenu,
       photos: photos.map((p) => ({ ...this.vuePhoto(p), role: p.role, statut: p.statut, realisationId: p.realisationId })),
@@ -275,12 +293,76 @@ export class PageEntrepriseService {
     };
   }
 
+  /* ------------------------------------------------------------------------------------- Brouillon et publication */
+
+  private async etatPublication(page: PageRow): Promise<{ publieLe: string | null; changementsAPublier: boolean; autorisee: boolean }> {
+    const publie = instantaneLu(page.publie);
+    // Une page en ligne sans instantané (d'avant le brouillon) : ce qui est en ligne EST le brouillon.
+    const changementsAPublier = page.visible ? (publie ? !memeInstantane(publie, await this.instantane(page)) : false) : false;
+    return { publieLe: (page.publieLe ?? (page.visible && !publie ? page.updatedAt : null))?.toISOString() ?? null, changementsAPublier, autorisee: await this.publicationAutorisee(page.companyId) };
+  }
+
+  /** L'état du brouillon, tel qu'il serait publié : les champs de la page, ses photos prêtes, ses chantiers. */
+  private async instantane(page: PageRow): Promise<InstantanePublie> {
+    const [photos, realisations] = await Promise.all([
+      // Toutes les photos du brouillon, prêtes ou encore en préparation : une photo publiée juste après son envoi s'affiche
+      // dès qu'elle est prête (le site ne montre jamais qu'une photo prête).
+      this.prisma.photoPage.findMany({ where: { companyId: page.companyId, statut: { not: "erreur" } }, orderBy: [{ role: "asc" }, { ordre: "asc" }, { createdAt: "asc" }], select: { id: true } }),
+      this.prisma.realisationPage.findMany({ where: { companyId: page.companyId }, orderBy: [{ ordre: "asc" }, { createdAt: "asc" }], select: { id: true, titre: true } }),
+    ]);
+    const champs: InstantanePublie["champs"] = {};
+    for (const k of CHAMPS_PUBLIES) champs[k] = (page as Record<string, unknown>)[k] ?? null;
+    return { version: 1, champs, photos: photos.map((p) => p.id), realisations };
+  }
+
+  /**
+   * Une page en ligne d'avant le brouillon (sans instantané) : juste avant son premier changement, ce qui est en ligne est
+   * figé, pour que rien ne bouge chez le visiteur sans « Publier ».
+   */
+  private async figerAvantChangement(companyId: string): Promise<void> {
+    const page = await this.prisma.pageEntreprise.findUnique({ where: { companyId } });
+    if (!page || !page.visible || page.publie) return;
+    const instantane = await this.instantane(page);
+    const data: Record<string, unknown> = { publie: instantane, publieLe: page.updatedAt };
+    await this.prisma.pageEntreprise.update({ where: { companyId }, data });
+  }
+
+  /** Le droit de publier (coupé tant que Greg ne l'a pas décidé : `SITE_PUBLICATION_PAYANTE`). */
+  private async publicationAutorisee(companyId: string): Promise<boolean> {
+    const allume = process.env.SITE_PUBLICATION_PAYANTE === "on";
+    if (!allume) return true;
+    const a = await this.prisma.abonnement.findUnique({ where: { companyId }, select: { statut: true, periodeFin: true } });
+    return publicationPermise(allume, a, this.now());
+  }
+
+  /** « Publier » : le brouillon devient le site en ligne (et la page devient visible). */
+  async publier(t: TenantContext) {
+    assertCanWrite(t);
+    const page = await this.pageDe(t.companyId);
+    if (!(await this.publicationAutorisee(t.companyId))) throw new DomainError("forbidden", "Publishing requires a subscription", { reason: "publication_reservee", phrase: "Mettre ton site en ligne fait partie de l'abonnement Pro." });
+    const instantane = await this.instantane(page);
+    const data: Record<string, unknown> = { visible: true, publie: instantane, publieLe: this.now() };
+    await this.prisma.pageEntreprise.update({ where: { companyId: t.companyId }, data });
+    return this.maPage(t);
+  }
+
+  /** « Retirer de la ligne » : la page n'est plus visible ; ce qui avait été publié est gardé (rien n'est effacé). */
+  async depublier(t: TenantContext) {
+    assertCanWrite(t);
+    await this.pageDe(t.companyId);
+    await this.prisma.pageEntreprise.update({ where: { companyId: t.companyId }, data: { visible: false } });
+    return this.maPage(t);
+  }
+
   /** Tout changement s'applique tout de suite ; un champ absent ne change pas, un champ vide (null) revient au profil. */
   async modifier(t: TenantContext, m: ModificationPage) {
     assertCanWrite(t);
+    await this.pageDe(t.companyId);
+    await this.figerAvantChangement(t.companyId);
     const page = await this.pageDe(t.companyId);
     const d: Record<string, unknown> = {};
-    if (m.visible !== undefined) d.visible = m.visible;
+    // « Page visible » (Greg, 27 novembre 2026) : la rendre visible PUBLIE le brouillon ; la cacher la retire de la ligne.
+    if (m.visible === false) d.visible = false;
     if (m.couleur !== undefined) {
       const teinte = m.couleur === null ? null : TEINTES.find((x) => x.hex.toLowerCase() === m.couleur!.toLowerCase() || x.id === m.couleur);
       if (m.couleur !== null && !teinte) throw refus("couleur", "Choisis une des teintes proposées.", "couleur");
@@ -298,6 +380,8 @@ export class PageEntrepriseService {
     // Le modèle de site (Greg, 27 novembre 2026) : un habillage seulement, aucune autre donnée ne change.
     if (m.modele !== undefined) {
       if (m.modele !== null && !MODELES_SITE.some((x) => x.id === m.modele)) throw refus("modele", "Choisis un des modèles proposés.", "modele");
+      // Le modèle d'avant reste connu : « Revenir au modèle précédent » d'un toucher.
+      if (modeleDe(m.modele).id !== modeleDe(page.modele).id) d.modelePrecedent = modeleDe(page.modele).id;
       d.modele = m.modele;
     }
     if (m.prestations !== undefined) {
@@ -337,6 +421,7 @@ export class PageEntrepriseService {
     }
     if (m.afficherAdresse !== undefined) d.afficherAdresse = m.afficherAdresse;
     if (Object.keys(d).length) await this.prisma.pageEntreprise.update({ where: { companyId: page.companyId }, data: d });
+    if (m.visible === true) return this.publier(t);
     return this.maPage(t);
   }
 
@@ -384,6 +469,7 @@ export class PageEntrepriseService {
 
   async ajouterPhoto(t: TenantContext, octets: Buffer, role: RolePhoto, legende: string | null, realisationId: string | null = null) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     if (!this.stockage.actif) throw new DomainError("forbidden", "Photo storage off", { reason: "stockage_coupe", phrase: "L'envoi de photos n'est pas encore ouvert." });
     const page = await this.pageDe(t.companyId);
     if (!page.photosAccordLe) throw new DomainError("forbidden", "Photo rights not confirmed", { reason: "accord_photos", phrase: "Coche d'abord que tu as le droit de publier ces photos." });
@@ -465,6 +551,7 @@ export class PageEntrepriseService {
 
   async modifierPhoto(t: TenantContext, id: string, legende: string | null) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     await this.maPhoto(t, id);
     await this.prisma.photoPage.update({ where: { id }, data: { legende: nettoyer(legende, LIMITES_PAGE.legende) } });
     return this.maPage(t);
@@ -472,6 +559,7 @@ export class PageEntrepriseService {
 
   async supprimerPhoto(t: TenantContext, id: string) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     await this.effacer(await this.maPhoto(t, id));
     return this.maPage(t);
   }
@@ -479,6 +567,7 @@ export class PageEntrepriseService {
   /** Glisser pour réordonner : l'ordre complet des photos de la galerie, uniquement les siennes. */
   async ordonner(t: TenantContext, ids: string[]) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     const siennes = await this.prisma.photoPage.findMany({ where: { companyId: t.companyId, role: "galerie" }, select: { id: true } });
     const connues = new Set(siennes.map((p) => p.id));
     if (ids.some((id) => !connues.has(id)) || new Set(ids).size !== ids.length) throw notFound("Photo");
@@ -489,6 +578,7 @@ export class PageEntrepriseService {
   /** Retirer la couverture choisie : la page reprend le visuel du métier. */
   async retirerCouverture(t: TenantContext) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     const page = await this.pageDe(t.companyId);
     const cov = page.couvertureId ? await this.prisma.photoPage.findFirst({ where: { id: page.couvertureId, companyId: t.companyId } }) : null;
     if (cov) await this.effacer(cov);
@@ -498,6 +588,7 @@ export class PageEntrepriseService {
   /** Retirer la photo « À propos » (artisan ou équipe). */
   async retirerPhotoEquipe(t: TenantContext) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     for (const a of await this.prisma.photoPage.findMany({ where: { companyId: t.companyId, role: "equipe" } })) await this.effacer(a);
     return this.maPage(t);
   }
@@ -507,6 +598,7 @@ export class PageEntrepriseService {
   /** Un chantier réalisé (« Toiture ardoise · Paimpol ») : ses photos s'y ajoutent ensuite. */
   async creerRealisation(t: TenantContext, titre: string) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     await this.pageDe(t.companyId);
     const propre = nettoyer(titre.replace(/\n/g, " "), LIMITES_PAGE.realisationTitre);
     if (!propre) throw refus("titre", "Donne un titre au chantier (par exemple « Toiture ardoise · Paimpol »).", "titre");
@@ -523,6 +615,7 @@ export class PageEntrepriseService {
 
   async renommerRealisation(t: TenantContext, id: string, titre: string) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     await this.maRealisation(t, id);
     const propre = nettoyer(titre.replace(/\n/g, " "), LIMITES_PAGE.realisationTitre);
     if (!propre) throw refus("titre", "Donne un titre au chantier.", "titre");
@@ -533,6 +626,7 @@ export class PageEntrepriseService {
   /** Retirer un chantier retire ses photos (fichiers d'abord). */
   async supprimerRealisation(t: TenantContext, id: string) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     await this.maRealisation(t, id);
     for (const ph of await this.prisma.photoPage.findMany({ where: { companyId: t.companyId, realisationId: id } })) await this.effacer(ph);
     await this.prisma.realisationPage.deleteMany({ where: { id, companyId: t.companyId } });
@@ -541,6 +635,7 @@ export class PageEntrepriseService {
 
   async ordonnerRealisations(t: TenantContext, ids: string[]) {
     assertCanWrite(t);
+    await this.figerAvantChangement(t.companyId);
     const siennes = new Set((await this.prisma.realisationPage.findMany({ where: { companyId: t.companyId }, select: { id: true } })).map((r) => r.id));
     if (ids.some((id) => !siennes.has(id)) || new Set(ids).size !== ids.length) throw notFound("Réalisation");
     await this.prisma.$transaction(ids.map((id, ordre) => this.prisma.realisationPage.update({ where: { id }, data: { ordre } })));
@@ -568,7 +663,7 @@ export class PageEntrepriseService {
   async publique(adresse: string): Promise<{ redirection: string } | { contenu: ContenuPage }> {
     const p = await this.pagePublique(adresse);
     if ("redirection" in p) return p;
-    return { contenu: await this.contenu(p) };
+    return { contenu: await this.contenu(p, instantaneLu(p.publie)) };
   }
 
   /* --------------------------------------------------------------------------------------------- Entre pros */

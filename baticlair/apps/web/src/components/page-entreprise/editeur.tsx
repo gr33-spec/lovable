@@ -24,6 +24,7 @@ import {
   Smartphone,
   Sparkles,
   Trash2,
+  Undo2,
   UserRound,
   Wrench,
   X,
@@ -31,7 +32,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { lienGooglePropre, photoDefautDe, photoPubliqueDefaut, texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
+import { lienGooglePropre, PALETTES_SITE, photoDefautDe, photoPubliqueDefaut, texteSurCouleur, type ContenuPage, type Prestation } from "@baticlair/domain/page-entreprise";
 import { Button, Skeleton } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useTyping } from "@/lib/typing";
@@ -73,6 +74,8 @@ interface Reglages {
   afficherAdresse: boolean;
   photosAccord: boolean;
   couvertureId: string | null;
+  /** Le modèle d'avant le dernier changement (« Revenir au modèle précédent »). */
+  modelePrecedent?: string | null;
 }
 interface PhotoGalerie {
   id: string;
@@ -82,6 +85,8 @@ interface PhotoGalerie {
 }
 interface MaPage {
   reglages: Reglages;
+  /** Brouillon et publié (Greg, 27 novembre 2026) : la dernière publication et ce qui reste à mettre en ligne. */
+  publication?: { publieLe: string | null; changementsAPublier: boolean; autorisee: boolean };
   profil: { nom: string; metiers: string[]; telephone: string | null; zone: string | null; adressePostale: string | null; siret: string | null; verifiee: boolean; logo: boolean };
   contenu: ContenuPage;
   photos: (PhotoEditeur & { largeur: number; hauteur: number; partage: string | null })[];
@@ -426,10 +431,10 @@ function Statut({ etat, erreur, compact = false }: { etat: Etat; erreur: string 
       ) : etat === "enregistrement" || etat === "enregistre" ? (
         <p className="flex items-center gap-1.5 text-[14px] leading-tight text-muted" role="status">
           {etat === "enregistrement" ? <Loader2 size={14} className="shrink-0 motion-safe:animate-spin" aria-hidden="true" /> : <Check size={14} className="shrink-0 text-ok" aria-hidden="true" />}
-          {etat === "enregistrement" ? "Enregistrement…" : "Enregistré : ton site est à jour."}
+          {etat === "enregistrement" ? "Enregistrement…" : "Enregistré dans ton brouillon."}
         </p>
       ) : compact ? null : (
-        <p className="text-[14px] leading-tight text-muted">Chaque changement s&apos;enregistre tout seul.</p>
+        <p className="text-[14px] leading-tight text-muted">Chaque changement s&apos;enregistre tout seul dans ton brouillon.</p>
       )}
     </div>
   );
@@ -777,6 +782,29 @@ export function EditeurMaPage() {
     [enregistrer],
   );
 
+  /**
+   * « Publier » (Greg, 27 novembre 2026) : ce qui attend encore d'être enregistré part d'abord, puis le brouillon devient le
+   * site en ligne. Rien ne se publie tout seul.
+   */
+  const [publication, setPublication] = useState<"repos" | "en-cours">("repos");
+  const publier = useCallback(async () => {
+    setPublication("en-cours");
+    try {
+      if (minuteur.current) clearTimeout(minuteur.current);
+      await enregistrer();
+      const d = await api<MaPage>("/v1/ma-page/publication", { method: "POST" });
+      setData(d);
+      setR(d.reglages);
+      await rafraichirPagePublique();
+      setErreur(null);
+    } catch (e) {
+      setErreur((e as ApiError).phrase ?? "Ton site n'a pas été publié. Réessaie.");
+    } finally {
+      setPublication("repos");
+    }
+  }, [enregistrer]);
+  const aPublier = !!data?.reglages.visible && !!data?.publication?.changementsAPublier;
+
   const couverture = data?.photos.find((p) => p.role === "couverture" && p.id === data.reglages.couvertureId) ?? null;
 
   // L'aperçu se dessine avec ce qui est à l'écran, à chaque toucher (une couleur change : le site change aussitôt).
@@ -863,6 +891,37 @@ export function EditeurMaPage() {
             </div>
           </Bloc>
         ) : null}
+        {r.modelePrecedent && (data.choix.modeles?.length ?? 0) > 1 && r.modelePrecedent !== (r.modele ?? data.choix.modeles![0]!.id) ? (
+          <Button variant="secondary" onClick={() => changer("modele", r.modelePrecedent === data.choix.modeles![0]!.id ? null : r.modelePrecedent!)}>
+            <Undo2 size={18} aria-hidden="true" /> Revenir au modèle {data.choix.modeles!.find((m) => m.id === r.modelePrecedent)?.nom ?? "précédent"}
+          </Button>
+        ) : null}
+        {/* Les palettes (Greg, 27 novembre 2026) : la teinte et les boutons d'un toucher ; le jaune Mobiiz n'est qu'un choix. */}
+        <Bloc titre="Palettes" aide="Une teinte et une couleur de boutons qui vont ensemble. Tu peux ensuite changer l'une ou l'autre.">
+          <div role="radiogroup" aria-label="Palettes" className="grid grid-cols-2 gap-2">
+            {PALETTES_SITE.map((p) => {
+              const choisie = (r.couleur ?? "").toLowerCase() === p.teinte.toLowerCase() && (r.couleurBoutons ?? "#FED206").toLowerCase() === p.boutons.toLowerCase();
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={choisie}
+                  onClick={() => {
+                    changer("couleur", p.teinte);
+                    changer("couleurBoutons", p.boutons.toLowerCase() === "#fed206" ? null : p.boutons);
+                  }}
+                  className={`pressable flex min-h-14 items-center gap-2.5 rounded-2xl border-2 p-2 pr-3 text-left text-[14px] font-bold text-ink ${choisie ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}
+                >
+                  <span className="grid size-10 shrink-0 place-items-end overflow-hidden rounded-xl p-1.5 ring-1 ring-line" style={{ background: p.teinte }} aria-hidden="true">
+                    <span className="h-2 w-5 rounded-full" style={{ background: p.boutons }} />
+                  </span>
+                  <span className="min-w-0 leading-tight">{p.nom}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Bloc>
         <Bloc titre="Couleur des boutons" aide="« Appeler », « Demander un devis », les petits traits et la ville du titre.">
           <div role="radiogroup" aria-label="Couleur des boutons" className="grid grid-cols-3 gap-2">
             {data.choix.couleursBoutons.map((c, i) => {
@@ -1160,7 +1219,18 @@ export function EditeurMaPage() {
       <>
         <Bloc titre="Mettre en ligne">
           <div id="visibilite" data-testid="visibilite" className="grid grid-cols-[minmax(0,1fr)] gap-3">
-            <Interrupteur actif={r.visible} onChange={(v) => changer("visible", v)} label="Page visible" aide={r.visible ? "En ligne : tout le monde peut voir ton site avec le lien." : "Privé : personne ne le voit pour l'instant."} />
+            <Interrupteur actif={r.visible} onChange={(v) => changer("visible", v)} label="Page visible" aide={r.visible ? "En ligne : tout le monde peut voir ton site avec le lien." : "Privé : personne ne le voit pour l'instant. Le rendre visible publie ton brouillon."} />
+            {aPublier ? (
+              <div role="status" className="grid grid-cols-[minmax(0,1fr)] gap-2 rounded-2xl bg-[color-mix(in_srgb,var(--color-accent)_14%,transparent)] p-3">
+                <p className="text-[14px] font-bold">Tu as des changements pas encore en ligne.</p>
+                <Button pending={publication === "en-cours"} onClick={() => void publier()}>
+                  <Send size={18} aria-hidden="true" /> Publier les changements
+                </Button>
+              </div>
+            ) : r.visible && data.publication?.publieLe ? (
+              <p className="text-[14px] text-muted">En ligne, à jour depuis le {new Date(data.publication.publieLe).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>
+            ) : null}
+            {data.publication && !data.publication.autorisee ? <p className="text-[14px] text-muted">Mettre ton site en ligne fait partie de l&apos;abonnement Pro.</p> : null}
             {r.masquee ? <p className="rounded-xl bg-red-500/10 px-3 py-2 text-[14px] font-bold text-red-700 dark:text-red-300">Ton site a été masqué par l&apos;équipe Mobiiz après un signalement. Écris-nous à contact@mobiiz.fr.</p> : null}
             <p className="text-[14px] break-all">
               <span className="text-muted">Adresse : </span>
@@ -1292,6 +1362,11 @@ export function EditeurMaPage() {
                 <Statut etat={etat} erreur={erreur} />
               </div>
               <ChoixEcran ecran={ecran} onChange={setEcran} />
+              {aPublier ? (
+                <button type="button" onClick={() => void publier()} disabled={publication === "en-cours"} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-ink px-4 text-[14px] font-extrabold text-ground">
+                  <Send size={16} aria-hidden="true" /> Publier
+                </button>
+              ) : null}
               <button type="button" onClick={() => setApercuPlein(true)} className="pressable flex min-h-11 items-center gap-1.5 rounded-full bg-accent px-4 text-[14px] font-extrabold text-on-accent">
                 <Maximize2 size={16} aria-hidden="true" /> Voir mon site
               </button>
@@ -1314,7 +1389,11 @@ export function EditeurMaPage() {
             <section className={`flex min-h-0 flex-1 flex-col gap-1.5${actif ? " min-h-[38%]" : ""}`} aria-label="Aperçu de mon site">
               {/* Une seule ligne : l'état (ou « le rendre visible ») à gauche, « Voir mon site » en petit à droite. */}
               <div className="flex min-h-11 shrink-0 items-center gap-2">
-                {etat === "pret" && !erreur && !r.visible && actif !== "publier" ? (
+                {aPublier && etat !== "enregistrement" && !erreur ? (
+                  <button type="button" onClick={() => void publier()} disabled={publication === "en-cours"} className="pressable flex min-h-11 min-w-0 flex-1 items-center gap-1 rounded-full bg-ink px-3 text-[13px] font-extrabold text-ground">
+                    <Send size={14} aria-hidden="true" /> Publier
+                  </button>
+                ) : etat === "pret" && !erreur && !r.visible && actif !== "publier" ? (
                   <button type="button" onClick={() => ouvrir("publier")} className="min-w-0 flex-1 text-left text-[12.5px] leading-tight font-bold underline">
                     Site privé : le rendre visible
                   </button>

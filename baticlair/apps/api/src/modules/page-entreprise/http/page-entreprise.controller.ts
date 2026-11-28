@@ -96,6 +96,18 @@ export class MaPageController {
     });
   }
 
+  /** « Publier » (Greg, 27 novembre 2026) : le brouillon devient le site en ligne. */
+  @Post("publication")
+  publier(@Tenant() t: TenantContext) {
+    return this.pages.publier(t);
+  }
+
+  /** Retirer le site de la ligne ; rien n'est effacé. */
+  @Delete("publication")
+  depublier(@Tenant() t: TenantContext) {
+    return this.pages.depublier(t);
+  }
+
   @Put("adresse")
   changerAdresse(@Tenant() t: TenantContext, @Body(new ZodPipe(corpsAdresse)) b: z.infer<typeof corpsAdresse>) {
     return this.pages.changerAdresse(t, b.adresse);

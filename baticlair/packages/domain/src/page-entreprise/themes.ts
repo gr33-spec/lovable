@@ -218,10 +218,28 @@ export function teinteDeLaPage(couleur: string | null | undefined, metier: strin
  * habillage : il lit le même contenu (`ContenuPage`) et n'écrit rien. Changer de modèle ne change aucune donnée. Un seul
  * modèle pour l'instant ; l'éditeur ne montre le choix qu'à partir de deux.
  */
-export const MODELES_SITE = [{ id: "atelier", nom: "Atelier", description: "Grande photo d'accueil, prestations en cartes, réalisations en grand." }] as const;
+export const MODELES_SITE = [
+  { id: "atelier", nom: "Atelier", description: "Grande photo d'accueil, prestations en cartes, réalisations en grand." },
+  { id: "sobre", nom: "Sobre", description: "Accueil en deux parties, texte et photo côte à côte ; prestations en liste ; fond clair." },
+] as const;
 export type ModeleSiteId = (typeof MODELES_SITE)[number]["id"];
 
 /** Le modèle d'une page : celui choisi s'il existe encore, sinon le premier (jamais une page sans habillage). */
 export function modeleDe(modele: string | null | undefined): (typeof MODELES_SITE)[number] {
   return MODELES_SITE.find((m) => m.id === modele) ?? MODELES_SITE[0];
 }
+
+/**
+ * LES PALETTES (Greg, 27 novembre 2026, cahier 03 : « le jaune Mobiiz n'est pas imposé aux sites des artisans ; quelques
+ * palettes lisibles, réglées de la même façon dans tous les modèles »). Une palette pose d'un toucher la teinte des fonds
+ * sombres et la couleur des boutons, choisies parmi les valeurs existantes (le texte d'un bouton reste lisible :
+ * `texteSurCouleur`). L'artisan peut ensuite changer l'une ou l'autre à la main.
+ */
+export const PALETTES_SITE = [
+  { id: "ardoise-jaune", nom: "Ardoise et jaune", teinte: "#3E5163", boutons: "#FED206" },
+  { id: "nuit-orange", nom: "Bleu nuit et orange", teinte: "#1D3557", boutons: "#F7931E" },
+  { id: "anthracite-rouge", nom: "Anthracite et rouge", teinte: "#2E3338", boutons: "#E03131" },
+  { id: "sapin-vert", nom: "Vert sapin et vert", teinte: "#1F4D3A", boutons: "#2F9E44" },
+  { id: "petrole-turquoise", nom: "Pétrole et turquoise", teinte: "#0E5A5E", boutons: "#15AABF" },
+  { id: "prune-rose", nom: "Prune et rose", teinte: "#6B2D7A", boutons: "#E64980" },
+] as const;

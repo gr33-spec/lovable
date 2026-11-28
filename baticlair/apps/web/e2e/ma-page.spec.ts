@@ -60,7 +60,7 @@ async function onglet(page: Page, nom: string) {
   await expect(page.getByRole("tabpanel", { name: nom })).toBeVisible();
 }
 
-const enregistre = (page: Page) => expect(page.getByText("Enregistré : ton site est à jour.")).toBeVisible();
+const enregistre = (page: Page) => expect(page.getByText("Enregistré dans ton brouillon.")).toBeVisible();
 const apercu = (page: Page) => page.locator("[data-testid=apercu-page]:visible").first();
 
 /** Les liens d'appel réellement visibles à l'écran (Greg, 18 novembre 2026 : jamais trois à la fois). */

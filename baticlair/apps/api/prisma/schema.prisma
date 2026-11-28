@@ -3133,6 +3133,11 @@ model PageEntreprise {
   photoDefaut      String?   @map("photo_defaut")
   /// Le modèle de site (`MODELES_SITE`, Greg, 27 novembre 2026) : un habillage, jamais le contenu ; null : le modèle par défaut.
   modele           String?
+  /// Le modèle d'avant le dernier changement de modèle (« Revenir au modèle précédent »).
+  modelePrecedent  String?   @map("modele_precedent")
+  /// L'instantané publié (`InstantanePublie`) : ce que lit le visiteur. Null : jamais publié depuis le 27 novembre 2026.
+  publie           Json?
+  publieLe         DateTime? @map("publie_le") @db.Timestamptz(3)
   accroche         String?
   presentation     String?
   telephone        String?

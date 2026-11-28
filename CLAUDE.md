@@ -456,6 +456,16 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - MODÈLES DE SITE : `MODELES_SITE` et `modeleDe` (domaine), colonne `page_entreprise.modele` (migration additive `20261127180000_page_modele`), registre `RENDUS` dans `vue-page.tsx` (`ModeleAtelier`). Un modèle est un habillage : il lit le même contenu, changer de modèle ne touche à aucune donnée (test « MODÈLES DE SITE », `apps/api/test/page-entreprise.test.ts`). Un seul modèle pour l'instant ; le choix apparaît dans l'onglet Couleurs dès qu'il y en a deux.
 - RÈGLE CHANGÉE : « Voir mon site » s'ouvre en version ordinateur sur ordinateur et en version téléphone sur téléphone (avant : toujours téléphone) ; le sélecteur reste. L'aperçu ordinateur se dessine sur 1440 px (avant : 1200), réduit en miniature entière sur un téléphone.
 
+## Décisions du 27 novembre 2026 (soir) : sites des artisans, le socle (cahiers 02 et 03)
+
+- Cahiers 02 et 03 rangés dans `baticlair/docs/cahiers-chatgpt/` ; le message de Greg l'emporte, « plus tard » attend (carrousel, animations, illustrations, vibrations, « Améliorer mon référencement », pied « Site pro créé avec Mobiiz »). Compte rendu complet : `baticlair/docs/sites-artisans-socle-2026-11-27.md`.
+- RÈGLE CHANGÉE : avant, chaque changement de « Mon site » était en ligne tout de suite → l'éditeur modifie un BROUILLON, le visiteur ne voit que ce qui a été PUBLIÉ (« Publier », ou l'interrupteur « Page visible ») ; couper « Page visible » retire le site de la ligne sans rien effacer. Une page en ligne d'avant ce changement ne bouge pas : elle est figée juste avant son premier changement. Une photo retirée quitte aussi le site (elle est effacée). Colonnes additives `publie`, `publie_le`, `modele_precedent` (migration `20261127200000_page_brouillon_publie`).
+- Deux modèles, mêmes données, un seul éditeur : « Atelier » (l'actuel) et « Sobre » (clair, accueil en deux parties, prestations en liste, bande de la teinte, contact clair ; `modele-sobre.tsx`). Aller-retour sans perte prouvé (test API « MODÈLES DE SITE », parcours `e2e/site-modeles.spec.ts`) ; « Revenir au modèle … » dans « Couleurs ».
+- RÈGLE CHANGÉE : le jaune Mobiiz n'est plus imposé aux sites : six palettes lisibles (`PALETTES_SITE`), réglées de la même façon dans tous les modèles.
+- Adresses : noms réservés étendus (technique, messagerie, marque) ; doublons, changement unique avec redirection et adresses réservées pour toujours vérifiés. Sous-domaines : comparaison écrite, rien de changé (DNS, domaine, Vercel).
+- Droit de publier réservé à l'abonnement : prêt et COUPÉ (`SITE_PUBLICATION_PAYANTE`), contrôlé côté serveur, sans Stripe ni prix. Le devenir du site à la résiliation : trois propositions, À DÉCIDER PAR GREG.
+- Coûts estimés pour 100, 1 000 et 10 000 sites (stockage et bande passante Vercel Blob) ; aucun service payant ajouté.
+
 ## Idées à venir, notées sans être codées (Greg, 20 novembre 2026)
 
 - Les derniers prix négociés affichés anonymement : jamais le nom du négoce, seulement après la clôture ; à prévoir dans les conditions des négoces.

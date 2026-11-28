@@ -87,33 +87,45 @@ describe("Ma page : réglages", () => {
     expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu.telephone).toBe("06 22 22 22 22");
     // Le métier principal change : l'ambiance suit (métier), la couleur choisie reste.
     await a.agent.patch("/v1/ma-page").send({ couleur: "#1d3557" }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     await a.agent.patch("/v1/company/trades").send({ trades: ["painting"] }).expect(200);
     const c = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
     expect(c).toMatchObject({ metierPrincipal: "painting", couleur: "#1D3557" });
     // Un téléphone propre à la page l'emporte ; vide, il revient à celui du profil.
     await a.agent.patch("/v1/ma-page").send({ telephone: "02 98 00 00 00" }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.telephone).toBe("02 98 00 00 00");
     await a.agent.patch("/v1/ma-page").send({ telephone: null }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.telephone).toBe("06 22 22 22 22");
   });
 
-  it("MODÈLES DE SITE (Greg, 27 novembre 2026) : un habillage seulement ; un modèle inconnu est refusé ; changer de modèle ne touche à aucune donnée", async () => {
+  it("MODÈLES DE SITE (Greg, 27 novembre 2026) : un habillage seulement ; un modèle inconnu est refusé ; l'aller-retour entre deux modèles ne perd rien ; « modèle précédent » se souvient", async () => {
     const a = await signUpWithCompany(ctx.app, "a@exemple.fr", "Toits Martin", ["roofing"]);
     await rendrePublique(a.agent);
-    await a.agent.patch("/v1/ma-page").send({ accroche: "Ardoise et zinc", couleur: "#1d3557" }).expect(200);
+    await a.agent.patch("/v1/ma-page").send({ accroche: "Ardoise et zinc", couleur: "#1d3557", horaires: "8 h à 18 h", certifications: ["RGE"] }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     const p = (await a.agent.get("/v1/ma-page").expect(200)).body;
-    expect(p.choix.modeles.map((m: { id: string }) => m.id)).toEqual(["atelier"]);
+    expect(p.choix.modeles.map((m: { id: string }) => m.id)).toEqual(["atelier", "sobre"]);
     expect(p.reglages.modele).toBe("atelier");
     const avantChangement = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
     expect(avantChangement.modele).toBe("atelier");
-    const refus = await a.agent.patch("/v1/ma-page").send({ modele: "inconnu" });
-    expect(refus.status).toBe(400);
-    await a.agent.patch("/v1/ma-page").send({ modele: "atelier" }).expect(200);
-    const apres = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
-    expect({ ...apres, majLe: null }).toEqual({ ...avantChangement, majLe: null });
-    // Retour au modèle par défaut : toujours le même contenu.
-    await a.agent.patch("/v1/ma-page").send({ modele: null }).expect(200);
-    expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu).toMatchObject({ modele: "atelier", accroche: "Ardoise et zinc", couleur: "#1D3557" });
+    const reglagesAvant = p.reglages;
+    expect((await a.agent.patch("/v1/ma-page").send({ modele: "inconnu" })).status).toBe(400);
+    // Atelier → Sobre : seul le modèle change ; « modèle précédent » = Atelier.
+    const sobre = (await a.agent.patch("/v1/ma-page").send({ modele: "sobre" }).expect(200)).body;
+    expect(sobre.reglages).toEqual({ ...reglagesAvant, modele: "sobre", modelePrecedent: "atelier" });
+    // Pas encore publié : le visiteur voit toujours Atelier.
+    expect((await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu.modele).toBe("atelier");
+    expect(sobre.publication.changementsAPublier).toBe(true);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
+    const enSobre = (await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu;
+    expect({ ...enSobre, modele: null, majLe: null }).toEqual({ ...avantChangement, modele: null, majLe: null });
+    // Sobre → Atelier (« Revenir au modèle précédent ») : tout est là, à l'identique.
+    const retour = (await a.agent.patch("/v1/ma-page").send({ modele: null }).expect(200)).body;
+    expect(retour.reglages).toEqual({ ...reglagesAvant, modelePrecedent: "sobre" });
+    await a.agent.post("/v1/ma-page/publication").expect(201);
+    expect({ ...(await anon().get("/v1/public/pages/toits-martin").expect(200)).body.contenu, majLe: null }).toEqual({ ...avantChangement, majLe: null });
   });
 
   it("PHOTO PAR DÉFAUT : celle du métier, qui suit le métier ; la galerie la remplace ; crédit en pied de page ; la photo de l'artisan passe devant", async () => {
@@ -135,6 +147,7 @@ describe("Ma page : réglages", () => {
     expect(p.choix.photosDefaut.length).toBeGreaterThanOrEqual(20);
     expect(p.choix.photosDefaut[0]).toMatchObject({ id: "neutre-1", metier: null, vignette: "/site/photos/neutre-1-800.webp" });
     await a.agent.patch("/v1/ma-page").send({ photoDefaut: "neutre-4" }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     await a.agent.patch("/v1/company/trades").send({ trades: ["painting"] }).expect(200);
     c = await lire();
     expect(c.photoDefaut.id).toBe("defaut:neutre-4");
@@ -142,11 +155,15 @@ describe("Ma page : réglages", () => {
     expect((await a.agent.patch("/v1/ma-page").send({ photoDefaut: "inventee" }).expect(400)).body.error.details).toMatchObject({ phrase: "Choisis une des photos de la galerie." });
     // Revenir à « selon mon métier ».
     await a.agent.patch("/v1/ma-page").send({ photoDefaut: null }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     expect((await lire()).photoDefaut.id).toBe("defaut:painting");
     // Sa propre photo passe devant, et le crédit tombe.
     await a.agent.post("/v1/ma-page/accord-photos").expect(200);
     await a.agent.post("/v1/ma-page/photos").field("role", "couverture").attach("file", await photoDeTelephone(2000, 1200), "c.jpg").expect(202);
     await service.traitementsTermines();
+    // Brouillon (27 novembre 2026) : la photo est dans le brouillon ; le visiteur la voit une fois publiée.
+    expect((await lire()).couverture).toBeNull();
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     c = await lire();
     expect(c.couverture).not.toBeNull();
     expect(c.creditPhoto).toBeNull();
@@ -161,8 +178,10 @@ describe("Ma page : réglages", () => {
     expect(p.choix.engagements).toEqual(["Devis gratuit", "Déplacement gratuit", "Intervention rapide"]);
     expect((await a.agent.patch("/v1/ma-page").send({ lienGoogle: "https://avis-pas-chers.fr/toits" }).expect(400)).body.error.details).toMatchObject({ reason: "lien_google" });
     await a.agent.patch("/v1/ma-page").send({ lienGoogle: "maps.app.goo.gl/AbCd123", engagements: ["Intervention rapide", "Devis gratuit", "Travaux garantis"] }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     expect(await lire()).toMatchObject({ lienGoogle: "https://maps.app.goo.gl/AbCd123", engagements: ["Devis gratuit", "Intervention rapide"] });
     await a.agent.patch("/v1/ma-page").send({ lienGoogle: null, engagements: [] }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     expect(await lire()).toMatchObject({ lienGoogle: null, engagements: [] });
   });
 
@@ -190,6 +209,7 @@ describe("Ma page : réglages", () => {
     const texte = JSON.stringify((await anon().get("/v1/public/pages/toits-martin").expect(200)).body);
     expect(texte).not.toMatch(/rue des Ardoises|@|Jean|Dupont/);
     await a.agent.patch("/v1/ma-page").send({ afficherAdresse: true }).expect(200);
+    await a.agent.post("/v1/ma-page/publication").expect(201);
     expect((await anon().get("/v1/public/pages/toits-martin")).body.contenu.adressePostale).toBe("3 rue des Ardoises, 22300 Lannion");
   });
 

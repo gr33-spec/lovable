@@ -11,7 +11,17 @@ import { teinteDeLaPage, themeDuMetier, type Prestation, type ThemeMetier } from
 /** `mobiiz.fr/e/<adresse>` : 3 à 50 caractères, minuscules, chiffres et tirets. */
 export const ADRESSE_PAGE_MIN = 3;
 export const ADRESSE_PAGE_MAX = 50;
-const MOTS_RESERVES = new Set(["admin", "api", "v1", "mobiiz", "aide", "nouveau", "nouvelle", "compte", "connexion", "inscription", "page", "pages", "e", "test", "contact", "support", "negoce", "negoces", "missions", "www"]);
+/**
+ * Les adresses que personne ne prend. Audit du 27 novembre 2026 (cahier 03 : « noms réservés, prise de contrôle de
+ * sous-domaine impossible ») : en plus des écrans de Mobiiz, les noms qu'un sous-domaine `<adresse>.mobiiz.fr` ne doit
+ * jamais porter (messagerie, technique, marque), au cas où les sites passeraient un jour en sous-domaines.
+ */
+const MOTS_RESERVES = new Set([
+  "admin", "api", "v1", "mobiiz", "aide", "nouveau", "nouvelle", "compte", "connexion", "inscription", "page", "pages", "e", "test", "contact", "support", "negoce", "negoces", "missions", "www",
+  "app", "site", "sites", "mon-site", "web", "mail", "email", "smtp", "imap", "pop", "mx", "webmail", "ns1", "ns2", "dns", "cdn", "static", "assets", "img", "images", "media", "fichiers",
+  "blog", "docs", "doc", "status", "statut", "securite", "security", "auth", "login", "dev", "staging", "preprod", "prod", "demo", "api-test", "tarifs", "cgu", "legal", "mentions-legales",
+  "confidentialite", "facture", "factures", "paiement", "abonnement", "stripe", "artisan", "artisans", "admin-mobiiz", "equipe-mobiiz", "mobiiz-fr", "bati-invest",
+]);
 
 /** « Toits Martin & Fils (SARL) » → « toits-martin-fils-sarl ». */
 export function adresseDepuis(texte: string): string {
@@ -412,3 +422,52 @@ export function dossierEcriture(p: ProfilPourEcrire, libelles: Record<string, st
 }
 
 export type { ThemeMetier, Prestation };
+
+/* ------------------------------------------------------------------------------------------------- Brouillon et publié */
+
+/**
+ * BROUILLON ET SITE PUBLIÉ (Greg, 27 novembre 2026, cahier 03 : « aperçu non publié, publication explicite, distinction
+ * brouillon / site publié »). L'éditeur modifie le brouillon (la ligne de la page, ses photos, ses chantiers) ; le visiteur
+ * lit l'instantané publié. « Publier » recopie le brouillon dans l'instantané. Les champs de la page recopiés : tous ceux
+ * de l'éditeur, même ceux qu'un modèle n'affiche pas (rien ne se perd en changeant de modèle).
+ */
+export const CHAMPS_PUBLIES = [
+  "couleur", "couleurBoutons", "modele", "photoDefaut", "prestations", "accroche", "presentation", "telephone", "zone", "horaires", "siteWeb", "lienGoogle", "engagements", "creeeEn", "certifications", "afficherAdresse", "couvertureId",
+] as const;
+export type ChampPublie = (typeof CHAMPS_PUBLIES)[number];
+
+export interface InstantanePublie {
+  /** Version du format (pour lire sans risque un ancien instantané après une mise à jour). */
+  version: 1;
+  champs: Partial<Record<ChampPublie, unknown>>;
+  /** Les photos publiées (identifiants), toutes rubriques confondues ; une photo retirée depuis disparaît aussi du site. */
+  photos: string[];
+  /** Les chantiers publiés, dans leur ordre, avec leur titre au moment de la publication. */
+  realisations: { id: string; titre: string }[];
+}
+
+/** Lit un instantané enregistré (JSON) ; un format inconnu vaut « rien de publié ». */
+export function instantaneLu(x: unknown): InstantanePublie | null {
+  if (!x || typeof x !== "object") return null;
+  const o = x as Partial<InstantanePublie>;
+  if (o.version !== 1 || !o.champs || typeof o.champs !== "object" || !Array.isArray(o.photos) || !Array.isArray(o.realisations)) return null;
+  return { version: 1, champs: o.champs, photos: o.photos.filter((p): p is string => typeof p === "string"), realisations: o.realisations.filter((r): r is { id: string; titre: string } => !!r && typeof r.id === "string" && typeof r.titre === "string") };
+}
+
+/** Deux instantanés disent-ils la même chose ? (« Tu as des changements pas encore en ligne. ») */
+export function memeInstantane(a: InstantanePublie | null, b: InstantanePublie | null): boolean {
+  if (!a || !b) return a === b;
+  const champs = (i: InstantanePublie) => JSON.stringify(CHAMPS_PUBLIES.map((k) => i.champs[k] ?? null));
+  return champs(a) === champs(b) && JSON.stringify(a.photos) === JSON.stringify(b.photos) && JSON.stringify(a.realisations) === JSON.stringify(b.realisations);
+}
+
+/**
+ * LE DROIT DE PUBLIER (cahier 03 : « préparer les droits de publication dans l'offre payante, sans toucher à Stripe ni aux
+ * prix »). Tant que Greg ne l'a pas décidé, le réglage est COUPÉ et tout le monde publie. Allumé, publier demande un
+ * abonnement en cours (Pro ou Pro Max) ; la vérification se fait côté serveur.
+ */
+export function publicationPermise(reglageAllume: boolean, abonnement: { statut: string; periodeFin: Date | null } | null, maintenant: Date): boolean {
+  if (!reglageAllume) return true;
+  if (!abonnement) return false;
+  return (abonnement.statut === "actif" || abonnement.statut === "resilie") && !!abonnement.periodeFin && abonnement.periodeFin > maintenant;
+}
