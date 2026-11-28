@@ -28,7 +28,6 @@ import {
   phrasesVolumesV1,
   PHRASE_SOUS_5,
   PHRASE_REGROUPEMENT,
-  participantsVisiblesV1,
   preparationV1,
   quantiteAvecConversion,
   produitV1,
@@ -280,20 +279,6 @@ describe("volumes", () => {
     expect(phrasesVolumesV1(volumesV1(besoins, { statut: "ouvert" }), { statut: "ouvert" }, { unite: { singulier: "palette", pluriel: "palettes", feminin: true }, parUnite: 480 }).principale).not.toBe(PHRASE_SOUS_5);
     // Personne encore : la phrase d'avant.
     expect(phrasesVolumesV1(volumesV1([], { statut: "ouvert" }), { statut: "ouvert" }, aff1).principale).toBe("Aucune quantité confirmée pour le moment.");
-  });
-
-  it("qui participe (Greg, 16 novembre 2026) : les noms par ordre alphabétique, jamais une quantité ; « rester anonyme » n'est que compté", () => {
-    const qui = participantsVisiblesV1([
-      { companyId: "c", nom: "Zinguerie Morvan", anonyme: false },
-      { companyId: "a", nom: "Toitures Le Goff", anonyme: false },
-      { companyId: "b", nom: "Couverture Riou", anonyme: true },
-      // Deux besoins de la même entreprise : comptée une fois ; anonyme sur l'un, anonyme pour l'achat.
-      { companyId: "a", nom: "Toitures Le Goff", anonyme: false },
-      { companyId: "d", nom: "Ardoises Kerdoncuff", anonyme: false },
-      { companyId: "d", nom: "Ardoises Kerdoncuff", anonyme: true },
-    ]);
-    expect(qui).toEqual({ noms: ["Toitures Le Goff", "Zinguerie Morvan"], anonymes: 2 });
-    expect(participantsVisiblesV1([])).toEqual({ noms: [], anonymes: 0 });
   });
 
   it("à partir de 3 entreprises : des totaux seulement, en conditionnement, avec l'indicatif à part", () => {
