@@ -207,3 +207,4 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
     qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.
 - 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
   (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.
+- 28 nov., soir — banc du calcul : POUSSÉ d4057d87 (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement), site et API en ligne. Branche de test LIBRE.
