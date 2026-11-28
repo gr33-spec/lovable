@@ -108,6 +108,11 @@ export interface TakeoffRepository {
   updateLine(tenant: TenantContext, lineId: string, fields: LineFields): Promise<void>;
   confirmLine(tenant: TenantContext, lineId: string): Promise<void>;
   addLine(tenant: TenantContext, takeoffId: string, fields: LineFields): Promise<void>;
+  /**
+   * Un article dit en cours de route (« ajoute un Velux », Greg, 28 novembre 2026) : la lecture reçoit ses lignes, les
+   * lignes enregistrées suivent (reliées par leur repère), et le calcul se rouvre (questions de l'article, puis recalcul).
+   */
+  ajouterLignesLues(tenant: TenantContext, takeoffId: string, lecture: LectureDevis, lines: readonly { designation: string; quantityRaw: string | null; unitRaw: string | null; sourceRef: string }[]): Promise<void>;
   deleteLine(tenant: TenantContext, lineId: string): Promise<void>;
   setStatus(tenant: TenantContext, id: string, status: TakeoffStatus): Promise<void>;
   setAnswer(tenant: TenantContext, id: string, key: string, value: string | { value: string; unit: string } | null): Promise<void>;

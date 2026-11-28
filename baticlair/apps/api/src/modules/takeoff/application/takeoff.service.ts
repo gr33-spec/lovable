@@ -57,6 +57,7 @@ import {
   lectureDepuisLignes,
   lignesDeLecture,
   lectureDeLaDictee,
+  ajouterALaLecture,
   dicteeAuPropre,
   lotLabel,
   choixParPiece,
@@ -921,6 +922,26 @@ export class TakeoffService {
       })),
     });
     return this.review(tenant, takeoff);
+  }
+
+  /**
+   * « Ajoute un Velux » à tout moment (Greg, 28 novembre 2026) : l'article dit rejoint la lecture du quantitatif (rangé par le
+   * moteur), le calcul se rouvre : ses questions s'ajoutent à la discussion, puis la liste se recalcule. Rend le nombre de
+   * lignes ajoutées (0 : rien d'un article dans le texte).
+   */
+  async ajouterUnArticleDit(tenant: TenantContext, takeoffId: string, texte: string): Promise<number> {
+    const takeoff = await this.editable(tenant, await this.takeoffs.findById(tenant, takeoffId));
+    const ref = referentialFor(takeoff.trade) ?? ROOFING_REFERENTIAL;
+    const base = takeoff.lecture ?? lectureDepuisLignes(takeoff.lines.map((l) => ({ id: l.id, designation: l.designation, quantity: l.quantityRaw, unit: l.unitRaw })));
+    const { lecture, nouvelles } = ajouterALaLecture(ref, base, texte);
+    if (nouvelles.length === 0) return 0;
+    await this.takeoffs.ajouterLignesLues(
+      tenant,
+      takeoff.id,
+      lecture,
+      nouvelles.map((l) => ({ designation: l.designation, quantityRaw: l.quantite, unitRaw: l.unite, sourceRef: lignesDeLecture({ ...lecture, lignes: [l] })[0]?.id ?? l.ref })),
+    );
+    return nouvelles.length;
   }
 
   /** Une liste déjà comptée peut-elle être lue ? (le lecteur d'image est configuré) */

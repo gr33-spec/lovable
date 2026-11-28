@@ -10,7 +10,9 @@ export type Origine = "Dit par toi" | "Calculé" | "À vérifier" | "Modifié pa
 export function origineDeLaLigne(item: Pick<PurchaseItem, "kind" | "state" | "verification"> & Partial<Pick<PurchaseItem, "postes">>): Origine {
   const v = item.verification?.etat;
   // Un poste du calcul corrigé dans « Calcul proposé » (Greg, 22 novembre 2026) : la ligne le dit aussi.
-  if (v === "modifie" || item.postes?.some((x) => x.modifie)) return "Modifié par toi";
+  // RÈGLE CHANGÉE (Greg, 28 novembre 2026) : une ligne modifiée par l'artisan passe en « Dit par toi » (avant : « Modifié par
+  // toi ») ; c'est sa quantité, elle part telle quelle, et la correction nourrit l'apprentissage.
+  if (v === "modifie" || item.postes?.some((x) => x.modifie)) return "Dit par toi";
   if (v === "a_verifier") return "À vérifier";
   if (v === "calcule") return "Calculé";
   if (v === "dit") return "Dit par toi";

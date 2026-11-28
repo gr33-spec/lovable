@@ -1283,7 +1283,8 @@ test("la flèche du calcul (Greg, 21 et 22 novembre 2026) : elle déroule les po
   await expect(feuille).toHaveCount(0);
   await settle(page);
   await expect.poll(() => ligne.innerText()).not.toBe(avant);
-  await expect(ligne.getByText("Modifié par toi")).toBeVisible();
+  // Règle changée (Greg, 28 novembre 2026) : une ligne modifiée par l'artisan dit « Dit par toi » (avant : « Modifié par toi »).
+  await expect(ligne.getByText("Dit par toi")).toBeVisible();
   await list.getByRole("button", { name: `Voir le calcul : ${nom}` }).click();
   await expect(detail.getByText(/^Surface 50 m²/)).toBeVisible();
   await expect(detail.getByText("modifié par toi")).toBeVisible();
@@ -1643,11 +1644,12 @@ test("feuilles de zinc : le nombre, une estimation, s'ajuste d'un toucher dans l
   await passQuestions(page);
   const list = page.getByRole("region", { name: "Liste des fournitures" });
   await expect(list).toBeVisible({ timeout: 60_000 });
-  // Sur la ligne fermée des feuilles : « − », le nombre, « + ». Les autres lignes n'ont pas ces boutons tant qu'elles sont fermées.
+  // Sur la ligne fermée des feuilles : « − », le nombre, « + ». Règle changée (Greg, 28 novembre 2026) : toutes les lignes ont
+  // leur « − / + » (le pas : le plus petit conditionnement vendu) ; avant, seulement les quantités « estimation ».
   const reglage = list.getByRole("group", { name: /^Quantité : Feuilles/ }).first();
   await expect(reglage).toBeVisible();
   await expect(list.getByRole("group", { name: /^Ligne ouverte/ })).toHaveCount(0);
-  expect(await list.getByRole("group", { name: /^Quantité : / }).count()).toBe(await list.getByRole("group", { name: /^Quantité : Feuilles/ }).count());
+  expect(await list.getByRole("group", { name: /^Quantité : / }).count()).toBeGreaterThan(await list.getByRole("group", { name: /^Quantité : Feuilles/ }).count());
   const nombre = reglage.locator("[aria-live]");
   const avant = Number((await nombre.innerText()).trim());
   expect(avant).toBeGreaterThan(0);

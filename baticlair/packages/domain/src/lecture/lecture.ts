@@ -56,6 +56,8 @@ export interface LectureFourniture {
 export interface LectureLigne {
   /** Le repère de la ligne dans le devis (« 1 », « 2 »…), dans l'ordre du devis. */
   ref: string;
+  /** Une ligne DITE par l'artisan (dictée, « ajoute un Velux ») et non lue dans un devis écrit (Greg, 28 novembre 2026). */
+  dite?: true;
   designation: string;
   quantite: string | null;
   unite: string | null;
@@ -148,7 +150,7 @@ export function parseLecture(raw: unknown): LectureDevis | null {
         precision: str(x.precision, 160),
       });
     }
-    lignes.push({ ref: str(l.ref, 20) ?? String(i + 1), designation, quantite: str(l.quantite ?? l.qte, 20), unite: str(l.unite, 10), role, fournitures });
+    lignes.push({ ref: str(l.ref, 20) ?? String(i + 1), ...(l.dite === true ? { dite: true as const } : {}), designation, quantite: str(l.quantite ?? l.qte, 20), unite: str(l.unite, 10), role, fournitures });
   }
   const questions: LectureQuestion[] = [];
   for (const item of list(o.questions)) {
@@ -247,7 +249,7 @@ export function lignesDeLecture(lecture: LectureDevis, ids?: ReadonlyMap<string,
     // Une ligne de pose qui ne fait que citer (« soudures » : l'étain) reste une ligne sans fourniture, avec ce qu'elle cite.
     // Une DICTÉE (Greg, 28 novembre 2026) : « une gouttière bandeau de 25 », sans sa longueur, est un article dit, pas une
     // pose : elle garde ses données (le développé, la pose en bandeau) et le moteur demande seulement la longueur.
-    const ditSansMesure = lecture.source === "dictee" && ligne.role === "fourniture_et_pose" && ligne.quantite === null && fournitures[0]?.ouvrage != null;
+    const ditSansMesure = (lecture.source === "dictee" || ligne.dite === true) && ligne.role === "fourniture_et_pose" && ligne.quantite === null && fournitures[0]?.ouvrage != null;
     if (written.length === 0 && !ditSansMesure && (ligne.role === "pose" || ligne.role === "fourniture_et_pose")) {
       const id = ids?.get(ligne.ref) ?? ligne.ref;
       out.push({ id, ligne, fourniture: null, designation: ligne.designation, quantity: ligne.quantite, unit: ligne.unite, cites: ligne.fournitures });

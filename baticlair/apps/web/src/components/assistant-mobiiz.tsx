@@ -192,7 +192,11 @@ export function AssistantMobiiz({
       switch (c.type) {
         case "ajouter": {
           const avant = new Set(t.lines.map((l) => l.id));
-          const apres = await corriger({ action: "ajouter", ligne: { libelle: c.libelle, quantite: c.quantite, unite: c.unite } });
+          // Greg, 28 novembre 2026 (« Ajoute un Velux ») : l'article ajouté passe par le MOTEUR comme une dictée (rangé, ses
+          // seules questions, puis le calcul) ; avant, il entrait tel qu'écrit, sans calcul.
+          const q = await api<Quantitatif>(`/v1/quantitatifs/${qid}/dire?ecran=1`, { method: "POST", body: { texte: [c.quantite, c.unite, c.libelle].filter(Boolean).join(" ") } });
+          onUpdated(q);
+          const apres = q.ecran ?? t;
           const neuve = apres.lines.find((l) => !avant.has(l.id));
           return { t: apres, retour: neuve ? { libelle: `l'ajout de « ${c.libelle} »`, corps: [{ action: "retirer", id: neuve.id }] } : null };
         }

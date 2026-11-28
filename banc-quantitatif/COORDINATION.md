@@ -168,3 +168,17 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (titre), `Ce que tu as dit` (région), `Envoyer` (bouton) tenus par le parcours « le quantitatif à la voix ».
 - Serveur : `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre` ; moteur : `lecture/dictee.ts`.
 - 28 nov. — JE POUSSE sur la branche de test après la chaîne verte ; « branche rendue » écrit ici après /version.
+
+## Banc du calcul, 28 novembre 2026 (soir) : retours de Greg sur le quantitatif (iPhone), part écran
+- À LA DISCUSSION DES ÉCRANS (Greg : « si c'est surtout de l'écran, note-le ») : les SUGGESTIONS en panneau compact qui
+  monte du bas (bottom sheet) : catégories en titres simples, une ligne fine par suggestion avec sa case, 10 à 15 visibles
+  sans défiler, en bas « Ajouter (3) » et « Passer ». Composants : `CasesSuggestions` (`journey.tsx`, dans la discussion) et
+  `SuggestionsCard` (même fichier). Le contenu (catégories, libellés, clé `suggestions:choisies`) ne change pas ; noms tenus
+  par les parcours : la case par son libellé, « Continuer » (à renommer « Ajouter (N) » / « Passer » avec les parcours).
+- Fait par le banc (contenu et parcours, déjà dans ses fichiers) :
+  - `journey.tsx` : la barre d'écriture reste ouverte (`onDire`, « ajoute un Velux ») dans les questions ET au
+    récapitulatif ; « Il me manque N infos pour <ouvrage>, ensuite ta liste » ; calcul automatique quand plus rien ne
+    manque après les suggestions ; « Je vais calculer tes feuilles de zinc » ; nombre de feuilles au récapitulatif.
+  - `supply-list.tsx` : « − / + » sur chaque ligne (pas = unité de commande de la fiche), nombre à taper, boutons 44 px ;
+    « Réunit : … » sur une ligne qui rassemble plusieurs lignes du devis. `lib/origine-ligne.ts` : modifié = « Dit par toi ».
+  - `assistant-mobiiz.tsx`, `project-takeoff.tsx` : « Ajouter un article » passe par le moteur (`POST /v1/quantitatifs/:id/dire`).

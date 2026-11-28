@@ -20,7 +20,7 @@ import type { LectureDevis, LectureFourniture, LectureLigne } from "./lecture.js
  */
 export function lectureParLeCode(ref: Referential, lecture: LectureDevis): LectureDevis {
   if (ref.workItems.length === 0) return lecture;
-  const lues = lecture.lignes.map((l) => motsJamaisDemandes(ref, sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes, lecture.source === "dictee"))));
+  const lues = lecture.lignes.map((l) => motsJamaisDemandes(ref, sansMesureEnPieces(ref, ligneParLeCode(ref, l, lecture.lignes, lecture.source === "dictee" || l.dite === true))));
   const lignes = sansRediteDeLaQuantite(ref, donneesDesAutresOuvrages(ref, lues));
   return { ...lecture, lignes };
 }

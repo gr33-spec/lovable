@@ -161,6 +161,13 @@ export class QuantitatifsController {
     return result;
   }
 
+  /** « Ajoute un Velux », « retire les chatières », « mets 3 descentes » : à tout moment, écrit ou dicté (Greg, 28 novembre 2026). */
+  @Post(":id/dire")
+  @HttpCode(200)
+  dire(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(z.object({ texte: z.string().trim().min(1).max(1000) }))) body: { texte: string }, @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>) {
+    return this.quantitatifs.dire(tenant, id, body.texte, { ecran: query.ecran === "1" });
+  }
+
   /**
    * « Décris ton chantier » (Greg, 28 novembre 2026) : le texte dicté remis au propre avec les mots du métier, ses vrais doutes
    * (des boutons), et s'il nomme un ouvrage (il part alors au moteur, comme un devis). Rien n'est créé ; aucun appel IA.

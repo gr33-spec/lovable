@@ -169,6 +169,7 @@ export function lectureDeLaDictee(ref: Referential, texte: string): LectureDevis
       const designation = l.mots.join(", ");
       return {
         ref: `voix:${i + 1}`,
+        dite: true,
         role: "fourniture_et_pose",
         designation,
         quantite: l.quantite,
@@ -187,4 +188,15 @@ export function lignesDeLaDictee(lecture: LectureDevis): { ref: string; designat
 /** Une dictée qui nomme un ouvrage du métier (une couverture, une gouttière) : elle part au moteur, jamais telle quelle. */
 export function dicteeVaAuMoteur(ref: Referential, texte: string): boolean {
   return lectureDeLaDictee(ref, texte).lignes.some((l) => ouvrageNomme(ref, l.designation) !== null);
+}
+
+/**
+ * UNE VRAIE CONVERSATION, TOUJOURS OUVERTE (Greg, 28 novembre 2026 : « Ajoute un Velux » en fin de parcours, impossible) :
+ * ce que l'artisan ajoute en cours de route (écrit ou dicté) rejoint la lecture comme une dictée, à la suite, sous des repères
+ * neufs (« dit2:1 ») ; le moteur le range, pose seulement les questions de cet article, puis recalcule.
+ */
+export function ajouterALaLecture(ref: Referential, lecture: LectureDevis, texte: string): { lecture: LectureDevis; nouvelles: LectureLigne[] } {
+  const numero = new Set(lecture.lignes.filter((l) => /^dit\d+:/.test(l.ref)).map((l) => l.ref.split(":")[0])).size + 1;
+  const nouvelles = lectureDeLaDictee(ref, dicteeAuPropre(ref, texte).texte).lignes.map((l, i) => ({ ...l, ref: `dit${numero}:${i + 1}` }));
+  return { lecture: { ...lecture, lignes: [...lecture.lignes, ...nouvelles] }, nouvelles };
 }
