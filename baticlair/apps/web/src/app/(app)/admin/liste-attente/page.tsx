@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback } from "react";
 import { PorteAdmin } from "@/components/admin-achat-groupe";
 import { BackButton, Card, ErrorNotice, PageTitle, Spinner } from "@/components/ui";
@@ -17,7 +18,7 @@ interface ListeAttente {
   total: number;
   parMetier: { metier: string; libelle: string; nombre: number }[];
   parDepartement: { code: string | null; nom: string; nombre: number }[];
-  inscrits: { id: string; email: string; metier: string; libelle: string; departement: string | null; nomDepartement: string | null; source: string | null; le: string }[];
+  inscrits: { id: string; email: string; metier: string; libelle: string; departement: string | null; nomDepartement: string | null; source: string | null; le: string; etat: "inscrit" | "prevenu" | "desinscrit"; compte: boolean }[];
 }
 const quand = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
 
@@ -66,6 +67,9 @@ function Liste() {
   const i = data.inscritsParMetier;
   const inscrits = (
     <>
+      <Link href="/admin/prevenir" className="pressable inline-flex min-h-12 items-center self-start rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent">
+        Prévenir les inscrits d&apos;un métier
+      </Link>
       <p className="text-[16px]">
         <strong className="text-[22px] tabular-nums">{i.total}</strong> entreprise{i.total > 1 ? "s" : ""} inscrite{i.total > 1 ? "s" : ""}, dont{" "}
         <strong className="tabular-nums">{i.essai}</strong> par la carte (nouvel onboarding).
@@ -82,7 +86,7 @@ function Liste() {
   return (
     <>
       {inscrits}
-      <h2 className="mt-4 text-[22px] font-extrabold">Ancienne liste d&apos;attente</h2>
+      <h2 className="mt-4 text-[22px] font-extrabold">Liste d&apos;attente (e-mail d&apos;ouverture)</h2>
       <p className="text-[16px]">
         <strong className="text-[22px] tabular-nums">{data.total}</strong> artisan{data.total > 1 ? "s" : ""} en attente d&apos;un métier.
       </p>
@@ -99,7 +103,8 @@ function Liste() {
                 <span className="font-semibold break-all">{i.email}</span>
                 <span className="text-muted">
                   {i.libelle} · {i.nomDepartement ?? "Département non indiqué"} · {quand(i.le)}
-                  {i.source && i.source !== "inscription" ? ` · depuis /${i.source}` : ""}
+                  {i.compte ? " · a un compte" : i.source && i.source !== "inscription" ? ` · depuis /${i.source}` : ""}
+                  {i.etat === "prevenu" ? " · prévenu" : i.etat === "desinscrit" ? " · désinscrit" : ""}
                 </span>
               </Card>
             </li>

@@ -16,6 +16,8 @@ const listeAttenteBody = z.object({
   metier: z.string().refine((m) => METIERS_EN_ATTENTE.includes(m), { message: "Métier inconnu ou déjà ouvert." }),
   departement: z.string().trim().max(3).nullable().optional(),
   source: z.string().trim().max(60).nullable().optional(),
+  /** CHANTIER 05 : la case « préviens-moi » cochée (choix explicite, noté avec sa version). */
+  consentement: z.boolean().optional(),
 });
 
 /** Les pages régionales (Greg, 19 novembre 2026) : la carte et la liste d'attente, sans compte. */
@@ -35,7 +37,7 @@ export class PagesRegionalesPublicController {
   @Post("liste-attente")
   @HttpCode(204)
   async listeAttente(@Body(new ZodPipe(listeAttenteBody)) b: z.infer<typeof listeAttenteBody>) {
-    await this.pages.rejoindreListeAttente({ email: b.email, metier: b.metier, departement: b.departement ?? null, source: b.source ?? null });
+    await this.pages.rejoindreListeAttente({ email: b.email, metier: b.metier, departement: b.departement ?? null, source: b.source ?? null, consentement: b.consentement === true });
   }
 }
 

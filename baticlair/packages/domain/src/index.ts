@@ -113,6 +113,7 @@ export * from "./groupe/cout-total-livre.js";
 export * from "./groupe/geographie.js";
 export * from "./inscription/metiers-ouverts.js";
 export * from "./inscription/essai.js";
+export * from "./inscription/liste-attente.js";
 export * from "./supervision/supervision.js";
 export * from "./assistant/interpretation-ia.js";
 export * from "./ia/prompts/index.js";

@@ -475,7 +475,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 
 ## À faire avant l'ouverture d'un nouveau métier
 
-- Un bouton admin « Prévenir les inscrits de ce métier », qui envoie un e-mail à tous les inscrits de ce métier (entreprises du métier et ancienne liste d'attente). Pas encore codé (Greg, 20 novembre 2026).
+- Le bouton admin « Prévenir les inscrits » existe (chantier 05, 28 novembre 2026, voir plus bas) : seuls les inscrits qui l'ont choisi sont prévenus, jamais toutes les entreprises du métier.
 
 ## Décisions du 27 novembre 2026 : sécurité, sauvegardes (audit `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`)
 
@@ -486,3 +486,12 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - RÈGLE CHANGÉE : les analyses en cours comptent dans les 3 analyses offertes (réservation sous verrou par entreprise) ; avant, dix lectures lancées d'un coup passaient toutes.
 - RÈGLE CHANGÉE : les lectures qui coûtent sont limitées (route avec son `@Throttle`, PDF, Excel, CSV, pages par jeton) ; avant, aucune lecture n'était comptée. Les jetons du chemin ne sont plus écrits dans les journaux (`cheminJournalise`).
 - Dépôt privé : AVANT de le passer en privé, les commits qui partent sur Vercel doivent avoir pour AUTEUR le compte GitHub de Greg (gr33-spec), seul membre de l'équipe Vercel ; sinon Vercel bloque la mise en ligne (« commit author is not a member of the team »).
+
+## Décisions du 28 novembre 2026 : chantier 05, liste d'attente et invitations
+
+- Cahier `baticlair/docs/cahiers-chatgpt/05_Admin_Stripe_parrainage.pdf`, partie 2 seulement ; compte rendu : `baticlair/docs/chantier-05-liste-attente-invitations.md`.
+- Ouvert au lancement : les couvreurs des Côtes-d'Armor (`OUVERTURES_DE_DEPART`). Un couple métier et département s'ouvre quand l'admin « prévient les inscrits » (confirmation = décision d'ouverture) ; ouvrir ne bloque personne et ne change aucune règle d'achat groupé.
+- Liste d'attente : case « Préviens-moi » à l'inscription (`/commencer`) et sur l'accueil, jamais cochée d'office, choix noté avec sa version ; « Tu es sur la liste. On t'écrit dès que Mobiiz ouvre pour les plaquistes du 22. » ; une ligne par e-mail et métier ; désinscription en un clic (lien de l'e-mail, ou l'accueil).
+- Admin › « Prévenir les inscrits » (`/admin/prevenir`) : métier, départements, nombre, aperçu de l'e-mail, confirmation sur ce nombre ; lots de 20 ; une fois par inscrit ; journal (adresses masquées). Admin › « Invitations » : qui a invité qui.
+- « Invite d'autres artisans » sur l'accueil (fermable) : lien personnel `/invitation/<code>` partagé par l'artisan (SMS, WhatsApp, e-mail, copier) ; aucune récompense ; suivi seul (`invitation_suivi`), prêt pour Flouzeo plus tard.
+- Migration additive `20261128120000_liste_attente_invitations`. Registre RGPD lignes 24 et 25. À valider par Greg : les durées de conservation proposées (ligne 24), pas encore appliquées.
