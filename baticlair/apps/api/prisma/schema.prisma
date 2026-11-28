@@ -3405,3 +3405,25 @@ model EmailEntrant {
   @@index([suspect, recuLe])
   @@map("email_entrant")
 }
+
+/// La sauvegarde nocturne (Greg, 28 novembre 2026) : chaque nuit, le workflow GitHub « Sauvegarde de la base » dit ici
+/// s'il a réussi ou à quelle étape il a échoué (jeton signé de GitHub, aucun secret). Un échec envoie l'alerte Mobiiz ;
+/// la carte « Santé » de l'admin lit le dernier rapport. Un « essai » vient d'une autre branche que `main` : il prévient,
+/// mais ne compte jamais comme une sauvegarde faite. Aucune donnée de client.
+model SauvegardeRapport {
+  id     String   @id @default(uuid(7)) @db.Uuid
+  recuLe DateTime @default(now()) @map("recu_le") @db.Timestamptz(3)
+  /// reussie | echec
+  statut String
+  essai  Boolean  @default(false)
+  /// L'étape en échec, en mots (« Test de restauration »).
+  etape  String?
+  runId  String   @map("run_id")
+  ref    String
+  tables Int?
+  lignes Int?
+  octets Int?
+
+  @@index([essai, recuLe])
+  @@map("sauvegarde_rapport")
+}

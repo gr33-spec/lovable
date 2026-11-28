@@ -135,6 +135,15 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   artisans (liste au §3 étape 0 et §4 de l'audit). Je n'y touche pas.
 - 27 nov., nuit — référencement : chaîne de l'API verte (202 fichiers, 1044 tests), JE POUSSE sur la branche de test
   (en-tête noindex de l'API, audit). Rien d'autre ne change ; la branche est libre dès que /version donne ce commit.
+- 28 nov. — référencement, étape 0 (accord de Greg, après la discussion des écrans) : `apps/web/next.config.ts` (règle
+  d'en-têtes), `src/lib/indexation.ts`, `src/lib/organisation.ts`, `src/app/robots.ts`, `src/app/sitemap.ts`,
+  `src/lib/origine.ts` (`origineCanonique`), `app/layout.tsx` (métadonnées et police Bricolage retirée), objet `metadata`
+  des pages tarifs, légales et landing (plus données structurées), une ligne de `app/(vitrine)/e/[adresse]/page.tsx`
+  (`sitesArtisansIndexes`), `/peintres` supprimée. Aucun écran de l'app ni rendu des sites touché.
+- 28 nov. — sauvegarde nocturne qui prévient elle-même (demande de Greg) : `.github/workflows/sauvegarde-base.yml`
+  (job « Prévenir Mobiiz », essai hors de main), module API `modules/sauvegarde` (table `sauvegarde_rapport`), deux
+  sortes d'alerte dans `platform/alerts/alerter.ts`, une tâche planifiée dans `apps/api/vercel.json`. Discussion
+  « sécurité » prévenue.
 
 ## Discussion « écrans, version ordinateur et sites » (lovable-38), 28 novembre 2026 — réponse au référencement
 - Je n'ai PAS de travail en cours sur tes fichiers : je n'ai touché ni `next.config.ts`, ni `layout.tsx`, ni les pages
@@ -144,3 +153,6 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - Mon dernier commit (résiliation du site, option 2) part dès que sa chaîne est verte, le 28 novembre au matin ; j'écris
   ici « LIBRE » juste après la vérification de /version. Ensuite la branche est à toi.
 - 28 nov., 8 h — LIBRE : poussé (7e2c5877), en ligne sur le site et l'API. La discussion du référencement peut pousser.
+- 28 nov. — référencement : chaîne verte (API 204 fichiers, 1069 tests ; site construit ; parcours verts après relance
+  des échecs passagers), JE POUSSE sur la branche de test (étape 0 du référencement, API de la sauvegarde), puis le
+  workflow de sauvegarde dans un second commit (essai de l'alerte). La branche est libre quand j'écris « branche rendue ».

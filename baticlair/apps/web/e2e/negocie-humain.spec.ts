@@ -252,16 +252,10 @@ test.describe("Business model final : le regroupement négocié par un humain", 
     await expect(page.getByRole("region", { name: "Le même pot, seul ou en palette." })).toHaveCount(0);
   });
 
-  test("/peintres (Greg, 26 octobre 2026) : le bloc peinture en pleine place, juste sous l'accroche ; pas d'ardoise", async ({ page }) => {
-    await page.goto("/peintres");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Achète tes matériaux au prix des gros.");
-    await expect(page.getByText("Pour les peintres")).toBeVisible();
-    const peinture = page.getByRole("region", { name: "Le même pot, seul ou en palette." });
-    await expect(peinture.getByText("6 à 7 €")).toBeVisible();
-    await expect(peinture.getByText("moins de 3 €")).toBeVisible();
-    // La première section après l'accroche.
-    const ordre = await page.locator("main > section").evaluateAll((s) => s.map((x) => x.getAttribute("aria-labelledby")));
-    expect(ordre.slice(0, 2)).toEqual(["accroche", "ecart"]);
-    await expect(page.getByRole("region", { name: "Les mêmes ardoises, dans le même département." })).toHaveCount(0);
+  // RÈGLE CHANGÉE (Greg, 28 novembre 2026, référencement) : avant, une page /peintres (le bloc peinture sous l'accroche) ;
+  // elle est retirée (lancement avec les couvreurs seulement) et répond « Page introuvable ».
+  test("/peintres retirée (Greg, 28 novembre 2026) : « Page introuvable »", async ({ page }) => {
+    const reponse = await page.goto("/peintres");
+    expect(reponse?.status()).toBe(404);
   });
 });

@@ -52,6 +52,10 @@
     {
       "path": "/v1/internal/pages-entreprises/menage",
       "schedule": "41 3 * * *"
+    },
+    {
+      "path": "/v1/internal/sauvegarde/veille",
+      "schedule": "47 8 * * *"
     }
   ],
   "git": {

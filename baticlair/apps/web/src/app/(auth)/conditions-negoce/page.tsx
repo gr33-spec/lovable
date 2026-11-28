@@ -5,7 +5,11 @@ import { styleLegal as s } from "@/components/legal-style";
 import { PageTitle } from "@/components/ui";
 import { NOM_APP } from "@/lib/nom";
 
-export const metadata: Metadata = { title: `Conditions négoces — ${NOM_APP}` };
+export const metadata: Metadata = {
+  title: { absolute: `Conditions négoces · ${NOM_APP}` },
+  description: `Les conditions d'utilisation de ${NOM_APP} pour les négoces de matériaux.`,
+  alternates: { canonical: "/conditions-negoce" },
+};
 
 /**
  * Les conditions pour les négoces (mise en conformité du 24 octobre 2026) : le même texte que l'espace négoce, une seule

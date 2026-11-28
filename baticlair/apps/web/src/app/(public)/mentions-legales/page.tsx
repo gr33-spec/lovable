@@ -6,6 +6,8 @@ import { NOM_APP } from "@/lib/nom";
 
 export const metadata: Metadata = {
   title: { absolute: `Mentions légales · ${NOM_APP}` },
+  description: `Mentions légales de ${NOM_APP} : éditeur, hébergement et contact.`,
+  alternates: { canonical: "/mentions-legales" },
 };
 
 const s = { h2: "mz-titre mz-legal-h2", p: "mz-legal-p" };

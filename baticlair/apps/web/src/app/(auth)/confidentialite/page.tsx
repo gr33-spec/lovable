@@ -5,7 +5,11 @@ import { PageTitle } from "@/components/ui";
 import { EDITEUR, HEBERGEUR_BASE } from "@/lib/legal";
 import { NOM_APP, nom } from "@/lib/nom";
 
-export const metadata: Metadata = { title: `Confidentialité — ${NOM_APP}` };
+export const metadata: Metadata = {
+  title: { absolute: `Politique de confidentialité · ${NOM_APP}` },
+  description: `Données personnelles traitées par ${NOM_APP} : finalités, durées de conservation, sous-traitants et droits.`,
+  alternates: { canonical: "/confidentialite" },
+};
 
 /** La version de cette page (une date, comme les CGU). */
 const VERSION = "17/11/2026";

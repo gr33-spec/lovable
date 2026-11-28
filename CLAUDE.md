@@ -495,3 +495,19 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Admin › « Prévenir les inscrits » (`/admin/prevenir`) : métier, départements, nombre, aperçu de l'e-mail, confirmation sur ce nombre ; lots de 20 ; une fois par inscrit ; journal (adresses masquées). Admin › « Invitations » : qui a invité qui.
 - « Invite d'autres artisans » sur l'accueil (fermable) : lien personnel `/invitation/<code>` partagé par l'artisan (SMS, WhatsApp, e-mail, copier) ; aucune récompense ; suivi seul (`invitation_suivi`), prêt pour Flouzeo plus tard.
 - Migration additive `20261128120000_liste_attente_invitations`. Registre RGPD lignes 24 et 25. À valider par Greg : les durées de conservation proposées (ligne 24), pas encore appliquées.
+
+## Décisions du 28 novembre 2026 : référencement Google et IA (audit `baticlair/docs/referencement/audit-seo-ia-2026-11-27.md`)
+
+- Robots : « recherche oui, entraînement non ». `robots.txt` permet tous les robots de recherche (Googlebot, Bingbot, OAI-SearchBot, Claude-SearchBot…) et refuse les robots d'entraînement (GPTBot, ClaudeBot, Google-Extended, Applebot-Extended, CCBot, meta-externalagent) : `apps/web/src/app/robots.ts`, liste dans `apps/web/src/lib/indexation.ts`.
+- RÈGLE CHANGÉE : seul mobiiz.fr en production s'ouvre aux moteurs (`INDEXATION_SITE=on` en Production ET hôte `mobiiz.fr`), et seulement la landing, les tarifs et les pages légales (`PAGES_INDEXABLES`) ; tout le reste dit `noindex` (en-tête), test.mobiiz.fr et les adresses Vercel compris. Avant : `noindex` partout, sauf les sites des artisans dès `PAGES_ENTREPRISES_INDEXEES=on` sur n'importe quel hôte ; maintenant ils demandent aussi mobiiz.fr en production. Test `apps/web/scripts/indexation.test.mjs`.
+- Une page entre dans le sitemap et s'ouvre aux moteurs en l'ajoutant à `PAGES_INDEXABLES`, jamais autrement. Adresse officielle (canonical) toujours `https://mobiiz.fr` en production (`origineCanonique`).
+- `/couvreurs` gardée, non liée, non indexée (base de la future page couverture) ; `/peintres` retirée.
+- Pas de page Côtes-d'Armor avant d'avoir de vrais couvreurs. Pas de pages villes en série. Chaque texte de page publique : brouillon dans `baticlair/docs/referencement/brouillons/`, relu par Greg, aucune affirmation commerciale sans son accord.
+- Titre des sites des artisans : on garde « Couvreur à Saint-Brieuc – Dupont Couverture ».
+- Search Console (propriété « Domaine ») : feu vert, Greg pose la ligne TXT dans Vercel (DNS de mobiiz.fr chez Vercel) : `baticlair/docs/referencement/search-console-bing.md`.
+
+## Décisions du 28 novembre 2026 : la sauvegarde prévient elle-même
+
+- RÈGLE CHANGÉE (Greg : « je ne veux pas dépendre des notifications de mon compte GitHub ») : avant, seul GitHub prévenait d'un échec de la sauvegarde nocturne → à la fin de chaque exécution, le workflow envoie son résultat à l'API (`POST /v1/internal/sauvegarde`, jeton signé de GitHub OIDC, aucun secret) ; un échec, test de restauration compris, part par les alertes de Mobiiz (« SAUVEGARDE ÉCHOUÉE », adresse d'Admin › Réglages), avec l'étape et le lien de l'exécution ; la réussite qui suit un échec dit « rétablie » ; la veille quotidienne de l'API prévient après 36 h sans réussite (une fois le workflow branché).
+- Essai de l'alerte : le fichier du workflow modifié sur une autre branche que `main` se lance seul et échoue exprès ; l'e-mail dit « ESSAI de l'alerte », jamais compté comme une sauvegarde.
+- Carte « Santé » de l'admin (à faire) : lire `GET /v1/admin/sauvegarde` (dernière nuit, dernière réussite, retard, dernier essai). Code : `baticlair/apps/api/src/modules/sauvegarde/`, test `apps/api/test/sauvegarde-alerte.test.ts`.

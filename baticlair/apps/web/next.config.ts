@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { reglesXRobots } from "./src/lib/indexation.ts";
 
 /**
  * Le site relaie /v1/* vers l'API : pour le navigateur, tout vient de la
@@ -7,11 +8,6 @@ import type { NextConfig } from "next";
  */
 const API_URL = (process.env.API_URL ?? "http://localhost:4000").replace(/\/$/, "");
 
-/**
- * Ma page Mobiiz (16 novembre 2026) : les pages publiques des entreprises (`/e/…`) ne sont indexées par Google que quand
- * `PAGES_ENTREPRISES_INDEXEES=on` (le site de test reste hors des moteurs) ; elles disent alors elles-mêmes leur règle.
- */
-const PAGES_INDEXEES = process.env.PAGES_ENTREPRISES_INDEXEES === "on";
 /** L'adresse publique du store Vercel Blob des photos (« https://<id>.public.blob.vercel-storage.com »), côté site. */
 const PHOTOS_BLOB_URL = (process.env.PHOTOS_BLOB_URL ?? "").replace(/\/$/, "");
 
@@ -36,11 +32,9 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
-    return [
-      { source: "/:path*", headers: securityHeaders },
-      PAGES_INDEXEES ? { source: "/:path((?!e/).*)", headers: noindex } : { source: "/:path*", headers: noindex },
-    ];
+    // Référencement (Greg, 28 novembre 2026) : seul mobiiz.fr en production s'ouvre aux moteurs, page par page
+    // (`src/lib/indexation.ts`) ; test.mobiiz.fr, les adresses Vercel et tout le reste disent « noindex ».
+    return [{ source: "/:path*", headers: securityHeaders }, ...reglesXRobots(process.env)];
   },
 };
 
