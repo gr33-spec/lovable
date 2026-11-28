@@ -387,6 +387,9 @@ test("déconnexion puis reconnexion ramène à la page demandée", async ({ page
 test("Menu ordinateur (Greg, 1er novembre 2026) : chaque lien du menu de gauche se lit, en sombre comme en clair (contraste AA, 4,5:1 au moins)", async ({ page }, info) => {
   test.skip(info.project.name !== "ordinateur", "le menu de gauche n'existe que sur ordinateur");
   await signUp(page);
+  // Le guide du premier lancement, ouvert en retard sous charge, rend la page derrière lui inerte (aucun lien lisible) :
+  // il est noté vu d'avance (série du 27 novembre 2026 : « 0 lien » pendant 20 s).
+  await apiJson(page, "POST", "/v1/me/guide/vu");
   for (const theme of ["sombre", "clair"]) {
     await page.evaluate((t) => localStorage.setItem("mobiiz-theme", t), theme);
     await page.goto("/chantiers/nouveau?mode=assistant");
