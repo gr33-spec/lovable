@@ -30,7 +30,9 @@ async function jusquALaListe(agent: Agent, id: string, e: Ecran): Promise<Ecran>
     expect(r.status, JSON.stringify(r.body).slice(0, 300)).toBeLessThan(300);
     e = r.body as Ecran;
   }
-  const fin = await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send({ reponses: [{ question: "suggestions:choisies", valeur: "aucune" }] });
+  // L'étape « Suggestions » ne se présente qu'une fois par devis : on n'y répond que si elle est là.
+  const suggestions = ((e as unknown as { ecran?: { suggestions?: unknown[] } }).ecran?.suggestions ?? []).length > 0;
+  const fin = await agent.post(`/v1/quantitatifs/${id}/calcul?ecran=1`).send(suggestions ? { reponses: [{ question: "suggestions:choisies", valeur: "aucune" }] } : {});
   expect(fin.status, JSON.stringify(fin.body).slice(0, 300)).toBe(200);
   return fin.body as Ecran;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dicteeAuPropre, ecranDeLecture, lectureDeLaDictee, ROOFING_REFERENTIAL as ref, type EngineAnswer } from "../src/index.js";
+import { dicteeAuPropre, dicteeVaAuMoteur, ecranDeLecture, lectureDeLaDictee, ROOFING_REFERENTIAL as ref, type EngineAnswer } from "../src/index.js";
 
 /**
  * LE QUANTITATIF À LA VOIX (Greg, 28 novembre 2026, test réel sur iPhone). « Le chemin voix doit passer par TON moteur,
@@ -102,5 +102,12 @@ describe("le quantitatif à la voix passe par le moteur, comme un devis", () => 
     // Un seul mot du métier à une lettre de son : remplacé ; sinon le doute a ses boutons.
     for (const d of vocab.doutes) expect(d.candidats.length).toBeGreaterThan(1);
     expect(vocab.texte).toMatch(/chatières/);
+  });
+
+  it("ce qui part au moteur : une mesure à calculer ; des articles comptés en pièces restent tels quels", () => {
+    expect(dicteeVaAuMoteur(ref, "je dois environ 50 m² d'ardoise 32x22")).toBe(true);
+    expect(dicteeVaAuMoteur(ref, "une gouttière bandeau de 25 avec les crochets")).toBe(true);
+    expect(dicteeVaAuMoteur(ref, "1 000 ardoises naturelles 32×22 Espagne 1er choix et 950 crochets inox 100 mm")).toBe(false);
+    expect(dicteeVaAuMoteur(ref, "10 sacs de colle")).toBe(false);
   });
 });

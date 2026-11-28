@@ -59,8 +59,12 @@ export function dicteeAuPropre(ref: Referential, brut: string, choix: Readonly<R
     const parle = (w: string) => cleDeSon(w).replace(/ai|ei/g, "e");
     const son = parle(cle);
     if (son.length < 3) return mot;
+    // Une autre forme du même mot (« naturelles » et « naturel », « liteaux » et « liteau ») n'est jamais une erreur d'écoute.
+    const racine = (w: string) => w.replace(/(?:ees|ee|es|e|s|x)$/, "");
     const proches = [...vocab.connus.values()].filter((f) => {
-      const s = parle(sansAccent(f));
+      const c = sansAccent(f);
+      if (cle.startsWith(c) || c.startsWith(cle) || racine(c) === racine(cle)) return false;
+      const s = parle(c);
       return s[0] === son[0] && Math.abs(s.length - son.length) <= 2 && ecart(s, son) <= 1;
     });
     const candidats = [...new Set(proches)].filter((f) => !MOTS_COURANTS.has(sansAccent(f))).sort();
@@ -88,9 +92,9 @@ function quantiteDite(segment: string): { quantite: string | null; unite: string
   const t = segment.trim();
   // Un nombre de pièces se dit EN TÊTE (« deux chatières », « 2 descentes de 5 mètres ») ; « gouttière de 25 », « 32x22 »
   // ne comptent rien. Une longueur dite après lui reste dans les mots de la ligne (la hauteur des descentes).
-  const n = /^(\d+|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|quinze|vingt|trente|quarante|cinquante|cent)\s+(?=[\p{L}])(?!(?:m²|m2|ml|m|mètres?|metres?)(?![\p{L}]))/iu.exec(t);
+  const n = /^(\d{1,3}(?:[  ]\d{3})+|\d+|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|quinze|vingt|trente|quarante|cinquante|cent)\s+(?=[\p{L}])(?!(?:m²|m2|ml|m|mètres?|metres?)(?![\p{L}]))/iu.exec(t);
   if (n) {
-    const v = /^\d+$/.test(n[1]!) ? n[1]! : String(NOMBRES[n[1]!.toLowerCase()]);
+    const v = /^\d/.test(n[1]!) ? n[1]!.replace(/[  ]/g, "") : String(NOMBRES[n[1]!.toLowerCase()]);
     return { quantite: v, unite: "u", reste: t.slice(n[0].length).replace(/(\d+(?:[.,]\d+)?)\s*(?:mètres?|metres?)(?![\p{L}])/iu, "$1 m").trim() };
   }
   const m = /(?:\s(?:sur|de|d'|d’|à|en))?\s*(\d+(?:[.,]\d+)?)\s*(m²|m2|mètres? carrés?|metres? carres?|ml|mètres? linéaires?|metres? lineaires?|mètres?|metres?|m)(?![\p{L}\d])/iu.exec(` ${t}`);
@@ -185,9 +189,13 @@ export function lignesDeLaDictee(lecture: LectureDevis): { ref: string; designat
   return lecture.lignes.map((l) => ({ ref: l.ref, designation: l.designation, quantity: l.quantite, unit: l.unite }));
 }
 
-/** Une dictée qui nomme un ouvrage du métier (une couverture, une gouttière) : elle part au moteur, jamais telle quelle. */
+/**
+ * Une dictée qui a quelque chose à CALCULER part au moteur : un ouvrage du métier dit avec sa mesure (« 50 m² d'ardoise »,
+ * « 12 mètres de gouttière ») ou sans quantité (« une gouttière bandeau de 25 »). Des articles déjà comptés en pièces
+ * (« 1 000 ardoises et 950 crochets ») font foi tels quels : ils restent dans la conversation, ligne par ligne.
+ */
 export function dicteeVaAuMoteur(ref: Referential, texte: string): boolean {
-  return lectureDeLaDictee(ref, texte).lignes.some((l) => ouvrageNomme(ref, l.designation) !== null);
+  return lectureDeLaDictee(ref, texte).lignes.some((l) => ouvrageNomme(ref, l.designation) !== null && (l.quantite === null || l.unite === "m²" || l.unite === "ml"));
 }
 
 /**
