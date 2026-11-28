@@ -191,11 +191,12 @@ export function lignesDeLaDictee(lecture: LectureDevis): { ref: string; designat
 
 /**
  * Une dictée qui a quelque chose à CALCULER part au moteur : un ouvrage du métier dit avec sa mesure (« 50 m² d'ardoise »,
- * « 12 mètres de gouttière ») ou sans quantité (« une gouttière bandeau de 25 »). Des articles déjà comptés en pièces
- * (« 1 000 ardoises et 950 crochets ») font foi tels quels : ils restent dans la conversation, ligne par ligne.
+ * « 12 mètres de gouttière ») ; ce qui l'accompagne (« une gouttière bandeau de 25 ») part avec lui. Des articles comptés en
+ * pièces (« 1 000 ardoises et 950 crochets ») ou flous (« Ardoise 5 et fruitier ») restent dans la conversation, qui les
+ * demande ou les prend tels quels.
  */
 export function dicteeVaAuMoteur(ref: Referential, texte: string): boolean {
-  return lectureDeLaDictee(ref, texte).lignes.some((l) => ouvrageNomme(ref, l.designation) !== null && (l.quantite === null || l.unite === "m²" || l.unite === "ml"));
+  return lectureDeLaDictee(ref, texte).lignes.some((l) => ouvrageNomme(ref, l.designation) !== null && l.quantite !== null && (l.unite === "m²" || l.unite === "ml"));
 }
 
 /**

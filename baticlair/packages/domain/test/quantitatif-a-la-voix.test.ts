@@ -106,7 +106,8 @@ describe("le quantitatif à la voix passe par le moteur, comme un devis", () => 
 
   it("ce qui part au moteur : une mesure à calculer ; des articles comptés en pièces restent tels quels", () => {
     expect(dicteeVaAuMoteur(ref, "je dois environ 50 m² d'ardoise 32x22")).toBe(true);
-    expect(dicteeVaAuMoteur(ref, "une gouttière bandeau de 25 avec les crochets")).toBe(true);
+    expect(dicteeVaAuMoteur(ref, "12 mètres de gouttière bandeau de 25 avec les crochets")).toBe(true);
+    expect(dicteeVaAuMoteur(ref, "Ardoise 5 et fruitier")).toBe(false);
     expect(dicteeVaAuMoteur(ref, "1 000 ardoises naturelles 32×22 Espagne 1er choix et 950 crochets inox 100 mm")).toBe(false);
     expect(dicteeVaAuMoteur(ref, "10 sacs de colle")).toBe(false);
   });
