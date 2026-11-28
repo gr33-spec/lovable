@@ -1563,6 +1563,8 @@ test("§49.8 : chaque ligne orange passe au vert dans sa carte, un geste par lig
 });
 
 test("une lecture refusée au départ se dit, avec sa raison et « Réessayer » : jamais d'analyse sans fin", async ({ page }) => {
+  // Série chargée du 27 novembre 2026 : inscription, chantier et dépôt dépassaient les 30 s par défaut (seul, 4 s).
+  test.setTimeout(90_000);
   await signUp(page);
   await createProject(page, "Toiture Le Goff", "M. Le Goff", "4 rue du Port, Paimpol");
   // Le serveur refuse le lancement (ici : trop d'essais en une heure).
