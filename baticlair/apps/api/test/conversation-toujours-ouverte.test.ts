@@ -66,4 +66,22 @@ describe("la conversation reste ouverte jusqu'à la liste finale", () => {
     expect(noms(retire).some((n) => /^Chatières/.test(n))).toBe(false);
     expect(noms(retire).length).toBe(noms(avant).length - 1);
   }, 120_000);
+
+  it("couvreur testeur : « enlève les velux » sans Velux dans la liste n'ajoute rien ; « mets 3 joints mousse » ne change pas 20 m en 3", async () => {
+    const { agent } = await signUpWithCompany(ctx.app, "ouverte3@example.fr", "BATI INVEST");
+    const res = await agent.post("/v1/quantitatifs?ecran=1").send({ dictee: "60 m² d'ardoise 32x22 et deux chatières" });
+    const id = res.body.id as string;
+    const avant = await jusquALaListe(agent, id, res.body as Ecran);
+    const enleve = (await agent.post(`/v1/quantitatifs/${id}/dire?ecran=1`).send({ texte: "enlève les velux" }).expect(200)).body as Ecran;
+    expect(enleve.message).toMatch(/je ne trouve pas « velux » dans ta liste/i);
+    expect(enleve.message).not.toMatch(/ajouté/);
+    expect(noms(enleve)).toEqual(noms(avant));
+    // Une ligne comptée en mètres, écrite par l'artisan.
+    const ajout = (await agent.post(`/v1/quantitatifs/${id}/dire?ecran=1`).send({ texte: "ajoute 20 m de joint mousse" }).expect(200)).body as Ecran;
+    const liteaux = ajout.lignes.find((l) => /^Joint mousse/.test(l.libelle));
+    expect(liteaux, JSON.stringify(noms(ajout))).toBeDefined();
+    const mets = (await agent.post(`/v1/quantitatifs/${id}/dire?ecran=1`).send({ texte: "mets 3 joints mousse" }).expect(200)).body as Ecran;
+    expect(mets.message).toMatch(/se compte en m/);
+    expect(mets.lignes.find((l) => l.id === liteaux!.id)?.quantite).toEqual(liteaux!.quantite);
+  }, 120_000);
 });

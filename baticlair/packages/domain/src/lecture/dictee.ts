@@ -2,7 +2,7 @@ import type { Referential } from "../referential/model.js";
 import { normalizeText } from "../trades/trade-profile.js";
 import type { LectureDevis, LectureLigne } from "./lecture.js";
 import { cleDeSon, corrigerTexte, vocabulaireDuMetier, type Doute } from "./orthographe.js";
-import { ouvrageNomme } from "./par-le-code.js";
+import { donneesEcrites, ouvrageNomme, ouvragePorte } from "./par-le-code.js";
 
 /**
  * LE QUANTITATIF À LA VOIX (Greg, 28 novembre 2026, test réel sur iPhone : « je dois environ 50 m² d'ardoise 32x22, j'ai une
@@ -17,7 +17,7 @@ import { ouvrageNomme } from "./par-le-code.js";
 
 /** Les mots courants d'une phrase dite : jamais pris pour un mot du métier mal entendu. */
 const MOTS_COURANTS = new Set(
-  "alors aussi autre autres avec avoir beaucoup bien cela cette ceux chaque chez combien comme dans deja deux donc dois doit elle encore entre environ etre faire faut leur mais meme metre metres moins nous notre pour pourquoi prevoir puis quand quelque sans selon tout toute toutes tous tres trois quatre cinq vingt cent mille voila vous ensuite egalement voudrais besoin chantier maison toiture toit".split(" "),
+  "alors aussi autre autres avec avoir beaucoup bien cela cette ceux chaque chez combien comme dans deja deux donc dois doit elle encore entre environ etre faire faut leur mais meme metre metres moins nous notre pour pourquoi prevoir puis quand quelque sans selon tout toute toutes tous tres trois quatre cinq vingt cent mille voila vous ensuite egalement voudrais besoin chantier maison toiture toit cote cotes chacun chacune".split(" "),
 );
 
 /** Le nombre de lettres à changer pour passer d'une clé de son à l'autre (Levenshtein). */
@@ -134,6 +134,11 @@ function uniteDeLOuvrage(ref: Referential, id: string): string | null {
 export function lectureDeLaDictee(ref: Referential, texte: string): LectureDevis {
   const segments = texte
     .split(/[,;.\n](?!\d)|\s+(?:et|puis|ensuite|plus)\s+/i)
+    // « deux noues de 6 m chacune sur une couverture ardoise de 60 m² » : deux ouvrages dans un même souffle, deux lignes.
+    .flatMap((s) => {
+      const m = /\s+(?:chacune?s?\s+)?sur\s+(?:une|un|la|le|l['’])\s*(?=\p{L})/iu.exec(s);
+      return m && ouvrageNomme(ref, s.slice(m.index + m[0].length)) && ouvrageNomme(ref, s.slice(0, m.index)) ? [s.slice(0, m.index), s.slice(m.index + m[0].length)] : [s];
+    })
     .map((s) => s.trim())
     .filter((s) => /\p{L}{3,}/u.test(s));
   const lignes: { ouvrage: string | null; mots: string[]; quantite: string | null; unite: string | null }[] = [];
@@ -144,9 +149,32 @@ export function lectureDeLaDictee(ref: Referential, texte: string): LectureDevis
     const mots = motsDeLArticle(lu.reste);
     if (!mots) continue;
     const w = ouvrageNomme(ref, mots);
+    // « rampant 6 m », « rives sur tasseau des deux côtés » : une donnée d'un ouvrage déjà dit, jamais une fourniture
+    // (couvreur testeur, chantier 4 : « Rampant 6 m » envoyé au négoce, puis le rampant redemandé).
+    const porteuse = !w ? [...lignes].reverse().find((l) => l.ouvrage && Object.keys(donneesEcrites(ref.workItems.find((x) => x.id === l.ouvrage)!.params, parle)).length > 0) : undefined;
+    if (porteuse) {
+      // Collé par un espace : une virgule couperait la ligne pour le moteur (le format de l'ardoise ne se lirait plus).
+      porteuse.mots[porteuse.mots.length - 1] += ` ${parle.charAt(0).toLowerCase()}${parle.slice(1)}`;
+      continue;
+    }
     // « l'abergement de la cheminée », « une sortie de toit » : un ouvrage qui se compte en pièces, dit au singulier, en vaut un.
     const enPieces = w ? w.params.some((x) => x.fromLineQuantity && x.unit === "u") && !w.params.some((x) => x.fromLineQuantity && /^(?:m|m2)$/.test(x.unit)) : false;
-    const { quantite, unite } = lu.quantite === null && unSeul && enPieces ? { quantite: "1", unite: "u" } : lu;
+    let { quantite, unite } = lu.quantite === null && unSeul && enPieces ? { quantite: "1", unite: "u" } : lu;
+    // « deux noues de 6 m (chacune) » : un ouvrage qui se mesure au mètre, dit en pièces d'une longueur, fait N × L mètres.
+    const auMetre = w ? w.params.some((x) => x.fromLineQuantity && x.unit === "m") && !w.params.some((x) => x.fromLineQuantity && x.unit === "u") : false;
+    const longueur = /(?:^|\s)(?:de\s+)?(\d+(?:[.,]\d+)?)\s*(?:m|ml|mètres?|metres?)(?![\p{L}\d²])/iu.exec(lu.reste);
+    if (w && auMetre && unite === "u" && quantite && longueur) {
+      quantite = String(Math.round(Number(quantite) * Number(longueur[1]!.replace(",", ".")) * 100) / 100);
+      unite = "ml";
+    }
+    // Ce qui ne nomme ni un ouvrage ni une quantité (« avec les crochets », « crochet de 90 », « toit compliqué ») précise la
+    // ligne d'avant (celle dont l'ouvrage porte ce qui est dit, sinon la dernière) : jamais un article envoyé tel quel.
+    if (!w && quantite === null && lignes.length > 0) {
+      const porte = [...lignes].reverse().find((l) => l.ouvrage && ouvragePorte(ref, ref.workItems.find((x) => x.id === l.ouvrage)!, mots));
+      const cible = porte ?? lignes[lignes.length - 1]!;
+      cible.mots[cible.mots.length - 1] += ` ${mots.charAt(0).toLowerCase()}${mots.slice(1)}`;
+      continue;
+    }
     const deja = w ? lignes.find((l) => l.ouvrage === w.id) : undefined;
     if (deja) {
       deja.mots.push(mots.charAt(0).toLowerCase() + mots.slice(1));

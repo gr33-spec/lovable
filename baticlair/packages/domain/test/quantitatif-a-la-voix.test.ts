@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dicteeAuPropre, dicteeVaAuMoteur, ecranDeLecture, lectureDeLaDictee, ROOFING_REFERENTIAL as ref, type EngineAnswer } from "../src/index.js";
+import { dicteeAuPropre, dicteeVaAuMoteur, ecranDeLecture, lectureDeLaDictee, ouvrageNomme, ROOFING_REFERENTIAL as ref, type EngineAnswer } from "../src/index.js";
 
 /**
  * LE QUANTITATIF À LA VOIX (Greg, 28 novembre 2026, test réel sur iPhone). « Le chemin voix doit passer par TON moteur,
@@ -110,5 +110,32 @@ describe("le quantitatif à la voix passe par le moteur, comme un devis", () => 
     expect(dicteeVaAuMoteur(ref, "Ardoise 5 et fruitier")).toBe(false);
     expect(dicteeVaAuMoteur(ref, "1 000 ardoises naturelles 32×22 Espagne 1er choix et 950 crochets inox 100 mm")).toBe(false);
     expect(dicteeVaAuMoteur(ref, "10 sacs de colle")).toBe(false);
+  });
+
+  describe("couvreur testeur, 28 novembre 2026 : rien de la phrase ne part au négoce comme un article", () => {
+    const lignes = (t: string) => lectureDeLaDictee(ref, dicteeAuPropre(ref, t).texte).lignes.map((l) => [l.designation, l.quantite, l.unite]);
+
+    it("« avec les crochets » précise la gouttière ; jamais une ligne « Avec les crochets »", () => {
+      const l = lignes("il me faut 18 m de gouttière zinc demi-ronde de 33 et 2 descentes de 4 m en 80, avec les crochets");
+      expect(l).toEqual([["Gouttière zinc demi-ronde de 33 avec les crochets", "18", "ml"], ["Descentes de 4 m en 80", "2", "u"]]);
+    });
+
+    it("deux noues de 6 m sur une couverture d'ardoise : 12 ml de noue et 60 m² d'ardoise, « crochet de 90 » et « toit compliqué » précisent l'ardoise", () => {
+      const t = "deux noues en zinc de 6 m chacune sur une couverture ardoise 30x20 de 60 m2, crochet de 90, toit compliqué";
+      expect(lignes(t)).toEqual([["Noues en zinc de 6 m", "12", "ml"], ["Couverture ardoise 30x20 crochet de 90 toit compliqué", "60", "m²"]]);
+      expect(dicteeVaAuMoteur(ref, t)).toBe(true);
+    });
+
+    it("« rampant 6 m » et « rives des deux côtés » sont des données de la couverture, jamais une fourniture ; « côtés » reste « côtés »", () => {
+      const l = lignes("couverture zinc à tasseaux 40 m2, rampant 6 m, rives sur tasseau des deux côtés, faîtage zinc 8 ml");
+      expect(l).toEqual([["Couverture zinc à tasseaux rampant 6 m, rives sur tasseau des deux côtés", "40", "m²"], ["Faîtage zinc", "8", "ml"]]);
+    });
+
+    it("« 2 velux sur ardoise » : deux fenêtres de toit ; l'ardoise dite ensuite reste sa propre ligne, et part au moteur", () => {
+      const t = "2 velux 78x98 rotation sur ardoise, 35 m2 d'ardoise 32x22 crochet 100";
+      expect(lignes(t)).toEqual([["Velux 78x98 rotation sur ardoise", "2", "u"], ["Ardoise 32x22 crochet 100", "35", "m²"]]);
+      expect(ouvrageNomme(ref, "Velux 78x98 rotation sur ardoise")?.id).toBe("fenetre-de-toit");
+      expect(dicteeVaAuMoteur(ref, t)).toBe(true);
+    });
   });
 });

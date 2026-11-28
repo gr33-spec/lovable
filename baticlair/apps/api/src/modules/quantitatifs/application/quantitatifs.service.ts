@@ -214,7 +214,14 @@ export class QuantitatifsService {
         await this.correct(tenant, id, { action: "retirer_article", id: c.cle });
         faits.push(`retiré « ${c.libelle} »`);
       } else if (c.type === "quantite") {
-        const unite = c.unite ?? reviewed.purchase.toBuy.find((b) => b.key === c.cle)?.order?.unit ?? "u";
+        const uniteLigne = reviewed.purchase.toBuy.find((b) => b.key === c.cle)?.order?.unit ?? null;
+        // « mets 3 descentes » sur une ligne comptée en mètres : 3 pièces, pas 3 m (couvreur testeur, chantier 10). Sans unité
+        // dite, un nombre de pièces ne remplace jamais une longueur ou une surface : on le redemande avec l'unité.
+        if (!c.unite && uniteLigne && /^(?:m|ml|m²|m2)$/.test(uniteLigne) && /^(?:mets|met|mettre|passe|passer|change|changer)\s+\d/i.test(texte.trim())) {
+          doutes.push(`« ${c.libelle} » se compte en ${uniteLigne} : dis la longueur (« mets 12 m de ${c.libelle.toLowerCase()} »)`);
+          continue;
+        }
+        const unite = c.unite ?? uniteLigne ?? "u";
         await this.correct(tenant, id, { action: "fixer_quantite", id: c.cle, quantite: c.quantite, unite });
         faits.push(`« ${c.libelle} » passe à ${c.quantite} ${unite}`);
       } else if (c.type === "ajouter") {
@@ -227,6 +234,10 @@ export class QuantitatifsService {
           faits.push(`ajouté « ${c.libelle} »${c.quantite ? `, ${c.quantite}${c.unite ? ` ${c.unite}` : ""}` : ""}`);
         }
       }
+      // « enlève les chatières » qui ne trouve pas sa ligne n'est jamais un ajout (couvreur testeur, chantier 2 : « C'est fait :
+      // ajouté », et « Enlève les chatières » au négoce).
+      else if (c.type === "incompris" && /^(?:retire|retirer|retires|enl[eè]ve|enlever|enl[eè]ves|supprime|supprimer|vire|virer|pas besoin|pas de|plus de|sans)\b/i.test(c.texte.trim()))
+        doutes.push(`je ne trouve pas « ${c.texte.trim().replace(/^\S+\s+(?:les?\s+|la\s+|l['’]|des?\s+|du\s+|d['’])?/i, "")} » dans ta liste`);
       else if (c.type === "incompris") aAjouter.push(c.texte);
       else if (c.type === "ambigu") doutes.push(`« ${c.texte} » : laquelle ? ${c.candidats.map((x) => x.libelle).join(" ou ")}`);
     }

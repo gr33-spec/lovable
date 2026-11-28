@@ -53,6 +53,17 @@ const motsDeFamille = (ref: Referential, code: string) => (ref.families.find((f)
  * aucun (jamais deviner).
  */
 export function ouvrageNomme(ref: Referential, texte: string, lu?: string | null): WorkItemType | null {
+  // « Velux 78x98 sur ardoise » : ce qui suit « sur » dit le support, pas l'ouvrage (couvreur testeur, 28 novembre 2026) ;
+  // quand le début nomme à lui seul un ouvrage, c'est lui.
+  const avantSur = /^(.+?)\s+sur\s+(?!tasseaux?\b|chevrons?\b|liteaux?\b|voliges?\b)/iu.exec(texte)?.[1];
+  if (avantSur && !lu) {
+    const seul = ouvrageNommeSansSupport(ref, avantSur, lu);
+    if (seul) return seul;
+  }
+  return ouvrageNommeSansSupport(ref, texte, lu);
+}
+
+function ouvrageNommeSansSupport(ref: Referential, texte: string, lu?: string | null): WorkItemType | null {
   // Un mot qui finit par « é » dit une façon ou une teinte, jamais le nom d'un ouvrage : « tuiles HP10 ardoisé » est une
   // tuile de teinte ardoisée, pas une ardoise (banc du calcul, C12, 21 novembre 2026). Il est retiré avant de chercher.
   // Un nom en « ée » que la fiche connaît (« jouée », « cheminée ») reste : c'est un ouvrage, pas une façon.
@@ -76,6 +87,12 @@ export function ouvrageNomme(ref: Referential, texte: string, lu?: string | null
   const len = Math.max(...best.map((b) => b.len));
   const longs = best.filter((b) => b.len === len);
   return longs.length === 1 ? longs[0]!.w : null;
+}
+
+/** Un ouvrage porte-t-il un article que nomme ce texte (« avec les crochets » : la gouttière a ses crochets) ? */
+export function ouvragePorte(ref: Referential, w: WorkItemType, texte: string): boolean {
+  const t = motsDeLaFiche(texte);
+  return w.slots.some((s) => [...(s.keywords ?? []).map(motsDeLaFiche), ...motsDeFamille(ref, s.family)].some((k) => contient(t, k)));
 }
 
 const motsDEmplacement = (ref: Referential, w: WorkItemType, s: Slot) =>
