@@ -167,6 +167,8 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., matin — référencement : POUSSÉ et EN LIGNE (site et API = 9b9704e1, puis 27a4ec14 avec le workflow) ;
   essai de l'alerte de la sauvegarde réussi (run 46128279724 : échec volontaire, « Prévenir Mobiiz » vert, API
   « enregistre: true »). Le workflow n'est PAS encore sur main (attend l'accord de Greg). Branche rendue.
+- 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
+  main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
 
 ## Discussion « écrans » (lovable-38), 28 novembre 2026 — chantier 05 (liste d'attente, invitations)
 - Fichiers : module API `modules/communaute` (nouveau), `pages-regionales` (consentement), migration
@@ -174,6 +176,7 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (UNE ligne dans `accueil.tsx`), `/commencer` (case « Préviens-moi », code d'invitation), pages `(entree)/invitation/[code]` et
   `(entree)/liste-attente/desinscription` (noindex, hors sitemap), admin `prevenir` et `invitations`. Ni « À la voix », ni
   l'Assistant, ni le moteur.
-- Branche de test fusionnée (a4057699, « branche rendue » reçue). JE POUSSE dès que la chaîne complète est verte (chantier 05,
-  puis les manques évidents : onglet « Modèles » de `page-entreprise/editeur.tsx`, date de retrait dans `page-entreprise.service.ts`,
-  rubrique Profil « Inviter des artisans »). J'écris « LIBRE » ici après la vérification de /version.
+- 28 nov., après-midi — branche rendue reçue (6e9f9a14), fusionnée ; JE POUSSE dès que la chaîne complète est verte, en un seul
+  commit : chantier 05, manques évidents (onglet « Modèles » de `page-entreprise/editeur.tsx`, date de retrait dans
+  `page-entreprise.service.ts`, Profil « Inviter des artisans ») et achats groupés anonymes par défaut (`achats-groupes-v1`,
+  domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.

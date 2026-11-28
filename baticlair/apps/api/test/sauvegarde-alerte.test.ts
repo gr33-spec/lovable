@@ -113,7 +113,9 @@ describe("par l'API : le rapport, l'alerte, la veille", () => {
     await envoyer({ statut: "echec", etape: "Échec volontaire (essai de l'alerte)" }, essai).expect(200);
     expect(alertes).toHaveLength(1);
     expect(alertes[0]!.kind).toBe("sauvegarde_info");
-    expect(alertes[0]!.message).toContain("ESSAI de l'alerte (branche claude/upbeat-tesla-blyocz)");
+    expect(alertes[0]!.message).toContain("essai de l'alerte de la sauvegarde nocturne");
+    // Rien qui ressemble à un indésirable (Greg, 28 novembre 2026, Hotmail) : ni majuscules criées, ni lien, ni nom de branche.
+    expect(alertes[0]!.message).not.toMatch(/ESSAI|https?:|claude\//);
     const etat = await ctx.app.get(SauvegardeService).etat();
     expect(etat.derniere).toBeNull();
     expect(etat.dernierEssai?.statut).toBe("echec");
