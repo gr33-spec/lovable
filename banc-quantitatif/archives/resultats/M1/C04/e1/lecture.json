@@ -1,0 +1,486 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "Couverture zinc à tasseaux",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « Couverture zinc à tasseaux sur voligeage existant »"
+  },
+  {
+   "donnee": "neuf ou rénovation",
+   "valeur": "Extension neuve",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "en-tête, objet : « Extension neuve »"
+  },
+  {
+   "donnee": "support",
+   "valeur": "voligeage existant",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « sur voligeage existant »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "zinc quartz",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « zinc quartz »"
+  },
+  {
+   "donnee": "épaisseur du zinc de couverture",
+   "valeur": "0,70 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « épaisseur 0,70 mm »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "45 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « 45 m2 »"
+  },
+  {
+   "donnee": "nombre de pans",
+   "valeur": "1",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « un pan »"
+  },
+  {
+   "donnee": "rampant (longueur des bacs)",
+   "valeur": "5 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « bacs de 5 m »"
+  },
+  {
+   "donnee": "largeur du pan",
+   "valeur": "9 m",
+   "origine": "deduite",
+   "regle": "surface ÷ rampant = 45 m² ÷ 5 m (concorde avec les 9 ml de chéneau)",
+   "preuve": ""
+  },
+  {
+   "donnee": "rives sur tasseau",
+   "valeur": "1 (l'autre côté contre le mur de la maison)",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « rive sur tasseau 1 côté (l'autre côté contre le mur de la maison) »"
+  },
+  {
+   "donnee": "largeur de bobine",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "tasseaux bois et couvre-joints zinc quartz",
+   "valeur": "1 ens",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Fourniture des tasseaux bois et des couvre-joints zinc quartz (pose comprise au poste 2) »"
+  },
+  {
+   "donnee": "longueur de bande de solin",
+   "valeur": "5 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « 5 ml »"
+  },
+  {
+   "donnee": "développé de la bande de solin",
+   "valeur": "200 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « développé 200 mm »"
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "longueur de chéneau",
+   "valeur": "9 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « Chéneau encaissé zinc quartz épaisseur 0,70 mm », « 9 ml »"
+  },
+  {
+   "donnee": "épaisseur du zinc du chéneau",
+   "valeur": "0,70 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « épaisseur 0,70 mm »"
+  },
+  {
+   "donnee": "développé du chéneau",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "nombre de descentes",
+   "valeur": "1",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « 1 u »"
+  },
+  {
+   "donnee": "diamètre des descentes",
+   "valeur": "Ø100 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « Ø100 »"
+  },
+  {
+   "donnee": "hauteur d'une descente",
+   "valeur": "3 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « hauteur 3 m »"
+  },
+  {
+   "donnee": "dauphin",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
+ ],
+ "bref": "Extension neuve : couverture zinc à tasseaux d'un pan sur voligeage existant, pas de voligeage neuf. 45 m² de couverture zinc à tasseaux, zinc quartz épaisseur 0,70 mm, bacs de 5 m, rive sur tasseau 1 côté, l'autre côté contre le mur de la maison. Tasseaux bois et couvre-joints zinc quartz pour cette couverture. 5 ml de bande de solin zinc quartz contre le mur de la maison, développé 200 mm. 9 ml de chéneau encaissé zinc quartz épaisseur 0,70 mm. 1 descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m. Le pan fait donc 9 m de large (45 m² sur 5 m de rampant), comme le chéneau.",
+ "questions": [
+  {
+   "cle": "largeur_bobine_tasseaux",
+   "texte": "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+   "boutons": [
+    {
+     "label": "Bobine de 650 mm",
+     "valeur": "650"
+    },
+    {
+     "label": "Bobine de 500 mm",
+     "valeur": "500"
+    }
+   ],
+   "unite": "mm",
+   "donnee": "largeur de bobine",
+   "ligne": "2"
+  },
+  {
+   "cle": "faconnage",
+   "texte": "Ta bande de solin : tu la plies toi-même, ou tu l'achètes toute faite ?",
+   "boutons": [
+    {
+     "label": "Je façonne (feuilles ou bobineau)",
+     "valeur": "1"
+    },
+    {
+     "label": "Je commande façonné",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "façonnage",
+   "ligne": "4"
+  },
+  {
+   "cle": "developpe_cheneau",
+   "texte": "Ton chéneau fait quel développé ?",
+   "boutons": [
+    {
+     "label": "Jusqu'à 50 cm",
+     "valeur": "500"
+    },
+    {
+     "label": "Jusqu'à 65 cm",
+     "valeur": "650"
+    },
+    {
+     "label": "Jusqu'à 1 m",
+     "valeur": "1000"
+    }
+   ],
+   "unite": "mm",
+   "donnee": "développé du chéneau",
+   "ligne": "5"
+  },
+  {
+   "cle": "dauphin",
+   "texte": "Tu mets un dauphin en pied de la descente ?",
+   "boutons": [
+    {
+     "label": "Oui",
+     "valeur": "1"
+    },
+    {
+     "label": "Non",
+     "valeur": "0"
+    }
+   ],
+   "unite": "",
+   "donnee": "dauphin",
+   "ligne": "6"
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier, échafaudage de pied et protections",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Couverture zinc à tasseaux sur voligeage existant, zinc quartz épaisseur 0,70 mm, un pan, bacs de 5 m, rive sur tasseau 1 côté (l'autre côté contre le mur de la maison)",
+   "quantite": "45",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Zinc quartz épaisseur 0,70 mm pour couverture à tasseaux",
+     "quantite": "45",
+     "unite": "m²",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "bobine",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "45"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "5"
+      },
+      {
+       "cle": "nb_rives_tasseau",
+       "valeur": "1"
+      }
+     ],
+     "attend": [
+      "largeur_bobine_tasseaux"
+     ],
+     "a_preciser": [],
+     "precision": "un pan, bacs de 5 m, sur voligeage existant, rive sur tasseau 1 côté"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Fourniture des tasseaux bois et des couvre-joints zinc quartz (pose comprise au poste 2)",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tasseaux bois",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "tasseau",
+     "donnees": [],
+     "attend": [
+      "largeur_bobine_tasseaux"
+     ],
+     "a_preciser": [
+      "section"
+     ],
+     "precision": "pour la couverture zinc à tasseaux du poste 2, bacs de 5 m"
+    },
+    {
+     "nom": "Couvre-joints zinc quartz",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-zinc-tasseaux",
+     "emplacement": "couvre_joint",
+     "donnees": [
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      }
+     ],
+     "attend": [
+      "largeur_bobine_tasseaux"
+     ],
+     "a_preciser": [],
+     "precision": "pour la couverture zinc à tasseaux du poste 2 (zinc quartz épaisseur 0,70 mm), bacs de 5 m"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Bande de solin zinc quartz contre le mur de la maison, développé 200 mm",
+   "quantite": "5",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bande de solin zinc quartz, développé 200 mm",
+     "quantite": "5",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "5"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      },
+      {
+       "cle": "developpe",
+       "valeur": "200"
+      }
+     ],
+     "attend": [
+      "faconnage"
+     ],
+     "a_preciser": [
+      "épaisseur"
+     ],
+     "precision": "contre le mur de la maison"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Chéneau encaissé zinc quartz épaisseur 0,70 mm",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "cheneau-encaisse",
+     "emplacement": "bobineau",
+     "donnees": [
+      {
+       "cle": "longueur_cheneau",
+       "valeur": "9"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "2"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7"
+      }
+     ],
+     "attend": [
+      "developpe_cheneau"
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Descente d'eaux pluviales zinc quartz Ø100",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "100"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "3"
+      }
+     ],
+     "attend": [
+      "dauphin"
+     ],
+     "a_preciser": [],
+     "precision": "hauteur 3 m"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Nettoyage du chantier et évacuation des déchets",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Le Goff"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "14 rue de la Corderie"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Saint-Brieuc"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "22000"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D-2026-0412"
+  },
+  {
+   "cle": "date",
+   "valeur": "9 novembre 2026"
+  },
+  {
+   "cle": "objet",
+   "valeur": "Couverture zinc de l'extension"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "Extension neuve"
+  },
+  {
+   "cle": "délai",
+   "valeur": "démarrage sous 6 semaines après accord, durée prévue 2 semaines"
+  }
+ ],
+ "notes": [
+  "Le voligeage est existant : pas de voliges à acheter."
+ ]
+}

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { SUGGESTIONS_KEY } from "../src/index.js";
+import { SUGGESTIONS_DU_BANC } from "./support/read-quote.js";
 import { briefTexte, DE00000071_LECTURE, ecranDeLecture, ROOFING_REFERENTIAL } from "../src/index.js";
 import { DE00000071_LINES } from "./devis-reels/de00000071.js";
 
@@ -24,7 +26,7 @@ const ref = ROOFING_REFERENTIAL;
 
 /** Les trois écrans, tels que les voit l'artisan : le bref (§50.8), les questions (§51.2) et la liste (§49), depuis la lecture. */
 function ecran(answers: Record<string, unknown> = {}) {
-  const e = ecranDeLecture({ ref, lecture: DE00000071_LECTURE, answers: answers as never });
+  const e = ecranDeLecture({ ref, lecture: DE00000071_LECTURE, answers: { [SUGGESTIONS_KEY]: SUGGESTIONS_DU_BANC, ...answers } as never });
   const bref = briefTexte(DE00000071_LECTURE.bref.map((texte, i) => ({ cle: `fiche-bref-${i + 1}`, texte })));
   // L'écran des questions montre les questions du modèle ; un « C'est bon » de ligne (à préciser) se règle sur la liste.
   const questions = e.purchase.questions.filter((d) => d.question).map((d) => ({ key: d.question!.key, text: d.question!.text, options: (d.question!.options ?? []).map((o) => o.label) }));
@@ -47,11 +49,17 @@ describe("§51.5 : DE00000071, le résultat attendu par le fondateur", () => {
     }
   });
 
-  it("les questions, exactement cinq : développé 25 ou 33, descentes, chéneau, raccord ZWC ou Pratikal, tôles 10 ou 10 m²", () => {
+  it("les questions, exactement sept : développé, descentes, chéneau, raccord ZWC ou Pratikal, tôles 10 ou 10 m², la pose des crochets et le Ø des descentes", () => {
     const { questions } = ecran();
-    expect(questions).toHaveLength(5);
-    const [developpe, descentes, cheneau, raccord, toles] = [/développé de la gouttière/, /descentes/, /chéneau/, /raccord/, /tôles/].map((re) => questions.find((q) => re.test(texte(q)))!);
-    expect(developpe?.options).toEqual(["De 25", "De 33"]);
+    // Greg, 20 novembre 2026 : « les questions sont décidées par le code à partir de la fiche métier » ; la pose des crochets
+    // (chevrons ou bandeau) est une question du comptoir (§47.8) que le devis ne tranche pas : elle se pose. Avant : cinq,
+    // celles du modèle seulement. Les naissances cochées à l'étape « Suggestions » demandent leur Ø (les descentes).
+    expect(questions).toHaveLength(7);
+    expect(questions.find((q) => /Ø 80/.test(q.options.join(" ")))).toBeDefined();
+    expect(questions.find((q) => /crochets/i.test(q.text) && /chevrons/i.test(q.text))).toBeDefined();
+    const [developpe, descentes, cheneau, raccord, toles] = [/^gouttière de 25/, /combien de descentes/, /chéneau/, /raccord/, /tôles/].map((re) => questions.find((q) => re.test(texte(q)))!);
+    // Le devis ne dit ni 25 ni 33 : la question est celle de la fiche, avec ses choix (avant : deux boutons du modèle).
+    expect(developpe?.options).toEqual(["De 25", "De 28", "De 33", "De 40"]);
     expect(descentes).toBeDefined();
     expect(texte(cheneau!)).toMatch(/epdm ou pvc/);
     expect(texte(cheneau!)).toMatch(/largeur développée/);

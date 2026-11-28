@@ -1,0 +1,50 @@
+[
+  {
+    "article": "Bobine zinc quartz (prépatiné clair) 0,70 mm, largeur 650 mm, pour bacs à tasseaux",
+    "quantite": 79,
+    "unite": "ml (2 bobineaux de 31 m + 1 de 17 m)",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune section « couverture zinc à tasseaux » dans la fiche (seulement « bobine de zinc joint debout » 650 → entraxe 580, qui ne vaut pas pour les tasseaux) ; calcul au mieux : 15 bacs (fiche vérité) × 5,15 m (bac coupé, relevés compris) = 77,25 ml ; « bobineau de zinc » : largeurs 500/650/1000, longueurs 17/21/31 m → 31 m = 6 bacs, 31 m = 6 bacs, 17 m = 3 bacs (15,45 m) → 79 ml ; aucun % de perte donné par la fiche pour des bacs. (Si la même bobine sert au chéneau, 3 × 31 m couvrent bacs + chéneau.)",
+    "ligne_devis": "2"
+  },
+  {
+    "article": "Tasseaux bois trapézoïdaux 50 mm",
+    "quantite": 79,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune règle pour les tasseaux de couverture zinc (ni nombre de rangs, ni longueur vendue, ni perte) ; au mieux : 15 rangs (14 entre bacs + 1 de rive) × 5 m = 75 ml (fiche vérité) ; perte 5 % prise par analogie sur « liteau, unite_de_vente ml, perte_casse_coupes 5 % » (Bois de couverture) → 75 × 1,05 = 78,75 → 79 ml",
+    "ligne_devis": "3"
+  },
+  {
+    "article": "Couvre-joints zinc quartz 0,70 mm pour tasseaux de 50 mm",
+    "quantite": 45,
+    "unite": "longueurs de 2 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? les couvre-joints ne sont pas dans la fiche ; par analogie « bande zinc façonnée, longueur_standard 2 m » et « zinc en bandes : ml + recouvrement à chaque jonction, arrondi à 2 m (5 cm → +2,5 %) » : 15 rangs de 5 m ; par rang 5 m + 2 recouvrements de 5 cm = 5,10 m → 3 longueurs de 2 m (la chute de 0,90 m ne fait pas un rang suivant) → 15 × 3 = 45 ; la méthode globale de la fiche (75 + 30 × 0,05 = 76,5 m → 39 longueurs) sous-estime car elle suppose des chutes réutilisables",
+    "ligne_devis": "3"
+  },
+  {
+    "article": "Feuille de zinc quartz 0,70 mm 2000 × 1000 mm (bande de solin dév. 200, pliée par le couvreur)",
+    "quantite": 1,
+    "unite": "feuille",
+    "a_chiffrer": false,
+    "calcul": "Façonnage = 1 (il plie, feuilles 2 × 1 m) ; « zinc en bandes » : 5 ml + recouvrements (5 cm → +2,5 %) = 5,125 m → 3 bandes de 2 m ; « bandes de 2 m tirées d'une feuille 2 × 1 m : partie entière de 1000 / développé » → 1000/200 = 5 bandes par feuille → 1 feuille (format_courant 2000 × 1000 mm, épaisseur 0,7 dans « epaisseurs »)",
+    "ligne_devis": "4"
+  },
+  {
+    "article": "Bobineau zinc quartz 0,70 mm, largeur 650 mm (chéneau encaissé dév. 650, façonné sur place)",
+    "quantite": 17,
+    "unite": "ml (1 bobineau de 17 m)",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? pas de section chéneau dans la fiche ; au mieux : 9 ml de chéneau + 30 mm par jonction soudée (méthode « gouttières zinc ») ≈ 9,1 m de bobineau 650 (largeur = développé 650, fiche vérité) ; « bobineau de zinc » : longueurs vendues 17/21/31 m → 1 bobineau de 17 m (le reste couvre les 2 talons façonnés) ; la fiche ne dit pas si le bobineau se vend coupé au mètre",
+    "ligne_devis": "5"
+  },
+  {
+    "article": "Tuyau de descente zinc quartz Ø100, longueur 2 m",
+    "quantite": 2,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "« descente EP zinc » : longueurs vendues 2/3/4 m, Ø100 vendu ; le couvreur prend des tubes de 2 m (fiche vérité) ; 1 descente × hauteur 3 m → arrondi sup. 3 / 2 = 2 tubes ; coudes et colliers non écrits au devis et non dits indissociables par la fiche → non sortis",
+    "ligne_devis": "6"
+  }
+]

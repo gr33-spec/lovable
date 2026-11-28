@@ -16,7 +16,7 @@ const PAQUET: Metier[] = [
       { ref: "1", designation: "Remplacement des chevrons 63x75 sapin traité classe 2", quantity: "82", unit: "m²" },
       { ref: "2", designation: "Planches de rive sapin traité", quantity: "24", unit: "ml" },
     ],
-    questions: ["Chevrons : en quelle longueur (rampant + débord) ?", "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: ["Chevrons : en quelle longueur (rampant + débord) ?"],
     couleurs: { vert: 0, orange: 2, gris: 0 },
   },
   {
@@ -32,7 +32,7 @@ const PAQUET: Metier[] = [
     ref: BARDAGE_REFERENTIAL,
     metier: "bardage",
     bench: [{ ref: "1", designation: "Bardage bois claire-voie horizontal sur tasseaux, pare-pluie", quantity: "64", unit: "m²" }],
-    questions: ["Bardage : douglas ou mélèze ?", "Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: ["Bardage : douglas ou mélèze ?"],
     couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {

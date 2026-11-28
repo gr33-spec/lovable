@@ -1,0 +1,15 @@
+{
+  "juste": 0,
+  "quantite_fausse": 4,
+  "manquante": 3,
+  "en_trop": 0,
+  "detail": [
+    {"article": "Tuile canal terre cuite courant (Edilians Canal 50, courant)", "classe": "quantite_fausse", "attendu": "991 pièces", "obtenu": "85 pièces (ligne unique « courants et couverts »)"},
+    {"article": "Tuile canal terre cuite couvert (Edilians Canal 50, couvert)", "classe": "manquante", "attendu": "à chiffrer (pièces)", "obtenu": null},
+    {"article": "Liteau sapin traité classe 2, 27×40", "classe": "quantite_fausse", "attendu": "256 ml", "obtenu": "85 ml"},
+    {"article": "Bardelis (tuile de rive canal) terre cuite gauche", "classe": "quantite_fausse", "attendu": "17 pièces", "obtenu": "12 pièces (ligne unique « Rives », gauche et droit confondus)"},
+    {"article": "Bardelis (tuile de rive canal) terre cuite droit", "classe": "manquante", "attendu": "17 pièces", "obtenu": null},
+    {"article": "Faîtière canal terre cuite 50 cm", "classe": "quantite_fausse", "attendu": "28 pièces", "obtenu": "27 pièces"},
+    {"article": "Mortier de couverture (scellement du faîtage), sac 25 kg", "classe": "manquante", "attendu": "à chiffrer (sacs de 25 kg)", "obtenu": null}
+  ]
+}

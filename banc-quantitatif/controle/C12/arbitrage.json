@@ -1,0 +1,51 @@
+[
+  {
+    "article": "Faîtières demi-rondes HP 10 ardoisé",
+    "bonne_valeur": "23 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Le couvreur prend la faîtière demi-ronde à emboîtement de la gamme HP 10, et la fiche (Edilians HP 10 Huguenot) dit « losangée 716 et 1/2 rond 717 2,5/ml » : 9 ml × 2,5 = 22,5, casse 1 % (« faîtières, arêtiers, tuiles de rive ») = 22,7, donc 23. La référence (27 = 9 × 3) a pris le 3/ml de la « faîtière 1/2 ronde ou angulaire 40-42 cm » ou de l'angulaire 710 sans demander le modèle, alors que 3 contre 2,5/ml change la commande de 20 %."
+  },
+  {
+    "article": "Liteaux 27×40",
+    "bonne_valeur": "270 ml",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Fiche, liteau : « ml_de_liteaux_par_m2 1 / pureau ; perte_casse_coupes 5 % » ; au pureau de 37 cm donné par le couvreur : 95 m² × 2,70 = 256,8 ml × 1,05 = 269,6, donc 270 ml (chute d'aboutage non comptée : entraxe des chevrons inconnu). La référence n'a pas trouvé de « pureau minimal de tuile » parce qu'elle a lu la ligne 5 (« tuiles terre cuite HP10 ardoisé ») comme des ardoises, alors que la fiche HP 10 donne pureau 310 à 376 mm et 3,22 / 2,66 ml/m²."
+  },
+  {
+    "article": "Tuiles terre cuite HP 10 Huguenot ardoisé",
+    "bonne_valeur": "1026 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Ligne 5 du devis : « F et P couverture tuiles terre cuite HP10 ardoisé, pente 35°, rampant 6 m, 95 m2 » ; fiche : 1 ÷ (0,268 × 0,37) = 10,08 tuiles/m² × 95 = 958,1, plus 7 % (« toutes tuiles : toit compliqué 7 à 10 % … fenêtres de toit ») = 1025,2, donc 1026 (1017 avec les 10/m² dits par le couvreur). La référence a pris « ardoisé » (la teinte) pour des ardoises et a perdu l'article principal du devis."
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 ardoisé, gauche",
+    "bonne_valeur": "9 pièces (plus 9 demi-tuiles de rive à rabat gauche, réf. G 205.75, en article à part)",
+    "qui_a_raison": "aucun",
+    "cause": "lecture de référence fausse",
+    "explication": "La référence a lu « tuiles de rive HP10 ardoisé » comme des ardoises (à chiffrer), et le contrôleur oublie la règle générale de la fiche « rive_a_rabat_joints_croises : moitié tuiles à rabat, moitié demi-tuiles à rabat (par côté) », la HP 10 étant posée à joints croisés : 6 m × 2,7/ml = 16,2, + 1 % = 16,4, soit 9 tuiles de rive et 9 demi-tuiles de rive. Défaut de la fiche à signaler : la ligne HP 10 ne dit ni sa pose à joints croisés (écrite seulement dans la ligne PV 10) ni ce partage, et son « (2,7/ml) » mis sur les deux références se lit comme 2,7/ml de chacune."
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 ardoisé, droite",
+    "bonne_valeur": "9 pièces (plus 9 demi-tuiles de rive à rabat droite, réf. D 205.74, en article à part)",
+    "qui_a_raison": "aucun",
+    "cause": "lecture de référence fausse",
+    "explication": "Même calcul côté droit (une rive de 6 m, pignon libre) : 16,2 pièces + 1 % de casse, partagées moitié tuiles de rive à rabat D 205.72, moitié demi-tuiles de rive à rabat D 205.74, selon la règle « joints croisés » de la fiche. La référence n'a rien chiffré (rive lue comme des ardoises) et le contrôleur a tout mis en tuiles de rive entières ; le même défaut de la fiche HP 10 est à signaler."
+  },
+  {
+    "article": "Ardoises",
+    "bonne_valeur": "ne doit pas sortir",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Le devis ne fournit aucune ardoise : la ligne 2 est la « Dépose ancienne couverture ardoises fibro » (sans fourniture) et « ardoisé » aux lignes 5 et 6 est la teinte des tuiles HP 10. La ligne « Ardoises » de la référence vient de cette mauvaise lecture."
+  },
+  {
+    "article": "Tuile à douille HP 10 / embase plomb de sortie de toit",
+    "bonne_valeur": "1 pièce : tuile à douille HP 10 Huguenot ardoisé (diamètre de la douille à confirmer)",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Sur une couverture en tuiles, la fiche (Ventilation) prévoit une « tuile à douille + lanterne / chapeau », et la ligne HP 10 donne la « tuile à douille HP 10 Huguenot Ø 160 (réf. 205.32) » ; l'embase plomb « pour ardoise ou tuile » de la référence n'est pas dans la fiche. Défaut de la fiche à signaler : aucune tuile à douille ni lanterne Ø 125 pour la HP 10 (seulement Ø 160, lanterne Ø 126 / 160), alors que le devis écrit « Sortie de toit Ø125 pour VMC »."
+  }
+]

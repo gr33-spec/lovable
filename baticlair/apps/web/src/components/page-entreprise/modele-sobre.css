@@ -1,0 +1,373 @@
+/*
+ * LE MODÈLE « SOBRE » (Greg, 27 novembre 2026, cahier 03). Même contenu que « Atelier », autre habillage : clair de haut
+ * en bas, accueil en deux parties, prestations en liste à filets, une bande de la teinte, contact sur fond clair. Les
+ * couleurs viennent des mêmes réglages (`--pe-teinte`, `--jaune` = la couleur des boutons, `--sur-jaune`). Mise en page
+ * par requêtes de conteneur, comme « Atelier » : l'aperçu de l'éditeur se dessine comme le vrai écran. Toutes les règles
+ * sont sous `.pe-m-sobre` : elles ne touchent jamais « Atelier ».
+ */
+.pe-m-sobre {
+  --ps-fond: #fbf8f3;
+  --ps-carte: #ffffff;
+  --ps-filet: rgba(21, 18, 14, 0.12);
+  background: var(--ps-fond);
+}
+.pe-m-sobre .pe-entete {
+  background: #fff;
+}
+.pe-m-sobre h2 {
+  font-size: clamp(30px, 5cqi, 46px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin-bottom: 14px;
+}
+/* « Atelier » trace un petit trait au-dessus des titres : pas ici. */
+.pe-m-sobre h2::before {
+  content: none !important;
+}
+
+/* ------------------------------------------------------------------------------------------------ Accueil */
+.pe-m-sobre .ps-accueil {
+  padding: 28px 0 40px;
+  border-bottom: 1px solid var(--ps-filet);
+}
+.pe-m-sobre .ps-accueil-grille {
+  display: grid;
+  gap: 28px;
+}
+/* Téléphone : la photo d'abord, le texte dessous. */
+.pe-m-sobre .ps-accueil-photo {
+  order: -1;
+  overflow: hidden;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--pe-teinte) 30%, #ddd);
+}
+.pe-m-sobre .ps-accueil-photo picture,
+.pe-m-sobre .ps-accueil-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.pe-m-sobre .ps-accueil-photo img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.pe-m-sobre .ps-surtitre {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--doux);
+}
+.pe-m-sobre .ps-accueil h1 {
+  margin-top: 10px;
+  font-size: clamp(38px, 10cqi, 72px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  color: var(--encre);
+  overflow-wrap: break-word;
+}
+.pe-m-sobre .ps-ville {
+  color: var(--pe-teinte);
+}
+.pe-m-sobre .ps-accroche {
+  margin-top: 16px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--doux);
+  max-width: 44ch;
+}
+.pe-m-sobre .ps-actions {
+  margin-top: 26px;
+}
+.pe-m-sobre .pe-btn-appel {
+  background: var(--jaune);
+  color: var(--sur-jaune) !important;
+  box-shadow: none;
+}
+.pe-m-sobre .ps-btn-contour {
+  border: 1.5px solid var(--encre);
+  color: var(--encre);
+  background: transparent;
+}
+.pe-m-sobre .ps-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: 14px;
+  font-weight: 750;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.pe-m-sobre .ps-garanties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 24px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.pe-m-sobre .ps-garanties li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.pe-m-sobre .ps-garanties svg {
+  flex-shrink: 0;
+  color: var(--pe-teinte);
+}
+
+/* ------------------------------------------------------------------------------------------------ Rubriques */
+.pe-m-sobre .ps-section {
+  padding: 56px 0;
+}
+.pe-m-sobre .ps-section + .ps-section {
+  border-top: 1px solid var(--ps-filet);
+}
+.pe-m-sobre .ps-deux-colonnes {
+  display: grid;
+  gap: 24px;
+}
+.pe-m-sobre .ps-sous-titre {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--doux);
+  max-width: 36ch;
+}
+.pe-m-sobre .ps-prestations {
+  display: grid;
+}
+.pe-m-sobre .ps-prestations li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  padding: 22px 0;
+  border-top: 1px solid var(--ps-filet);
+}
+.pe-m-sobre .ps-prestations li:last-child {
+  border-bottom: 1px solid var(--ps-filet);
+}
+.pe-m-sobre .ps-prestation-icone {
+  margin-top: 2px;
+  color: var(--pe-teinte);
+}
+.pe-m-sobre .ps-prestations h3 {
+  font-size: 19px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+.pe-m-sobre .ps-prestations p {
+  margin-top: 6px;
+  color: var(--doux);
+  line-height: 1.55;
+}
+
+/* La bande de la teinte : zone, horaires, certifications. */
+.pe-m-sobre .ps-bande {
+  background: var(--pe-teinte);
+  color: #fff;
+}
+.pe-m-sobre .ps-bande-liste {
+  display: grid;
+  gap: 18px;
+  padding: 30px 0;
+}
+.pe-m-sobre .ps-bande-liste li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pe-m-sobre .ps-bande-liste svg {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+.pe-m-sobre .ps-bande-etiquette {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+.pe-m-sobre .ps-bande-valeur {
+  display: block;
+  font-size: 17px;
+  font-weight: 750;
+}
+
+/* Chantiers : la liste partagée, en mosaïque claire. */
+.pe-m-sobre .ps-realisations .pe-chantier {
+  border-radius: 16px;
+}
+.pe-m-sobre .ps-realisations .pe-chantier img {
+  border-radius: 16px;
+}
+
+/* À propos : photo ronde à gauche, le texte à droite. */
+.pe-m-sobre .ps-apropos-grille {
+  display: grid;
+  gap: 28px;
+  align-items: start;
+}
+.pe-m-sobre .ps-apropos-photo {
+  width: min(240px, 60%);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+}
+.pe-m-sobre .ps-apropos-photo picture,
+.pe-m-sobre .ps-apropos-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pe-m-sobre .ps-texte {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--doux);
+  max-width: 62ch;
+}
+.pe-m-sobre .ps-texte + .ps-texte {
+  margin-top: 14px;
+}
+.pe-m-sobre .ps-qualifs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 22px;
+  font-weight: 700;
+}
+.pe-m-sobre .ps-qualifs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.pe-m-sobre .ps-qualifs svg {
+  color: var(--pe-teinte);
+}
+
+/* Contact sur fond clair, le formulaire dans une carte blanche. */
+.pe-m-sobre .ps-contact {
+  padding: 56px 0 64px;
+  border-top: 1px solid var(--ps-filet);
+}
+.pe-m-sobre .ps-contact-grille {
+  display: grid;
+  gap: 28px;
+}
+.pe-m-sobre .ps-telephone {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  margin-top: 18px;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--encre);
+}
+.pe-m-sobre .ps-telephone svg {
+  color: var(--pe-teinte);
+}
+.pe-m-sobre .ps-contact-carte {
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--ps-carte);
+  border: 1px solid var(--ps-filet);
+  color: var(--encre);
+}
+.pe-m-sobre .ps-contact-carte .pe-form input,
+.pe-m-sobre .ps-contact-carte .pe-form textarea {
+  background: var(--ps-fond);
+  border-color: var(--ps-filet);
+}
+.pe-m-sobre .ps-contact-carte .pe-form input:focus,
+.pe-m-sobre .ps-contact-carte .pe-form textarea:focus {
+  border-color: var(--pe-teinte);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pe-teinte) 25%, transparent);
+}
+.pe-m-sobre .ps-contact-carte .pe-form .pe-btn {
+  background: var(--jaune);
+  color: var(--sur-jaune) !important;
+}
+.pe-m-sobre .ps-contact-carte .pe-note {
+  color: var(--doux);
+}
+.pe-m-sobre .ps-contact-carte .pe-erreur {
+  color: #b3261e;
+}
+.pe-m-sobre .ps-contact-carte .pe-merci {
+  color: var(--encre);
+}
+
+/* ------------------------------------------------------------------------------------------------ Tablette et plus */
+@container pe (min-width: 640px) {
+  .pe-m-sobre .ps-bande-liste {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+  .pe-m-sobre .ps-contact-carte {
+    padding: 30px;
+  }
+}
+@container pe (min-width: 960px) {
+  .pe-m-sobre .ps-accueil {
+    padding: 56px 0 72px;
+  }
+  .pe-m-sobre .ps-accueil-grille {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: center;
+    gap: 56px;
+  }
+  .pe-m-sobre .ps-accueil-photo {
+    order: 0;
+    border-radius: 28px;
+  }
+  .pe-m-sobre .ps-accueil-photo img {
+    aspect-ratio: 4 / 5;
+    max-height: min(78svh, 760px);
+  }
+  .pe-m-sobre .ps-section {
+    padding: 96px 0;
+  }
+  .pe-m-sobre .ps-deux-colonnes {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+    gap: 64px;
+    align-items: start;
+  }
+  .pe-m-sobre .ps-prestations {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+  }
+  .pe-m-sobre .ps-prestations li:nth-last-child(2):nth-child(odd) {
+    border-bottom: 1px solid var(--ps-filet);
+  }
+  .pe-m-sobre .ps-apropos-grille {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 64px;
+  }
+  .pe-m-sobre .ps-apropos-photo {
+    width: 260px;
+  }
+  .pe-m-sobre .ps-contact {
+    padding: 96px 0 104px;
+  }
+  .pe-m-sobre .ps-contact-grille {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 64px;
+    align-items: start;
+  }
+}
+@container pe (min-width: 1200px) {
+  .pe.pe-m-sobre .pe-cadre {
+    width: min(1360px, calc(100% - 160px));
+  }
+  .pe-m-sobre .ps-accueil h1 {
+    font-size: clamp(72px, 6.4cqi, 104px);
+  }
+  .pe-m-sobre .ps-accroche {
+    font-size: 21px;
+  }
+  .pe-m-sobre .ps-section {
+    padding: 120px 0;
+  }
+}

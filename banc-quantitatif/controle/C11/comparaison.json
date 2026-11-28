@@ -1,0 +1,33 @@
+{
+  "accords": [
+    {"article": "Feuille de zinc naturel 2 × 1 m, ép. 0,65 mm (arêtiers 6 + faîtage 1 + noues 1)", "quantite": 8, "unite": "feuilles"},
+    {"article": "Équerre (angle) extérieure 90° pour gouttière demi-ronde zinc de 25", "quantite": 4, "unite": "pièces"},
+    {"article": "Tuyau de descente zinc naturel Ø 80, longueur 2 m", "quantite": 12, "unite": "tubes de 2 m"}
+  ],
+  "desaccords": [
+    {
+      "article": "Ardoise naturelle 35×25",
+      "controleur": "6494 pièces",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur chiffre 6494 ardoises ; la référence ne chiffre pas l'article (calcul impossible sans « Longueur » de l'ardoise)."
+    },
+    {
+      "article": "Crochets d'ardoise inox à agrafe Ø 2,7 mm, 11 cm",
+      "controleur": "11 boîtes de 500",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur chiffre 11 boîtes de 500 ; la référence ne chiffre pas les crochets (dépend du calcul des ardoises)."
+    },
+    {
+      "article": "Crochets d'ardoise inox à pointe Ø 2,7 mm, 11 cm",
+      "controleur": "2 boîtes de 700",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur chiffre 2 boîtes de 700 ; la référence ne chiffre pas les crochets (dépend du calcul des ardoises)."
+    },
+    {
+      "article": "Gouttière demi-ronde zinc naturel de 25, ép. 0,65 mm, longueur 4 m",
+      "controleur": "12 longueurs de 4 m",
+      "reference": "absent",
+      "ecart": "Article absent de la liste de référence ; le contrôleur chiffre 12 longueurs de 4 m."
+    }
+  ]
+}

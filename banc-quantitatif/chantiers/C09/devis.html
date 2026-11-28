@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Devis DV-2026-118 - Couverture Zinguerie Kerlann</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #e9e9e9; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; color: #1c1c1c; line-height: 1.35; }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto; padding: 16mm 15mm 14mm; background: #fff; position: relative; }
+  .entete { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5pt solid #2f4a5c; padding-bottom: 5mm; }
+  .raison { font-size: 17pt; font-weight: bold; color: #2f4a5c; letter-spacing: .3pt; }
+  .metier { font-size: 9.5pt; text-transform: uppercase; letter-spacing: 1.2pt; color: #5b6b75; margin-bottom: 2mm; }
+  .coord { font-size: 9pt; color: #333; }
+  .bloc-devis { text-align: right; }
+  .bloc-devis .mot { font-size: 20pt; font-weight: bold; color: #2f4a5c; letter-spacing: 2pt; }
+  .bloc-devis table { margin-left: auto; border-collapse: collapse; font-size: 9.5pt; margin-top: 1mm; }
+  .bloc-devis td { padding: .4mm 0 .4mm 4mm; }
+  .bloc-devis td:first-child { color: #5b6b75; }
+  .parties { display: flex; justify-content: space-between; margin-top: 8mm; gap: 10mm; }
+  .chantier { width: 88mm; font-size: 9.5pt; }
+  .client { width: 80mm; border: .8pt solid #9aa7ae; padding: 3.5mm 4.5mm; font-size: 10.5pt; }
+  .etiq { font-size: 8pt; text-transform: uppercase; letter-spacing: 1pt; color: #5b6b75; margin-bottom: 1.2mm; }
+  .objet { margin-top: 7mm; padding: 2.5mm 3.5mm; background: #eef2f4; border-left: 3pt solid #2f4a5c; font-size: 10.5pt; }
+  table.lignes { width: 100%; border-collapse: collapse; margin-top: 6mm; }
+  table.lignes th { background: #2f4a5c; color: #fff; font-size: 9pt; font-weight: bold; padding: 2.2mm 2mm; text-align: left; }
+  table.lignes td { padding: 2.6mm 2mm; border-bottom: .5pt solid #c9d1d5; vertical-align: top; }
+  table.lignes .n { width: 9mm; text-align: center; }
+  table.lignes .q { width: 19mm; text-align: right; white-space: nowrap; }
+  table.lignes .u { width: 15mm; text-align: center; }
+  table.lignes .p { width: 24mm; text-align: right; white-space: nowrap; }
+  table.lignes .t { width: 27mm; text-align: right; white-space: nowrap; }
+  table.lignes th.q, table.lignes th.p, table.lignes th.t { text-align: right; }
+  table.lignes th.n, table.lignes th.u { text-align: center; }
+  .bas { display: flex; justify-content: space-between; margin-top: 7mm; gap: 8mm; }
+  .conditions { width: 100mm; font-size: 8.8pt; color: #333; }
+  .conditions p { margin: 0 0 1.6mm; }
+  table.totaux { width: 72mm; border-collapse: collapse; }
+  table.totaux td { padding: 2mm 2.5mm; border: .5pt solid #c9d1d5; }
+  table.totaux td:last-child { text-align: right; white-space: nowrap; }
+  table.totaux tr.ttc td { background: #2f4a5c; color: #fff; font-weight: bold; font-size: 11.5pt; border-color: #2f4a5c; }
+  .signatures { display: flex; justify-content: space-between; margin-top: 9mm; gap: 10mm; }
+  .cadre { width: 85mm; height: 30mm; border: .8pt solid #9aa7ae; padding: 2.5mm 3mm; font-size: 8.8pt; color: #333; }
+  .pied { position: absolute; left: 15mm; right: 15mm; bottom: 8mm; border-top: .5pt solid #9aa7ae; padding-top: 2mm; font-size: 7.6pt; color: #5b6b75; text-align: center; }
+  @media print { html, body { background: #fff; } .page { margin: 0; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="entete">
+    <div>
+      <div class="raison">KERLANN COUVERTURE</div>
+      <div class="metier">Couverture &middot; Zinguerie &middot; Ardoise</div>
+      <div class="coord">
+        SARL Kerlann Couverture &mdash; Yann Kerlann, gérant<br>
+        14, rue des Ajoncs &mdash; ZA de Kergadic<br>
+        22300 Lannion<br>
+        Tél. 02 96 55 01 37 &mdash; contact@kerlann-couverture.example
+      </div>
+    </div>
+    <div class="bloc-devis">
+      <div class="mot">DEVIS</div>
+      <table>
+        <tr><td>N°</td><td><strong>DV-2026-118</strong></td></tr>
+        <tr><td>Date</td><td>03/11/2026</td></tr>
+        <tr><td>Validité</td><td>2 mois</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="parties">
+    <div class="chantier">
+      <div class="etiq">Adresse du chantier</div>
+      Construction neuve &mdash; maison individuelle<br>
+      Lot n° 4, chemin de Pors Rolland<br>
+      22700 Perros-Guirec
+    </div>
+    <div class="client">
+      <div class="etiq">Client</div>
+      <strong>M. et Mme Erwan Le Goff</strong><br>
+      Lot n° 4, chemin de Pors Rolland<br>
+      22700 Perros-Guirec
+    </div>
+  </div>
+
+  <div class="objet"><strong>Objet :</strong> Couverture zinc à joint debout d'une maison individuelle neuve</div>
+
+  <table class="lignes">
+    <thead>
+      <tr>
+        <th class="n">N°</th>
+        <th>Désignation</th>
+        <th class="q">Quantité</th>
+        <th class="u">Unité</th>
+        <th class="p">P.U. HT</th>
+        <th class="t">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="n">1</td>
+        <td>Installation de chantier : échafaudage de pied, montage, location et démontage</td>
+        <td class="q">1</td>
+        <td class="u">forfait</td>
+        <td class="p">1 450,00 €</td>
+        <td class="t">1 450,00 €</td>
+      </tr>
+      <tr>
+        <td class="n">2</td>
+        <td>Voligeage jointif en voliges sapin, fourniture et pose</td>
+        <td class="q">60,00</td>
+        <td class="u">m²</td>
+        <td class="p">38,00 €</td>
+        <td class="t">2 280,00 €</td>
+      </tr>
+      <tr>
+        <td class="n">3</td>
+        <td>Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m, fourniture et pose</td>
+        <td class="q">60,00</td>
+        <td class="u">m²</td>
+        <td class="p">135,00 €</td>
+        <td class="t">8 100,00 €</td>
+      </tr>
+      <tr>
+        <td class="n">4</td>
+        <td>Bande d'égout en zinc naturel, fourniture et pose</td>
+        <td class="q">12,00</td>
+        <td class="u">ml</td>
+        <td class="p">42,00 €</td>
+        <td class="t">504,00 €</td>
+      </tr>
+      <tr>
+        <td class="n">5</td>
+        <td>Faîtage en zinc naturel (bande de faîtage), fourniture et pose</td>
+        <td class="q">6,00</td>
+        <td class="u">ml</td>
+        <td class="p">68,00 €</td>
+        <td class="t">408,00 €</td>
+      </tr>
+      <tr>
+        <td class="n">6</td>
+        <td>Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, fourniture et pose</td>
+        <td class="q">12,00</td>
+        <td class="u">ml</td>
+        <td class="p">62,00 €</td>
+        <td class="t">744,00 €</td>
+      </tr>
+      <tr>
+        <td class="n">7</td>
+        <td>Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, fourniture et pose</td>
+        <td class="q">2</td>
+        <td class="u">u</td>
+        <td class="p">265,00 €</td>
+        <td class="t">530,00 €</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="bas">
+    <div class="conditions">
+      <div class="etiq">Conditions</div>
+      <p>Acompte de 30 % à la signature, soit 5 045,76 € TTC. Solde à la réception des travaux, à 30 jours.</p>
+      <p>Délai d'intervention : 6 semaines après réception du devis signé, hors intempéries.</p>
+      <p>TVA au taux de 20 % (construction neuve).</p>
+      <p>Tous travaux non décrits au présent devis feront l'objet d'un devis complémentaire.</p>
+      <p>Assurance décennale et responsabilité civile : Mutuelle Armor Bâtiment, contrat n° 22-448-0917, couverture France métropolitaine.</p>
+    </div>
+    <table class="totaux">
+      <tr><td>Total HT</td><td>14 016,00 €</td></tr>
+      <tr><td>TVA 20 %</td><td>2 803,20 €</td></tr>
+      <tr class="ttc"><td>Total TTC</td><td>16 819,20 €</td></tr>
+    </table>
+  </div>
+
+  <div class="signatures">
+    <div class="cadre">L'entreprise<br>Yann Kerlann, gérant</div>
+    <div class="cadre">Le client &mdash; date, signature précédée de la mention<br>« Bon pour accord »</div>
+  </div>
+
+  <div class="pied">
+    SARL Kerlann Couverture au capital de 12 000 € &mdash; SIRET 000 000 000 00000 &mdash; RCS Saint-Brieuc &mdash; APE 4391B &mdash; TVA intracommunautaire FR00 000000000
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+[
+  {
+    "article": "Plaque bac acier simple peau 63/100 (ep. 0,63 mm), RAL 7016, avec feutre anti-condensation en sous-face, longueur 6,00 m, largeur utile 1,00 m",
+    "quantite": 26,
+    "unite": "plaques de 6,00 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune section bac acier dans la fiche (ni plaques, ni débord, ni perte) : une plaque par rampant et par largeur utile (fiche vérité : largeur utile 1,00 m, rampant 6,00 m au devis) ; par pan 12,50 m / 1,00 m = 12,5 -> 13 plaques ; 2 pans -> 26 plaques de 6,00 m (aucun débord ni % de perte ajouté faute de règle ; le feutre est collé en usine, pas d'article séparé)",
+    "ligne_devis": "2 - F. et P. couv. BA 63/100 simple peau, ep. 0,63 mm, RAL 7016, avec feutre anti-condensation en sous-face, 150 M2"
+  },
+  {
+    "article": "Vis autoperceuses avec rondelle EPDM pour bac acier sur pannes métalliques",
+    "quantite": null,
+    "unite": "boîtes",
+    "a_chiffrer": true,
+    "calcul": "FICHE ? aucune densité de vis ni conditionnement en boîte pour le bac acier dans la fiche (seule la fixation des plaques fibres-ciment est décrite, sans nombre) ; le couvreur ne connaît pas le nombre exact de vis (ne_sait_pas) et la taille de boîte est inconnue -> à chiffrer (ordre de grandeur donné par le couvreur : env. 6/m² x 150 m² = 900 + rives)",
+    "ligne_devis": "2 - y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)"
+  },
+  {
+    "article": "Closoir mousse profilé au bac acier (égout et sous faîtière), longueur 1 m",
+    "quantite": 52,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? pas de closoir de bac acier dans la fiche ; par analogie « closoir d'égout, longueur_piece 1 m » (§ égout) et « nombre = longueur ÷ longueur utile » (§ plaques fibres-ciment, closoir) : par rangée 12,50 m / 1,00 m = 12,5 -> 13 (une par plaque) ; 2 rangées (égout + faîtage) x 2 pans = 4 x 13 = 52 pièces",
+    "ligne_devis": "2 - y/c access. (vis autoperc. rondelle EPDM, closoirs mousse)"
+  },
+  {
+    "article": "Faîtière double pente bac acier RAL 7016, longueur 2 m",
+    "quantite": 7,
+    "unite": "pièces de 2 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? pas de faîtière bac acier dans la fiche ; méthode des bandes en 2 m (§ pertes, zinc en bandes : ml + recouvrement à chaque jonction, arrondi à 2 m, 5 cm -> +2,5 %) : 12,50 ml x 1,025 = 12,81 ml / 2 m = 6,4 -> 7 faîtières de 2 m",
+    "ligne_devis": "3 - F. et P. faîtière BA RAL 7016, lg 12,50 m, 12,5 ML"
+  },
+  {
+    "article": "Gouttière PVC demi-ronde grise dév. 25, longueur 4 m",
+    "quantite": 7,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "§ gouttière PVC : longueurs vendues 4 et 2 m (4 m = standard) ; pas de règle d'arrondi propre au PVC, méthode « arrondi aux longueurs de 4 m » de la gouttière zinc sans recouvrement soudé (jonctions collées) : 2 x 12,50 = 25 ml / 4 = 6,25 -> 7 longueurs de 4 m (3 par ligne + 1 coupée pour les deux bouts de 0,50 m) ; accessoires (crochets, jonctions, talons, naissances, dilatation) non écrits au devis et non dits indissociables par la fiche -> non sortis",
+    "ligne_devis": "4 - F. et P. goutt. PVC gris dév. 25, 2 x 12,50 m, 25 ML"
+  },
+  {
+    "article": "Tube de descente EP PVC gris Ø80, longueur 4 m",
+    "quantite": 2,
+    "unite": "tubes de 4 m",
+    "a_chiffrer": false,
+    "calcul": "§ descente EP PVC : longueurs vendues 4, 3, 2, 1 m (4 m standard) ; 2 descentes de 4,00 m -> 1 tube de 4 m par descente = 2 tubes de 4 m ; coudes et colliers non écrits au devis -> non sortis",
+    "ligne_devis": "5 - F. et P. desc. EP PVC gris Ø80, ht 4,00 m, 2 U"
+  }
+]

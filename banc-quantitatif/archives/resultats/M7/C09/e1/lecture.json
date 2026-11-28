@@ -1,0 +1,201 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Voligeage jointif en voliges sapin, fourniture et pose",
+   "quantite": "60,00",
+   "unite": "m²",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Voliges sapin",
+     "quantite": "60,00",
+     "unite": "m²",
+     "ouvrage": "voligeage",
+     "emplacement": "volige",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "60 m2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m, fourniture et pose",
+   "quantite": "60,00",
+   "unite": "m²",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Couverture zinc joint debout",
+     "quantite": "60,00",
+     "unite": "m²",
+     "ouvrage": "couverture-zinc-joint-debout",
+     "emplacement": "couverture",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "60 m2"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "1"
+      },
+      {
+       "cle": "epaisseur_zinc",
+       "valeur": "0.7 mm"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "5 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Bande d'égout en zinc naturel, fourniture et pose",
+   "quantite": "12,00",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bande d'égout en zinc naturel",
+     "quantite": "12,00",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "12 m"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Faîtage en zinc naturel (bande de faîtage), fourniture et pose",
+   "quantite": "6,00",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Faîtage zinc (bande)",
+     "quantite": "6,00",
+     "unite": "ml",
+     "ouvrage": "faitage-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "6 m"
+      },
+      {
+       "cle": "aspect_zinc",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, fourniture et pose",
+   "quantite": "12,00",
+   "unite": "ml",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Gouttière zinc demi-ronde",
+     "quantite": "12,00",
+     "unite": "ml",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "12 m"
+      },
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "33 cm"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, fourniture et pose",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tubes de descente zinc",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "2 u"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "100 mm"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "5 m"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Installation de chantier : échafaudage de pied, montage, location et démontage",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

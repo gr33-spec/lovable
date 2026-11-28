@@ -1,0 +1,547 @@
+{
+ "id": "C12",
+ "jeu": "examen",
+ "commune": "Quimper",
+ "code_postal": "29000",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "réfection de couverture en tuiles à emboîtement, rénovation",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « Réfection couverture tuiles » ; ligne 2 : « Dépose ancienne couverture »"
+   },
+   {
+    "donnee": "tuile",
+    "valeur": "HP10 ardoisé",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « tuiles terre cuite HP10 ardoisé »"
+   },
+   {
+    "donnee": "surface",
+    "valeur": "95 m²",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "lignes 2 à 5 : « 95 m2 »"
+   },
+   {
+    "donnee": "pente",
+    "valeur": "35°",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « pente 35° »"
+   },
+   {
+    "donnee": "rampant",
+    "valeur": "6 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « rampant 6 m »"
+   },
+   {
+    "donnee": "écran sous-toiture",
+    "valeur": "95 m²",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « écran sous-toiture », 95 m2"
+   },
+   {
+    "donnee": "liteaux",
+    "valeur": "95 m² de lattage",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « liteaux », 95 m2"
+   },
+   {
+    "donnee": "longueur de rives",
+    "valeur": "12 m",
+    "origine": "deduite",
+    "regle": "2 rives × 6 m = 12 m",
+    "preuve": "ligne 6 : « 2 rives de 6 m »"
+   },
+   {
+    "donnee": "faîtage",
+    "valeur": "à sec, 9 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « Faîtage à sec », 9 ml"
+   },
+   {
+    "donnee": "fenêtres de toit",
+    "valeur": "2 Velux GGL SK06 114x118 et 1 Velux GGL CK02 55x78, soit 3",
+    "origine": "deduite",
+    "regle": "2 + 1 = 3",
+    "preuve": "lignes 8 et 9"
+   },
+   {
+    "donnee": "raccord des fenêtres de toit",
+    "valeur": "pour tuiles",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "lignes 8 et 9 : « raccord tuiles »"
+   },
+   {
+    "donnee": "sortie de toit",
+    "valeur": "1 sortie Ø125 pour VMC",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 10 : « Sortie de toit Ø125 pour VMC », 1 u"
+   },
+   {
+    "donnee": "bavette plomb",
+    "valeur": "4 ml, largeur 30 cm, sous fenêtres",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 11 : « plomb larg. 30 sous fenêtres de toit, 4 ml en tout »"
+   },
+   {
+    "donnee": "pureau",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "épaisseur du plomb",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Réfection d'une couverture en tuiles, en rénovation : l'ancienne couverture est déposée.",
+   "95 m² d'écran sous-toiture.",
+   "95 m² de liteaux.",
+   "95 m² de tuiles terre cuite HP10 ardoisé, pente 35°, rampant 6 m.",
+   "Tuiles de rive HP10 ardoisé : 2 rives de 6 m, soit 12 m.",
+   "Faîtage à sec de 9 ml.",
+   "2 fenêtres de toit Velux GGL SK06 114x118 avec raccord tuiles.",
+   "1 fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles.",
+   "1 sortie de toit Ø125 pour VMC.",
+   "4 ml de bavette plomb largeur 30 sous les fenêtres de toit.",
+   "Échafaudage, dépose et nettoyage : rien à acheter."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Echafaudage de pied + protections, montage, location et repli",
+    "quantite": "1",
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "2",
+    "designation": "Dépose ancienne couverture ardoises fibro + liteaux, descente et évacuation en déchetterie",
+    "quantite": "95",
+    "unite": "m2",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "3",
+    "designation": "F et P écran sous-toiture",
+    "quantite": "95",
+    "unite": "m2",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Écran sous-toiture",
+      "quantite": "95",
+      "unite": "m2",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "ecran",
+      "donnees": {
+       "surface": "95"
+      },
+      "attend": [],
+      "aPreciser": [
+       "type d'écran"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "F et P liteaux",
+    "quantite": "95",
+    "unite": "m2",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Liteaux",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "liteau",
+      "donnees": {
+       "surface": "95"
+      },
+      "attend": [],
+      "aPreciser": [
+       "section"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "F et P couverture tuiles terre cuite HP10 ardoisé, pente 35°, rampant 6 m",
+    "quantite": "95",
+    "unite": "m2",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Tuiles terre cuite HP10 ardoisé",
+      "quantite": "95",
+      "unite": "m2",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "tuile",
+      "donnees": {
+       "surface": "95",
+       "pente": "35",
+       "longueur_rampant": "6"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "F et P tuiles de rive HP10 ardoisé, 2 rives de 6 m",
+    "quantite": "1",
+    "unite": "ens",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Tuiles de rive HP10 ardoisé",
+      "quantite": "12",
+      "unite": "ml",
+      "ouvrage": "couverture-tuiles-emboitement",
+      "emplacement": "rive",
+      "donnees": {
+       "longueur_rives": "12"
+      },
+      "attend": [],
+      "aPreciser": [
+       "rives gauches et droites"
+      ],
+      "precision": "2 rives de 6 m"
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "designation": "Faîtage à sec",
+    "quantite": "9",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Faîtières",
+      "quantite": "9",
+      "unite": "ml",
+      "ouvrage": "faitage",
+      "emplacement": "faitiere",
+      "donnees": {
+       "longueur_faitage": "9"
+      },
+      "attend": [],
+      "aPreciser": [
+       "modèle de faîtière",
+       "teinte"
+      ],
+      "precision": "faîtage à sec"
+     }
+    ]
+   },
+   {
+    "ref": "8",
+    "designation": "F et P fenêtre de toit Velux GGL SK06 114x118 avec raccord tuiles",
+    "quantite": "2",
+    "unite": "u",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Velux GGL SK06 114x118",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {
+       "nb_fenetres": "2",
+       "raccord_couverture": "1",
+       "taille_fenetre": "114x118"
+      },
+      "attend": [],
+      "aPreciser": [
+       "finition"
+      ],
+      "precision": null
+     },
+     {
+      "nom": "Raccord tuiles pour Velux GGL SK06 114x118",
+      "quantite": "2",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "raccord",
+      "donnees": {
+       "nb_fenetres": "2",
+       "raccord_couverture": "1",
+       "taille_fenetre": "114x118"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "9",
+    "designation": "F et P fenêtre de toit Velux GGL CK02 55x78 avec raccord tuiles",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Velux GGL CK02 55x78",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "fenetre",
+      "donnees": {
+       "nb_fenetres": "1",
+       "raccord_couverture": "1",
+       "taille_fenetre": "55x78"
+      },
+      "attend": [],
+      "aPreciser": [
+       "finition"
+      ],
+      "precision": null
+     },
+     {
+      "nom": "Raccord tuiles pour Velux GGL CK02 55x78",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "fenetre-de-toit",
+      "emplacement": "raccord",
+      "donnees": {
+       "nb_fenetres": "1",
+       "raccord_couverture": "1",
+       "taille_fenetre": "55x78"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "10",
+    "designation": "Sortie de toit Ø125 pour VMC, fournie et posée",
+    "quantite": "1",
+    "unite": "u",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Sortie de toit Ø125 pour VMC",
+      "quantite": "1",
+      "unite": "u",
+      "ouvrage": "sortie-de-toit",
+      "emplacement": "sortie",
+      "donnees": {
+       "nb_sorties": "1",
+       "diametre_sortie": "125",
+       "usage_sortie": "2",
+       "support_sortie": "1"
+      },
+      "attend": [],
+      "aPreciser": [
+       "teinte"
+      ],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "11",
+    "designation": "Bavette plomb larg. 30 sous fenêtres de toit, 4 ml en tout, fournie et posée",
+    "quantite": "1",
+    "unite": "ens",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Bavette plomb largeur 30",
+      "quantite": "4",
+      "unite": "ml",
+      "ouvrage": "bandes-plomb",
+      "emplacement": "plomb",
+      "donnees": {
+       "longueur_plomb": "4",
+       "largeur_plomb": "30"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "sous fenêtres de toit"
+     }
+    ]
+   },
+   {
+    "ref": "12",
+    "designation": "Nettoyage du chantier et repli",
+    "quantite": "1",
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   }
+  ],
+  "contexte": {
+   "entreprise": "Couverture Le Bihan",
+   "client": "M. et Mme Riou",
+   "adresse": "23 rue de Kergoat ar Lez",
+   "ville": "Quimper",
+   "code postal": "29000",
+   "numéro du devis": "2026-214",
+   "date": "09/11/2026",
+   "objet": "Réfection couverture tuiles",
+   "neuf ou rénovation": "rénovation"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:longueur_plomb": {
+   "valeur": "4",
+   "unite": "m"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Écran HPV",
+   "mots": [
+    "ecran"
+   ],
+   "quantite": 2,
+   "unite": "rl"
+  },
+  {
+   "article": "Liteaux 27×40",
+   "mots": [
+    "liteau"
+   ],
+   "quantite": 279,
+   "unite": "ml"
+  },
+  {
+   "article": "Tuiles HP 10",
+   "mots": [
+    "tuile",
+    "!rive",
+    "!faiti",
+    "!douille"
+   ],
+   "quantite": 993,
+   "unite": "n"
+  },
+  {
+   "article": "Tuiles de rive gauches",
+   "mots": [
+    "rive",
+    "gauche"
+   ],
+   "quantite": 16,
+   "unite": "n"
+  },
+  {
+   "article": "Tuiles de rive droites",
+   "mots": [
+    "rive",
+    "droit|droite"
+   ],
+   "quantite": 16,
+   "unite": "n"
+  },
+  {
+   "article": "Faîtières",
+   "mots": [
+    "faitiere"
+   ],
+   "quantite": 23,
+   "unite": "n"
+  },
+  {
+   "article": "Fenêtres GGL SK06",
+   "mots": [
+    "sk06"
+   ],
+   "quantite": 2,
+   "unite": "n"
+  },
+  {
+   "article": "Raccords SK06",
+   "mots": [
+    "raccord",
+    "114",
+    "!velux",
+    "!ggl"
+   ],
+   "quantite": 2,
+   "unite": "n"
+  },
+  {
+   "article": "Fenêtre GGL CK02",
+   "mots": [
+    "ck02"
+   ],
+   "quantite": 1,
+   "unite": "n"
+  },
+  {
+   "article": "Raccord CK02",
+   "mots": [
+    "raccord",
+    "55",
+    "!velux",
+    "!ggl"
+   ],
+   "quantite": 1,
+   "unite": "n"
+  },
+  {
+   "article": "Tuile à douille",
+   "mots": [
+    "douille"
+   ],
+   "quantite": 1,
+   "unite": "n"
+  },
+  {
+   "article": "Lanterne de sortie de toit Ø125",
+   "mots": [
+    "lanterne|sortie|chapeau",
+    "!douille"
+   ],
+   "quantite": 1,
+   "unite": "n"
+  },
+  {
+   "article": "Plomb en rouleau",
+   "mots": [
+    "plomb"
+   ],
+   "quantite": 1,
+   "unite": "rl"
+  }
+ ],
+ "suggestions": []
+}

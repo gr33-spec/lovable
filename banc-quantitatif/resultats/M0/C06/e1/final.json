@@ -1,0 +1,154 @@
+{
+ "posees": [
+  {
+   "key": "param:recouvrement_canal",
+   "text": "Recouvrement des tuiles canal ?",
+   "options": [
+    "140 mm",
+    "150 mm",
+    "160 mm",
+    "170 mm"
+   ],
+   "reponse": "150 mm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuiles canal terre cuite, courants et couverts",
+    "quantite": "85",
+    "unite": "pièces",
+    "affiche": "85 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "param:recouvrement_canal",
+     "a-preciser:2"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Liteaux",
+    "quantite": "85",
+    "unite": "ml",
+    "affiche": "85 ml",
+    "etat": "ready",
+    "precision": "liteaux neufs sur toute la toiture",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "param:recouvrement_canal"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Rives",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": "2 rives de 6 ml",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "Divers et imprevus"
+  ],
+  "questions": [
+   "param:recouvrement_canal"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuiles canal terre cuite, courants et couverts",
+    "quantite": "85",
+    "unite": "pièces",
+    "affiche": "85 pièces",
+    "etat": "ready",
+    "precision": "150 mm",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "a-preciser:2"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Liteaux",
+    "quantite": "85",
+    "unite": "ml",
+    "affiche": "85 ml",
+    "etat": "ready",
+    "precision": "liteaux neufs sur toute la toiture, 150 mm",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Rives",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": "2 rives de 6 ml",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "Divers et imprevus"
+  ],
+  "questions": []
+ }
+}

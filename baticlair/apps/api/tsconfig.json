@@ -12,7 +12,6 @@
     "src",
     "test",
     "vitest.config.ts",
-    "prisma.config.ts",
-    "scripts"
+    "prisma.config.ts"
   ]
 }

@@ -1,0 +1,471 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "zinguerie seule, pan nord",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « zinguerie seule, pan nord (pas de reprise de couv.) »"
+  },
+  {
+   "donnee": "couverture",
+   "valeur": "pas de reprise de couverture",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « (pas de reprise de couv.) »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « bdes de rive zn » ; ligne 3 : « 1/2 rde zn » ; ligne 6 : « abergt cheminée zn »"
+  },
+  {
+   "donnee": "nombre de bandes de rive",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « 2 x 7 ml »"
+  },
+  {
+   "donnee": "longueur des bandes de rive",
+   "valeur": "14 m",
+   "origine": "deduite",
+   "regle": "2 × 7 ml = 14 ml",
+   "preuve": ""
+  },
+  {
+   "donnee": "développé des bandes de rive",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "bandes porte-solin",
+   "valeur": "2 bandes de 3 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « 2 bdes porte-solin de 3 m »"
+  },
+  {
+   "donnee": "longueur de porte-solin",
+   "valeur": "6 m",
+   "origine": "deduite",
+   "regle": "2 × 3 m = 6 m",
+   "preuve": ""
+  },
+  {
+   "donnee": "développé du porte-solin",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "gouttière",
+   "valeur": "demi-ronde zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « gouttière 1/2 rde zn »"
+  },
+  {
+   "donnee": "développé de gouttière",
+   "valeur": "25 cm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « de 25 »"
+  },
+  {
+   "donnee": "longueur de gouttière",
+   "valeur": "14 m",
+   "origine": "deduite",
+   "regle": "quantité « 14 » sans unité : une gouttière se mesure en mètres",
+   "preuve": "ligne 3 : « 14 »"
+  },
+  {
+   "donnee": "nombre de descentes",
+   "valeur": "1",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « 1 DEP »"
+  },
+  {
+   "donnee": "diamètre des descentes",
+   "valeur": "Ø 80 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Ø80 »"
+  },
+  {
+   "donnee": "hauteur de descente",
+   "valeur": "5 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « haut. 5 m »"
+  },
+  {
+   "donnee": "dauphin",
+   "valeur": "1",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « 1 dauphin »"
+  },
+  {
+   "donnee": "nombre de cheminées",
+   "valeur": "1",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « 1 abergt cheminée zn »"
+  },
+  {
+   "donnee": "périmètre de la cheminée",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Zinguerie seule sur le pan nord, pas de couverture neuve.",
+  "Bandes de rive zinc 14 m (2 × 7 m).",
+  "Bandes porte-solin 6 m (2 bandes de 3 m).",
+  "Gouttière demi-ronde zinc de 25, 14 m.",
+  "Une descente Ø80, hauteur 5 m.",
+  "Un dauphin en pied de descente.",
+  "Un abergement de cheminée zinc.",
+  "Une descente, donc une naissance Ø80 sur la gouttière."
+ ],
+ "questions": [
+  {
+   "cle": "faconnage",
+   "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    {
+     "label": "Je façonne (feuilles ou bobineau)",
+     "valeur": "1"
+    },
+    {
+     "label": "Je commande façonné",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "façonnage",
+   "ligne": ""
+  },
+  {
+   "cle": "developpe",
+   "texte": "Tes bandes de rive zinc, tu les prends de quel développé ?",
+   "boutons": [
+    {
+     "label": "Dév. 25 cm",
+     "valeur": "250"
+    },
+    {
+     "label": "Dév. 33 cm",
+     "valeur": "330"
+    },
+    {
+     "label": "Dév. 40 cm",
+     "valeur": "400"
+    },
+    {
+     "label": "Dév. 20 cm",
+     "valeur": "200"
+    }
+   ],
+   "unite": "",
+   "donnee": "développé des bandes de rive",
+   "ligne": "1"
+  },
+  {
+   "cle": "developpe",
+   "texte": "Tes bandes porte-solin, tu les prends de quel développé ?",
+   "boutons": [
+    {
+     "label": "Dév. 10 cm",
+     "valeur": "100"
+    },
+    {
+     "label": "Dév. 20 cm",
+     "valeur": "200"
+    },
+    {
+     "label": "Dév. 25 cm",
+     "valeur": "250"
+    },
+    {
+     "label": "Dév. 33 cm",
+     "valeur": "330"
+    }
+   ],
+   "unite": "",
+   "donnee": "développé du porte-solin",
+   "ligne": "2"
+  },
+  {
+   "cle": "perimetre_cheminee",
+   "texte": "Ta cheminée fait quel périmètre (les 4 côtés) ?",
+   "boutons": [
+    {
+     "label": "2 m",
+     "valeur": "2"
+    },
+    {
+     "label": "3 m",
+     "valeur": "3"
+    },
+    {
+     "label": "4 m",
+     "valeur": "4"
+    },
+    {
+     "label": "5 m",
+     "valeur": "5"
+    }
+   ],
+   "unite": "m",
+   "donnee": "périmètre de la cheminée",
+   "ligne": "6"
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "F. et P. bdes de rive zn, 2 x 7 ml",
+   "quantite": "2 x 7",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bandes de rive zinc",
+     "quantite": "14",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "14"
+      }
+     ],
+     "attend": [
+      "faconnage",
+      "developpe"
+     ],
+     "a_preciser": [
+      "épaisseur"
+     ],
+     "precision": "2 rives de 7 ml"
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "2 bdes porte-solin de 3 m, posées",
+   "quantite": "2",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bandes porte-solin",
+     "quantite": "6",
+     "unite": "ml",
+     "ouvrage": "bande-porte-solin",
+     "emplacement": "porte_solin",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "6"
+      }
+     ],
+     "attend": [
+      "faconnage",
+      "developpe"
+     ],
+     "a_preciser": [
+      "matière",
+      "épaisseur"
+     ],
+     "precision": "2 bandes de 3 m"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "gouttière 1/2 rde zn de 25 14",
+   "quantite": "14",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttière demi-ronde zinc de 25",
+     "quantite": "14",
+     "unite": "ml",
+     "ouvrage": "gouttiere",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "14"
+      },
+      {
+       "cle": "developpe_gouttiere",
+       "valeur": "25"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "épaisseur"
+     ],
+     "precision": "1 descente Ø80 (ligne 4)"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "1 DEP Ø80 haut. 5 m",
+   "quantite": "1",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Descente EP Ø80",
+     "quantite": "5",
+     "unite": "ml",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "5"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "matière"
+     ],
+     "precision": "1 descente, hauteur 5 m"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "1 dauphin",
+   "quantite": "1",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Dauphin",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "dauphin",
+     "donnees": [
+      {
+       "cle": "dauphin",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "matière"
+     ],
+     "precision": "pour la descente Ø80 (ligne 4)"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "1 abergt cheminée zn",
+   "quantite": "1",
+   "unite": "",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Abergement de cheminée zinc",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "abergement-cheminee",
+     "emplacement": "abergement",
+     "donnees": [
+      {
+       "cle": "nb_cheminees",
+       "valeur": "1"
+      }
+     ],
+     "attend": [
+      "perimetre_cheminee",
+      "faconnage"
+     ],
+     "a_preciser": [
+      "épaisseur"
+     ],
+     "precision": ""
+    }
+   ]
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "client",
+   "valeur": "Mme GUEGAN Annick"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "8 venelle des Lavoirs"
+  },
+  {
+   "cle": "ville",
+   "valeur": "LANNION"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "22300"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "2026-094"
+  },
+  {
+   "cle": "date",
+   "valeur": "16/11/2026"
+  },
+  {
+   "cle": "objet",
+   "valeur": "zinguerie seule, pan nord (pas de reprise de couv.)"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation (TVA 10 %, maison de plus de 2 ans)"
+  },
+  {
+   "cle": "délai",
+   "valeur": "sous 6 semaines selon météo"
+  }
+ ],
+ "notes": [
+  "Zinguerie seule sur le pan nord : aucune fourniture de couverture à acheter.",
+  "Gravats et vieux zinc évacués par l'entreprise."
+ ]
+}

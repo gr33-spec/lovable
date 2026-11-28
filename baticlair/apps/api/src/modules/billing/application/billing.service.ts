@@ -13,6 +13,8 @@ export interface BillingStatus {
   offers: Plan[];
   requestedPlan: string | null;
   activationEnabled: boolean;
+  /** Le paywall est-il allumé (`PAYWALL=on`) ? Éteint, l'écran dit « Gratuit pour l'artisan » (plan « finition », bloc 4). */
+  payant: boolean;
 }
 
 /**
@@ -53,6 +55,7 @@ export class BillingService {
       offers: this.config.plans.filter((p) => p.offered && p.key !== TRIAL_PLAN),
       requestedPlan: company.requestedPlan,
       activationEnabled: Object.keys(this.config.activationCodes).length > 0,
+      payant: this.config.enforced !== false,
     };
   }
 

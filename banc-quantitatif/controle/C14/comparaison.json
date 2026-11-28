@@ -1,0 +1,15 @@
+{
+  "accords": [
+    {"article": "Bobineau zinc anthracite 0,65 mm, largeur 650 mm (chéneau)", "quantite": 1, "unite": "bobineau de 17 m"},
+    {"article": "Descente d'eaux pluviales en zinc anthracite Ø80 (tubes de 2 m)", "quantite": 2, "unite": "pièces (tubes de 2 m)"},
+    {"article": "Feuille de zinc anthracite 0,65 mm, 2000 × 1000 mm (bande de solin, développé 200)", "quantite": 1, "unite": "feuille"}
+  ],
+  "desaccords": [
+    {
+      "article": "Bobine zinc anthracite 0,65 mm, largeur 650 mm (bacs à tasseaux)",
+      "controleur": "47,5 ml",
+      "reference": "48 ml",
+      "ecart": "Même article et même unité (ml) ; quantité différente : 47,5 ml côté contrôleur contre 48 ml côté référence (0,5 ml d'écart, arrondi différent du même calcul 13 bacs × 3,65 m)."
+    }
+  ]
+}

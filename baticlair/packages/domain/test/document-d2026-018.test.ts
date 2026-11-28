@@ -38,8 +38,10 @@ describe("D-2026-018 : le document dit les longueurs et le nom des pièces (§50
     expect(v.toBuy.map((b) => b.label).filter((l) => /^Bandes façonnées/.test(l))).toEqual([]);
     const ventilation = line(v, /^Bande de ventilation en Z/);
     expect(ventilation?.quantity).toBe("7 longueurs de 2 m");
-    // La rive façonnée par l'artisan (« comprend le pliage ») : des feuilles 2 × 1 m qui disent leur pièce.
-    expect(line(v, /^Feuilles .*2 × 1 m/)?.label).toMatch(/pour habillage de rive/);
+    // La rive façonnée par l'artisan (« comprend le pliage ») : des feuilles 2 × 1 m. RÈGLE CHANGÉE (Greg, 17 novembre 2026) :
+    // le nom ne dit plus l'usage (avant : « …, pour habillage de rive… ») ; il reste dans le détail de la ligne.
+    expect(line(v, /^Feuilles .*2 × 1 m/)?.label).toBe("Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm");
+    expect(line(v, /^Feuilles .*2 × 1 m/)?.precision).toMatch(/de bande/);
   });
 
   it("pattes : une seule règle (§36.2), le chiffre suit la largeur de bobine", () => {

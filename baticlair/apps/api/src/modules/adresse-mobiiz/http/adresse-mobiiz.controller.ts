@@ -1,0 +1,113 @@
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Res, StreamableFile, UseGuards } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
+import { HOURLY } from "../../../platform/http/rate-limit.module.js";
+import { IdentiteConfirmeeGuard } from "../../../platform/http/identite-confirmee.guard.js";
+import type { Response } from "express";
+import { z } from "zod";
+import { ZodPipe } from "../../../platform/http/zod.js";
+import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
+import { AdresseMobiizService } from "../application/adresse-mobiiz.service.js";
+import { ReponsesRecuesService } from "../application/reponses-recues.service.js";
+
+const adresseBody = z.object({ adresse: z.string().min(1).max(80) });
+const rattacherBody = z.object({ recipientId: z.string().uuid() });
+const repondreBody = z.object({ texte: z.string().min(1).max(10_000) });
+const indesirableBody = z.object({ indesirable: z.boolean() });
+
+/** R7 : l'adresse Mobiiz de l'entreprise, et les e-mails reçus dessus. */
+@Controller("v1")
+@UseGuards(TenantGuard)
+export class AdresseMobiizController {
+  constructor(
+    @Inject(AdresseMobiizService) private readonly adresses: AdresseMobiizService,
+    @Inject(ReponsesRecuesService) private readonly recus: ReponsesRecuesService,
+  ) {}
+
+  @Get("company/adresse-mobiiz")
+  etat(@Tenant() tenant: TenantContext) {
+    return this.adresses.etat(tenant);
+  }
+
+  /** L'écran « Voici ton adresse Mobiiz » a été vu. */
+  @Post("company/adresse-mobiiz/vue")
+  @HttpCode(200)
+  vue(@Tenant() tenant: TenantContext) {
+    return this.adresses.marquerVue(tenant);
+  }
+
+  @Post("company/adresse-mobiiz/verifier")
+  @HttpCode(200)
+  verifier(@Tenant() tenant: TenantContext, @Body(new ZodPipe(adresseBody)) body: z.infer<typeof adresseBody>) {
+    return this.adresses.verifier(tenant, body.adresse);
+  }
+
+  @Put("company/adresse-mobiiz")
+  changer(@Tenant() tenant: TenantContext, @Body(new ZodPipe(adresseBody)) body: z.infer<typeof adresseBody>) {
+    return this.adresses.changer(tenant, body.adresse);
+  }
+
+  @Get("recus")
+  async lister(@Tenant() tenant: TenantContext, @Query("projectId") projectId?: string) {
+    return { items: await this.recus.lister(tenant, projectId || undefined) };
+  }
+
+  /** Le dossier « Indésirables » (déclaré avant `recus/:id`). */
+  @Get("recus/indesirables")
+  async indesirables(@Tenant() tenant: TenantContext) {
+    return { items: await this.recus.indesirables(tenant) };
+  }
+
+  /** Les demandes parties, pour « Rattacher à une demande » (déclarée avant `recus/:id`). */
+  @Get("recus/demandes")
+  demandes(@Tenant() tenant: TenantContext, @Query("email") email?: string) {
+    return this.recus.demandesParties(tenant, email || undefined);
+  }
+
+  @Get("recus/:id")
+  un(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    return this.recus.un(tenant, id);
+  }
+
+  @Get("recus/:id/fichiers/:fichierId")
+  async fichier(@Tenant() tenant: TenantContext, @Param("id") id: string, @Param("fichierId") fichierId: string, @Res({ passthrough: true }) res: Response) {
+    const f = await this.recus.fichier(tenant, id, fichierId);
+    // Une pièce reçue n'est jamais servie comme une page (saboteur, 22 novembre 2026) : PDF et images tels quels, tout le
+    // reste en téléchargement neutre ; le navigateur ne devine jamais un autre type.
+    const sur = /^(application\/pdf|image\/(png|jpeg|gif|webp))$/i.test(f.type);
+    res.setHeader("Content-Type", sur ? f.type : "application/octet-stream");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Disposition", `${sur ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(f.nom)}`);
+    res.setHeader("Cache-Control", "private, no-store");
+    return new StreamableFile(f.contenu);
+  }
+
+  @Post("recus/:id/rattacher")
+  @HttpCode(200)
+  rattacher(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(rattacherBody)) body: z.infer<typeof rattacherBody>) {
+    return this.recus.rattacher(tenant, id, body.recipientId);
+  }
+
+  /** « Répondre », comme Gmail : la réponse part de l'adresse Mobiiz de l'artisan, au négoce de la demande. */
+  @Post("recus/:id/repondre")
+  @HttpCode(200)
+  @Throttle({ default: HOURLY(30) })
+  // Comme l'envoi d'une demande : rien ne part chez un négoce tant que l'identité de l'entreprise n'est pas confirmée.
+  @UseGuards(IdentiteConfirmeeGuard)
+  repondre(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(repondreBody)) body: z.infer<typeof repondreBody>) {
+    return this.recus.repondre(tenant, id, body.texte);
+  }
+
+  /** « Signaler comme indésirable » / « Ce n'est pas un indésirable ». */
+  @Post("recus/:id/indesirable")
+  @HttpCode(200)
+  indesirable(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(indesirableBody)) body: z.infer<typeof indesirableBody>) {
+    return this.recus.indesirable(tenant, id, body.indesirable);
+  }
+
+  /** « Ce n'est pas la bonne demande » : l'e-mail retourne dans les réponses à classer, sans rien supprimer. */
+  @Post("recus/:id/detacher")
+  @HttpCode(200)
+  detacher(@Tenant() tenant: TenantContext, @Param("id") id: string) {
+    return this.recus.detacher(tenant, id);
+  }
+}

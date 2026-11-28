@@ -1,0 +1,14 @@
+{
+ "param:teinte_gouttiere@gouttiere-pvc-alu__4 ¦ Gouttière : gouttière : grise, blanche, sable, brune ou anthracite ?": {
+  "question": {
+   "id": "param:teinte_gouttiere@gouttiere-pvc-alu__4 ¦ Gouttière : gouttière : grise, blanche, sable, brune ou anthracite ?"
+  },
+  "reponse": {
+   "bouton": "Grise",
+   "valeur": "",
+   "unite": "",
+   "ne_sait_pas": false,
+   "dit": "Grise."
+  }
+ }
+}

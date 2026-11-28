@@ -1,0 +1,30 @@
+{
+ "liste": [
+  {
+   "article": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+   "quantite": "8",
+   "unite": "pièces",
+   "detail": "pour 30 ml de bande, développé 33 cm ; pour 4 ml de faîtage, développé 33 cm ; pour 1,5 ml de noue, développé 50 cm"
+  },
+  {
+   "article": "Angles de gouttière dév. 25",
+   "quantite": "4",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Tubes de descente Ø80, longueur 2 m",
+   "quantite": "3",
+   "unite": "pièces",
+   "detail": "1 descente × 5,5 m"
+  },
+  {
+   "article": "Ardoises (Ardoises)",
+   "a_chiffrer": true
+  },
+  {
+   "article": "Crochets d'ardoise (Ardoises)",
+   "a_chiffrer": true
+  }
+ ]
+}

@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
+import { NOM_APP } from "@/lib/nom";
 
 interface PartnerKey {
   id: string;
@@ -103,7 +104,7 @@ export function PartnerKeysCard() {
       {open ? (
         <>
           <p className="text-sm text-muted">
-            Une clé par logiciel qui envoie ses devis à BatiClair, avec un
+            Une clé par logiciel qui envoie ses devis à {NOM_APP}, avec un
             nombre de listes par mois.
           </p>
           {error && !data ? (

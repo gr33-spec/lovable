@@ -1,0 +1,16 @@
+[
+  {
+    "article": "Tuyau de descente zinc Ø80",
+    "bonne_valeur": "à chiffrer",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Le devis écrit « Remplact DEP Ø80 1 u » (1 descente, pas 1 tube) et la fiche vend la descente zinc en tubes (« longueurs_vendues [2, 3, 4] m », ici 2 m), donc le nombre de tubes dépend de la hauteur, que le couvreur a répondu ne pas connaître (« je ne sais pas »). Le moteur a pourtant sorti « 1 pièce » au libellé confus au lieu d'une ligne à chiffrer avec la hauteur à mesurer."
+  },
+  {
+    "article": "Ardoises naturelles d'Espagne 32×22",
+    "bonne_valeur": "168 pièces (environ 170, à confirmer)",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Avec le format 32×22 et des crochets de 9, la fiche donne R = C − 5 mm = 85, un pureau de (320 − 85)/2 = 117,5 mm et 1/[0,1175 × 0,223] = 38,2 ardoises/m², soit 458 déposées sur 12 m² ; le tiers neuf plus 10 % de casse donne 168, cohérent avec les « environ 170 ardoises neuves » du couvreur. DÉFAUT DE LA FICHE À SIGNALER : elle n'a aucune règle de remaniage (part d'ardoises neuves), et le moteur n'a de plus posé ni la question du format (absent du devis, « identiques à l'existant ») ni celle de la part à remplacer, d'où « à chiffrer » sans question pour le débloquer."
+  }
+]

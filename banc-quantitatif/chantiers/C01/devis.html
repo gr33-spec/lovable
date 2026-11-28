@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Devis D-2026-0412 — Couverture Le Bihan</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e9e9; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; color: #1c1c1c; }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff; padding: 16mm 15mm 14mm; }
+  .entete { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2.5pt solid #2f4858; padding-bottom: 6mm; }
+  .entreprise .nom { font-size: 19pt; font-weight: bold; color: #2f4858; letter-spacing: .3pt; }
+  .entreprise .metier { font-size: 10pt; text-transform: uppercase; letter-spacing: 1.2pt; color: #555; margin: 1mm 0 3mm; }
+  .entreprise p, .client p { margin: 0; line-height: 1.45; }
+  .cartouche { text-align: right; }
+  .cartouche .titre { font-size: 22pt; font-weight: bold; color: #2f4858; }
+  .cartouche table { margin-left: auto; margin-top: 2mm; border-collapse: collapse; }
+  .cartouche td { padding: .6mm 0 .6mm 5mm; font-size: 10pt; }
+  .cartouche td:first-child { color: #666; }
+  .blocs { display: flex; justify-content: space-between; margin: 8mm 0 6mm; }
+  .chantier { width: 92mm; }
+  .client { width: 75mm; border: .8pt solid #999; padding: 4mm 5mm; }
+  .etiquette { font-size: 8.5pt; text-transform: uppercase; letter-spacing: .8pt; color: #666; margin-bottom: 1.5mm; }
+  .objet { font-weight: bold; }
+  table.lignes { width: 100%; border-collapse: collapse; margin-top: 2mm; }
+  table.lignes th { background: #2f4858; color: #fff; font-size: 9.5pt; padding: 2.2mm 2.5mm; text-align: left; }
+  table.lignes td { padding: 2.6mm 2.5mm; border-bottom: .6pt solid #cfcfcf; vertical-align: top; }
+  table.lignes .n { width: 9mm; color: #666; }
+  table.lignes .q, table.lignes .u { text-align: center; white-space: nowrap; }
+  table.lignes .q { width: 16mm; } table.lignes .u { width: 12mm; }
+  table.lignes .pu, table.lignes .t { text-align: right; white-space: nowrap; width: 25mm; }
+  table.lignes th.q, table.lignes th.u { text-align: center; } table.lignes th.pu, table.lignes th.t { text-align: right; }
+  .bas { display: flex; justify-content: space-between; margin-top: 7mm; }
+  .conditions { width: 98mm; font-size: 9pt; line-height: 1.5; color: #333; }
+  .conditions p { margin: 0 0 1.5mm; }
+  table.totaux { width: 70mm; border-collapse: collapse; }
+  table.totaux td { padding: 2mm 2.5mm; border-bottom: .6pt solid #cfcfcf; }
+  table.totaux td:last-child { text-align: right; white-space: nowrap; }
+  table.totaux tr.ttc td { background: #2f4858; color: #fff; font-weight: bold; font-size: 11.5pt; border-bottom: none; }
+  .accord { margin-top: 9mm; display: flex; justify-content: space-between; font-size: 9.5pt; }
+  .accord .case { width: 84mm; height: 30mm; border: .8pt solid #999; padding: 3mm 4mm; }
+  .pied { margin-top: 9mm; border-top: .6pt solid #999; padding-top: 3mm; font-size: 8pt; color: #666; text-align: center; line-height: 1.5; }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="entete">
+    <div class="entreprise">
+      <div class="nom">Couverture Le Bihan</div>
+      <div class="metier">Couverture · Zinguerie · Ardoise</div>
+      <p>Yann Le Bihan, artisan couvreur</p>
+      <p>7 ZA de Kerlan — 22470 Plouézec</p>
+      <p>Tél. 02 96 00 00 41 — contact@couverture-lebihan.example</p>
+    </div>
+    <div class="cartouche">
+      <div class="titre">DEVIS</div>
+      <table>
+        <tr><td>N°</td><td><strong>D-2026-0412</strong></td></tr>
+        <tr><td>Date</td><td>12 octobre 2026</td></tr>
+        <tr><td>Validité</td><td>3 mois</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="blocs">
+    <div class="chantier">
+      <div class="etiquette">Objet</div>
+      <p class="objet">Réfection de la couverture en ardoise, maison 2 pans</p>
+      <div class="etiquette" style="margin-top:4mm">Adresse du chantier</div>
+      <p style="margin:0">14 rue de Kerjean, 22580 Plouha</p>
+      <p style="margin:1mm 0 0">Travaux de rénovation sur maison d'habitation de plus de 2 ans</p>
+    </div>
+    <div class="client">
+      <div class="etiquette">Client</div>
+      <p><strong>M. et Mme Le Goff</strong></p>
+      <p>14 rue de Kerjean</p>
+      <p>22580 Plouha</p>
+    </div>
+  </div>
+
+  <table class="lignes">
+    <thead>
+      <tr><th class="n">N°</th><th>Désignation</th><th class="q">Qté</th><th class="u">U</th><th class="pu">PU HT</th><th class="t">Total HT</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Installation de chantier, échafaudage de pied sur les deux façades, protections</td><td class="q">1</td><td class="u">u</td><td class="pu">1 450,00 €</td><td class="t">1 450,00 €</td></tr>
+      <tr><td class="n">2</td><td>Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie</td><td class="q">96</td><td class="u">m²</td><td class="pu">14,00 €</td><td class="t">1 344,00 €</td></tr>
+      <tr><td class="n">3</td><td>Fourniture et pose d'un écran sous-toiture HPV</td><td class="q">96</td><td class="u">m²</td><td class="pu">9,50 €</td><td class="t">912,00 €</td></tr>
+      <tr><td class="n">4</td><td>Fourniture et pose de liteaux sapin traité</td><td class="q">96</td><td class="u">m²</td><td class="pu">12,00 €</td><td class="t">1 152,00 €</td></tr>
+      <tr><td class="n">5</td><td>Couverture en ardoise naturelle d'Espagne 1er choix 32×22 : pose au crochet inox, pente 45°, rampant 6 m</td><td class="q">96</td><td class="u">m²</td><td class="pu">118,00 €</td><td class="t">11 328,00 €</td></tr>
+      <tr><td class="n">6</td><td>Faîtage zinc</td><td class="q">8</td><td class="u">ml</td><td class="pu">62,00 €</td><td class="t">496,00 €</td></tr>
+      <tr><td class="n">7</td><td>Gouttière demi-ronde zinc de 25 (2 longueurs de 8 m)</td><td class="q">16</td><td class="u">ml</td><td class="pu">58,00 €</td><td class="t">928,00 €</td></tr>
+      <tr><td class="n">8</td><td>Descente d'eau pluviale zinc Ø80, hauteur 5,50 m</td><td class="q">2</td><td class="u">u</td><td class="pu">245,00 €</td><td class="t">490,00 €</td></tr>
+      <tr><td class="n">9</td><td>Dauphin fonte Ø80 en pied de descente</td><td class="q">2</td><td class="u">u</td><td class="pu">135,00 €</td><td class="t">270,00 €</td></tr>
+      <tr><td class="n">10</td><td>Nettoyage du chantier et repli de l'échafaudage</td><td class="q">1</td><td class="u">u</td><td class="pu">280,00 €</td><td class="t">280,00 €</td></tr>
+    </tbody>
+  </table>
+
+  <div class="bas">
+    <div class="conditions">
+      <div class="etiquette">Conditions</div>
+      <p>Acompte de 30 % à la commande, solde à la réception des travaux.</p>
+      <p>Délai d'exécution : 3 semaines, selon conditions météo.</p>
+      <p>TVA à taux réduit de 10 % (logement achevé depuis plus de 2 ans).</p>
+      <p>Garantie décennale et responsabilité civile : Assurances du Trégor, contrat n° 22-0458-D.</p>
+    </div>
+    <table class="totaux">
+      <tr><td>Total HT</td><td>18 650,00 €</td></tr>
+      <tr><td>TVA 10 %</td><td>1 865,00 €</td></tr>
+      <tr class="ttc"><td>Total TTC</td><td>20 515,00 €</td></tr>
+    </table>
+  </div>
+
+  <div class="accord">
+    <div class="case">Bon pour accord, date et signature du client :</div>
+    <div class="case">Pour l'entreprise :<br><br>Yann Le Bihan</div>
+  </div>
+
+  <div class="pied">
+    Couverture Le Bihan — Entreprise individuelle — 7 ZA de Kerlan, 22470 Plouézec<br>
+    SIRET 000 000 000 00041 — APE 4391B — TVA intracommunautaire FR00 000000000
+  </div>
+
+</div>
+</body>
+</html>

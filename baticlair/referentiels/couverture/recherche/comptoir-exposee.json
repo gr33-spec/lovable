@@ -1,0 +1,1150 @@
+{
+ "famille": "comptoir-exposee",
+ "generated": "2026-11-20",
+ "entrees": [
+  {
+   "id": "faitiere_armor_729_pieces_par_ml",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Armor 33 (réf. 729)",
+   "attribut": "pieces_par_ml",
+   "valeur": 3,
+   "unite": "u/ml",
+   "condition": "longueur utile 0,33 m (nom « 33 », négoces « 0,33 » / « 0,33 m ») ; 1 000 ÷ 330 = 3,03 → 3 au ml ; ajouter 1 pièce par about (arrondi au supérieur)",
+   "regions": [
+    "Bretagne",
+    "Pays de la Loire"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Point.P (même article chez Bretagne Matériaux, A3434781) : titre de fiche « Faîtière Armor 33 à emboîtement … vieilli masse 3 / ml teinte C1044 EDILIANS »",
+     "url": "https://www.pointp.fr/p/couverture/faitiere-armor-33-a-emboitement-imerys-toiture-terre-vieilli-masse-3-ml-A3434781",
+     "type": "negoce",
+     "extrait": "Faîtière Armor 33 à emboîtement terre vieilli masse 3 / ml teinte C1044 EDILIANS (titre ; page 403 au robot, lue par le moteur de recherche)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+     "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+     "type": "negoce",
+     "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Leadermat, « Faîtière Armor - 0,33 - Vieillie Masse » (réf. 115599)",
+     "url": "https://www.leadermat.com/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033",
+     "type": "negoce",
+     "extrait": "Faîtière Armor - 0,33 - Vieillie Masse … 370 mm … 1 palette 184 unités",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729)",
+     "url": "https://edilians.com/faitiere-armor-33.html",
+     "type": "fabricant",
+     "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "pieces_par_ml = 1000 / longueur_utile_mm",
+    "longueur_utile_mm": 330,
+    "calcul": 3.03,
+    "publie": 3,
+    "ok": true
+   },
+   "ecart": "Edilians ne publie ni longueur utile ni nombre au ml sur sa page ; le nombre vient de deux négoces indépendants (Point.P/Bretagne Matériaux : « 3 / ml » ; Tanguy : « 0,33 m ») et du nom « 33 » du fabricant. Leadermat et Quéguiner (même fiche) écrivent « 0,33 ». Pas de confirme_fabricant : aucune fiche Edilians datée ne l'écrit.",
+   "famille": "points_singuliers"
+  },
+  {
+   "id": "faitiere_armor_729_recouvrement",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Armor 33 (réf. 729)",
+   "attribut": "recouvrement_entre_faitieres",
+   "valeur": 40,
+   "unite": "mm",
+   "condition": "calcul : longueur hors tout 370 mm − longueur utile 330 mm (emboîtement)",
+   "regions": [
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729)",
+     "url": "https://edilians.com/faitiere-armor-33.html",
+     "type": "fabricant",
+     "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+     "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+     "type": "negoce",
+     "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Déduit par le calcul (370 hors tout chez Edilians, 0,33 m utile chez les négoces) ; aucune source n'écrit le recouvrement.",
+   "famille": "points_singuliers"
+  },
+  {
+   "id": "faitiere_armor_729_coloris",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Armor 33 (réf. 729)",
+   "attribut": "coloris",
+   "valeur": [
+    "Rouge (C1029, code RO)",
+    "Vieilli Masse (C1044, code VM)",
+    "Émaillé Brun (E03)"
+   ],
+   "unite": "liste",
+   "condition": "Rouge et Vieilli Masse en stock courant en Bretagne (Tanguy, Leadermat) ; Émaillé Brun sur commande, environ 3 fois plus cher (Quéguiner 23,33 € TTC contre 6,91 €)",
+   "regions": [
+    "Bretagne"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729)",
+     "url": "https://edilians.com/faitiere-armor-33.html",
+     "type": "fabricant",
+     "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+     "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+     "type": "negoce",
+     "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Quéguiner Matériaux, « Faîtière Armor - 0,33 - Emaille Brun » (réf. 115600 ; même fiche que Leadermat)",
+     "url": "https://www.queguiner.fr/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033-0",
+     "type": "negoce",
+     "extrait": "Couleur Emaille Brun · Longueur 370 mm · Poids 3.1 kg · Conditionnement 1 palette 176 unités",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Passe 3b : Émaillé Brun à une seule source ; Quéguiner le vend (réf. 115600) : deuxième source.",
+   "famille": "points_singuliers"
+  },
+  {
+   "id": "faitiere_armor_729_palette_emaille",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière Armor 33 Émaillé Brun",
+   "attribut": "conditionnement",
+   "valeur": 176,
+   "unite": "u/palette",
+   "condition": "Rouge et Vieilli Masse : 184 par palette (PC184, déjà confirmé)",
+   "regions": [
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Quéguiner Matériaux, « Faîtière Armor - 0,33 - Emaille Brun » (réf. 115600 ; même fiche que Leadermat)",
+     "url": "https://www.queguiner.fr/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033-0",
+     "type": "negoce",
+     "extrait": "Couleur Emaille Brun · Longueur 370 mm · Poids 3.1 kg · Conditionnement 1 palette 176 unités",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Seule la fiche Quéguiner donne 176 pour l'émaillé.",
+   "famille": "points_singuliers"
+  },
+  {
+   "id": "faitiere_ardoise_40_720_pieces_par_ml",
+   "sous_famille": "faîtage ardoise",
+   "marque": "Edilians",
+   "modele": "Faîtière ardoise de 40 Ouverture 17 (réf. 720)",
+   "attribut": "pieces_par_ml",
+   "valeur": 2.5,
+   "unite": "u/ml",
+   "condition": "longueur utile 0,40 m (hors tout 445 mm) ; 1 000 ÷ 400 = 2,5",
+   "regions": [
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Edilians, page produit « Faîtière ardoise de 40 Ouverture 17 » (réf. 720)",
+     "url": "https://edilians.com/faitiere-ardoise-de-40-ouverture-17.html",
+     "type": "fabricant",
+     "extrait": "Référence 720 … Longueur hors tout 445 mm … Poids en Kg 4.2",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Point.P, titre de fiche « Faîtière ardoisee bretagne à emboîtement terre cuite vieilli masse 2,5 / ml teinte C1044 EDILIANS »",
+     "url": "https://www.pointp.fr/p/couverture/faitiere-ardoisee-a-emboitement-imerys-toiture-terre-cuite-vieilli-A1228889",
+     "type": "negoce",
+     "extrait": "Faîtière ardoisee bretagne à emboîtement … 2,5 / ml (titre, lu par le moteur de recherche)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+     "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+     "type": "negoce",
+     "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Point.P écrit « Faîtière ardoisee bretagne … 2,5 / ml » sans numéro de référence ; Tanguy parle de faîtières à emboîtement « (0,40 m) » ; le rattachement à la réf. 720 est une lecture.",
+   "famille": "points_singuliers"
+  },
+  {
+   "id": "ardoise_palette_regle_poids",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "tous formats",
+   "attribut": "ardoises_par_palette_estimation",
+   "valeur": "≈ 1 350 kg ÷ poids unitaire (poids = L × l × e × 2,8 g/cm³)",
+   "unite": "u/palette",
+   "condition": "palette de 1 300 à 1 400 kg dans la plupart des cas (palettes publiées de 1,13 à 1,66 t, ardoise-modeles.json, 20/11/2026) ; estimation pour l'affichage, à faire confirmer par le négoce",
+   "regions": [
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Ardoises Catteau (négoce), « Les classiques »",
+     "url": "http://www.ardoises-catteau.com/les-ardoises-catteau/les-classiques/",
+     "type": "negoce",
+     "extrait": "Ardoise fine > + – 2.7 mm > 2.300 pièces/palettes … Ardoise épaisse > 7 à 10 mm > 800 pièces/palettes (32 x 22)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+     "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+     "type": "negoce",
+     "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Apok (négoce belge), « Ardoise naturelle Samaca 55 Primera 4 mm 40x25 cm »",
+     "url": "https://www.apok.be/fr-be/products/ardoise-naturelle-samaca-55-primera-4mm-40x25cm",
+     "type": "negoce",
+     "extrait": "Épaisseur 4 mm … Pièce par m² 25 … Pièce par Palette 950",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "poids_unitaire_kg_3_5mm": {
+     "27x18": 0.476,
+     "30x20": 0.588,
+     "32x22": 0.69,
+     "33x23": 0.744,
+     "35x22": 0.755,
+     "35x25": 0.858,
+     "40x22": 0.862,
+     "40x25": 0.98,
+     "45x30_5mm": 1.89,
+     "46x30_5mm": 1.932,
+     "50x25_5mm": 1.75
+    },
+    "estimation_1350kg": {
+     "27x18": 2840,
+     "30x20": 2300,
+     "32x22": 1960,
+     "33x23": 1810,
+     "35x22": 1790,
+     "35x25": 1570,
+     "40x22": 1570,
+     "40x25": 1380,
+     "45x30_5mm": 710,
+     "46x30_5mm": 700,
+     "50x25_5mm": 770
+    },
+    "verif_negoces": {
+     "27x18 : 2800 × 0,476": 1333,
+     "32x22 : 2000 × 0,690": 1380,
+     "40x22 : 1500 × 0,862": 1293,
+     "46x30 (5 mm) : 700 × 1,932": 1352,
+     "32x22 Catteau 2,7 mm : 2300 × 0,532": 1224,
+     "32x22 Catteau 3,5-4 mm : 1900 × 0,739": 1404,
+     "40x25 Samaca 4 mm : 950 × 1,12": 1064
+    }
+   },
+   "raison": "Aucun fabricant (Cupa, Samaca, Rathscheck) ne publie le nombre par palette ; la masse de palette déduite des négoces va de 1,0 à 1,45 t. Règle utile pour un ordre de grandeur, pas pour une commande.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_27x18",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "27x18",
+   "attribut": "ardoises_par_palette",
+   "valeur": 2800,
+   "unite": "u/palette",
+   "condition": "épaisseur non lue (A1-T1-S1) ; 2800 × 0,476 kg = 1 333 kg (3,5 mm)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+     "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+     "type": "negoce",
+     "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_40x22",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "40x22",
+   "attribut": "ardoises_par_palette",
+   "valeur": 1500,
+   "unite": "u/palette",
+   "condition": "1500 × 0,862 = 1 293 kg à 3,5 mm",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+     "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+     "type": "negoce",
+     "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_35x25",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "35x25",
+   "attribut": "ardoises_par_palette",
+   "valeur": 800,
+   "unite": "u/palette",
+   "condition": "800 pièces = 690 kg à 3,5 mm, 980 kg à 5 mm : ardoise probablement épaisse (5 à 7 mm)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+     "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+     "type": "negoce",
+     "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_40x25",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "40x25",
+   "attribut": "ardoises_par_palette",
+   "valeur": 950,
+   "unite": "u/palette",
+   "condition": "Samaca 55 Primera 4 mm ; Leroy Merlin donne 900 (épaisseur non lue) : écart de 5 %, épaisseur différente probable",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Apok (négoce belge), « Ardoise naturelle Samaca 55 Primera 4 mm 40x25 cm »",
+     "url": "https://www.apok.be/fr-be/products/ardoise-naturelle-samaca-55-primera-4mm-40x25cm",
+     "type": "negoce",
+     "extrait": "Épaisseur 4 mm … Pièce par m² 25 … Pièce par Palette 950",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_46x30",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "46x30",
+   "attribut": "ardoises_par_palette",
+   "valeur": 700,
+   "unite": "u/palette",
+   "condition": "700 × 1,932 (5 mm) = 1 352 kg ; le 45×30 n'est publié nulle part : même ordre de grandeur (≈ 710)",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+     "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+     "type": "negoce",
+     "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Un seul négoce (ou un groupe) ; carrière et épaisseur non dites ou propres à un produit ; à demander au comptoir.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_30x20",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "30x20",
+   "attribut": "ardoises_par_palette",
+   "valeur": "1 800 à 2 000",
+   "unite": "u/palette",
+   "condition": "Corrigé le 20/11/2026 (ardoise-modeles.json : Cupa Prestige, ancienne production d'Angers, Rathscheck = 1 800 à 2 000, confirmé par 3 sources) ; l'estimation par le poids (≈ 2 300) était trop haute. Gardé ici en une_source : le chiffre confirmé est dans ardoise-modeles.",
+   "regions": [
+    "France"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_33x23",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "33x23",
+   "attribut": "ardoises_par_palette",
+   "valeur": null,
+   "unite": "u/palette",
+   "condition": "non publié ; estimation par le poids : ≈ 1810 (1 350 kg ÷ 0.744 kg)",
+   "regions": [
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_35x22",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "35x22",
+   "attribut": "ardoises_par_palette",
+   "valeur": null,
+   "unite": "u/palette",
+   "condition": "non publié ; estimation par le poids : ≈ 1790 (1 350 kg ÷ 0.755 kg)",
+   "regions": [
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_45x30",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "45x30",
+   "attribut": "ardoises_par_palette",
+   "valeur": null,
+   "unite": "u/palette",
+   "condition": "non publié ; estimation par le poids : ≈ 710 (1 350 kg ÷ 1.89 kg)",
+   "regions": [
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_palette_50x25",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "50x25",
+   "attribut": "ardoises_par_palette",
+   "valeur": null,
+   "unite": "u/palette",
+   "condition": "non publié ; estimation par le poids : ≈ 770 (1 350 kg ÷ 1.75 kg)",
+   "regions": [
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "raison": "Aucun fabricant ni négoce consulté ne publie ce nombre ; ne pas l'afficher comme sûr.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_vente_au_mille",
+   "sous_famille": "ardoise naturelle",
+   "marque": "Cupa",
+   "modele": "Cupa 10 Excellence 40×22",
+   "attribut": "unite_de_vente",
+   "valeur": "au mille (MIL)",
+   "unite": "",
+   "condition": "Sobemat vend au mille et donne le poids du mille : 862 kg = 1 000 × 0,862 kg (poids Cupa 3,5 mm). Le « 690 kg » du 32×22 noté en passe 3b est aussi le poids du mille, pas de la palette",
+   "regions": [
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Sobemat, « ARDOISE CUPA 10 EXCELLENCE 40x22 CE-NF » (réf. ARD100215), vendue au mille",
+     "url": "https://www.sobemat.fr/produit/ardoise-cupa-10-excellence-40x22-ce-nf-QVJEMTAwMjE1",
+     "type": "negoce",
+     "extrait": "MIL … poids : 862 kg (mise à jour 16/11/2026)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "formule": "poids_mille = 1000 × poids_unitaire",
+    "calcul_kg": 862,
+    "publie_kg": 862,
+    "ok": true
+   },
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_crochets_pointe_sur_liteaux",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "",
+   "attribut": "part_crochets_pointe",
+   "valeur": 0.2,
+   "unite": "fraction",
+   "condition": "pose à l'agrafe sur liteaux : pointes là où l'agrafe ne passe pas (au droit de chaque chevron ou contre-liteau) et sur les parties voligées (égout : doublis et 1er rang) ; rives : ardoises à 2 clous, pas de crochet ; sur voligeage jointif : 100 % de pointes",
+   "regions": [
+    "France",
+    "Bretagne"
+   ],
+   "statut": "une_source",
+   "sources": [
+    {
+     "titre": "Manuel CAP couvreur, chapitre 21 « Quantitatif d'une couverture en ardoise au crochet »",
+     "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf",
+     "type": "guide",
+     "extrait": "4/5 agrafes, 1/5 pointes (lu en passe 1, ardoise.json)",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Ministère de la Culture, guide MOA/MOE « Ouvrages de couverture – Ardoises »",
+     "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+     "type": "guide",
+     "extrait": "Des crochets à pointes sont prévus pour le passage des chevrons. On parle de crochets agrafes et de crochets pointes.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cours BTS (lycée Ch. Péguy), « Lot 4-2 Couvertures en ardoises » §5.1.1",
+     "url": "https://chpbtsmendes.wordpress.com/wp-content/uploads/2015/03/lot-4-2-couvertures-en-ardoises.pdf",
+     "type": "guide",
+     "extrait": "Crochets à pointe pour fixation au droit des chevrons ou fermettes et sur volige.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Leroy Merlin, tutoriel PDF « Comment poser des ardoises ? »",
+     "url": "https://media.adeo.com/media/1434615/comment-poser-des-ardoises-5efeda16de57bc000920cd45.pdf",
+     "type": "guide",
+     "extrait": "Poursuivez la pose avec les ardoises et crochets agrafes sur les liteaux ou crochets pointes lorsque ces derniers ne passent pas.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "geometrie": "part ≈ (largeur d'appui + 2 cm) ÷ entraxe des chevrons",
+    "contre_liteau_4cm_entraxe_60": 0.1,
+    "chevron_8cm_sans_contre_liteau": 0.17,
+    "egout_volige": "≈ 2 rangs sur 30 à 40 rangs d'un rampant de 4 à 5 m : 5 à 7 %",
+    "total": "10 à 23 % selon support : 1/5 est dans la plage"
+   },
+   "raison": "Le chiffre 1/5 n'est écrit que dans le manuel CAP ; le Ministère, le cours BTS et le tutoriel Leroy Merlin confirment seulement le principe (pointes au passage des chevrons et sur volige). Frénéhard, Cupa et Rathscheck ne donnent aucune proportion.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "gouttiere_crochets_ecartement_littoral_neige",
+   "sous_famille": "gouttière",
+   "marque": "",
+   "modele": "pendante, nantaise, havraise",
+   "attribut": "ecartement_crochets",
+   "valeur": 0.5,
+   "unite": "m",
+   "condition": "0,50 m au plus partout (DTU 40.5 art. 5.2.1.1 et 5.2.1.2), « fonction des charges climatiques » sans valeur ; 0,40 m seulement pour la gouttière à l'anglaise (art. 5.2.1.3) et pour le crochet discret VMZINC (2,5/m, propre au produit)",
+   "regions": [
+    "France",
+    "Bretagne"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Progineer, synthèse du NF DTU 40.5 (art. 5.2.1.1 à 5.2.1.3)",
+     "url": "https://progineer.fr/workspace/regulation/dtu-40-5/",
+     "type": "guide",
+     "extrait": "écartement qui est fonction des charges climatiques … au plus 0,50 m ; havraises, nantaises : 0,50 m au maximum ; à l'anglaise : crochets à pied 0,40 m au maximum",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "CAPEB, calepin « Évacuation des eaux pluviales » (DTU 40.5 / 60.11)",
+     "url": "https://www.capeb.fr/www/capeb/media//herault/document/Evacuation_eaux_pluviales.pdf",
+     "type": "guide",
+     "extrait": "schémas de pose des crochets (valeurs en image) ; colliers PVC 2 m, fonte 2,70 m, cuivre 2,50 m",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "VMZINC, Le Catalogue 2026 (crochet discret)",
+     "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+     "type": "fabricant",
+     "extrait": "2,5 crochets pour 1 m de gouttière posée … 1 crochet discret tous les 40 cm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "RHEINZINK France, catalogue gamme zinc 2026",
+     "url": "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Brochures-Informations-Produit/catalogue-gamme-zinc-2026-v03-fr-fr.pdf",
+     "type": "fabricant",
+     "extrait": "climat marin : seulement la tenue de la patine ; aucun écartement de crochets publié",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "gouttieres-aluminium.fr, blog « Crochet gouttière »",
+     "url": "https://gouttieres-aluminium.fr/blog/crochet-gouttiere-types/",
+     "type": "autre",
+     "extrait": "En zone exposée (littoral, montagne), réduisez à 40-50 cm.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Azur Toiture Rénovation, « Crochets de gouttière »",
+     "url": "https://www.azurtoiturerenovation.fr/role-des-crochets-de-gouttiere/",
+     "type": "autre",
+     "extrait": "Espacement maximal de 50 cm … réduit à 40 cm en zone venteuse ou neigeuse ; crochets renforcés avec tirant neige",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Frénéhard & Michaux, fiche crochets de gouttière (hébergée par Denis Matériaux)",
+     "url": "https://media.denismateriaux.com/media/139488_qsfeq0108_cq.pdf",
+     "type": "fabricant",
+     "extrait": "en zone neige, crochets « légers » avec raidisseur ou tirant neige (extrait du moteur de recherche ; PDF non lu : certificat invalide puis 503)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "Aucune source sérieuse ne réduit l'écartement en bord de mer. Pour la neige : le DTU renvoie aux charges climatiques sans chiffre ; Frénéhard (extrait seulement) demande raidisseur ou tirant neige sur les crochets légers ; deux blogs d'artisans écrivent 40 cm en zone venteuse ou neigeuse (non fiable, attribué au DTU à tort). En bord de mer la contrainte est la matière (inox, cuivre, zinc), pas l'écartement.",
+   "raison": "0,40 m en bord de mer : a_confirmer (prudence d'atelier seulement).",
+   "famille": "zinguerie"
+  },
+  {
+   "id": "ardoise_situation_exposee_zone3",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "tous formats",
+   "attribut": "majoration_recouvrement",
+   "valeur": "R + 10 mm (retenir max(R + 10 mm, R × 1,10))",
+   "unite": "mm",
+   "condition": "zone III, situation exposée (≈ 5 km du littoral, falaises, îles, estuaires) ; pose au crochet et aux clous, pureau entier et développé",
+   "regions": [
+    "Bretagne",
+    "France"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.1.2 et §5.1.1.4, copie non officielle (dtu.golgoth.org)",
+     "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+     "type": "dtu",
+     "extrait": "valeur : +10 mm en zone III situation exposée ; tableaux 6 et 7 fonction de la zone et de la situation (valeur et référence seulement)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Progineer, synthèse du NF DTU 40.11",
+     "url": "https://progineer.fr/workspace/regulation/dtu-40-11/",
+     "type": "guide",
+     "extrait": "Le recouvrement doit être majoré de 10 mm en zone III situation exposée",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, catalogue architecte (texte DTU 1993 repris)",
+     "url": "https://www.cupapizarras.com/wp-content/uploads/2018/11/catalogue_architecte.pdf",
+     "type": "fabricant",
+     "extrait": "versant en site exposé (il est conseillé de majorer le recouvrement de 10 %)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck, brochure « L'ardoise » FR (2026)",
+     "url": "https://www.rathscheck.de/wp-content/uploads/2026/02/RS_Broschuere_L_Ardoise_12s_FR_Digital.pdf",
+     "type": "fabricant",
+     "extrait": "minimas valables en site normal ou protégé dans chaque région … site exposé (il est conseillé de majorer le recouvrement de 10%)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "ecart": "DTU 2020 : + 10 mm. Cupa et Rathscheck (texte de 1993) : conseil de + 10 %. Avec le tableau Cupa (Ph ≤ 5,5 m), les deux écarts restent sous 3 mm de 60 % à 170 % ; même crochet sauf aux bords d'arrondi.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "ardoise_situation_exposee_zones1_2",
+   "sous_famille": "ardoise naturelle",
+   "marque": "",
+   "modele": "tous formats",
+   "attribut": "majoration_recouvrement",
+   "valeur": "R × 1,10 arrondi au mm supérieur (≈ + 7 à + 10 mm)",
+   "unite": "mm",
+   "condition": "zones I et II, situation exposée ; la côte sud de Lorient à l'Espagne (Morbihan sud-est, Loire-Atlantique) est en zone 2 exposée",
+   "regions": [
+    "Bretagne",
+    "Pays de la Loire",
+    "France"
+   ],
+   "statut": "a_confirmer",
+   "sources": [
+    {
+     "titre": "Cupa Pizarras, catalogue architecte (texte DTU 1993 repris)",
+     "url": "https://www.cupapizarras.com/wp-content/uploads/2018/11/catalogue_architecte.pdf",
+     "type": "fabricant",
+     "extrait": "versant en site exposé (il est conseillé de majorer le recouvrement de 10 %)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck, brochure « L'ardoise » FR (2026)",
+     "url": "https://www.rathscheck.de/wp-content/uploads/2026/02/RS_Broschuere_L_Ardoise_12s_FR_Digital.pdf",
+     "type": "fabricant",
+     "extrait": "minimas valables en site normal ou protégé dans chaque région … site exposé (il est conseillé de majorer le recouvrement de 10%)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "calcul-pente.fr, page ardoise",
+     "url": "https://calcul-pente.fr/ardoise/",
+     "type": "autre",
+     "extrait": "En site exposé, le tableau ne s'applique plus … les fabricants conseillent de majorer le recouvrement de 10 %",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.1.2 et §5.1.1.4, copie non officielle (dtu.golgoth.org)",
+     "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+     "type": "dtu",
+     "extrait": "valeur : +10 mm en zone III situation exposée ; tableaux 6 et 7 fonction de la zone et de la situation (valeur et référence seulement)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, tableau de recouvrement (CSV, régions 1-3, Ph)",
+     "url": "https://www.cupapizarras.com/wp-content/uploads/2018/12/recubrimiento_fr-2.csv",
+     "type": "fabricant",
+     "extrait": "Region;proyeccion;Pendiente %;…;solape (sans colonne de situation)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "controle": {
+    "pente_%": {
+     "60": "z1 92→102 / +10mm 102 / zone2 103 ; z2 103→114 / 113 / zone3 113",
+     "80": "z1 80→88 / 90 / 89 ; z2 89→98 / 99 / 97",
+     "100": "z1 73→81 / 83 / 80 ; z2 80→88 / 90 / 89",
+     "120": "z1 69→76 / 79 / 77 ; z2 77→85 / 87 / 83",
+     "140": "z1 65→72 / 75 / 73 ; z2 73→81 / 83 / 80"
+    },
+    "lecture": "R normal → ×1,10 / +10 mm / R de la zone suivante en site normal (Ph ≤ 5,5 m, tableau Cupa)"
+   },
+   "raison": "Les tableaux 6 et 7 du DTU 2020 ont leurs propres valeurs par zone ET situation (zones I et II exposées incluses) mais ne sont pas lisibles (image, texte AFNOR). Cupa et Rathscheck (1993) disent : tableau valable en site normal ou protégé, + 10 % conseillé en site exposé quelle que soit la région. Les trois lectures (×1,10 ; +10 mm ; zone suivante) diffèrent de 0 à 5 mm.",
+   "famille": "ardoise"
+  },
+  {
+   "id": "tuile_situation_exposee",
+   "sous_famille": "tuile terre cuite",
+   "marque": "",
+   "modele": "DTU 40.21 / 40.211",
+   "attribut": "effet_situation_exposee",
+   "valeur": "pente minimale plus forte (colonne « exposé » des tableaux), pas de majoration de recouvrement",
+   "unite": "",
+   "condition": "ex. famille B sans écran, zone 1/2/3 : normal 40/50/60 %, exposé 60/70/80 % ; le recouvrement est fixé par le modèle (emboîtement)",
+   "regions": [
+    "France",
+    "Bretagne"
+   ],
+   "statut": "confirme",
+   "sources": [
+    {
+     "titre": "Edilians, Encyclopédie de la tuile terre cuite 2024 (tableaux extraits du DTU 40.21 / 40.211)",
+     "url": "https://edilians.com/media//wysiwyg/Encyclopedie/encyclopedie-tuiles-2024.pdf",
+     "type": "fabricant",
+     "extrait": "colonnes Protégé / Normal / Exposé par zone ; ex. famille B : 35% 35% 50% / 40% 50% 60% / 60% 70% 80%",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Koramic (Wienerberger), Guide de pose 2016, p. 7",
+     "url": "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/FR_MKT_DOC_KOR_GuidePoseKoramic_001.pdf",
+     "type": "fabricant",
+     "extrait": "DTU 40.21 … Protégé 35 … 35 … 50",
+     "consulte": "2026-11-19"
+    }
+   ],
+   "ecart": "La règle ardoise (+10 mm / +10 %) ne s'applique pas aux tuiles à emboîtement : en site exposé on contrôle la pente minimale et la fixation (régions de vent × site normal/exposé), déjà dans tuiles-emboitement.json.",
+   "famille": "tuile_emboitement"
+  }
+ ],
+ "verdict_ratios": [
+  {
+   "ratio": "Faîtière Armor : nombre au ml à demander",
+   "origine": "points-singuliers.json faitiere_armor_pieces_par_ml ; TESTEUR-NEGOCE-1",
+   "valeur_actuelle": "a_confirmer (null)",
+   "verdict": "corrige",
+   "bonne_valeur": "3 au ml (longueur utile 0,33 m) ; 2,5 au ml pour la faîtière ardoise de 40",
+   "sources": [
+    {
+     "titre": "Point.P (même article chez Bretagne Matériaux, A3434781) : titre de fiche « Faîtière Armor 33 à emboîtement … vieilli masse 3 / ml teinte C1044 EDILIANS »",
+     "url": "https://www.pointp.fr/p/couverture/faitiere-armor-33-a-emboitement-imerys-toiture-terre-vieilli-masse-3-ml-A3434781",
+     "type": "negoce",
+     "extrait": "Faîtière Armor 33 à emboîtement terre vieilli masse 3 / ml teinte C1044 EDILIANS (titre ; page 403 au robot, lue par le moteur de recherche)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+     "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+     "type": "negoce",
+     "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729)",
+     "url": "https://edilians.com/faitiere-armor-33.html",
+     "type": "fabricant",
+     "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Deux négoces indépendants + nom du modèle + calcul 1000/330."
+  },
+  {
+   "ratio": "Palette 32×22 « 2 200 à demander » ; poids 690 kg de la Cupa 10",
+   "origine": "ardoise.json passe 3b",
+   "valeur_actuelle": "690 kg lu comme poids de palette",
+   "verdict": "corrige",
+   "bonne_valeur": "690 kg = poids du mille (Sobemat vend au mille) ; palette ≈ 1,3-1,4 t",
+   "sources": [
+    {
+     "titre": "Sobemat, « ARDOISE CUPA 10 EXCELLENCE 40x22 CE-NF » (réf. ARD100215), vendue au mille",
+     "url": "https://www.sobemat.fr/produit/ardoise-cupa-10-excellence-40x22-ce-nf-QVJEMTAwMjE1",
+     "type": "negoce",
+     "extrait": "MIL … poids : 862 kg (mise à jour 16/11/2026)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "862 kg/mille en 40×22 = 1000 × 0,862 kg (Cupa)."
+  },
+  {
+   "ratio": "Crochets à pointe 1/5 sur liteaux",
+   "origine": "référentiel §25.1 ; regles-metier SKILL.md",
+   "valeur_actuelle": "1/5",
+   "verdict": "a_confirmer",
+   "bonne_valeur": "1/5 (CAP) compatible avec la géométrie (10 à 23 %) ; 100 % sur voligeage",
+   "sources": [
+    {
+     "titre": "Manuel CAP couvreur, chapitre 21 « Quantitatif d'une couverture en ardoise au crochet »",
+     "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf",
+     "type": "guide",
+     "extrait": "4/5 agrafes, 1/5 pointes (lu en passe 1, ardoise.json)",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Ministère de la Culture, guide MOA/MOE « Ouvrages de couverture – Ardoises »",
+     "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+     "type": "guide",
+     "extrait": "Des crochets à pointes sont prévus pour le passage des chevrons. On parle de crochets agrafes et de crochets pointes.",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Leroy Merlin, tutoriel PDF « Comment poser des ardoises ? »",
+     "url": "https://media.adeo.com/media/1434615/comment-poser-des-ardoises-5efeda16de57bc000920cd45.pdf",
+     "type": "guide",
+     "extrait": "Poursuivez la pose avec les ardoises et crochets agrafes sur les liteaux ou crochets pointes lorsque ces derniers ne passent pas.",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Un seul chiffre publié."
+  },
+  {
+   "ratio": "Crochets de gouttière à 0,40 m en bord de mer",
+   "origine": "zinguerie.json / référentiel",
+   "valeur_actuelle": "0,40 m",
+   "verdict": "a_confirmer",
+   "bonne_valeur": "0,50 m (DTU) partout ; 0,40 m seulement anglaise ou crochet discret VMZINC",
+   "sources": [
+    {
+     "titre": "Progineer, synthèse du NF DTU 40.5 (art. 5.2.1.1 à 5.2.1.3)",
+     "url": "https://progineer.fr/workspace/regulation/dtu-40-5/",
+     "type": "guide",
+     "extrait": "écartement qui est fonction des charges climatiques … au plus 0,50 m ; havraises, nantaises : 0,50 m au maximum ; à l'anglaise : crochets à pied 0,40 m au maximum",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VMZINC, Le Catalogue 2026 (crochet discret)",
+     "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+     "type": "fabricant",
+     "extrait": "2,5 crochets pour 1 m de gouttière posée … 1 crochet discret tous les 40 cm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Azur Toiture Rénovation, « Crochets de gouttière »",
+     "url": "https://www.azurtoiturerenovation.fr/role-des-crochets-de-gouttiere/",
+     "type": "autre",
+     "extrait": "Espacement maximal de 50 cm … réduit à 40 cm en zone venteuse ou neigeuse ; crochets renforcés avec tirant neige",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Aucune source sérieuse ne lie 0,40 m au littoral."
+  },
+  {
+   "ratio": "Situation exposée : + 10 mm",
+   "origine": "ardoise.json ardoise_zone_exposee",
+   "valeur_actuelle": "+10 mm zone III",
+   "verdict": "confirme",
+   "bonne_valeur": "zone III : max(R + 10, R × 1,10) ; zones I-II : R × 1,10 (à confirmer)",
+   "sources": [
+    {
+     "titre": "NF DTU 40.11 P1-1 (déc. 2020) §5.1.1.2 et §5.1.1.4, copie non officielle (dtu.golgoth.org)",
+     "url": "https://dtu.golgoth.org/docs/dtu-40-11-p32-201-couverture-en-ardoises/nf-dtu-40-11-p1-1-decembre-2020/5-execution-des-ouvrages-html",
+     "type": "dtu",
+     "extrait": "valeur : +10 mm en zone III situation exposée ; tableaux 6 et 7 fonction de la zone et de la situation (valeur et référence seulement)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Progineer, synthèse du NF DTU 40.11",
+     "url": "https://progineer.fr/workspace/regulation/dtu-40-11/",
+     "type": "guide",
+     "extrait": "Le recouvrement doit être majoré de 10 mm en zone III situation exposée",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, catalogue architecte (texte DTU 1993 repris)",
+     "url": "https://www.cupapizarras.com/wp-content/uploads/2018/11/catalogue_architecte.pdf",
+     "type": "fabricant",
+     "extrait": "versant en site exposé (il est conseillé de majorer le recouvrement de 10 %)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Rathscheck, brochure « L'ardoise » FR (2026)",
+     "url": "https://www.rathscheck.de/wp-content/uploads/2026/02/RS_Broschuere_L_Ardoise_12s_FR_Digital.pdf",
+     "type": "fabricant",
+     "extrait": "minimas valables en site normal ou protégé dans chaque région … site exposé (il est conseillé de majorer le recouvrement de 10%)",
+     "consulte": "2026-11-20"
+    }
+   ],
+   "explication": "Écart +10 mm / +10 % < 3 mm."
+  }
+ ],
+ "commande_comptoir": [
+  {
+   "article": "Faîtière Armor 33 Edilians (réf. 729)",
+   "ce_que_le_vendeur_demande": [
+    "coloris : Rouge C1029, Vieilli Masse C1044, Émaillé Brun (commande)",
+    "nombre de pièces (3 au ml + abouts)",
+    "à sceller ou à sec (vis/clou)"
+   ],
+   "unite_de_vente": "pièce",
+   "conditionnement": "palette de 184 (RO, VM) ; 176 (Émaillé Brun, une source)",
+   "sources": [
+    {
+     "titre": "Edilians, page produit « Faîtière Armor 33 » (réf. 729)",
+     "url": "https://edilians.com/faitiere-armor-33.html",
+     "type": "fabricant",
+     "extrait": "Référence 729 … Longueur hors tout 370 mm … Poids en Kg 3.1",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Edilians, catalogue Toiture ardoise 360 (octobre 2025)",
+     "url": "https://edilians.com/media/wysiwyg/uploads/TOITURE_ARDOISE_360_web-oct-2025.pdf",
+     "type": "fabricant",
+     "extrait": "Fait Armor PC184 VM 077439 … Fait Armor PC184 RO 077556 … Fait Armor U VM 018287",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Tanguy (négoce breton), « EDILIANS FAITIERE ARMOR 33 VIEILLI MASSE C1044 REF 729 »",
+     "url": "https://www.tanguy.fr/couverture-etancheite/tuiles/tuile-faitiere/edilians-ime-faitiere-armor-vieilli-0m33",
+     "type": "negoce",
+     "extrait": "faîtières Armor en rouge intemporel ou en finition vieillie pour un cachet authentique (0,33 m) ; variantes ROUGE C1029 et VIEILLI MASSE C1044",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Quéguiner Matériaux, « Faîtière Armor - 0,33 - Emaille Brun » (réf. 115600 ; même fiche que Leadermat)",
+     "url": "https://www.queguiner.fr/toiture/couverture/accessoires-de-couverture/autres-accessoires-couverture/faitiere-armor-033-0",
+     "type": "negoce",
+     "extrait": "Couleur Emaille Brun · Longueur 370 mm · Poids 3.1 kg · Conditionnement 1 palette 176 unités",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Point.P (même article chez Bretagne Matériaux, A3434781) : titre de fiche « Faîtière Armor 33 à emboîtement … vieilli masse 3 / ml teinte C1044 EDILIANS »",
+     "url": "https://www.pointp.fr/p/couverture/faitiere-armor-33-a-emboitement-imerys-toiture-terre-vieilli-masse-3-ml-A3434781",
+     "type": "negoce",
+     "extrait": "Faîtière Armor 33 à emboîtement terre vieilli masse 3 / ml teinte C1044 EDILIANS (titre ; page 403 au robot, lue par le moteur de recherche)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Ardoise naturelle hors 32×22",
+   "ce_que_le_vendeur_demande": [
+    "format",
+    "carrière / marque et choix",
+    "épaisseur",
+    "nombre (pièces ou milliers)"
+   ],
+   "unite_de_vente": "pièce, au mille ou palette",
+   "conditionnement": "palette selon épaisseur : 27×18 ≈ 2 800 ; 40×22 ≈ 1 500 ; 40×25 900-950 ; 35×25 800 (épaisse) ; 46×30 ≈ 700 ; autres : à demander",
+   "sources": [
+    {
+     "titre": "Leroy Merlin / Tecnomat (même groupe, vendeur Europe Matériaux) : titres « PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 », « … 2000 … 32X22 », « … 1500 … 40X22 », « … 900 … 40X25 », « … 800 … 35X25 », « … 700 … 46X30 »",
+     "url": "https://www.tecnomat.fr/produits/palette-de-2800-ardoises-naturelles-27x18-a1-t1-s1-83385025.html",
+     "type": "negoce",
+     "extrait": "PALETTE DE 2800 ARDOISES NATURELLES 27X18 A1-T1-S1 (titres lus par le moteur de recherche ; pages 403 au robot, épaisseur non lue)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Apok (négoce belge), « Ardoise naturelle Samaca 55 Primera 4 mm 40x25 cm »",
+     "url": "https://www.apok.be/fr-be/products/ardoise-naturelle-samaca-55-primera-4mm-40x25cm",
+     "type": "negoce",
+     "extrait": "Épaisseur 4 mm … Pièce par m² 25 … Pièce par Palette 950",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Sobemat, « ARDOISE CUPA 10 EXCELLENCE 40x22 CE-NF » (réf. ARD100215), vendue au mille",
+     "url": "https://www.sobemat.fr/produit/ardoise-cupa-10-excellence-40x22-ce-nf-QVJEMTAwMjE1",
+     "type": "negoce",
+     "extrait": "MIL … poids : 862 kg (mise à jour 16/11/2026)",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Cupa Pizarras, FAQ « poids d'une ardoise naturelle » (tableau par format et épaisseur)",
+     "url": "https://www.cupapizarras.com/fr/centre-ressources/faqs/poids-ardoise/",
+     "type": "fabricant",
+     "extrait": "masse volumique de 2,8 grammes par centimètre cube … 32 x 22 cm 0,690 … 40 x 25 cm 0,980 (kg, 3,5 mm)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Crochets d'ardoise à pointe (avec pose à l'agrafe)",
+   "ce_que_le_vendeur_demande": [
+    "longueur, Ø, nuance",
+    "nombre (≈ 1/5 du total sur liteaux ; tout en pointe sur volige)"
+   ],
+   "unite_de_vente": "boîte",
+   "conditionnement": "pointes par 700 (7-14 cm), 500 (15-16 cm)",
+   "sources": [
+    {
+     "titre": "Manuel CAP couvreur, chapitre 21 « Quantitatif d'une couverture en ardoise au crochet »",
+     "url": "https://www.fichier-pdf.fr/2020/04/05/1q/1q.pdf",
+     "type": "guide",
+     "extrait": "4/5 agrafes, 1/5 pointes (lu en passe 1, ardoise.json)",
+     "consulte": "2026-11-19"
+    },
+    {
+     "titre": "Ministère de la Culture, guide MOA/MOE « Ouvrages de couverture – Ardoises »",
+     "url": "https://www.culture.gouv.fr/Media/Thematiques/Monuments-historiques-Sites-patrimoniaux-remarquables/Fichiers/Guides-MOA-MOE/Guide-de-maitrise-d-ouvrage-et-de-maitrise-d-aeuvre-Ouvrages-de-couverture-ardoises",
+     "type": "guide",
+     "extrait": "Des crochets à pointes sont prévus pour le passage des chevrons. On parle de crochets agrafes et de crochets pointes.",
+     "consulte": "2026-11-20"
+    }
+   ]
+  },
+  {
+   "article": "Crochets de gouttière",
+   "ce_que_le_vendeur_demande": [
+    "profil et développé",
+    "matière (inox ou cuivre en bord de mer)",
+    "tirant neige / raidisseur en zone de neige",
+    "nombre : 1 tous les 0,50 m + 1"
+   ],
+   "unite_de_vente": "pièce ou carton",
+   "conditionnement": "carton de 100 / 50 selon développé",
+   "sources": [
+    {
+     "titre": "Progineer, synthèse du NF DTU 40.5 (art. 5.2.1.1 à 5.2.1.3)",
+     "url": "https://progineer.fr/workspace/regulation/dtu-40-5/",
+     "type": "guide",
+     "extrait": "écartement qui est fonction des charges climatiques … au plus 0,50 m ; havraises, nantaises : 0,50 m au maximum ; à l'anglaise : crochets à pied 0,40 m au maximum",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "VMZINC, Le Catalogue 2026 (crochet discret)",
+     "url": "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Catalogues/CATALOGUE%20VMZINC%202026.pdf",
+     "type": "fabricant",
+     "extrait": "2,5 crochets pour 1 m de gouttière posée … 1 crochet discret tous les 40 cm",
+     "consulte": "2026-11-20"
+    },
+    {
+     "titre": "Frénéhard & Michaux, fiche crochets de gouttière (hébergée par Denis Matériaux)",
+     "url": "https://media.denismateriaux.com/media/139488_qsfeq0108_cq.pdf",
+     "type": "fabricant",
+     "extrait": "en zone neige, crochets « légers » avec raidisseur ou tirant neige (extrait du moteur de recherche ; PDF non lu : certificat invalide puis 503)",
+     "consulte": "2026-11-20"
+    }
+   ]
+  }
+ ]
+}

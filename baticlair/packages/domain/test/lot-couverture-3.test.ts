@@ -21,7 +21,8 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Descente PVC Ø80 grise, hauteur 5 m", quantity: "2", unit: "u" },
     ],
     questions: [],
-    couleurs: { vert: 2, orange: 1, gris: 0 },
+  // Greg, 22 novembre 2026 : les tubes de 2 m sont une valeur par défaut validée ; leur ligne n'est plus orange.
+    couleurs: { vert: 3, orange: 0, gris: 0 },
   },
   {
     nom: "Gouttière alu anthracite sans développé",
@@ -32,7 +33,8 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Descente alu Ø80, hauteur 5 m", quantity: "1", unit: "u" },
     ],
     questions: ["Gouttière de 25, de 28, de 33 ou de 40 ?"],
-    couleurs: { vert: 0, orange: 3, gris: 0 },
+  // Greg, 22 novembre 2026 : les tubes de 2 m sont une valeur par défaut validée ; leur ligne n'est plus orange.
+    couleurs: { vert: 1, orange: 2, gris: 0 },
   },
 ];
 

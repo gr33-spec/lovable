@@ -1,0 +1,324 @@
+{
+ "posees": [
+  {
+   "key": "param:support_sortie",
+   "text": "Sortie de toit : sur quelle couverture ?",
+   "options": [
+    "Ardoise ou tuile",
+    "Zinc"
+   ],
+   "reponse": "Ardoise ou tuile"
+  },
+  {
+   "key": "param:surface@couverture-ardoises-crochet__5",
+   "text": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : surface du toit ?",
+   "options": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "reponse": "3.2 m2"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:raccord_couverture",
+   "text": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+   "options": [
+    "Pour tuiles (mécaniques, canal)",
+    "Pour ardoises",
+    "Pour tuiles plates"
+   ],
+   "reponse": "Pour ardoises"
+  },
+  {
+   "key": "param:qualite_ardoise@couverture-ardoises-crochet__4",
+   "text": "Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  },
+  {
+   "key": "param:qualite_ardoise@couverture-ardoises-crochet__5",
+   "text": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Ardoise naturelle 30×20",
+    "quantite": "7027",
+    "unite": "pièces",
+    "affiche": "7 027 pièces",
+    "etat": "ready",
+    "precision": "140 m² × 47,8 ardoises/m² (crochet 10 cm, pente 50°) + 5 % de marge",
+    "lignes": [
+     "4",
+     "5"
+    ],
+    "attend": [
+     "param:qualite_ardoise@couverture-ardoises-crochet__4",
+     "param:surface@couverture-ardoises-crochet__5"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Noues en zinc",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "4 noues de 1,80 m",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Raccords d'étanchéité pour ardoise, fenêtre 78 × 98",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Raccords pour ardoise",
+    "lignes": [
+     "7"
+    ],
+    "attend": [
+     "param:raccord_couverture"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Abergement de cheminée en zinc",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "périmètre 3 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières terre cuite",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Sorties de toit Ø125 pour VMC",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "Dépose de la couverture existante Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "Dépose des anciens châssis de toit Dépose sans réemploi.",
+   "Évacuation des gravats Tri et évacuation des gravats en déchetterie agréée.",
+   "Fin de chantier Nettoyage du chantier et repli de l'échafaudage."
+  ],
+  "questions": [
+   "param:support_sortie",
+   "param:surface@couverture-ardoises-crochet__5",
+   "param:faconnage@pieces-pliees",
+   "param:raccord_couverture",
+   "param:qualite_ardoise@couverture-ardoises-crochet__4",
+   "param:qualite_ardoise@couverture-ardoises-crochet__5"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 30×20",
+    "quantite": "7184",
+    "unite": "pièces",
+    "affiche": "7 184 pièces",
+    "etat": "ready",
+    "precision": "140 m² × 47,8 ardoises/m² (crochet 10 cm, pente 50°) + 5 % de marge ; 3,2 m² × 46,6 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "4",
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Crochets d'ardoise inox standard, longueur 10 cm",
+    "quantite": "157",
+    "unite": "pièces",
+    "affiche": "157 pièces",
+    "etat": "ready",
+    "precision": "un par ardoise commandée",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Noues en zinc",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": "4 noues de 1,80 m",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Raccords pour ardoise",
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "1",
+    "unite": "pièce",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": "pour façonner l'abergement de cheminée, développé 33 cm",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtières terre cuite",
+    "quantite": "33",
+    "unite": "pièces",
+    "affiche": "33 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Embase plomb de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125, pour ardoise ou tuile",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chapeau de sortie de toit",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "Ø 125",
+    "lignes": [
+     "10"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [],
+  "sansFourniture": [
+   "Installation de chantier Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "Dépose de la couverture existante Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "Dépose des anciens châssis de toit Dépose sans réemploi.",
+   "Évacuation des gravats Tri et évacuation des gravats en déchetterie agréée.",
+   "Fin de chantier Nettoyage du chantier et repli de l'échafaudage."
+  ],
+  "questions": []
+ }
+}

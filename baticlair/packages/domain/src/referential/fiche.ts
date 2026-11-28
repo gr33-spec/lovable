@@ -51,16 +51,45 @@ const singular = (t: string) =>
     .replace(/^(?:nombre|nb) (?:de |d )?/, "nb ")
     .trim();
 
-/** Le paramètre du référentiel que nomme une donnée de la fiche (« rampant », « nombre de descentes »), parmi ceux d'un toit. */
-export function paramOfDonnee(ref: Referential, name: string): ParamDef | null {
-  const n = singular(name);
-  const defs = ref.workItems.flatMap((w) => w.params).filter((p) => (FICHE_PARAMS_CHANTIER as readonly string[]).includes(p.key));
-  return (
-    defs.find((p) => {
-      const names = [p.key.replace(/_/g, " "), p.label, ...(p.textLabels ?? [])].map(singular);
+/**
+ * La donnée d'une fiche de métier que NOMME un mot du devis ou du modèle (« rampant », « nombre de descentes », « longueur
+ * des bacs »), parmi `defs`. Retour de Greg du 18 novembre 2026 (D-2026-024, « bacs de 4 m ») : « Si l'information fait
+ * partie du devis, il ne faut évidemment pas poser la question ». Les mots sont ceux de la fiche du métier (`textLabels`) ;
+ * un nom écrit avec une précision entre parenthèses (« rampant (longueur des bacs) ») est essayé entier, puis par morceau.
+ */
+/** Les noms d'une donnée de la fiche, au singulier : calculés une fois (la fiche ne change pas). */
+const NOMS = new WeakMap<ParamDef, string[]>();
+function nomsDeLaDonnee(p: ParamDef): string[] {
+  let n = NOMS.get(p);
+  if (!n) NOMS.set(p, (n = [p.key.replace(/_/g, " "), p.label, ...(p.textLabels ?? [])].map(singular)));
+  return n;
+}
+
+export function paramParNom(defs: readonly ParamDef[], name: string): ParamDef | null {
+  const morceaux = [name, ...name.split(/[()]/)].map((m) => singular(m.replace(/_/g, " "))).filter((m, i, all) => m.length > 0 && all.indexOf(m) === i);
+  for (const n of morceaux) {
+    const def = defs.find((p) => {
+      const names = nomsDeLaDonnee(p);
       return names.includes(n) || names.some((x) => x.length > 3 && (n === `nb ${x}` || `${n}` === x.replace(/^longueur (?:du |de la |des )?/, "")));
-    }) ?? null
-  );
+    });
+    if (def) return def;
+  }
+  return null;
+}
+
+/** Le paramètre du référentiel que nomme une donnée de la fiche (« rampant », « nombre de descentes »), parmi ceux d'un toit. */
+// La vitesse (Greg, 23 novembre 2026 : « moins de 2 secondes par réponse ») : la fiche est refaite à chaque réponse et
+// rapproche plusieurs fois les mêmes noms ; la fiche du métier ne change pas, la réponse d'un nom est gardée.
+const PARAM_PAR_NOM = new WeakMap<Referential, Map<string, ParamDef | null>>();
+export function paramOfDonnee(ref: Referential, name: string): ParamDef | null {
+  let deja = PARAM_PAR_NOM.get(ref);
+  if (!deja) PARAM_PAR_NOM.set(ref, (deja = new Map()));
+  if (deja.has(name)) return deja.get(name)!;
+  // Le nom le plus précis d'abord : la donnée qui porte ce mot dans ses propres mots (« longueur des bacs » du joint debout).
+  const defs = ref.workItems.flatMap((w) => w.params).filter((p) => (FICHE_PARAMS_CHANTIER as readonly string[]).includes(p.key));
+  const trouve = paramParNom(defs, name);
+  deja.set(name, trouve);
+  return trouve;
 }
 
 const ORIGINES: Record<string, FicheOrigine> = { lue: "devis", lu: "devis", devis: "devis", "lue au devis": "devis", deduite: "deduite", deduit: "deduite", manquante: "manquante", manquant: "manquante", reponse: "reponse" };

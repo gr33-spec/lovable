@@ -1,0 +1,20 @@
+{
+  "accords": [
+    {"article": "Écran de sous-toiture HPV, rouleau 1,50 × 50 m", "quantite": 2, "unite": "rouleaux"},
+    {"article": "Fenêtre de toit Velux GGL SK06 114x118", "quantite": 2, "unite": "pièces"},
+    {"article": "Raccord d'étanchéité Velux EDW SK06 (tuiles)", "quantite": 2, "unite": "pièces"},
+    {"article": "Fenêtre de toit Velux GGL CK02 55x78", "quantite": 1, "unite": "pièces"},
+    {"article": "Raccord d'étanchéité Velux EDW CK02 (tuiles)", "quantite": 1, "unite": "pièces"},
+    {"article": "Lanterne / chapeau de sortie de toit Ø125", "quantite": 1, "unite": "pièce"},
+    {"article": "Plomb laminé 1,5 mm, largeur 30 cm (4 ml de bande)", "quantite": 1, "unite": "rouleau"}
+  ],
+  "desaccords": [
+    {"article": "Faîtières demi-rondes HP 10 ardoisé", "controleur": "23 pièces", "reference": "27 pièces", "ecart": "Quantité différente : 23 contre 27 pièces, même unité."},
+    {"article": "Liteaux 27×40", "controleur": "270 ml", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 270 ml ; la référence ne chiffre pas (pureau minimal de tuile manquant)."},
+    {"article": "Tuiles terre cuite HP 10 Huguenot ardoisé", "controleur": "1026 pièces", "reference": "absent", "ecart": "Article présent chez le contrôleur, absent de la liste de référence."},
+    {"article": "Tuile de rive à rabat HP 10 ardoisé, gauche", "controleur": "17 pièces", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 17 pièces ; la référence ne chiffre pas (ligne rives : « Ardoises », longueur d'ardoise manquante)."},
+    {"article": "Tuile de rive à rabat HP 10 ardoisé, droite", "controleur": "17 pièces", "reference": "à chiffrer", "ecart": "Le contrôleur chiffre 17 pièces ; la référence ne chiffre pas (ligne rives : « Ardoises », longueur d'ardoise manquante)."},
+    {"article": "Ardoises", "controleur": "absent", "reference": "à chiffrer", "ecart": "Article présent à la référence (à chiffrer), absent chez le contrôleur."},
+    {"article": "Tuile à douille HP 10 / embase plomb de sortie de toit", "controleur": "1 pièce (tuile à douille)", "reference": "1 pièce (embase plomb Ø 125, ardoise ou tuile)", "ecart": "Même quantité mais article différent : tuile à douille d'un côté, embase plomb de l'autre."}
+  ]
+}

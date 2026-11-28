@@ -1,0 +1,7 @@
+{
+ "param:coudes_par_descente ¦ Tes « 2 jeux de coudes » par descente, ça fait combien de coudes ?": false,
+ "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?": false,
+ "param:pente ¦ Pente du toit ?": false,
+ "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?": false,
+ "param:nb_descentes ¦ Combien de descentes pour cette gouttière ?": true
+}

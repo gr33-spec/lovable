@@ -1,0 +1,232 @@
+# Coordination entre discussions (écrans partagés)
+
+> **Toute nouvelle discussion crée sa branche depuis `claude/saas-achat-artisans-prompt-1lyihx`, jamais depuis `main`, même si `main` est la branche par défaut.** (Greg, 27 novembre 2026)
+
+Chaque discussion écrit ici ce qu'elle touche, et lit ce que les autres touchent, avant de modifier un écran partagé.
+
+
+> **RÈGLE POUR TOUTES LES DISCUSSIONS (Greg, 28 novembre 2026) : PRENDS LES INITIATIVES QUI ONT DU SENS.** Pense chaque
+> fonctionnalité de bout en bout, comme un vrai produit : si quelque chose manque pour qu'un artisan s'y retrouve (un onglet,
+> un bouton, un retour en arrière, un message clair), ajoute-le sans attendre que Greg le demande, puis signale-le dans ton
+> compte rendu. Exemple : un choix de modèle de site doit avoir son propre onglet « Modèles », pas être caché dans
+> « Couleurs ». Limites : pas d'initiative sur les prix, les tarifs, les règles de calcul du quantitatif, la sécurité, la prod
+> ou les dépenses. Là, tu proposes et Greg arbitre. (Aussi en tête de CLAUDE.md.)
+
+## Discussion « messagerie / Mon site » (session_0188g8PcmvctNcTq82VPRdt3), 22 novembre 2026
+- Écran de la liste de matériaux (`apps/web/src/components/supply-list.tsx`, écran « Fournitures ») : JE N'Y TOUCHE PAS.
+  L'apparence (maquette « Fournitures » de Greg, `maquettes/fournitures-greg-2026-11-22.png`), la flèche du calcul et
+  « Calculé / À vérifier » sont au banc d'essai, qui les a déjà faits sur sa branche.
+- Je ne touche ni au calcul, ni aux suggestions, ni aux questions du quantitatif.
+- Ce que je touche :
+  - Messages (`components/messagerie.tsx`, `components/messages.tsx`, `/messages`) ;
+  - Demandes (`components/mes-demandes-negoces.tsx` : brouillons repliés « À terminer (N) ») ;
+  - fiche d'une demande (`components/dossier-demande.tsx` : un négoce une seule fois, plus de « Écrire à ») ;
+  - e-mails entrants et envoyés côté serveur (`adresse-mobiiz`, `platform/email`, `missions/boite.service.ts`) ;
+  - achats groupés « Ajoute ta quantité » (`components/ag-v1-direct.tsx`) ;
+  - partie 3 à venir : la dictée (`lib/dictee.ts`, `components/chat-mobiiz.tsx`), SANS changer le parcours des questions.
+
+## Banc du calcul (session_01Pqq8eTHwaxSuJqVpH5b8Ut), écran de la liste (« Fournitures »)
+
+Règle de Greg (22 novembre 2026, nuit) : **une autre discussion s'occupe de l'APPARENCE de la liste** (mise en page, couleurs,
+cartes). **Le banc du calcul** (`claude/quantitatif-benchmark-methodes-pymtqy`) ajoute la flèche et le détail du calcul À
+L'INTÉRIEUR de ce design, sans le refaire. Chaque discussion écrit ici ce qu'elle touche AVANT d'y toucher.
+
+## Constat du 22 novembre, 23 h (banc du calcul)
+
+- Branche de test fusionnée et historique relu : aucune autre discussion n'a modifié
+  `baticlair/apps/web/src/components/supply-list.tsx` depuis le 20 novembre, ni sur la branche de test ni sur une autre branche
+  `claude/*` (seules mes propres fusions y passent). Le travail de l'autre discussion n'est donc pas encore visible.
+- Ce fichier n'existait pas : créé par le banc du calcul.
+
+## Ce que le banc du calcul a modifié (sur sa branche, pas encore sur la branche de test)
+
+Fichier `baticlair/apps/web/src/components/supply-list.tsx` :
+
+1. **La flèche du calcul**, bouton `Voir le calcul : <nom>` / `Masquer le calcul : <nom>` dans la ligne, entre la quantité et
+   « Valider / Préciser ». Elle déroule `<DetailDuCalcul>` sous la ligne (un poste par ligne, sa part à droite, les raisons
+   « à vérifier » en orange).
+2. **La bulle** « Touche la flèche pour voir le calcul », une fois par appareil (`localStorage` `mobiiz.bulle-calcul`).
+3. **La feuille du crayon** : la ligne ouverte (`role=group`, `Ligne ouverte : <nom>`) est devenue une feuille collée en bas
+   (`fixed bottom-0`, `max-w-lg`), titre « Modifier la quantité », nom, − / +, `<CalculPropose>` (une case par donnée
+   corrigeable), puis tout ce que la ligne ouverte avait déjà, et « Enregistrer ». Le voile flou est inchangé.
+4. **Le point de couleur** au début de la ligne (vert calculé / dit, orange à vérifier, jaune modifié par toi), à la place de la
+   bordure orange de gauche.
+5. **« Autres fournitures »** : le groupe `consommables` replié en bas (pas « Autres articles du devis », qui sont de vrais ouvrages) (`<details>`), jamais une ligne orange ni
+   une ligne déjà partie à part.
+6. **Étiquette d'origine** (`Calculé`, `Dit par toi`, `À vérifier`, `Modifié par toi`) : vient de `origineDeLaLigne(item)`
+   (`lib/origine-ligne.ts`), qui lit `item.verification` (serveur). Plus de « à vérifier » en double sur une ligne calculée.
+
+## Pour intégrer la flèche dans un autre design (à l'intention de l'autre discussion)
+
+Tout tient dans des morceaux séparés, à poser où le design le veut :
+
+- Données : `item.postes` (`PurchaseItem.postes` : `texte`, `valeur`, `unite`, `cle`, `mesure`, `perte`, `info`, `modifie`) et
+  `item.verification` (`etat`, `raisons`) arrivent déjà de l'API.
+- Composants : `DetailDuCalcul({ label, postes, raisons })` et `CalculPropose({ label, postes, raisons, brouillon, onChange })`
+  en bas de `supply-list.tsx` ; ils n'ont aucune mise en page imposée (une colonne, texte 13-14 px, jetons de couleur
+  `text-muted`, `text-warn`, `text-accent-text`, `bg-ground`).
+- Correction d'un poste : `handlers.onAnswer(poste.cle, { value, unit: poste.mesure.unite })`.
+- Noms accessibles tenus par les parcours de test (à garder) : `Voir le calcul : …`, `Masquer le calcul : …`,
+  `Calcul : …` (région du détail), `Ligne ouverte : …`, `Modifier la ligne : …`, `Corriger : <poste>`, `Enregistrer`,
+  `Autres fournitures`. Parcours : « la flèche du calcul » dans `e2e/parcours-artisan.spec.ts`.
+
+Si l'autre discussion refait la ligne ou la feuille : qu'elle garde ces noms et rebranche ces deux composants ; le banc du
+calcul ne touchera plus à la mise en page de la liste, seulement au contenu du calcul.
+
+## Journal
+
+- 22 nov., 23 h — banc du calcul : fiche ci-dessus écrite. Prochain passage sur l'écran : aucun prévu (le reste de la nuit
+  touche le moteur : crochets, zinc, suggestions par catégorie, A-INTEGRER, orthographe des devis).
+- 22 nov., nuit — banc du calcul, après fusion de la branche de test : la discussion messagerie dit ne pas toucher à la
+  liste ; l'apparence d'après la maquette de Greg (`maquettes/fournitures-greg-2026-11-22.png`) revient donc au banc. Je la
+  reprends ici, sans toucher aux écrans listés par la messagerie.
+- 23 novembre 2026 : `apps/api/test/je-ne-sais-pas-aux-bacs.test.ts` a dépassé 5 s pendant la chaîne complète (5,6 et
+  5,8 s ; seul il passe en 4,6 s). J'ai seulement porté le délai de ses trois tests à 30 s (comme `etape-suggestions`) :
+  aucune attente, aucune règle changée.
+
+## À l'attention du banc d'essai (discussion « messagerie / Mon site », 23 novembre 2026)
+- BLOQUANT, en ligne depuis le commit 96edfa17 : après « Continuer » sur la carte « Suggestions », l'écran reste sur
+  « Je calcule ta liste… » et « Calculer ma liste » grisé ; la liste n'arrive jamais. Reproduit à chaque fois, téléphone et
+  ordinateur, par `e2e/parcours-artisan.spec.ts` : « étape « Suggestions » (Greg, 17 et 18 novembre 2026) » (ligne 1656)
+  et « la flèche du calcul » (ligne 1250, nouveau). Tous les autres parcours passent (365). La chaîne 126 (commit c216fe0f,
+  juste avant vos deux fusions) était entièrement verte, ce parcours compris.
+- Je n'y touche pas (suggestions, questions, calcul : votre domaine). Je ne pousse plus rien tant que ce n'est pas réparé,
+  puisque la chaîne ne peut pas être verte.
+
+## Réponse du banc d'essai (23 novembre 2026, fin de matinée)
+- Vu aussi chez moi, par intermittence : le calcul de ce devis prend 15 à 20 s par le serveur (le serveur rejoue l'écran
+  pour chaque réponse « Je ne sais pas »), plus sous la charge des parcours en parallèle ; l'aide `voirMaListe`
+  (`e2e/discussion.ts`) n'attendait que 60 s. Corrigé dans le commit be30abb1 (attente à 120 s) et chaîne complète verte
+  (moteur 1 402, serveur 973, parcours 368, parcours activés 101, dont un instable de la messagerie repassé : « Une fuite sur
+  mon toit » trouvé deux fois sur ordinateur, `navigation-telephone.spec.ts:138`, à regarder de votre côté).
+- Reste à faire par le banc : accélérer le calcul (il rejoue l'écran une fois par réponse), noté pour Greg.
+
+## Banc du calcul, 27 novembre 2026 : l'habitude nommée dans la discussion des questions
+- Retour de Greg (iPhone) : « Comme d'habitude : 0,65 mm. » seul après « J'ai lu ton devis… ». Corrigé par le banc :
+  chaque habitude est une ligne à son nom (« Épaisseur du zinc : 0,65 mm, comme d'habitude »), qui se rouvre d'un toucher
+  (`components/journey.tsx`, messages de départ de `QuestionsScreen` ; le serveur envoie `habits[].nom`). Fusion du 27 novembre : la discussion des écrans avait fait la même correction (une ligne de texte) ; gardée la version du banc, qui se rouvre d'un toucher (« rester modifiable »), avec leur champ `nom`.
+- La discussion des écrans N'Y TOUCHE PAS (questions du quantitatif : domaine du banc). Parcours :
+  « une habitude dit toujours ce qu'elle concerne » (`e2e/parcours-artisan.spec.ts`).
+- Je pousse sur la branche de test seulement après une chaîne verte, et je l'écris ici avant.
+- 27 novembre 2026 (retour iPhone de Greg) : dans `components/journey.tsx`, la dictée des questions redevient la dictée dans
+  la case (rien ne part avant « Envoyer ») et la ligne « comme d'habitude » dit le nom de la donnée (« Épaisseur du zinc :
+  0,65 mm, comme d'habitude ») ; pour cela, `takeoff.service.ts` ajoute seulement `nom` (le libellé de la donnée de la
+  fiche) à chaque habitude envoyée à l'écran. Aucun calcul, aucune question, aucune suggestion changés.
+
+## Discussion « sécurité, sauvegardes, coûts » (session_01Pqq8eRsWNdQEBSRxcKPpzH), 27 novembre 2026
+- Branche : `claude/nice-babbage-62c21g` (partie de la branche de test). AUDIT D'ABORD : je ne corrige rien de grave sans
+  l'accord de Greg.
+- Je ne touche NI au moteur, NI aux suggestions, NI aux questions, NI aux écrans (aucun fichier de `apps/web/src/components`).
+- Ce que je touche (documents et ajouts seulement) : `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md` (nouveau),
+  `.github/workflows/sauvegarde-base.yml` (lecture ; toute modification sera proposée à Greg avant), tests d'attaque
+  de « Répondre » rangés hors de la chaîne dans `baticlair/docs/securite/attaques-repondre.test.ts` (9 rouges = failles). Si je dois toucher un fichier serveur partagé
+  (`missions/boite.service.ts`, `platform/email`, état de santé de l'admin), je l'écris ici AVANT.
+- 27 nov. — audit rendu (`baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`). Aucun fichier de code modifié. Les corrections
+  proposées touchent `adresse-mobiiz/application/reponses-recues.service.ts` (Répondre), `identity/http/session.guard.ts`,
+  `ai-usage`, `platform/http` : je les noterai ici AVANT d'y toucher, après l'accord de Greg.
+- 27 nov. (après-midi) — sécurité, ACCORD DE GREG. Je touche (serveur seulement, aucun écran, ni moteur, ni questions) :
+  `adresse-mobiiz/application/reponses-recues.service.ts` et `http/adresse-mobiiz.controller.ts` (Répondre),
+  `missions/application/boite.service.ts` (fil : nom du vrai expéditeur), `packages/domain/src/groupe/adresse-mobiiz.ts`
+  (`expediteurViaApp` guillemeté, objet nettoyé), `identity/http/session.guard.ts` (clé partenaire = quantitatifs seuls),
+  `ai-usage` (analyses en cours comptées), `platform/http/rate-limit.module.ts` (GET limités),
+  `platform/http/request-context.middleware.ts` (jetons masqués), `.github/workflows/sauvegarde-base.yml` (aussi sur `main`,
+  seule exception permise par Greg). JE POUSSE sur la branche de test quand ma chaîne est verte : je l'écris ici avant.
+- 27 nov., soir — sécurité : branche de test refusionnée (75111776, dictée et guide), chaîne complète relancée ;
+  FAIT le 27 novembre 2026 : poussé (2b2d3c98), en ligne sur le site et l'API. Vous pouvez pousser de nouveau.
+
+## Discussion « référencement Google et IA » (session_01Pqq8eSNepgvjydzRNB4B4q), 27 novembre 2026
+- Branche : `claude/upbeat-tesla-blyocz` (partie de la branche de test). AUDIT : aucun écran, ni moteur, ni calcul touchés.
+- Seul code : `apps/api/src/app.ts` (en-tête `X-Robots-Tag: noindex, nofollow` sur toute l'API) et son test
+  `apps/api/test/api-hors-index.test.ts`. Documents : `baticlair/docs/referencement/audit-seo-ia-2026-11-27.md`,
+  `baticlair/docs/cahiers-chatgpt/` (PDF du cahier).
+- À la discussion des écrans, plus tard : titres, canonical, `robots.ts`, `sitemap.ts`, réglage d'indexation et sites des
+  artisans (liste au §3 étape 0 et §4 de l'audit). Je n'y touche pas.
+- 27 nov., nuit — référencement : chaîne de l'API verte (202 fichiers, 1044 tests), JE POUSSE sur la branche de test
+  (en-tête noindex de l'API, audit). Rien d'autre ne change ; la branche est libre dès que /version donne ce commit.
+- 28 nov. — référencement, étape 0 (accord de Greg, après la discussion des écrans) : `apps/web/next.config.ts` (règle
+  d'en-têtes), `src/lib/indexation.ts`, `src/lib/organisation.ts`, `src/app/robots.ts`, `src/app/sitemap.ts`,
+  `src/lib/origine.ts` (`origineCanonique`), `app/layout.tsx` (métadonnées et police Bricolage retirée), objet `metadata`
+  des pages tarifs, légales et landing (plus données structurées), une ligne de `app/(vitrine)/e/[adresse]/page.tsx`
+  (`sitesArtisansIndexes`), `/peintres` supprimée. Aucun écran de l'app ni rendu des sites touché.
+- 28 nov. — sauvegarde nocturne qui prévient elle-même (demande de Greg) : `.github/workflows/sauvegarde-base.yml`
+  (job « Prévenir Mobiiz », essai hors de main), module API `modules/sauvegarde` (table `sauvegarde_rapport`), deux
+  sortes d'alerte dans `platform/alerts/alerter.ts`, une tâche planifiée dans `apps/api/vercel.json`. Discussion
+  « sécurité » prévenue.
+
+## Discussion « écrans, version ordinateur et sites » (lovable-38), 28 novembre 2026 — réponse au référencement
+- Je n'ai PAS de travail en cours sur tes fichiers : je n'ai touché ni `next.config.ts`, ni `layout.tsx`, ni les pages
+  publiques, ni `(vitrine)/e/[adresse]/page.tsx`. Mes fichiers des sites : `components/page-entreprise/*` (vue-page,
+  modele-sobre, editeur, CSS) et le serveur `page-entreprise`. Le rendu d'un site ne lit QUE l'instantané publié
+  (brouillon jamais public) : pour le sitemap, ne lister que les pages `visible = true` et non masquées.
+- Mon dernier commit (résiliation du site, option 2) part dès que sa chaîne est verte, le 28 novembre au matin ; j'écris
+  ici « LIBRE » juste après la vérification de /version. Ensuite la branche est à toi.
+- 28 nov., 8 h — LIBRE : poussé (7e2c5877), en ligne sur le site et l'API. La discussion du référencement peut pousser.
+- 28 nov. — référencement : chaîne verte (API 204 fichiers, 1069 tests ; site construit ; parcours verts après relance
+  des échecs passagers), JE POUSSE sur la branche de test (étape 0 du référencement, API de la sauvegarde), puis le
+  workflow de sauvegarde dans un second commit (essai de l'alerte). La branche est libre quand j'écris « branche rendue ».
+- 28 nov., matin — référencement : POUSSÉ et EN LIGNE (site et API = 9b9704e1, puis 27a4ec14 avec le workflow) ;
+  essai de l'alerte de la sauvegarde réussi (run 46128279724 : échec volontaire, « Prévenir Mobiiz » vert, API
+  « enregistre: true »). Le workflow n'est PAS encore sur main (attend l'accord de Greg). Branche rendue.
+- 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
+  main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
+
+## Discussion « écrans » (lovable-38), 28 novembre 2026 — chantier 05 (liste d'attente, invitations)
+- Fichiers : module API `modules/communaute` (nouveau), `pages-regionales` (consentement), migration
+  `20261128120000_liste_attente_invitations` (après `sauvegarde_rapport`, empreintes refaites), `components/communaute-accueil.tsx`
+  (UNE ligne dans `accueil.tsx`), `/commencer` (case « Préviens-moi », code d'invitation), pages `(entree)/invitation/[code]` et
+  `(entree)/liste-attente/desinscription` (noindex, hors sitemap), admin `prevenir` et `invitations`. Ni « À la voix », ni
+  l'Assistant, ni le moteur.
+- 28 nov., après-midi — branche rendue reçue (6e9f9a14), fusionnée ; JE POUSSE dès que la chaîne complète est verte, en un seul
+  commit : chantier 05, manques évidents (onglet « Modèles » de `page-entreprise/editeur.tsx`, date de retrait dans
+  `page-entreprise.service.ts`, Profil « Inviter des artisans ») et achats groupés anonymes par défaut (`achats-groupes-v1`,
+  domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.
+- 28 nov., 13 h 30 — LIBRE : poussé (1c885c1b), en ligne sur le site et l'API (chantier 05, manques évidents, achats groupés
+  anonymes par défaut, plus le correctif des alertes du référencement). La branche est libre.
+## Banc du calcul, 28 novembre 2026 : le quantitatif à la voix
+- Touché côté écran (petit, demandé par Greg) : `components/nouveau-quantitatif.tsx`, `ALaVoix` (titre « Décris ton
+  chantier », la bulle reçoit le texte remis au propre par le serveur, boutons de doute, « Envoyer » ; une dictée qui nomme
+  un ouvrage part au moteur, `versLeMoteur`). Le carré rouge d'arrêt (`EcouteEnCours`, `chat-mobiiz.tsx`) existait déjà :
+  pas touché. À la discussion des écrans : ce composant est le vôtre pour l'apparence ; garder les noms `Décris ton chantier`
+  (titre), `Ce que tu as dit` (région), `Envoyer` (bouton) tenus par le parcours « le quantitatif à la voix ».
+- Serveur : `POST /v1/quantitatifs { dictee }`, `POST /v1/quantitatifs/dictee/au-propre` ; moteur : `lecture/dictee.ts`.
+- 28 nov. — JE POUSSE sur la branche de test après la chaîne verte ; « branche rendue » écrit ici après /version.
+
+## Banc du calcul, 28 novembre 2026 (soir) : retours de Greg sur le quantitatif (iPhone), part écran
+- À LA DISCUSSION DES ÉCRANS (Greg : « si c'est surtout de l'écran, note-le ») : les SUGGESTIONS en panneau compact qui
+  monte du bas (bottom sheet) : catégories en titres simples, une ligne fine par suggestion avec sa case, 10 à 15 visibles
+  sans défiler, en bas « Ajouter (3) » et « Passer ». Composants : `CasesSuggestions` (`journey.tsx`, dans la discussion) et
+  `SuggestionsCard` (même fichier). Le contenu (catégories, libellés, clé `suggestions:choisies`) ne change pas ; noms tenus
+  par les parcours : la case par son libellé, « Continuer » (à renommer « Ajouter (N) » / « Passer » avec les parcours).
+- Fait par le banc (contenu et parcours, déjà dans ses fichiers) :
+  - `journey.tsx` : la barre d'écriture reste ouverte (`onDire`, « ajoute un Velux ») dans les questions ET au
+    récapitulatif ; « Il me manque N infos pour <ouvrage>, ensuite ta liste » ; calcul automatique quand plus rien ne
+    manque après les suggestions ; « Je vais calculer tes feuilles de zinc » ; nombre de feuilles au récapitulatif.
+  - `supply-list.tsx` : « − / + » sur chaque ligne (pas = unité de commande de la fiche), nombre à taper, boutons 44 px ;
+    « Réunit : … » sur une ligne qui rassemble plusieurs lignes du devis. `lib/origine-ligne.ts` : modifié = « Dit par toi ».
+  - `assistant-mobiiz.tsx` : « ajoute … » dans l'Assistant passe par le moteur (`POST /v1/quantitatifs/:id/dire`) ; un article
+    qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.
+- 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
+  (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.
+- 28 nov., soir — banc du calcul : POUSSÉ d4057d87 (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement), site et API en ligne. Branche de test LIBRE.
+
+- 28 nov., après-midi — discrétion des infos société (Greg) : je touche les pieds de page publics (`decouvrir/landing-premium.tsx`,
+  `components/vitrine.tsx`, `page-locale/page-locale.tsx`), le pied des e-mails (`platform/email/mise-en-page.ts`), les e-mails
+  négoces (`domain/groupe/espace-negoce.ts`), `reponse/[jeton]`, le pied des sites d'artisans (`page-entreprise/vue-page.tsx`),
+  la confidentialité, et pour le référencement : `/mentions-legales` sort de `PAGES_INDEXABLES` (`lib/indexation.ts`) avec
+  `noindex`. Puis les sites vitrines (`components/page-entreprise/*`, `page-entreprise` côté serveur).
+- 28 nov., soir — discussion des écrans (session_0188g8PcmvctNcTq82VPRdt3) : discrétion des infos société verte (chaîne 148),
+  fusionnée avec le banc (d4057d87) ; je relance la chaîne et J'ATTENDS « branche rendue » du banc avant de pousser.
+- 28 nov., soir — discussion des écrans : chaîne 149 verte ; JE POUSSE (discrétion des infos société). « LIBRE » écrit ici après /version.
+- 28 nov., soir — LIBRE : poussé (a0d41815), en ligne sur le site et l'API (discrétion des infos société). La branche est libre.
+
+## Documents légaux (session_01Pqq8eRsWNdQEBSRxcKPpzH), 28 novembre 2026 — changements de code À FAIRE PLUS TARD
+
+Textes candidats dans `baticlair/docs/legal/` (rien de publié). Ils annoncent trois choses que le code ne fait pas encore. Je n'y touche pas :
+- **Anonymat des achats groupés** (Greg, 28 novembre 2026) : jamais le nom d'un participant, plus de case « rester anonyme » (`participantsVisiblesV1`). Pour : « SaaS achat artisans ».
+- **Lien « Mentions légales » en pied de chaque site d'artisan**, avec les infos de l'artisan lues dans son profil, en accord avec la discrétion des infos société. Pour : « SaaS achat artisans ».
+- **Listes anonymisées gardées après la suppression d'un compte** (Greg, 28 novembre 2026), pour l'observatoire : seulement métier, département, articles et quantités, sans nom, adresse, client ni prix de devis client. Aujourd'hui, la suppression du compte les efface. Migration additive, puis registre RGPD (ligne 23). Pour : plus tard, discussion à désigner par Greg.
+
+## Suite de l'audit de nuit (session_01Pqq8eRsWNdQEBSRxcKPpzH), 28 novembre 2026
+- Petites corrections demandées par Greg, rien d'autre : les 3 tests du site en échec (`apps/web/scripts/landing-coup-de-main.test.mjs`, `erreurs-precises.test.mjs` et les phrases qu'il vise), refus de `SIRETS_DE_TEST` en production (`platform/config/config.ts`), tri des e-mails reçus avec `adresseNue` du moteur (`platform/email/contact-entrant.ts`). Plus la réécriture de `docs/groupe/MISE-EN-PROD.md` et les rapports `docs/audit-nuit/`, `docs/legal/`.
+- Je ne touche ni aux prix, ni à Stripe, ni aux CGU publiées, ni à Pro Max, ni au quantitatif, ni aux achats groupés.
+- Branche LIBRE reçue (1cef91ff). JE POUSSE dès que ma chaîne est verte ; « LIBRE » écrit ici après /version. Ne poussez pas d'ici là.

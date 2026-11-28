@@ -1,0 +1,36 @@
+{
+ "m": "M12",
+ "c": "C13",
+ "e": 1,
+ "nRef": 6,
+ "justes": 3,
+ "quantite": 2,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 3,
+ "questionsRef": 4,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 2,
+ "detail": {
+  "quantite": [
+   "Bandes porte-solin de 3 m : 2 pièces attendu, 7 pièces lu",
+   "Abergement de cheminée zinc : 1 pièces attendu, 1  lu"
+  ],
+  "manquantes": [
+   "Dauphin (1 pièces)"
+  ],
+  "inventees": [
+   "Dauphins, diamètre des descentes 80 mm (1 )"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:longueur_bande",
+    "text": "Longueur de bande zinc ?"
+   }
+  ]
+ }
+}

@@ -1,0 +1,176 @@
+{
+ "C01": {
+  "lignes": {
+   "Écran HPV": "juste",
+   "Liteaux 18×40": "juste",
+   "Ardoises 32×22": "juste",
+   "Crochets à agrafe": "juste",
+   "Crochets à pointe": "juste",
+   "Feuilles de zinc (faîtage)": "juste",
+   "Gouttière de 25": "juste",
+   "Tubes de descente Ø80": "juste",
+   "Dauphins fonte": "juste"
+  },
+  "enTrop": 0
+ },
+ "C02": {
+  "lignes": {
+   "Écran HPV": "juste",
+   "Contre-liteaux 27×40": "juste",
+   "Liteaux 27×40": "juste",
+   "Tuiles HP 10": "juste",
+   "Tuiles de rive gauches": "juste",
+   "Tuiles de rive droites": "juste",
+   "Faîtières": "juste",
+   "Closoir ventilé": "juste"
+  },
+  "enTrop": 0
+ },
+ "C03": {
+  "lignes": {
+   "Gouttière de 33": "juste",
+   "Angles de gouttière": "juste",
+   "Tubes de descente Ø100": "juste",
+   "Dauphins fonte": "juste"
+  },
+  "enTrop": 0
+ },
+ "C04": {
+  "lignes": {
+   "Bobine zinc 650 (bacs)": "juste",
+   "Tasseaux": "juste",
+   "Couvre-joints": "juste",
+   "Feuille de zinc (solin)": "juste",
+   "Bobineau zinc (chéneau)": "juste",
+   "Tubes de descente Ø100": "juste"
+  },
+  "enTrop": 0
+ },
+ "C05": {
+  "lignes": {
+   "Ardoises 30×20": "juste",
+   "Crochets à pointe": "juste",
+   "Feuilles de zinc": "juste",
+   "Fenêtres GGL MK04": "juste",
+   "Raccords MK04": "juste",
+   "Faîtières": "juste",
+   "Sorties de toit Ø125": "juste"
+  },
+  "enTrop": 0
+ },
+ "C06": {
+  "lignes": {
+   "Tuiles canal, courants": "juste",
+   "Tuiles canal, couverts": "juste",
+   "Liteaux 27×40": "juste",
+   "Bardelis gauches": "juste",
+   "Bardelis droits": "juste",
+   "Faîtières canal": "juste",
+   "Mortier de faîtage": "juste"
+  },
+  "enTrop": 0
+ },
+ "C07": {
+  "lignes": {
+   "Plaques bac acier": "juste",
+   "Vis autoperceuses": "juste",
+   "Closoirs mousse": "juste",
+   "Faîtières bac acier": "juste",
+   "Gouttière PVC de 25": "juste",
+   "Tubes de descente PVC Ø80": "juste"
+  },
+  "enTrop": 0
+ },
+ "C08": {
+  "lignes": {
+   "Feuilles de zinc (noue)": "juste",
+   "Ardoises 32×22": "juste",
+   "Mortier pour solin": "juste",
+   "Tubes de descente Ø80": "juste"
+  },
+  "enTrop": 0
+ },
+ "C09": {
+  "lignes": {
+   "Voliges": "juste",
+   "Bacs joint debout": "juste",
+   "Bande d'égout": "juste",
+   "Faîtage zinc": "juste",
+   "Gouttière de 33": "juste",
+   "Tubes de descente Ø100": "juste"
+  },
+  "enTrop": 0
+ },
+ "C10": {
+  "lignes": {
+   "Écran HPV": "juste",
+   "Liteaux 18×40": "juste",
+   "Ardoises fibres-ciment 40×24": "juste",
+   "Faîtières fibres-ciment": "juste",
+   "Feuilles de zinc (rives)": "juste",
+   "Gouttière PVC de 25": "juste",
+   "Tubes de descente PVC Ø80": "juste",
+   "Sortie de toit Ø100": "juste"
+  },
+  "enTrop": 0
+ },
+ "C11": {
+  "lignes": {
+   "Ardoises 35×25": "juste",
+   "Crochets à agrafe": "juste",
+   "Crochets à pointe": "juste",
+   "Feuilles de zinc (arêtiers, faîtage, noues)": "juste",
+   "Gouttière de 25": "juste",
+   "Angles de gouttière": "juste",
+   "Tubes de descente Ø80": "juste"
+  },
+  "enTrop": 0
+ },
+ "C12": {
+  "lignes": {
+   "Écran HPV": "juste",
+   "Liteaux 27×40": "juste",
+   "Tuiles HP 10": "juste",
+   "Tuiles de rive gauches": "juste",
+   "Tuiles de rive droites": "juste",
+   "Faîtières": "juste",
+   "Fenêtres GGL SK06": "juste",
+   "Raccords SK06": "juste",
+   "Fenêtre GGL CK02": "juste",
+   "Raccord CK02": "juste",
+   "Tuile à douille": "juste",
+   "Lanterne de sortie de toit Ø125": "juste",
+   "Plomb en rouleau": "juste"
+  },
+  "enTrop": 0
+ },
+ "C13": {
+  "lignes": {
+   "Bandes de rive zinc": "juste",
+   "Bandes porte-solin": "juste",
+   "Gouttière de 25": "juste",
+   "Tubes de descente Ø80": "juste",
+   "Dauphin fonte": "juste",
+   "Abergement de cheminée": "juste"
+  },
+  "enTrop": 0
+ },
+ "C14": {
+  "lignes": {
+   "Bobine zinc 650 (bacs)": "juste",
+   "Bobineau zinc (chéneau)": "juste",
+   "Tubes de descente Ø80": "juste",
+   "Feuille de zinc (solin)": "juste"
+  },
+  "enTrop": 0
+ },
+ "C15": {
+  "lignes": {
+   "Tuiles à emboîtement": "juste",
+   "Plaques bac acier": "juste",
+   "Gouttière alu de 25": "juste",
+   "Tubes de descente alu Ø80": "juste"
+  },
+  "enTrop": 0
+ }
+}

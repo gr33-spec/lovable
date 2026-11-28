@@ -48,7 +48,7 @@ description: Règles du référentiel couverture BatiClair (règle numéro un, s
 ## Chaque règle touchée a son test permanent
 
 - Écrire d'abord le test qui échoue, sur un devis réel de `test/devis-reels/` quand c'en est un, puis corriger.
-- Le nommer d'après la règle (par exemple `joint-debout-d2026-018.test.ts`, `zinguerie-piece-par-piece.test.ts`), avec en tête la section et la date du retour du fondateur.
+- Le nommer d'après la règle (par exemple `joint-debout-d2026-018.test.ts`, `pliage-une-reponse-pour-le-devis.test.ts`), avec en tête la section et la date du retour du fondateur.
 - Vérifier qu'il échoue sans la correction (`git stash` du code, relancer, `git stash pop`).
 - Tests transversaux à garder verts :
   - `regle-numero-un-tous-tiroirs.test.ts` (les 22 tiroirs) ;

@@ -1,0 +1,58 @@
+{
+ "liste": [
+  {
+   "article": "Écran HPV, rouleau 1,50 × 50 m",
+   "quantite": "2",
+   "unite": "rouleaux",
+   "detail": null
+  },
+  {
+   "article": "Liteaux sapin traité",
+   "quantite": "100",
+   "unite": "ml",
+   "detail": "Surface à confirmer : 100 m² sur la ligne des liteaux, 110 m² sur la couverture"
+  },
+  {
+   "article": "Ardoises fibres-ciment",
+   "quantite": null,
+   "unite": null,
+   "detail": "110 M2 au devis"
+  },
+  {
+   "article": "Faîtières",
+   "quantite": "30",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+   "quantite": "3",
+   "unite": "pièces",
+   "detail": "pour 22 ml de bande, développé 25 cm"
+  },
+  {
+   "article": "Gouttière dév. 25",
+   "quantite": "5",
+   "unite": "longueurs de 4 m",
+   "detail": "Développé de gouttière : 25 cm"
+  },
+  {
+   "article": "Tubes de descente Ø80, longueur 2 m",
+   "quantite": "6",
+   "unite": "pièces",
+   "detail": "2 descentes × 5 m ; Dauphin : Non"
+  },
+  {
+   "article": "Embase plomb de sortie de toit",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "Ø 100, pour ardoise ou tuile"
+  },
+  {
+   "article": "Chapeau de sortie de toit",
+   "quantite": "1",
+   "unite": "pièce",
+   "detail": "Ø 100"
+  }
+ ]
+}

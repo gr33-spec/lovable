@@ -4,6 +4,7 @@ import { isUuid } from "../../../platform/validation/ids.js";
 import type { TenantContext } from "../../tenancy/index.js";
 import type { Project } from "../domain/project.js";
 import type {
+  EtapeDemande,
   NewProject,
   ProjectListQuery,
   ProjectPage,
@@ -37,7 +38,9 @@ export class PrismaProjectRepository implements ProjectRepository {
    */
   async list(tenant: TenantContext, query: ProjectListQuery): Promise<ProjectPage> {
     const conditions: Prisma.Sql[] = [Prisma.sql`"companyId" = ${tenant.companyId}::uuid`];
-    if (query.status !== "all") {
+    if (query.etape) {
+      conditions.push(etapeSql(query.etape));
+    } else if (query.status !== "all") {
       conditions.push(Prisma.sql`"status" = ${query.status}::"ProjectStatus"`);
     }
     for (const word of query.search ?? []) {
@@ -46,6 +49,9 @@ export class PrismaProjectRepository implements ProjectRepository {
           LIKE '%' || immutable_unaccent(lower(${escapeLike(word)})) || '%'`,
       );
     }
+    // Greg, 19 novembre 2026 : une liste faite pour un besoin groupé, jamais partie chez un négoce, vit dans Demandes › Groupées.
+    if (query.groupe === "a-finir") conditions.push(Prisma.sql`"origine" = 'achat-groupe' AND NOT ${PARTIE} AND NOT ${AVEC_BESOIN}`);
+    else if (query.groupe !== "toutes") conditions.push(Prisma.sql`("origine" IS NULL OR ${PARTIE})`);
     if (query.cursor) {
       conditions.push(
         Prisma.sql`("lastActivityAt", "id") < (${query.cursor.lastActivityAt}, ${query.cursor.id}::uuid)`,
@@ -77,5 +83,30 @@ export class PrismaProjectRepository implements ProjectRepository {
       data: { ...patch, lastActivityAt: new Date() },
     });
     return count === 0 ? null : this.findById(tenant, id);
+  }
+}
+
+/* « Mes demandes » : l'étape d'un dossier, d'après ses demandes de prix (mêmes règles que `ListesService.resumes`). */
+const PARTIE = Prisma.sql`EXISTS (SELECT 1 FROM "price_request" pr JOIN "price_request_recipient" r ON r."priceRequestId" = pr."id"
+  WHERE pr."projectId" = "project"."id" AND (r."status" <> 'to_send' OR r."sentAt" IS NOT NULL))`;
+const AVEC_BESOIN = Prisma.sql`EXISTS (SELECT 1 FROM "besoin_groupe_v1" b WHERE b."project_id" = "project"."id")`;
+const REPONDUE = Prisma.sql`EXISTS (SELECT 1 FROM "price_request" pr JOIN "price_request_recipient" r ON r."priceRequestId" = pr."id"
+  WHERE pr."projectId" = "project"."id" AND (r."status" = 'received' OR r."reponduLe" IS NOT NULL OR r."documentId" IS NOT NULL))`;
+const RETENUE = Prisma.sql`EXISTS (SELECT 1 FROM "price_request" pr
+  WHERE pr."projectId" = "project"."id" AND (pr."classifiedAt" IS NOT NULL OR cardinality(pr."retainedSupplierIds") > 0))`;
+
+function etapeSql(etape: EtapeDemande): Prisma.Sql {
+  const enCours = Prisma.sql`"status" = 'active'::"ProjectStatus"`;
+  switch (etape) {
+    case "a-preparer":
+      return Prisma.sql`(${enCours} AND NOT ${PARTIE})`;
+    case "parties":
+      return Prisma.sql`NOT (${enCours} AND NOT ${PARTIE})`;
+    case "envoyees":
+      return Prisma.sql`(${enCours} AND ${PARTIE} AND NOT ${REPONDUE} AND NOT ${RETENUE})`;
+    case "reponses":
+      return Prisma.sql`(${enCours} AND ${REPONDUE} AND NOT ${RETENUE})`;
+    case "terminees":
+      return Prisma.sql`("status" = 'archived'::"ProjectStatus" OR ${RETENUE})`;
   }
 }

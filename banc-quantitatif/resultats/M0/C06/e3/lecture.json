@@ -1,0 +1,290 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "réfection de toiture en tuiles canal",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "titre : « refection toiture tuilles canal »"
+  },
+  {
+   "donnee": "état",
+   "valeur": "existant : dépose des anciennes tuiles et des vieux liteaux, évacuation à la déchetterie",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "tuiles canal terre cuite, courants et couverts",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « tuilles canal terre cuite, courants et couverts »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "85 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « sur 85m2 » ; ligne 3 : « sur toute la toiture 85m2 »"
+  },
+  {
+   "donnee": "liteaux",
+   "valeur": "liteaux neufs sur toute la toiture, 85 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Liteaux neufs sur toute la toiture 85m2 »"
+  },
+  {
+   "donnee": "longueur de rives",
+   "valeur": "12 m (2 × 6 m)",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Les rives 2 x 6ml soit 12ml »"
+  },
+  {
+   "donnee": "longueur du faîtage",
+   "valeur": "9 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « Faitage 9ml »"
+  },
+  {
+   "donnee": "pose du faîtage",
+   "valeur": "scellé au mortier",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « scellé au mortier »"
+  },
+  {
+   "donnee": "recouvrement des tuiles canal",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Réfection d'une toiture en tuiles canal : dépose des anciennes tuiles et des vieux liteaux, évacuation à la déchetterie.",
+  "Tuiles canal terre cuite, courants et couverts, sur 85 m².",
+  "Liteaux neufs sur toute la toiture, 85 m².",
+  "Rives 12 m (2 × 6 m).",
+  "Faîtage 9 m scellé au mortier : faîtières et mortier."
+ ],
+ "questions": [
+  {
+   "cle": "recouvrement_canal",
+   "texte": "Tes tuiles canal, tu les poses avec quel recouvrement ?",
+   "boutons": [
+    {
+     "label": "140 mm",
+     "valeur": "140"
+    },
+    {
+     "label": "150 mm",
+     "valeur": "150"
+    },
+    {
+     "label": "160 mm",
+     "valeur": "160"
+    },
+    {
+     "label": "170 mm",
+     "valeur": "170"
+    }
+   ],
+   "unite": "mm",
+   "donnee": "recouvrement des tuiles canal",
+   "ligne": ""
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Fourniturre et pose de tuilles canal terre cuite, courants et couverts, sur 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuiles canal terre cuite, courants et couverts",
+     "quantite": "",
+     "unite": "u",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85"
+      }
+     ],
+     "attend": [
+      "recouvrement_canal"
+     ],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Liteaux neufs sur toute la toiture 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Liteaux neufs",
+     "quantite": "",
+     "unite": "ml",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "liteau",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85"
+      }
+     ],
+     "attend": [
+      "recouvrement_canal"
+     ],
+     "a_preciser": [],
+     "precision": "sur toute la toiture en tuiles canal, 85 m²"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Les rives 2 x 6ml soit 12ml",
+   "quantite": "12",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Rives",
+     "quantite": "12",
+     "unite": "ml",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "rive",
+     "donnees": [
+      {
+       "cle": "longueur_rives",
+       "valeur": "12"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": "2 × 6 ml, couverture en tuiles canal terre cuite"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faitage 9ml scellé au mortier",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "9"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": "faîtage scellé au mortier, couverture en tuiles canal terre cuite"
+    },
+    {
+     "nom": "Mortier",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "conditionnement"
+     ],
+     "precision": "pour sceller le faîtage, 9 ml"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Divers et imprevus",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "entreprise",
+   "valeur": "Guilbaud Couverture"
+  },
+  {
+   "cle": "client",
+   "valeur": "Mme Raffin"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "23 rue des Sauniers"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "85100"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Les Sables-d'Olonne"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "2026-094"
+  },
+  {
+   "cle": "date",
+   "valeur": "16/11/2026"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation (réfection toiture tuiles canal)"
+  },
+  {
+   "cle": "période des travaux",
+   "valeur": "printemps, selon le temps"
+  },
+  {
+   "cle": "tva",
+   "valeur": "10 %"
+  }
+ ],
+ "notes": []
+}

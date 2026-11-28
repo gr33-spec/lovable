@@ -1,0 +1,29 @@
+{
+ "m": "M0",
+ "c": "C01",
+ "e": 1,
+ "nRef": 8,
+ "justes": 8,
+ "quantite": 0,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 3,
+ "questionsRef": 2,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:longueur_crochet",
+    "text": "Quelle longueur de crochet ?"
+   }
+  ]
+ }
+}

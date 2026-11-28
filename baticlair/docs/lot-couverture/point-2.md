@@ -8,7 +8,7 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 | Devis de test | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
 | Tuiles et deux fenêtres Velux MK04 | 1 | 1 | 0 | 1 |
-| Ardoises et une fenêtre de toit sans taille | 0 | 3 | 0 | 2 |
+| Ardoises et une fenêtre de toit sans taille | 0 | 2 | 0 | 4 |
 | Une fenêtre de toit seule, sur tuiles plates | 1 | 0 | 0 | 0 |
 
 ## Tuiles et deux fenêtres Velux MK04
@@ -27,13 +27,13 @@ Questions du comptoir :
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces | Valeur par défaut à confirmer |
+| Tuiles HP10 | 1 283 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tuiles HP10 | 1 488 pièces (≈ 7 palettes) |  | chiffrable |
+| Tuiles HP10 | 1 283 pièces (≈ 6 palettes) |  | chiffrable |
 | Fenêtre de toit Velux GGL MK04 tout confort | 2 pièces |  | chiffrable |
 
 ## Ardoises et une fenêtre de toit sans taille
@@ -45,24 +45,26 @@ Devis de test :
 | 1 | Couverture en ardoises naturelles 30x22 posées au crochet | 150 m² |
 | 2 | Fourniture et pose fenêtre de toit | 1 u |
 
-**À l'ouverture : 0 verte · 3 orange · 0 grise.**
+**À l'ouverture : 0 verte · 2 orange · 0 grise.**
 
 Questions du comptoir :
+- Tes m² d'ardoise comprennent déjà l'égout et les coupes ? (Oui / Non)
+- Tes crochets d'ardoise : à agrafe ou à pointe ? (À agrafe / À pointe)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Fenêtre de toit : quelle taille ? (55 × 78 / 78 × 98 / 78 × 118 / 114 × 118)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 6 953 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | — | Qualité à préciser |
 | Fenêtre de toit | 1 pièce | Fenêtre à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 6 953 pièces | 150 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 7 093 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 6 694 pièces | 150 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox à agrafe standard, longueur 10 cm | 11 boîtes de 500 (5 356 pièces) | 4 ardoises sur 5 (la cinquième au crochet à pointe) | chiffrable |
+| Crochets d'ardoise inox à pointe standard, longueur 10 cm | 2 boîtes de 700 (1 339 pièces) |  | chiffrable |
 | Fenêtre de toit | 1 pièce | 55 × 78 | chiffrable |
 
 ## Une fenêtre de toit seule, sur tuiles plates
@@ -88,22 +90,24 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
+- Tes crochets d'ardoise : à agrafe ou à pointe ? (À agrafe / À pointe)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 9 040 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 19 boîtes de 500 | Qualité, crochet à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
-| Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 040 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox à agrafe standard, longueur 10 cm | 15 boîtes de 500 (7 232 pièces) | 4 ardoises sur 5 (la cinquième au crochet à pointe) | chiffrable |
+| Crochets d'ardoise inox à pointe standard, longueur 10 cm | 3 boîtes de 700 (1 808 pièces) |  | chiffrable |
+| Gouttière zinc demi-ronde dév. 33 | 7 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

@@ -1,6 +1,7 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
-import type { AnalysisKind, AnalysisRecord, AnalysisRepository } from "../application/analysis.repository.js";
+import { DomainError } from "../../../platform/errors/domain-error.js";
+import { EN_COURS_COMPTEES_MS, type AnalysisKind, type AnalysisRecord, type AnalysisRepository } from "../application/analysis.repository.js";
 
 const FIELDS = {
   id: true,
@@ -29,16 +30,44 @@ export class PrismaAnalysisRepository implements AnalysisRepository {
     return c?.monthlyAnalysisLimit ?? null;
   }
 
-  countBillable(companyId: string, billingMonth: string): Promise<number> {
-    return this.prisma.aiAnalysis.count({ where: { companyId, billingMonth, billable: true } });
+  async countBillable(companyId: string, billingMonth: string | null): Promise<number> {
+    const r = await this.prisma.aiAnalysis.aggregate({ where: { companyId, ...(billingMonth ? { billingMonth } : {}), billable: true }, _sum: { poids: true } });
+    return r._sum.poids ?? 0;
   }
 
-  create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind }): Promise<AnalysisRecord> {
+  create(data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids?: number }): Promise<AnalysisRecord> {
     return this.prisma.aiAnalysis.create({ data: { ...data, status: "started" }, select: FIELDS });
   }
 
-  restart(id: string, userId: string | null): Promise<AnalysisRecord> {
-    return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null, startedAt: new Date() }, select: FIELDS });
+  async reserver(
+    data: { companyId: string; userId: string | null; projectId: string; documentId: string; kind: AnalysisKind; poids: number },
+    existante: AnalysisRecord | null,
+    mois: string,
+    verifier: (prises: { total: number; mois: number }) => void,
+  ): Promise<AnalysisRecord> {
+    return this.prisma.$transaction(async (tx) => {
+      // Un verrou par entreprise, relâché en fin de transaction : deux réservations de la même entreprise passent l'une après l'autre.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`analyse:${data.companyId}`}::text))`;
+      const depuis = new Date(Date.now() - EN_COURS_COMPTEES_MS);
+      // Relue SOUS le verrou (contre-vérification du 27 novembre 2026) : une lecture de ce document déjà en cours n'est jamais
+      // relancée une seconde fois, même par dix appuis au même instant (dix appels IA pour une analyse).
+      const actuelle = existante ? await tx.aiAnalysis.findUnique({ where: { id: existante.id }, select: { status: true, startedAt: true } }) : null;
+      if (actuelle?.status === "started" && actuelle.startedAt >= depuis) throw new DomainError("request_in_progress", "Reading already in progress", { raison: "lecture_en_cours" });
+      const [total, duMois, enCours] = await Promise.all([
+        tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, billable: true }, _sum: { poids: true } }),
+        tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, billingMonth: mois, billable: true }, _sum: { poids: true } }),
+        tx.aiAnalysis.aggregate({ where: { companyId: data.companyId, status: "started", startedAt: { gte: depuis }, ...(existante ? { id: { not: existante.id } } : {}) }, _sum: { poids: true } }),
+      ]);
+      const enCoursPoids = enCours._sum.poids ?? 0;
+      verifier({ total: (total._sum.poids ?? 0) + enCoursPoids, mois: (duMois._sum.poids ?? 0) + enCoursPoids });
+      return existante
+        ? tx.aiAnalysis.update({ where: { id: existante.id }, data: { status: "started", userId: data.userId, completedAt: null, startedAt: new Date(), poids: data.poids }, select: FIELDS })
+        : tx.aiAnalysis.create({ data: { ...data, status: "started" }, select: FIELDS });
+    });
+  }
+
+  restart(id: string, userId: string | null, poids?: number): Promise<AnalysisRecord> {
+    return this.prisma.aiAnalysis.update({ where: { id }, data: { status: "started", userId, completedAt: null, startedAt: new Date(), ...(poids ? { poids } : {}) }, select: FIELDS });
   }
 
   async complete(id: string, billingMonth: string, at: Date, billable = true): Promise<AnalysisRecord> {

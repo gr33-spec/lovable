@@ -1,0 +1,278 @@
+{
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier Mise en place d'un échafaudage de pied sur les deux façades, protections des abords et de la voirie.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Dépose de la couverture existante Dépose des ardoises, crochets et liteaux, descente des matériaux.",
+   "quantite": "140",
+   "unite": "m²",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "Dépose des anciens châssis de toit Dépose sans réemploi.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture en ardoise naturelle 30×20 : pose au crochet noir Fourniture et pose. Pente 50°, rampant 7 m.",
+   "quantite": "140",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises",
+     "quantite": "140",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7 m"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Crochets d'ardoise",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "crochet",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Jouées de lucarnes Fourniture et pose : habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir.",
+     "quantite": "1",
+     "unite": "ens",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "ardoise",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Crochets d'ardoise",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-ardoises-crochet",
+     "emplacement": "crochet",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Noues de lucarnes Fourniture et pose de noues en zinc : 4 noues de 1,80 m.",
+   "quantite": "7.2",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Noues zinc façonnées",
+     "quantite": "7.2",
+     "unite": "ml",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [
+      {
+       "cle": "longueur_noue",
+       "valeur": "1.80 m"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Fenêtres de toit Fourniture et pose de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Fenêtres de toit de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise.",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "fenetre-de-toit",
+     "emplacement": "raccord",
+     "donnees": [
+      {
+       "cle": "raccord_couverture",
+       "valeur": "2"
+      },
+      {
+       "cle": "taille_fenetre",
+       "valeur": "7898"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Abergement de cheminée Fourniture et pose d'un abergement de cheminée en zinc, périmètre 3 m.",
+   "quantite": "3",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Abergement de cheminée d'un abergement de cheminée en zinc, périmètre 3 m.",
+     "quantite": "3",
+     "unite": "ml",
+     "ouvrage": "abergement-cheminee",
+     "emplacement": "abergement",
+     "donnees": [
+      {
+       "cle": "perimetre_cheminee",
+       "valeur": "3 m"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Faîtage Fourniture et pose d'un faîtage en faîtières terre cuite.",
+   "quantite": "11",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières",
+     "quantite": "11",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "10",
+   "designation": "Sorties de toit Fourniture et pose de sorties de toit Ø125 pour VMC.",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Sorties de toit de sorties de toit Ø125 pour VMC.",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "sortie-de-toit",
+     "emplacement": "sortie",
+     "donnees": [
+      {
+       "cle": "diametre_sortie",
+       "valeur": "125"
+      },
+      {
+       "cle": "usage_sortie",
+       "valeur": "2"
+      }
+     ],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "11",
+   "designation": "Évacuation des gravats Tri et évacuation des gravats en déchetterie agréée.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "12",
+   "designation": "Fin de chantier Nettoyage du chantier et repli de l'échafaudage.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note1",
+   "designation": "Objet : réfection de la couverture en ardoise naturelle, lucarnes, fenêtres de toit et ouvrages de zinguerie.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note2",
+   "designation": "Maison d'habitation de plus de 2 ans",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note3",
+   "designation": "TVA à 10 % : travaux de rénovation sur logement achevé depuis plus de 2 ans (attestation à nous retourner signée).",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note4",
+   "designation": "Délai d'intervention : 8 à 10 semaines après accord, hors intempéries.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note5",
+   "designation": "Durée des travaux : environ 3 semaines.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note6",
+   "designation": "Tout remplacement de bois de charpente constaté nécessaire à la dépose fera l'objet d'un avenant.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ]
+}

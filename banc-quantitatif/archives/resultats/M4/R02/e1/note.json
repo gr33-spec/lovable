@@ -1,0 +1,38 @@
+{
+ "m": "M4",
+ "c": "R02",
+ "e": 1,
+ "nRef": 18,
+ "justes": 14,
+ "quantite": 0,
+ "manquantes": 4,
+ "inventees": 3,
+ "doutes": 0,
+ "questions": 2,
+ "questionsRef": 1,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Tubes de descente Ø80, longueur 2 m (4 pièces)",
+   "Coudes descente Ø80 (4 pièces)",
+   "Colliers de descente Ø80 (6 pièces)",
+   "Liteaux 27×40 (140 ml)"
+  ],
+  "inventees": [
+   "Contre-lattes en liteaux 27x40 mm (120 ml)",
+   "Ensemble de descente d'eau pluviale en PVC Ø80 coloris sable, hauteur 4m, comprenant 2 jeux de coudes et les colliers de fixation par descente (2 ensembles au total) (2 pièces)",
+   "Contre-liteaux (Tuiles) (à chiffrer )"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:nb_descentes",
+    "text": "Combien de descentes pour cette gouttière ?"
+   }
+  ]
+ }
+}

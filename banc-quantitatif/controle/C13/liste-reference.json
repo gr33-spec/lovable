@@ -1,0 +1,86 @@
+{
+ "liste": [
+  {
+   "article": "Bandes de rive zinc, zinc naturel 0,65 mm",
+   "quantite": "7",
+   "unite": "longueurs de 2 m",
+   "detail": "14 ml à couvrir, développé 25 cm"
+  },
+  {
+   "article": "Bandes porte-solin de 3 m",
+   "quantite": "2",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Gouttière demi-ronde zinc de 25",
+   "quantite": "4",
+   "unite": "longueurs de 4 m",
+   "detail": null
+  },
+  {
+   "article": "Descente Ø80",
+   "quantite": "3",
+   "unite": "pièces",
+   "detail": "1 descente × 5 m"
+  },
+  {
+   "article": "Dauphin",
+   "quantite": "1",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Abergement de cheminée zinc",
+   "quantite": "1",
+   "unite": "pièces",
+   "detail": null
+  }
+ ],
+ "questions_posees_au_couvreur": [
+  {
+   "key": "param:perimetre_cheminee",
+   "text": "Périmètre d'une cheminée (les 4 côtés) ?",
+   "options": [
+    "2 m",
+    "3 m",
+    "4 m",
+    "5 m"
+   ],
+   "reponse": "je ne sais pas"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je commande façonné"
+  },
+  {
+   "key": "param:developpe@bande-porte-solin",
+   "text": "Bande porte-solin zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "100 mm (solin, couvre-joint)"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Bandes de rive zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "250 mm"
+  }
+ ]
+}

@@ -1,6 +1,8 @@
 import type { Fact, ParamDef, Product, Provenance, Referential } from "../model.js";
 import { rule, todo } from "./kit.js";
 import { WITHOUT_SUPPLY_UNITS } from "../../takeoff/supply.js";
+import { baseDuMetier, constanteDe, tableDe } from "../base/index.js";
+import type { LookupTable } from "../model.js";
 
 /**
  * Référentiel COUVERTURE.
@@ -93,6 +95,49 @@ const generic = (id: string, family: string, label: string, shortLabel: string, 
 });
 const F = "fondateur-referentiel-2026-10-03";
 
+/**
+ * BASCULE VERS LA FICHE COUVERTURE (décision du fondateur, 2026-11-19 : « le code lit cette fiche et rien d'autre »,
+ * par étapes, tests verts à chaque pas). Une constante passée dans la fiche (`referentiels/couverture/constantes.json`,
+ * prouvée par des chiffres confirmés de `fiche-couverture.json`) se lit ici par sa clé, jamais recopiée.
+ */
+const FICHE = "fiche-couverture";
+/** Données produit de la fiche (longueurs vendues, conditionnements) : relevées chez les fabricants et les négoces. */
+const FICHE_PRODUITS = "fiche-couverture-produits";
+const FICHE_VERIFIEE = {
+  status: "verified",
+  verifiedAt: "2026-11-19",
+  verifiedBy: "Fondateur (couvreur), règle confirmée par la recherche du 19/11/2026",
+} as const;
+const constanteFiche = (cle: string) => constanteDe(baseDuMetier("couverture")!.base, cle);
+/** Une table de calcul lue dans la fiche (axes : données du chantier ; valeurs prouvées par des chiffres confirmés). */
+const tableFiche = (cle: string): LookupTable => {
+  const t = tableDe(baseDuMetier("couverture")!.base, cle);
+  return {
+    label: t.libelle,
+    unit: t.unite,
+    axes: t.axes.map((a) => ({ param: a.donnee, thresholds: a.seuils })),
+    values: t.valeurs,
+    source: FICHE,
+    verification: FICHE_VERIFIEE,
+    version: 1,
+    note: t.decision,
+  };
+};
+/** Une donnée produit lue dans la fiche (caractéristique d'un article générique). */
+const specFiche = (cle: string): Fact => {
+  const k = constanteFiche(cle);
+  return spec(k.valeur, k.unite, FICHE_PRODUITS, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
+};
+/** Une longueur de vente lue dans la fiche (conditionnement d'un produit). */
+const longueurFiche = (cle: string): Fact => {
+  const k = constanteFiche(cle);
+  return packaging(k.valeur, k.unite, FICHE_PRODUITS, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
+};
+const deFiche = (cle: string): Fact => {
+  const k = constanteFiche(cle);
+  return condition(k.valeur, k.unite, FICHE, FICHE_VERIFIEE, `${k.libelle}. ${k.decision}`);
+};
+
 /** Hypothèses par défaut du référentiel du fondateur : dites à l'artisan, modifiables d'un geste. */
 const PENTE_PARAM: ParamDef = {
   key: "pente",
@@ -133,6 +178,24 @@ const REGION_ARDOISE_PARAM: ParamDef = {
   label: "Région ardoise",
   display: { "1": "I", "2": "II", "3": "III" },
   estimate: "Prise égale à la zone climatique du département, en attendant la liste des régions du DTU 40.11.",
+};
+/**
+ * Situation du chantier (NF DTU 40.11 : protégée / normale / exposée). Exposée : littoral sur environ 5 km, îles,
+ * presqu'îles, falaises, rives d'estuaire près de l'embouchure. Lue dans la carte des régions par commune (fiche
+ * couverture), sinon normale ; un défaut affiché, modifiable, jamais une question (comme la zone).
+ */
+const SITUATION_PARAM: ParamDef = {
+  key: "situation",
+  label: "Situation du chantier",
+  unit: "u",
+  kind: "site_data",
+  question: "Le chantier est-il en situation exposée (bord de mer à moins de 5 km, île, falaise) ?",
+  default: { value: "1", source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "situation normale, à défaut de commune au bord de mer" },
+  choices: [
+    { label: "Normale", value: "1" },
+    { label: "Exposée (bord de mer, île)", value: "2" },
+  ],
+  display: { "1": "normale", "2": "exposée" },
 };
 /**
  * Table officielle Cupa (§34) : ardoises au m² par format (hauteur × largeur, cm) et recouvrement (mm).
@@ -384,9 +447,114 @@ const RAMPANT_PARAM: ParamDef = {
   ],
 };
 /**
+ * Le rampant d'une couverture en bacs de zinc (joint debout, tasseaux) : un bac va de l'égout au faîtage, sa longueur EST
+ * celle du rampant (« Bacs façonnés à la longueur du rampant », §7). Retour de Greg du 18 novembre 2026 (D-2026-024) : le
+ * devis disait « bacs de 4 m » et la longueur du rampant était demandée quand même. Les mots du devis sont ici.
+ */
+// Règle changée (18 novembre 2026) : avant, 5,5 m supposés en silence quand le devis ne disait rien. Pour des bacs, la
+// longueur commandée EST le rampant : une supposition donne une mauvaise commande. Écrite au devis, elle est prise ; sinon
+// elle se demande, en mètres (plus de boutons « jusqu'à 5,5 m », qui ne disent pas une longueur de bac).
+const RAMPANT_BACS_PARAM: ParamDef = {
+  key: RAMPANT_PARAM.key,
+  label: RAMPANT_PARAM.label,
+  unit: "m",
+  kind: "site_data",
+  question: "Longueur des bacs (le rampant, de l'égout au faîtage) ?",
+  textLabels: ["rampant", "longueur des bacs", "longueur de bac", "longueur bac", "bac"],
+};
+/** Réponses du fondateur du 2026-11-18 (couverture zinc à tasseaux). */
+const FR_REPLY_TASSEAUX = "fondateur-reponses-2026-11-18";
+/** Recherche « fixations » du 20/11/2026 (`referentiels/couverture/recherche/fixations.json`). */
+const RECH_FIXATIONS = "recherche-fixations-2026-11-20";
+const RECH_ACCESSOIRES_TUILES = "recherche-accessoires-tuiles-2026-11-20";
+const RECH_ABERGEMENT = "recherche-abergement-cheminee-2026-11-23";
+/** Cotes déduites des minimums des règles de l'art : la ligne reste une estimation (orange, − / +), à confirmer par Greg. */
+const ABERGEMENT_DEDUIT = { status: "verified", verifiedAt: "2026-11-23", verifiedBy: "Recherche base couverture : valeur déduite des minimums (DTU, guides du ministère de la Culture), à confirmer par Greg" } as const;
+const ACCESSOIRES_TUILES_VERIFIE = { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "Recherche base couverture (accessoires-tuiles.json) : fiches fabricant 2025-2026" } as const;
+const FIXATIONS_VERIFIE = { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "Recherche base couverture (fixations.json) : deux sources indépendantes" } as const;
+/** Le skill « regles-metier » du fondateur (interview du 18/11/2026). */
+const SKILL_FONDATEUR = "fondateur-skill-regles-metier-2026-11-18";
+const FOUNDER_SKILL = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur), interview du skill regles-metier" } as const;
+const FOUNDER_REPLY_TASSEAUX = { status: "verified", verifiedAt: "2026-11-18", verifiedBy: "Fondateur (couvreur)" } as const;
+/**
+ * Greg, 20 novembre 2026 : « Pour les tasseaux : ne compte pas sur moi, vérifie-le toi-même […] Croise au moins deux
+ * sources. » Recoupé dans trois guides de pose : RHEINZINK §1.15, VMZINC (Delta, « rive à tasseau »), NedZink (« Rive »).
+ */
+const GUIDES_TASSEAUX = {
+  status: "verified",
+  verifiedAt: "2026-11-20",
+  verifiedBy: "BatiClair (trois guides de pose recoupés : RHEINZINK, VMZINC, NedZink)",
+  note: "Une rive a son tasseau de rive, coiffé d'un couvre-joint ; contre un mur, le bac se relève (90 mm), sans tasseau.",
+} as const;
+/**
+ * Zinc à tasseaux : ce qui finit le pan de chaque côté. Une rive a son tasseau de rive (RHEINZINK §1.15, VMZINC Delta,
+ * NedZink) ; contre un mur, le bac se relève sans tasseau (RHEINZINK §1.6.5). D'où les rangs : un entre deux bacs, plus
+ * un par rive. Écrit au devis (« bandes de rive pour les 2 côtés »), il est pris ; sinon, une question à boutons.
+ */
+/**
+ * Le développé d'un chéneau encaissé : sa largeur de zinc avant façonnage, qui choisit la largeur du bobineau. Référentiel
+ * du fondateur : « Chéneau encaissé | ml × 1,05, dév. selon section (50 à 80 cm) » : aucune valeur courante, il se demande.
+ */
+const DEVELOPPE_CHENEAU_PARAM: ParamDef = {
+  key: "developpe_cheneau",
+  label: "Développé du chéneau",
+  unit: "mm",
+  kind: "site_data",
+  question: "Ton chéneau fait quel développé ?",
+  hint: "La largeur de zinc avant façonnage : elle choisit la largeur du bobineau (500, 650 ou 1 000 mm).",
+  textLabels: ["developpe du cheneau", "developpe"],
+  choices: [
+    { label: "Jusqu'à 50 cm", value: "500" },
+    { label: "Jusqu'à 65 cm", value: "650" },
+    { label: "Jusqu'à 1 m", value: "1000" },
+  ],
+};
+const RIVES_TASSEAUX_PARAM: ParamDef = {
+  key: "nb_rives_tasseau",
+  label: "Rives sur tasseau",
+  unit: "u",
+  kind: "site_data",
+  question: "Ton pan finit comment, de chaque côté ?",
+  hint: "Une rive a son tasseau de rive et son couvre-joint ; contre un mur, le bac se relève sans tasseau.",
+  textLabels: ["rives", "rive"],
+  textValues: [
+    { value: "2", keywords: ["2 cotes", "deux cotes", "2 rives", "deux rives", "chaque cote"] },
+    { value: "1", keywords: ["1 cote", "un cote", "une rive", "1 rive"] },
+  ],
+  choices: [
+    { label: "Une rive de chaque côté", value: "2" },
+    { label: "Une rive et un mur", value: "1" },
+    { label: "Un mur de chaque côté", value: "0" },
+  ],
+};
+/**
+ * Zinc à tasseaux : la largeur de la bobine. Greg, 18 novembre 2026 : « En général : bobine de 65 cm de largeur […] Parfois
+ * les bacs sont faits dans des bobines de 50 cm de large ». La valeur courante est dite (hypothèse modifiable), jamais
+ * demandée ; écrite au devis, elle est prise.
+ */
+const LARGEUR_BOBINE_TASSEAUX_PARAM: ParamDef = {
+  key: "largeur_bobine_tasseaux",
+  label: "Largeur de la bobine",
+  unit: "mm",
+  kind: "artisan_preference",
+  question: "Tes bacs : dans de la bobine de 650 ou de 500 ?",
+  // Recette en ligne du 19 novembre 2026 : le modèle posait cette question et la couverture restait en attente. Greg : « en
+  // général 65 cm » : la valeur courante est dite et se change dans la liste, elle ne se demande jamais.
+  neverAsk: true,
+  textLabels: ["largeur de bobine", "largeur bobine", "bobine", "largeur developpee", "developpe des bacs"],
+  default: { value: "650", source: FR_REPLY_TASSEAUX, verification: FOUNDER_REPLY_TASSEAUX, version: 1, note: "bobine de 65 cm en général ; parfois 50 cm" },
+  choices: [
+    { label: "Bobine de 650 mm", value: "650" },
+    { label: "Bobine de 500 mm", value: "500" },
+  ],
+};
+/**
  * Métal façonné (§40.2, §41.2) : « tu façonnes toi-même ou tu commandes façonné ? ». La réponse change
  * tout : bobines au mètre linéaire d'un côté, pièces aux dimensions de l'autre. Pas de défaut : on demande.
  */
+/** Les mots de l'artisan pour le façonnage (Greg, 16 novembre 2026 : « J'achète tout fait », « ou je pli »). */
+const DIT_JE_FACONNE = ["pli", "plie", "plis", "plies", "plier", "pliage", "je plie", "je le plie", "je les plie", "je la plie", "moi meme", "je fais", "je le fais", "je les fais", "je la fais", "je faconne", "je le faconne", "je les faconne", "je la faconne"];
+const DIT_JE_COMMANDE = ["tout fait", "tout faits", "toute faite", "toutes faites", "tout pret", "tout prets", "toute prete", "toutes pretes", "achete", "deja faconne", "deja faconnes", "deja faconnee", "deja faconnees", "commande", "commandes", "commandee", "commandees"];
 const FACONNAGE_PARAM: ParamDef = {
   key: "faconnage",
   // §48.6 : une question par ouvrage, jamais une réponse prêtée d'une pièce à l'autre.
@@ -397,8 +565,8 @@ const FACONNAGE_PARAM: ParamDef = {
   question: "Tu façonnes tes bacs toi-même, ou tu les commandes façonnés ?",
   hint: "Bobine de zinc au mètre linéaire si tu façonnes ; bacs à la longueur du rampant sinon.",
   choices: [
-    { label: "Je façonne (bobines)", value: "1" },
-    { label: "Je commande façonné (bacs)", value: "2" },
+    { label: "Je façonne (bobines)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné (bacs)", value: "2", dit: DIT_JE_COMMANDE },
   ],
   display: { "1": "je façonne", "2": "commandé façonné" },
 };
@@ -458,7 +626,8 @@ const ASPECT_ZINC_PARAM: ParamDef = {
   ],
   textValues: [
     { value: "2", keywords: ["quartz", "quartz zinc", "quartz-zinc"] },
-    { value: "3", keywords: ["anthra", "anthra zinc", "anthra-zinc"] },
+    // « zinc anthracite » (D-2026-024) : le prépatiné noir, l'Anthra-Zinc.
+    { value: "3", keywords: ["anthra", "anthra zinc", "anthra-zinc", "anthracite"] },
     { value: "4", keywords: ["pigmento"] },
     { value: "1", keywords: ["zinc naturel"] },
   ],
@@ -504,14 +673,14 @@ const FIXATION_CROCHET_PARAM: ParamDef = {
   ],
   display: { "1": "sur chevron", "2": "bandeau" },
 };
-/** Diamètre des descentes : Ø 80 jusqu'à ≈ 70 m² de toit par descente, Ø 100 jusqu'à ≈ 130 m² (§11). */
+/** Diamètre des descentes : Ø 80 jusqu'à ≈ 70 m² de toit par descente, Ø 100 jusqu'à ≈ 113 m² (NF DTU 40.5 via VMZinc, fiche couverture). */
 const DIAMETRE_DESCENTE_PARAM: ParamDef = {
   key: "diametre_descente",
   label: "Diamètre des descentes",
   unit: "mm",
   kind: "site_data",
   question: "Descentes en Ø 80, Ø 100 ou Ø 120 ?",
-  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 130 m², Ø 120 au-delà.",
+  hint: "Ø 80 jusqu'à environ 70 m² de toit par descente, Ø 100 jusqu'à 113 m², Ø 120 jusqu'à 160 m².",
   choices: [
     { label: "Ø 80", value: "80" },
     { label: "Ø 100", value: "100" },
@@ -548,11 +717,19 @@ const QUALITE_ARDOISE_PARAM: ParamDef = {
 };
 const FACONNAGE_BANDES_PARAM: ParamDef = {
   ...FACONNAGE_PARAM,
+  // Greg, 17 novembre 2026 : « une seule réponse pour tout le devis, plus jamais pièce par pièce ». S'il plie : des
+  // feuilles, comptées d'après les développés et les longueurs. S'il achète tout fait : des longueurs de pièces façonnées.
+  // Il peut ensuite changer ce choix pour une pièce.
+  groupe: {
+    id: "pieces-pliees",
+    question: "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+    hint: "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés.",
+  },
   question: "Abergements, solins, bandes zinc : tu les façonnes toi-même ou tu les commandes façonnés ?",
   hint: "Je façonne : feuilles de zinc 2 × 1 m, bobineau au-delà de 6 ml. Commandé façonné : bandes en longueurs de 2 m. Gouttières et descentes ne sont pas concernées.",
   choices: [
-    { label: "Je façonne (feuilles ou bobineau)", value: "1" },
-    { label: "Je commande façonné", value: "2" },
+    { label: "Je façonne (feuilles ou bobineau)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné", value: "2", dit: DIT_JE_COMMANDE },
   ],
   // « Façonnage et pose des bandes de rive » (D-2026-020), « comprend le pliage » (D-2026-018) : l'artisan les façonne
   // lui-même. « Bandes de ventilation perforées pliées en Z » (D-2026-018) : la pièce s'achète déjà pliée. §48.6 : une
@@ -567,6 +744,9 @@ const FACONNAGE_BANDES_PARAM: ParamDef = {
  * (faîtage). Pas de défaut : le développé change le poids et la pièce, on demande (ce n'est pas une quantité).
  */
 const DEVELOPPE_PARAM: ParamDef = {
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe",
   label: "Développé de la bande",
   unit: "mm",
@@ -604,6 +784,9 @@ const FACONNAGE_NOUE_PARAM: ParamDef = {
  * noue préformée de 50, dite et modifiable : c'est celle que le comptoir sert sans rien demander.
  */
 const DEVELOPPE_NOUE_PARAM: ParamDef = {
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe_noue",
   label: "Développé de la noue",
   unit: "mm",
@@ -625,6 +808,146 @@ const DEVELOPPE_NOUE_PARAM: ParamDef = {
  * Arêtier en tuiles (arêtières, la pièce de la faîtière) ou en bande zinc (§3, §5) : deux articles au comptoir. Lu dans
  * la ligne ; sur un toit de tuiles, des arêtières ; sinon on demande, avec les mots du comptoir.
  */
+/**
+ * Greg, 21 novembre 2026 (soir) : « Faîtière sur HP 10 sans modèle écrit : demi-ronde par défaut (2,5 au mètre), sans
+ * question, marquée par défaut et modifiable. » Le mot « HP 10 » se lit sur la ligne des tuiles et vaut pour le faîtage du
+ * même devis ; jamais demandé. Edilians : faîtière demi-ronde 2,5 au mètre, angulaire 3 au mètre (documentation HP 10).
+ */
+const TUILE_HP10_PARAM: ParamDef = {
+  key: "tuile_hp10",
+  label: "Tuile HP 10",
+  unit: "u",
+  kind: "site_data",
+  question: "La tuile posée est une HP 10 ?",
+  neverAsk: true,
+  textValues: [{ value: "1", keywords: ["hp10", "hp 10"] }],
+  silentDefault: true,
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "pas une HP 10" },
+};
+/**
+ * ARDOISES : LES OUVRAGES AU MÈTRE (Greg, 21 novembre 2026, soir). « Surface × ardoises au m², PLUS ce que consomment les
+ * ouvrages au mètre écrits au devis, puis la perte. » Leurs longueurs sont celles de leurs propres lignes (arêtier, noue,
+ * faîtage, gouttière), lues sur le même devis ; jamais demandées, zéro quand le devis n'en parle pas.
+ * Chiffres : manuel du CAP couvreur (`referentiels/couverture/recherche/ardoise-ouvrages-au-metre.md`), tranchés par Greg :
+ * arêtier 0,66 m² par mètre (26 ardoises 32×22), noue 0,50 m² par mètre, faîtage et égout un rang d'ardoises.
+ */
+const longueurLue = (key: string, label: string): ParamDef => ({
+  key,
+  label,
+  unit: "m",
+  kind: "site_data",
+  question: `${label} ?`,
+  neverAsk: true,
+  silentDefault: true,
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "le devis n'en parle pas" },
+});
+const OUVRAGES_AU_METRE_ARDOISE: ParamDef[] = [
+  longueurLue("longueur_aretier", "Longueur d'arêtier"),
+  longueurLue("longueur_noue", "Longueur de noue"),
+  longueurLue("longueur_faitage", "Longueur du faîtage"),
+  longueurLue("longueur_gouttiere", "Longueur de gouttière"),
+  {
+    // Greg, 21 novembre 2026 (soir) : l'égout fait la longueur de la gouttière si elle est écrite ; sinon une seule question.
+    key: "egout_compris",
+    label: "Égout et coupes compris dans les m²",
+    unit: "u",
+    kind: "site_data",
+    question: "Tes m² d'ardoise comprennent déjà l'égout et les coupes ?",
+    // Greg, 22 novembre 2026 : « Jouées de lucarne : pas de question d'égout, elles n'en ont pas. »
+    textValues: [{ value: "1", keywords: ["jouee", "jouees"] }],
+    ownOnly: true,
+    choices: [
+      { label: "Oui", value: "1" },
+      { label: "Non", value: "2" },
+    ],
+    display: { "1": "oui", "2": "non" },
+  },
+  {
+    // Règle changée (Greg, 21 novembre 2026) : cette longueur se demande, seulement après « Non » à la question d'avant.
+    key: "egout_a_ajouter",
+    label: "Égout à ajouter",
+    unit: "m",
+    kind: "site_data",
+    question: "Quelle longueur d'égout ?",
+    askOnlyAfter: { param: "egout_compris", value: "2" },
+  },
+];
+/**
+ * FAÎTIÈRE D'UN TOIT EN ARDOISES FIBRES-CIMENT (Greg, 22 novembre 2026 : « oui, pose Quelle faîtière ? avec des boutons
+ * (demi-ronde, angulaire, d'aération) »). Le faîtage est sur fibres-ciment quand le devis a cette couverture (lu par le
+ * code sur les autres ouvrages) ; jamais demandé. Longueurs utiles : manuel de pose Cedral du 15 avril 2026 et fiche Cedral
+ * (`recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`) : demi-ronde 330 mm, angulaire 1 100 mm, d'aération 490 mm.
+ */
+const FAITAGE_SUR_FC_PARAM: ParamDef = {
+  key: "faitage_sur_fc",
+  label: "Faîtage sur ardoises fibres-ciment",
+  unit: "u",
+  kind: "site_data",
+  question: "Le faîtage est-il sur des ardoises fibres-ciment ?",
+  neverAsk: true,
+  silentDefault: true,
+  fromWorks: [{ value: "1", workItems: ["couverture-ardoises-fibres-ciment"] }],
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "pas de fibres-ciment au devis" },
+};
+const FAITIERE_FC_PARAM: ParamDef = {
+  key: "faitiere_fc",
+  label: "Faîtière fibres-ciment",
+  unit: "u",
+  kind: "site_data",
+  question: "Quelle faîtière ?",
+  choices: [
+    { label: "Demi-ronde", value: "1" },
+    { label: "Angulaire", value: "2" },
+    { label: "D'aération", value: "3" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["demi ronde", "demi-ronde", "ronde"] },
+    { value: "2", keywords: ["angulaire", "bords plats"] },
+    { value: "3", keywords: ["aeration", "d aeration", "ventilee", "ventilation"] },
+  ],
+  display: { "1": "demi-ronde", "2": "angulaire", "3": "d'aération" },
+};
+/**
+ * Arêtier d'un toit d'ardoises : fermé en ardoises biaises (Greg, 21 novembre : 26 ardoises au mètre, 0,66 m²) ou en bande
+ * zinc (Greg, 22 novembre : « compté comme la noue, 0,50 m² par mètre »). Lu sur la ligne de l'arêtier (« biaises »,
+ * « fermé ») ; sinon en zinc, la règle des toits d'ardoises (§3, §4). Jamais demandé.
+ */
+const ARETIER_FERME_PARAM: ParamDef = {
+  key: "aretier_ferme",
+  label: "Arêtier fermé en ardoises",
+  unit: "u",
+  kind: "site_data",
+  question: "L'arêtier est-il fermé en ardoises ?",
+  neverAsk: true,
+  silentDefault: true,
+  textValues: [{ value: "1", keywords: ["biaise", "biaises", "ferme", "aretier ferme"] }],
+  default: { value: "0", source: F, verification: FOUNDER_DOC, version: 1, note: "arêtier en bande zinc" },
+};
+/**
+ * CROCHETS D'ARDOISE : À AGRAFE OU À POINTE (Greg, 22 novembre 2026 : « quand le devis ne le dit pas, pose Agrafe ou
+ * pointe ? En pose à agrafe, ajoute quand même quelques crochets à pointe pour ceux qui tombent sur les chevrons »). Les
+ * mots du devis : recherche `referentiels/couverture/recherche/crochets-pointe-et-agrafe-2026-11-22.md`. « Tige droite »,
+ * « tige ondulée » ne disent que la forme de la tige, pas le type.
+ */
+const TYPE_CROCHET_PARAM: ParamDef = {
+  key: "type_crochet",
+  label: "Type de crochet",
+  unit: "u",
+  kind: "site_data",
+  question: "Agrafe ou pointe ?",
+  hint: "À agrafe : le crochet s'agrafe sur le liteau. À pointe : il se plante (volige, ou au droit des chevrons).",
+  // Une seule réponse pour tout le devis (le toit et ses jouées de lucarne), comme le pliage ; elle se change par pièce.
+  groupe: { id: "crochets-ardoise", question: "Tes crochets d'ardoise : à agrafe ou à pointe ?", hint: "À agrafe : on ajoute 1 crochet à pointe sur 5, pour ceux qui tombent sur les chevrons." },
+  choices: [
+    { label: "À agrafe", value: "1" },
+    { label: "À pointe", value: "2" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["agrafe", "a agrafe", "a agrafer", "tige agrafe", "crochet agrafe", "crochets agrafe", "pression", "ressort"] },
+    { value: "2", keywords: ["a pointe", "crochet pointe", "crochets pointe", "crochet a pointe", "crochets a pointe", "a piquer", "a pic", "passe chevron", "pour volige", "crochet double"] },
+  ],
+  display: { "1": "à agrafe", "2": "à pointe" },
+};
 const ARETIER_PARAM: ParamDef = {
   key: "aretier_matiere",
   label: "Arêtier",
@@ -648,7 +971,100 @@ const ARETIER_PARAM: ParamDef = {
   display: { "1": "en tuiles", "2": "en zinc" },
 };
 /** Arêtier zinc : « bande zinc dév. 25 à 33 cm » (§3) ; le comptoir sert « de 25 » ou « de 33 », il ne le devine pas. */
+/**
+ * CALCULATEUR DE FEUILLES (Greg, 22 novembre 2026) : une feuille de zinc fait 2 × 1 m ; une pièce pliée se coupe en bandes
+ * de 2 m (une pièce de 2 m) ou de 1 m (deux pièces par bande). Pièces = ml ÷ longueur, arrondi au-dessus ; bandes par
+ * feuille = 100 cm ÷ développé, arrondi en dessous ; feuilles = bandes ÷ bandes par feuille. Pas de recouvrement ajouté.
+ * Demandée une fois pour toutes les pièces (comme le pliage), changeable pièce par pièce ; 2 m par défaut, la longueur de la
+ * feuille (prudence de la nuit du 22 novembre : à confirmer par Greg, qui la voulait « par pièce »).
+ */
+const LONGUEUR_PIECES_PARAM: ParamDef = {
+  key: "longueur_pieces",
+  label: "Longueur des pièces pliées",
+  unit: "m",
+  kind: "site_data",
+  question: "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?",
+  hint: "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m.",
+  groupe: { id: "longueur-pieces-pliees", question: "Tes pièces pliées : en longueurs de 2 m ou de 1 m ?", hint: "Une feuille fait 2 × 1 m : une bande de 2 m, ou deux pièces de 1 m." },
+  default: { value: "2", source: "greg-calculateur-feuilles-2026-11-22", verification: { status: "verified", verifiedAt: "2026-11-22", verifiedBy: "Greg (couvreur) : calculateur de feuilles" }, version: 1, note: "pièces de 2 m, la longueur de la feuille" },
+  choices: [
+    { label: "2 m", value: "2" },
+    { label: "1 m", value: "1" },
+  ],
+  textValues: [
+    { value: "1", keywords: ["longueurs de 1 m", "pieces de 1 m", "elements de 1 m"] },
+    { value: "2", keywords: ["longueurs de 2 m", "pieces de 2 m", "elements de 2 m"] },
+  ],
+};
+/** Développé de l'abergement (§7 : « dév. 33 à 40 cm ») : lu au devis, sinon 33, dit et modifiable (calculateur de feuilles). */
+const DEVELOPPE_ABERGEMENT_PARAM: ParamDef = {
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
+  key: "developpe_abergement",
+  label: "Développé de l'abergement",
+  unit: "mm",
+  kind: "site_data",
+  question: "Abergement : bande de 25, de 33 ou de 40 ?",
+  hint: "Le développé : la largeur de la feuille avant façonnage.",
+  default: { value: "330", source: F, verification: FOUNDER_DOC, version: 1, note: "« dév. 33 à 40 cm » (§7) : 33 retenu" },
+  choices: [
+    { label: "De 25", value: "250" },
+    { label: "De 33", value: "330" },
+    { label: "De 40", value: "400" },
+  ],
+  textValues: [
+    { value: "250", keywords: ["dev 25", "dev. 25", "developpe 25"] },
+    { value: "330", keywords: ["dev 33", "dev. 33", "developpe 33"] },
+    { value: "400", keywords: ["dev 40", "dev. 40", "developpe 40"] },
+  ],
+};
+/** Le détail sous la flèche : « 4 pièces de 2 m, 8 ml, développé 25 cm, 4 par feuille » ; la longueur se corrige. */
+const postesDeFeuille = (ml: string, dev: string, dites: string) => [
+  {
+    id: "pieces",
+    libelle: `{= arrondi_sup(${ml} / longueur_pieces)} pièces de {longueur_pieces|m} ({${ml}|ml}), développé {${dev}|cm}, {= max(1, arrondi_inf(regle.largeur_feuille / ${dev}))} par feuille`,
+    formule: siFeuillesDites(dev, calculDeFeuille(ml, dev), "0"),
+    cle: ml,
+  },
+  { id: "dites", libelle: `Ta réponse : {= ${dites}} feuilles`, formule: siFeuillesDites(dev, "0", dites), cle: dites },
+];
+/** La part de feuille d'une pièce (voir `LONGUEUR_PIECES_PARAM`) : additionnée sur la liste, arrondie une fois. */
+const calculDeFeuille = (ml: string, dev: string) =>
+  `arrondi_sup(arrondi_sup(${ml} / longueur_pieces) / max(1, arrondi_inf(regle.longueur_feuille / longueur_pieces))) / max(1, arrondi_inf(regle.largeur_feuille / ${dev}))`;
+/**
+ * Greg, 23 novembre 2026 : « Combien de feuilles ? » quand le développé dépasse la largeur de la feuille (1 m) ou n'est pas
+ * connu (« Je ne sais pas » : le développé vaut 0, `inconnu`). Le nombre dit par l'artisan remplace le calcul.
+ */
+const siFeuillesDites = (dev: string, calcul: string, dites: string) => `si(${dev} / regle.largeur_feuille > 1, ${dites}, si(${dev} / regle.largeur_feuille > 0, ${calcul}, ${dites}))`;
+const partDeFeuille = (ml: string, dev: string, dites: string) => siFeuillesDites(dev, calculDeFeuille(ml, dev), dites);
+/** Une bande pliée de longueur `len`, dans la largeur de la feuille : sa part de feuille (bandes de 2 m, `dev` de large). */
+const partDeBande = (len: string, dev: string) => `arrondi_sup(${len} / regle.longueur_feuille) / max(1, arrondi_inf(regle.largeur_feuille / ${dev}))`;
+const ABERG_DEVANT = `nb_cheminees * ${partDeBande("(largeur_cheminee + 2 * regle.retour_devant)", "regle.developpe_devant")}`;
+const ABERG_DERRIERE = `nb_cheminees * ${partDeBande("(largeur_cheminee + 2 * regle.retour_derriere)", "regle.developpe_derriere")}`;
+const ABERG_COTES = `nb_cheminees * 2 * ${partDeBande("(profondeur_cheminee + regle.allonge_cote)", "regle.developpe_cote")}`;
+const ABERGEMENT_CALCULE = `${ABERG_DEVANT} + ${ABERG_DERRIERE} + ${ABERG_COTES}`;
+/** « Combien de feuilles de zinc pour … ? » : 1, 2, 3, 4 et « Autre ». Propre à sa pièce. */
+const feuillesDites = (quoi: string, key: string): ParamDef => ({
+  key,
+  label: `Feuilles de zinc pour ${quoi}`,
+  unit: "u",
+  kind: "site_data",
+  question: `Pour ${quoi}, combien de feuilles de zinc te faut-il ?`,
+  hint: "Le développé dépasse la feuille ou n'est pas connu : dis le nombre de feuilles de 2 × 1 m.",
+  ownOnly: true,
+  toujoursDemandee: true,
+  choices: [
+    { label: "1", value: "1" },
+    { label: "2", value: "2" },
+    { label: "3", value: "3" },
+    { label: "4", value: "4" },
+  ],
+});
 const DEVELOPPE_ARETIER_PARAM: ParamDef = {
+  // Greg, 23 novembre 2026 : « Je ne sais pas » au développé → « Combien de feuilles ? » (0 = inconnu), quand l'artisan
+  // plie lui-même. La question naît au calcul : le serveur ramène l'écran des questions avec elle, sans bloquer.
+  inconnu: { valeur: "0", si: { param: "faconnage", value: "1" } },
   key: "developpe_aretier",
   label: "Développé de l'arêtier zinc",
   unit: "mm",
@@ -773,11 +1189,11 @@ const TEINTE_GOUTTIERE_PARAM: ParamDef = {
     { label: "Anthracite", value: "5" },
   ],
   textValues: [
-    { value: "1", keywords: ["grise", "grises", "gris clair"] },
+    { value: "1", keywords: ["grise", "grises", "gris clair", "gris"] },
     { value: "2", keywords: ["blanc", "blanche", "blanches"] },
     { value: "3", keywords: ["sable"] },
     { value: "4", keywords: ["brun", "brune", "marron"] },
-    { value: "5", keywords: ["anthracite", "7016"] },
+    { value: "5", keywords: ["anthracite", "7016", "gris anthracite"] },
   ],
   display: { "1": "grise", "2": "blanche", "3": "sable", "4": "brune", "5": "anthracite" },
   named: true,
@@ -800,6 +1216,10 @@ const NB_ANGLES_PARAM: ParamDef = {
     { value: "1", keywords: ["1 angle", "un angle"] },
     { value: "2", keywords: ["2 angles", "deux angles"] },
     { value: "3", keywords: ["3 angles", "trois angles"] },
+    // Une gouttière sur le pourtour d'un toit à quatre pans (banc du calcul, C11) : écrit au devis, jamais redemandé.
+    { value: "4", keywords: ["4 angles", "quatre angles"] },
+    { value: "5", keywords: ["5 angles", "cinq angles"] },
+    { value: "6", keywords: ["6 angles", "six angles"] },
   ],
 };
 /**
@@ -889,21 +1309,29 @@ const PANS_BAC_PARAM: ParamDef = {
     { value: "2", keywords: ["2 pans", "deux pans", "double pente", "bipente"] },
   ],
 };
+/** Plomb en bandes : 10 m jusqu'à 30 cm de large, 5 m au-delà (Le Plomb Français, D'Huart Industrie ; recherche du 20/11/2026). */
+const PLOMB_VERIFIE: Provenance["verification"] = {
+  status: "verified",
+  verifiedAt: "2026-11-20",
+  verifiedBy: "Recherche base couverture : Le Plomb Français, D'Huart Industrie",
+  note: "Bandes de plomb vendues en 10, 5 et 2 m ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer.",
+};
 /** Teinte de l'ardoise fibres-ciment : le comptoir ne la sert pas sans elle. */
 const TEINTE_FC_PARAM: ParamDef = {
   key: "teinte_fc",
   label: "Teinte de l'ardoise fibres-ciment",
   unit: "u",
   kind: "site_data",
-  question: "Ardoises fibres-ciment : bleu-noir, noir ou brun ?",
+  // Recherche du 20/11/2026 (Cedral, Cembrit) : anthracite / noir et brun ; « bleu-noir » n'existe chez aucun des deux.
+  // Écrit au devis, il reste lu tel quel (valeur 1), jamais proposé en bouton.
+  question: "Ardoises fibres-ciment : anthracite (noir) ou brun ?",
   choices: [
-    { label: "Bleu-noir", value: "1" },
-    { label: "Noir", value: "2" },
+    { label: "Anthracite / noir", value: "2" },
     { label: "Brun", value: "3" },
   ],
   textValues: [
     { value: "1", keywords: ["bleu noir", "bleu-noir", "bleue noire"] },
-    { value: "2", keywords: ["noire", "noires", "teinte noir", "coloris noir"] },
+    { value: "2", keywords: ["noire", "noires", "teinte noir", "coloris noir", "anthracite"] },
     { value: "3", keywords: ["brun", "brune", "brunes"] },
   ],
   display: { "1": "bleu-noir", "2": "noir", "3": "brun" },
@@ -952,8 +1380,8 @@ const FACONNAGE_CUIVRE_PARAM: ParamDef = {
   ...FACONNAGE_BANDES_PARAM,
   question: "Bandes cuivre : tu les façonnes toi-même ou tu les commandes façonnées ?",
   choices: [
-    { label: "Je façonne (feuilles ou bobine)", value: "1" },
-    { label: "Je commande façonné", value: "2" },
+    { label: "Je façonne (feuilles ou bobine)", value: "1", dit: DIT_JE_FACONNE },
+    { label: "Je commande façonné", value: "2", dit: DIT_JE_COMMANDE },
   ],
   hint: "Je façonne : feuilles de cuivre 2 × 1 m, bobine au mètre au-delà de 6 ml. Commandées façonnées : longueurs de 2 m.",
 };
@@ -1079,12 +1507,15 @@ const SURFACE_PARAM: ParamDef = {
 const USUAL_LITEAU_TUILE = { text: "Liteaux 27×40 pour la tuile (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_CONTRE_LITEAU = { text: "Contre-liteaux 27×40 sur chevrons (section courante).", source: F, productShort: "Liteaux 27×40", productId: "liteau-sapin-27x40" };
 const USUAL_ECRAN = { text: "Écran HPV courant en rouleau de 1,5 × 50 m (75 m²).", source: F, productId: "ecran-hpv-standard" };
+// Fiche couverture (2026-11-19) : m² d'écran = surface × 1,10 au-dessus de 30 % de pente (la règle du fondateur), × 1,20 à
+// 30 % et moins (lés recouverts de 20 cm, abouts et faîtage). Avant : recouvrement des lés seul (× 1,071 / × 1,154).
 const ECRAN_CONSTANTS = {
   seuil_pente_ecran: condition("16.7", "°", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Fiche Soprema : « pente ≤ 30 % », soit 16,7°."),
-  recouvrement_faible_pente: condition("0.20", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente inférieure OU ÉGALE au seuil (« ≤ 30 % », 16,7°)."),
-  recouvrement_forte_pente: condition("0.10", "m", "soprema-sop-ecran-hpv-r2", FOUNDER_CHECKED, "Pente supérieure au seuil."),
+  coef_ecran_faible_pente: deFiche("ecran.coef_pente_faible"),
+  coef_ecran_forte_pente: deFiche("ecran.coef_pente_forte"),
 };
-const ECRAN_FORMULA = "surface * ecran.largeur_rouleau / (ecran.largeur_rouleau - si(pente <= regle.seuil_pente_ecran, regle.recouvrement_faible_pente, regle.recouvrement_forte_pente))";
+const ECRAN_FORMULA = "surface * si(pente <= regle.seuil_pente_ecran, regle.coef_ecran_faible_pente, regle.coef_ecran_forte_pente)";
+// Le comptoir sert l'écran en rouleaux entiers (§40, test du fournisseur) ; les m² à couvrir se disent sur la ligne.
 
 /** Formats d'ardoise naturelle (hauteur × largeur, cm) du tableau du référentiel du fondateur (§3). */
 const SLATE_FORMATS: [number, number][] = [[40, 25], [40, 22], [35, 25], [35, 22], [33, 23], [32, 22], [30, 22], [30, 20], [30, 18]];
@@ -1104,15 +1535,75 @@ function slate(h: number, l: number): Product {
   };
 }
 
+/**
+ * SUGGESTION « SORTIE DE VENTILATION » (Greg, 21 novembre 2026, soir). « Sur toute réfection de toiture (ardoise, tuile,
+ * zinc…), si le devis n'en parle pas, propose en Suggestions : Sortie de ventilation (VMC, extraction d'air). Le même mot
+ * partout pour l'artisan ; l'article commandé s'adapte au matériau. » Une case de l'étape « Suggestions », jamais d'office ;
+ * pas proposée quand le devis écrit déjà une sortie de toit. Cochée : une pièce, modifiable.
+ */
+const SORTIE_VENTILATION_LABEL = "Sortie de ventilation (VMC, extraction d'air)";
+const SORTIE_VENTILATION_PAR_COUVERTURE: Record<string, string> = {
+  "couverture-tuiles-emboitement": "sortie-ventilation-tuile",
+  "couverture-tuiles-canal": "sortie-ventilation-tuile",
+  "couverture-ardoises-crochet": "sortie-ventilation-ardoise",
+  "couverture-ardoises-fibres-ciment": "sortie-ventilation-ardoise",
+  "couverture-zinc-tasseaux": "sortie-ventilation-zinc",
+  "couverture-zinc-joint-debout": "sortie-ventilation-zinc",
+  "couverture-bac-acier": "sortie-ventilation-bac-acier",
+};
+function avecSortieDeVentilation(works: Referential["workItems"]): Referential["workItems"] {
+  return works.map((w) => {
+    const productId = SORTIE_VENTILATION_PAR_COUVERTURE[w.id];
+    if (!productId) return w;
+    return {
+      ...w,
+      slots: [
+        ...w.slots,
+        { key: "sortie_ventilation", family: "outlet_vent", label: "Sortie de ventilation", usual: { text: "Une sortie de ventilation adaptée à la couverture.", source: F, productId }, suggested: { label: SORTIE_VENTILATION_LABEL, unlessWorks: ["sortie-de-toit"], onlyOnMeasuredWork: true } },
+      ],
+      needs: [
+        ...w.needs,
+        {
+          id: "sortie-ventilation",
+          slot: "sortie_ventilation",
+          // Une pièce quand la case est cochée ; le nombre se corrige d'un toucher.
+          formula: "1",
+          unit: "u",
+          core: true,
+          exclusions: "Une sortie de ventilation, seulement si la case « Suggestions » est cochée ; le nombre se corrige d'un toucher.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    };
+  });
+}
 export const ROOFING_REFERENTIAL: Referential = {
   id: "roofing",
-  version: "roofing-2026.10.11-51",
+  version: "roofing-2026.11.28-86",
   writtenOnly: true,
   // §49.9 : une unité h, fft ou jour n'est jamais une fourniture (la même liste que la lecture du code).
   withoutSupplyUnits: [...WITHOUT_SUPPLY_UNITS],
   trade: "roofing",
   sources: [
     { id: "definition", kind: "definition", title: "Définition", retrievedAt: "2026-10-01" },
+    {
+      id: FICHE,
+      kind: "baticlair_rule",
+      title: "Fiche couverture Mobiiz (base de référence, constantes de calcul)",
+      documentRef: "referentiels/couverture/fiche-couverture.json, constantes.json",
+      retrievedAt: "2026-11-19",
+      note: "Chaque constante renvoie aux chiffres confirmés de la recherche du 19/11/2026 qui la prouvent (règle du fondateur ou deux sources).",
+    },
+    {
+      id: FICHE_PRODUITS,
+      kind: "retailer",
+      title: "Fiche couverture Mobiiz : données produit relevées chez les fabricants et les négoces",
+      documentRef: "referentiels/couverture/fiche-couverture.json (sources de chaque chiffre)",
+      retrievedAt: "2026-11-19",
+      note: "Longueurs vendues et conditionnements confirmés par un fabricant et des négoces (bretons d'abord).",
+    },
     {
       id: "edilians-canal",
       kind: "manufacturer",
@@ -1121,6 +1612,15 @@ export const ROOFING_REFERENTIAL: Referential = {
       url: "https://edilians.com/media/wysiwyg/Encyclopedie/canal-tuiles-edilians.pdf",
       note: "Nombres au m² (couvert seul) et liteaux au m² par recouvrement, relevés par le fondateur (référentiel §35.3).",
       retrievedAt: "2026-10-04",
+    },
+    {
+      id: "terreal-volnay-pv",
+      kind: "manufacturer",
+      title: "Fiche produit Volnay PV (Terreal, Wienerberger)",
+      publisher: "Terreal",
+      url: "https://www.wienerberger.fr/content/dam/wienerberger/france/marketing/documents-magazines/commercial/commercial-product-info-sheet/roof/terreal/FR_MKT_DOC_TRL_Fiche_Produit_Volnay_PV_001.pdf",
+      note: "Fiche de mars 2025, relevée dans la base couverture (S84) : 10 tuiles au m², pureau 340 à 408 mm, largeur utile 251 mm. Fabricant seul ; contrôlé par le calcul 1 / (largeur utile × pureau).",
+      retrievedAt: "2026-11-19",
     },
     {
       id: "edilians-hp10",
@@ -1182,12 +1682,68 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Convention « longueur × largeur » (30×22 = 30 cm de long, 22 cm de large), confirmée par le fondateur le 2026-10-02.",
     },
     {
+      id: "greg-calculateur-feuilles-2026-11-22",
+      kind: "trade_practice",
+      title: "Calculateur de feuilles de zinc (Greg, couvreur)",
+      documentRef: "Message de Greg dans la conversation du banc du calcul, 2026-11-22",
+      retrievedAt: "2026-11-22",
+      note: "Feuilles 2 × 1 m. Par pièce : développé (20, 25, 33, 40 cm, autre) et longueur des pièces (1 m ou 2 m). Pièces = ml ÷ longueur, arrondi au-dessus ; bandes par feuille = 100 cm ÷ développé, arrondi en dessous ; feuilles = pièces ÷ bandes par feuille, arrondi au-dessus ; pièces de même longueur regroupées sur les mêmes feuilles ; pas de recouvrement ajouté. Exemple : 10 ml, pièces de 2 m, dév. 20 → 5 pièces, 5 bandes par feuille → 1 feuille.",
+    },
+    {
       id: "fondateur-reponses-2026-10-04",
       kind: "trade_practice",
       title: "Réponses du fondateur (couvreur) aux partiels du référentiel",
       documentRef: "Message du fondateur dans la conversation de travail, 2026-10-04 (réponses aux partiels : sortie de toit, bobineau, surlongueur, bâche)",
       retrievedAt: "2026-10-04",
       note: "Sortie de toit : une embase par sortie adaptée à la couverture (plomb pour ardoise et tuile, platine zinc soudée pour zinc), au diamètre du conduit, plus un chapeau ; collerette d'étanchéité seulement pour un conduit de fumée. Surlongueur de bobine 15 cm par bac. Bâche : fourniture. Bobineau : largeurs 500, 650, 1 000 mm, longueurs 17, 21, 31 m (40 m en 500), épaisseurs 0,65 (défaut), 0,70, 0,80.",
+    },
+    {
+      id: RECH_ABERGEMENT,
+      kind: "trade_practice",
+      title: "Abergement de souche en zinc : minimums des règles de l'art (NF DTU 40.11, 40.21, 40.211, 40.41 ; guides du ministère de la Culture ; Le Plomb Français)",
+      documentRef: "referentiels/couverture/recherche/abergement-cheminee-2026-11-23.md",
+      retrievedAt: "2026-11-23",
+      note: "Aucune source ne chiffre la consommation de zinc ni le développé complet d'une pièce. Devant L + 10 à 12 cm de chaque côté, relevé 90 mm min. ; derrière L + 12 à 15 cm de chaque côté, relevé 90 mm min. ; couloir latéral 10 cm min., relevé 9 cm ; noquets un tous les deux rangs. Développés déduits, à confirmer.",
+    },
+    {
+      id: RECH_ACCESSOIRES_TUILES,
+      kind: "manufacturer",
+      title: "Chatières : section par modèle (Edilians, Monier, Koramic, Terreal) et section de ventilation à atteindre (NF DTU 40.11 §4.5.2, DTU 40.23 tableau 6, FFB, Ubbink)",
+      documentRef: "referentiels/couverture/recherche/accessoires-tuiles.json",
+      retrievedAt: "2026-11-20",
+      note: "1/5000 de la surface projetée (comble perdu ou au-dessus d'un écran, 2 cm² par m²) ; 1/3000 sans écran (3,3 cm² par m²). HP 10 et PV 10 : 50 cm² ; Signy 33 ; Actua 26 ; Alpha 10 : 19 ; Romane Canal 18 ; Volnay PV (613 VPV) : 35 cm² avec grille (catalogue Terreal, DTA CSTB 5.1/17-2546_V3), recherche du 23/11/2026 (`recherche/chatiere-volnay-et-clous-2026-11-23.md`).",
+    },
+    {
+      id: RECH_FIXATIONS,
+      kind: "manufacturer",
+      title: "Pointes de liteaux : une par croisement avec le chevron (NF DTU 40.11 §4.2.1.4, DTU 40.21, Koramic, guide du ministère de la Culture) ; pointes au kg (Alsafix, ArcelorMittal)",
+      documentRef: "referentiels/couverture/recherche/fixations.json",
+      retrievedAt: "2026-11-20",
+    },
+    {
+      id: SKILL_FONDATEUR,
+      kind: "trade_practice",
+      title: "Règles métier du fondateur (couvreur, 20-25 ans de terrain) : skill regles-metier, interview du 18/11/2026",
+      documentRef: ".claude/skills/regles-metier/SKILL.md (§ Velux, § Oublis probables)",
+      retrievedAt: "2026-11-18",
+      note: "« En Suggestion : kit d'isolation (BDX), pare-vapeur (BBX), volet roulant, store, habillage intérieur. » Un par fenêtre, à sa taille ; la collerette d'écran (BFX) ajoutée d'après le tarif Velux France 2024 (vendue à part du raccord), recherche du 20/11/2026.",
+    },
+    {
+      id: "fondateur-reponses-2026-11-18",
+      kind: "trade_practice",
+      title: "Réponses du fondateur (couvreur) : couverture zinc à tasseaux",
+      documentRef: "Message du fondateur dans la conversation de travail, 2026-11-18, après son devis D-2026-024",
+      retrievedAt: "2026-11-18",
+      note: "« En général : bobine de 65 cm de largeur, hauteur de tasseau 50 mm, entraxe 62, les pattes sont souvent faites avec des chutes de zinc (4 cm par 15 cm environ). Parfois les bacs sont faits dans des bobines de 50 cm de large. »",
+    },
+    {
+      id: "vmzinc-tasseaux",
+      kind: "manufacturer",
+      title: "VMZINC, « Couverture à tasseaux », descriptif type (DTU 40.41)",
+      publisher: "VMZINC",
+      url: "https://www.vmzinc.com/getmedia/53fd3606-92a5-440e-9110-1377f96be36e/couv-tasseau-14-03-2022.doc",
+      retrievedAt: "2026-11-18",
+      note: "Largeur développée 650 mm : entraxe des tasseaux 630 mm (tasseaux de 40) ou 620 mm (tasseaux de 50) ; 500 mm : 480 ou 470 mm, imposée en région 3 site exposé et en région 4. Tasseaux de 40 mm si la projection horizontale du rampant est inférieure à 8 m, de 50 mm sinon. Reliefs latéraux 35 / 45 mm. Pattes à tasseaux en zinc de 40 mm de large, tous les 50 cm. Couvre-joints en éléments de 1 m, recouvrement de 50 mm au moins. Pointes Ø 3,4 ou vis Ø 4, longueur 70 mm (tasseaux de 40) ou 80 mm (tasseaux de 50).",
     },
     {
       id: "fondateur-reponses-2026-10-05",
@@ -1215,6 +1771,33 @@ export const ROOFING_REFERENTIAL: Referential = {
       note: "Mise à jour septembre 2026 (référentiel du fondateur, §34) : ardoises/m² = 1 / [pureau × (largeur + Ø crochet)], Ø 1 mm, inox 2,7 mm en zone littorale.",
     },
     {
+      id: "rheinzink-tasseau-pose-pliage",
+      kind: "manufacturer",
+      title: "RHEINZINK, « Tasseau, pose et pliage : schémas détaillés et cotés à usage professionnel »",
+      publisher: "RHEINZINK",
+      url: "https://www.rheinzink.fr/fileadmin/redaktion/RHEINZINK_FR/Downloads/Documents-Techniques/guides-de-pose-tasseau-pose-pliage-v09201-fr-fr.pdf",
+      retrievedAt: "2026-11-20",
+      note: "§1.6.4 : entraxe 620 mm (feuille 650, tasseau 50), 470 mm (500, 50). §1.6.5 : relevé du bac 45 mm contre un tasseau de 50, 90 mm contre un mur. §1.12.4 : couvre-joints de partie courante en éléments de 1 m au plus ; 1,50 m de tasseau au m² (650 / 50). §1.15 « Habillage de rive » : « rive droite avec tasseau de rive […] On pose ensuite un couvre-joint pour recouvrir le bac et l'habillage de la rive ».",
+    },
+    {
+      id: "vmzinc-delta-guide",
+      kind: "manufacturer",
+      title: "VMZINC, « Toiture Delta VMZINC, guide de prescription et de pose », traitement des finitions",
+      publisher: "VMZINC",
+      url: "https://assets.fedrusinternational.be/gen/VMZINC/Documentation/France/Solutions%20couverture/Delta%20VMZINC/Guide%20Delta%20VMZINC%20FR.pdf",
+      retrievedAt: "2026-11-20",
+      note: "« Rives latérales, rive à tasseau : placer et fixer un tasseau bois […], réaliser une rive de couverture identique à celle d'une couverture à tasseaux » ; repères : 1 couvre-joint, 2 tasseau de rive, 3 patte à tasseau, 4 bande de rive.",
+    },
+    {
+      id: "nedzink-cahier-technique",
+      kind: "manufacturer",
+      title: "NedZink, « Conseils de zinc, cahier technique » (techguide FR, novembre 2013)",
+      publisher: "NedZink",
+      url: "https://www.nedzink.com/wp-content/uploads/2019/07/13426-fr-v1-techn-advboek-volledig.pdf",
+      retrievedAt: "2026-11-20",
+      note: "« Rive : pour la finition latérale, le zinc du premier et du dernier bac est relevé contre un rebord en bois, par exemple un tasseau […] Le tasseau est recouvert d'un profil au choix. » Chapitre 6 : « bacs relevés de chaque côté et séparés par des tasseaux […] recouverts de couvre-joints ».",
+    },
+    {
       id: "vmzinc-joint-debout",
       kind: "manufacturer",
       title: "VMZINC / Umicore, « Joint debout, couverture froide ventilée, dossier technique » (DTU 40.41)",
@@ -1236,7 +1819,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       code: "ridge_tile",
       label: "Faîtière",
       needUnit: "u",
-      attributes: [{ key: "pieces_par_ml", label: "Pièces au mètre", unit: "u/m" }],
+      attributes: [{ key: "pieces_par_ml", label: "Pièces au mètre", unit: "u/m" }, { key: "pieces_par_ml_hp10", label: "Pièces au mètre sur une tuile HP 10", unit: "u/m" }],
       keyAttributes: [],
       keywords: ["faitiere", "faitage"],
     },
@@ -1261,6 +1844,11 @@ export const ROOFING_REFERENTIAL: Referential = {
     { code: "clip_fixing", label: "Fixation de patte", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["pointe annelee", "pointes annelees", "vis de patte", "fixation de patte"], consumable: true },
     // Joint debout (§7, §36) : la ligne du devis est une SURFACE ; ce qui se commande, ce sont des bobines (au mètre linéaire) ou des bacs.
     { code: "standing_seam", label: "Couverture zinc joint debout", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["joint debout", "couverture zinc", "zinc a joint debout", "jdb"] },
+    // Zinc à tasseaux (Greg, 18 novembre 2026 ; VMZINC) : la ligne du devis est une SURFACE ; ce qui se commande, c'est de la
+    // bobine au mètre linéaire, et, quand le devis les écrit, les tasseaux de bois et les couvre-joints.
+    { code: "batten_seam", label: "Couverture zinc à tasseaux", needUnit: "m2", attributes: [], keyAttributes: [], keywords: ["zinc a tasseaux", "couverture a tasseaux", "zinc sur tasseaux", "a tasseaux", "sur tasseaux"] },
+    { code: "zinc_batten", label: "Tasseau bois pour couverture zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["tasseau trapezoidal", "tasseaux trapezoidaux", "tasseau zinc", "tasseaux bois"] },
+    { code: "batten_cap", label: "Couvre-joint zinc de tasseau", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["couvre-joint de tasseau", "couvre-joints de tasseaux", "couvre joint tasseau"] },
     { code: "zinc_coil", label: "Bobine de zinc", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["bobine de zinc", "bobine zinc", "zinc en bobine"] },
     { code: "zinc_panel", label: "Bac joint debout", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bac joint debout", "bac zinc", "bacs zinc"] },
     // Bandes zinc au ml (§7, §36.4) : solin, rive, égout, ventilation, couvre-joint. Jamais commandées en « ml de zinc » nu.
@@ -1274,8 +1862,12 @@ export const ROOFING_REFERENTIAL: Referential = {
     },
     { code: "zinc_sheet", label: "Feuille de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["feuille de zinc", "feuille zinc"] },
     { code: "zinc_narrow_coil", label: "Bobineau de zinc", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["bobineau"] },
+    // Référentiel du fondateur : « "chéneau" = encaissé, pas une gouttière ». En zinc seulement : un chéneau en membrane
+    // (EPDM, PVC, DE00000071) n'est pas cet ouvrage.
+    { code: "box_gutter", label: "Chéneau encaissé", needUnit: "m", attributes: [], keyAttributes: [], keywords: ["cheneau encaisse", "cheneau zinc", "cheneau en zinc"] },
     // Le mortier du solin (« bande porte-solin zinc et mortier ciment », D-2026-020) : jamais supprimé ; mortier d'étanchéité en sacs de 25 kg (§49.7).
     { code: "solin_mortar", label: "Mortier de solin", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["mortier"] },
+    { code: "ridge_mortar", label: "Mortier de faîtage", needUnit: "kg", attributes: [], keyAttributes: [], keywords: ["mortier de faitage"] },
     { code: "solin_support", label: "Bande porte-solin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["porte-solin", "porte solin"] },
     // Abergement (entourage de cheminée) : un ouvrage compté, converti en bandes zinc façonnées ou en bobine (§7 « Abergement de cheminée »).
     { code: "chimney_flashing", label: "Abergement de cheminée", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["abergement", "entourage de cheminee", "entourage cheminee", "solin de cheminee", "habillage de cheminee"] },
@@ -1297,7 +1889,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       keywords: ["crochet de gouttiere"],
     },
     { code: "gutter_outlet", label: "Naissance", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["naissance"] },
-    { code: "downpipe", label: "Tube de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["descente", "tuyau de descente"] },
+    { code: "downpipe", label: "Tube de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["descente", "tuyau de descente", "dep", "desc ep", "descente ep"] }, // « DEP », « desc. EP » : les abréviations des couvreurs (banc du calcul, C07, C15)
     { code: "downpipe_shoe", label: "Dauphin", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["dauphin", "dauphins"] },
     { code: "downpipe_elbow", label: "Coude de descente", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["coude"] },
     {
@@ -1316,12 +1908,15 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "largeur_utile", label: "Largeur utile", unit: "m" },
         { key: "pureau_min", label: "Pureau minimal", unit: "m" },
         { key: "pureau_max", label: "Pureau maximal", unit: "m" },
+        { key: "section_chatiere", label: "Section de la chatière du modèle", unit: "cm2" },
       ],
       keyAttributes: ["largeur_utile"],
       keywords: ["tuile"],
     },
     // Tuile canal (§35.3, DTU 40.22) : couvert + courant, nombre au m² selon le recouvrement. « Romane canal » reste
     // une tuile à emboîtement grand moule (§5) : seuls les mots ci-dessous désignent une vraie tuile canal.
+    // Les deux articles d'une tuile canal au comptoir : le courant et le couvert (Greg, 21 novembre 2026).
+    { code: "roof_tile_canal_part", label: "Tuile canal, courant ou couvert", needUnit: "u", attributes: [], keyAttributes: [] },
     {
       code: "roof_tile_canal",
       label: "Tuile canal",
@@ -1373,6 +1968,9 @@ export const ROOFING_REFERENTIAL: Referential = {
       keyAttributes: ["largeur", "longueur"],
       keywords: ["ardoise"],
     },
+    // Greg, 21 novembre 2026 (soir) : « Remaniage : aucune ardoise d'office. » Les ardoises d'un remaniage sont celles que
+    // l'artisan dit ; aucune marge (ce qu'il dit est ce qu'il commande).
+    { code: "roof_slate_rework", label: "Ardoises de remaniage", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["remaniage", "remaniage ardoise", "remaniage ardoises", "remaniage d'ardoise", "remaniage d'ardoises", "remaniement"] },
     // §4 : l'ardoise fibres-ciment précise « ardoise » ; même calcul, ses formats, ses clous et ses crochets d'antivent.
     {
       code: "roof_slate_fc",
@@ -1401,11 +1999,16 @@ export const ROOFING_REFERENTIAL: Referential = {
         "crochet galvanise ardoise",
         "crochet teinte ardoise",
       ],
-    },
+    },    // Greg, 22 novembre 2026 : le crochet à pointe, une autre pièce au comptoir (boîtes de 700).
+    { code: "slate_hook_pointe", label: "Crochet d'ardoise à pointe", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["crochet a pointe", "crochets a pointe", "crochet pointe", "crochets pointe"] },
+
     // Familles de VOCABULAIRE seulement (aucun produit ni règle encore) : elles évitent qu'une
     // « tuile chatière » ou un « solin adapté à la tuile HP10 » soit pris pour une tuile.
     { code: "vent_tile", label: "Tuile chatière", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["chatiere", "tuile chatiere", "tuile de ventilation"] },
     // Sortie de toit : un ouvrage compté (réponse du fondateur, 2026-10-04) ; la ligne du devis en est la mesure.
+    { code: "outlet_vent", label: "Sortie de ventilation", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de ventilation"] },
+    { code: "outlet_tile", label: "Tuile à douille", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["tuile a douille"] },
+    { code: "outlet_lantern", label: "Lanterne", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["lanterne"] },
     { code: "roof_outlet", label: "Sortie de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["sortie de toit"] },
     { code: "outlet_base", label: "Embase de sortie de toit (plomb)", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "outlet_plate", label: "Platine zinc de sortie de toit", needUnit: "u", attributes: [], keyAttributes: [] },
@@ -1464,7 +2067,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       needUnit: "m2",
       attributes: [],
       keyAttributes: [],
-      keywords: ["bac acier", "bacs acier", "bacs aciers", "tole nervuree", "toles nervurees", "panneau sandwich", "panneaux sandwich", "bac sec", "couverture acier"],
+      // « couv. BA 63/100 », « faîtière BA » : l'abréviation des couvreurs (banc du calcul, C07, 21 novembre 2026).
+      keywords: ["bac acier", "bacs acier", "bacs aciers", "tole nervuree", "toles nervurees", "panneau sandwich", "panneaux sandwich", "bac sec", "couverture acier", "ba", "couv ba"],
     },
     { code: "steel_sheet", label: "Plaque bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "steel_screw", label: "Vis de bac acier", needUnit: "u", attributes: [], keyAttributes: [] },
@@ -1500,6 +2104,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
     },
     // §11 : « Raccord d'étanchéité : 1 par fenêtre ; type tuile (ondulée, pureau > 45 mm), ardoise ou matériau plat ».
+    { code: "roof_window_insulation", label: "Kit d'isolation de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_vapour", label: "Pare-vapeur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_collar", label: "Collerette d'écran de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_shutter", label: "Volet roulant de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_blind", label: "Store de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "roof_window_lining", label: "Habillage intérieur de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "batten_nail", label: "Pointes de liteaux", needUnit: "u", attributes: [], keyAttributes: [] },
+    { code: "tile_clip", label: "Crochet de fixation de tuile", needUnit: "u", attributes: [], keyAttributes: [] },
     { code: "roof_window_flashing", label: "Raccord d'étanchéité de fenêtre de toit", needUnit: "u", attributes: [], keyAttributes: [], keywords: ["raccord d'etancheite", "raccord etancheite"] },
   ],
   products: [
@@ -1514,6 +2126,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         largeur_utile: spec("0.268", "m", "edilians-hp10", FOUNDER_CHECKED, "≈ 268 mm selon la documentation."),
         pureau_min: spec("0.310", "m", "edilians-hp10", FOUNDER_CHECKED),
         pureau_max: spec("0.376", "m", "edilians-hp10", FOUNDER_CHECKED),
+        // A-INTEGRER §1 : chatière HP 10 réf. 205.20, 50 cm² (fiche Edilians, `recherche/accessoires-tuiles.json`).
+        section_chatiere: spec("50", "cm2", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "Chatière 205.20 : 50 cm² (Edilians)."),
       },
       sellingUnits: [
         { id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true },
@@ -1687,12 +2301,17 @@ export const ROOFING_REFERENTIAL: Referential = {
       manufacturer: "Edilians",
       // Appellations de CE modèle seulement : « faîtières ventilées » n'est pas une preuve que c'est lui.
       aliases: ["faitiere angulaire", "faitiere angulaire a emboitement", "faitiere 710", "ref 710"],
-      attributes: { pieces_par_ml: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024).") },
+      attributes: {
+        pieces_par_ml: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."),
+        pieces_par_ml_hp10: spec("3", "u/m", "edilians-hp10", FOUNDER_CHECKED, "« 3 pièces/ml » (documentation HP 10, 19/04/2024)."),
+      },
       sellingUnits: [{ id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true }],
     },
     // ---- Produits génériques (référentiel du fondateur) : utilisés par défaut, dits comme hypothèse.
     generic("faitiere-standard", "ridge_tile", "Faîtière 40 à 42 cm, recouvrement 5 à 7 cm (modèle à préciser)", "Faîtières", {
-      attributes: { pieces_par_ml: spec("2.9", "u/m", F, FOUNDER_DOC, "« ml faîtage / 0,35 ≈ 2,9 pièces/ml ».") },
+      // Fiche couverture (2026-11-19) : 3 au ml sans modèle connu (avant 2,9, « ml ÷ 0,35 »).
+      // Sur une HP 10, sans modèle écrit : la demi-ronde, 2,5 au mètre (Greg, 21 novembre 2026 ; documentation HP 10 Edilians).
+      attributes: { pieces_par_ml: specFiche("faitage.faitieres_par_ml_sans_modele"), pieces_par_ml_hp10: spec("2.5", "u/m", "edilians-hp10", FOUNDER_CHECKED, "Faîtière demi-ronde : 2,5 au mètre (documentation HP 10).") },
     }),
     generic("closoir-standard-5m", "ridge_closure", "Closoir ventilé de faîtage, rouleau de 5 m (modèle à préciser)", "Closoir", {
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC), primary: true }],
@@ -1708,7 +2327,9 @@ export const ROOFING_REFERENTIAL: Referential = {
     }),
     // §4 : formats, recouvrement courant 100 mm, ardoises et liteaux au m² du référentiel du fondateur.
     ...([
-      [40, 24, "27.8", "6.67"],
+      // Banc du calcul (C10, 22 novembre 2026) : 27,10 au m² à recouvrement 100 mm, pose au crochet (Cedral, manuel de pose
+      // du 15 avril 2026 ; Cembrit, documentation de septembre 2016 : même tableau). Avant 27,8 (ancien relevé).
+      [40, 24, "27.1", "6.67"],
       [40, 27, "24.7", "6.67"],
       [60, 30, "13.3", "4"],
       [60, 40, "10", "4"],
@@ -1727,10 +2348,44 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
       sellingUnits: BY_PIECE,
     })),
+    generic("ardoise-remaniage", "roof_slate_rework", "Ardoises identiques à l'existant, pour remaniage", "Ardoises pour remaniage"),
     generic("clou-ardoise-fc", "slate_nail", "Clou inox pour ardoise fibres-ciment", "Clous inox d'ardoise"),
     generic("antivent-ardoise-fc", "slate_wind_hook", "Crochet d'antivent inox pour ardoise fibres-ciment", "Crochets d'antivent"),
-    generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise"),
+    // Greg, 21 novembre 2026 : « Crochets d'ardoise : en boîtes, avec le nombre de pièces écrit sur la ligne. » Boîte de 500
+    // (base couverture, crochets à agrafe de 7 à 14 cm ; règles métier : « vendus en boîte de 500 »). Avant : à la pièce.
+    // Greg, 22 novembre 2026 : boîtes de 700 pour le crochet à pointe Ø 2,7 de 7 à 14 cm (Chausson, Frénéhard ; recherche du
+    // 22 novembre). Le nombre de pièces s'écrit sur la ligne.
+    generic("crochet-ardoise-pointe", "slate_hook_pointe", "Crochet d'ardoise inox à pointe", "Crochets d'ardoise à pointe", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 700", many: "boîtes de 700" }, contains: packaging("700", "u", F, FOUNDER_DOC, "Crochets à pointe en boîtes de 700 (Greg, 22 novembre 2026 ; Chausson, Frénéhard)."), primary: true }],
+    }),
+    generic("crochet-ardoise-standard", "slate_hook", "Crochet d'ardoise inox (longueur = pureau + 10 à 20 mm)", "Crochets d'ardoise", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 500", many: "boîtes de 500" }, contains: packaging("500", "u", F, FOUNDER_DOC, "Crochets d'ardoise en boîtes de 500 (Greg, 21 novembre 2026)."), primary: true }],
+    }),
+    // Banc du calcul (C15, 21 novembre 2026) : la Volnay PV de la base couverture entre au catalogue du moteur. Avant : un
+    // modèle inconnu, « à chiffrer » sans question.
+    {
+      id: "terreal-volnay-pv",
+      family: "roof_tile",
+      label: "Tuile terre cuite Volnay PV (Terreal)",
+      shortLabel: "Tuiles Volnay PV",
+      manufacturer: "Terreal",
+      aliases: ["volnay", "volnay pv", "terreal volnay", "terreal volnay pv"],
+      attributes: {
+        largeur_utile: spec("0.251", "m", "terreal-volnay-pv", FOUNDER_CHECKED, "251 mm (fiche Terreal 03/2025)."),
+        pureau_min: spec("0.340", "m", "terreal-volnay-pv", FOUNDER_CHECKED),
+        pureau_max: spec("0.408", "m", "terreal-volnay-pv", FOUNDER_CHECKED),
+        // Greg, 23 novembre 2026 : chatière 613 VPV, 35 cm² avec grille (catalogue Terreal des accessoires Volnay PV ; DTA CSTB
+        // 5.1/17-2546_V3 §2.4.2 : « 52 cm² sans grille et 35 cm² avec grille »).
+        section_chatiere: spec("35", "cm2", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "Chatière 613 VPV : 35 cm² avec grille (Terreal ; DTA CSTB 5.1/17-2546_V3)."),
+      },
+      sellingUnits: [
+        { id: "piece", label: { one: "pièce", many: "pièces" }, contains: ONE_PIECE, primary: true },
+        { id: "palette", label: { one: "palette", many: "palettes" }, contains: packaging("240", "u", "terreal-volnay-pv", FOUNDER_CHECKED) },
+      ],
+    },
     generic("tuile-rive-standard", "verge_tile", "Tuile de rive (modèle de la tuile)", "Tuiles de rive"),
+    generic("tuile-rive-gauche-standard", "verge_tile", "Tuile de rive gauche (modèle de la tuile)", "Tuiles de rive gauches"),
+    generic("tuile-rive-droite-standard", "verge_tile", "Tuile de rive droite (modèle de la tuile)", "Tuiles de rive droites"),
     generic("gouttiere-standard-4m", "gutter", "Gouttière, longueurs de 4 m (profil à préciser)", "Gouttière", {
       sellingUnits: [
         { id: "longueur", label: { one: "longueur de 4 m", many: "longueurs de 4 m" }, contains: packaging("4", "m", F, FOUNDER_DOC), primary: true },
@@ -1758,9 +2413,14 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("bobine-cuivre", "copper_coil", "Cuivre en bobine, au mètre linéaire (largeur et épaisseur du chantier)", "Cuivre en bobine", {
       sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
     }),
-    // §49.7 : un mortier d'étanchéité spécial solin, prêt à gâcher, en sac de 25 kg (jamais « ciment + sable »).
-    generic("mortier-solin-25", "solin_mortar", "Mortier d'étanchéité pour solin, prêt à gâcher, sac de 25 kg", "Mortier d'étanchéité pour solin, sac 25 kg", {
+    // RÈGLE CHANGÉE (Greg, 17 novembre 2026 : « Ne transforme pas mes mots : "mortier de ciment" est devenu "mortier
+    // d'étanchéité" ») : le mortier garde le nom que le devis lui donne ; le code ne compte que les sacs de 25 kg.
+    // Avant (§49.7) : « Mortier d'étanchéité pour solin, prêt à gâcher ».
+    generic("mortier-solin-25", "solin_mortar", "Mortier pour solin", "Mortier pour solin", {
       sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "« sac de 25 kg » (§49.7)."), primary: true }],
+    }),
+    generic("mortier-faitage-25", "ridge_mortar", "Mortier de faîtage", "Mortier de faîtage", {
+      sellingUnits: [{ id: "sac", label: { one: "sac de 25 kg", many: "sacs de 25 kg" }, contains: packaging("25", "kg", F, FOUNDER_DOC, "Sac de 25 kg."), primary: true }],
     }),
     generic("jonction-gouttiere", "gutter_joint", "Jonction de gouttière (système de la gouttière)", "Jonctions de gouttière"),
     generic("talon-gouttiere", "gutter_end", "Talon (fond) de gouttière (système de la gouttière)", "Talons de gouttière"),
@@ -1772,20 +2432,49 @@ export const ROOFING_REFERENTIAL: Referential = {
     generic("tube-descente-standard", "downpipe", "Tube de descente (longueur du chantier)", "Tubes de descente"),
     generic("dauphin-standard", "downpipe_shoe", "Dauphin de pied de descente, 1 m", "Dauphins"),
     generic("coude-descente-standard", "downpipe_elbow", "Coude de descente (modèle à préciser)", "Coudes"),
-    generic("bande-faitage-zinc-standard", "zinc_ridge", "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 3 m", "Faîtage zinc (bande)", {
-      sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
+    // Fiche couverture (2026-11-19) : faîtage et arêtier zinc façonnés vendus en longueurs de 2 m (avant 3 m, §3).
+    generic("bande-faitage-zinc-standard", "zinc_ridge", "Bande de faîtage zinc, développé 25 à 33 cm, longueurs de 2 m", "Faîtage zinc (bande)", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: longueurFiche("zinguerie.longueur_faitage_aretier_faconne"), primary: true }],
     }),
     generic("patte-zinc-standard", "zinc_clip", "Patte de fixation pour bande zinc", "Pattes de fixation"),
     // §5 : l'arêtier est en général la même pièce que la faîtière (≈ 2,9 pièces/ml), son closoir fait 23 cm de large.
     generic("aretiere-standard", "hip", "Arêtier 40 à 42 cm, recouvrement 5 à 7 cm (modèle de la tuile posée)", "Arêtiers", {
-      attributes: { pieces_par_ml: spec("2.9", "u/m", F, FOUNDER_DOC, "« ml arêtier / 0,35 ≈ 2,9 pièces/ml » (§5).") },
+      // Fiche couverture (2026-11-19) : même pièce que la faîtière, 3 au ml sans modèle connu (avant 2,9).
+      attributes: { pieces_par_ml: specFiche("faitage.faitieres_par_ml_sans_modele") },
     }),
     generic("closoir-aretier-5m", "hip_closure", "Closoir ventilé d'arêtier, largeur 23 cm, rouleau de 5 m", "Closoir d'arêtier", {
       sellingUnits: [{ id: "rouleau", label: { one: "rouleau de 5 m", many: "rouleaux de 5 m" }, contains: packaging("5", "m", F, FOUNDER_DOC, "« arêtier : largeur 23 cm », rouleau de 5 m (§5)."), primary: true }],
     }),
     generic("crochet-aretier-standard", "hip_fixing", "Crochet d'arêtier à sec (modèle de l'arêtier)", "Crochets d'arêtier"),
-    generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 3 m", "Arêtier zinc (bande)", {
-      sellingUnits: [{ id: "longueur", label: { one: "longueur de 3 m", many: "longueurs de 3 m" }, contains: packaging("3", "m", F, FOUNDER_DOC), primary: true }],
+    generic("bande-aretier-zinc-standard", "hip_strip", "Bande d'arêtier zinc, développé 25 à 33 cm, longueurs de 2 m", "Arêtier zinc (bande)", {
+      sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: longueurFiche("zinguerie.longueur_faitage_aretier_faconne"), primary: true }],
+    }),
+    generic("kit-isolation-fenetre", "roof_window_insulation", "Kit d'isolation de fenêtre de toit, à la taille de la fenêtre", "Kits d'isolation (type BDX)"),
+    generic("pare-vapeur-fenetre", "roof_window_vapour", "Pare-vapeur de fenêtre de toit, à la taille de la fenêtre", "Pare-vapeur de fenêtre (type BBX)"),
+    generic("collerette-ecran-fenetre", "roof_window_collar", "Collerette d'écran de fenêtre de toit, à la taille de la fenêtre", "Collerettes d'écran (type BFX)"),
+    generic("volet-fenetre-toit", "roof_window_shutter", "Volet roulant de fenêtre de toit, à la taille de la fenêtre", "Volets roulants de fenêtre de toit"),
+    generic("store-fenetre-toit", "roof_window_blind", "Store de fenêtre de toit, à la taille de la fenêtre", "Stores de fenêtre de toit"),
+    generic("habillage-fenetre-toit", "roof_window_lining", "Habillage intérieur de fenêtre de toit, à la taille de la fenêtre", "Habillages intérieurs de fenêtre de toit"),
+    // Pointes galva annelées, longueur ≈ 2 × épaisseur du liteau + ancrage : 2,8 × 60 sous liteau de 18 (ardoise ; Ø 2,7
+    // au moins, NF DTU 40.11 2020), 3,1 × 70 sous liteau de 27 (tuile). Boîtes de 1 kg : 335 et 230 pointes (Alsafix, ArcelorMittal).
+    generic("pointes-liteau-28x60", "batten_nail", "Pointes galva annelées 2,8 × 60 pour liteaux, boîte de 1 kg", "Pointes galva 2,8 × 60", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("335", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "2,8 × 60 : ≈ 335 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
+    }),
+    // A-INTEGRER §3 : clous d'ardoise apparents en cuivre (ou inox), 3 × 30 : ≈ 418 au kg (Alsafix, ArcelorMittal), cartons de 1 kg.
+    generic("clou-ardoise-galva-27x30", "slate_nail", "Clous galvanisés 2,7 × 30 pour ardoise, boîte de 1 kg", "Clous galva 2,7 × 30", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("653", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Galva 2,7 × 30 : ≈ 653 clous au kg (Alsafix, ArcelorMittal)."), primary: true }],
+    }),
+    generic("clou-ardoise-cuivre-3x30", "slate_nail", "Clous cuivre 3 × 30 pour ardoise, boîte de 1 kg", "Clous cuivre 3 × 30", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("418", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Cuivre 3 × 30 : ≈ 418 clous au kg (Alsafix, ArcelorMittal)."), primary: true }],
+    }),
+    // A-INTEGRER §1 : la chatière du modèle de tuile posé (le comptoir la sert d'après la tuile).
+    // A-INTEGRER §2 : crochets de fixation de tuiles en boîtes de 400 (Dimos, Frénéhard ; une source chacun).
+    generic("crochet-fixation-tuile", "tile_clip", "Crochets de fixation de tuile (modèle de la tuile posée), boîte de 400", "Crochets de fixation de tuiles", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 400", many: "boîtes de 400" }, contains: packaging("400", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Boîtes de 400 (Dimos, Frénéhard)."), primary: true }],
+    }),
+    generic("chatiere-standard", "vent_tile", "Tuile chatière du modèle de tuile posé", "Chatières"),
+    generic("pointes-liteau-31x70", "batten_nail", "Pointes galva annelées 3,1 × 70 pour liteaux, boîte de 1 kg", "Pointes galva 3,1 × 70", {
+      sellingUnits: [{ id: "boite", label: { one: "boîte de 1 kg", many: "boîtes de 1 kg" }, contains: packaging("230", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "3,1 × 70 : ≈ 230 pointes au kg (Alsafix, ArcelorMittal)."), primary: true }],
     }),
     generic("raccord-fenetre-toit", "roof_window_flashing", "Raccord d'étanchéité de fenêtre de toit, adapté à la couverture et à la taille de la fenêtre", "Raccords d'étanchéité"),
     generic("about-aretier-standard", "hip_end", "About d'arêtier (modèle de la tuile posée)", "Abouts d'arêtier"),
@@ -1794,6 +2483,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       sellingUnits: [{ id: "longueur", label: { one: "longueur de 2 m", many: "longueurs de 2 m" }, contains: ONE_PIECE, primary: true }],
     }),
     // §45.5 : pattes fixes et pattes coulissantes sont deux articles au comptoir, les pointes un troisième.
+    generic("sortie-ventilation-tuile", "outlet_vent", "Tuile à douille et sa lanterne (modèle de la tuile posée)", "Tuile à douille et lanterne (sortie de ventilation)"),
+    generic("sortie-ventilation-ardoise", "outlet_vent", "Sortie de ventilation pour couverture en ardoise", "Sortie de ventilation pour ardoise"),
+    generic("sortie-ventilation-zinc", "outlet_vent", "Sortie de ventilation pour couverture zinc", "Sortie de ventilation pour zinc"),
+    generic("sortie-ventilation-bac-acier", "outlet_vent", "Sortie de ventilation pour bac acier", "Sortie de ventilation pour bac acier"),
+    generic("tuile-a-douille", "outlet_tile", "Tuile à douille (modèle de la tuile posée), au diamètre du conduit", "Tuile à douille"),
+    generic("lanterne-sortie", "outlet_lantern", "Lanterne de ventilation pour tuile à douille", "Lanterne de sortie de toit"),
     generic("embase-plomb-sortie", "outlet_base", "Embase plomb pour sortie de toit, au diamètre du conduit", "Embase plomb de sortie de toit"),
     generic("platine-zinc-sortie", "outlet_plate", "Platine zinc soudée pour sortie de toit, au diamètre du conduit", "Platine zinc de sortie de toit"),
     generic("chapeau-sortie", "outlet_cap", "Chapeau de sortie de toit, au diamètre du conduit", "Chapeau de sortie de toit"),
@@ -1828,11 +2523,21 @@ export const ROOFING_REFERENTIAL: Referential = {
         sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: packaging("1", "m", "definition", { status: "verified", verifiedAt: "2026-10-04", verifiedBy: "BatiClair (définition)" }), primary: true }],
       }),
     ),
+    generic("tasseau-zinc-50", "zinc_batten", "Tasseau bois trapézoïdal de 50 mm pour couverture zinc, au mètre linéaire", "Tasseaux bois trapézoïdaux de 50 mm", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
+    generic("couvre-joint-tasseau-zinc", "batten_cap", "Couvre-joint zinc pour tasseau de 50 mm, au mètre linéaire (aspect et épaisseur du chantier)", "Couvre-joints zinc de tasseaux", {
+      sellingUnits: [{ id: "ml", label: { one: "ml", many: "ml" }, contains: ONE_METRE, primary: true }],
+    }),
     generic("bac-joint-debout-standard", "zinc_panel", "Bac joint debout zinc naturel, façonné à la longueur du rampant (largeur utile 430 ou 580 mm)", "Bacs joint debout zinc", {
       // §50.7 : « 31 bacs », la longueur dans le nom (« longueur 7,15 m »).
       sellingUnits: [{ id: "bac", label: { one: "bac", many: "bacs" }, contains: ONE_PIECE, primary: true }],
     }),
-    generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
+generic("tuile-canal-courant", "roof_tile_canal_part", "Tuile canal, courant (modèle de la tuile posée)", "Tuiles canal, courants"),
+    generic("tuile-canal-couvert", "roof_tile_canal_part", "Tuile canal, couvert (modèle de la tuile posée)", "Tuiles canal, couverts"),
+        generic("bardelis-standard", "verge_tile", "Bardelis (tuile de rive canal), modèle de la tuile posée", "Bardelis"),
+    generic("bardelis-gauche-standard", "verge_tile", "Bardelis gauche (tuile de rive canal), modèle de la tuile posée", "Bardelis gauches"),
+    generic("bardelis-droit-standard", "verge_tile", "Bardelis droit (tuile de rive canal), modèle de la tuile posée", "Bardelis droits"),
     // Zinc façonné sur place (§25.2) : feuilles de 2 × 1 m, épaisseur du chantier ; jamais au kg pour un abergement ou une bande.
     generic("feuille-zinc-2x1", "zinc_sheet", "Feuille zinc naturel 2 × 1 m (épaisseur du chantier)", "Feuilles zinc 2 × 1 m"),
     // Réponse du fondateur (2026-10-04) : bobineau vendu à la pièce, désignation « bobineau 650 × 31 m, 0,65 ».
@@ -1856,7 +2561,7 @@ export const ROOFING_REFERENTIAL: Referential = {
     }),
     generic("collier-descente-standard", "downpipe_clamp", "Collier de descente (modèle à préciser)", "Colliers"),
   ],
-  workItems: [
+  workItems: avecSortieDeVentilation([
     {
       id: "couverture-tuiles-emboitement",
       trade: "roofing",
@@ -1865,6 +2570,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       triggers: ["roof_tile"],
       params: [
         SURFACE_PARAM,
+        TUILE_HP10_PARAM,
         {
           key: "pureau",
           label: "Pureau",
@@ -1874,19 +2580,27 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Il change le nombre de tuiles et de liteaux.",
           range: { min: "tuile.pureau_min", max: "tuile.pureau_max" },
           textLabels: ["pureau"],
-          // Référentiel du fondateur : « en zone 3 et pente < 35 % (19,3°), prendre le pureau mini » ; sinon le pureau se cale
-          // selon la pente, le maxi du fabricant pour une pente courante. Dit comme hypothèse, modifiable.
+          // Fiche couverture (2026-11-19 ; Edilians, Koramic, Terreal) : le couvreur partage le rampant en un nombre ENTIER de
+          // rangs, au pureau le plus long admis par le fabricant ; aucune source ne lie le pureau à la zone ou à la pente
+          // (avant : pureau mini en zone 3 ou sous 19,3°, sinon maxi). Dit comme hypothèse, modifiable.
           default: {
-            formula: "si(zone >= regle.zone_littorale, tuile.pureau_min, si(pente < regle.seuil_pente_pureau, tuile.pureau_min, tuile.pureau_max))",
-            source: F,
-            verification: FOUNDER_DOC,
-            version: 1,
-            note: "pureau mini du fabricant en zone littorale ou pente < 19,3° (35 %), sinon pureau maxi",
+            formula: "max(tuile.pureau_min, longueur_rampant / arrondi_sup(longueur_rampant / tuile.pureau_max))",
+            source: FICHE,
+            verification: FICHE_VERIFIEE,
+            version: 2,
+            note: "rampant partagé en rangs entiers, au plus long pureau admis par le fabricant",
           },
         },
         ENTRAXE_PARAM,
         PENTE_PARAM,
         ZONE_PARAM,
+        // A-INTEGRER §1 et §2 (Greg, 22 novembre 2026) : une seule question, et seulement si le devis ne le dit pas.
+        // A-INTEGRER §2 (Greg, 23 novembre 2026 : « la Bretagne d'abord ») : la zone de vent vient du département du chantier
+        // (22, 29, 56 : vent 3 ; 35 : vent 2), jamais demandée ; hors Bretagne, inconnue : la fixation reste « à chiffrer ».
+        { key: "zone_vent", label: "Zone de vent", unit: "u", kind: "site_data", question: "Zone de vent ?", neverAsk: true },
+        SITUATION_PARAM,
+        { key: "ecran_sous_toiture", label: "Écran sous toiture", unit: "u", kind: "site_data", question: "Écran sous toiture ?", textValues: [{ value: "1", keywords: ["ecran", "hpv", "sous toiture", "sous-toiture"] }], choices: [{ label: "Oui", value: "1" }, { label: "Non", value: "2" }], display: { "1": "oui", "2": "non" } },
+        RAMPANT_PARAM,
         { key: "longueur_rives", label: "Longueur de rives", unit: "m", kind: "site_data", question: "Longueur totale des rives ?", fromLineQuantity: true, forSlots: ["rive"] },
       ],
       slots: [
@@ -1894,11 +2608,23 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte"], usual: USUAL_LITEAU_TUILE },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
-        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" } },
+        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (DTU 40.21, Koramic).", source: RECH_FIXATIONS, productId: "pointes-liteau-31x70" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
+        // A-INTEGRER §1 : les chatières se comptent d'après le modèle et la surface, jamais demandées ; proposées en Suggestion.
+        { key: "fixation", family: "tile_clip", label: "Crochets de fixation des tuiles", usual: { text: "Crochet de fixation de tuile (boîtes de 400).", source: RECH_FIXATIONS, productId: "crochet-fixation-tuile" }, suggested: { label: "Fixation des tuiles (crochets)", onlyOnMeasuredWork: true } },
+        { key: "chatiere", family: "vent_tile", label: "Chatières", keywords: ["chatiere"], usual: { text: "Chatière du modèle de tuile posé.", source: RECH_ACCESSOIRES_TUILES, productId: "chatiere-standard" }, suggested: { label: "Chatières (ventilation de la toiture)", onlyOnMeasuredWork: true } },
+        { key: "rive", family: "verge_tile", label: "Tuiles de rive", keywords: ["rive"], usual: { text: "Tuile de rive du modèle de tuile posé.", source: F, productId: "tuile-rive-standard" }, suggested: { label: "Tuiles de rive" } },
+        // Greg, 21 novembre 2026 : « Tuiles de rive : deux lignes, gauches et droites » (ce ne sont pas les mêmes pièces).
+        { key: "rive_gauche", family: "verge_tile", label: "Tuiles de rive gauches", usual: { text: "Tuile de rive gauche du modèle de tuile posé.", source: F, productId: "tuile-rive-gauche-standard" }, formOf: "rive" },
+        { key: "rive_droite", family: "verge_tile", label: "Tuiles de rive droites", usual: { text: "Tuile de rive droite du modèle de tuile posé.", source: F, productId: "tuile-rive-droite-standard" }, formOf: "rive" },
       ],
       constants: {
+        pente_100: condition("45", "°", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Pente de 100 % = 45°."),
+        pente_175: condition("60.26", "°", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Pente de 175 % ≈ 60,26°."),
+        ventilation_avec_ecran: condition("0.0002", "u", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "1/5000 de la surface projetée, au-dessus d'un écran ou en comble perdu (NF DTU 40.11 §4.5.2) : 2 cm² par m²."),
+        ventilation_sans_ecran: condition("0.000333", "u", RECH_ACCESSOIRES_TUILES, ACCESSOIRES_TUILES_VERIFIE, "1/3000 de la surface projetée, sans écran (DTU 40.23 tableau 6) : 3,3 cm² par m²."),
+        // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
+        liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
-        seuil_pente_pureau: condition("19.3", "°", F, FOUNDER_DOC, "Sous cette pente (35 %, soit 19,3°), pureau mini (nombre de tuiles maxi)."),
         zone_littorale: ZONE_LITTORALE,
       },
       needs: [
@@ -1916,6 +2642,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "liteaux",
           slot: "liteau",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
           formula: "surface / pureau",
           unit: "ml",
           precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
@@ -1923,6 +2650,53 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Hors doublage du liteau d'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-couverture",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "pointes-liteaux",
+          slot: "pointe",
+          formula: "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          unit: "u",
+          core: false,
+          precision: "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          exclusions: "Pointes de contre-liteaux et de voliges à part.",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
+          version: 1,
+        },
+        {
+          // A-INTEGRER §1 : surface projetée × 1/5000 (écran) ou 1/3000 (sans écran) ÷ section de la chatière du modèle,
+          // arrondi au nombre pair au-dessus (moitié en bas, moitié près du faîtage). 100 m² sans écran, HP 10 : 333 ÷ 50 = 6,7
+          // → 8. Modèle sans section connue : pas de nombre, la ligne reste à chiffrer (jamais inventé).
+          id: "chatieres",
+          slot: "chatiere",
+          formula: "2 * arrondi_sup(surface * cos_deg(pente) * si(ecran_sous_toiture < 2, regle.ventilation_avec_ecran, regle.ventilation_sans_ecran) / (2 * tuile.section_chatiere))",
+          unit: "u",
+          core: false,
+          precision: "ventilation de la sous-face : surface projetée × section à atteindre ÷ section d'une chatière, en nombre pair",
+          exclusions: "Moitié en partie basse, moitié près du faîtage.",
+          source: RECH_ACCESSOIRES_TUILES,
+          verification: ACCESSOIRES_TUILES_VERIFIE,
+          version: 1,
+        },
+        {
+          // A-INTEGRER §2 : tuiles du 1er rang d'égout et tuiles de rive toujours fixées ; partie courante selon le tableau du
+          // NF DTU 40.21 §5.4 (Edilians, Koramic), Bretagne seulement : vent 3 (22, 29, 56) sans écran 1 sur 3 (pente ≤ 100 %) ou
+          // 1 sur 2 (100 à 175 %), toutes en site exposé, 1 sur 5 avec écran ; vent 2 (35) sans écran 1 sur 5 / 1 sur 3, avec
+          // écran aucune (site normal, ≤ 100 %) ou 1 sur 5 ; au-delà de 175 % toutes. Faîtières et arêtières : avec leur ouvrage.
+          id: "fixation-tuiles",
+          slot: "fixation",
+          formula: "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5)))))) + surface / longueur_rampant / tuile.largeur_utile + longueur_rives / pureau",
+          postes: [
+            { id: "courante", libelle: "Partie courante : {= arrondi_sup(surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile)} tuiles, fixées selon le vent, l'écran et la pente", formule: "arrondi_sup((surface / (tuile.largeur_utile * pureau) - surface / longueur_rampant / tuile.largeur_utile) * si(pente > regle.pente_175, 1, si(zone_vent > 2.5, si(ecran_sous_toiture < 2, 1 / 5, si(situation > 1, 1, si(pente > regle.pente_100, 1 / 2, 1 / 3))), si(ecran_sous_toiture < 2, si(pente > regle.pente_100, 1 / 5, si(situation > 1, 1 / 5, 0)), si(pente > regle.pente_100, si(situation > 1, 1, 1 / 3), si(situation > 1, 1 / 3, 1 / 5))))))" },
+            { id: "egout", libelle: "1er rang d'égout : toutes", formule: "surface / longueur_rampant / tuile.largeur_utile" },
+            { id: "rives", libelle: "Rives {longueur_rives|ml} : toutes", formule: "longueur_rives / pureau", cle: "longueur_rives" },
+          ],
+          unit: "u",
+          core: false,
+          precision: "égout et rives toujours fixés ; partie courante selon la zone de vent, l'écran et la pente (NF DTU 40.21)",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
           version: 1,
         },
         {
@@ -1950,16 +2724,28 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
-          id: "tuiles-de-rive",
-          slot: "rive",
-          formula: "longueur_rives / pureau",
+          id: "tuiles-de-rive-gauches",
+          slot: "rive_gauche",
+          formula: "longueur_rives / 2 / pureau",
           unit: "u",
           core: true,
           requires: ["longueur_rives"],
-          exclusions: "Une tuile de rive par rang, sur la longueur totale des rives du devis (gauche et droite) ; hors abouts.",
+          exclusions: "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
           source: F,
           verification: FOUNDER_DOC,
-          version: 1,
+          version: 2,
+        },
+        {
+          id: "tuiles-de-rive-droites",
+          slot: "rive_droite",
+          formula: "longueur_rives / 2 / pureau",
+          unit: "u",
+          core: true,
+          requires: ["longueur_rives"],
+          exclusions: "Une tuile de rive par rang ; la moitié de la longueur des rives du devis est à gauche, l'autre à droite ; hors abouts.",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 2,
         },
       ],
     },
@@ -1990,8 +2776,15 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "tuile", family: "roof_tile_canal", label: "Tuiles canal" },
+        // Greg, 21 novembre 2026 : « Tuile canal : deux lignes, courants et couverts. » Deux articles au comptoir (le couvert et
+        // le courant à tenons), autant de l'un que de l'autre : Edilians (Canal 50, réf. 414 et 454) et Terreal, recherche du
+        // 21 novembre 2026 (`referentiels/couverture/recherche/bac-acier-canal-fibres-ciment-2026-11-21.md`).
+        { key: "courant", family: "roof_tile_canal_part", label: "Tuiles canal, courants", usual: { text: "Le courant du modèle de tuile canal posé.", source: "edilians-canal", productId: "tuile-canal-courant" }, formOf: "tuile" },
+        { key: "couvert", family: "roof_tile_canal_part", label: "Tuiles canal, couverts", usual: { text: "Le couvert du modèle de tuile canal posé.", source: "edilians-canal", productId: "tuile-canal-couvert" }, formOf: "tuile" },
         { key: "liteau", family: "batten", label: "Liteaux", keywords: ["lattage", "liteau", "latte", "liteaunage"], usual: USUAL_LITEAU_TUILE },
-        { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" } },
+        { key: "rive", family: "verge_tile", label: "Bardelis (rives)", keywords: ["rive", "bardelis"], usual: { text: "Bardelis du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-standard" }, suggested: { label: "Bardelis (tuiles de rive)" } },
+        { key: "rive_gauche", family: "verge_tile", label: "Bardelis gauches", usual: { text: "Bardelis gauche du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-gauche-standard" }, formOf: "rive" },
+        { key: "rive_droite", family: "verge_tile", label: "Bardelis droits", usual: { text: "Bardelis droit du modèle de tuile, 2,7 au ml (Edilians, §35.3).", source: F, productId: "bardelis-droit-standard" }, formOf: "rive" },
       ],
       constants: {
         couvert_et_courant: condition("2", "u", "edilians-canal", FOUNDER_DOC, "« multiplier par 2 pour couvert + courant » (règle Edilians, §35.3)."),
@@ -2002,19 +2795,31 @@ export const ROOFING_REFERENTIAL: Referential = {
       },
       needs: [
         {
-          id: "tuiles-canal",
-          slot: "tuile",
-          formula: "surface * regle.couvert_et_courant * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          id: "tuiles-canal-courants",
+          slot: "courant",
+          formula: "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
           unit: "u",
           core: true,
-          exclusions: "Couvert et courant ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          exclusions: "Les courants seuls (autant que de couverts) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
           source: "edilians-canal",
           verification: FOUNDER_DOC,
-          version: 1,
+          version: 2,
+        },
+        {
+          id: "tuiles-canal-couverts",
+          slot: "couvert",
+          formula: "surface * si(recouvrement_canal >= regle.r170, tuile.nb_r170, si(recouvrement_canal >= regle.r160, tuile.nb_r160, si(recouvrement_canal >= regle.r150, tuile.nb_r150, tuile.nb_r140)))",
+          unit: "u",
+          core: true,
+          exclusions: "Les couverts seuls (autant que de courants) ; hors faîtières, bardelis de rive et tuiles d'égout (comptés à part).",
+          source: "edilians-canal",
+          verification: FOUNDER_DOC,
+          version: 2,
         },
         {
           id: "liteaux-canal",
           slot: "liteau",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
           formula: "surface * si(recouvrement_canal >= regle.r170, tuile.lit_r170, si(recouvrement_canal >= regle.r160, tuile.lit_r160, si(recouvrement_canal >= regle.r150, tuile.lit_r150, tuile.lit_r140)))",
           unit: "ml",
           core: false,
@@ -2024,14 +2829,55 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
-          id: "bardelis",
-          slot: "rive",
-          formula: "longueur_rives * regle.bardelis_par_ml",
+          id: "bardelis-gauches",
+          slot: "rive_gauche",
+          formula: "longueur_rives / 2 * regle.bardelis_par_ml",
           unit: "u",
           core: true,
           requires: ["longueur_rives"],
-          exclusions: "Rives gauche et droite du devis ; mortier de scellement à part.",
+          exclusions: "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
           source: "edilians-canal",
+          verification: FOUNDER_DOC,
+          version: 2,
+        },
+        {
+          id: "bardelis-droits",
+          slot: "rive_droite",
+          formula: "longueur_rives / 2 * regle.bardelis_par_ml",
+          unit: "u",
+          core: true,
+          requires: ["longueur_rives"],
+          exclusions: "La moitié de la longueur des rives du devis est à gauche, l'autre à droite ; mortier de scellement à part.",
+          source: "edilians-canal",
+          verification: FOUNDER_DOC,
+          version: 2,
+        },
+      ],
+    },
+    {
+      // Greg, 21 novembre 2026 (soir) : « Remaniage : aucune ardoise d'office. Question : Tu vas remanier. Je te prévois des
+      // ardoises ? Si oui, combien ? Ça dépend de l'état de la toiture. » Avant : la surface remaniée comptée en ardoises
+      // neuves (12 m² : 489 ardoises). La surface écrite est celle du travail, jamais une quantité d'ardoises.
+      id: "remaniage-ardoises",
+      trade: "roofing",
+      section: "principal",
+      label: "Remaniage d'ardoises",
+      triggers: ["roof_slate_rework"],
+      params: [
+        { key: "surface_remaniee", label: "Surface remaniée", unit: "m2", kind: "site_data", question: "Surface remaniée ?", fromLineQuantity: true, neverAsk: true },
+        { key: "ardoises_a_prevoir", label: "Ardoises à prévoir", unit: "u", kind: "site_data", question: "Tu vas remanier. Je te prévois des ardoises ? Si oui, combien ?", hint: "Ça dépend de l'état de la toiture. Zéro si tu n'en veux pas." },
+      ],
+      slots: [{ key: "ardoise", family: "roof_slate_rework", label: "Ardoises pour remaniage", usual: { text: "Ardoises identiques à l'existant.", source: F, productId: "ardoise-remaniage" } }],
+      constants: {},
+      needs: [
+        {
+          id: "ardoises-remaniage",
+          slot: "ardoise",
+          formula: "ardoises_a_prevoir",
+          unit: "u",
+          core: true,
+          exclusions: "Le nombre d'ardoises dit par l'artisan ; aucune marge, aucun crochet d'office.",
+          source: F,
           verification: FOUNDER_DOC,
           version: 1,
         },
@@ -2053,11 +2899,15 @@ export const ROOFING_REFERENTIAL: Referential = {
           question: "À quel pureau posez-vous ces ardoises ?",
           hint: "Il change le nombre d'ardoises, de crochets et de liteaux.",
           textLabels: ["pureau"],
-          // Pose au crochet, double recouvrement : pureau = (hauteur − recouvrement) / 2 (référentiel du fondateur). Des crochets
-          // écrits au devis disent le recouvrement de l'artisan : crochet − 1 cm (Cupa, §34), jamais contredits (D-2026-020).
+          // RÈGLE CHANGÉE (Greg, 17 novembre 2026) : « Ne me demande jamais le pureau : demande seulement le format de
+          // l'ardoise et la taille des crochets. » Le pureau se CALCULE toujours : (hauteur de l'ardoise − recouvrement) ÷ 2.
+          // Des crochets écrits au devis disent le recouvrement de l'artisan : crochet − 5 mm de jeu de tête (règle du
+          // fondateur, confirmée le 2026-11-19 : manuel CAP, ministère de la Culture, Cupa ; fiche couverture), jamais
+          // contredits (D-2026-020) ; sans crochets écrits, le recouvrement vient du tableau du NF DTU 40.11 (fiche).
+          neverAsk: true,
           default: {
             formula: "(ardoise.longueur - recouvrement) / 2",
-            whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.marge_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 1 cm)" },
+            whenGiven: { param: "longueur_crochet", formula: "(ardoise.longueur - (longueur_crochet - regle.jeu_tete_crochet)) / 2", note: "recouvrement des crochets du devis (crochet − 5 mm, jeu de tête)" },
             source: F,
             verification: FOUNDER_DOC,
             version: 1,
@@ -2065,7 +2915,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           },
         },
         {
-          // Le comptoir sert un crochet à sa longueur : celle du devis s'il l'écrit, sinon recouvrement + 1 cm (Cupa, §34).
+          // Le comptoir sert un crochet à sa longueur : celle du devis s'il l'écrit, sinon recouvrement + 3 mm arrondi au cm
+          // supérieur (fiche couverture, 2026-11-19 : Cupa, Frénéhard, NF DTU 40.11).
           key: "longueur_crochet",
           label: "Longueur de crochet",
           unit: "cm",
@@ -2081,14 +2932,20 @@ export const ROOFING_REFERENTIAL: Referential = {
             source: "cupa-pureau-ardoises-m2",
             verification: FOUNDER_DOC,
             version: 1,
-            note: "recouvrement + 1 cm (Cupa)",
+            note: "recouvrement + 3 mm, arrondi au cm (Cupa, Frénéhard, NF DTU 40.11)",
           },
         },
         ENTRAXE_PARAM,
         PENTE_PARAM,
         REGION_ARDOISE_PARAM,
+        SITUATION_PARAM,
         DIAMETRE_CROCHET_PARAM,
         QUALITE_ARDOISE_PARAM,
+        ...OUVRAGES_AU_METRE_ARDOISE,
+        ARETIER_FERME_PARAM,
+        TYPE_CROCHET_PARAM,
+        // Les rives (clous d'ardoise) : lues au devis ; demandées seulement si la case des clous est cochée.
+        { key: "longueur_rives", label: "Longueur des rives", unit: "m", kind: "site_data", question: "Longueur totale de tes rives (en mètres) ?", textLabels: ["rive", "rives"], ownOnly: true },
         {
           key: "longueur_rampant",
           label: "Longueur du rampant",
@@ -2101,53 +2958,62 @@ export const ROOFING_REFERENTIAL: Referential = {
             { label: "Jusqu'à 5,5 m", value: "5.5" },
             { label: "5,5 à 8 m", value: "8" },
             { label: "Plus de 8 m", value: "10" },
+            { label: "Plus de 11 m", value: "12" },
           ],
         },
       ],
       slots: [
-        { key: "ardoise", family: "roof_slate", label: "Ardoises" },
-        { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"], usual: { text: "Un crochet inox par ardoise.", source: F, productId: "crochet-ardoise-standard" } },
+        // Banc du calcul (C08, « ardoises identiques à l'existant ») : sans format écrit, le comptoir demande l'ardoise.
+        { key: "ardoise", family: "roof_slate", label: "Ardoises", ask: "Quelle ardoise ? Donne son format." },
+        { key: "crochet", family: "slate_hook", label: "Crochets d'ardoise", keywords: ["crochet"], dicteAvec: true, usual: { text: "Un crochet inox par ardoise.", source: F, productId: "crochet-ardoise-standard" } },
+        // Les crochets à pointe : une autre pièce au comptoir (boîtes de 700), forme d'achat des crochets écrits.
+        { key: "crochet_pointe", family: "slate_hook_pointe", label: "Crochets d'ardoise à pointe", usual: { text: "Crochets à pointe : au droit des chevrons en pose à agrafe, tous sur volige.", source: F, productId: "crochet-ardoise-pointe" }, formOf: "crochet" },
         {
           key: "liteau",
           family: "batten",
           label: "Liteaux",
           keywords: ["lattage", "liteau", "latte"],
-          usual: { text: "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40", productId: "liteau-sapin-18x40" },
+          usual: { text: "Section 18×40 par défaut : le devis ne la précise pas (règle validée par le fondateur).", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40", productId: "liteau-sapin-18x40", sur: true },
         },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
+        { key: "pointe", family: "batten_nail", label: "Pointes de liteaux", usual: { text: "Une pointe par croisement liteau / chevron (NF DTU 40.11).", source: RECH_FIXATIONS, productId: "pointes-liteau-28x60" }, suggested: { label: "Pointes pour liteaux", onlyWith: ["liteau"] } },
+        // A-INTEGRER §3 (Greg, 22 novembre 2026) : clous d'ardoise naturelle en Suggestion ; cochée, 2 clous par ardoise au
+        // doublis et au 1er rang d'égout, aux rives et au dernier rang sous le faîtage (NF DTU 40.11 P1-1 2020 §5.1.3).
+        // Greg, 23 novembre 2026 : en galva par défaut (avant : cuivre). Un clou APPARENT doit être inox ou cuivre (NF DTU 40.11
+        // P1-2 2020, annexe B) : dit à Greg, la règle ne change pas.
+        { key: "clou", family: "slate_nail", label: "Clous d'ardoise", usual: { text: "Clous galvanisés 2,7 × 30 (un clou apparent : inox ou cuivre, NF DTU 40.11 2020, annexe B).", source: RECH_FIXATIONS, productId: "clou-ardoise-galva-27x30" }, suggested: { label: "Clous d'ardoise (égout, rives, faîtage)" } },
       ],
       constants: {
+        // Recherche fixations du 20/11/2026 : liteaux vendus en 4 m en Bretagne (bois.json) ; une pointe de plus par bout de liteau.
+        liteau_vendu: rule("4", "m", RECH_FIXATIONS, FIXATIONS_VERIFIE, "liteau de {v} : une pointe de plus à chaque bout"),
         ...ECRAN_CONSTANTS,
-        seuil_rampant: condition("5.5", "m", F, FOUNDER_DOC, "Au-delà, +10 mm de recouvrement."),
-        supplement_rampant: condition("10", "mm", F, FOUNDER_DOC),
-        supplement_nul: condition("0", "mm", "definition", { status: "verified", verifiedAt: "2026-10-03", verifiedBy: "BatiClair (définition)" }),
-        pas_recouvrement: condition("5", "mm", F, FOUNDER_DOC, "Recouvrement arrondi aux 5 mm supérieurs."),
-        marge_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "« Longueur de crochet = R + 1 cm environ » (Cupa, §34)."),
+        supplement_expose: deFiche("ardoise.supplement_expose"),
+        coef_expose: deFiche("ardoise.coef_expose"),
+        pas_mm: condition("1", "mm", "definition", { status: "verified", verifiedAt: "2026-11-20", verifiedBy: "BatiClair (définition)" }, "Recouvrement arrondi au millimètre supérieur."),
+        seuil_rampant: deFiche("ardoise.seuil_projection_1"),
+        seuil_rampant_2: deFiche("ardoise.seuil_projection_2"),
+        marge_crochet: deFiche("ardoise.marge_choix_crochet"),
+        jeu_tete_crochet: deFiche("ardoise.jeu_de_tete_crochet"),
+        // Greg, 21 novembre 2026 (soir), d'après le manuel du CAP couvreur : arêtier fermé 0,66 m² par mètre, les deux côtés
+        // (26 ardoises 32×22 : « seulement le surplus ») ; noue zinc 0,50 m² par mètre (deux tranchis biais).
+        part_crochets_pointe: condition("0.2", "u", F, FOUNDER_DOC, "Pose à agrafe : 1 crochet à pointe sur 5 (manuel du CAP couvreur, ch. 21 ; une seule source chiffrée)."),
+        sans_gouttiere: condition("0", "m", "definition", { status: "verified", verifiedAt: "2026-11-21", verifiedBy: "Mobiiz (définition)" }, "Aucune gouttière écrite au devis."),
+        clous_bord_ardoise: condition("2", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "2 clous par ardoise au doublis, au 1er rang d'égout, aux rives et au dernier rang du faîtage (NF DTU 40.11 P1-1 2020 §5.1.3, ministère de la Culture, CAPEB)."),
+        rangs_egout_cloues: condition("2", "u", RECH_FIXATIONS, FIXATIONS_VERIFIE, "Doublis et 1er rang d'égout cloués (NF DTU 40.11 P1-1 2020 §5.1.3)."),
+        aretier_zinc_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Arêtier en bande zinc : 0,50 m² d'ardoise par mètre, comme la noue (Greg, 22 novembre 2026 ; deux tranchis biais, manuel du CAP couvreur)."),
+        aretier_m2_par_ml: condition("0.66", "m2/m", F, FOUNDER_DOC, "Arêtier : 0,66 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
+        noue_m2_par_ml: condition("0.50", "m2/m", F, FOUNDER_DOC, "Noue : 0,50 m² d'ardoise par mètre (manuel du CAP couvreur ; Greg, 21 novembre 2026)."),
         pas_crochet: condition("10", "mm", "cupa-pureau-ardoises-m2", FOUNDER_DOC, "Crochets vendus de centimètre en centimètre (R 100 → 11 cm, R 90 → 10)."),
       },
       points: { ardoises_m2: CUPA_ARDOISES_M2 },
+      // (constantes des ouvrages au mètre : voir OUVRAGES_AU_METRE_ARDOISE)
       tables: {
-        recouvrement: {
-          label: "Recouvrement de l'ardoise",
-          unit: "mm",
-          axes: [
-            { param: "pente", thresholds: ["25", "30", "35", "40", "45", "50"] },
-            { param: "zone", thresholds: ["1", "2", "3"] },
-          ],
-          values: [
-            ["110", "120", "130"],
-            ["100", "110", "120"],
-            ["90", "100", "110"],
-            ["85", "90", "100"],
-            ["80", "85", "95"],
-            ["70", "80", "90"],
-          ],
-          source: F,
-          verification: FOUNDER_DOC,
-          version: 1,
-          note: "Pose au crochet, rampant ≤ 5,5 m. Lignes 25°, 30°, 35°, 40°, 45°, ≥ 50° du référentiel (§3) ; la première ligne vaut dès la pente minimale de l'ardoise (24°, arrondie à 25°). Sous 25° : hors table, l'ouvrage n'est pas calculé.",
-        },
+        // NF DTU 40.11 (2020), annexe B, relu chez Cupa et Rathscheck : une table par bande de projection horizontale du
+        // rampant, lue dans la fiche couverture (2026-11-19). Le rampant tient lieu de projection (prudent : il est plus long).
+        recouvrement_a: tableFiche("ardoise.recouvrement_dtu_a"),
+        recouvrement_b: tableFiche("ardoise.recouvrement_dtu_b"),
+        recouvrement_c: tableFiche("ardoise.recouvrement_dtu_c"),
       },
       derived: [
         {
@@ -2161,14 +3027,27 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
+          key: "recouvrement_dtu",
+          label: "Recouvrement DTU (situation normale)",
+          unit: "mm",
+          // La pente et la zone d'abord (elles disent la ligne), puis le rampant (il choisit la table).
+          formula: "table.recouvrement_a * si(longueur_rampant <= regle.seuil_rampant, 1, 0) + table.recouvrement_b * si(longueur_rampant > regle.seuil_rampant, si(longueur_rampant <= regle.seuil_rampant_2, 1, 0), 0) + table.recouvrement_c * si(longueur_rampant > regle.seuil_rampant_2, 1, 0)",
+          source: FICHE,
+          verification: FICHE_VERIFIEE,
+          version: 1,
+        },
+        {
           key: "recouvrement",
           label: "Recouvrement",
           unit: "mm",
-          formula: "arrondi_sup((table.recouvrement + si(longueur_rampant > regle.seuil_rampant, regle.supplement_rampant, regle.supplement_nul)) / regle.pas_recouvrement) * regle.pas_recouvrement",
+          // Situation exposée en région III (NF DTU 40.11 2020, Cupa, Rathscheck ; fiche couverture 2026-11-20) : la plus
+          // forte de R + 10 mm et R × 1,10, au mm supérieur. Régions I et II exposées : rien d'appliqué (non confirmé).
+          // Le recouvrement du DTU d'abord (pente, zone, rampant), puis la situation (elle ajoute la majoration).
+          formula: "recouvrement_dtu + si(situation >= 2, si(zone >= 3, arrondi_sup(max(recouvrement_dtu + regle.supplement_expose, recouvrement_dtu * regle.coef_expose) / regle.pas_mm) * regle.pas_mm - recouvrement_dtu, recouvrement_dtu * 0), recouvrement_dtu * 0)",
           shown: true,
-          source: F,
-          verification: FOUNDER_DOC,
-          version: 1,
+          source: FICHE,
+          verification: FICHE_VERIFIEE,
+          version: 2,
         },
       ],
       needs: [
@@ -2176,14 +3055,23 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "ardoises",
           slot: "ardoise",
           // Table Cupa (§34) : elle fait foi ; la formule Cupa ne calcule que hors table.
-          formula: "surface * points.ardoises_m2",
+          formula: "(surface + si(aretier_ferme > 0, regle.aretier_m2_par_ml, regle.aretier_zinc_m2_par_ml) * longueur_aretier + regle.noue_m2_par_ml * longueur_noue) * points.ardoises_m2 + (longueur_faitage + si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter))) / ardoise.largeur",
           unit: "u",
           core: true,
-          exclusions: "Hors ardoises de rive, doublis à l'égout, coupes en noue et en arêtier (la perte de 5 % couvre casse et coupes de rive d'un pan simple).",
+          exclusions: "Surface, plus les ouvrages au mètre écrits au devis (arêtier, noue, un rang au faîtage et à l'égout), puis la perte. Hors rives.",
+          // Le détail sous la flèche (Greg, 22 novembre 2026) : les mêmes termes que la formule, un par ligne.
+          postes: [
+            { id: "surface", libelle: "Surface {surface|m2} × {points.ardoises_m2|u/m2#} au m²", formule: "surface * points.ardoises_m2", cle: "surface" },
+            { id: "aretiers", libelle: "Arêtiers {longueur_aretier|ml}", formule: "si(aretier_ferme > 0, regle.aretier_m2_par_ml, regle.aretier_zinc_m2_par_ml) * longueur_aretier * points.ardoises_m2", cle: "longueur_aretier" },
+            { id: "noues", libelle: "Noues {longueur_noue|ml}", formule: "regle.noue_m2_par_ml * longueur_noue * points.ardoises_m2", cle: "longueur_noue" },
+            { id: "faitage", libelle: "Faîtage {longueur_faitage|ml}, 1 rang", formule: "longueur_faitage / ardoise.largeur", cle: "longueur_faitage" },
+            { id: "egout-gouttiere", libelle: "Égout {longueur_gouttiere|ml} (la gouttière), 1 rang", formule: "si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, regle.sans_gouttiere) / ardoise.largeur", cle: "longueur_gouttiere" },
+            { id: "egout-reponse", libelle: "Égout {egout_a_ajouter|ml} (ta réponse), 1 rang", formule: "si(longueur_gouttiere > regle.sans_gouttiere, regle.sans_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur", cle: "egout_a_ajouter" },
+          ],
           // Le comptoir ne chiffre pas une ardoise sans sa qualité (§47.8) ; le format suit l'ardoise du devis.
           designation: "Ardoises naturelles {qualite_ardoise} {ardoise.longueur|cm#}×{ardoise.largeur|cm#}",
           // §49.3.4 : la phrase d'hypothèse, la marge du tiroir écrite (§49.2.4).
-          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}) + {marge} de marge",
+          precision: "{surface|m2} × {points.ardoises_m2|u/m2#} ardoises/m² (crochet {longueur_crochet|cm}, pente {pente|°}), arêtiers, noues, faîtage et égout du devis compris, + {marge} de marge",
           precisionRequires: ["qualite_ardoise"],
           source: "cupa-pureau-ardoises-m2",
           verification: FOUNDER_DOC,
@@ -2192,21 +3080,58 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "crochets-ardoise",
           slot: "crochet",
-          // « Commander crochets = ardoises × 1,02 » : les ardoises COMMANDÉES (après leur marge), puis +2 %.
-          formula: "commande.ardoises",
+          // Un crochet par ardoise COMMANDÉE (après sa marge), sans perte en plus (règle du fondateur, confirmée le 2026-11-19 :
+          // fiche couverture, ardoise.perte_crochets). En pose à agrafe (Greg, 22 novembre 2026) : 4 sur 5 à agrafe, le
+          // cinquième à pointe (ligne à part) ; en pose à pointe, tous à pointe (ligne à part), aucun ici.
+          when: "type_crochet < 2",
+          formula: "arrondi_sup(commande.ardoises * (1 - regle.part_crochets_pointe))",
           unit: "u",
           core: true,
-          exclusions: "Un crochet par ardoise commandée, +2 % (référentiel du fondateur) : jamais moins de crochets que d'ardoises.",
-          precision: "un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02)",
-          // Le comptoir sert un crochet à sa longueur (Cupa, §34 : recouvrement + 1 cm) et à son diamètre.
-          designation: "Crochets d'ardoise inox {diametre_crochet}, longueur {longueur_crochet|cm}",
+          exclusions: "Un crochet par ardoise commandée (règle du fondateur) ; en pose à agrafe, 1 sur 5 à pointe au droit des chevrons.",
+          precision: "4 ardoises sur 5 (la cinquième au crochet à pointe)",
+          // Le comptoir sert un crochet à sa longueur (recouvrement + 3 mm arrondi au cm, fiche couverture) et à son diamètre.
+          designation: "Crochets d'ardoise inox à agrafe {diametre_crochet}, longueur {longueur_crochet|cm}",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
           version: 1,
         },
         {
+          // Tant que « Agrafe ou pointe ? » attend sa réponse : la ligne des crochets reste, un par ardoise commandée, orange,
+          // avec sa question (une ligne écrite ne disparaît jamais) ; la réponse la partage en agrafes et pointes.
+          id: "crochets-ardoise-a-preciser",
+          slot: "crochet",
+          when: "type_crochet < 1",
+          ligneEnAttente: true,
+          formula: "commande.ardoises",
+          unit: "u",
+          core: true,
+          exclusions: "Un crochet par ardoise commandée ; à agrafe ou à pointe selon la réponse.",
+          precision: "un par ardoise commandée",
+          designation: "Crochets d'ardoise inox {type_crochet} {diametre_crochet}, longueur {longueur_crochet|cm}",
+          precisionRequires: ["type_crochet"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "crochets-ardoise-pointe",
+          slot: "crochet_pointe",
+          // Greg, 22 novembre 2026. Pose à agrafe : 1 crochet à pointe sur 5 ardoises (manuel du CAP couvreur, ch. 21 :
+          // « 4/5 de crochets-agrafes ; 1/5 de crochets-pointes » ; UNE source chiffrée, la base couverture redit la même).
+          // Pose à pointe : un par ardoise commandée.
+          formula: "si(type_crochet < 2, arrondi_sup(commande.ardoises * regle.part_crochets_pointe), commande.ardoises)",
+          unit: "u",
+          core: true,
+          exclusions: "Pose à agrafe : 1 ardoise sur 5, au droit des chevrons ; pose à pointe : une par ardoise commandée.",
+          designation: "Crochets d'ardoise inox à pointe {diametre_crochet}, longueur {longueur_crochet|cm}",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
           id: "liteaux-ardoise",
           slot: "liteau",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
           formula: "surface / pureau",
           unit: "ml",
           precision: "lattage {surface|m2}, une file tous les {pureau|cm}",
@@ -2214,6 +3139,38 @@ export const ROOFING_REFERENTIAL: Referential = {
           exclusions: "Une file par rang ; hors doublis à l'égout et liteaux de faîtage.",
           source: "baticlair-geometrie-ardoise",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "pointes-liteaux",
+          slot: "pointe",
+          formula: "surface / pureau * (1 / entraxe_supports + 1 / regle.liteau_vendu)",
+          unit: "u",
+          core: false,
+          precision: "une pointe par croisement avec un chevron, plus une par bout de liteau",
+          exclusions: "Pointes de contre-liteaux et de voliges à part.",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
+          version: 1,
+        },
+        {
+          // A-INTEGRER §3 : égout 2 rangs (doublis + 1er rang) × ardoises au mètre × 2 ; faîtage 1 rang × 2 (au moins 2 clous
+          // au dernier rang, Greg, 22 novembre 2026 : avant, 1) ; rives (rampant ÷ pureau) × 2. Exemple : 32×22, 10 m
+          // d'égout : 2 × 45,5 × 2 = 182 clous.
+          id: "clous-ardoise",
+          slot: "clou",
+          formula: "regle.clous_bord_ardoise * (regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur + longueur_faitage / ardoise.largeur + longueur_rives / pureau)",
+          postes: [
+            { id: "egout", libelle: "Égout : 2 rangs × 2 clous", formule: "regle.clous_bord_ardoise * regle.rangs_egout_cloues * si(longueur_gouttiere > regle.sans_gouttiere, longueur_gouttiere, si(egout_compris < 2, regle.sans_gouttiere, egout_a_ajouter)) / ardoise.largeur" },
+            { id: "faitage", libelle: "Faîtage {longueur_faitage|ml} : dernier rang × 2 clous", formule: "regle.clous_bord_ardoise * longueur_faitage / ardoise.largeur", cle: "longueur_faitage" },
+            { id: "rives", libelle: "Rives {longueur_rives|ml} × 2 clous", formule: "regle.clous_bord_ardoise * longueur_rives / pureau", cle: "longueur_rives" },
+          ],
+          unit: "u",
+          core: false,
+          precision: "2 clous par ardoise : doublis et 1er rang d'égout, rives, dernier rang du faîtage",
+          exclusions: "Pose au crochet : la partie courante n'est pas clouée.",
+          source: RECH_FIXATIONS,
+          verification: FIXATIONS_VERIFIE,
           version: 1,
         },
         {
@@ -2252,14 +3209,14 @@ export const ROOFING_REFERENTIAL: Referential = {
       params: [SURFACE_PARAM, TEINTE_FC_PARAM, ENTRAXE_PARAM, PENTE_PARAM],
       slots: [
         { key: "ardoise", family: "roof_slate_fc", label: "Ardoises fibres-ciment", ask: "Ardoises fibres-ciment : 40 × 24, 40 × 27, 60 × 30 ou 60 × 40 ?" },
-        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" } },
+        { key: "clou", family: "slate_nail", label: "Clous", usual: { text: "Deux clous inox par ardoise (§4).", source: F, productId: "clou-ardoise-fc" }, suggested: { label: "Clous d'ardoise fibres-ciment" } },
         { key: "antivent", family: "slate_wind_hook", label: "Crochets d'antivent", keywords: ["antivent", "crochet"], usual: { text: "Un crochet d'antivent par ardoise (§4).", source: F, productId: "antivent-ardoise-fc" } },
         {
           key: "liteau",
           family: "batten",
           label: "Liteaux",
           keywords: ["lattage", "liteau", "latte"],
-          usual: { text: "Section 18×40 par défaut, comme l'ardoise naturelle.", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40", productId: "liteau-sapin-18x40" },
+          usual: { text: "Section 18×40 par défaut, comme l'ardoise naturelle.", source: "fondateur-pratique-2026-10-02", productShort: "Liteaux 18×40", productId: "liteau-sapin-18x40", sur: true },
         },
         { key: "contre_liteau", family: "batten", label: "Contre-liteaux", keywords: ["contre lattage", "contre latte", "contre liteau"], usual: USUAL_CONTRE_LITEAU },
         { key: "ecran", family: "underlay", label: "Écran sous-toiture", usual: USUAL_ECRAN },
@@ -2288,6 +3245,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "liteaux-ardoise",
           slot: "liteau",
+          // Greg, 22 novembre 2026 : 10 % de chute au total sur les liteaux (aboutage compris) : la marge de l'emplacement « liteau ».
           formula: "surface * ardoise.liteaux_par_m2",
           unit: "ml",
           precision: "lattage {surface|m2}",
@@ -2327,27 +3285,49 @@ export const ROOFING_REFERENTIAL: Referential = {
       trade: "roofing",
       label: "Faîtage (faîtières, closoir, abouts, fixations)",
       triggers: ["ridge_tile"],
-      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }],
+      params: [{ key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] }, TUILE_HP10_PARAM, FAITAGE_SUR_FC_PARAM, FAITIERE_FC_PARAM],
       slots: [
         { key: "faitiere", family: "ridge_tile", label: "Faîtières", usual: { text: "Faîtière courante (40 à 42 cm) : le modèle suit la tuile ou l'ardoise posée.", source: F, productId: "faitiere-standard" } },
         { key: "closoir", family: "ridge_closure", label: "Closoir", usual: { text: "Closoir ventilé en rouleau de 5 m.", source: F, productId: "closoir-standard-5m" } },
         { key: "fixation_faitiere", family: "ridge_fixing", label: "Crochets de faîtière", keywords: ["fixation", "crochet"], usual: { text: "Faîtage à sec : un crochet par faîtière.", source: F, productId: "crochet-faitiere-standard" } },
         { key: "about", family: "ridge_end", label: "Abouts de faîtage", usual: { text: "Un about à chaque extrémité du faîtage.", source: F, productId: "about-faitage-standard" } },
+        { key: "mortier", family: "ridge_mortar", label: "Mortier de faîtage", keywords: ["mortier"], usual: { text: "Mortier de faîtage, en sacs de 25 kg.", source: F, productId: "mortier-faitage-25" } },
       ],
       constants: {
+        // Greg, 21 novembre 2026 (soir) : « 7,5 kg au mètre par défaut, en sacs, modifiable. » Weber et VPI : 5 à 10 kg au mètre.
+        utile_fc_demi_ronde: condition("0.33", "m", F, FOUNDER_DOC, "Faîtière demi-ronde fibres-ciment : longueur utile 330 mm (Cedral)."),
+        utile_fc_angulaire: condition("1.10", "m", F, FOUNDER_DOC, "Faîtière angulaire fibres-ciment : longueur utile 1 100 mm (Cedral)."),
+        utile_fc_aeration: condition("0.49", "m", F, FOUNDER_DOC, "Faîtière d'aération fibres-ciment : longueur utile 490 mm (Cedral)."),
+        mortier_faitage_par_ml: condition("7.5", "kg/m", F, FOUNDER_DOC, "7,5 kg de mortier par mètre de faîtage scellé (Greg, 21 novembre 2026 ; Weber et VPI : 5 à 10 kg)."),
         abouts_par_faitage: condition("2", "u", F, FOUNDER_DOC, "Deux extrémités libres par ligne de faîtage (une seule ligne supposée)."),
       },
       needs: [
         {
           id: "faitieres",
           slot: "faitiere",
+          when: "faitage_sur_fc < 1",
           // Le ratio « pièces au mètre » du fabricant, appliqué à la longueur : c'est sa définition.
-          formula: "longueur_faitage * faitiere.pieces_par_ml",
+          formula: "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           unit: "u",
           core: true,
           exclusions: "Hors abouts (comptés à part) et rencontres d'arêtiers.",
           source: "definition",
           verification: { status: "verified", verifiedAt: "2026-10-01", verifiedBy: "BatiClair (définition d'un ratio au mètre)" },
+          version: 1,
+        },
+        {
+          id: "faitieres-fibres-ciment",
+          slot: "faitiere",
+          when: "faitage_sur_fc > 0",
+          // Sur fibres-ciment : la longueur du faîtage ÷ la longueur utile du modèle choisi, arrondi à la pièce au-dessus.
+          formula: "arrondi_sup(longueur_faitage / si(faitiere_fc < 2, regle.utile_fc_demi_ronde, si(faitiere_fc < 3, regle.utile_fc_angulaire, regle.utile_fc_aeration)))",
+          unit: "u",
+          core: true,
+          exclusions: "Faîtières fibres-ciment au modèle choisi ; recouvrement compris dans la longueur utile.",
+          designation: "Faîtières fibres-ciment {faitiere_fc}",
+          precisionRequires: ["faitiere_fc"],
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -2364,7 +3344,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "crochets-faitiere",
           slot: "fixation_faitiere",
-          formula: "longueur_faitage * faitiere.pieces_par_ml",
+          when: "faitage_sur_fc < 1",
+          formula: "longueur_faitage * si(tuile_hp10 > 0, faitiere.pieces_par_ml_hp10, faitiere.pieces_par_ml)",
           unit: "u",
           core: true,
           exclusions: "Un crochet par faîtière (faîtage à sec).",
@@ -2383,6 +3364,19 @@ export const ROOFING_REFERENTIAL: Referential = {
           verification: FOUNDER_DOC,
           version: 1,
         },
+        // Seulement quand le devis dit le mortier (« faîtage scellé au mortier ») : jamais d'office.
+        {
+          id: "mortier-faitage",
+          slot: "mortier",
+          formula: "longueur_faitage * regle.mortier_faitage_par_ml",
+          unit: "kg",
+          core: false,
+          exclusions: "Mortier du faîtage scellé : 7,5 kg par mètre, par défaut (5 à 10 kg selon la faîtière).",
+          precision: "{longueur_faitage|ml} × {regle.mortier_faitage_par_ml|kg/m#} kg/ml, par défaut",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
       ],
     },
     {
@@ -2391,15 +3385,16 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Faîtage en bande zinc",
       triggers: ["zinc_ridge"],
       params: [
+        LONGUEUR_PIECES_PARAM, feuillesDites("le faîtage", "feuilles_faitage"),
         { key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, textLabels: ["faitage"] },
         DEVELOPPE_PARAM,
         // §48.6 : « tu le façonnes toi-même ? », pour le faîtage seul.
-        { ...FACONNAGE_BANDES_PARAM, question: "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?", hint: "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 3 m." },
+        { ...FACONNAGE_BANDES_PARAM, question: "Faîtage zinc : tu le façonnes toi-même ou tu le commandes façonné ?", hint: "Je façonne : feuilles de zinc 2 × 1 m, estimées d'après le développé. Commandé façonné : bandes de faîtage en longueurs de 2 m." },
         EPAISSEUR_ZINC_PARAM,
         ASPECT_ZINC_PARAM,
       ],
       slots: [
-        { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
+        { key: "bande", family: "zinc_ridge", label: "Faîtage zinc (bande)", usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre.", source: F, productId: "patte-zinc-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).", source: F, productId: "feuille-zinc-2x1" }, formOf: "bande" },
       ],
@@ -2413,7 +3408,7 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "ml",
           core: true,
           exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
-          precision: "{longueur_faitage|ml} de faîtage à couvrir",
+          precision: "{longueur_faitage|ml} de faîtage à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           // Le comptoir sert une bande à un développé (§7 : « dév. 25 à 33 cm ») : il ne le devine pas.
           designation: "Faîtage {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe|cm}",
           precisionRequires: ["developpe", "aspect_zinc"],
@@ -2425,11 +3420,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "feuilles-faitage-zinc",
           slot: "feuille",
           when: "faconnage < 2",
-          formula: "arrondi_sup(longueur_faitage / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          formula: partDeFeuille("longueur_faitage", "developpe", "feuilles_faitage"),
+          partage: true,
+          postes: postesDeFeuille("longueur_faitage", "developpe", "feuilles_faitage"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          precision: "pour {longueur_faitage|ml} de faîtage : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_faitage|ml} de faîtage, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2459,6 +3456,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Noue zinc (façonnée ou à façonner)",
       triggers: ["valley"],
       params: [
+        LONGUEUR_PIECES_PARAM, feuillesDites("la noue", "feuilles_noue"),
         { key: "longueur_noue", label: "Longueur de noue", unit: "m", kind: "site_data", question: "Longueur de noue ?", fromLineQuantity: true, textLabels: ["noue"] },
         DEVELOPPE_NOUE_PARAM,
         FACONNAGE_NOUE_PARAM,
@@ -2500,11 +3498,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "feuille",
           when: "faconnage < 2",
           // §48.6 : feuilles 2 × 1 m (jamais de bobineau hors joint debout, terrasse, chéneaux), estimées d'après le développé.
-          formula: "arrondi_sup(longueur_noue / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_noue))))",
+          formula: partDeFeuille("longueur_noue", "developpe_noue", "feuilles_noue"),
+          partage: true,
+          postes: postesDeFeuille("longueur_noue", "developpe_noue", "feuilles_noue"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          precision: "pour {longueur_noue|ml} de noue : estimation d'après un développé de {developpe_noue|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_noue|ml} de noue, développé {developpe_noue|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2522,10 +3522,15 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Arêtier (arêtières et closoir, ou bande zinc)",
       triggers: ["hip"],
       params: [
+        LONGUEUR_PIECES_PARAM, feuillesDites("l'arêtier", "feuilles_aretier"),
         { key: "longueur_aretier", label: "Longueur d'arêtier", unit: "m", kind: "site_data", question: "Longueur d'arêtier ?", fromLineQuantity: true, textLabels: ["aretier", "aretiers"] },
         ARETIER_PARAM,
+        ARETIER_FERME_PARAM,
         NB_ARETIERS_PARAM,
         DEVELOPPE_ARETIER_PARAM,
+        // Banc du calcul (C11, 21 novembre 2026) : un arêtier en bande zinc est une pièce pliée comme les autres ; la réponse
+        // « je plie » donnée une fois pour le devis vaut pour lui (des feuilles 2 × 1 m), sinon des bandes façonnées.
+        FACONNAGE_BANDES_PARAM,
         EPAISSEUR_ZINC_PARAM,
         ASPECT_ZINC_PARAM,
       ],
@@ -2534,10 +3539,11 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "closoir", family: "hip_closure", label: "Closoir d'arêtier", usual: { text: "Closoir ventilé d'arêtier, 23 cm, rouleau de 5 m (§5).", source: F, productId: "closoir-aretier-5m" } },
         { key: "crochet", family: "hip_fixing", label: "Crochets d'arêtier", keywords: ["crochet"], usual: { text: "Pose à sec : un crochet par arêtier (§5).", source: F, productId: "crochet-aretier-standard" } },
         { key: "about", family: "hip_end", label: "Abouts d'arêtier", usual: { text: "Un about par arêtier (§5).", source: F, productId: "about-aretier-standard" } },
-        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", usual: { text: "Bande zinc en longueurs de 3 m (développé 25 à 33 cm, §3).", source: F, productId: "bande-aretier-zinc-standard" } },
+        { key: "bande", family: "hip_strip", label: "Arêtier zinc (bande)", keywords: ["en bande", "bande d'aretier", "bande aretier", "aretier zinc"], usual: { text: "Bande zinc en longueurs de 2 m (développé 25 à 33 cm, fiche couverture).", source: F, productId: "bande-aretier-zinc-standard" } },
         { key: "patte", family: "zinc_clip", label: "Pattes de fixation", keywords: ["patte"], usual: { text: "Trois pattes par mètre (§3).", source: F, productId: "patte-zinc-standard" } },
+        { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§48.6).", source: F, productId: "feuille-zinc-2x1" }, formOf: "bande" },
       ],
-      constants: { pattes_par_metre: PATTES_PAR_METRE },
+      constants: { ...ZINC_PLAT_CONSTANTS, pattes_par_metre: PATTES_PAR_METRE },
       needs: [
         {
           id: "aretieres",
@@ -2588,14 +3594,32 @@ export const ROOFING_REFERENTIAL: Referential = {
           version: 1,
         },
         {
+          id: "feuilles-aretier-zinc",
+          slot: "feuille",
+          when: "si(aretier_matiere < 2, 9, faconnage) < 2",
+          formula: partDeFeuille("longueur_aretier", "developpe_aretier", "feuilles_aretier"),
+          partage: true,
+          postes: postesDeFeuille("longueur_aretier", "developpe_aretier", "feuilles_aretier"),
+          unit: "u",
+          core: true,
+          exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
+          precision: "pour {longueur_aretier|ml} d'arêtier, développé {developpe_aretier|cm}",
+          estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
+          precisionRequires: ["aspect_zinc"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
           id: "bande-aretier-zinc",
           slot: "bande",
-          when: "aretier_matiere >= 2",
+          when: "si(aretier_matiere < 2, 0, faconnage) >= 2",
           formula: "longueur_aretier",
           unit: "ml",
           core: true,
           exclusions: "Recouvrements des longueurs couverts par la perte de 5 %.",
-          precision: "{longueur_aretier|ml} d'arêtier à couvrir",
+          precision: "{longueur_aretier|ml} d'arêtier à couvrir. Longueur du devis reprise telle quelle, sans recouvrement.",
           designation: "Arêtier {aspect_zinc} {epaisseur_zinc} mm, bande dév. {developpe_aretier|cm#}",
           precisionRequires: ["developpe_aretier", "aspect_zinc"],
           source: F,
@@ -2632,7 +3656,12 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
       slots: [
         { key: "fenetre", family: "roof_window", label: "Fenêtres de toit", measureOnly: true, orderedAsWritten: true },
-        { key: "raccord", family: "roof_window_flashing", label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },
+        { key: "raccord", family: "roof_window_flashing", keywords: ["raccord", "raccords"], label: "Raccords d'étanchéité", usual: { text: "Un raccord par fenêtre, adapté à la couverture (§11).", source: F, productId: "raccord-fenetre-toit" } },        { key: "isolation", family: "roof_window_insulation", label: "Kits d'isolation (type BDX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "kit-isolation-fenetre" }, suggested: { label: "Kits d'isolation de fenêtre de toit (type BDX)" } },
+        { key: "pare_vapeur", family: "roof_window_vapour", label: "Pare-vapeur de fenêtre (type BBX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "pare-vapeur-fenetre" }, suggested: { label: "Pare-vapeur de fenêtre de toit (type BBX)" } },
+        { key: "collerette", family: "roof_window_collar", label: "Collerettes d'écran (type BFX)", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "collerette-ecran-fenetre" }, suggested: { label: "Collerettes d'écran de fenêtre de toit (type BFX)" } },
+        { key: "volet", family: "roof_window_shutter", label: "Volets roulants de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "volet-fenetre-toit" }, suggested: { label: "Volets roulants de fenêtre de toit" } },
+        { key: "store", family: "roof_window_blind", label: "Stores de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "store-fenetre-toit" }, suggested: { label: "Stores de fenêtre de toit" } },
+        { key: "habillage", family: "roof_window_lining", label: "Habillages intérieurs de fenêtre de toit", usual: { text: "Un par fenêtre, à sa taille (skill du fondateur).", source: SKILL_FONDATEUR, productId: "habillage-fenetre-toit" }, suggested: { label: "Habillages intérieurs de fenêtre de toit" } },
       ],
       constants: {},
       needs: [
@@ -2649,6 +3678,78 @@ export const ROOFING_REFERENTIAL: Referential = {
           verification: FOUNDER_DOC,
           version: 1,
         },
+        {
+          id: "kit-isolation-fenetre",
+          slot: "isolation",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Kits d'isolation (type BDX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "pare-vapeur-fenetre",
+          slot: "pare_vapeur",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Pare-vapeur de fenêtre (type BBX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "collerette-ecran-fenetre",
+          slot: "collerette",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Collerettes d'écran (type BFX), {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "volet-fenetre-toit",
+          slot: "volet",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Volets roulants de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "store-fenetre-toit",
+          slot: "store",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Stores de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
+        {
+          id: "habillage-fenetre-toit",
+          slot: "habillage",
+          formula: "nb_fenetres",
+          unit: "u",
+          core: true,
+          exclusions: "Un par fenêtre, à la taille de la fenêtre.",
+          designation: "Habillages intérieurs de fenêtre de toit, {taille_fenetre}",
+          source: SKILL_FONDATEUR,
+          verification: FOUNDER_SKILL,
+          version: 1,
+        },
       ],
     },
     {
@@ -2659,6 +3760,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       // §48.6 : une pièce écrite = sa question (« Bande de ventilation en Z : tu façonnes ? »), jamais « Bandes zinc (…) ».
       perLine: true,
       params: [
+        LONGUEUR_PIECES_PARAM, feuillesDites("cette bande", "feuilles_bande"),
         { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande zinc ?", fromLineQuantity: true },
         DEVELOPPE_PARAM,
         FACONNAGE_BANDES_PARAM,
@@ -2671,7 +3773,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de bande (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" }, formOf: "bande" },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
         { key: "vis", family: "strip_screw", label: "Vis de bandes", usual: { text: "Vis inox 4 × 40, 4 par mètre (§25.5).", source: F, productId: "vis-inox-4x40" } },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier pour solin, en sacs de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
@@ -2694,7 +3796,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1) ; fixations à part.",
-          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          // Greg, 21 novembre 2026 : ml du devis ÷ 2, arrondi au-dessus, rien pour les jonctions ; la ligne le dit.
+          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           // §50.7 : la pièce porte son nom d'ouvrage, tel que le devis l'écrit (« Bande de ventilation en Z… »).
           designation: "{piece}, {aspect_zinc} {epaisseur_zinc} mm",
           // Une bande commandée façonnée se fabrique à son développé : le fournisseur ne peut pas le deviner.
@@ -2708,14 +3811,16 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "feuille",
           when: "faconnage < 2",
           // §48.6 : « 1 feuille 2 × 1 m, développé 25 cm → 4 bandes de 2 m = 8 m par feuille ; 8 m de porte-solin ⇒ 1 feuille ».
-          formula: "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          formula: partDeFeuille("longueur_bande", "developpe", "feuilles_bande"),
+          partage: true,
+          postes: postesDeFeuille("longueur_bande", "developpe", "feuilles_bande"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé × longueur, découpé dans des feuilles de 2 × 1 m (§25.2) ; chutes non réemployées.",
           // §45.5 : une feuille dont on ne sait pas à quoi elle sert n'a rien à faire dans la liste.
-          precision: "pour {longueur_bande|ml} de bande : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_bande|ml} de bande, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
-          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm, pour {piece_min}",
+          designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
           verification: FOUNDER_DOC,
@@ -2755,7 +3860,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "kg",
           core: false,
           exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
           precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
@@ -2771,7 +3875,8 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Bande porte-solin zinc",
       triggers: ["solin_support"],
       params: [
-        { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande porte-solin ?", fromLineQuantity: true },
+        LONGUEUR_PIECES_PARAM, feuillesDites("le porte-solin", "feuilles_porte_solin"),
+        { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande porte-solin ?", fromLineQuantity: true, ownOnly: true },
         DEVELOPPE_PARAM,
         FACONNAGE_BANDES_PARAM,
         EPAISSEUR_ZINC_PARAM,
@@ -2780,7 +3885,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", usual: { text: "Bande porte-solin, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" } },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "porte_solin" },
-        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier d'étanchéité pour solin, sac de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
+        { key: "mortier", family: "solin_mortar", label: "Mortier de solin", keywords: ["mortier"], usual: { text: "Mortier pour solin, en sacs de 25 kg (§49.7).", source: F, productId: "mortier-solin-25" } },
         { key: "mastic", family: "sealant", label: "Silicone ou mastic", usual: { text: "Silicone neutre compatible zinc, 1 cartouche par 8 ml de joint (§25.6).", source: F, productId: "cartouche-silicone-zinc" } },
       ],
       constants: {
@@ -2798,7 +3903,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "u",
           core: true,
           exclusions: "Longueurs de 2 m, ml ÷ 2 arrondi sup. (§1).",
-          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}",
+          // Greg, 21 novembre 2026 : ml du devis ÷ 2, arrondi au-dessus, rien pour les jonctions ; la ligne le dit.
+          precision: "{longueur_bande|ml} à couvrir, développé {developpe|cm}. Longueur du devis reprise telle quelle, sans recouvrement.",
           designation: "Bandes porte-solin {aspect_zinc} {epaisseur_zinc} mm",
           precisionRequires: ["developpe", "aspect_zinc"],
           source: F,
@@ -2809,11 +3915,13 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "feuilles-porte-solin",
           slot: "feuille",
           when: "faconnage < 2",
-          formula: "arrondi_sup(longueur_bande / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe))))",
+          formula: partDeFeuille("longueur_bande", "developpe", "feuilles_porte_solin"),
+          partage: true,
+          postes: postesDeFeuille("longueur_bande", "developpe", "feuilles_porte_solin"),
           unit: "u",
           core: true,
           exclusions: "Zinc plat découpé dans des feuilles de 2 × 1 m (§48.6) ; chutes non réemployées.",
-          precision: "pour {longueur_bande|ml} de porte-solin : estimation d'après un développé de {developpe|cm}, ajuste selon ton façonnage",
+          precision: "pour {longueur_bande|ml} de porte-solin, développé {developpe|cm}",
           estimate: "Estimation d'après le développé : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
@@ -2829,7 +3937,6 @@ export const ROOFING_REFERENTIAL: Referential = {
           unit: "kg",
           core: false,
           exclusions: "Mortier du solin cité au devis : 2 kg par mètre linéaire de solin (§49.7).",
-          designation: "Mortier d'étanchéité pour solin, sac 25 kg",
           precision: "{longueur_bande|ml} × {regle.mortier_solin_par_ml|kg/m#} kg/ml",
           source: F,
           verification: FOUNDER_DOC,
@@ -2867,17 +3974,36 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [{ key: "plomb", family: "lead_strip", label: "Plomb en rouleau", usual: { text: "Plomb laminé en rouleau (§12).", source: FR_REPLY_DESCENTES, productId: "plomb-rouleau" } }],
       constants: {
         marge_bandes: ZINC_PLAT_CONSTANTS.marge_bandes,
-        rouleau_plomb: rule("6", "m", F, todo("§12 : rouleaux de 3 à 6 m ; 6 m retenus, à confirmer."), "rouleau de plomb de {v}"),
+        // Recherche du 20/11/2026 : bandes de plomb jusqu'à 30 cm vendues en 10 m (aussi 5 et 2 m), Le Plomb Français et
+        // D'Huart Industrie ; aucun rouleau de 3 ou 6 m trouvé. Avant : 6 m, à confirmer.
+        rouleau_plomb: rule("10", "m", F, PLOMB_VERIFIE, "rouleau de plomb de {v} (bande jusqu'à 30 cm)"),
+        rouleau_plomb_large: rule("5", "m", F, PLOMB_VERIFIE, "rouleau de plomb de {v} (bande de plus de 30 cm)"),
+        largeur_bande_plomb_max: rule("30", "cm", F, PLOMB_VERIFIE, "bande de plomb en rouleau de 10 m jusqu'à {v} de large"),
       },
       needs: [
         {
           id: "rouleaux-plomb",
           slot: "plomb",
+          when: "largeur_plomb <= regle.largeur_bande_plomb_max",
           formula: "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb)",
           unit: "u",
           core: true,
           exclusions: "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
-          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 6 m",
+          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 10 m",
+          precision: "{longueur_plomb|ml} de bande",
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "rouleaux-plomb-larges",
+          slot: "plomb",
+          when: "largeur_plomb > regle.largeur_bande_plomb_max",
+          formula: "arrondi_sup(longueur_plomb * regle.marge_bandes / regle.rouleau_plomb_large)",
+          unit: "u",
+          core: true,
+          exclusions: "Bande à la longueur du devis, + 10 % de recouvrements et de façon.",
+          designation: "Plomb laminé {epaisseur_plomb} mm, rouleau largeur {largeur_plomb|cm#} cm × 5 m",
           precision: "{longueur_plomb|ml} de bande",
           source: F,
           verification: FOUNDER_DOC,
@@ -2894,6 +4020,7 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Bandes cuivre (façonnées, feuilles ou bobine)",
       triggers: ["copper_strip"],
       params: [
+        LONGUEUR_PIECES_PARAM, feuillesDites("le cuivre", "feuilles_cuivre"),
         { key: "longueur_bande", label: "Longueur de bande", unit: "m", kind: "site_data", question: "Longueur de bande cuivre ?", fromLineQuantity: true },
         DEVELOPPE_CUIVRE_PARAM,
         FACONNAGE_CUIVRE_PARAM,
@@ -2947,7 +4074,9 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "feuilles-cuivre",
           slot: "feuille",
           when: "si(faconnage < 2, si(longueur_bande > regle.seuil_bobineau, 0, 1), 0)",
-          formula: "arrondi_sup(ml_cuivre / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / developpe_cuivre))))",
+          formula: partDeFeuille("ml_cuivre", "developpe_cuivre", "feuilles_cuivre"),
+          partage: true,
+          postes: postesDeFeuille("ml_cuivre", "developpe_cuivre", "feuilles_cuivre"),
           unit: "u",
           core: true,
           exclusions: "Cuivre plat, développé × longueur, découpé dans des feuilles de 2 × 1 m.",
@@ -2979,6 +4108,11 @@ export const ROOFING_REFERENTIAL: Referential = {
       label: "Abergement de cheminée (zinc + porte-solin)",
       triggers: ["chimney_flashing"],
       params: [
+        LONGUEUR_PIECES_PARAM, feuillesDites("l'entourage de ta cheminée", "feuilles_cheminee"),
+        // Greg, 23 novembre 2026 : « c'est du sur-mesure (un devant, un derrière, des noquets) ». La taille de la souche se lit
+        // au devis ; sans elle, ni calcul ni question de taille : « combien de feuilles de zinc te faut-il ? ».
+        longueurLue("largeur_cheminee", "Largeur de la cheminée"),
+        longueurLue("profondeur_cheminee", "Profondeur de la cheminée"),
         { key: "nb_cheminees", label: "Nombre de cheminées", unit: "u", kind: "site_data", question: "Combien de cheminées ?", fromLineQuantity: true, textLabels: ["cheminee"] },
         {
           key: "perimetre_cheminee",
@@ -3003,11 +4137,19 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "bande", family: "zinc_strip", label: "Bandes zinc façonnées (dév. 330 mm)", usual: { text: "Bandes façonnées par le fournisseur, longueurs de 2 m, développé 33 cm (§7).", source: F, productId: "bande-zinc-faconnee-standard" }, formOf: "abergement" },
         { key: "feuille", family: "zinc_sheet", label: "Feuilles zinc 2 × 1 m", usual: { text: "Feuilles de zinc naturel 2 × 1 m, façonnées sur place (§25.2).", source: F, productId: "feuille-zinc-2x1" }, formOf: "abergement" },
         { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", usual: { text: "Bobineau de zinc au-delà de 6 ml de zinc (réponse du fondateur).", source: FR_REPLY, productId: "bobineau-zinc" }, formOf: "abergement" },
-        { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", keywords: ["solin", "porte-solin"], usual: { text: "Bande porte-solin au périmètre, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" }, formOf: "abergement" },
+        { key: "porte_solin", family: "solin_support", label: "Bandes porte-solin", keywords: ["solin", "porte-solin"], usual: { text: "Bande porte-solin au périmètre, longueurs de 2 m (§7).", source: F, productId: "porte-solin-standard" }, suggested: { label: "Bandes porte-solin de l'abergement" } }, // Greg, 21 novembre 2026 : non dite au devis, elle ne sort plus d'office (avant : forme d'achat de l'abergement), elle est proposée en suggestion
       ],
       constants: {
         ...ZINC_PLAT_CONSTANTS,
         coef_abergement: condition("1.3", "u", F, FOUNDER_DOC, "« périmètre cheminée × 1,3 en ml de zinc » (§7)."),
+        // Abergement sur mesure (Greg, 23 novembre 2026 ; recherche `recherche/abergement-cheminee-2026-11-23.md`). Aucune source
+        // ne chiffre la consommation : les cotes sont déduites des minimums des règles de l'art, à confirmer par Greg.
+        retour_devant: condition("0.11", "m", RECH_ABERGEMENT, ABERGEMENT_DEDUIT, "Devant : largeur de la souche + 10 à 12 cm de chaque côté (guides du ministère de la Culture, ardoises et tuiles plates)."),
+        retour_derriere: condition("0.135", "m", RECH_ABERGEMENT, ABERGEMENT_DEDUIT, "Derrière : largeur de la souche + 12 à 15 cm de chaque côté (guides du ministère de la Culture)."),
+        developpe_devant: condition("300", "mm", RECH_ABERGEMENT, ABERGEMENT_DEDUIT, "Relevé 9 à 10 cm (NF DTU 40.11, 40.41) + bavette 15 à 20 cm sur la couverture : environ 30 cm (déduit)."),
+        developpe_derriere: condition("500", "mm", RECH_ABERGEMENT, ABERGEMENT_DEDUIT, "Relevé 10 à 15 cm + fond de 3 à 4 pureaux + recouvrement 6 cm : environ 50 cm (déduit ; Le Plomb Français : coupé ≈ 500 mm)."),
+        developpe_cote: condition("250", "mm", RECH_ABERGEMENT, ABERGEMENT_DEDUIT, "Côté : couloir de 10 cm + relevé de 9 cm + pince (NF DTU 40.211 §5.5.8.1.1), ou noquets découpés dans une bande de 25 : environ 25 cm (déduit)."),
+        allonge_cote: condition("0.2", "m", RECH_ABERGEMENT, ABERGEMENT_DEDUIT, "Côté : profondeur de la souche + recouvrement de la bavette en bas + retour de la besace en haut (déduit)."),
         developpe_abergement: condition("330", "mm", F, FOUNDER_DOC, "« dév. 33 à 40 cm » (§7) : 33 cm retenu."),
       },
       derived: [
@@ -3035,11 +4177,21 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "feuilles-abergement",
           slot: "feuille",
           when: "faconnage < 2",
-          formula: "arrondi_sup(ml_zinc / (regle.longueur_feuille * max(1, arrondi_inf(regle.largeur_feuille / regle.developpe_abergement))))",
+          // Greg, 23 novembre 2026 : taille de la souche au devis → devant + derrière + côtés, en bandes de 2 m dans la largeur de
+          // la feuille (comme toute pièce pliée) ; sinon le nombre de feuilles dit par l'artisan.
+          formula: `si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, ${ABERGEMENT_CALCULE}, feuilles_cheminee), feuilles_cheminee)`,
+          partage: true,
+          postes: [
+            { id: "devant", libelle: "Devant : {largeur_cheminee|m} + 2 retours de 11 cm, bande de 30 cm", formule: `si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, ${ABERG_DEVANT}, 0), 0)`, cle: "largeur_cheminee" },
+            { id: "derriere", libelle: "Derrière : {largeur_cheminee|m} + 2 retours de 13,5 cm, bande de 50 cm", formule: `si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, ${ABERG_DERRIERE}, 0), 0)` },
+            { id: "cotes", libelle: "Côtés : 2 × ({profondeur_cheminee|m} + 20 cm), bandes de 25 cm", formule: `si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, ${ABERG_COTES}, 0), 0)`, cle: "profondeur_cheminee" },
+            { id: "dites", libelle: "Ta réponse : {= feuilles_cheminee} feuilles", formule: "si(largeur_cheminee / regle.longueur_feuille > 0, si(profondeur_cheminee / regle.longueur_feuille > 0, 0, feuilles_cheminee), feuilles_cheminee)", cle: "feuilles_cheminee" },
+          ],
           unit: "u",
           core: true,
           exclusions: "Zinc plat, développé 33 cm × longueur, découpé dans des feuilles de 2 × 1 m (§25.2).",
-          precision: "pour façonner l'abergement de cheminée, développé 33 cm",
+          precision: "pour façonner l'entourage de la cheminée (devant, derrière, côtés)",
+          estimate: "Estimation d'après les minimums des règles de l'art : ajuste selon ton façonnage",
           designation: "Feuilles {aspect_zinc} 2 × 1 m, {epaisseur_zinc} mm",
           precisionRequires: ["aspect_zinc"],
           source: F,
@@ -3098,7 +4250,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           hint: "Un conduit de fumée demande une collerette d'étanchéité (solin).",
           textValues: [
             { value: "1", keywords: ["fumee", "conduit de fumee", "poele", "insert", "chaudiere"] },
-            { value: "2", keywords: ["ventilation", "extraction", "aeration"] },
+            // « pour VMC », « pour chute/évent » (D-2026-024) : une ventilation (VMC, ventilation primaire des eaux usées).
+            { value: "2", keywords: ["ventilation", "extraction", "aeration", "vmc", "event", "chute event", "ventilation primaire"] },
           ],
           choices: [
             { label: "Conduit de fumée", value: "1" },
@@ -3113,18 +4266,24 @@ export const ROOFING_REFERENTIAL: Referential = {
           kind: "site_data",
           question: "Sortie de toit : sur quelle couverture ?",
           textValues: [
-            { value: "1", keywords: ["ardoise", "ardoises", "tuile", "tuiles"] },
+            { value: "1", keywords: ["ardoise", "ardoises"] },
             { value: "2", keywords: ["zinc"] },
+            { value: "3", keywords: ["tuile", "tuiles"] },
           ],
+          // Greg, 21 novembre 2026 (soir) : l'article s'adapte au matériau. Sur tuile, une sortie de ventilation est une tuile
+          // à douille et sa lanterne (Edilians, gamme HP 10) ; sur ardoise, l'embase plomb ; sur zinc, la platine soudée.
+          // Avant : « ardoise ou tuile », une seule réponse, l'embase plomb pour les deux.
           fromWorks: [
             { value: "2", workItems: ["couverture-zinc-joint-debout"] },
-            { value: "1", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal", "couverture-ardoises-crochet"] },
+            { value: "1", workItems: ["couverture-ardoises-crochet"] },
+            { value: "3", workItems: ["couverture-tuiles-emboitement", "couverture-tuiles-canal"] },
           ],
           choices: [
-            { label: "Ardoise ou tuile", value: "1" },
+            { label: "Ardoise", value: "1" },
+            { label: "Tuile", value: "3" },
             { label: "Zinc", value: "2" },
           ],
-          display: { "1": "ardoise ou tuile", "2": "zinc" },
+          display: { "1": "ardoise", "2": "zinc", "3": "tuile" },
         },
       ],
       slots: [
@@ -3132,6 +4291,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "embase", family: "outlet_base", label: "Embase plomb", usual: { text: "Embase plomb au diamètre du conduit, pour ardoise et tuile.", source: FR_REPLY, productId: "embase-plomb-sortie" }, formOf: "sortie" },
         { key: "platine", family: "outlet_plate", label: "Platine zinc soudée", usual: { text: "Platine zinc soudée au diamètre du conduit, pour couverture zinc.", source: FR_REPLY, productId: "platine-zinc-sortie" }, formOf: "sortie" },
         { key: "chapeau", family: "outlet_cap", label: "Chapeau", usual: { text: "Un chapeau par sortie, au diamètre du conduit.", source: FR_REPLY, productId: "chapeau-sortie" }, formOf: "sortie" },
+        { key: "douille", family: "outlet_tile", label: "Tuile à douille", usual: { text: "Tuile à douille au modèle de la tuile posée, au diamètre du conduit.", source: "edilians-hp10", productId: "tuile-a-douille" }, formOf: "sortie" },
+        { key: "lanterne", family: "outlet_lantern", label: "Lanterne", usual: { text: "Une lanterne par tuile à douille.", source: "edilians-hp10", productId: "lanterne-sortie" }, formOf: "sortie" },
         { key: "collerette", family: "outlet_collar", label: "Collerette d'étanchéité", usual: { text: "Collerette d'étanchéité (solin), seulement pour un conduit de fumée.", source: FR_REPLY, productId: "collerette-sortie" }, formOf: "sortie" },
       ],
       constants: {
@@ -3142,7 +4303,8 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "embase-sortie",
           slot: "embase",
-          when: "support_sortie < 2",
+          // Ardoise, ou conduit de fumée sur tuile : l'embase plomb. Ventilation sur tuile : la tuile à douille (plus bas).
+          when: "si(support_sortie >= 3, si(usage_sortie >= 2, 0, 1), si(support_sortie < 2, 1, 0))",
           formula: "nb_sorties",
           unit: "u",
           core: true,
@@ -3156,7 +4318,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "platine-sortie",
           slot: "platine",
-          when: "support_sortie >= 2",
+          when: "si(support_sortie >= 2, si(support_sortie < 3, 1, 0), 0)",
           formula: "nb_sorties",
           unit: "u",
           core: true,
@@ -3170,6 +4332,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "chapeau-sortie",
           slot: "chapeau",
+          when: "si(si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0), 0, 1)",
           formula: "nb_sorties",
           unit: "u",
           core: true,
@@ -3178,6 +4341,34 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["diametre_sortie"],
           source: FR_REPLY,
           verification: FOUNDER_REPLY,
+          version: 1,
+        },
+        {
+          id: "tuile-a-douille",
+          slot: "douille",
+          when: "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une tuile à douille par sortie de ventilation, au modèle de la tuile posée.",
+          precision: "{diametre_sortie}",
+          precisionRequires: ["diametre_sortie"],
+          source: "edilians-hp10",
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "lanterne-sortie",
+          slot: "lanterne",
+          when: "si(support_sortie >= 3, si(usage_sortie >= 2, 1, 0), 0)",
+          formula: "nb_sorties",
+          unit: "u",
+          core: true,
+          exclusions: "Une lanterne par tuile à douille.",
+          precision: "{diametre_sortie}",
+          precisionRequires: ["diametre_sortie"],
+          source: "edilians-hp10",
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -3198,12 +4389,89 @@ export const ROOFING_REFERENTIAL: Referential = {
       ],
     },
     {
+      // Greg, 18 novembre 2026 (devis D-2026-024) : « Tu dois TOUT connaître sur la couverture ». Le zinc à tasseaux manquait :
+      // 32 m² de couverture sortaient sans aucune fourniture. Ses chiffres (bobine de 650, tasseaux de 50, entraxe 62) sont
+      // ceux du descriptif VMZINC. Les pattes sont faites dans les chutes : aucune ligne à commander.
+      id: "couverture-zinc-tasseaux",
+      trade: "roofing",
+      section: "principal",
+      label: "Couverture zinc à tasseaux",
+      triggers: ["batten_seam"],
+      params: [SURFACE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, LARGEUR_BOBINE_TASSEAUX_PARAM, RIVES_TASSEAUX_PARAM],
+      slots: [
+        { key: "couverture", family: "batten_seam", label: "Couverture zinc à tasseaux", measureOnly: true },
+        { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine de 650 mm (500 mm parfois), commandé au mètre linéaire.", source: FR_REPLY_TASSEAUX, productId: "bobine-zinc-standard", sur: true }, formOf: "couverture" },
+        { key: "tasseau", family: "zinc_batten", label: "Tasseaux bois", keywords: ["tasseau", "tasseaux"], usual: { text: "Tasseaux de bois trapézoïdaux de 50 mm, un rang entre deux bacs.", source: FR_REPLY_TASSEAUX, productId: "tasseau-zinc-50" } },
+        { key: "couvre_joint", family: "batten_cap", label: "Couvre-joints zinc", keywords: ["couvre-joint", "couvre-joints", "couvre joint", "couvre joints"], usual: { text: "Un couvre-joint zinc sur chaque rang de tasseaux, en éléments de 1 m (VMZINC).", source: "vmzinc-tasseaux", productId: "couvre-joint-tasseau-zinc" } },
+      ],
+      constants: {
+        largeur_etroite: condition("500", "mm", "vmzinc-tasseaux", FOUNDER_REPLY_TASSEAUX, "Bobine de 500 : « parfois » (Greg) ; imposée en région 3 site exposé et en région 4 (VMZINC)."),
+        entraxe_650: condition("620", "mm", FR_REPLY_TASSEAUX, FOUNDER_REPLY_TASSEAUX, "« entraxe 62 » (Greg) ; VMZINC : 620 mm pour une bobine de 650 et des tasseaux de 50."),
+        entraxe_500: condition("470", "mm", "vmzinc-tasseaux", FOUNDER_REPLY_TASSEAUX, "VMZINC : 470 mm pour une bobine de 500 et des tasseaux de 50."),
+        seuil_070: ZINC_PLAT_CONSTANTS.seuil_070,
+        surlongueur_bac: condition("0.15", "m", FR_REPLY, FOUNDER_REPLY, "Comme le joint debout : « 15 cm par bac (10 en égout, 5 en faîtage) » (réponse du fondateur, 2026-10-04)."),
+      },
+      derived: [
+        { key: "entraxe_tasseaux", label: "Entraxe des tasseaux", unit: "mm", formula: "si(largeur_bobine_tasseaux <= regle.largeur_etroite, regle.entraxe_500, regle.entraxe_650)", shown: true, source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
+        { key: "largeur_pan", label: "Largeur du pan", unit: "m", formula: "surface / longueur_rampant", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        { key: "nb_bacs", label: "Nombre de bacs", unit: "u", formula: "arrondi_sup(largeur_pan / entraxe_tasseaux)", source: "vmzinc-tasseaux", verification: FOUNDER_REPLY_TASSEAUX, version: 1 },
+        { key: "longueur_bac", label: "Longueur de bobine par bac", unit: "m", formula: "longueur_rampant + regle.surlongueur_bac", source: FR_REPLY, verification: FOUNDER_REPLY, version: 1 },
+        // Un rang entre deux bacs (nb_bacs − 1), plus le tasseau de chaque rive ; contre un mur, aucun (le bac se relève).
+        // Recoupé le 20 novembre 2026 : RHEINZINK §1.15 et §1.6.5, VMZINC Delta « rive à tasseau », NedZink « Rive ».
+        { key: "nb_rangs", label: "Rangs de tasseaux", unit: "u", formula: "nb_bacs - 1 + nb_rives_tasseau", source: "rheinzink-tasseau-pose-pliage", verification: GUIDES_TASSEAUX, version: 2 },
+      ],
+      needs: [
+        {
+          id: "zinc-bobine-tasseaux",
+          slot: "bobine",
+          // Une bande de bobine par bac : nombre de bacs (largeur du pan ÷ entraxe des tasseaux) × (rampant + 15 cm).
+          // L'épaisseur ne change pas la longueur mais l'article : le facteur 1 la garde dans le calcul (comme le joint debout).
+          formula: "nb_bacs * longueur_bac * si(epaisseur_zinc >= regle.seuil_070, 1, 1)",
+          unit: "m",
+          core: true,
+          exclusions: "Une longueur de rampant par bac plus 15 cm de surlongueur ; hors couvre-joints, bandes d'égout, de rive et de faîtage, comptés à part. Les pattes à tasseaux se font dans les chutes.",
+          precision: "{nb_bacs} bacs × {longueur_bac|m}",
+          designation: "Bobine {aspect_zinc} {epaisseur_zinc} mm, largeur {largeur_bobine_tasseaux|mm}",
+          precisionRequires: ["aspect_zinc"],
+          source: FR_REPLY_TASSEAUX,
+          verification: FOUNDER_REPLY_TASSEAUX,
+          version: 1,
+        },
+        {
+          id: "tasseaux-zinc",
+          slot: "tasseau",
+          formula: "nb_rangs * longueur_rampant",
+          unit: "m",
+          core: true,
+          exclusions: "Un rang entre deux bacs et un tasseau de rive par rive, sur la longueur du rampant ; aucun contre un mur. Pointes ou vis de 80 mm à part.",
+          precision: "{nb_rangs} rangs × {longueur_rampant|m}",
+          source: "rheinzink-tasseau-pose-pliage",
+          verification: GUIDES_TASSEAUX,
+          version: 2,
+        },
+        {
+          id: "couvre-joints-tasseaux",
+          slot: "couvre_joint",
+          formula: "nb_rangs * longueur_rampant",
+          unit: "m",
+          core: true,
+          exclusions: "Un couvre-joint par rang de tasseaux, tasseaux de rive compris (RHEINZINK §1.15) ; le recouvrement de 5 cm entre éléments de 1 m n'est pas ajouté.",
+          precision: "{nb_rangs} rangs × {longueur_rampant|m}",
+          designation: "Couvre-joints {aspect_zinc} {epaisseur_zinc} mm pour tasseaux de 50 mm",
+          precisionRequires: ["aspect_zinc"],
+          source: "rheinzink-tasseau-pose-pliage",
+          verification: GUIDES_TASSEAUX,
+          version: 2,
+        },
+      ],
+    },
+    {
       id: "couverture-zinc-joint-debout",
       trade: "roofing",
       section: "principal",
       label: "Couverture zinc à joint debout",
       triggers: ["standing_seam"],
-      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
+      params: [SURFACE_PARAM, FACONNAGE_PARAM, EPAISSEUR_ZINC_PARAM, ASPECT_ZINC_PARAM, RAMPANT_BACS_PARAM, BACS_LONGS_PARAM, ZONE_PARAM],
       slots: [
         { key: "couverture", family: "standing_seam", label: "Couverture zinc joint debout", measureOnly: true },
         { key: "bobine", family: "zinc_coil", label: "Zinc en bobine", keywords: ["bobine"], usual: { text: "Zinc en bobine largeur 650 mm (naturel ou prépatiné selon le devis), commandé au mètre linéaire.", source: "vmzinc-joint-debout", productId: "bobine-zinc-standard" }, formOf: "couverture" },
@@ -3215,7 +4483,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "patte_fixe", family: "seam_clip_fixed", label: "Pattes fixes", keywords: ["patte fixe", "pattes fixes", "fixes"], usual: { text: "Pattes fixes, selon le rampant (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "patte-fixe-joint-debout" } },
         { key: "fixation_patte", family: "clip_fixing", label: "Fixations des pattes", keywords: ["pointe", "pointes"], usual: { text: "Pointes annelées 2,5 × 28 mm sur volige 18 mm, 2 par patte (VMZINC 36.2).", source: "vmzinc-joint-debout", productId: "pointe-annelee-2-5x28" } },
         { key: "egout", family: "eaves_strip", label: "Bandes d'égout", keywords: ["egout"], usual: { text: "Bande d'égout à ourlet, développé 33 cm, longueurs de 2 m (§7).", source: F, productId: "bande-egout-zinc-330" } },
-        { key: "faitage", family: "zinc_ridge", label: "Faîtage zinc", usual: { text: "Bande de faîtage zinc en longueurs de 3 m (§7).", source: F, productId: "bande-faitage-zinc-standard" } },
+        { key: "faitage", family: "zinc_ridge", label: "Faîtage zinc", usual: { text: "Bande de faîtage zinc en longueurs de 2 m (fiche couverture).", source: F, productId: "bande-faitage-zinc-standard" } },
         { key: "volige", family: "sheathing", label: "Voliges", keywords: ["volige"], usual: { text: "Volige sapin 18 mm sous le zinc (§7).", source: F, productId: "volige-sapin-standard" } },
       ],
       constants: {
@@ -3438,13 +4706,23 @@ export const ROOFING_REFERENTIAL: Referential = {
       section: "principal",
       label: "Couverture bac acier (plaques à longueur, vis, closoirs, faîtière)",
       triggers: ["steel_tray"],
-      params: [SURFACE_PARAM, LONGUEUR_PLAQUES_PARAM, TYPE_BAC_PARAM, TEINTE_BAC_PARAM, FEUTRE_BAC_PARAM, PANS_BAC_PARAM],
+      params: [
+        SURFACE_PARAM,
+        LONGUEUR_PLAQUES_PARAM,
+        TYPE_BAC_PARAM,
+        TEINTE_BAC_PARAM,
+        FEUTRE_BAC_PARAM,
+        PANS_BAC_PARAM,
+        // Banc du calcul (C07, « faîtière BA, lg 12,50 m », 12,5 ML) : la longueur de faîtage écrite sur la ligne de la faîtière
+        // fait foi ; sans elle, c'est la largeur d'un pan, comme avant. Jamais demandée.
+        { key: "longueur_faitage", label: "Longueur du faîtage", unit: "m", kind: "site_data", question: "Longueur du faîtage ?", fromLineQuantity: true, forSlots: ["faitiere"], neverAsk: true, default: { formula: "largeur_pan", source: F, verification: FOUNDER_DOC, version: 1, note: "le faîtage fait la largeur d'un pan" } },
+      ],
       slots: [
         { key: "couverture", family: "steel_tray", label: "Bac acier", measureOnly: true },
         { key: "plaque", family: "steel_sheet", label: "Plaques bac acier", usual: { text: "Bac de largeur utile 1,00 m, une plaque par rampant (§8).", source: F, productId: "plaque-bac-acier" }, formOf: "couverture" },
-        { key: "vis", family: "steel_screw", label: "Vis", usual: { text: "Vis autoperceuses avec rondelle EPDM (§8).", source: F, productId: "vis-bac-acier" } },
-        { key: "closoir", family: "steel_closure", label: "Closoirs", usual: { text: "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).", source: F, productId: "closoir-bac-acier" } },
-        { key: "faitiere", family: "steel_ridge", label: "Faîtières", usual: { text: "Faîtière de bac en longueurs de 2 m (§8).", source: F, productId: "faitiere-bac-acier" } },
+        { key: "vis", family: "steel_screw", label: "Vis", keywords: ["vis"], usual: { text: "Vis autoperceuses avec rondelle EPDM (§8).", source: F, productId: "vis-bac-acier" } },
+        { key: "closoir", family: "steel_closure", label: "Closoirs", keywords: ["closoir", "closoirs"], usual: { text: "Closoirs mousse profilés, en bas et en haut de chaque plaque (§8).", source: F, productId: "closoir-bac-acier" } },
+        { key: "faitiere", family: "steel_ridge", label: "Faîtières", keywords: ["faitiere", "faitieres", "faitage"], usual: { text: "Faîtière de bac en longueurs de 2 m (§8).", source: F, productId: "faitiere-bac-acier" } },
       ],
       constants: {
         largeur_utile: condition("1", "m", F, FOUNDER_DOC, "« Largeur utile courante 1,00 m (bac 1000) » (§8)."),
@@ -3518,13 +4796,59 @@ export const ROOFING_REFERENTIAL: Referential = {
           id: "faitieres",
           slot: "faitiere",
           when: "nb_pans >= 2",
-          formula: "arrondi_sup(largeur_pan / regle.faitiere) + 1",
+          // Greg, 21 novembre 2026 (soir) : « 7 pour 12,50 m, comme les fabricants. Plus de + 1. » Bacacier et Joris Ide :
+          // faîtière de 2,10 m hors tout, 2,00 m utile (le recouvrement est dans la pièce). Avant : ml ÷ 2 arrondi au-dessus, + 1.
+          formula: "arrondi_sup(longueur_faitage / regle.faitiere)",
           unit: "u",
           core: true,
-          exclusions: "Faîtage de la largeur d'un pan, longueurs de 2 m, une de plus pour les recouvrements.",
+          exclusions: "Faîtage de la largeur d'un pan, longueurs de 2 m utiles (recouvrement compris dans la pièce).",
           designation: "Faîtières bac acier {teinte_bac}, longueur 2 m",
           precision: "{largeur_pan|ml} de faîtage",
           precisionRequires: ["teinte_bac"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+      ],
+    },
+    {
+      // Référentiel du fondateur : « Chéneau encaissé | ml × 1,05, dév. selon section (50 à 80 cm) » ; « Bobineau (grandes
+      // longueurs) uniquement pour les ouvrages continus : joint debout, terrasse à tasseaux, chéneaux. Automatique, pas de
+      // question » ; « "chéneau" = encaissé, pas une gouttière ». D-2026-024 (8 ml) sortait « à chiffrer » (20 novembre 2026).
+      id: "cheneau-encaisse",
+      trade: "roofing",
+      section: "evacuation",
+      label: "Chéneau encaissé zinc",
+      triggers: ["box_gutter"],
+      params: [
+        { key: "longueur_cheneau", label: "Longueur de chéneau", unit: "m", kind: "site_data", question: "Longueur du chéneau ?", fromLineQuantity: true, textLabels: ["cheneau"] },
+        DEVELOPPE_CHENEAU_PARAM,
+        EPAISSEUR_ZINC_PARAM,
+        ASPECT_ZINC_PARAM,
+      ],
+      slots: [
+        { key: "cheneau", family: "box_gutter", label: "Chéneau encaissé", measureOnly: true },
+        { key: "bobineau", family: "zinc_narrow_coil", label: "Bobineau zinc", keywords: ["bobineau"], usual: { text: "Bobineau de zinc, façonné et soudé sur place (référentiel du fondateur : chéneaux en bobineau).", source: F, productId: "bobineau-zinc" }, formOf: "cheneau" },
+      ],
+      constants: {
+        ...ZINC_PLAT_CONSTANTS,
+        marge_zinc_lineaire: MARGE_ZINC_LINEAIRE,
+      },
+      derived: [
+        { key: "ml_zinc", label: "Longueur de zinc façonné", unit: "m", formula: "longueur_cheneau * regle.marge_zinc_lineaire", shown: true, source: F, verification: FOUNDER_DOC, version: 1 },
+        ...bobineauDerived("developpe_cheneau"),
+      ],
+      needs: [
+        {
+          id: "bobineau-cheneau",
+          slot: "bobineau",
+          formula: "arrondi_sup(ml_zinc / longueur_bobineau)",
+          unit: "u",
+          core: true,
+          exclusions: "Longueur du chéneau × 1,05, en bobineau de la largeur du développé ; joints de dilatation (tous les 12 m) et naissances à part.",
+          precision: "pour {longueur_cheneau|m} de chéneau, marge 5 % comprise",
+          designation: "Bobineau {aspect_zinc} {epaisseur_zinc} mm, {largeur_bobineau|mm} × {longueur_bobineau|m}",
+          precisionRequires: ["aspect_zinc", "developpe_cheneau"],
           source: F,
           verification: FOUNDER_DOC,
           version: 1,
@@ -3561,14 +4885,18 @@ export const ROOFING_REFERENTIAL: Referential = {
           ],
         },
         ZONE_PARAM,
+        NB_ANGLES_PARAM,
         DEVELOPPE_GOUTTIERE_PARAM,
         FIXATION_CROCHET_PARAM,
         DIAMETRE_DESCENTE_PARAM,
       ],
       slots: [
         { key: "profil", family: "gutter", label: "Gouttière", usual: { text: "Longueurs de 4 m ; le profil (demi-ronde de 25, de 33…) suit le devis.", source: F, productId: "gouttiere-standard-4m" } },
-        { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" } },
-        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true },
+        { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer).", source: F, productId: "crochet-gouttiere-standard" }, suggested: { label: "Crochets de gouttière" } },
+        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true, suggested: { label: "Naissances de gouttière" } },
+        // Greg, 17 novembre 2026 (point 13) : talons et angles, des lignes à part, proposées seulement à l'étape « Suggestions ».
+        { key: "talon", family: "gutter_end", label: "Talons", keywords: ["talon"], usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" }, suggested: { label: "Talons de gouttière (si tu ne les fabriques pas)" } },
+        { key: "angle", family: "gutter_angle", label: "Angles", keywords: ["angle"], usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" }, suggested: { label: "Angles de gouttière (si tu ne les fabriques pas)" } },
         // §49.1 point 4 : « étain et décapant si du zinc à souder est écrit » (« réalisation des soudures » à la pose).
         { key: "etain", family: "solder", label: "Étain à souder", citedBy: ["soudure", "soudures", "souder"], usual: { text: "Baguettes d'étain 33 % de 250 g (§25.3).", source: F, productId: "baguette-etain-250" } },
         { key: "decapant", family: "flux", label: "Décapant zinc", usual: { text: "Décapant pour zinc, flacon de 250 ml (§25.3).", source: F, productId: "decapant-zinc-250" } },
@@ -3577,8 +4905,12 @@ export const ROOFING_REFERENTIAL: Referential = {
         // §2 : « Jonctions (soudure) : nb longueurs − 1 par ligne ; étain + décapant ≈ 15 g/jonction » (à valider, §25.7).
         etain_par_jonction: rule("0.015", "kg", F, todo("§2 et §25.3 : ≈ 15 g d'étain par jonction, à valider par un couvreur (§25.7)."), "étain {v} par jonction"),
         longueur_barre_gouttiere: condition("4", "m", F, FOUNDER_DOC, "Gouttière zinc en longueurs de 4 m (§25.2)."),
+        // Base couverture, « gouttières zinc » (confirmé) : « ml de gouttière + 30 mm par jonction soudée, arrondi aux
+        // longueurs de 4 m ; pas de % en plus ». Banc du calcul, 21 novembre 2026 : 2 × 8 m = 5 longueurs, pas 4.
+        recouvrement_jonction: condition("0.03", "m", F, FOUNDER_DOC, "Gouttière zinc : 30 mm de recouvrement par jonction soudée (base couverture, gouttières zinc)."),
         flacons_decapant: rule("1", "u", F, todo("§25.3 : 1 flacon de 250 ml pour ≈ 40 ml de soudure, à valider (§25.7)."), "décapant {v} flacon pour les soudures"),
         ...CROCHETS_GOUTTIERE,
+        talons_par_ligne: condition("2", "u", F, FOUNDER_DOC, "« 2 talons par ligne droite » (§15, « même logique que le zinc »)."),
       },
       derived: [
         {
@@ -3595,10 +4927,18 @@ export const ROOFING_REFERENTIAL: Referential = {
         {
           id: "profil",
           slot: "profil",
-          formula: "longueur_gouttiere",
+          // Les jonctions : une de moins que de longueurs ; chaque jonction soudée mange 30 mm (base couverture).
+          formula: "longueur_gouttiere + regle.recouvrement_jonction * (arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1)",
           unit: "ml",
           core: true,
-          exclusions: "Hors recouvrements ou jonctions propres au système.",
+          exclusions: "Recouvrement des jonctions soudées compris (30 mm par jonction).",
+          covers: "longueur_gouttiere",
+          // Greg, 22 novembre 2026 : sous la flèche, en clair, « 5 longueurs couvrent 19,88 m » (pour repasser à 5 d'un toucher).
+          postes: [
+            { id: "longueur", libelle: "Gouttière {longueur_gouttiere|ml}", formule: "longueur_gouttiere", cle: "longueur_gouttiere" },
+            { id: "croisures", libelle: "Croisures : {= arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1} jonctions × 3 cm", formule: "regle.recouvrement_jonction * (arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1)" },
+            { id: "une-de-moins", libelle: "{= arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1} longueurs couvriraient", formule: "(arrondi_sup((longueur_gouttiere - regle.recouvrement_jonction) / (regle.longueur_barre_gouttiere - regle.recouvrement_jonction)) - 1) * (regle.longueur_barre_gouttiere - regle.recouvrement_jonction) + regle.recouvrement_jonction", info: true },
+          ],
           // Comme au comptoir : « Gouttière zinc demi-ronde dév. 33 » ; le développé, il ne le devine pas.
           designation: "Gouttière {devis} dév. {developpe_gouttiere|cm#}",
           precisionRequires: ["developpe_gouttiere"],
@@ -3633,6 +4973,33 @@ export const ROOFING_REFERENTIAL: Referential = {
           precisionRequires: ["developpe_gouttiere", "diametre_descente"],
           source: "baticlair-pratique-accessoires",
           verification: FOUNDER_VALIDATED,
+          version: 1,
+        },
+        {
+          id: "talons",
+          slot: "talon",
+          formula: "regle.talons_par_ligne",
+          unit: "u",
+          core: true,
+          exclusions: "Deux talons pour une ligne droite (une ligne finissant en angle n'en a qu'un : à corriger d'un toucher).",
+          designation: "Talons de gouttière {devis} dév. {developpe_gouttiere|cm#}",
+          precisionRequires: ["developpe_gouttiere"],
+          source: F,
+          verification: FOUNDER_DOC,
+          version: 1,
+        },
+        {
+          id: "angles",
+          slot: "angle",
+          when: "nb_angles > 0",
+          formula: "nb_angles",
+          unit: "u",
+          core: true,
+          exclusions: "Angles extérieurs à 90° ; un angle intérieur se corrige d'un toucher.",
+          designation: "Angles de gouttière {devis} dév. {developpe_gouttiere|cm#}",
+          precisionRequires: ["developpe_gouttiere"],
+          source: F,
+          verification: FOUNDER_DOC,
           version: 1,
         },
         {
@@ -3721,10 +5088,10 @@ export const ROOFING_REFERENTIAL: Referential = {
       slots: [
         { key: "profil", family: "gutter_plastic", label: "Gouttière", usual: { text: "Longueurs de 4 m (§15).", source: F, productId: "gouttiere-pvc-alu-4m" } },
         { key: "crochet", family: "gutter_hook", label: "Crochets", keywords: ["crochet"], usual: { text: "Un crochet tous les 50 cm (40 cm en bord de mer), plus un en bout (§15).", source: F, productId: "crochet-gouttiere-standard" } },
-        { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" } },
-        { key: "talon", family: "gutter_end", label: "Talons", usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" } },
-        { key: "angle", family: "gutter_angle", label: "Angles", usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" } },
-        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true },
+        { key: "jonction", family: "gutter_joint", label: "Jonctions", usual: { text: "Une jonction entre deux longueurs (§15).", source: F, productId: "jonction-gouttiere" }, suggested: { label: "Jonctions de gouttière" } },
+        { key: "talon", family: "gutter_end", label: "Talons", usual: { text: "Deux talons par ligne droite (§15).", source: F, productId: "talon-gouttiere" }, suggested: { label: "Talons de gouttière" } },
+        { key: "angle", family: "gutter_angle", label: "Angles", usual: { text: "Un angle par angle de façade (§15).", source: F, productId: "angle-gouttiere" }, suggested: { label: "Angles de gouttière" } },
+        { key: "naissance", family: "gutter_outlet", label: "Naissances", charsFrom: "profil", usual: { text: "Une naissance par descente.", source: F, productId: "naissance-standard" }, indissociable: true, suggested: { label: "Naissances de gouttière" } },
         { key: "dilatation", family: "gutter_expansion", label: "Joints de dilatation", usual: { text: "Un joint de dilatation tous les 12 m de ligne droite en PVC (§15).", source: F, productId: "dilatation-gouttiere" } },
       ],
       constants: {
@@ -3841,19 +5208,23 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "nb_descentes", label: "Nombre de descentes", unit: "u", kind: "site_data", question: "Combien de descentes ?", fromLineQuantity: true, forSlots: ["tube"], textCount: ["descente"] },
         DIAMETRE_DESCENTE_PARAM,
         // « hauteur 4 m », et « 2 descentes de 3 m » (D-2026-020) ; « descente 100 mm » n'est pas une hauteur (textRange).
-        { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur", "descente"], textRange: { min: "1", max: "30" } },
+        { key: "hauteur_descente", label: "Hauteur d'une descente", unit: "m", kind: "site_data", question: "Hauteur d'une descente ?", textLabels: ["hauteur", "descente", "ht", "haut"], textRange: { min: "1", max: "30" } },
         {
           key: "longueur_tube",
           label: "Longueur des tubes",
           unit: "m",
           kind: "site_data",
-          question: "Tubes de descente en longueurs de 4 m ou de 2 m ?",
-          default: { value: "4", source: FR_REPLY_DESCENTES, verification: FOUNDER_REPLY_DESCENTES, version: 1, note: "longueurs de 4 m" },
+          question: "Tubes de descente en longueurs de 2 m ou de 4 m ?",
+          // Fiche couverture (2026-11-19) : 2 m, ta règle, vendu en zinc comme en PVC (avant 4 m).
+          default: { sur: true, value: constanteFiche("evacuation.longueur_tube_descente").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 2, note: "longueurs de 2 m (zinc et PVC)" },
           choices: [
-            { label: "4 m", value: "4" },
             { label: "2 m", value: "2" },
+            { label: "4 m", value: "4" },
           ],
-          textValues: [{ value: "2", keywords: ["longueur de 2 m", "longueurs de 2 m", "tube de 2 m", "tubes de 2 m", "en 2 m", "barres de 2 m"] }],
+          textValues: [
+            { value: "2", keywords: ["longueur de 2 m", "longueurs de 2 m", "tube de 2 m", "tubes de 2 m", "en 2 m", "barres de 2 m"] },
+            { value: "4", keywords: ["longueur de 4 m", "longueurs de 4 m", "tube de 4 m", "tubes de 4 m", "en 4 m", "barres de 4 m"] },
+          ],
         },
         {
           key: "dauphin",
@@ -3892,7 +5263,7 @@ export const ROOFING_REFERENTIAL: Referential = {
         { key: "coude", family: "downpipe_elbow", label: "Coudes", charsFrom: "tube", usual: { text: "Coudes du même système que la descente.", source: F, productId: "coude-descente-standard" } },
         // §49.6 : « fixation … des tuyaux de descente » sur la ligne de pose cite les colliers sans les chiffrer.
         { key: "collier", family: "downpipe_clamp", label: "Colliers", citedBy: ["fixation", "fixations"], usual: { text: "Un collier tous les 2 m, plus un.", source: FR_REPLY_DESCENTES, productId: "collier-descente-standard" } },
-        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" } },
+        { key: "dauphin", family: "downpipe_shoe", label: "Dauphins", usual: { text: "Un dauphin par descente, 1 m (§15).", source: F, productId: "dauphin-standard" }, suggested: { label: "Dauphins (pied de descente)", vaut: { dauphin: "1" } } },
       ],
       constants: {
         espacement_collier: condition("2", "m", FR_REPLY_DESCENTES, FOUNDER_REPLY_DESCENTES, "« colliers tous les 2 m » (réponse du fondateur, 2026-10-05)."),
@@ -3903,7 +5274,8 @@ export const ROOFING_REFERENTIAL: Referential = {
           slot: "tube",
           formula: "nb_descentes * arrondi_sup(hauteur_descente / longueur_tube)",
           unit: "u",
-          precision: "{nb_descentes} descentes × {hauteur_descente|m}",
+          precision: "{nb_descentes|pluriel:descente:descentes} × {hauteur_descente|m}",
+          pieceUnit: { one: "tube de {longueur_tube|m}", many: "tubes de {longueur_tube|m}" },
           designation: "Tubes de descente {devis} Ø{diametre_descente|mm#}, longueur {longueur_tube|m}",
           precisionRequires: ["diametre_descente"],
           core: true,
@@ -3979,15 +5351,25 @@ export const ROOFING_REFERENTIAL: Referential = {
         },
       ],
     },
-  ],
+  ]),
   wasteRules: [
     // Pertes du référentiel du fondateur (pan simple) : appliquées après le calcul, avant l'arrondi au conditionnement.
     { family: "roof_slate", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Casse et coupes de rive, pans rectangulaires simples." },
     { family: "roof_slate_fc", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Comme l'ardoise naturelle (§4 : « mêmes formules »)." },
-    { family: "slate_hook", rate: "2", source: F, verification: FOUNDER_DOC, version: 1, note: "« Commander crochets = ardoises × 1,02 »." },
-    { family: "roof_tile", rate: "3", source: F, verification: FOUNDER_DOC, version: 1, note: "Tuiles mécaniques." },
-    { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes de liteaux et contre-liteaux." },
-    { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes de 3 m." },
+    // Un crochet par ardoise commandée (fiche couverture, ardoise.perte_crochets) : une perte nulle n'est pas une marge à dire.
+    ...(Number(constanteFiche("ardoise.perte_crochets").valeur) > 0
+      ? [{ family: "slate_hook", rate: constanteFiche("ardoise.perte_crochets").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 2, note: "Perte sur les crochets (fiche couverture)." }]
+      : []),
+    // Greg, 21 novembre 2026 : « Tuiles à emboîtement : 5 % de casse. » Avant : 3 %.
+    { family: "roof_tile", rate: "5", source: F, verification: FOUNDER_DOC, version: 2, note: "Tuiles à emboîtement : 5 % de casse (Greg, 21 novembre 2026)." },
+    // Fiche couverture (2026-11-20) : la tuile canal a sa marge, jamais 0 % (casse à la pose 1 %, CTMNC ; coupes en plus).
+    { family: "roof_tile_canal", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
+    { family: "roof_tile_canal_part", rate: constanteFiche("tuile.perte_canal").valeur, source: FICHE, verification: FICHE_VERIFIEE, version: 1, note: "Tuile canal, couverts et courants (fiche couverture, tuile.perte_canal)." },
+    { family: "batten", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Chutes des contre-liteaux (et des liteaux d'un ouvrage sans règle propre)." },
+    // Greg, 22 novembre 2026 : « Liteaux : 10 % de chute au total (pas 10 % en plus des 5 %) » : casse, coupes et aboutage
+    // (liteaux de 4 m sur chevrons à 60 cm). Avant : 5 %. Les contre-liteaux restent à 5 %.
+    { family: "batten", slot: "liteau", rate: "10", source: F, verification: FOUNDER_DOC, version: 1, note: "Liteaux : 10 % de chute au total, aboutage compris (Greg, 22 novembre 2026)." },
+    { family: "zinc_ridge", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "Recouvrements des bandes façonnées." },
     { family: "hip_strip", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Zinc en bande (faîtage, noue, rive) : 5 % » (§2), arêtier « ml × 1,05 » (§3)." },
     { family: "sheathing", rate: "5", source: F, verification: FOUNDER_DOC, version: 1, note: "« Support voligeage : m² rampant × 1,05 » (§7)." },
   ],

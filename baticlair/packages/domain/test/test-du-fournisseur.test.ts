@@ -4,7 +4,7 @@ import { D2026_015_LINES } from "./devis-reels/d2026-015.js";
 
 /** Le banc des devis réels : D-2026-015 (tuiles HP10 confirmées, faîtières ventilées refusées : « aucun de ces modèles »). */
 const REAL_QUOTES = [{ id: "D-2026-015", lines: D2026_015_LINES, answers: { "product:tuile": "edilians-hp10-huguenot", "product:faitiere": null } as Record<string, string | null> }];
-import { readQuote } from "./support/read-quote.js";
+import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * LE TEST DU FOURNISSEUR (référentiel §40, verrou moteur §41.3) : le quantitatif est lu par le gars du
@@ -29,14 +29,14 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     const labels = v.toBuy.map((b) => b.label);
     expect(labels).not.toContain("Couverture zinc joint debout");
     expect(labels).not.toContain("Voligeage en sapin traité 18×200 mm");
-    // La bande garde son nom écrit (§48.6, pièce par pièce), mais elle attend son façonnage : orange, jamais commandée telle quelle.
+    // La bande garde son nom écrit (§48.6), mais elle attend la réponse de pliage du devis : orange, jamais commandée telle quelle.
     const bande = v.toBuy.find((b) => b.label === "Bande de ventilation en Z en zinc quartz");
     expect(bande?.key).toMatch(/^manque:/);
-    expect(bande?.waitsOn).toContain("param:faconnage@bandes-zinc");
+    expect(bande?.waitsOn).toContain("param:faconnage@pieces-pliees");
     // La bande zinc au ml n'est plus « à chiffrer » : le moteur tente d'abord (développé ? façonnage ?), ce sont des questions.
     expect(v.toQuote).toEqual([]);
     // §48.2 « zinc, pièce par pièce » : le joint debout et la bande zinc ont chacun leur question de façonnage.
-    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(expect.arrayContaining(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@bandes-zinc"]));
+    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(expect.arrayContaining(["param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees"]));
     // Le voligeage est un composant du joint debout : calculé (91 m² × 1,05), vendu au m² de planche.
     expect(v.toBuy.find((b) => b.label === "Voliges sapin 18 mm")?.quantity).toBe("96 m²");
     // La gouttière, elle, a une règle : des longueurs de 4 m et sa naissance (indissociable, §48.7) ; le comptoir demande
@@ -51,16 +51,17 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
 
   it("une ligne qui échoue au test ne part pas, mais elle n'empêche pas d'envoyer le reste", () => {
     const v = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" } });
-    // Restent, posées d'un coup : la question de façonnage de chaque pièce (§48.2, pièce par pièce), le développé (une bande commandée
+    // Restent, posées d'un coup : la question des bacs et la question de pliage des pièces (une seule pour tout le devis, Greg, 17 novembre 2026), le développé (une bande commandée
     // façonnée se fabrique à son développé ; façonnée sur place au-delà de 6 ml, un bobineau de 500 mm suffit et la
     // réponse est simplement ignorée), et ce que le comptoir demande pour la gouttière (§47.8). Plus « égout et
     // faîtage ? » (proposés dans « On ajoute ? »). Le voligeage est reconnu (§7), plus « article inconnu ».
-    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:consommables", "param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@bandes-zinc", "param:faconnage@couverture-zinc-joint-debout"]);
-    // Une réponse pièce par pièce ne vaut que pour sa pièce : la bande est réglée, le joint debout reste à demander.
-    const parPiece = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage@bandes-zinc": { value: "1", unit: "u" } });
+    // Règle changée le 18 novembre 2026 : le rampant des bacs (non écrit ici) se demande, il n'est plus supposé à 5,5 m.
+    expect(v.questions.map((q) => q.question?.key ?? q.key).sort()).toEqual(["param:developpe", "param:developpe_gouttiere", "param:diametre_descente", "param:faconnage@couverture-zinc-joint-debout", "param:faconnage@pieces-pliees", "param:longueur_rampant"]);
+    // La réponse de pliage vaut pour les pièces pliées, pas pour les bacs : le joint debout reste à demander.
+    const parPiece = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage@pieces-pliees": { value: "1", unit: "u" } });
     const restantes = parPiece.questions.map((q) => q.question?.key ?? q.key);
     expect(restantes).toContain("param:faconnage@couverture-zinc-joint-debout");
-    expect(restantes).not.toContain("param:faconnage@bandes-zinc");
+    expect(restantes).not.toContain("param:faconnage@pieces-pliees");
     const surPlaceLong = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" } });
     // Façonnée sur place, la bande se compte en feuilles 2 × 1 m d'après son développé (§48.6) : le devis ne le dit pas, on le demande.
     expect(surPlaceLong.questions.map((q) => q.question?.key ?? q.key)).toContain("param:developpe");
@@ -74,8 +75,8 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
     // L'aspect se lit sur sa ligne (la bande « en zinc quartz ») ; une bande ne fait pas l'aspect de la couverture.
     // Je façonne 13 ml : des FEUILLES 2 × 1 m (§48.6), jamais du zinc au kg ni un bobineau : développé 10 cm, 10 bandes de
     // 2 m par feuille → 1 feuille. Le joint debout, lui, part en bobine au mètre linéaire, largeur écrite (jamais au kg).
-    const surPlace = readQuote(ZINC_QUOTE, { "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
-    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: expect.stringMatching(/^Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm, pour /), quantity: "1 pièce" });
+    const surPlace = readQuote(ZINC_QUOTE, { "param:longueur_rampant": { value: "5.5", unit: "m" }, "param:nb_descentes": { value: "2", unit: "u" }, "param:faconnage": { value: "1", unit: "u" }, "param:developpe": { value: "100", unit: "mm" } });
+    expect(surPlace.toBuy.find((b) => b.needIds.includes("feuilles-bandes"))).toMatchObject({ label: "Feuilles Quartz-Zinc 2 × 1 m, 0,65 mm", quantity: "1 pièce" });
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.label).toBe("Bobine zinc naturel 0,65 mm, largeur 500 mm");
     expect(surPlace.toBuy.find((b) => b.needIds.some((id) => id.startsWith("zinc-bobines")))?.order?.unit).toBe("ml");
   });
@@ -104,7 +105,8 @@ describe("test du fournisseur : chaque ligne « À commander » se charge dans l
 
 describe("§ 41.4 : les mots de l'artisan passent devant ceux de BatiClair", () => {
   it("libellé et quantité réécrits sur une ligne calculée ; les autres lignes ne bougent pas", () => {
-    const v = readQuote([{ ref: "a", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }]);
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande ; ici répondu « Oui », la ligne est calculée.
+    const v = readQuote([{ ref: "a", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "200", unit: "m²" }], EGOUT_COMPRIS_OUI);
     const key = "product:Ardoises naturelles Espagne 1er choix 30×22";
     const out = applyPurchaseOverrides(v, { [`libelle:${key}`]: "Ardoises Cupa 30×22", [`quantite:${key}`]: { value: "9000", unit: "pièces" } });
     const edited = out.toBuy.find((b) => b.key === key)!;

@@ -17,14 +17,14 @@ const need = (r: ReturnType<typeof computeWorkItem>, id: string) => r.needs.find
 const order = (r: ReturnType<typeof computeWorkItem>, id: string) => Number(need(r, id).purchase?.order.count);
 
 describe("modèle refusé : le générique compte, le fournisseur met sa marque", () => {
-  it("D-2026-015 : faîtières ventilées refusées → 29 faîtières (modèle à préciser) et 29 crochets, plus rien à chiffrer", () => {
+  it("D-2026-015 : faîtières ventilées refusées → 25 faîtières (modèle à préciser ; sur HP 10, la demi-ronde, 2,5 au ml : Greg, 21 novembre 2026 ; avant 30) et 25 crochets, plus rien à chiffrer", () => {
     const c = REAL_QUOTES.find((q) => q.id === "D-2026-015")!;
     const v = readQuote(c.lines, c.answers);
     expect(v.toQuote).toEqual([]);
     const faitieres = v.toBuy.find((b) => b.needIds.includes("faitieres"))!;
     expect(faitieres.label).toMatch(/^Faîtières \(modèle à préciser\)/);
-    expect(faitieres.quantity).toBe("29 pièces");
-    expect(v.toBuy.find((b) => b.needIds.includes("crochets-faitiere"))?.quantity).toBe("29 pièces");
+    expect(faitieres.quantity).toBe("25 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("crochets-faitiere"))?.quantity).toBe("25 pièces");
     // L'hypothèse « modèle » n'est pas re-posée : l'artisan a déjà répondu.
     expect(v.assumptions.some((a) => a.key === "product:faitiere")).toBe(false);
   });
@@ -49,7 +49,7 @@ describe("bandes zinc au ml (§36.4) : jamais « ml de zinc » nu", () => {
   it("je façonne, 6 ml au plus : des feuilles de zinc 2 × 1 m, jamais du zinc au kg (§25.2) : 5,5 m × 0,25 m / 2 m² = 0,69 → 1 feuille", () => {
     const r = computeWorkItem(ROOFING_REFERENTIAL, input({ faconnage: "1", developpe: "250", longueur_bande: "5" }));
     expect(order(r, "feuilles-bandes")).toBe(1);
-    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm, pour bandes zinc");
+    expect(need(r, "feuilles-bandes").label).toBe("Feuilles zinc naturel 2 × 1 m, 0,65 mm");
     expect(r.needs.some((n) => n.purchase?.order.unit.many === "kg")).toBe(false);
   });
 
@@ -84,18 +84,33 @@ describe("abergement de cheminée (§7) : un ouvrage compté devient des bandes 
       mentioned: ["abergement"],
     });
     expect(order(r, "bandes-abergement")).toBe(4);
-    expect(order(r, "porte-solin-abergement")).toBe(3);
+    // Greg, 21 novembre 2026 : la bande porte-solin que le devis ne dit pas ne sort plus d'office (elle est proposée en
+    // suggestion) ; écrite au devis ou cochée, elle se compte comme avant : 6 m ÷ 2 = 3.
+    expect(r.needs.find((n) => n.needId === "porte-solin-abergement")).toBeUndefined();
+    const avecSolin = computeWorkItem(ROOFING_REFERENTIAL, {
+      workItemId: "abergement-cheminee",
+      params: {
+        nb_cheminees: { value: "2", unit: "u", origin: "devis", evidence: "Devis" },
+        perimetre_cheminee: { value: "3", unit: "m", origin: "artisan", evidence: "Réponse" },
+        faconnage: { value: "2", unit: "u", origin: "artisan", evidence: "Réponse" },
+      },
+      products: {},
+      mentioned: ["abergement", "porte_solin"],
+    });
+    expect(order(avecSolin, "porte-solin-abergement")).toBe(3);
     const bobine = computeWorkItem(ROOFING_REFERENTIAL, {
       workItemId: "abergement-cheminee",
       params: {
         nb_cheminees: { value: "2", unit: "u", origin: "devis", evidence: "Devis" },
         perimetre_cheminee: { value: "3", unit: "m", origin: "artisan", evidence: "Réponse" },
         faconnage: { value: "1", unit: "u", origin: "artisan", evidence: "Réponse" },
+        // Règle changée (Greg, 23 novembre 2026) : sans la taille de la souche, l'artisan dit le nombre de feuilles (avant :
+        // 7,8 m de zinc au développé de 33 cm, 3 bandes de 2 m par feuille → 2 feuilles).
+        feuilles_cheminee: { value: "2", unit: "u", origin: "artisan", evidence: "Réponse" },
       },
       products: {},
       mentioned: ["abergement"],
     });
-    // Façonné sur place (§48.6) : 7,8 m de zinc au développé de 33 cm, 3 bandes de 2 m par feuille → 2 feuilles 2 × 1 m.
     expect(order(bobine, "feuilles-abergement")).toBe(2);
     expect(bobine.needs.some((n) => /bobineau/i.test(n.label))).toBe(false);
   });

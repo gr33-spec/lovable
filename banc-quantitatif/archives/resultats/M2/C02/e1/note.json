@@ -1,0 +1,28 @@
+{
+ "m": "M2",
+ "c": "C02",
+ "e": 1,
+ "nRef": 7,
+ "justes": 6,
+ "quantite": 1,
+ "manquantes": 0,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 0,
+ "questionsRef": 0,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Tuiles de rive (Tuiles de rive HP 10 rouge) : à chiffrer  attendu, 4  lu"
+  ],
+  "manquantes": [],
+  "inventees": [
+   "Liteaux 27×40 (Écran sous-toiture HPV) (à chiffrer )"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

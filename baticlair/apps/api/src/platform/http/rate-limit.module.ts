@@ -15,8 +15,20 @@ import { PrismaService } from "../database/prisma.service.js";
 import { DomainError } from "../errors/domain-error.js";
 import { CONFIG } from "../tokens.js";
 
-/** Requêtes qui ne coûtent rien et ne créent rien : jamais comptées. */
+/** Requêtes qui ne créent rien : comptées seulement quand elles coûtent (voir `lectureACompter`). */
 const READ_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+/** Clé du plafond posé par `@Throttle` sur une route (constante de @nestjs/throttler, `THROTTLER:LIMIT` + nom). */
+const THROTTLER_LIMIT = "THROTTLER:LIMIT";
+
+/** Une lecture qui fabrique un fichier ou qui ouvre une page par jeton : comptée comme une écriture. */
+export function lectureACompter(url: string): boolean {
+  const chemin = (url.split("?")[0] ?? "").toLowerCase().replace(/\/+$/, "");
+  if (/\.(pdf|xlsx|csv|zones)$/.test(chemin) || /\/pdf$/.test(chemin)) return true;
+  if (/^\/v1\/(me|negoce)\/export$/.test(chemin)) return true;
+  // Seulement les pages ouvertes PAR JETON. Jamais les sites publics des artisans (`/v1/public/pages/…`) : le site web les lit
+  // depuis sa propre adresse, un compteur commun bloquerait tous les visiteurs (relecture du 27 novembre 2026).
+  return /^\/v1\/(public\/(chiffrer|achat-groupe)|reponse|negoce\/(connexion|invitation|opposition)|emails\/stop|fichiers-pro\/ouvrir)\//.test(chemin);
+}
 
 /**
  * Compteurs en base : l'API tourne en plusieurs instances (fonctions serverless), une
@@ -62,7 +74,17 @@ export class ApiThrottlerGuard extends ThrottlerGuard {
   protected override async shouldSkip(context: ExecutionContext): Promise<boolean> {
     if (!this.config.rateLimit.enabled) return true;
     const req = context.switchToHttp().getRequest<Request>();
-    return READ_METHODS.has(req.method);
+    if (!READ_METHODS.has(req.method)) return false;
+    // LECTURES LIMITÉES (audit du 27 novembre 2026, accord de Greg) : avant, AUCUNE lecture n'était comptée, même celles qui
+    // portaient leur `@Throttle` (export PDF « 10 par heure » qui passait 14 fois). Une lecture est comptée quand sa route a
+    // son propre plafond, ou quand elle fabrique un fichier (PDF, Excel, CSV) ou ouvre une page par jeton (négoces, liens
+    // publics). Les autres lectures (écrans, suivi d'une lecture chaque seconde) restent libres : aucune écriture en base.
+    // HEAD passe par la même route que GET (Express) et fabrique le même fichier : compté pareil (relecture du 27 novembre).
+    if (req.method === "OPTIONS") return true;
+    const handler = context.getHandler();
+    const classe = context.getClass();
+    if (this.reflector.getAllAndOverride<number>(`${THROTTLER_LIMIT}default`, [handler, classe]) !== undefined) return false;
+    return !lectureACompter(req.originalUrl ?? req.url);
   }
 
   protected override async throwThrottlingException(_context: ExecutionContext, detail: ThrottlerLimitDetail): Promise<void> {

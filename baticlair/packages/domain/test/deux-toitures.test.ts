@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readQuote } from "./support/read-quote.js";
+import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * DEUX TOITURES DANS UN DEVIS (relevé en préparant le compte rendu du §44, 2026-10-04) : 200 m² d'ardoises sur la
@@ -12,11 +12,14 @@ describe("une surface par ouvrage", () => {
     { ref: "2", designation: "Couverture du garage en tuiles mécaniques", quantity: "20", unit: "m²" },
   ];
   it("ardoises sur 200 m², tuiles sur 20 m² ; aucune question de surface", () => {
-    const v = readQuote(LIGNES);
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout des ardoises se demande ; répondu « Oui »,
+    // rien n'est ajouté et le nombre d'avant reste.
+    const v = readQuote(LIGNES, EGOUT_COMPRIS_OUI);
+    expect(readQuote(LIGNES).questions.map((q) => q.question?.key)).not.toContain("param:surface");
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:surface");
     // Sans adresse : le même nombre que le devis d'ardoises seul, sans le garage.
-    const seul = readQuote([LIGNES[0]!]).toBuy.find((b) => b.needIds.includes("ardoises"))?.quantity;
-    expect(seul).toBe("9 271 pièces");
+    const seul = readQuote([LIGNES[0]!], EGOUT_COMPRIS_OUI).toBuy.find((b) => b.needIds.includes("ardoises"))?.quantity;
+    expect(seul).toBe("8 925 pièces");
     expect(v.toBuy.find((b) => b.needIds.includes("ardoises"))?.quantity).toBe(seul);
   });
   it("le nombre de descentes écrit sur la ligne « descente » sert toujours à la gouttière", () => {

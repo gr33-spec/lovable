@@ -7,11 +7,11 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Métier | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Terrasse bois | 0 | 1 | 0 | 1 |
+| Terrasse bois | 0 | 1 | 0 | 0 |
 | Pavage | 0 | 2 | 0 | 0 |
 | Terrassement | 1 | 2 | 0 | 0 |
 | Arrosage | 0 | 1 | 0 | 0 |
-| Constructeur, entreprise générale | 2 | 4 | 0 | 1 |
+| Constructeur, entreprise générale | 2 | 4 | 0 | 0 |
 
 ## Terrasse bois
 
@@ -23,8 +23,7 @@ Devis de test :
 
 **À l'ouverture : 0 verte · 1 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -35,7 +34,6 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
 | Lames pin classe 4 27×145, L 4,20 m | 56 lames |  | chiffrable |
-| Vis inox terrasse 5 × 50 | 960 pièces |  | chiffrable |
 
 ## Pavage
 
@@ -126,8 +124,7 @@ Devis de test :
 
 **À l'ouverture : 2 vertes · 4 orange · 0 grise.**
 
-Questions du comptoir :
-- Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ? (Oui / Non)
+Questions du comptoir : aucune.
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
@@ -146,31 +143,30 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 | Prise 2P+T 16 A Legrand Dooxie blanc | 24 pièces |  | chiffrable |
 | Carrelage grès cérame 60×60 | 58 cartons de 1,44 m² | carton entier, un seul bain | chiffrable |
 | Peinture acrylique mate blanche, seau de 15 L | 4 seaux de 15 L | même teinte, même lot | chiffrable |
-| Vis à plaque 25 mm | 1 950 vis |  | chiffrable |
-| Bande à joint | 260 ml |  | chiffrable |
-| Enduit à joint | 52 kg |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
 
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
+- Tes crochets d'ardoise : à agrafe ou à pointe ? (À agrafe / À pointe)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 9 040 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 19 boîtes de 500 | Qualité, crochet à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
-| Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 040 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox à agrafe standard, longueur 10 cm | 15 boîtes de 500 (7 232 pièces) | 4 ardoises sur 5 (la cinquième au crochet à pointe) | chiffrable |
+| Crochets d'ardoise inox à pointe standard, longueur 10 cm | 3 boîtes de 700 (1 808 pièces) |  | chiffrable |
+| Gouttière zinc demi-ronde dév. 33 | 7 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

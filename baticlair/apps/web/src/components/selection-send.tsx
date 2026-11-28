@@ -114,7 +114,7 @@ export function SelectionBar({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   return (
-    <section aria-label="Envoyer la sélection" className="flex flex-col gap-2 rounded-[22px] bg-surface p-3 shadow-card">
+    <section aria-label="Envoyer la sélection" className="flex flex-col gap-2 rounded-xl bg-surface p-3 shadow-card">
       <p className="text-[14px] font-extrabold">
         {count === 0 ? "Coche les lignes à envoyer" : `${count} ligne${count > 1 ? "s" : ""} cochée${count > 1 ? "s" : ""}`}
       </p>

@@ -1,0 +1,168 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "Réparation de couverture en tuiles terre cuite mécaniques",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Remplacement unitaire d'une tuile cassée ou défectueuse » « Tuile terre cuite mécanique »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "Tuile terre cuite mécanique",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Tuile terre cuite mécanique »"
+  },
+  {
+   "donnee": "tuiles à remplacer",
+   "valeur": "20 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « 20 u »"
+  },
+  {
+   "donnee": "modèle et teinte",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "repositionnement des tuiles déplacées",
+   "valeur": "1,5 h",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « 1,5 h »"
+  },
+  {
+   "donnee": "élément de rive à refixer",
+   "valeur": "1 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « élément de rive de toit arraché » « 1 u »"
+  },
+  {
+   "donnee": "fixations de la rive",
+   "valeur": "petites fournitures de fixation",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « y compris les petites fournitures de fixation »"
+  },
+  {
+   "donnee": "évacuation des déchets",
+   "valeur": "1 fft, centre de tri agréé",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « vers un centre de tri agréé »"
+  }
+ ],
+ "bref": [
+  "Réparation d'une couverture existante en tuiles terre cuite mécaniques : pas de couverture neuve.",
+  "20 tuiles terre cuite mécaniques neuves, identiques à l'existant, pour remplacer les tuiles cassées ou défectueuses.",
+  "Les tuiles déplacées sur le versant sont repositionnées et alignées : rien à acheter.",
+  "Petites fournitures de fixation pour refixer l'élément de rive de toit arraché, qui est reposé.",
+  "Les tuiles cassées et les déchets sont évacués vers un centre de tri agréé."
+ ],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Remplacement unitaire d'une tuile cassée ou défectueuse, comprenant accès toit, dépose de la tuile abîmée et pose d'une tuile neuve identique – Tuile terre cuite mécanique – Main d'œuvre couvreur",
+   "quantite": "20",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuile terre cuite mécanique",
+     "quantite": "20",
+     "unite": "u",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [
+      "modele_tuile"
+     ],
+     "a_preciser": [],
+     "precision": "tuile neuve identique à l'existant, en remplacement de tuiles cassées ou défectueuses"
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Repositionnement et alignement des tuiles déplacées sur le versant",
+   "quantite": "1,5",
+   "unite": "h",
+   "role": "pose",
+   "fournitures": []
+  },
+  {
+   "ref": "3",
+   "designation": "Refixation mécanique et consolidation de l'élément de rive de toit arraché, y compris les petites fournitures de fixation",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Petites fournitures de fixation",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "type de fixation",
+      "type d'élément de rive"
+     ],
+     "precision": "pour la refixation mécanique de l'élément de rive de toit arraché"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Descente et évacuation des tuiles cassées et déchets de chantier vers un centre de tri agréé",
+   "quantite": "1",
+   "unite": "fft",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "entreprise",
+   "valeur": "Couverture Baudry & Fils"
+  },
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Chauvin"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "14 rue des Tisserands"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Cholet"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "49300"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D.2026.105"
+  },
+  {
+   "cle": "date",
+   "valeur": "06/10/2026"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation"
+  }
+ ],
+ "notes": []
+}

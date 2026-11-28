@@ -1,0 +1,224 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier Mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente.",
+   "quantite": "1",
+   "unite": "U",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Écran sous-toiture Fourniture et pose d'un écran sous-toiture HPV.",
+   "quantite": "110",
+   "unite": "M2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Écran sous-toiture HPV",
+     "quantite": "110",
+     "unite": "M2",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "ecran",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Liteaux Fourniture et pose de liteaux sapin traité.",
+   "quantite": "100",
+   "unite": "M2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Liteaux sapin traité",
+     "quantite": "100",
+     "unite": "M2",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "liteau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture ardoises fibres-ciment Fourniture et pose d'ardoises fibres-ciment 40×24 noires. Pente 35°.",
+   "quantite": "110",
+   "unite": "M2",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Ardoises fibres-ciment 40×24 noires",
+     "quantite": "110",
+     "unite": "M2",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "teinte_fc",
+       "valeur": "2"
+      },
+      {
+       "cle": "pente",
+       "valeur": "35"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faîtage Fourniture et pose de faîtières.",
+   "quantite": "10",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières",
+     "quantite": "10",
+     "unite": "ML",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Rives Fourniture et pose de bandes de rive en zinc, développé 250. 4 rives de 5,50 m.",
+   "quantite": "22",
+   "unite": "ML",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Bandes de rive en zinc, développé 250",
+     "quantite": "22",
+     "unite": "ML",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "developpe",
+       "valeur": "250"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Gouttières Fourniture et pose de gouttières PVC sable. 2 longueurs de 10 m.",
+   "quantite": "20",
+   "unite": "ML",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Gouttières PVC sable",
+     "quantite": "20",
+     "unite": "ML",
+     "ouvrage": "gouttiere-pvc-alu",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "matiere_gouttiere",
+       "valeur": "1"
+      },
+      {
+       "cle": "teinte_gouttiere",
+       "valeur": "3"
+      },
+      {
+       "cle": "nb_lignes",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Descentes Fourniture et pose de descentes PVC Ø80, hauteur 5 m.",
+   "quantite": "2",
+   "unite": "U",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Descentes PVC Ø80",
+     "quantite": "2",
+     "unite": "U",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "5"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Sortie de toit Fourniture et pose d'une sortie de toit Ø100 pour évent.",
+   "quantite": "1",
+   "unite": "U",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Sortie de toit Ø100 pour évent",
+     "quantite": "1",
+     "unite": "U",
+     "ouvrage": "sortie-de-toit",
+     "emplacement": "sortie",
+     "donnees": [
+      {
+       "cle": "diametre_sortie",
+       "valeur": "100"
+      },
+      {
+       "cle": "usage_sortie",
+       "valeur": "2"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

@@ -1,0 +1,20 @@
+{
+  "accords": [
+    {"article": "Feuille de zinc naturel 2 × 1 m, 0,65 mm", "quantite": 2, "unite": "feuilles"},
+    {"article": "Mortier pour solin", "quantite": 1, "unite": "sac de 25 kg"}
+  ],
+  "desaccords": [
+    {
+      "article": "Tuyau de descente zinc Ø80",
+      "controleur": "à chiffrer",
+      "reference": "1 pièce",
+      "ecart": "Le contrôleur ne chiffre pas (hauteur de descente inconnue, tubes de 2 m), la référence donne 1 pièce sans détail."
+    },
+    {
+      "article": "Ardoises naturelles d'Espagne 32×22",
+      "controleur": "168 pièces",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur chiffre 168 pièces, la référence ne peut pas calculer (longueur d'ardoise manquante)."
+    }
+  ]
+}

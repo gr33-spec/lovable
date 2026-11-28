@@ -29,15 +29,15 @@ beforeEach(async () => {
 });
 
 describe("paywall en pause (fondateur, 2026-10-11)", () => {
-  it("par défaut, le paywall est éteint ; PAYWALL=on le rallume", () => {
+  it("la limite de chantiers ne s'applique plus, même avec PAYWALL=on (règle changée, 14 novembre 2026)", () => {
     const base = { ...process.env };
     expect(loadConfig({ ...base, PAYWALL: undefined }).billing.enforced).toBe(false);
-    expect(loadConfig({ ...base, PAYWALL: "on" }).billing.enforced).toBe(true);
+    expect(loadConfig({ ...base, PAYWALL: "on" }).billing.enforced).toBe(false);
   });
 
   it("au-delà de la limite, le chantier se crée quand même, et l'écran de limite ne s'affiche pas", async () => {
     const { agent } = await signUpWithCompany(ctx.app, "a@example.fr", "Toitures Martin");
     for (const name of ["A", "B", "C", "D"]) await agent.post("/v1/projects").send({ name }).expect(201);
-    expect((await agent.get("/v1/billing")).body).toMatchObject({ usage: { projects: 4, limit: 2 }, limitReached: false });
+    expect((await agent.get("/v1/billing")).body).toMatchObject({ usage: { projects: 4, limit: 2 }, limitReached: false, payant: false });
   });
 });

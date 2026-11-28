@@ -1,0 +1,26 @@
+{
+ "m": "M4",
+ "c": "C08",
+ "e": 4,
+ "nRef": 4,
+ "justes": 3,
+ "quantite": 1,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 2,
+ "questionsRef": 2,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Mortier pour solin : 1 sac de 25 kg attendu, 3 ml lu"
+  ],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": []
+ }
+}

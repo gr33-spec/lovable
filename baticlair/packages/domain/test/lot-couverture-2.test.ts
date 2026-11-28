@@ -30,8 +30,14 @@ const CAS: Metier[] = [
       { ref: "1", designation: "Couverture en ardoises naturelles 30x22 posées au crochet", quantity: "150", unit: "m²" },
       { ref: "2", designation: "Fourniture et pose fenêtre de toit", quantity: "1", unit: "u" },
     ],
-    questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
-    couleurs: { vert: 0, orange: 3, gris: 0 },
+    // Règle changée (Greg, 21 novembre 2026) : avant, deux questions → l'égout se demande quand aucune gouttière n'est écrite.
+    // Tant qu'elle attend, les ardoises n'ont pas de chiffre et la ligne des crochets (un par ardoise) n'est pas encore là :
+    // 2 lignes orange au lieu de 3. Répondu « Oui » : 6 694 ardoises, comme avant.
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise). Répondu « À agrafe » (premier bouton) : 6 694 × 0,8 = 5 355,2 → 5 356 agrafes, / 500 = 10,7 → 11
+    // boîtes ; 6 694 × 0,2 = 1 338,8 → 1 339 pointes, / 700 = 1,91 → 2 boîtes (avant : 6 694 crochets, 14 boîtes de 500).
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes crochets d'ardoise : à agrafe ou à pointe ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Fenêtre de toit : quelle taille ?"],
+    couleurs: { vert: 0, orange: 2, gris: 0 },
   },
   {
     nom: "Une fenêtre de toit seule, sur tuiles plates",
@@ -77,6 +83,13 @@ describe("fenêtres de toit : la fenêtre telle qu'écrite, son raccord adapté"
     expect(answered.toBuy.map((b) => [b.label, b.precision ?? ""])).toEqual([
       ["Fenêtre de toit", "78 × 118"],
       ["Raccords d'étanchéité pour ardoises, à la taille de la fenêtre de toit", ""],
+      // Proposés en Suggestion (skill du fondateur, 18/11/2026), calculés ici parce que le mode validation sort tout : un par fenêtre.
+      ["Kits d'isolation (type BDX), à la taille de la fenêtre de toit", ""],
+      ["Pare-vapeur de fenêtre (type BBX), à la taille de la fenêtre de toit", ""],
+      ["Collerettes d'écran (type BFX), à la taille de la fenêtre de toit", ""],
+      ["Volets roulants de fenêtre de toit, à la taille de la fenêtre de toit", ""],
+      ["Stores de fenêtre de toit, à la taille de la fenêtre de toit", ""],
+      ["Habillages intérieurs de fenêtre de toit, à la taille de la fenêtre de toit", ""],
     ]);
   });
 });

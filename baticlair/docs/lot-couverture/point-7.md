@@ -7,7 +7,7 @@ puis le PDF que lit le vendeur une fois les questions répondues (premier bouton
 
 | Devis de test | Vertes | Orange | Grises | Questions |
 | --- | --- | --- | --- | --- |
-| Deux descentes zinc de 5 m, dauphin à demander | 0 | 1 | 0 | 0 |
+| Deux descentes zinc de 5 m, dauphin à demander | 1 | 0 | 0 | 0 |
 | Une descente PVC en longueurs de 2 m, avec dauphin | 2 | 0 | 0 | 0 |
 
 ## Deux descentes zinc de 5 m, dauphin à demander
@@ -18,19 +18,15 @@ Devis de test :
 | --- | --- | --- |
 | 1 | Descente zinc Ø100, hauteur 5 m | 2 u |
 
-**À l'ouverture : 0 verte · 1 orange · 0 grise.**
+**À l'ouverture : 1 verte · 0 orange · 0 grise.**
 
 Questions du comptoir : aucune.
-
-| Ligne orange | Chiffre | Sous-ligne |
-| --- | --- | --- |
-| Tubes de descente zinc Ø100, longueur 4 m | 4 pièces | Valeur par défaut à confirmer |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tubes de descente zinc Ø100, longueur 4 m | 4 pièces | 2 descentes × 5 m | chiffrable |
+| Tubes de descente zinc Ø100, longueur 2 m | 6 pièces | 2 descentes × 5 m | chiffrable |
 
 ## Une descente PVC en longueurs de 2 m, avec dauphin
 
@@ -48,7 +44,7 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Tubes de descente PVC gris Ø80, longueur 2 m | 3 pièces | 1 descentes × 4,5 m | chiffrable |
+| Tubes de descente PVC gris Ø80, longueur 2 m | 3 pièces | 1 descente × 4,5 m | chiffrable |
 | Dauphins Ø80, 1 m | 1 pièce |  | chiffrable |
 
 ## Le tableau de Brest (couverture), inchangé
@@ -56,22 +52,24 @@ Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 **À l'ouverture : 1 verte · 3 orange · 0 grise.**
 
 Questions du comptoir :
+- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
+- Tes crochets d'ardoise : à agrafe ou à pointe ? (À agrafe / À pointe)
 - Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ? (Espagne 1er choix / Ardoise NF (type Cupa))
 - Descentes en Ø 80, Ø 100 ou Ø 120 ? (Ø 80 / Ø 100 / Ø 120)
-- Combien de descentes pour cette gouttière ? (1 / 2 / 3 / 4)
 
 | Ligne orange | Chiffre | Sous-ligne |
 | --- | --- | --- |
-| Ardoises naturelles 30×22 | 9 271 pièces | Qualité à préciser |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | Qualité à préciser |
+| Ardoises naturelles 30×22 | 9 040 pièces | Qualité à préciser |
+| Crochets d'ardoise inox standard, longueur 10 cm | 19 boîtes de 500 | Qualité, crochet à préciser |
 | Naissances | — | Descentes à préciser |
 
 Le PDF lu par le vendeur (après les réponses et les « C'est bon ») :
 
 | Désignation | Quantité | Précision | Le vendeur |
 | --- | --- | --- | --- |
-| Ardoises naturelles Espagne 1er choix 30×22 | 9 271 pièces | 200 m² × 44,15 ardoises/m² (crochet 11 cm, pente 45°) + 5 % de marge | chiffrable |
-| Crochets d'ardoise inox standard, longueur 11 cm | 9 457 pièces | un par ardoise commandée, + 2 % de casse (référentiel : crochets = ardoises × 1,02) | chiffrable |
-| Gouttière zinc demi-ronde dév. 33 | 6 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
+| Ardoises naturelles Espagne 1er choix 30×22 | 9 040 pièces | 200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°), arêtiers, noues, faîtage et égout du devis compris, + 5 % de marge | chiffrable |
+| Crochets d'ardoise inox à agrafe standard, longueur 10 cm | 15 boîtes de 500 (7 232 pièces) | 4 ardoises sur 5 (la cinquième au crochet à pointe) | chiffrable |
+| Crochets d'ardoise inox à pointe standard, longueur 10 cm | 3 boîtes de 700 (1 808 pièces) |  | chiffrable |
+| Gouttière zinc demi-ronde dév. 33 | 7 longueurs de 4 m (24 ml à couvrir) |  | chiffrable |
 | Naissances dév. 33 Ø80 | 1 pièce |  | chiffrable |
 

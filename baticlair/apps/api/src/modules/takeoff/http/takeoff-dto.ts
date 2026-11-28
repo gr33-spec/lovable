@@ -1,5 +1,5 @@
-import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
-import type { ArtisanView, PurchaseView } from "@baticlair/domain";
+import { briefResume, briefTexte, libelleDuMetier, LOTS_KEY, lotsRetenus, phraseLotNonLu, phrasePrecision, precisionDeLigne, ratiosEnValidationDuDevis, REFERENTIALS, siteUnits, withoutLabour, writtenNumber } from "@baticlair/domain";
+import { verificationDeLaLigne, type ArtisanView, type Assumption, type PurchaseView } from "@baticlair/domain";
 import { artisanNotes } from "../../../platform/ai/artisan-notes.js";
 import type { ReviewedTakeoff } from "../application/takeoff.service.js";
 
@@ -8,7 +8,7 @@ import type { ReviewedTakeoff } from "../application/takeoff.service.js";
  * mesure, et pour chaque élément sa PREUVE (« Voir le calcul ») — critères et
  * origines, calcul détaillé pour un besoin calculé. Aucun pourcentage.
  */
-function item(b: PurchaseView["toBuy"][number]) {
+function item(b: PurchaseView["toBuy"][number], assumptions: readonly Assumption[] = []) {
   return {
     key: b.key,
     label: b.label,
@@ -25,15 +25,31 @@ function item(b: PurchaseView["toBuy"][number]) {
     /** §49.8 : de quoi régler la ligne orange dans sa carte, d'un tap. */
     asks: b.asks ?? [],
     gap: b.gap ?? null,
+    /**
+     * Une quantité estimée (les feuilles de zinc, Greg, 17 novembre 2026 : « c'est une estimation, le nombre de feuilles doit
+     * s'ajuster d'un toucher ») : l'écran montre « − / + » sur la ligne, sans l'ouvrir.
+     */
+    estimation: (b.rules ?? []).some((r) => r.key.startsWith("estimation:")),
+    /**
+     * Nouveau cap (22 octobre) : ce qui manque à la ligne pour se grouper avec les autres (format, origine, choix, marque…),
+     * en boutons ; vide quand elle est précise. Ne bloque jamais l'envoi à son négoce.
+     */
+    aPreciserPourGroupe: precisionDeLigne(b.label).questions,
+    /**
+     * Greg, 22 novembre 2026 : « Calculé » ou « À vérifier », et pourquoi (une vraie hypothèse, une réponse attendue) ; le
+     * détail du calcul poste par poste sous la flèche. Ni l'un ni l'autre ne part dans le PDF ni l'e-mail.
+     */
+    verification: verificationDeLaLigne(b, assumptions),
+    postes: (b.postes ?? []).map((x) => ({ id: x.id, texte: x.texte, valeur: x.valeur, unite: x.unite, cle: x.cle ?? null, perte: x.perte ?? false, info: x.info ?? false, mesure: x.mesure ?? null, modifie: x.modifie ?? false })),
   };
 }
 
 function purchaseDto(p: PurchaseView) {
   return {
     understood: p.understood,
-    toBuy: p.toBuy.map(item),
+    toBuy: p.toBuy.map((b) => item(b, p.assumptions)),
     /** §45.8 « On ajoute ? » : Oui / Non d'un tap (réponse « ajout:<clé> »), au plus huit. */
-    suggestions: p.suggestions.map(item),
+    suggestions: p.suggestions.map((b) => item(b, p.assumptions)),
     groups: p.groups.map((g) => ({ key: g.key, label: g.label, measure: g.measure, itemKeys: g.itemKeys })),
     toQuote: p.toQuote.map((q) => ({ key: q.key, label: q.label, measure: q.measure, reason: q.reason, lineIds: q.lineIds })),
     assumptions: p.assumptions.map((a) => ({ key: a.key, label: a.label, value: a.value, unit: a.unit, note: a.note ?? null, choices: a.choices ?? [], named: a.named ?? false })),
@@ -106,7 +122,7 @@ function viewDto(view: ArtisanView) {
   };
 }
 
-export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, aiSuggestions, withoutSupply, brief, siteNotes, fiche }: ReviewedTakeoff) {
+export function takeoffDto({ takeoff, validation, view, roles, purchase, excluded, habits, choixPieces, dicibles, aiSuggestions, withoutSupply, suggestions, brief, siteNotes, fiche, ajustements }: ReviewedTakeoff) {
   const byId = new Map(validation.lines.map((v) => [v.lineId, v]));
   return {
     id: takeoff.id,
@@ -118,6 +134,8 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     purchase: purchaseDto(purchase),
     // §48 : « Comme d'habitude ? » sur l'écran des questions.
     habits: habits ?? [],
+    choixPieces: choixPieces ?? [],
+    dicibles: dicibles ?? [],
     // §49.9 : « N lignes sans fourniture », repliées sous la liste.
     sansFourniture: withoutSupply ?? [],
     // §50.7 : « Le chantier en bref », le même que chez le fournisseur ; chaque ligne se corrige ou se retire (`bref:<clé>`).
@@ -125,26 +143,46 @@ export function takeoffDto({ takeoff, validation, view, roles, purchase, exclude
     bref: brief ? briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null) : [],
     // Retour du fondateur (2026-10-11) : le bref en UN texte descriptif (le même que chez le fournisseur) ; le client et
     // l'adresse seulement si l'artisan les ajoute (`bref:avec-client`).
-    brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null)) : "",
+    brefTexte: brief ? briefTexte(briefResume(brief, siteNotes ?? null, takeoff.answers, takeoff.fiche ? (fiche ?? null) : null), Boolean(brief.ville || brief.situation)) : "",
     brefAvecClient: takeoff.answers["bref:avec-client"] === "oui",
+    // Assistant Mobiiz (31 octobre 2026) : l'adresse du chantier et la livraison dites par l'artisan (PDF, points 9 et 11).
+    chantier: {
+      adresse: typeof takeoff.answers["chantier:adresse"] === "string" ? takeoff.answers["chantier:adresse"] : null,
+      livraison: typeof takeoff.answers["chantier:livraison"] === "string" ? takeoff.answers["chantier:livraison"] : null,
+    },
     // §52 (retour du fondateur, 2026-10-12) : un métier pas encore relu par un artisan porte « Ratios en cours de
     // validation » sur l'écran 3 et dans le PDF fournisseur ; pas la couverture.
+    /** La phrase de la pastille orange d'une ligne vague (« Précise pour trouver d'autres couvreurs »). */
+    phrasePrecision: phrasePrecision(takeoff.trade),
+    /** Le métier du quantitatif (1er novembre 2026) : le lot unique de « Qui reçoit quoi » avant l'envoi aux négoces. */
+    metier: takeoff.trade ?? null,
     ratiosEnValidation: ratiosEnValidationDuDevis(takeoff.lecture ? { ...takeoff.lecture, lots: lotsRetenus(takeoff.lecture, takeoff.answers[LOTS_KEY]) } : null, takeoff.trade),
     // §52, la carte « Lots repérés » (directive du fondateur, 2026-10-13) : les lots que la lecture a repérés, ceux que
     // l'artisan a gardés ou ajoutés (null tant qu'il n'a pas dit « C'est bon »), et les métiers qu'il peut ajouter.
     lots: (takeoff.lecture?.lots ?? []).filter((l) => l.lignes.length > 0).map((l) => ({ metier: l.metier, libelle: l.libelle, lignes: l.lignes.length })),
+    /**
+     * Greg, 22 novembre 2026 : « J'ai lu ton devis » seulement s'il y a vraiment un devis. Vrai pour un devis lu ; faux pour
+     * une liste écrite à la main, dictée, envoyée en lignes, ou la photo d'une liste.
+     */
+    devisLu: takeoff.source === "pdf" && !takeoff.lines.some((l) => l.origin === "liste"),
+    /** Étape « Suggestions » : les cases à proposer avant les questions (brouillon seulement) ; vide : pas d'étape. */
+    suggestions: takeoff.status === "draft" ? (suggestions ?? []) : [],
     lotsConfirmes: typeof takeoff.answers[LOTS_KEY] === "string" ? (takeoff.answers[LOTS_KEY] as string).split(",").filter(Boolean) : null,
+    // Lecture lot par lot (décision du fondateur, 24 octobre 2026) : un lot dont la lecture a échoué, dit en une phrase.
+    lotsNonLus: (takeoff.lecture?.lotsNonLus ?? []).map((l) => phraseLotNonLu(l.libelle)),
     metiersAjoutables: REFERENTIALS.filter((r) => r.trade !== "general").map((r) => ({ metier: r.trade, libelle: libelleDuMetier(r.trade) })),
     // §51 : la fiche de chantier, chaque donnée avec son origine (lue, déduite, ta réponse, manquante).
     fiche: (fiche?.donnees ?? []).map((d) => ({ cle: d.cle, libelle: d.libelle, valeur: d.valeur, origine: d.origine, regle: d.regle ?? null, preuve: d.preuve ?? null })),
     // §48.4 : les ajouts proposés par l'IA, décochés, hors de la liste.
     aiSuggestions: aiSuggestions ?? [],
+    // L'apprentissage (24 octobre 2026) : les lignes ajustées par une habitude, « Annuler » d'un tap (`habitude:<ligne>`).
+    ajustements: ajustements ?? [],
     model: takeoff.model,
     promptVersion: takeoff.promptVersion,
     // §44.2 : la ligne retirée par une phrase de la note est dite à l'artisan, avec sa phrase.
     notes: [
       ...artisanNotes(takeoff.notes),
-      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par vous (« ${excluded!.get(l.id)} »), rien à chiffrer.`),
+      ...takeoff.lines.filter((l) => excluded?.has(l.id)).map((l) => `${l.designation} : exclu par toi (« ${excluded!.get(l.id)} »), rien à chiffrer.`),
     ],
     createdAt: takeoff.createdAt.toISOString(),
     validatedAt: takeoff.validatedAt?.toISOString() ?? null,

@@ -1,0 +1,34 @@
+{
+  "accords": [
+    {"article": "Écran sous-toiture HPV, rouleau 1,50 × 50 m", "quantite": 2, "unite": "rouleaux"},
+    {"article": "Feuilles de zinc naturel 2 × 1 m, 0,65 mm", "quantite": 3, "unite": "feuilles"},
+    {"article": "Gouttière PVC demi-ronde de 25", "quantite": 5, "unite": "longueurs de 4 m"},
+    {"article": "Tubes de descente PVC Ø80 (2 descentes × 5 m = 12 m en tubes entiers)", "quantite": 3, "unite": "tubes de 4 m (= 6 tubes de 2 m)"}
+  ],
+  "desaccords": [
+    {
+      "article": "Liteaux sapin traité 18×40",
+      "controleur": "770 ml",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur chiffre 770 ml ; la référence ne chiffre pas (liteaux au m² d'ardoise manquant)."
+    },
+    {
+      "article": "Ardoises fibres-ciment 40×24",
+      "controleur": "3209 ardoises (pièces)",
+      "reference": "à chiffrer",
+      "ecart": "Le contrôleur chiffre 3209 pièces ; la référence n'a ni quantité ni unité (seulement « 110 M2 au devis »)."
+    },
+    {
+      "article": "Faîtières fibres-ciment",
+      "controleur": "à chiffrer",
+      "reference": "30 pièces",
+      "ecart": "Le contrôleur ne chiffre pas (pièces au ml du modèle inconnues) ; la référence donne 30 pièces."
+    },
+    {
+      "article": "Sortie de toit Ø100 pour évent",
+      "controleur": "1 pièce (sortie de toit unique)",
+      "reference": "1 pièce (embase plomb) + 1 pièce (chapeau)",
+      "ecart": "Le contrôleur sort une seule ligne d'1 pièce ; la référence en sort deux (embase plomb 1 + chapeau 1), soit 2 pièces au total."
+    }
+  ]
+}

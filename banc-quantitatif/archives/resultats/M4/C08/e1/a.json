@@ -1,0 +1,15 @@
+{"lignes": [
+  {"ref": "1", "designation": "Remplact noue zinc", "quantite": "6", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+    {"nom": "Noue zinc", "quantite": "6", "unite": "ml", "ouvrage": "noue", "emplacement": "noue", "donnees": [{"cle": "longueur_noue", "valeur": "6"}], "a_preciser": ["developpe", "epaisseur"], "precision": "Remplacement de noue"}
+  ]},
+  {"ref": "2", "designation": "Remaniage ardoises autour noue, ardoises identiques à l'existant", "quantite": "12", "unite": "m2", "role": "fourniture_et_pose", "fournitures": [
+    {"nom": "Ardoises identiques à l'existant", "quantite": "", "unite": "", "ouvrage": "", "emplacement": "", "donnees": [], "a_preciser": ["modele", "dimension", "quantite"], "precision": "Remaniage autour de la noue sur 12 m2, ardoises identiques à l'existant"}
+  ]},
+  {"ref": "3", "designation": "Reprise solin au mortier", "quantite": "3", "unite": "ml", "role": "fourniture_et_pose", "fournitures": [
+    {"nom": "Mortier pour solin", "quantite": "3", "unite": "ml", "ouvrage": "bandes-zinc", "emplacement": "mortier", "donnees": [{"cle": "longueur_bande", "valeur": "3"}], "a_preciser": [], "precision": "Reprise de solin au mortier, 3 ml"}
+  ]},
+  {"ref": "4", "designation": "Remplact DEP Ø80", "quantite": "1", "unite": "u", "role": "fourniture_et_pose", "fournitures": [
+    {"nom": "Descente d'eau pluviale Ø80", "quantite": "1", "unite": "u", "ouvrage": "descente", "emplacement": "tube", "donnees": [{"cle": "nb_descentes", "valeur": "1"}, {"cle": "diametre_descente", "valeur": "80"}], "a_preciser": ["matiere"], "precision": ""}
+  ]},
+  {"ref": "5", "designation": "Echelle de toit + évac gravats", "quantite": "", "unite": "forfait", "role": "hors_quantitatif", "fournitures": []}
+]}

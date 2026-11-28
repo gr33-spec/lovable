@@ -11,7 +11,7 @@ import { DIMENSIONLESS, dimLabel, mulDim, sameDim, type Dim } from "./units.js";
  *   nombres          12   0,5 n'existe pas (le point : 0.5)
  *   opérations       + - * / et parenthèses
  *   comparaisons     < <= > >=   (dans si(...) uniquement)
- *   fonctions        arrondi_sup(x)  arrondi_inf(x)  min(a, b…)  max(a, b…)
+ *   fonctions        arrondi_sup(x)  arrondi_inf(x)  min(a, b…)  max(a, b…)  cos_deg(angle en degrés, de 0 à 90)
  *                    si(condition, alors, sinon)
  */
 export type Expr =
@@ -21,8 +21,13 @@ export type Expr =
   | { type: "bin"; op: "+" | "-" | "*" | "/" | "<" | "<=" | ">" | ">="; left: Expr; right: Expr }
   | { type: "call"; fn: Fn; args: Expr[] };
 
-type Fn = "arrondi_sup" | "arrondi_inf" | "min" | "max" | "si";
-const FUNCTIONS: readonly Fn[] = ["arrondi_sup", "arrondi_inf", "min", "max", "si"];
+type Fn = "arrondi_sup" | "arrondi_inf" | "min" | "max" | "si" | "cos_deg";
+const FUNCTIONS: readonly Fn[] = ["arrondi_sup", "arrondi_inf", "min", "max", "si", "cos_deg"];
+/** Cosinus d'un angle en degrés, de 0 à 90 (la surface projetée d'un toit en pente). Hors de cet intervalle : refusé. */
+const cosDeg = (deg: Decimal): Decimal => {
+  if (deg.lessThan(0) || deg.greaterThan(90)) throw new FormulaError(`cos_deg : un angle de 0 à 90°, pas ${deg.toFixed()}`);
+  return new Decimal(Math.cos((deg.toNumber() * Math.PI) / 180)).toDecimalPlaces(12);
+};
 
 export class FormulaError extends Error {
   override name = "FormulaError";
@@ -178,6 +183,10 @@ function callDim(fn: Fn, dims: Dim[]): Dim {
       if (dims.length < 2) throw new FormulaError(`${fn} prend au moins deux valeurs`);
       dims.slice(1).forEach((d) => requireSame(dims[0]!, d, fn));
       return dims[0]!;
+    case "cos_deg":
+      if (dims.length !== 1) throw new FormulaError("cos_deg prend un seul angle");
+      requireSame(dims[0]!, DIMENSIONLESS, "cos_deg");
+      return DIMENSIONLESS;
     case "si":
       if (dims.length !== 3) throw new FormulaError("si(condition, alors, sinon)");
       requireSame(dims[1]!, dims[2]!, "si");
@@ -244,11 +253,10 @@ export function evaluate(expr: Expr, valueOf: (name: string) => DimValue): DimVa
     }
     case "call": {
       if (expr.fn === "si") {
+        // Seule la branche retenue se calcule (une division par un développé nul dans l'autre branche ne casse rien) ; les
+        // dimensions des deux branches sont contrôlées au chargement du référentiel (inferDim).
         const cond = evaluate(expr.args[0]!, valueOf);
-        const yes = evaluate(expr.args[1]!, valueOf);
-        const no = evaluate(expr.args[2]!, valueOf);
-        callDim("si", [cond.dim, yes.dim, no.dim]);
-        return cond.value.isZero() ? no : yes;
+        return cond.value.isZero() ? evaluate(expr.args[2]!, valueOf) : evaluate(expr.args[1]!, valueOf);
       }
       const args = expr.args.map((a) => evaluate(a, valueOf));
       const dim = callDim(
@@ -265,6 +273,8 @@ export function evaluate(expr: Expr, valueOf: (name: string) => DimValue): DimVa
           return { value: Decimal.min(...values), dim };
         case "max":
           return { value: Decimal.max(...values), dim };
+        case "cos_deg":
+          return { value: cosDeg(values[0]!), dim };
       }
     }
   }
@@ -349,11 +359,14 @@ export function evaluateInterval(expr: Expr, valueOf: (name: string) => Interval
     case "call": {
       if (expr.fn === "si") {
         const cond = evaluateInterval(expr.args[0]!, valueOf);
+        // Condition tranchée : seule la branche retenue est lue. Une donnée de l'autre branche n'est alors ni manquante ni
+        // demandée (« Tes m² comprennent déjà l'égout ? » Oui : la longueur d'égout ne se demande pas). Les dimensions des
+        // deux branches sont contrôlées au chargement du référentiel (inferDim).
+        if (cond.lo.equals(1)) return evaluateInterval(expr.args[1]!, valueOf);
+        if (cond.hi.equals(0)) return evaluateInterval(expr.args[2]!, valueOf);
         const yes = evaluateInterval(expr.args[1]!, valueOf);
         const no = evaluateInterval(expr.args[2]!, valueOf);
         callDim("si", [cond.dim, yes.dim, no.dim]);
-        if (cond.lo.equals(1)) return yes;
-        if (cond.hi.equals(0)) return no;
         // Condition indécidable : les deux branches restent possibles.
         return { lo: Decimal.min(yes.lo, no.lo), hi: Decimal.max(yes.hi, no.hi), dim: yes.dim };
       }
@@ -371,6 +384,9 @@ export function evaluateInterval(expr: Expr, valueOf: (name: string) => Interval
           return { lo: Decimal.min(...args.map((a) => a.lo)), hi: Decimal.min(...args.map((a) => a.hi)), dim };
         case "max":
           return { lo: Decimal.max(...args.map((a) => a.lo)), hi: Decimal.max(...args.map((a) => a.hi)), dim };
+        case "cos_deg":
+          // Le cosinus baisse de 0 à 90° : la borne haute de l'angle donne la borne basse.
+          return { lo: cosDeg(Decimal.min(args[0]!.hi, 90)), hi: cosDeg(Decimal.max(args[0]!.lo, 0)), dim };
       }
     }
   }

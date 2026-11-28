@@ -1,0 +1,29 @@
+{
+ "m": "M11",
+ "c": "C10",
+ "e": 2,
+ "nRef": 9,
+ "justes": 9,
+ "quantite": 0,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 4,
+ "questionsRef": 3,
+ "questionsHorsRef": 1,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:surface",
+    "text": "Surface du toit ?"
+   }
+  ]
+ }
+}

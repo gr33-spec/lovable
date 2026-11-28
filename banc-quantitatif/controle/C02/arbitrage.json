@@ -1,0 +1,44 @@
+[
+  {
+    "article": "Contre-liteau sapin traité classe 2, 27×40",
+    "bonne_valeur": "200 ml",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche « contre-liteau sur écran » : « 1 file par chevron … ml = surface ÷ entraxe des chevrons », soit 120 ÷ 0,60 = 200 ml, et aucune perte n'y est donnée ; le moteur a ajouté les 5 % de la rubrique « liteau » (200 × 1,05 = 210) et a appelé la ligne « Liteaux 27×40 ». Défaut de la fiche à signaler : la rubrique « liteaux et contre-liteaux » des pertes ne donne que la chute d'aboutage et ne dit pas si les 5 % du liteau valent aussi pour le contre-liteau."
+  },
+  {
+    "article": "Liteau sapin traité classe 2, 27×40",
+    "bonne_valeur": "336 ml",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche donne la règle « ml_de_liteaux_par_m2 1 / pureau (m) » et, pour la HP 10, « liteaux_ml_par_m2 3.22 (pureau mini) / 2.66 (pureau maxi) » : au pureau de pose de 37,5 cm (≈ pureau maxi 376 mm), 120 × 2,667 = 320 ml + 5 % (« perte_casse_coupes 5 % ») = 336 ml. Le moteur bloque sur un « pureau minimal » qui n'entre pas dans la formule et ne pose aucune question au couvreur (liste de questions vide)."
+  },
+  {
+    "article": "Tuile terre cuite HP 10 Huguenot rouge",
+    "bonne_valeur": "1260 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche HP 10 : « tuiles_par_m2_min 9.9 … max 12 », largeur utile 268 mm, d'où 1 ÷ (0,268 × 0,375) ≈ 10/m² (10/m² chez le couvreur) × 120 m² = 1 200, + 5 % (« perte_casse_et_coupes 3 à 5 % », toit simple à deux pans) = 1 260 ; le moteur sort la ligne sans quantité ni question alors que tout est dans la fiche. Défaut de la fiche à signaler : la perte est une fourchette « a_confirmer » (3 % donnerait 1 236) qui contredit la casse de 1 % de la FDES, et la condition « rives en tuiles de rive comptées à part » ne dit pas s'il faut retirer de la surface courante la place des 82 tuiles de rive."
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 rouge, gauche (réf. 205.73)",
+    "bonne_valeur": "41 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche HP 10 : « tuile de rive à rabat D 205.72 / G 205.73 (2,7/ml) », sans besoin de pureau ; devis « 4 rives de 7,50 m » = 2 rives gauches, 15 ml × 2,7 = 40,5, casse 1 % (« ml × pièces au ml du modèle, arrondi à la pièce supérieure ; casse 1 % ») = 40,9 → 41 (20 rangs de 37,5 cm par rive le confirment). Le moteur dit « pureau minimal manquant » alors que la fiche donne le compte au ml, et il ne sépare pas gauche et droite."
+  },
+  {
+    "article": "Tuile de rive à rabat HP 10 rouge, droite (réf. 205.72)",
+    "bonne_valeur": "41 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Même règle de la fiche HP 10 (« D 205.72 … 2,7/ml ») : 2 rives droites de 7,50 m = 15 ml × 2,7 = 40,5, casse 1 % → 41 pièces. Le blocage « pureau minimal manquant » n'a pas de base dans la fiche, qui donne directement les pièces au ml par côté."
+  },
+  {
+    "article": "Faîtière terre cuite demi-ronde à emboîtement rouge",
+    "bonne_valeur": "25 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Fiche « faîtières, arêtiers, tuiles de rive » : « ml × pièces au ml du modèle, arrondi à la pièce supérieure ; casse 1 % » : 8,00 × 3/ml (demi-ronde 40-42 cm, donnée du couvreur) = 24 × 1,01 = 24,24 → 25 ; le moteur a oublié la casse de 1 %. Défaut de la fiche à signaler : pour une demi-ronde non référencée elle se contredit (« faîtière 1/2 ronde ou angulaire 40-42 cm : 3/ml » contre « 1/2 rond 717 2,5/ml » sur la ligne HP 10 et « demi-ronde de 50 : 2/ml » chez Monier), sans dire laquelle prendre."
+  }
+]

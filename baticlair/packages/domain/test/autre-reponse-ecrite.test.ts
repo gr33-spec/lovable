@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readQuote } from "./support/read-quote.js";
+import { EGOUT_COMPRIS_OUI, readQuote } from "./support/read-quote.js";
 
 /**
  * Retour du fondateur (2026-10-10, écran des questions) : « Je dois pouvoir choisir autre chose que HP10, il existe énormément
@@ -45,7 +45,8 @@ describe("« Autre » : un modèle écrit par l'artisan", () => {
  */
 describe("« Autre » : une qualité écrite par l'artisan (ardoise, zinc, teinte)", () => {
   const ARDOISES = [{ ref: "1", designation: "Couverture en ardoises naturelles 32×22 au crochet", quantity: "48", unit: "m²" }];
-  const readSlate = (answers: Record<string, unknown>) => readQuote(ARDOISES, answers as never, [], {}, { acceptDraft: true });
+  // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande ; ici répondu « Oui » (rien n'est ajouté).
+  const readSlate = (answers: Record<string, unknown>) => readQuote(ARDOISES, { ...EGOUT_COMPRIS_OUI, ...answers } as never, [], {}, { acceptDraft: true });
 
   it("la question de la qualité est marquée « nommée » (la case « Autre » s'ouvre en texte)", () => {
     const q = readSlate({}).questions.find((d) => d.question?.key === "param:qualite_ardoise");

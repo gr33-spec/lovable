@@ -1,0 +1,108 @@
+import { NOM_APP, SIGNATURE_APP } from "@baticlair/domain";
+import type { TransactionalEmail } from "./email.port.js";
+
+/**
+ * LES E-MAILS RÉELS (Greg, 24 octobre 2026) : chaque e-mail qui part a le logo, le pied légal (l'éditeur, son adresse,
+ * son SIRET) et un lien pour ne plus en recevoir. Les services écrivent leur texte ; la mise en page est faite ici, une
+ * fois, pour tous (le texte reste la référence, le HTML en est la mise en forme).
+ */
+
+/** Les lignes de désabonnement écrites par les services : « Se désabonner : https://… », « Stop : … », etc. */
+const LIGNE_STOP = /^(?:Ne plus recevoir ces e-mails|Se désabonner|Stop|Pour ne plus rien recevoir)\s*:\s*(https?:\/\/\S+)\s*$/im;
+
+/**
+ * DISCRÉTION DES INFOS SOCIÉTÉ (Greg, 28 novembre 2026 ; RÈGLE CHANGÉE : avant, le bloc légal complet, adresse du siège,
+ * SIRET, RCS et capital, en pied de chaque e-mail) : seulement « Mobiiz » et le contact, plus le lien des mentions légales
+ * (où se trouvent l'éditeur, son adresse et son immatriculation, comme le demande la loi pour l'identification).
+ */
+export const PIED_LEGAL = `${NOM_APP} · contact@mobiiz.fr`;
+export const lienMentions = (webAppUrl: string) => `${webAppUrl}/mentions-legales`;
+/**
+ * L'INFORMATION SUR LES RÉPONSES (Greg, 26 octobre 2026, point D) : depuis que mobiiz.fr reçoit ses e-mails chez Resend,
+ * une réponse peut passer par Mobiiz avant d'arriver à son destinataire ; chaque e-mail le dit.
+ */
+export const PHRASE_REPONSES = `Une réponse à cet e-mail peut être reçue par ${NOM_APP} pour être transmise à son destinataire, comme le décrit notre politique de confidentialité.`;
+
+const echapper = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const liens = (t: string) => t.replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}" style="color:#0E0E0E">${u}</a>`);
+
+/** Le lien de désabonnement de l'e-mail : celui qu'il écrit, sinon la page de ses réglages. */
+export function lienDesabonnement(email: Pick<TransactionalEmail, "text">, webAppUrl: string): { url: string; propre: boolean } {
+  const m = LIGNE_STOP.exec(email.text);
+  return m ? { url: m[1]!, propre: true } : { url: `${webAppUrl}/compte`, propre: false };
+}
+
+/** L'e-mail tel qu'il part : HTML avec logo et pied, texte avec le pied légal, en-tête List-Unsubscribe. */
+export function miseEnPage(email: TransactionalEmail, webAppUrl: string): TransactionalEmail & { headers: Record<string, string> } {
+  // Un message externe n'est jamais habillé en Mobiiz : ni logo, ni pied, ni lien cliquable ; le texte tel quel.
+  if (email.externe) return { ...email, html: htmlExterne(email.text), headers: {} };
+  const stop = lienDesabonnement(email, webAppUrl);
+  const texteSansStop = stop.propre ? email.text.replace(LIGNE_STOP, "").trimEnd() : email.text.trimEnd();
+  const corps =
+    email.html ??
+    texteSansStop
+      .split(/\n{2,}/)
+      .map((p) => `<p style="margin:0 0 14px">${liens(echapper(p)).replace(/\n/g, "<br>")}</p>`)
+      .join("");
+  const motStop = stop.propre ? "Ne plus recevoir ces e-mails" : "Gérer tes e-mails";
+  const html = [
+    `<!doctype html><html lang="fr"><body style="margin:0;background:#F4F4F2;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#0E0E0E">`,
+    `<div style="max-width:560px;margin:0 auto;padding:24px 16px">`,
+    `<div style="padding:0 0 16px"><img src="${webAppUrl}/marque/logo-clair.png" alt="${NOM_APP}" height="32" style="height:32px;width:auto;display:block"></div>`,
+    `<div style="background:#FFFFFF;border-radius:16px;padding:24px;font-size:15px;line-height:1.5">${corps}</div>`,
+    `<div style="padding:16px 4px 0;font-size:12px;line-height:1.5;color:#555555">`,
+    `<p style="margin:0 0 8px;font-weight:700;color:#0E0E0E">${echapper(SIGNATURE_APP)}</p>`,
+    `<p style="margin:0 0 8px">${echapper(PIED_LEGAL)} · <a href="${lienMentions(webAppUrl)}" style="color:#555555">Mentions légales</a></p>`,
+    `<p style="margin:0 0 8px">${echapper(PHRASE_REPONSES)}</p>`,
+    `<p style="margin:0"><a href="${stop.url}" style="color:#555555">${motStop}</a></p>`,
+    `</div></div></body></html>`,
+  ].join("");
+  const text = `${texteSansStop}\n\n--\n${SIGNATURE_APP}\n${PIED_LEGAL} · Mentions légales : ${lienMentions(webAppUrl)}\n${PHRASE_REPONSES}\n${motStop} : ${stop.url}`;
+  return { ...email, text, html, headers: { "List-Unsubscribe": `<${stop.url}>` } };
+}
+
+/**
+ * LA LISTE BLANCHE DE LA PRÉVISUALISATION : seules les adresses (ou les domaines « @exemple.fr ») de `EMAILS_AUTORISES`
+ * reçoivent leurs e-mails ; les autres vont à l'adresse de test, objet « [TEST → destinataire réel] … ». Sans adresse de
+ * test, l'e-mail ne part pas. En production, la garde est éteinte (null).
+ */
+export interface GardeEnvoi {
+  autorises: readonly string[];
+  redirigerVers: string | null;
+}
+
+export function autorise(garde: GardeEnvoi, to: string): boolean {
+  const a = to.trim().toLowerCase();
+  return garde.autorises.some((x) => (x.startsWith("@") ? a.endsWith(x) : a === x));
+}
+
+/** Les domaines réservés aux exemples et aux tests (RFC 2606, et leurs équivalents français) : jamais un vrai envoi. */
+const DOMAINE_DE_TEST = /@([a-z0-9-]+\.)*(example\.(com|org|net|fr)|exemple\.(com|org|net|fr)|test|invalid|localhost)$/i;
+export const adresseDeTest = (to: string): boolean => DOMAINE_DE_TEST.test(to.trim());
+
+/**
+ * L'e-mail après la garde : tel quel, redirigé vers l'adresse de test, ou null (il ne part pas). RÈGLE CHANGÉE (Greg,
+ * 23 novembre 2026) : un e-mail de compte (`compte`) part à son vrai destinataire, sauf vers une adresse réservée aux
+ * tests ; avant, il était détourné comme les autres et l'ami qui s'inscrivait ne pouvait jamais valider son adresse.
+ */
+export function garder(garde: GardeEnvoi | null, email: TransactionalEmail): TransactionalEmail | null {
+  if (!garde || autorise(garde, email.to)) return email;
+  if (email.compte && !adresseDeTest(email.to)) return email;
+  if (!garde.redirigerVers) return null;
+  return { ...email, to: garde.redirigerVers, subject: `[TEST → ${email.to}] ${email.subject}` };
+}
+
+/**
+ * Le HTML d'un message externe : le texte échappé, sans aucun lien (un texte « https://… » reste du texte), dans une
+ * page neutre, sans logo ni couleur de la marque ; la première ligne (le bandeau) sur fond gris.
+ */
+export function htmlExterne(texte: string): string {
+  const [bandeau, ...reste] = texte.split("\n");
+  return [
+    `<!doctype html><html lang="fr"><body style="margin:0;background:#FFFFFF;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#222222">`,
+    `<div style="max-width:640px;margin:0 auto;padding:16px">`,
+    `<div style="background:#EDEDED;border:1px solid #CCCCCC;border-radius:6px;padding:10px 12px;font-size:14px;font-weight:700;color:#333333">${echapper(bandeau ?? "")}</div>`,
+    `<div style="white-space:pre-wrap;font-size:14px;line-height:1.5;padding:12px 2px">${echapper(reste.join("\n"))}</div>`,
+    `</div></body></html>`,
+  ].join("");
+}

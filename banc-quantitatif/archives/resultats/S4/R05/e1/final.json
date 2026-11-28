@@ -1,0 +1,290 @@
+{
+ "posees": [
+  {
+   "key": "param:developpe",
+   "text": "Développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "17",
+    "unite": "ml",
+    "affiche": "17 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Ardoises pour jouées de lucarnes",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Entourage de cheminée zinc et solin",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chatières de ventilation",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Liteaux (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Contre-liteaux (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": [
+   "param:developpe",
+   "param:faconnage@pieces-pliees"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "pour 17 ml de faîtage, développé 33 cm",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises pour jouées de lucarnes",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Entourage de cheminée zinc et solin",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chatières de ventilation",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Liteaux (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Contre-liteaux (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Pas encore calculé : le fournisseur proposera pour la mesure du devis.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": []
+ }
+}

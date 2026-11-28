@@ -1,0 +1,121 @@
+{
+ "posees": [],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Les rives 2 x 6ml soit 12ml",
+    "quantite": "12",
+    "unite": "ml",
+    "affiche": "12 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Fourniturre de tuilles canal terre cuite, courants et couverts, sur 85m2",
+    "raison": "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Liteaux neufs sur toute la toiture 85m2",
+    "raison": "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "Divers et imprevus",
+   "Devis valable 2 mois.",
+   "Travaux prévus au printemps selon le temps.",
+   "Assurance décennale MAAF n° 185 204 667."
+  ],
+  "questions": []
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Les rives 2 x 6ml soit 12ml",
+    "quantite": "12",
+    "unite": "ml",
+    "affiche": "12 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtières",
+    "quantite": "27",
+    "unite": "pièces",
+    "affiche": "27 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Fourniturre de tuilles canal terre cuite, courants et couverts, sur 85m2",
+    "raison": "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Liteaux neufs sur toute la toiture 85m2",
+    "raison": "Une surface en m² ne se charge pas dans un camion : il faut des pièces aux dimensions. Le fournisseur proposera pour cette mesure.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [],
+  "sansFourniture": [
+   "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "Divers et imprevus",
+   "Devis valable 2 mois.",
+   "Travaux prévus au printemps selon le temps.",
+   "Assurance décennale MAAF n° 185 204 667."
+  ],
+  "questions": []
+ }
+}

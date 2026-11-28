@@ -120,7 +120,7 @@ export function FileViewer() {
           type="button"
           onClick={close}
           aria-label="Fermer le document"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-[15px] font-bold active:bg-white/25"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-[15px] font-bold text-white active:bg-white/25"
         >
           <X size={20} aria-hidden="true" />
           Fermer
@@ -139,8 +139,12 @@ export function FileViewer() {
           <img src={loaded.objectUrl} alt={loaded.title} className="max-h-full max-w-full self-center rounded-xl object-contain" />
         ) : !native ? (
           <PdfPages file={loaded.file} title={loaded.title} onError={toNative} />
-        ) : (
+        ) : loaded.file.type === "application/pdf" ? (
           <iframe title={loaded.title} src={loaded.objectUrl} className="h-full w-full max-w-3xl rounded-xl bg-white" />
+        ) : (
+          // Saboteur, 22 novembre 2026 : seul un PDF s'affiche dans un cadre ; tout autre fichier ne s'ouvre jamais comme une
+          // page de Mobiiz (il se télécharge ou se partage).
+          <p className="self-center px-6 text-center text-white">Ce fichier ne s&apos;affiche pas dans Mobiiz : télécharge-le pour l&apos;ouvrir.</p>
         )}
       </div>
       <div className="flex gap-2 px-3 pt-2 pb-[max(12px,env(safe-area-inset-bottom))]">
@@ -151,7 +155,7 @@ export function FileViewer() {
           </button>
         ) : null}
         {loaded ? (
-          <a href={loaded.objectUrl} download={loaded.fileName} className={`${bar} bg-cta text-white`}>
+          <a href={loaded.objectUrl} download={loaded.fileName} className={`${bar} bg-cta text-on-accent`}>
             <Download size={18} aria-hidden="true" />
             Télécharger
           </a>

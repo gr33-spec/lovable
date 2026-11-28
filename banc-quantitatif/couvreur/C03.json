@@ -1,0 +1,18 @@
+{
+ "param:hauteur_descente ¦ Hauteur d'une descente ?": {
+  "question": {
+   "id": "param:hauteur_descente ¦ Hauteur d'une descente ?",
+   "question": "Hauteur d'une descente ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "6",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "6 m par descente."
+  }
+ }
+}

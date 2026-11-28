@@ -1,0 +1,36 @@
+{
+ "m": "M0",
+ "c": "C05",
+ "e": 2,
+ "nRef": 9,
+ "justes": 7,
+ "quantite": 2,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 6,
+ "questionsRef": 4,
+ "questionsHorsRef": 2,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 164 pièces lu",
+   "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 164 pièces lu"
+  ],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:developpe_noue",
+    "text": "Noue de 50 ou de 66 ?"
+   },
+   {
+    "key": "param:longueur_crochet",
+    "text": "Quelle longueur de crochet ?"
+   }
+  ]
+ }
+}

@@ -89,6 +89,9 @@ describe("lecture longue : elle continue après la réponse", () => {
 
     // Double appui, rechargement : la lecture en cours n'est pas relancée.
     expect((await agent.post(`/v1/documents/${documentId}/takeoff`)).status).toBe(202);
+    // La lecture part en arrière-plan : sur une machine chargée, elle n'a pas toujours atteint le lecteur à cet instant.
+    // On attend qu'elle y soit, puis on vérifie qu'il n'y a eu qu'UN appel (ici et à la fin du test).
+    await vi.waitFor(() => expect(extractor.calls).toBeGreaterThanOrEqual(1), { timeout: 5_000 });
     expect(extractor.calls).toBe(1);
     const during = await agent.get(`/v1/projects/${projectId}/takeoff`);
     expect(during.body).toMatchObject({ takeoff: null, reading: { status: "reading" } });

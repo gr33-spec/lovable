@@ -1,0 +1,283 @@
+{
+ "posees": [
+  {
+   "key": "param:perimetre_cheminee",
+   "text": "Périmètre d'une cheminée (les 4 côtés) ?",
+   "options": [
+    "2 m",
+    "3 m",
+    "4 m",
+    "5 m"
+   ],
+   "reponse": "je ne sais pas"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je commande façonné"
+  },
+  {
+   "key": "param:developpe@bande-porte-solin",
+   "text": "Bande porte-solin zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "100 mm (solin, couvre-joint)"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Bandes de rive zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "250 mm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Bandes de rive zinc",
+    "quantite": "14",
+    "unite": "ml",
+    "affiche": "14 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [
+     "param:developpe@bandes-zinc",
+     "param:faconnage@pieces-pliees"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Bandes porte-solin de 3 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "param:faconnage@pieces-pliees"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttière demi-ronde zinc de 25",
+    "quantite": "4",
+    "unite": "longueurs de 4 m",
+    "affiche": "4 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Descente Ø80",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 5 m",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphin",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "a-preciser:5"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Abergement de cheminée zinc",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [
+     "param:perimetre_cheminee",
+     "param:faconnage@pieces-pliees"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic+bande-porte-solin/mastic",
+    "label": "Cartouches de silicone zinc"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": [
+   "param:perimetre_cheminee",
+   "param:faconnage@pieces-pliees",
+   "param:developpe@bande-porte-solin",
+   "param:developpe@bandes-zinc"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Bandes de rive zinc, zinc naturel 0,65 mm",
+    "quantite": "7",
+    "unite": "longueurs de 2 m",
+    "affiche": "7 longueurs de 2 m",
+    "etat": "ready",
+    "precision": "14 ml à couvrir, développé 25 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Bandes porte-solin de 3 m",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttière demi-ronde zinc de 25",
+    "quantite": "4",
+    "unite": "longueurs de 4 m",
+    "affiche": "4 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Descente Ø80",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": "1 descente × 5 m",
+    "lignes": [
+     "4"
+    ],
+    "attend": [
+     "a-preciser:4"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphin",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "a-preciser:5"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Abergement de cheminée zinc",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic+bande-porte-solin/mastic",
+    "label": "Cartouches de silicone zinc"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": []
+ }
+}

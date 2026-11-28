@@ -1,0 +1,304 @@
+{
+ "posees": [
+  {
+   "key": "param:nb_angles",
+   "text": "Combien d'angles sur cette gouttière ?",
+   "options": [
+    "Aucun",
+    "1",
+    "2",
+    "3"
+   ],
+   "reponse": "4 u"
+  },
+  {
+   "key": "param:developpe_noue",
+   "text": "Noue de 50 ou de 66 ?",
+   "options": [
+    "De 50",
+    "De 66"
+   ],
+   "reponse": "De 50"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:nb_descentes",
+   "text": "Combien de descentes ?",
+   "options": [],
+   "reponse": "4 u"
+  },
+  {
+   "key": "param:developpe@bandes-zinc",
+   "text": "Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m) : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:developpe@faitage-zinc",
+   "text": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:dauphin",
+   "text": "Un dauphin en pied de chaque descente ?",
+   "options": [
+    "Oui",
+    "Non"
+   ],
+   "reponse": "Oui"
+  },
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "5.5 m"
+  },
+  {
+   "key": "param:longueur_crochet",
+   "text": "Quelle longueur de crochet ?",
+   "options": [],
+   "reponse": "11 cm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m)",
+    "quantite": "30",
+    "unite": "ml",
+    "affiche": "30 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "4",
+    "unite": "ml",
+    "affiche": "4 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Noues zinc façonnées",
+    "quantite": "3",
+    "unite": "ml",
+    "affiche": "3 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Angles, dév. 25 cm",
+    "quantite": "44",
+    "unite": "ml",
+    "affiche": "44 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Tubes de descente",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Ardoises)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier : échafaudage de pied sur le pourtour de la maison, filets et protections",
+   "Dépose de la couverture ardoise existante, tri et évacuation en déchetterie",
+   "Nettoyage du chantier, repli de l'échafaudage"
+  ],
+  "questions": [
+   "param:nb_angles",
+   "param:developpe_noue",
+   "param:faconnage@pieces-pliees",
+   "param:nb_descentes",
+   "param:developpe@bandes-zinc",
+   "param:developpe@faitage-zinc",
+   "param:dauphin",
+   "param:hauteur_descente",
+   "param:longueur_crochet"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "8",
+    "unite": "pièces",
+    "affiche": "8 pièces",
+    "etat": "ready",
+    "precision": "pour 30 ml de bande, développé 33 cm ; pour 4 ml de faîtage, développé 33 cm ; pour 1,5 ml de noue, développé 50 cm",
+    "lignes": [
+     "4",
+     "5",
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Angles de gouttière dév. 25",
+    "quantite": "4",
+    "unite": "pièces",
+    "affiche": "4 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": "4 descentes × 5,5 m ; Hauteur d'une descente : 5.5 m ; Dauphin : Oui",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Ardoises)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier : échafaudage de pied sur le pourtour de la maison, filets et protections",
+   "Dépose de la couverture ardoise existante, tri et évacuation en déchetterie",
+   "Nettoyage du chantier, repli de l'échafaudage"
+  ],
+  "questions": []
+ }
+}

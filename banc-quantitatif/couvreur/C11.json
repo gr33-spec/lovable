@@ -1,0 +1,172 @@
+{
+ "param:nb_angles ¦ Combien d'angles sur cette gouttière ?": {
+  "question": {
+   "id": "param:nb_angles ¦ Combien d'angles sur cette gouttière ?",
+   "question": "Combien d'angles sur cette gouttière ?",
+   "boutons": [
+    "Aucun",
+    "1",
+    "2",
+    "3"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "4",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "4 angles extérieurs à 90°."
+  }
+ },
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "unite": "u",
+   "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je plie moi-même."
+  }
+ },
+ "param:nb_descentes ¦ Combien de descentes ?": {
+  "question": {
+   "id": "param:nb_descentes ¦ Combien de descentes ?",
+   "question": "Combien de descentes ?",
+   "boutons": [],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "4",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "4 descentes."
+  }
+ },
+ "param:developpe@bandes-zinc ¦ Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m) : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@bandes-zinc ¦ Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m) : développé de la bande zinc ?",
+   "question": "Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m) : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "330 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "330 mm."
+  }
+ },
+ "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?": {
+  "question": {
+   "id": "param:developpe@faitage-zinc ¦ Faîtage en bande zinc : développé de la bande zinc ?",
+   "question": "Faîtage en bande zinc : développé de la bande zinc ?",
+   "boutons": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "330 mm",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "330 mm."
+  }
+ },
+ "param:hauteur_descente ¦ Hauteur d'une descente ?": {
+  "question": {
+   "id": "param:hauteur_descente ¦ Hauteur d'une descente ?",
+   "question": "Hauteur d'une descente ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "5.5",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "5,50 m"
+  }
+ },
+ "param:developpe_noue ¦ Noue de 50 ou de 66 ?": {
+  "question": {
+   "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
+   "question": "Noue de 50 ou de 66 ?",
+   "boutons": [
+    "De 50",
+    "De 66"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "De 50",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "De 50."
+  }
+ },
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": {
+  "question": {
+   "id": "param:dauphin ¦ Un dauphin en pied de chaque descente ?",
+   "question": "Un dauphin en pied de chaque descente ?",
+   "boutons": [
+    "Oui",
+    "Non"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Oui",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Oui, dauphin fonte."
+  }
+ },
+ "param:longueur_crochet ¦ Quelle longueur de crochet ?": {
+  "question": {
+   "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
+   "question": "Quelle longueur de crochet ?",
+   "boutons": [],
+   "unite": "cm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "11",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "11 cm."
+  }
+ }
+}

@@ -1,0 +1,187 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier : échafaudage de pied, montage, location et démontage",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Voligeage jointif en voliges sapin, fourniture et pose",
+   "quantite": "60,00",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Voligeage jointif en voliges sapin, fourniture et pose",
+     "quantite": "60,00",
+     "unite": "m²",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m, fourniture et pose",
+   "quantite": "60,00",
+   "unite": "m²",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Couverture zinc à joint debout, zinc naturel, épaisseur 0,70 mm, 2 pans, rampant 5,00 m, fourniture et pose",
+     "quantite": "60,00",
+     "unite": "m²",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Bande d'égout en zinc naturel, fourniture et pose",
+   "quantite": "12,00",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bande d'égout en zinc naturel, fourniture et pose",
+     "quantite": "12,00",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faîtage en zinc naturel (bande de faîtage), fourniture et pose",
+   "quantite": "6,00",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtage en zinc naturel (bande de faîtage), fourniture et pose",
+     "quantite": "6,00",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, fourniture et pose",
+   "quantite": "12,00",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttière zinc demi-ronde de 33, 2 longueurs de 6,00 m, fourniture et pose",
+     "quantite": "12,00",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, fourniture et pose",
+   "quantite": "2",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Descente d'eaux pluviales zinc Ø 100, hauteur 5,00 m, fourniture et pose",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "note1",
+   "designation": "Objet : Couverture zinc à joint debout d'une maison individuelle neuve",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note2",
+   "designation": "Construction neuve — maison individuelle",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note3",
+   "designation": "Délai d'intervention : 6 semaines après réception du devis signé, hors intempéries.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note4",
+   "designation": "TVA au taux de 20 % (construction neuve).",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note5",
+   "designation": "Tous travaux non décrits au présent devis feront l'objet d'un devis complémentaire.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "note6",
+   "designation": "Assurance décennale et responsabilité civile : Mutuelle Armor Bâtiment, contrat n° 22-448-0917, couverture France métropolitaine.",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

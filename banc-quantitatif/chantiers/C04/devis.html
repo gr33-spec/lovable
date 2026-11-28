@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Devis D-2026-0412 — Kerharo Couverture Zinguerie</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6e6e6; font-family: Verdana, Geneva, sans-serif; font-size: 9.5pt; color: #222; }
+  .page { width: 210mm; min-height: 297mm; margin: 0 auto; background: #fff; padding: 15mm 15mm 12mm; }
+  .entete { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3pt solid #5d6b73; padding-bottom: 5mm; }
+  .entreprise .nom { font-family: Georgia, "Times New Roman", serif; font-size: 20pt; font-weight: bold; color: #37444b; }
+  .entreprise .metier { font-size: 8.5pt; text-transform: uppercase; letter-spacing: 1.4pt; color: #5d6b73; margin: 1mm 0 3mm; }
+  p { margin: 0; line-height: 1.5; }
+  .cartouche { text-align: right; }
+  .cartouche .titre { font-family: Georgia, serif; font-size: 24pt; color: #37444b; letter-spacing: 2pt; }
+  .cartouche p { font-size: 9.5pt; }
+  .blocs { display: flex; justify-content: space-between; margin: 8mm 0 7mm; }
+  .chantier { width: 95mm; }
+  .client { width: 72mm; background: #f2f4f5; border-left: 3pt solid #5d6b73; padding: 4mm 5mm; }
+  .etiquette { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 1pt; color: #6b777d; margin-bottom: 1.5mm; }
+  .objet { font-weight: bold; }
+  table.lignes { width: 100%; border-collapse: collapse; }
+  table.lignes th { background: #5d6b73; color: #fff; font-size: 8.5pt; font-weight: normal; text-transform: uppercase; letter-spacing: .6pt; padding: 2.4mm 2.5mm; text-align: left; }
+  table.lignes td { padding: 3mm 2.5mm; border-bottom: .6pt solid #c9cfd2; vertical-align: top; line-height: 1.45; }
+  table.lignes tr:nth-child(even) td { background: #f7f8f9; }
+  .n { width: 9mm; color: #6b777d; }
+  .q { width: 15mm; text-align: right; white-space: nowrap; }
+  .u { width: 16mm; text-align: center; white-space: nowrap; }
+  .pu, .t { width: 26mm; text-align: right; white-space: nowrap; }
+  table.lignes th.q, table.lignes th.pu, table.lignes th.t { text-align: right; }
+  table.lignes th.u { text-align: center; }
+  .bas { display: flex; justify-content: space-between; margin-top: 7mm; }
+  .conditions { width: 100mm; font-size: 8.5pt; color: #333; }
+  .conditions p { margin-bottom: 1.5mm; }
+  table.totaux { width: 68mm; border-collapse: collapse; align-self: flex-start; }
+  table.totaux td { padding: 2.2mm 2.5mm; border-bottom: .6pt solid #c9cfd2; }
+  table.totaux td:last-child { text-align: right; white-space: nowrap; }
+  table.totaux tr.ttc td { background: #37444b; color: #fff; font-weight: bold; font-size: 11pt; border-bottom: none; }
+  .accord { margin-top: 9mm; display: flex; justify-content: space-between; font-size: 8.5pt; }
+  .accord .case { width: 86mm; height: 30mm; border: .8pt solid #9aa4a9; padding: 3mm 4mm; }
+  .pied { margin-top: 9mm; border-top: .6pt solid #9aa4a9; padding-top: 3mm; font-size: 7.5pt; color: #6b777d; text-align: center; line-height: 1.5; }
+  @media print { body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="entete">
+    <div class="entreprise">
+      <div class="nom">Kerharo Couverture Zinguerie</div>
+      <div class="metier">Couverture zinc · Ardoise · Zinguerie</div>
+      <p>Erwan Kerharo, artisan couvreur-zingueur</p>
+      <p>12 rue des Ajoncs — 22950 Trégueux</p>
+      <p>Tél. 02 96 00 00 58 — contact@kerharo-couverture.example</p>
+    </div>
+    <div class="cartouche">
+      <div class="titre">DEVIS</div>
+      <p>N° <strong>D-2026-0412</strong></p>
+      <p>Date : 9 novembre 2026</p>
+      <p>Valable 2 mois</p>
+    </div>
+  </div>
+
+  <div class="blocs">
+    <div class="chantier">
+      <div class="etiquette">Objet</div>
+      <p class="objet">Couverture zinc de l'extension</p>
+      <p>Extension neuve</p>
+      <div class="etiquette" style="margin-top:4mm">Adresse du chantier</div>
+      <p>14 rue de la Corderie</p>
+      <p>22000 Saint-Brieuc</p>
+    </div>
+    <div class="client">
+      <div class="etiquette">Client</div>
+      <p><strong>M. et Mme Le Goff</strong></p>
+      <p>14 rue de la Corderie</p>
+      <p>22000 Saint-Brieuc</p>
+    </div>
+  </div>
+
+  <table class="lignes">
+    <thead>
+      <tr><th class="n">N°</th><th>Désignation</th><th class="q">Qté</th><th class="u">Unité</th><th class="pu">P.U. HT</th><th class="t">Total HT</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="n">1</td><td>Installation de chantier, échafaudage de pied et protections</td><td class="q">1</td><td class="u">forfait</td><td class="pu">650,00 €</td><td class="t">650,00 €</td></tr>
+      <tr><td class="n">2</td><td>Couverture zinc à tasseaux sur voligeage existant, zinc quartz épaisseur 0,70 mm, un pan, bacs de 5 m, rive sur tasseau 1 côté (l'autre côté contre le mur de la maison)</td><td class="q">45</td><td class="u">m2</td><td class="pu">165,00 €</td><td class="t">7 425,00 €</td></tr>
+      <tr><td class="n">3</td><td>Fourniture des tasseaux bois et des couvre-joints zinc quartz (pose comprise au poste 2)</td><td class="q">1</td><td class="u">ens</td><td class="pu">980,00 €</td><td class="t">980,00 €</td></tr>
+      <tr><td class="n">4</td><td>Bande de solin zinc quartz contre le mur de la maison, développé 200 mm</td><td class="q">5</td><td class="u">ml</td><td class="pu">48,00 €</td><td class="t">240,00 €</td></tr>
+      <tr><td class="n">5</td><td>Chéneau encaissé zinc quartz épaisseur 0,70 mm</td><td class="q">9</td><td class="u">ml</td><td class="pu">145,00 €</td><td class="t">1 305,00 €</td></tr>
+      <tr><td class="n">6</td><td>Descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m</td><td class="q">1</td><td class="u">u</td><td class="pu">210,00 €</td><td class="t">210,00 €</td></tr>
+      <tr><td class="n">7</td><td>Nettoyage du chantier et évacuation des déchets</td><td class="q">1</td><td class="u">forfait</td><td class="pu">180,00 €</td><td class="t">180,00 €</td></tr>
+    </tbody>
+  </table>
+
+  <div class="bas">
+    <div class="conditions">
+      <p><strong>Conditions de règlement :</strong> acompte de 30 % à la commande, 40 % à la livraison des matériaux, solde à la réception des travaux.</p>
+      <p><strong>Délai :</strong> démarrage sous 6 semaines après accord, durée prévue 2 semaines, hors intempéries.</p>
+      <p>Prix fermes pendant la durée de validité du devis. Travaux non décrits ci-dessus non compris.</p>
+      <p>Assurance décennale et responsabilité civile : Mutuelle Armor Bâtiment, contrat n° 22-0458-C.</p>
+    </div>
+    <table class="totaux">
+      <tr><td>Total HT</td><td>10 990,00 €</td></tr>
+      <tr><td>TVA 20 %</td><td>2 198,00 €</td></tr>
+      <tr class="ttc"><td>Total TTC</td><td>13 188,00 €</td></tr>
+    </table>
+  </div>
+
+  <div class="accord">
+    <div class="case">L'entreprise<br>Erwan Kerharo</div>
+    <div class="case">Bon pour accord, le client<br>(date, signature précédée de « lu et approuvé »)</div>
+  </div>
+
+  <div class="pied">
+    Kerharo Couverture Zinguerie — EI Erwan Kerharo — 12 rue des Ajoncs, 22950 Trégueux<br>
+    SIRET 000 000 000 00058 — APE 4391B — TVA intracommunautaire FR00 000000000
+  </div>
+
+</div>
+</body>
+</html>

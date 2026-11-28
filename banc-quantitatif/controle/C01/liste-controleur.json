@@ -1,0 +1,66 @@
+[
+  {
+    "article": "Écran sous-toiture HPV, rouleau 1,50 × 50 m (75 m²)",
+    "quantite": 2,
+    "unite": "rouleaux",
+    "a_chiffrer": false,
+    "calcul": "Écrans sous toiture › écran souple : consommation 1,15 m²/m² (recouvrements compris) ; écran HPV : rouleau 75 m². 96 × 1,15 = 110,4 m² ; 110,4 / 75 = 1,47 → 2 rouleaux. (La fiche dit aussi « pose tendue avec contre-lattage obligatoire » : aucun contre-liteau au devis, rien n'est ajouté.)",
+    "ligne_devis": 3
+  },
+  {
+    "article": "Liteaux sapin traité classe 2, 18×40, longueurs de 4 m",
+    "quantite": 988,
+    "unite": "ml",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Ardoise naturelle : liteaux 1/pureau ml/m² ; pureau = (320 − 95)/2 = 112,5 mm (R = crochet 100 − 5 mm, valeur pratique) → 8,889 ml/m² × 96 = 853,3 ml ; + 5 % casse/coupes (liteau « tous ») = 896,0 ; + 10 % chute d'aboutage (4,00 m sur chevrons à 60 cm, Pertes › liteaux) = 985,6 ml → 247 liteaux de 4 m = 988 ml. La fiche ne dit pas si les 5 % et les 10 % se cumulent (cumulés ici) ; elle donne aussi pour le 18×40 un écartement maximal entre appuis de 53 cm, inférieur à l'entraxe de 60 cm du chantier.",
+    "ligne_devis": 4
+  },
+  {
+    "article": "Ardoise naturelle d'Espagne 1er choix 32×22",
+    "quantite": 4330,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Ardoise naturelle : u/m² = 1/[pureau × (largeur + 3 mm)] = 1/(0,1125 × 0,223) = 39,86 u/m² (pureau 112,5 mm, R = C − 5 = 95 mm avec crochet de 10 cm). Pertes › méthode : surface + plus-values = 96 + égout droit 2 × (0,1125 × 8) = 1,8 + rang de doublage au faîtage 2 × 0,9 = 1,8 + rives tranchis droit 4 × 6 ml × 0,16 = 3,84 → 103,44 m² × 39,86 = 4 123 ; + 5 % casse (toit simple deux pans) = 4 329,3 → 4 330 ardoises. Le tableau des plus-values ne cite pas le rang de doublage du faîtage (compté ici comme l'égout, pureau × longueur), et la fiche ne dit pas si une rive « ardoise en débord » est un tranchis droit (pris comme tel).",
+    "ligne_devis": 5
+  },
+  {
+    "article": "Crochets d'ardoise inox Ø 2,7 mm, longueur 10 cm, tige droite, à agrafe pour liteau de 18",
+    "quantite": 9,
+    "unite": "boîtes de 500",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Ardoise naturelle : 1 crochet par ardoise (pureau entier) → 4 330 crochets (les 5 % de casse servent de surplus, fourchette 0 à 10 % « à confirmer ») ; Ø minimal 2,7 mm (zone de vent 3, Côtes-d'Armor) ; conditionnement 500 u/boîte (agrafe Ø 2,7, 7 à 14 cm) : 4 330 / 500 = 8,66 → 9 boîtes. La fiche donne aussi 20 % de crochets à pointe pour une pose à l'agrafe sur liteaux (une source) et la nuance d'inox selon la distance à la mer, que ni le devis ni la fiche vérité ne tranchent : non appliqués ici.",
+    "ligne_devis": 5
+  },
+  {
+    "article": "Feuille de zinc naturel 2 × 1 m, épaisseur 0,65 mm (faîtage plié par le couvreur, dév. 33 cm)",
+    "quantite": 2,
+    "unite": "feuilles",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Il plie lui-même : feuille de zinc 2000 × 1000 mm, dév. 330 → 3 bandes de 2 m par feuille. Pertes › zinc en bandes : ml + recouvrement aux jonctions, arrondi à la longueur de 2 m (+2,5 % avec 5 cm) : 8 × 1,025 = 8,2 ml → 5 bandes de 2 m → 5/3 = 1,67 → 2 feuilles. La fiche ne donne pas la valeur du recouvrement à prendre (5 ou 10 cm, « à confirmer »). Pattes du faîtage (3/ml) non sorties : non écrites au devis.",
+    "ligne_devis": 6
+  },
+  {
+    "article": "Gouttière demi-ronde zinc de 25, 0,65 mm, longueur 4 m",
+    "quantite": 5,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? Pertes › gouttières zinc : ml + 30 mm par jonction soudée, arrondi aux longueurs de 4 m, pas de % : 2 lignes de 8 m, 2 jonctions par ligne → 16 + 4 × 0,03 = 16,12 ml / 4 = 4,03 → 5 longueurs (la chute de la 5e couvre les deux raccords). La fiche ne dit pas si l'arrondi se fait ligne par ligne (6 longueurs) ou sur le total. Crochets, naissances et talons : non écrits au devis, et la fiche ne dit aucun d'eux indissociable de la gouttière, donc non sortis.",
+    "ligne_devis": 7
+  },
+  {
+    "article": "Tuyau de descente zinc Ø 80, longueur 2 m",
+    "quantite": 6,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "Descente EP zinc : longueurs vendues 2 / 3 m en Ø 80, ici tubes de 2 m (fiche vérité). Hauteur 5,50 m moins le dauphin de 1 m en pied = 4,5 m (5,5 m sans le retrancher donne le même compte) → 3 tubes par descente × 2 descentes = 6 tubes. Coudes et colliers : non écrits au devis, non sortis.",
+    "ligne_devis": 8
+  },
+  {
+    "article": "Dauphin fonte Ø 80, longueur 1 m",
+    "quantite": 2,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "Dauphin : longueur standard 1 m, fonte, Ø 80 ; un par descente, écrit au devis : 2 pièces.",
+    "ligne_devis": 9
+  }
+]

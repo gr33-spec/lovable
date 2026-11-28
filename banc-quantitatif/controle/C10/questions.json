@@ -1,0 +1,7 @@
+{
+ "param:dauphin ¦ Un dauphin en pied de chaque descente ?": false,
+ "param:developpe_gouttiere ¦ Gouttière de 25, de 28, de 33 ou de 40 ?": false,
+ "param:surface ¦ Surface du toit ?": true,
+ "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?": true,
+ "param:fixation_crochet ¦ Crochets de gouttière : sur les chevrons ou en façade (bandeau) ?": false
+}

@@ -38,3 +38,4 @@ export { climateZone, departmentOf, isCoastal, postalCodeIn } from "./zone.js";
 export * from "./fiche.js";
 export * from "./fiches/index.js";
 export { metiersCouverts, type MetierCouvert } from "./metiers-couverts.js";
+export * from "./base/index.js";

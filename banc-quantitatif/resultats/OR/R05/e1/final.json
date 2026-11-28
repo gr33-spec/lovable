@@ -1,0 +1,305 @@
+{
+ "posees": [
+  {
+   "key": "param:perimetre_cheminee",
+   "text": "Périmètre d'une cheminée (les 4 côtés) ?",
+   "options": [
+    "2 m",
+    "3 m",
+    "4 m",
+    "5 m"
+   ],
+   "reponse": "3 m"
+  },
+  {
+   "key": "param:developpe",
+   "text": "Développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:qualite_ardoise",
+   "text": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "options": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "reponse": "Espagne 1er choix"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Liteaux 18×40",
+    "quantite": "1991",
+    "unite": "ml",
+    "affiche": "1 991 ml",
+    "etat": "ready",
+    "precision": "lattage 200 m², une file tous les 10,55 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises naturelles 30x22 30×22",
+    "quantite": "8925",
+    "unite": "pièces",
+    "affiche": "8 925 pièces",
+    "etat": "ready",
+    "precision": "200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "2"
+    ],
+    "attend": [
+     "param:qualite_ardoise"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière zinc de 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": "sur bandeau",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtage zinc en bande",
+    "quantite": "17",
+    "unite": "ml",
+    "affiche": "17 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Ardoises pour jouées de lucarnes",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "6 jouées de lucarnes à habiller, pas 6 ardoises",
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "a-preciser:5"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Entourage de cheminée zinc et solin",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Chatières de ventilation",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [
+     "a-preciser:7"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": [
+   "param:perimetre_cheminee",
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:qualite_ardoise"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Liteaux 18×40",
+    "quantite": "1991",
+    "unite": "ml",
+    "affiche": "1 991 ml",
+    "etat": "ready",
+    "precision": "lattage 200 m², une file tous les 10,55 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises naturelles Espagne 1er choix 30×22",
+    "quantite": "8925",
+    "unite": "pièces",
+    "affiche": "8 925 pièces",
+    "etat": "ready",
+    "precision": "200 m² × 42,5 ardoises/m² (crochet 10 cm, pente 45°) + 5 % de marge",
+    "lignes": [
+     "2"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière zinc de 25",
+    "quantite": "5",
+    "unite": "longueurs de 4 m",
+    "affiche": "5 longueurs de 4 m",
+    "etat": "ready",
+    "precision": "sur bandeau",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "a-preciser:3"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "5",
+    "unite": "pièces",
+    "affiche": "5 pièces",
+    "etat": "ready",
+    "precision": "pour 17 ml de faîtage, développé 33 cm ; pour façonner l'abergement de cheminée, développé 33 cm",
+    "lignes": [
+     "4",
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Ardoises pour jouées de lucarnes",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "6 jouées de lucarnes à habiller, pas 6 ardoises",
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "a-preciser:5"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Bandes porte-solin 2 m",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Chatières de ventilation",
+    "quantite": "12",
+    "unite": "pièces",
+    "affiche": "12 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [
+     "a-preciser:7"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [],
+  "questions": []
+ }
+}

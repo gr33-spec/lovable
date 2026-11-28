@@ -1,0 +1,33 @@
+{
+ "m": "M0",
+ "c": "C08",
+ "e": 3,
+ "nRef": 4,
+ "justes": 4,
+ "quantite": 0,
+ "manquantes": 0,
+ "inventees": 0,
+ "doutes": 0,
+ "questions": 4,
+ "questionsRef": 2,
+ "questionsHorsRef": 2,
+ "questionsInutiles": 1,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [],
+  "inventees": [],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:developpe_noue",
+    "text": "Noue de 50 ou de 66 ?"
+   },
+   {
+    "key": "fiche:modele_ardoise",
+    "text": "Quelle ardoise ?"
+   }
+  ]
+ }
+}

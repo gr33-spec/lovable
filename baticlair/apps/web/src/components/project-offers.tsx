@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Sparkles } from "lucide-react";
+import { ConflitGroupe, conflitGroupe } from "@/components/conflit-groupe";
+import { Check } from "lucide-react";
 import { useCallback, useState } from "react";
 import { OrderFeedbackBox } from "@/components/order-feedback";
 import { Button, Card, ErrorNotice, Spinner } from "@/components/ui";
@@ -11,73 +12,6 @@ import { shortName } from "@/lib/labels";
 
 function toError(e: unknown): ApiError {
   return e instanceof ApiError ? e : new ApiError("internal_error", 500);
-}
-
-/**
- * L'action de l'étape « Réponses » : comparer les offres reçues. Derrière ce
- * seul bouton, BatiClair lit les devis pas encore lus (les autres sont
- * réutilisés), les rapproche de la liste et calcule les écarts.
- */
-export function CompareQuotes({
-  requestId,
-  received,
-  waiting,
-  aiAvailable,
-  onDone,
-}: {
-  requestId: string;
-  /** Devis reçus (lus ou non). */
-  received: number;
-  /** Fournisseurs qui n'ont pas encore répondu. */
-  waiting: number;
-  aiAvailable: boolean;
-  onDone: (result: { aiAvailable: boolean; items: Offer[] }) => void;
-}) {
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [failed, setFailed] = useState<string[]>([]);
-
-  if (!aiAvailable) return <p className="text-sm text-muted">La comparaison automatique n&apos;est pas encore activée sur ce compte.</p>;
-
-  async function compare() {
-    setPending(true);
-    setError(null);
-    setFailed([]);
-    try {
-      const result = await api<{ aiAvailable: boolean; items: Offer[]; failed: { supplier: string }[] }>(`/v1/price-requests/${requestId}/analysis`, {
-        method: "POST",
-      });
-      setFailed(result.failed.map((f) => f.supplier));
-      onDone(result);
-      setTimeout(() => document.getElementById("comparer")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
-    } catch (e) {
-      setError(toError(e));
-    } finally {
-      setPending(false);
-    }
-  }
-
-  const label = received > 1 ? "Comparer les offres" : "Voir l'offre reçue";
-  return (
-    <div className="flex flex-col gap-2">
-      {error ? <ErrorNotice error={error} /> : null}
-      {failed.length > 0 ? (
-        <p role="alert" className="text-sm font-semibold text-warn">
-          {failed.length > 1 ? `Les devis de ${failed.join(", ")} n'ont pas pu être lus.` : `Le devis de ${failed[0]} n'a pas pu être lu.`} Réessaie dans un
-          instant.
-        </p>
-      ) : null}
-      <Button variant="accent" pending={pending} onClick={() => void compare()}>
-        <Sparkles size={18} aria-hidden="true" />
-        {pending ? "Comparaison en cours… (jusqu'à une minute)" : label}
-      </Button>
-      {!pending ? (
-        <p className="text-center text-[13px] text-muted">
-          {waiting > 0 ? `${received} offre${received > 1 ? "s" : ""} reçue${received > 1 ? "s" : ""} sur ${received + waiting} · tu peux aussi attendre` : received > 1 ? `${received} offres reçues` : "1 offre reçue"}
-        </p>
-      ) : null}
-    </div>
-  );
 }
 
 /** Ce qu'on retient d'un devis lu, en une ligne : articles chiffrés, manques, points à vérifier. */
@@ -233,6 +167,7 @@ export function ProjectComparison({
   const { data, error, reload } = useResource(fetchComparison);
   const [pending, setPending] = useState<string | null>(null);
   const [actionError, setActionError] = useState<ApiError | null>(null);
+  const [conflit, setConflit] = useState<{ phrase: string; supplierId: string } | null>(null);
 
   if (error && !data) return <ErrorNotice error={error} onRetry={reload} />;
   if (!data) return <Spinner />;
@@ -250,18 +185,22 @@ export function ProjectComparison({
   const names = new Map(data.suppliers.map((s) => [s.supplierId, s.name]));
   const chosen = request.classifiedAt ? new Set(request.retainedSupplierIds) : null;
 
-  async function choose(supplierId: string | null) {
+  async function choose(supplierId: string | null, retirerDesGroupes = false) {
     setPending(supplierId ?? "reset");
     setActionError(null);
+    setConflit(null);
     try {
       onRequestChange(
         await api<PriceRequest>(`/v1/price-requests/${request.id}/classification`, {
           method: "PATCH",
-          body: supplierId ? { classified: true, retainedSupplierIds: [supplierId] } : { classified: false, retainedSupplierIds: [] },
+          body: supplierId ? { classified: true, retainedSupplierIds: [supplierId], ...(retirerDesGroupes ? { retirerDesGroupes: true } : {}) } : { classified: false, retainedSupplierIds: [] },
         }),
       );
     } catch (e) {
-      setActionError(toError(e));
+      // §19 : une ligne tenue par un achat groupé ouvert attend le geste explicite de l'artisan.
+      const phrase = conflitGroupe(e);
+      if (phrase && supplierId) setConflit({ phrase, supplierId });
+      else setActionError(toError(e));
     } finally {
       setPending(null);
     }
@@ -276,6 +215,7 @@ export function ProjectComparison({
         <span className="text-xs font-bold text-muted">Prix HT</span>
       </div>
       {actionError ? <ErrorNotice error={actionError} /> : null}
+      {conflit ? <ConflitGroupe phrase={conflit.phrase} pending={pending === conflit.supplierId} onAnnuler={() => setConflit(null)} onRetirer={() => void choose(conflit.supplierId, true)} /> : null}
       <ol className="flex flex-col gap-2" aria-label="Offres">
         {ranked.map((s) => {
           const isRef = reference?.supplierId === s.supplierId && complete.length > 0 && ranked.length > 1;

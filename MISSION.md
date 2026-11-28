@@ -1,7 +1,7 @@
 # MISSION.md — journal de mission BatiClair
 
 Ce fichier est la mémoire de la mission. Une nouvelle session reprend avec : **« reprends MISSION.md »**.
-Il est tenu à jour après chaque PR fusionnée, quoi qu'il arrive. Dernière mise à jour : 2026-10-19 13 h (UTC).
+Il est tenu à jour après chaque PR fusionnée, quoi qu'il arrive. Dernière mise à jour : 2026-10-22 16 h (UTC).
 
 ## 0. Pour reprendre (nouvelle session)
 
@@ -69,7 +69,19 @@ l'état complet ici et dire à Greg « contexte plein, relance une session avec 
   permanent avant/après ; ni paiement, ni CGU, ni mentions légales. **Chaque jour à 18 h (Paris)** : un seul message à Greg (ce qui
   est en prod, chiffres : métiers, ratios, tests, coût par devis ; au plus 3 décisions, avec recommandation).
 
-## 2. État au 2026-10-19
+## 2. État au 2026-10-20 (point de 18 h)
+
+En production (main) : inchangé depuis le 19 (jusqu'à #283, tableau de bord des métiers). Zéro appel API aujourd'hui.
+Branche `claude/saas-achat-artisans-prompt-1lyihx` = PR #284 (non fusionnée, décision de Greg) : groupé étapes 1 à 7
+faites (+ onglet « Groupé », accroche par métier, bloc grisé SIRET, page de réponse négoce, SIRET_VERIFICATION=forme en
+prévisualisation seulement, WEB_APP_URL multiple + origines `*-gr33-spec.vercel.app` acceptées en preview, santé `db` /
+`origine`). Prévisualisation Vercel ouverte pour cette seule branche : web
+`https://baticlair-git-claude-saas-achat-artisans-promp-67e67a-gr33-spec.vercel.app`, API
+`https://baticlair-api-git-claude-saas-achat-artisans-p-1271cd-gr33-spec.vercel.app` (Resend pas posé en Preview :
+`email:false`). Suites : domaine 658, API 373 + étape 7, e2e groupé verts. Reste : étapes 8 (notifications, webhook
+e-mail entrant) et 9 (admin Greg).
+
+## 2 ter. État au 2026-10-19 (archive)
 
 En production (main) : tout jusqu'à la PR #276 (fiche chauffage), plus #262 (autre chantier, `patrimoine/`, pas le nôtre).
 - #257 carte « Lots repérés » ; #258 chaque bouton du modèle passe (22 tiroirs) ; #259 repérage rapide des métiers puis une seule
@@ -133,9 +145,9 @@ activer l'auto-reload. Le forfait Claude (claude.ai) est un autre compteur et ne
 | 3 | Étape 0 : socle `referentiels/metiers/` (format 8 sections, registre par fichier, « Métiers couverts », cache de prompt) | fait (#265, en prod) |
 | 4 | Étape 1-2 : 14 nouveaux référentiels, un par PR, dans l'ordre du §1 | 5/14 faits : terrassement-VRD (#266), maçonnerie (#267), charpente (#268), étanchéité déclarée (#269, tiroir relu gardé), menuiseries extérieures (#270), en prod ; #271 ratios « à vérifier » en orange, #272 consommables des fiches, menuiserie intérieure (#273), plâtrerie-isolation (#274), plomberie-sanitaire (#275), chauffage-PAC-VMC (#276), en prod ; carrelage-faïence (#277) ; sols souples et parquet (#278) ; peinture-finitions (#279) ; serrurerie-métallerie (`metalwork`, #280) ; ravalement-ITE (fiche, PR ouverte) : 16/16 métiers de l'étape 2 faits (couverture et électricité non touchées) |
 | 5 | Étape 3 : devis maison complète 8 lots | fait (#282) : `apps/api/test/maison-entiere-8-lots.test.ts` (maçonnerie, électricité, plomberie, carrelage, sols, peinture, serrurerie, façade ; carte des lots, une section par lot, envoi par lot) |
-| 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | à faire |
+| 6 | Mission B, boucle 1 à 5, jusqu'au vendredi 23 octobre 12 h | fait : 9 cas joués (e2e « Cas limites »), 3 corrigés : session expirée, redépôt négoce, confirmations admin |
 
-Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un test). Prochaine étape : puis boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
+Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un test). Prochaine étape : boucle de la mission B (épreuves, robustesse, écrans iPhone), sans API. Au retour du crédit : file du §2 bis.
 
 ## 5. Mesures (temps et coût par devis)
 
@@ -172,3 +184,90 @@ Tableau de bord : `baticlair/docs/tableau-de-bord-metiers.md` (écrit par un tes
   (fiche « moteur tiroir », comme couverture et électricité) plutôt que de le remplacer par une fiche brouillon. À confirmer.
 - (réglé) Les « docs du 3 octobre » sont dans `baticlair/docs/referentiels/*.md` (un par métier, 20 à 60 Ko), avec la
   recherche du 4 octobre dans `baticlair/referentiels/<métier>/tiroir.json` (valeurs sourcées ou à vérifier). Base de chaque fiche.
+
+## 9. Chantier « BatiClair Groupé » (Greg, 2026-10-19)
+
+Règles : `baticlair/docs/groupe/parcours-complet.md` (sections 1 à 6, prompt section 7). Drapeau `GROUPE` désactivé par
+défaut ; RIEN EN PROD SANS L'ACCORD EXPLICITE DE GREG (décision du 20 octobre : « ne fusionne pas la PR 1 ; enchaîne
+les PR 2 à 9 sur la même branche, sans rien fusionner, jusqu'à mon accord global ») : TOUTES les étapes s'empilent
+sur la PR #284 (une branche = une PR), jamais fusionnée sans son oui. Neuf familles (décision du 20 octobre :
++ « menuiseries et fermetures », « second œuvre », « serrurerie et métallerie », chaque métier rattaché à au moins
+une) ; désistements dans une table à part, étape 7. Décision du 20 octobre (changement de modèle) : GRATUIT pour
+l'artisan (plus aucune condition d'abonnement) ; le négoce accepte AVANT de répondre une commission de 2 % du HT du lot
+s'il est retenu (phrase en gras dans l'e-mail, case obligatoire sur la page de dépôt, contrat PDF à côté, date + e-mail
++ IP dans `accord_negoce` ; sans case, la réponse n'est pas prise en compte) ; au bon de commande, facture PDF
+automatique au négoce (2 % × total HT du lot, 30 jours, relance automatique, `facture_negoce`).
+
+| PR | Étape | État |
+|---|---|---|
+| 1 | Données : 12 tables (dont accord et facture du négoce), clé de référence, zone, statuts, drapeau, 9 familles | fait (#284, non fusionnée) |
+| 2 | Entrée du besoin (écran 3) : SIRET (INSEE), gratuit, « Proposer au groupé » par ligne et par lot, fenêtre, signé / en attente + engagement, bascule, retrait | fait (#284) |
+| 3 | Base négoces : « Mes négoces » (9 familles, favori, numéro de compte), message type, liens signés « pas concerné » / « stop » | fait (#284) |
+| 4 | Regroupement : `groupe/seuils.json`, un lot par (référence, zone, fenêtre compatible), un seul ouvert, seuil sur le volume ferme, lundi sur deux (`/v1/internal/groupe/regrouper`, cron Vercel lundi 6 h UTC), plafond 3 × médiane 90 j | fait (#284) |
+| 5 | Demande aux négoces : `DemandeService` (un e-mail par négoce concerné, texte + HTML avec la phrase de commission en gras, PDF en deux parties, lien unique `reponse/<jeton>` par lot × négoce, lot → envoyé, besoins signés → engagés), page publique `/reponse/[jeton]` (case d'accord OBLIGATOIRE, contrat PDF à côté, 1 ou 2 devis PDF, `accord_negoce` date + e-mail + IP), lecture prix + délai (faux lecteur en test, Sonnet `AI_QUANTITATIF_MODEL` en ligne), page `/negoces/lien/[jeton]` ; cron envoie aussi | fait (#284) |
+| 6 | Choix et offres : `choisirLeNegoce` (domaine pur : prix au volume ferme par palier, délai dans la fenêtre, un seul négoce, « à vérifier » jamais retenu), `ChoixService` (dès que tous ont répondu ou passé 7 jours ; lot choisi + `OffreArtisan` par besoin engagé ; sans offre valable, lot clos, besoins engagés gardés pour Greg), « pas concerné » / « stop » notés sur la réponse du lot, routes `GET /v1/groupe/offres`, `POST …/offres/:id/probleme`, `POST …/offres/:id/reference` (économie = (référence − groupé) × quantité), carte « Mon offre » dans « Au groupé », cron quotidien 6 h UTC | fait (#284) |
+| 7 | Bons de commande : `CommandeService` (dès le négoce retenu : un bon PDF par artisan engagé, nom + compte ou « ouverture demandée » + adresse + quantités + fenêtre + « tarif groupé lot n° … », e-mail au négoce avec récapitulatif, copie à l'artisan), facture 2 % × total HT des bons à 30 jours (`facture_negoce`, PDF, relance automatique une fois), « Livré » / « Problème » d'un tap (`POST /v1/groupe/bons/:id/livraison`), relance à J+15, table `desistement` à part (avertissement puis exclusion 6 mois, négoce prévenu, `exclu_du_groupe` ferme le groupé), compteur « Économisé grâce au groupé » dans Compte (`GET /v1/groupe/economies`) ; la tâche quotidienne enchaîne tout | fait (#284) |
+| 8 | Notifications : `NotificationsGroupeService` (push sur chaque appareil des membres + e-mail à l'entreprise), les quatre messages de la section 3 mot pour mot (besoin accepté, demande partie chez N négoces, négoce retenu avec −Y % si prix de référence, « Livraison aujourd'hui. Tout est arrivé ? » le jour J une fois, `livraison.prevenuLe`), avertissement par e-mail après un désistement ; facture : émetteur en variables `FACTURE_EMETTEUR_*` (nom, forme, SIRET, adresse, TVA intracom) + `FACTURE_TVA_POURCENT` (20), TTC sur la facture, plus de mention « projet » ; webhook Resend entrant `POST /v1/webhooks/resend` (signature Svix `RESEND_WEBHOOK_SECRET`, adresses `lot-<n°>@REPONSES_DOMAINE` en Reply-To) : une réponse par e-mail renvoie au négoce un lien de dépôt neuf, rien n'est pris sans la case | fait (#284) |
+| 9 | Admin Greg : `GET /v1/admin/groupe` (réservé à `GROUPE_ADMINS`, repli `REFERENTIAL_VALIDATORS` ; 404 drapeau éteint, 403 sinon) : lots par département avec fermes/total, réponses déposées/attendues/à vérifier, négoce retenu, bons ; `lots/:id` journal complet ; gestes de secours `clore`, `annuler` (libère les besoins), `forcer` (envoi sous le seuil), `negoce` (changer le retenu avant les bons) ; négoces, accords, factures + `factures.csv` (mois;numero;negoce;lot;total_lot_ht;commission_ht;tva;ttc;statut;emise_le;echeance_le;payee_le, « payée » à la main), exclusions ; ouverture par département `GROUPE_DEPARTEMENTS` (`*` = tous, raison `departement_ferme` + message sur l'onglet) ; page `/admin/groupe` (lien sur l'onglet Groupé pour l'admin seul) ; e2e étape 8 (lot de bout en bout, deux négoces par e-mail) et étape 9 verts téléphone + ordinateur | fait (#284) |
+
+### Plan de Greg du 20 octobre (jusqu'au vendredi 23 octobre 12 h, autonome, routine horaire `trig_019b3LSmsdY43Aowni5jVARm`)
+
+Décisions seul → `baticlair/docs/DECISIONS.md`. Rapport chaque jour 18 h, dernier vendredi 12 h. Zéro appel API. Rien fusionné.
+Groupé sur #284 ; le reste : une branche `claude/…` et une PR par bloc. Dans l'ordre :
+1. Étape 8 : e2e iPhone complet, un lot de bout en bout, deux négoces qui répondent par e-mail (webhook) — FAIT
+2. Étape 9 : admin Greg (journal, ouverture par département, lots, négoces, accords, factures, exclusions, clore, export CSV factures) — FAIT
+3. Base négoces préremplie (Sirene, NAF 46.73A/B, 47.52A/B, départements 22/29/35/56, suggestions dans « Mes négoces ») — FAIT : table `negoce_sirene`, `SireneService` (import page par page par curseur, `GET /v1/internal/groupe/sirene` le 1er du mois 5 h UTC avec `CRON_SECRET`, `INSEE_API_KEY` obligatoire, `SIRENE_DEPARTEMENTS`/`SIRENE_NAF`), `GET /v1/groupe/negoces/suggestions?q=` (3 lettres, département de l'entreprise d'abord, 8 au plus, source « Sirene » + date d'import), liste sous « Nom du négoce » ; test API `groupe-sirene.test.ts`
+4. Scénarios e2e groupé supplémentaires — FAIT : « scénarios 1 » (deux départements → deux lots, deux références → deux lots, retrait avant départ, SIRET invalide dit en clair, plafond 3 × médiane refusé avec son message) et « scénarios 2 » (lot sans offre clos par la tâche rejouée 8 jours plus tard via `?maintenant=` en test seulement, « pas concerné » par le lien de l'e-mail, désistement ×2 → exclusion 6 mois affichée sur l'onglet, nouveau lot refusé, l'autre artisan garde son lot) ; le seuil (2 signés) est couvert par « étape 8 » ; messages des motifs groupé dans `fr.ts` ; un besoin retiré par désistement reste dans « Mes lots »
+5. Landing page `/` — FAIT, PR #286 (`claude/landing-page`, base main) · 6. Pages légales + case CGU — FAIT, PR #285 (`claude/pages-legales`, base #284) · 7. PWA — FAIT, PR #287 (`claude/pwa`, base main) · 8. Audit sécurité + `docs/SECURITE.md` — FAIT sur `claude/securite` (base #284), PR à ouvrir après la suite e2e complète · 9. Non-régression 179 lectures + couverture 90 % domaine groupé — FAIT (`docs/non-regression-179-lectures.md` : 0 écart #284/main ; couverture groupé 97,9 % instructions, 86 % branches ; test permanent `banc-179-lectures.test.ts`) · 10. Aide « ? » — FAIT, PR #289 (`claude/aide`, base #284) · 11. `docs/groupe/MISE-EN-PROD.md` — FAIT · 12. `docs/DETTE.md` + performance — FAIT (`docs/PERFORMANCE.md` : Lighthouse mobile slow 4G, pages publiques 93–99, app 92–95, CLS de Mon compte corrigé ; `docs/DETTE.md` : 13 dettes classées par risque). Audit sécurité : PR #288 (`claude/securite`, base #284).
+
+### Point du 21 octobre, 18 h (plan 2 de Greg)
+
+- Plan 2, blocs 1 à 9 faits (PR #290 à #299). Test complet du parcours : `baticlair/docs/groupe/TEST-COMPLET.md`.
+- Simplification demandée par Greg (trois entrées en bas, menu derrière l'initiale, un bouton principal, accueil vide, mots simples) : fait, PR #300 (`claude/simplification` vers `claude/integration-groupe`), fusionnée dans la branche de la prévisualisation #284 pour qu'il la voie. Lecture à froid : `baticlair/docs/FRICTIONS.md`.
+- Chiffres : 24 métiers couverts, domaine 665 tests, API 392 tests, e2e iPhone 52 réussis et 4 ignorés. Coût par devis mesuré : aucun nouveau (crédit API à zéro, zéro appel).
+- Reste : passage ordinateur de la simplification, puis attendre les retours de Greg. Rien n'est fusionné dans `main`.
+
+### Point du 22 octobre, 18 h (nouveau cap)
+
+- Nouveau cap de Greg (22 octobre) : `baticlair/docs/groupe/parcours-complet.md` fait foi (section 0 : « Paie tes matériaux
+  moins cher », couvreurs d'abord, liste en cartes, ligne vague hors commande commune, compteur, devis négoce lu une fois,
+  livraison « gratuite jusqu'à X km / Y € au-delà » avec distance calculée, suivi façon colis, rémunération en suspens).
+- Fait sur #284 et reporté sur `claude/integration-groupe` : « Groupé » → « Commande commune » (une constante,
+  `packages/domain/src/groupe/nom.ts`) ; landing refaite deux fois (visuel pro, puis ton fun : « Marre de te faire enfumer
+  sur le prix de tes matériaux ? », compteur d'inscrits du 22 masqué sous 10, `GET /v1/public/compteur`) ; « Inviter un
+  collègue » (WhatsApp, SMS, lien) sur la landing, l'accueil et l'écran Commande commune. Décisions dans `docs/DECISIONS.md`.
+- Chiffres : 24 métiers couverts ; domaine 685 tests, API 409 tests, e2e iPhone 55 sur 55 (ordinateur : tests de la landing et
+  de la commande commune verts) ; CI de #284 verte au dernier commit vérifié. Coût par devis mesuré : aucun nouveau (zéro appel API).
+- Rien fusionné dans `main`. En attente de Greg : CGU et pages légales à renommer en « Commande commune » ? ; photos de chantier.
+
+### Plan « finition » (Greg, 22 octobre au soir, jusqu'au vendredi 23 octobre 12 h)
+
+Objectif : zéro bouton mort, zéro texte faux, zéro incohérence. Tout sur #284, reporté sur `claude/integration-groupe`.
+Routine horaire `trig_019b3LSmsdY43Aowni5jVARm` (prompt mis à jour). Rapport vendredi 12 h.
+
+| # | Bloc | État |
+|---|---|---|
+| 1 | Test qui clique chaque bouton et chaque lien (iPhone + ordinateur) | fait : `toutCliquer` (e2e « Zéro bouton mort » visiteur et artisan, + page du négoce et Commande commune avec offre dans « étape 8 », admin dans « étape 9 ») ; aucun bouton mort trouvé ; à reprendre au bloc 6 : « Annuler » / « Clore le lot » de l'admin sans confirmation |
+| 2 | Parcours complet nouveau cap + calculs à la main (trois cas) dans TEST-COMPLET.md | fait : 13 étapes rejouées, 3 cas posés à la main et gardés par `calculs-a-la-main.test.ts` ; 5 défauts corrigés (économie sans livraison, −11 %, « au même prix », livraison absente du bon, mail négoce « par zone ») |
+| 3 | Pages légales relues, `docs/A-FAIRE-RELIRE.md` | fait : plus aucun « 2 % » sur les pages, clause neutre, cookies sans bandeau, 19 points dans `A-FAIRE-RELIRE.md` |
+| 4 | Textes (tutoiement artisan, vouvoiement négoce, typographie, chiffres) | fait : textes relus écran par écran, gratuit partout (paywall éteint), milliers, lien négoce, mots |
+| 5 | Visuel, iPhone SE, Lighthouse landing > 90 | fait : landing 66 → 97, CLS 0, iPhone SE au test, mode clair forcé, suivi corrigé |
+| 6 | Cas limites | fait : 9 cas joués (e2e « Cas limites »), 3 corrigés : session expirée, redépôt négoce, confirmations admin |
+| 7 | RECETTE.md : 20 tests iPhone | fait : « Les 20 tests iPhone » en tête de RECETTE.md, chacun avec son résultat attendu |
+| 8 | DETTE.md, performance | fait : DETTE n° 23 à 27 ajoutées (rien d'élevé), MISE-EN-PROD complété ; performance : landing 97, pages publiques ≥ 96 (bloc 5) |
+
+### Point du 23 octobre, 18 h (dernier point programmé)
+
+- Journée sur #284, reportée sur `claude/integration-groupe`, CI verte à chaque commit : bloc « Mets ton négoce dans la
+  boucle » (dc5fbef, 15a19a2), cycle raccourci (clôture le 1er et le 15 à 12 h, réponse sous 5 jours ouvrés, relance la
+  veille ; d91d7c9), espace négoce autonome (5f6502d : invitation par lien unique, inscription en une page avec dépôts et
+  paliers de livraison, abonnement à la zone, confidentialité avec confirmation avant « Commander », prix fermes et
+  « non garanti » par article, grille garantie 30 jours avec « Recommander à ce prix », conditions négoce, admin négoces,
+  trois alertes). Docs à jour : `parcours-complet.md` (0 ter), `DECISIONS.md`, `ARCHITECTURE.md`, `SECURITE.md`,
+  `TEST-COMPLET.md`, `LANCEMENT.md`, `A-FAIRE-RELIRE.md`.
+- Chiffres : 24 métiers couverts ; domaine 713 tests, API 442, e2e passe mois 109 (dont le cycle complet invitation →
+  inscription → clôture → réponse → résultats → commande → recommande), passe lots 16. Coût par devis mesuré : aucun
+  nouveau (crédit API à zéro, zéro appel).
+- Rien fusionné dans `main`. Prochaine étape : les retours de Greg sur la prévisualisation ; à son « crédit rechargé »,
+  la file des vraies lectures (§2 bis) puis la vraie lecture d'une grille de négoce de plusieurs lignes (DETTE n° 28).
+- Routine horaire désactivée ; le point de 18 h était programmé jusqu'au vendredi 23 octobre : il n'est pas reprogrammé.

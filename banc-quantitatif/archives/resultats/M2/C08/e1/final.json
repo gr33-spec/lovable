@@ -1,0 +1,146 @@
+{
+ "posees": [
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "je ne sais pas"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Noues zinc façonnées",
+    "quantite": "6",
+    "unite": "ml",
+    "affiche": "6 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "solin au mortier",
+    "quantite": "1",
+    "unite": "sac de 25 kg",
+    "affiche": "1 sac de 25 kg",
+    "etat": "ready",
+    "precision": "3 ml × 2 kg/ml",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "DEP",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Remaniage ardoises autour noue, ardoises identiques à l'existant m2",
+   "Echelle de toit + évac gravats forfait",
+   "réparation toiture suite fuite",
+   "valable 1 mois - acompte 30% à la commande",
+   "travaux sous 15 jours selon temps"
+  ],
+  "questions": [
+   "param:faconnage@pieces-pliees",
+   "param:hauteur_descente"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "pour 6 ml de noue, développé 50 cm",
+    "lignes": [
+     "1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "solin au mortier",
+    "quantite": "1",
+    "unite": "sac de 25 kg",
+    "affiche": "1 sac de 25 kg",
+    "etat": "ready",
+    "precision": "3 ml × 2 kg/ml",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "DEP",
+    "quantite": "1",
+    "unite": "pièces",
+    "affiche": "1 pièce",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "bandes-zinc/mastic",
+    "label": "Cartouches de silicone zinc"
+   },
+   {
+    "key": "bandes-zinc/vis",
+    "label": "Vis inox 4 × 40"
+   }
+  ],
+  "sansFourniture": [
+   "Remaniage ardoises autour noue, ardoises identiques à l'existant m2",
+   "Echelle de toit + évac gravats forfait",
+   "réparation toiture suite fuite",
+   "valable 1 mois - acompte 30% à la commande",
+   "travaux sous 15 jours selon temps"
+  ],
+  "questions": []
+ }
+}

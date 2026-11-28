@@ -1,5 +1,6 @@
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { EGOUT_COMPRIS, attendreLaQuestionDeLEgout } from "./support/egout.js";
 import { createTestApp, resetDatabase, signUpWithCompany, type TestContext } from "./support/test-app.js";
 
 /**
@@ -35,7 +36,13 @@ describe("une clé API partenaire", () => {
 
     const q = await raw().post("/v1/quantitatifs").set("x-api-key", cle).send(RAPPIDOS);
     expect(q.status).toBe(201);
-    expect(q.body.lignes.find((l: { libelle: string }) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9200);
+    // Règle changée (Greg, 21 novembre 2026) : sans gouttière écrite, l'égout se demande (avant : aucune question).
+    // Le partenaire répond « Oui » avec sa clé (rien n'est ajouté) : les 9 383 ardoises d'avant. Une réponse ne compte pas au quota.
+    attendreLaQuestionDeLEgout(q.body.questions);
+    expect(q.body.lignes.find((l: { libelle: string }) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22")).toBeUndefined();
+    const repondu = await raw().post(`/v1/quantitatifs/${q.body.id}/reponses`).set("x-api-key", cle).send({ reponses: [EGOUT_COMPRIS] });
+    expect(repondu.status).toBe(201);
+    expect(repondu.body.lignes.find((l: { libelle: string }) => l.libelle === "Ardoises naturelles Espagne 1er choix 30×22").quantite).toBe(9383);
     // Le quantitatif appartient à l'entreprise de la clé ; l'appli le voit.
     expect((await ctx.prisma.quantitatif.findFirstOrThrow()).companyId).toBe(companyId);
     expect((await agent.get(`/v1/quantitatifs/${q.body.id}`)).status).toBe(200);

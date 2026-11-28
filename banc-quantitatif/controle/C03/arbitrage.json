@@ -1,0 +1,16 @@
+[
+  {
+    "article": "Gouttière demi-ronde zinc naturel dév. 33",
+    "bonne_valeur": "7 longueurs de 4 m",
+    "qui_a_raison": "reference",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Devis « 28 ml … y c. 2 angles » et fiche vérité (« une seule ligne continue », « angles extérieurs 90° du commerce, soudés », « longueurs de 4 m : 7 longueurs ») : les branches des 2 équerres du commerce prennent une partie des 28 ml et absorbent les recouvrements, donc 7 longueurs suffisent. DÉFAUT DE LA FICHE à signaler : « Pertes › gouttières zinc : ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m » ne dit pas de déduire les branches des équerres ni comment compter les jonctions, et appliquée à la lettre (28 + 6 × 0,03 = 28,18 m) elle donne 8 longueurs ; le moteur sort 7 en divisant simplement 28 / 4, sans suivre la règle."
+  },
+  {
+    "article": "Naissance (moignon) zinc pour gouttière demi-ronde dév. 33, sortie Ø100",
+    "bonne_valeur": "3 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Le devis écrit « 3/ F et P DEP zn Ø100 — 3 u » et la fiche vérité dit « 3 naissances Ø100 : non écrites au devis, mais accessoire indissociable de la gouttière (§49.1 point 3), que le code doit sortir d'office », 1 par descente, dév. 33 Ø100 (fiche « naissance / moignon » : dév_330 → Ø80 ou Ø100). DÉFAUT DE LA FICHE à signaler : la section « naissance / moignon » ne donne que types et diamètres et ne dit nulle part que la naissance est indissociable et à sortir d'office (une par descente), d'où son absence de la liste de référence."
+  }
+]

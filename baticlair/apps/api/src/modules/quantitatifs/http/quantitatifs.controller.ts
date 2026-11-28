@@ -1,15 +1,17 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Put, Query, Req, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { Throttle } from "@nestjs/throttler";
 import type { Response } from "express";
 import { memoryStorage } from "multer";
 import { z } from "zod";
 import { validationFailed } from "../../../platform/errors/domain-error.js";
 import { HOURLY } from "../../../platform/http/rate-limit.module.js";
+import { Idempotent } from "../../../platform/http/idempotency.interceptor.js";
 import { ZodPipe } from "../../../platform/http/zod.js";
 import type { RequestWithUser } from "../../identity/index.js";
 import { Tenant, TenantGuard, type TenantContext } from "../../tenancy/index.js";
-import { chunkedFields, UploadParts } from "../../documents/index.js";
+import { assembleQuote, chunkedFields, MAX_PHOTOS_PAR_ENVOI, UploadParts } from "../../documents/index.js";
+import { CatalogueService } from "../../catalogue/index.js";
 import { QuantitatifsService } from "../application/quantitatifs.service.js";
 
 type LigneRecue = { libelle: string; quantite?: string | null; unite?: string | null; prix?: string | null; reference?: string | null };
@@ -51,7 +53,8 @@ const contexte = {
  * Entrée « lignes » (Rappidos, §38) : le devis déjà découpé, sans IA. Entrée « documentId » (l'appli) :
  * un devis déjà déposé sur le chantier. Ni l'une ni l'autre en multipart (PDF).
  */
-const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional() });
+// « Décris ton chantier » (Greg, 28 novembre 2026) : le texte dicté, remis au propre ; il passe par le moteur comme un devis.
+const entree = z.object({ ...contexte, lignes: z.array(ligne).min(1).max(500).optional(), documentId: z.string().uuid().optional(), confirmeGros: z.boolean().optional(), dictee: z.string().trim().min(3).max(2000).optional() });
 const rendu = z.object({ ecran: z.enum(["0", "1"]).optional(), projetId: z.string().optional() });
 
 /**
@@ -98,6 +101,9 @@ const correction = z.discriminatedUnion("action", [
   // §50.7 : une ligne du chantier en bref, réécrite (texte) ou retirée (texte vide).
   z.object({ action: z.literal("bref"), cle: z.string().min(1).max(80), texte: z.string().trim().max(200) }),
   z.object({ action: z.literal("retirer_article"), id: z.string().min(1).max(200) }),
+  // Assistant Mobiiz (31 octobre 2026) : « Annuler » un retrait ; l'adresse du chantier et la livraison (PDF, points 9, 11).
+  z.object({ action: z.literal("remettre_article"), id: z.string().min(1).max(200) }),
+  z.object({ action: z.literal("chantier"), champ: z.enum(["adresse", "livraison"]), texte: z.string().trim().max(200) }),
   z.object({ action: z.literal("suggestion"), id: z.string().min(1).max(200), reponse: z.enum(["oui", "non"]) }),
 ]);
 
@@ -108,7 +114,10 @@ const correction = z.discriminatedUnion("action", [
 @Controller("v1/quantitatifs")
 @UseGuards(TenantGuard)
 export class QuantitatifsController {
-  constructor(@Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService) {}
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(CatalogueService) private readonly catalogue: CatalogueService,
+  ) {}
 
   @Throttle({ default: HOURLY(30) })
   @Post()
@@ -123,10 +132,11 @@ export class QuantitatifsController {
   ) {
     const ctx = { projetId: body.projetId, reference: body.reference, adresse: body.adresse, infos: body.infos, metier: body.metier, apiKey: req.apiKey ? { id: req.apiKey.id, monthlyQuota: req.apiKey.monthlyQuota } : undefined };
     const r = { ecran: query.ecran === "1" };
-    if ([file, body.lignes, body.documentId].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
+    if ([file, body.lignes, body.documentId, body.dictee].filter(Boolean).length > 1) throw validationFailed("Send one quote: a PDF, lines or a documentId", [{ path: "lignes", message: "several quotes sent" }]);
     let result;
     if (body.documentId) {
-      result = await this.quantitatifs.fromDocument(tenant, body.documentId, ctx, r);
+      // Greg, 30 octobre 2026 (décision 3) : à l'écran, un devis de plus de 150 lignes attend le « Lancer » de l'artisan.
+      result = await this.quantitatifs.fromDocument(tenant, body.documentId, ctx, r, { confirmeGros: r.ecran ? body.confirmeGros === true : true });
     } else if (file) {
       result = await this.quantitatifs.fromPdf(
         tenant,
@@ -139,11 +149,33 @@ export class QuantitatifsController {
       );
     } else if (body.lignes) {
       result = await this.quantitatifs.fromLines(tenant, body.lignes.map(ligneEntree), ctx, r);
+      // « Écris ta liste » (Greg, 30 octobre 2026) : les intitulés de l'artisan nourrissent les suggestions ; jamais ceux
+      // d'un partenaire (clé API), et une panne ici ne retient jamais la liste.
+      if (!req.apiKey) await this.catalogue.noterLibelles(tenant.companyId, body.lignes).catch(() => undefined);
+    } else if (body.dictee) {
+      result = await this.quantitatifs.fromDictee(tenant, body.dictee, ctx, r);
     } else {
       throw validationFailed("Missing quote", [{ path: "file", message: "send a PDF (file) or lines (lignes)" }]);
     }
     res.status(result.etat === "en_cours" ? 202 : 201);
     return result;
+  }
+
+  /** « Ajoute un Velux », « retire les chatières », « mets 3 descentes » : à tout moment, écrit ou dicté (Greg, 28 novembre 2026). */
+  @Post(":id/dire")
+  @HttpCode(200)
+  dire(@Tenant() tenant: TenantContext, @Param("id") id: string, @Body(new ZodPipe(z.object({ texte: z.string().trim().min(1).max(1000) }))) body: { texte: string }, @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>) {
+    return this.quantitatifs.dire(tenant, id, body.texte, { ecran: query.ecran === "1" });
+  }
+
+  /**
+   * « Décris ton chantier » (Greg, 28 novembre 2026) : le texte dicté remis au propre avec les mots du métier, ses vrais doutes
+   * (des boutons), et s'il nomme un ouvrage (il part alors au moteur, comme un devis). Rien n'est créé ; aucun appel IA.
+   */
+  @Post("dictee/au-propre")
+  @HttpCode(200)
+  auPropre(@Tenant() tenant: TenantContext, @Body(new ZodPipe(z.object({ texte: z.string().trim().min(1).max(2000) }))) body: { texte: string }) {
+    return this.quantitatifs.dicteeAuPropre(tenant, body.texte);
   }
 
   /** Le quantitatif le plus récent d'un chantier (`?projetId=`), et si la lecture IA est disponible. */
@@ -230,6 +262,39 @@ const croquisBody = z.object({
  * INFOS CHANTIER FACULTATIVES (docs/infos-chantier-facultatives.md) : la note de l'artisan et ses croquis vivent sur le
  * CHANTIER, pas sur un quantitatif ; chaque calcul les relit. Rien n'est obligatoire : le devis suffit.
  */
+/**
+ * « J'AI DÉJÀ MA LISTE » : `POST /v1/projects/:projetId/liste`, photo ou PDF en multipart (champ `file`, ou envoi en
+ * morceaux comme un devis). Les lignes sont lues telles qu'écrites : aucun calcul, aucune question.
+ */
+@Controller("v1/projects/:projetId/liste")
+@UseGuards(TenantGuard)
+export class ListeExistanteController {
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(UploadParts) private readonly uploads: UploadParts,
+  ) {}
+
+  @Throttle({ default: HOURLY(30) })
+  @Post()
+  @UseInterceptors(FilesInterceptor("file", MAX_PHOTOS_PAR_ENVOI, { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_PHOTOS_PAR_ENVOI } }))
+  async create(
+    @Tenant() tenant: TenantContext,
+    @Param("projetId") projetId: string,
+    @UploadedFiles() files: (UploadedPdf & { size: number })[] | undefined,
+    @Body(new ZodPipe(z.object({ ...chunkedFields }))) body: z.infer<z.ZodObject<typeof chunkedFields>>,
+    @Query(new ZodPipe(rendu)) query: z.infer<typeof rendu>,
+  ) {
+    // Plusieurs photos d'une liste papier (Greg, 7 novembre 2026) : un seul PDF, une page par photo, lu en une fois.
+    if ((files?.length ?? 0) > 1) {
+      const recus = await Promise.all(files!.map((f) => this.uploads.fileOf(tenant, f, {})));
+      const pdf = await assembleQuote(recus.map((r) => ({ fileName: r.name, bytes: r.bytes })));
+      return this.quantitatifs.fromListe(tenant, projetId, { name: pdf.fileName, bytes: pdf.bytes }, { ecran: query.ecran === "1" });
+    }
+    const received = await this.uploads.fileOf(tenant, files?.[0], body);
+    return this.quantitatifs.fromListe(tenant, projetId, { name: received.name, bytes: received.bytes }, { ecran: query.ecran === "1" });
+  }
+}
+
 @Controller("v1/projects/:projetId/infos")
 @UseGuards(TenantGuard)
 export class InfosChantierController {
@@ -260,5 +325,40 @@ export class InfosChantierController {
     const r = await this.quantitatifs.addSketch(tenant, projetId, received, body.commentaire, body.article);
     res.status(201);
     return r;
+  }
+}
+
+/**
+ * `POST /v1/assistant/document` (Greg, 12 novembre 2026 : « l'artisan doit pouvoir commencer manuellement, puis transmettre
+ * un devis, un PDF ou une autre liste pour compléter son quantitatif en cours ») : LA LECTURE SANS CRÉATION. Une photo ou un
+ * PDF (plusieurs photos : un seul PDF, lu en une fois) ; les lignes reviennent à l'écran, rien n'est créé ni gardé. Même
+ * lecteur, même quota et même journal que « J'ai déjà ma liste ». `Idempotency-Key` : un double clic ou un nouvel essai
+ * avec la même clé rend la même réponse, sans seconde lecture ni second décompte.
+ */
+@Controller("v1/assistant/document")
+@UseGuards(TenantGuard)
+export class DocumentDansLaListeController {
+  constructor(
+    @Inject(QuantitatifsService) private readonly quantitatifs: QuantitatifsService,
+    @Inject(UploadParts) private readonly uploads: UploadParts,
+  ) {}
+
+  @Throttle({ default: HOURLY(30) })
+  @Post()
+  @HttpCode(200)
+  @Idempotent()
+  @UseInterceptors(FilesInterceptor("file", MAX_PHOTOS_PAR_ENVOI, { storage: memoryStorage(), limits: { fileSize: HARD_MAX_UPLOAD_BYTES, files: MAX_PHOTOS_PAR_ENVOI } }))
+  async lire(
+    @Tenant() tenant: TenantContext,
+    @UploadedFiles() files: (UploadedPdf & { size: number })[] | undefined,
+    @Body(new ZodPipe(z.object({ ...chunkedFields }))) body: z.infer<z.ZodObject<typeof chunkedFields>>,
+  ) {
+    if ((files?.length ?? 0) > 1) {
+      const recus = await Promise.all(files!.map((f) => this.uploads.fileOf(tenant, f, {})));
+      const pdf = await assembleQuote(recus.map((r) => ({ fileName: r.name, bytes: r.bytes })));
+      return this.quantitatifs.lireDocument(tenant, { name: pdf.fileName, bytes: pdf.bytes });
+    }
+    const received = await this.uploads.fileOf(tenant, files?.[0], body);
+    return this.quantitatifs.lireDocument(tenant, { name: received.name, bytes: received.bytes });
   }
 }

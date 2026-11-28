@@ -18,7 +18,11 @@ describe("tri des questions par levier", () => {
     const v = readQuoteComplet(ZINC);
     // Le façonnage (une unité) d'abord, puis ce qui change l'ARTICLE au comptoir (développé, pose des crochets,
     // diamètre des descentes, §47.8), enfin le nombre de descentes (quelques naissances). Plus d'« égout et faîtage ? ».
-    expect(v.questions.map((q) => q.question?.key ?? q.key)).toEqual(["param:faconnage", "param:developpe_gouttiere", "param:fixation_crochet", "param:diametre_descente", "param:nb_descentes"]);
+    // Greg, 20 novembre 2026 : les questions sont celles du calcul, dès l'ouverture et dans son ordre (le levier le plus
+    // gros d'abord) ; la fiche complète compte aussi les angles, et le rampant du joint debout n'est plus supposé.
+    const cles = v.questions.map((q) => q.question?.key ?? q.key);
+    expect(cles[0]).toBe("param:faconnage");
+    expect([...cles].sort()).toEqual(["param:developpe_gouttiere", "param:diametre_descente", "param:faconnage", "param:fixation_crochet", "param:longueur_rampant", "param:nb_angles", "param:nb_descentes"]);
     expect(QUESTION_THRESHOLD).toBe(0.03);
   });
 });
@@ -46,14 +50,16 @@ describe("une question dont toutes les réponses donnent la même commande (à 3
 
   it("« serrage » (1 % d'écart) : pas de question, la première réponse vaut hypothèse dite ; « descentes » (naissances 1 à 4) : question", () => {
     const plan = planOf(REF, lines);
-    const r = computeWithAnswers(REF, plan, { "param:nb_descentes": { value: "2", unit: "u" } });
+    // La fiche complète (tous les articles) compte aussi les angles de la gouttière (étape « Suggestions », 18 novembre 2026) : aucun ici.
+    const r = computeWithAnswers(REF, plan, { "param:nb_descentes": { value: "2", unit: "u" }, "param:nb_angles": { value: "0", unit: "u" } });
     expect(r.questions).toEqual([]);
     const crochets = r.needs.find((n) => n.needId === "crochets")!;
     expect(crochets.status).toBe("calculated");
     expect(crochets.assumptions).toContainEqual(expect.objectContaining({ key: "param:serrage", label: "Serrage des crochets", value: "Normal" }));
     // Sans la réponse « descentes » : une seule question, celle qui change vraiment la commande.
     const open = computeWithAnswers(REF, plan, {});
-    expect(open.questions.map((q) => q.key)).toEqual(["param:nb_descentes"]);
+    // (La fiche complète demande aussi les angles : un par angle, §15.)
+    expect(open.questions.map((q) => q.key).filter((k) => k !== "param:nb_angles")).toEqual(["param:nb_descentes"]);
     expect(gouttiere.params.some((p) => p.key === "serrage")).toBe(false);
   });
 });

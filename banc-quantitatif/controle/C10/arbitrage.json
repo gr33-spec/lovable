@@ -1,0 +1,30 @@
+[
+  {
+    "article": "Liteaux sapin traité 18×40",
+    "bonne_valeur": "770 ml",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche donne bien les liteaux de la fibres-ciment (« ardoises fibres-ciment (complément à ardoise.json) » : « liteaux_ml_par_m2 | 40×24 : 6,67 », confirme) et la perte du liteau (« perte_casse_coupes 5 % »), donc 110 m² (surface réelle, le « 100 M2 » de la ligne 3 du devis est une erreur d'écriture) × 6,67 = 733,3 ml + 5 % = 770 ml ; le moteur cherche ses « Liteaux au m² » sous l'ardoise naturelle et ne lit pas cette section. Défaut de la fiche à signaler : elle range l'ardoise fibres-ciment à trois endroits, ne dit pas si la chute d'aboutage (10 % pour des liteaux de 4,00 m sur appuis à 60 cm) s'ajoute aux 5 %, et limite le 18×40 à 53 cm entre appuis (« ecartement_maximal_entre_appuis 53 cm ») alors que le devis le pose sur des fermettes à 60 cm."
+  },
+  {
+    "article": "Ardoises fibres-ciment 40×24",
+    "bonne_valeur": "3131 ardoises (pièces)",
+    "qui_a_raison": "aucun",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "La fiche donne pour « Cedral 40×24 » six valeurs sans leur condition (24,64 à 29,04 u/m²) et « recouvrement_minimal 100 mm » : par le calcul, ces valeurs sont 1 ÷ (pureau × 0,246 m) pour des recouvrements de 70 à 120 mm, donc 27,10 u/m² à 100 mm, et 110 m² × 27,10 × 1,05 (« perte_casse_et_coupes 5 % », toit simple) = 3 130,1, soit 3 131 ardoises. La référence ne chiffre rien et le contrôleur (27,78 u/m², joint entre ardoises oublié, 3 209) se trompe de 2,5 % : c'est un défaut de la fiche à signaler, qui doit dire quelle valeur vaut pour quel recouvrement ou quelle pente, et donner une formule pour la fibres-ciment."
+  },
+  {
+    "article": "Faîtières fibres-ciment",
+    "bonne_valeur": "à chiffrer",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "La fiche dit « ml × pièces au ml du modèle, arrondi à la pièce supérieure ; casse 1 % » ; or le modèle de faîtière fibres-ciment dépend de la marque des ardoises, que le couvreur ne sait pas, donc ses pièces au ml sont inconnues. Les 30 pièces de la référence (10 ml × 3 u/ml, sans la casse de 1 %) viennent de l'« Edilians Faîtière Armor 33 », une faîtière en terre cuite. Défaut de la fiche à signaler : sa rubrique « faîtage ardoise » ne cite que des faîtières en terre cuite et aucune faîtière fibres-ciment."
+  },
+  {
+    "article": "Sortie de toit Ø100 pour évent",
+    "bonne_valeur": "1 pièce (sortie de toit Ø100 pour couverture ardoise)",
+    "qui_a_raison": "controleur",
+    "cause": "fiche métier fausse ou incomplète",
+    "explication": "Le devis écrit « Fourniture et pose d'une sortie de toit Ø100 pour évent », 1 U, et c'est cet article unique qui se commande ; rien dans le devis ni dans la fiche ne la découpe en « embase plomb » et « chapeau ». La fiche ne connaît que la « tuile à douille + lanterne / chapeau » (Ø 100 à 160) pour les tuiles et rien pour une sortie de toit sur ardoise : c'est un trou de la fiche à signaler, que le moteur a comblé en sortant deux lignes."
+  }
+]

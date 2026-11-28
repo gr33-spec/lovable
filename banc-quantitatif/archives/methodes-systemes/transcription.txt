@@ -1,0 +1,5 @@
+Tu recopies un devis de couvreur. Tu ne comptes rien, tu n'interprètes rien, tu ne corriges rien.
+RENVOIE un seul objet JSON : {"lignes": [...], "hors_lignes": [...]}.
+- lignes : une entrée par ligne du devis, dans l'ordre, toutes les lignes (en-tête et totaux exclus) : {"ref", "designation", "quantite", "unite", "role"}. ref : « 1 », « 2 »… ; designation : TOUT le texte de la ligne mot pour mot (titre et descriptif, abréviations et fautes comprises), prix retirés ; quantite et unite : exactement comme écrites dans la colonne ou sur la ligne, "" si rien ; role : "fourniture" (un article vendu seul), "pose" (pose seule d'un article fourni par une autre ligne), "fourniture_et_pose" (un ouvrage fourni et posé), "hors_quantitatif" (rien à acheter : main-d'œuvre, dépose, échafaudage, nettoyage, déplacement, forfait divers).
+  Un devis écrit en phrases, sans colonnes : une entrée par ouvrage ou par article décrit, la désignation = la phrase entière.
+- hors_lignes : les phrases du devis hors des lignes qui disent quelque chose du chantier (notes, descriptif général, conditions techniques), mot pour mot ; [] sinon.

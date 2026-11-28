@@ -1,0 +1,271 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "type": "object",
+ "properties": {
+  "metier": {
+   "type": "string"
+  },
+  "lots": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "metier": {
+      "type": "string"
+     },
+     "libelle": {
+      "type": "string"
+     },
+     "lignes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "metier",
+     "libelle",
+     "lignes"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "fiche": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "donnee": {
+      "type": "string"
+     },
+     "valeur": {
+      "type": "string"
+     },
+     "origine": {
+      "type": "string",
+      "enum": [
+       "lue",
+       "deduite",
+       "manquante"
+      ]
+     },
+     "regle": {
+      "type": "string"
+     },
+     "preuve": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "donnee",
+     "valeur",
+     "origine",
+     "regle",
+     "preuve"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "bref": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "questions": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "cle": {
+      "type": "string"
+     },
+     "texte": {
+      "type": "string"
+     },
+     "boutons": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "label": {
+         "type": "string"
+        },
+        "valeur": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "label",
+        "valeur"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "unite": {
+      "type": "string"
+     },
+     "donnee": {
+      "type": "string"
+     },
+     "ligne": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cle",
+     "texte",
+     "boutons",
+     "unite",
+     "donnee",
+     "ligne"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "lignes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "ref": {
+      "type": "string"
+     },
+     "designation": {
+      "type": "string"
+     },
+     "quantite": {
+      "type": "string"
+     },
+     "unite": {
+      "type": "string"
+     },
+     "role": {
+      "type": "string",
+      "enum": [
+       "fourniture",
+       "pose",
+       "fourniture_et_pose",
+       "hors_quantitatif"
+      ]
+     },
+     "fournitures": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "nom": {
+         "type": "string"
+        },
+        "quantite": {
+         "type": "string"
+        },
+        "unite": {
+         "type": "string"
+        },
+        "ouvrage": {
+         "type": "string"
+        },
+        "emplacement": {
+         "type": "string"
+        },
+        "donnees": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "cle": {
+            "type": "string"
+           },
+           "valeur": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "cle",
+           "valeur"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "attend": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "a_preciser": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "precision": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "nom",
+        "quantite",
+        "unite",
+        "ouvrage",
+        "emplacement",
+        "donnees",
+        "attend",
+        "a_preciser",
+        "precision"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "ref",
+     "designation",
+     "quantite",
+     "unite",
+     "role",
+     "fournitures"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "contexte": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "cle": {
+      "type": "string"
+     },
+     "valeur": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cle",
+     "valeur"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "notes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "required": [
+  "metier",
+  "lots",
+  "fiche",
+  "bref",
+  "questions",
+  "lignes",
+  "contexte",
+  "notes"
+ ],
+ "additionalProperties": false
+}

@@ -188,6 +188,11 @@ export interface ParamDefault extends Provenance {
   /** Pourquoi, en mots d'artisan (« Pente moyenne d'une toiture »). */
   note?: string;
   /**
+   * Valeur VALIDÉE par le fondateur (les tubes de 2 m) : dite, modifiable, mais elle ne rend pas la ligne « à vérifier »
+   * (Greg, 22 novembre 2026). Sans ce mot, une valeur par défaut est une hypothèse à vérifier.
+   */
+  sur?: true;
+  /**
    * Le devis nomme la chose sans la préciser (« zinc prépatiné » : quartz ou anthra ?) : l'hypothèse ne vaut plus,
    * on demande (règle du comptoir, §47.8). Mots cherchés dans les lignes de l'ouvrage.
    */
@@ -237,7 +242,17 @@ export interface ParamDef {
   /** Sans valeur lue ni répondue : cette hypothèse, dite et modifiable. Sans hypothèse : une question. */
   default?: ParamDefault;
   /** Réponses proposées en boutons (l'artisan ne tape rien) : « Faible (30 %) », « Moyenne (45 %) »… */
-  choices?: { label: string; value: string }[];
+  /**
+   * `dit` : les mots de l'artisan pour ce bouton quand il répond au clavier ou à la voix (« je plie », « tout fait »).
+   * Ils vivent ICI, dans la fiche du métier : le lecteur des réponses est le même pour tous les métiers (Greg, 17 novembre
+   * 2026 : « le cœur de Mobiiz doit s'adapter à n'importe quel métier »).
+   */
+  choices?: { label: string; value: string; dit?: string[] }[];
+  /**
+   * Une donnée qui ne se DEMANDE JAMAIS à l'artisan (Greg, 17 novembre 2026 : « ne me demande jamais le pureau ») : elle
+   * se calcule (`default`) d'après d'autres données, qui se demandent, elles. Une question du modèle sur elle est écartée.
+   */
+  neverAsk?: true;
   /**
    * Valeur approchée faute de table officielle (la région ardoise prise égale à la zone climatique
    * du département) : dite « estimation » à l'artisan, avec cette raison.
@@ -263,10 +278,34 @@ export interface ParamDef {
    * zinc ; ardoises ou tuiles → embase plomb). Deux valeurs possibles dans le même devis : rien n'est déduit, on demande.
    */
   fromWorks?: { value: string; workItems: string[] }[];
+  /**
+   * La question ne se pose qu'une fois une autre donnée répondue avec cette valeur (« Quelle longueur d'égout ? » seulement
+   * après « Non » à « Tes m² comprennent déjà l'égout ? ») : jamais avant, jamais dans une liste de questions d'avance.
+   */
+  askOnlyAfter?: { param: string; value: string };
+  /**
+   * La valeur que prend la donnée quand l'artisan répond « Je ne sais pas » (Greg, 23 novembre 2026 : un développé inconnu
+   * fait demander « Combien de feuilles ? »). Absente : « Je ne sais pas » laisse la donnée inconnue, comme avant.
+   */
+  /**
+   * Une question dont chaque réponse change la commande (un nombre de feuilles) : toujours posée, sans rejouer le calcul
+   * avec chacun de ses boutons pour la règle des 3 % (§41). Absente : la règle des 3 % s'applique.
+   */
+  toujoursDemandee?: true;
+  inconnu?: { valeur: string; /** Seulement quand une autre donnée de l'ouvrage a cette valeur (« je plie »). */ si?: { param: string; value: string } };
+  /** La valeur par défaut ne dit rien à l'artisan (0 m d'arêtier quand le devis n'en a pas) : jamais listée en hypothèse. */
+  silentDefault?: true;
   /** Lue sur un autre ouvrage seulement si c'est un ouvrage principal (l'aspect du zinc de la couverture, pas d'une bande). */
   onlyFromPrincipal?: true;
-  /** Jamais prêtée par un autre ouvrage : « tu façonnes ? » se demande pièce par pièce (§48.6). */
+  /** Jamais prêtée par un autre ouvrage : ce que le devis écrit pour une pièce ne vaut pas pour sa voisine (§48.6). */
   ownOnly?: true;
+  /**
+   * UNE SEULE RÉPONSE POUR TOUT LE DEVIS (Greg, 17 novembre 2026 : « je plie : une seule réponse pour tout le devis, plus
+   * jamais pièce par pièce »). Les ouvrages dont la donnée porte le même groupe partagent UNE question (celle du groupe,
+   * avec ses mots) et sa réponse ; l'artisan peut ensuite changer ce choix pour une pièce (la clé de la pièce passe devant).
+   * Écrit dans la fiche du métier : le moteur ne connaît aucun groupe.
+   */
+  groupe?: { id: string; question: string; hint?: string };
 }
 
 /**
@@ -325,6 +364,11 @@ export interface Slot {
   key: string;
   family: string;
   label: string;
+  /**
+   * Dans une DICTÉE (Greg, 28 novembre 2026), l'article suit son ouvrage même s'il n'est pas dit : « 1 crochet par ardoise,
+   * partout » (règles du fondateur, skill `regles-metier`). Un devis écrit garde la règle numéro un (rien d'absent du devis).
+   */
+  dicteAvec?: true;
   /** Départage deux emplacements d'une même famille (« contre-lattage » ≠ « lattage »). */
   keywords?: string[];
   /** La question du comptoir quand le devis ne nomme pas le produit (« Parpaings de 20, de 15 ou de 10 ? »). */
@@ -335,7 +379,7 @@ export interface Slot {
    * utilisée sans question, dite à l'artisan dans les hypothèses et modifiable.
    * Elle s'efface dès que le devis nomme un produit.
    */
-  usual?: { text: string; source: string; productShort?: string; productId?: string };
+  usual?: { text: string; source: string; productShort?: string; productId?: string; /** Article par défaut validé (voir `ParamDefault.sur`). */ sur?: true };
   /** La ligne du devis donne une MESURE (« 91 m² de joint debout ») ; rien ne se commande sous ce nom. */
   measureOnly?: true;
   /**
@@ -359,6 +403,18 @@ export interface Slot {
    * d'une gouttière, §48.7). Toute nouvelle entrée est une décision du fondateur, écrite au §49.1.
    */
   indissociable?: true;
+  /**
+   * Étape « Suggestions » (Greg, 17 novembre 2026, points 13 à 17) : un oubli probable. Quand un autre article de
+   * l'ouvrage est écrit et que celui-ci ne l'est pas, il est PROPOSÉ une fois, dans une carte à cases, avec ces mots ;
+   * coché, il vaut un article écrit (ses questions se posent alors) ; non coché, il n'existe pas. Jamais ajouté d'office.
+   */
+  /**
+   * Étape « Suggestions » : la case proposée. `vaut` : les données qu'une case cochée tranche (le « oui » d'un dauphin) ;
+   * elles ne se demandent plus (skill du fondateur, 18/11/2026 : cochée, la case vaut l'article écrit).
+   * `unlessWorks` : pas proposée quand le devis a déjà l'un de ces ouvrages (une sortie de toit écrite).
+   * `onlyOnMeasuredWork` : seulement quand l'article principal de l'ouvrage est écrit avec sa surface (une couverture en m²).
+   */
+  suggested?: { label: string; vaut?: Record<string, string>; unlessWorks?: string[]; onlyOnMeasuredWork?: true; /** Seulement quand l'un de ces emplacements de l'ouvrage est écrit (les pointes de liteaux : avec les liteaux). */ onlyWith?: string[] };
   /**
    * La ligne écrite en mètres se commande en pièces : « 2 descentes de 3 m » = 2 tubes de 3 m (D-2026-020, §49.2.3).
    * `piece` : le nom de la pièce au comptoir (« tube »), « longueur » sinon.
@@ -405,11 +461,27 @@ export interface NeedRule extends Provenance {
   /** Ce que la règle ne compte pas (dit à l'artisan dans « Voir le calcul »). */
   exclusions?: string;
   /**
+   * La donnée que le besoin COUVRE, quand il compte plus qu'elle (« 13 ml » de gouttière, plus 30 mm par jonction) : la liste
+   * dit ce qui est couvert (« 13 ml à couvrir »), jamais la longueur gonflée des recouvrements.
+   */
+  covers?: string;
+  /**
    * Ce qui sert au comptoir (§45.3, colonne « précision ») : l'usage de la pièce
    * (« pour façonner la bande d'égout »), une position (« zone fixe de chaque bac »).
    * Une ligne dont on ne sait pas à quoi elle sert porte son usage ici (§45.5).
    */
   precision?: string;
+  /**
+   * LE DÉTAIL DU CALCUL, POSTE PAR POSTE (Greg, 22 novembre 2026 : « Surface 150 m² × 39,5 = 5 925 · Arêtiers 12 m × 26 =
+   * 312 · … · Perte 5 % »). Chaque poste : un libellé en mots simples (gabarit comme `precision`), sa formule, et la donnée
+   * qui le règle d'un toucher (`cle`). Leur somme est le besoin avant la perte : le moteur le vérifie. Un poste nul ne se dit pas.
+   */
+  postes?: { id: string; libelle: string; formule: string; cle?: string; /** Dit pour aider, hors du total (« 5 longueurs couvrent 19,88 m »). */ info?: true }[];
+  /**
+   * L'unité de vente d'une pièce dont la longueur est une donnée du chantier (Greg, 18 novembre 2026 : « 2 tubes de 3 m »,
+   * jamais « 2 pièces ») : deux gabarits, au singulier et au pluriel (« tube de {longueur_tube|m} »).
+   */
+  pieceUnit?: { one: string; many: string };
   /** Comment la quantité se compte, dit seulement quand le devis écrit une autre quantité (« pour 10 ml, un tous les 50 cm »). */
   basis?: string;
   /**
@@ -438,6 +510,11 @@ export interface NeedRule extends Provenance {
    * Condition d'existence (« faconnage < 2 ») : le besoin n'existe que si elle est vraie. Tant que
    * ses données ne sont pas connues, le besoin existe et pose sa question (« tu façonnes ? »).
    */
+  /**
+   * La ligne reste visible, orange, tant que la donnée de sa condition attend sa réponse (les crochets d'ardoise avant
+   * « Agrafe ou pointe ? ») : seulement si cette donnée ne fait que l'article (`precisionRequires`).
+   */
+  ligneEnAttente?: true;
   when?: string;
   /**
    * §49.1 point 4 : consommable de pose (pointes, vis, pattes, étain, silicone). Il ne sort que si l'artisan a dit OUI à
@@ -451,6 +528,12 @@ export interface NeedRule extends Provenance {
    * phrase (« ajuste selon ton façonnage », §49.6), jusqu'au « C'est bon » de l'artisan.
    */
   estimate?: string;
+  /**
+   * Calculateur de feuilles (Greg, 22 novembre 2026) : le besoin est une PART de feuille (bandes ÷ bandes par feuille), pas
+   * encore arrondie. La liste additionne les parts de toutes les pièces du même article et n'arrondit qu'une fois : les
+   * pièces de plusieurs ouvrages partagent les mêmes feuilles.
+   */
+  partage?: true;
 }
 
 export interface WorkItemType {
@@ -498,6 +581,8 @@ export interface WasteRule extends Provenance {
   family: string;
   product?: string;
   workItem?: string;
+  /** Un seul emplacement de l'ouvrage (les liteaux, pas les contre-liteaux, même s'ils sont de la même famille). */
+  slot?: string;
   /** En pourcentage (« 5 » = 5 %). */
   rate: string;
 }

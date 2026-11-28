@@ -1,0 +1,27 @@
+{
+  "accords": [
+    {"article": "Voliges sapin 18 mm", "quantite": 63, "unite": "m²"},
+    {"article": "Faîtage zinc naturel 0,70 mm, bande développé 330 mm, longueur 2 m", "quantite": 4, "unite": "longueurs de 2 m"},
+    {"article": "Tuyau de descente zinc Ø 100, longueur 2 m", "quantite": 6, "unite": "tubes de 2 m"}
+  ],
+  "desaccords": [
+    {
+      "article": "Bacs joint debout zinc naturel 0,70 mm",
+      "controleur": "28 bacs de 5,00 m",
+      "reference": "28 bacs de 5,15 m",
+      "ecart": "Même nombre de bacs (28), mais longueur de bac différente : 5,00 m côté contrôleur, 5,15 m côté référence."
+    },
+    {
+      "article": "Bande d'égout zinc naturel 0,70 mm, développé 330 mm",
+      "controleur": "7 bandes de 2 m",
+      "reference": "6 longueurs de 2 m",
+      "ecart": "Quantité différente : 7 contre 6 longueurs de 2 m (même unité, même article)."
+    },
+    {
+      "article": "Gouttière zinc demi-ronde développé 330 mm",
+      "controleur": "4 longueurs de 4 m",
+      "reference": "3 longueurs de 4 m",
+      "ecart": "Quantité différente : 4 contre 3 longueurs de 4 m (même unité, même article)."
+    }
+  ]
+}

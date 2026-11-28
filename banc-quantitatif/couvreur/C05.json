@@ -1,0 +1,268 @@
+{
+ "param:support_sortie ¦ Sortie de toit : sur quelle couverture ?": {
+  "question": {
+   "id": "param:support_sortie ¦ Sortie de toit : sur quelle couverture ?",
+   "question": "Sortie de toit : sur quelle couverture ?",
+   "boutons": [
+    "Ardoise ou tuile",
+    "Zinc"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Ardoise ou tuile",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Sur ardoise."
+  }
+ },
+ "param:surface@couverture-ardoises-crochet__5 ¦ Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : surface du toit ?": {
+  "question": {
+   "id": "param:surface@couverture-ardoises-crochet__5 ¦ Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : surface du toit ?",
+   "question": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : surface du toit ?",
+   "boutons": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "unite": "m2",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "3.2",
+   "unite": "m2",
+   "ne_sait_pas": false,
+   "dit": "3,2 m² de jouées."
+  }
+ },
+ "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?": {
+  "question": {
+   "id": "param:faconnage@pieces-pliees ¦ Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "question": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "unite": "u",
+   "aide": "Je plie : des feuilles 2 × 1 m, comptées d'après les développés et les longueurs. Tout fait : des longueurs de pièces façonnées. Gouttières, descentes, naissances et crochets ne sont pas concernés."
+  },
+  "reponse": {
+   "bouton": "Je façonne (feuilles ou bobineau)",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Je les plie moi-même."
+  }
+ },
+ "param:qualite_ardoise@couverture-ardoises-crochet__5 ¦ Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": {
+  "question": {
+   "id": "param:qualite_ardoise@couverture-ardoises-crochet__5 ¦ Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Habillage des jouées des 2 lucarnes en ardoise naturelle 30×20 au crochet noir. : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Espagne 1er choix",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Espagne 1er choix."
+  }
+ },
+ "param:developpe_noue ¦ Noue de 50 ou de 66 ?": {
+  "question": {
+   "id": "param:developpe_noue ¦ Noue de 50 ou de 66 ?",
+   "question": "Noue de 50 ou de 66 ?",
+   "boutons": [
+    "De 50",
+    "De 66"
+   ],
+   "unite": "mm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "De 50",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "De 50."
+  }
+ },
+ "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": {
+  "question": {
+   "id": "param:qualite_ardoise ¦ Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Espagne 1er choix",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Espagne 1er choix."
+  }
+ },
+ "param:longueur_crochet ¦ Quelle longueur de crochet ?": {
+  "question": {
+   "id": "param:longueur_crochet ¦ Quelle longueur de crochet ?",
+   "question": "Quelle longueur de crochet ?",
+   "boutons": [],
+   "unite": "cm",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "10",
+   "unite": "cm",
+   "ne_sait_pas": false,
+   "dit": "10 cm."
+  }
+ },
+ "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?": {
+  "question": {
+   "id": "param:perimetre_cheminee ¦ Périmètre d'une cheminée (les 4 côtés) ?",
+   "question": "Périmètre d'une cheminée (les 4 côtés) ?",
+   "boutons": [
+    "2 m",
+    "3 m",
+    "4 m",
+    "5 m"
+   ],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "3 m",
+   "valeur": "",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "3 m."
+  }
+ },
+ "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?": {
+  "question": {
+   "id": "param:diametre_sortie ¦ Sortie de toit : quel diamètre ?",
+   "question": "Sortie de toit : quel diamètre ?",
+   "boutons": [
+    "Ø 80",
+    "Ø 100",
+    "Ø 125",
+    "Ø 150",
+    "Ø 180",
+    "VMC"
+   ],
+   "unite": "mm",
+   "aide": "Le fournisseur en a besoin pour chiffrer la bonne embase et le bon chapeau."
+  },
+  "reponse": {
+   "bouton": "Ø 125",
+   "valeur": "",
+   "unite": "mm",
+   "ne_sait_pas": false,
+   "dit": "Ø 125."
+  }
+ },
+ "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?": {
+  "question": {
+   "id": "param:usage_sortie ¦ Sortie de toit : conduit de fumée ou ventilation ?",
+   "question": "Sortie de toit : conduit de fumée ou ventilation ?",
+   "boutons": [
+    "Conduit de fumée",
+    "Ventilation"
+   ],
+   "unite": "u",
+   "aide": "Un conduit de fumée demande une collerette d'étanchéité (solin)."
+  },
+  "reponse": {
+   "bouton": "Ventilation",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Ventilation, VMC."
+  }
+ },
+ "param:longueur_noue ¦ Longueur de noue ?": {
+  "question": {
+   "id": "param:longueur_noue ¦ Longueur de noue ?",
+   "question": "Longueur de noue ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "7.2",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "7,20 m au total."
+  }
+ },
+ "param:nb_cheminees ¦ Combien de cheminées ?": {
+  "question": {
+   "id": "param:nb_cheminees ¦ Combien de cheminées ?",
+   "question": "Combien de cheminées ?",
+   "boutons": [],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "1",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Une seule cheminée."
+  }
+ },
+ "param:raccord_couverture ¦ Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?": {
+  "question": {
+   "id": "param:raccord_couverture ¦ Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+   "question": "Raccord de fenêtre de toit : pour tuiles, pour ardoises ou pour tuiles plates ?",
+   "boutons": [
+    "Pour tuiles (mécaniques, canal)",
+    "Pour ardoises",
+    "Pour tuiles plates"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Pour ardoises",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Pour ardoises."
+  }
+ },
+ "param:qualite_ardoise@couverture-ardoises-crochet__4 ¦ Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?": {
+  "question": {
+   "id": "param:qualite_ardoise@couverture-ardoises-crochet__4 ¦ Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "question": "Ardoise naturelle 30×20 : quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?",
+   "boutons": [
+    "Espagne 1er choix",
+    "Ardoise NF (type Cupa)"
+   ],
+   "unite": "u",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "Espagne 1er choix",
+   "valeur": "",
+   "unite": "u",
+   "ne_sait_pas": false,
+   "dit": "Espagne 1er choix."
+  }
+ }
+}

@@ -7,6 +7,8 @@ export interface TransactionalEmail {
   to: string;
   subject: string;
   text: string;
+  /** Le même corps en HTML quand une mise en forme compte (la phrase de commission en gras, parcours groupé) ; le texte reste la référence. */
+  html?: string;
   /** Pièces jointes (le PDF de commande fournisseur, §43) : contenu en base64. */
   attachments?: { filename: string; contentType: string; contentBase64: string }[];
   /** Adresse de réponse : « Répondre » écrit à l'artisan, pas à l'adresse d'envoi de BatiClair. */
@@ -16,6 +18,40 @@ export interface TransactionalEmail {
    * d'être seulement journalisé comme pour un mail de compte (inscription, mot de passe), qu'on peut redemander.
    */
   mustDeliver?: boolean;
+  /**
+   * Un message EXTERNE renvoyé (Greg, 22 novembre 2026) : jamais habillé en Mobiiz. La mise en page ne pose ni logo, ni
+   * pied, ni lien : un bandeau gris et le texte tel quel (ses liens déjà rendus non cliquables).
+   */
+  externe?: boolean;
+  /**
+   * Un e-mail DE COMPTE (validation de l'inscription, lien de connexion, mot de passe oublié) : sur le site de test, il part
+   * à la personne elle-même, jamais détourné (Greg, 23 novembre 2026 : « il valide son inscription dans sa propre boîte
+   * mail tout seul, comme le jour où on lancera »). Tous les autres e-mails, ceux des négoces d'abord, restent détournés.
+   */
+  compte?: boolean;
+  /** En-têtes ajoutés par la mise en page (List-Unsubscribe). */
+  headers?: Record<string, string>;
+  /**
+   * R7 : l'expéditeur de cet e-mail quand il n'est pas celui de l'application (« Toitures Martin via Mobiiz
+   * <toitures-martin@mobiiz.fr> », une demande de prix). Toujours sur le domaine de l'application.
+   */
+  from?: string;
+  /**
+   * « Envoyés » (Greg, 22 novembre 2026) : cet e-mail part AU NOM de l'artisan (demande de prix, bon de commande, réponse,
+   * relance, « prévenir les autres négoces »). Une fois parti pour de vrai, il est noté dans son dossier « Envoyés ».
+   */
+  envoi?: EnvoiAuNomDe;
+}
+
+export type SorteEnvoi = "demande" | "commande" | "reponse" | "relance" | "prevenir";
+export interface EnvoiAuNomDe {
+  companyId: string;
+  sorte: SorteEnvoi;
+  projectId?: string | null;
+  recipientId?: string | null;
+  repondA?: string | null;
+  /** Le nom lisible du destinataire (« Point P Lannion »). */
+  destinataire?: string | null;
 }
 
 export interface TransactionalEmailSender {

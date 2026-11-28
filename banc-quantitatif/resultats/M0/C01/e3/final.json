@@ -1,0 +1,291 @@
+{
+ "posees": [
+  {
+   "key": "param:developpe",
+   "text": "Développé de la bande zinc ?",
+   "options": [
+    "100 mm (solin, couvre-joint)",
+    "200 mm",
+    "250 mm",
+    "330 mm",
+    "400 mm"
+   ],
+   "reponse": "330 mm"
+  },
+  {
+   "key": "param:faconnage@pieces-pliees",
+   "text": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "options": [
+    "Je façonne (feuilles ou bobineau)",
+    "Je commande façonné"
+   ],
+   "reponse": "Je façonne (feuilles ou bobineau)"
+  },
+  {
+   "key": "param:longueur_crochet",
+   "text": "Quelle longueur de crochet ?",
+   "options": [],
+   "reponse": "10 cm"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Faîtage zinc (bande) en bande",
+    "quantite": "8",
+    "unite": "ml",
+    "affiche": "8 ml",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "4",
+    "unite": "longueurs de 4 m",
+    "affiche": "4 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5,5 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphin fonte Ø80 en pied de descente",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [
+     "a-preciser:9"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 18×40 (Liteaux sapin traité)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Ardoises)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier, échafaudage de pied sur les deux façades, protections",
+   "Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie",
+   "Nettoyage du chantier et repli de l'échafaudage"
+  ],
+  "questions": [
+   "param:developpe",
+   "param:faconnage@pieces-pliees",
+   "param:longueur_crochet"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Écran HPV, rouleau 1,50 × 50 m",
+    "quantite": "2",
+    "unite": "rouleaux",
+    "affiche": "2 rouleaux",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Feuilles zinc naturel 2 × 1 m, 0,65 mm",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": "pour 8 ml de faîtage, développé 33 cm",
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière dév. 25",
+    "quantite": "4",
+    "unite": "longueurs de 4 m",
+    "affiche": "4 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Tubes de descente Ø80, longueur 2 m",
+    "quantite": "6",
+    "unite": "pièces",
+    "affiche": "6 pièces",
+    "etat": "ready",
+    "precision": "2 descentes × 5,5 m",
+    "lignes": [
+     "8"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphin fonte Ø80 en pied de descente",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "9"
+    ],
+    "attend": [
+     "a-preciser:9"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [
+   {
+    "label": "Liteaux 18×40 (Liteaux sapin traité)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Ardoises (Ardoises)",
+    "raison": "Calcul impossible sans « Longueur » de ardoise.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   },
+   {
+    "label": "Crochets d'ardoise (Ardoises)",
+    "raison": "Calcul impossible tant que « ardoises » n'est pas calculé.",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "asks": []
+   }
+  ],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "gouttiere/angle",
+    "label": "Angles de gouttière (si tu ne les fabriques pas)"
+   },
+   {
+    "key": "faitage-zinc/patte",
+    "label": "Pattes de fixation"
+   }
+  ],
+  "sansFourniture": [
+   "Installation de chantier, échafaudage de pied sur les deux façades, protections",
+   "Dépose de la couverture ardoise existante, liteaux compris, descente et évacuation des gravats en déchetterie",
+   "Nettoyage du chantier et repli de l'échafaudage"
+  ],
+  "questions": []
+ }
+}

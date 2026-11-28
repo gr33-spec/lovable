@@ -20,16 +20,19 @@ const work = ROOFING_REFERENTIAL.workItems;
 /** Valeurs identiques, règles différentes : la raison est dite dans le tableau. */
 const MEME_VALEUR_AUTRE_REGLE: Record<string, string> = {
   "2 u": "Nombres par pièce sans lien : 2 ardoises (couvert et courant), 2 abouts, 2 fixations par patte, 2 closoirs par plaque, 2 talons par ligne.",
-  "10 mm": "Supplément de recouvrement au-delà de 5,5 m de rampant, marge de crochet (R + 1 cm), pas de vente des crochets.",
-  "0 mm": "Supplément nul (rampant court) et diamètre de VMC non écrit : deux zéros.",
   "1.05 u": "Antivents par ardoise (§4) et marge du zinc linéaire (§7).",
+  "10 mm": "Pas de vente des crochets (de cm en cm) et majoration du recouvrement de l'ardoise en situation exposée (NF DTU 40.11, fiche couverture).",
+  "1.1 u": "Écran au-dessus de 30 % de pente (surface + 10 %, fiche couverture) et marge des bandes de plomb (ml × 1,1, §12).",
   "2 m": "Longueur d'une bande (§1), d'une feuille 2 × 1 m (§48.6), d'une faîtière de bac (§8), espacement des colliers (§15) : quatre produits ou gestes.",
   "1 m": "Largeur d'une feuille de zinc et largeur utile d'un bac acier 1000.",
-  "6 m": "Seuil du bobineau (au-delà de 6 ml) et longueur d'un rouleau de plomb.",
-  "500 mm": "Bobineau 500 (bandes), bobine 500 du joint debout (bacs), bobine de cuivre 500 : trois produits.",
+  "10 m": "Longueur d'un rouleau de bande de plomb (jusqu'à 30 cm de large) et longueur maximale d'un bac de joint debout.",
+  "500 mm": "Bobineau 500 (bandes), bobine 500 du joint debout (bacs), bobine de cuivre 500, bobine étroite du zinc à tasseaux : quatre produits.",
   "650 mm": "Bobineau 650 (bandes) et bobine 650 du joint debout (bacs).",
   "3 u/m": "Pattes de bande zinc (§1, §3) et vis de rive du bac acier (§8).",
   "4 m": "Barre de gouttière zinc (§25.2) et profil PVC ou alu (§15).",
+  // Greg, 22 novembre 2026 : l'arêtier en bande zinc est « compté comme la noue » (0,50 m²/m), mais ce sont deux ouvrages :
+  // l'un peut changer sans l'autre (l'arêtier fermé en ardoises garde 0,66).
+  "0.5 m2/m": "Ardoise de l'arêtier en bande zinc et ardoise de la noue (0,50 m² par mètre, Greg, 22 novembre 2026) : deux ouvrages.",
 };
 /** Noms retirés par l'audit : une seule règle reste (le nom de droite). */
 const RETIRES: Record<string, string> = {
@@ -46,6 +49,9 @@ const SECTION_OUVRAGE: Record<string, string> = {
   "couverture-tuiles-emboitement": "§5, §35",
   "couverture-tuiles-canal": "§5",
   "couverture-ardoises-crochet": "§3, §34",
+  // Greg, 21 novembre 2026 (soir) : le remaniage ne compte plus d'ardoises d'office. Pas encore de section à lui dans le
+  // référentiel du fondateur : rangé avec l'ardoise naturelle (§3).
+  "remaniage-ardoises": "§3",
   "couverture-ardoises-fibres-ciment": "§4",
   faitage: "§5",
   "faitage-zinc": "§1, §7",
@@ -59,6 +65,10 @@ const SECTION_OUVRAGE: Record<string, string> = {
   "abergement-cheminee": "§7",
   "sortie-de-toit": "§25",
   "couverture-zinc-joint-debout": "§7, §36",
+  // Le zinc à tasseaux n'a pas encore sa section dans le référentiel du fondateur : ses réponses du 18 novembre 2026.
+  "couverture-zinc-tasseaux": "§7",
+  // Le chéneau encaissé en zinc (Greg, 20 novembre 2026, D-2026-024) : bobineau au mètre, comme la zinguerie du §7 et du §36.
+  "cheneau-encaisse": "§7, §36",
   "couverture-bac-acier": "§8",
   gouttiere: "§7, §25",
   "gouttiere-pvc-alu": "§15",
@@ -157,9 +167,11 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
     // garde sa règle propre, écrite au §25.2 : « recouvrement 150 mm entre éléments → longueur utile 1,85 m pour 2 m ».
     expect(needs.filter((n) => /\/\s*regle\.longueur_(?!bande_2m|feuille|profil|barre|utile_noue)/.test(n.formula)).map((n) => n.id)).toEqual([]);
     // Toute feuille se compte en bandes découpées dans le mètre de largeur.
-    const feuilles = needs.filter((n) => /^feuilles-/.test(n.id));
+    // L'abergement de cheminée (Greg, 23 novembre 2026) est du sur-mesure : devant, derrière, côtés, ou le nombre dit.
+    const feuilles = needs.filter((n) => /^feuilles-/.test(n.id) && n.id !== "feuilles-abergement");
     expect(feuilles.length).toBeGreaterThan(0);
-    expect(feuilles.filter((n) => !/regle\.longueur_feuille \* max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula)).map((n) => n.id)).toEqual([]);
+    // Calculateur de feuilles (Greg, 22 novembre 2026) : une part de feuille, la même formule partout (`partDeFeuille`).
+    expect(feuilles.filter((n) => !/arrondi_inf\(regle\.longueur_feuille \/ longueur_pieces\)\)\) \/ max\(1, arrondi_inf\(regle\.largeur_feuille \//.test(n.formula) || !n.partage).map((n) => n.id)).toEqual([]);
   });
 
   it("chaque règle cite sa section, et le tableau règle / section / test est à jour", async () => {
@@ -203,5 +215,6 @@ describe("Audit du référentiel couverture : aucune règle de calcul en double"
       "",
     ].join("\n");
     await expect(doc).toMatchFileSnapshot("../../../docs/audit-referentiel-regles.md");
-  });
+    // Ce test relit tous les fichiers de test du dépôt : sur une machine qui vient de démarrer, 5 secondes ne suffisent pas.
+  }, 30_000);
 });

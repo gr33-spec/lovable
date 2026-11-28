@@ -1,0 +1,29 @@
+{
+  "accords": [
+    {
+      "article": "Plaque bac acier nervuré simple peau RAL 8012, sans feutre, longueur 4,05 m",
+      "quantite": 7,
+      "unite": "plaques de 4,05 m"
+    }
+  ],
+  "desaccords": [
+    {
+      "article": "Tuile terre cuite à emboîtement grand moule",
+      "controleur": "945 pièces",
+      "reference": "à chiffrer",
+      "ecart": "La référence ne donne ni quantité ni unité (90 m² au devis seulement) ; le contrôleur chiffre 945 pièces."
+    },
+    {
+      "article": "Gouttière pendante demi-ronde aluminium anthracite, développé 25, longueur 4 m",
+      "controleur": "8 longueurs de 4 m",
+      "reference": "6 longueurs de 4 m",
+      "ecart": "Même article et même unité, mais 8 longueurs côté contrôleur contre 6 côté référence (2 longueurs d'écart)."
+    },
+    {
+      "article": "Tuyau de descente aluminium anthracite Ø80, sans dauphin",
+      "controleur": "6 tubes de 2 m",
+      "reference": "3 pièces",
+      "ecart": "Le contrôleur compte 6 tubes de 2 m (2 par descente), la référence 3 pièces (une par descente) : quantité et unité différentes, longueur de tube non précisée côté référence."
+    }
+  ]
+}

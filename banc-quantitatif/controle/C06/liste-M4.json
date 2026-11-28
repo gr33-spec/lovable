@@ -1,0 +1,26 @@
+{
+ "liste": [
+  {
+   "article": "Tuiles canal terre cuite, courants et couverts",
+   "quantite": null,
+   "unite": null,
+   "detail": "85 m² au devis"
+  },
+  {
+   "article": "Rives",
+   "quantite": "33",
+   "unite": "pièces",
+   "detail": "2 rives de 6 ml"
+  },
+  {
+   "article": "Faîtières",
+   "quantite": "27",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Liteaux 27×40 (Liteaux)",
+   "a_chiffrer": true
+  }
+ ]
+}

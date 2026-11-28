@@ -1,0 +1,195 @@
+{
+ "posees": [
+  {
+   "key": "param:feutre_bac",
+   "text": "Bac acier : avec ou sans feutre anti-condensation ?",
+   "options": [
+    "Avec feutre",
+    "Sans feutre"
+   ],
+   "reponse": "Sans feutre"
+  },
+  {
+   "key": "param:developpe_gouttiere@gouttiere-pvc-alu__6",
+   "text": "Gouttière : gouttière de 25, de 28, de 33 ou de 40 ?",
+   "options": [
+    "De 25",
+    "De 28",
+    "De 33",
+    "De 40"
+   ],
+   "reponse": "De 25"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Tuiles",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "90 m² au devis",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Plaques bac acier simple peau RAL 8012 longueur 4,05 m",
+    "quantite": "7",
+    "unite": "pièces",
+    "affiche": "7 pièces",
+    "etat": "ready",
+    "precision": "25 m² de toiture, largeur utile 1,00 m",
+    "lignes": [
+     "5"
+    ],
+    "attend": [
+     "param:feutre_bac"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière alu anthracite de",
+    "quantite": "6",
+    "unite": "longueurs de 4 m",
+    "affiche": "6 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [
+     "param:developpe_gouttiere@gouttiere-pvc-alu__6"
+    ],
+    "genre": "computed"
+   },
+   {
+    "label": "F. et P. DEP alu gris anthracite Ø80, sans dauphin",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [
+     "a-preciser:7"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, échaf. de pied 2 façades, protections",
+   "Dépose couv. existante tuiles, évac. gravats en déchetterie",
+   "Dépose anc. tôles ondulées, évac.",
+   "Nettoyage fin de chantier, repli échaf."
+  ],
+  "questions": [
+   "param:feutre_bac",
+   "param:developpe_gouttiere@gouttiere-pvc-alu__6"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Tuiles",
+    "quantite": null,
+    "unite": null,
+    "affiche": null,
+    "etat": "ready",
+    "precision": "90 m² au devis",
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "product:tuile"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Plaques bac acier simple peau RAL 8012 sans feutre, longueur 4,05 m",
+    "quantite": "7",
+    "unite": "pièces",
+    "affiche": "7 pièces",
+    "etat": "ready",
+    "precision": "25 m² de toiture, largeur utile 1,00 m",
+    "lignes": [
+     "5"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Gouttière alu anthracite de 25",
+    "quantite": "6",
+    "unite": "longueurs de 4 m",
+    "affiche": "6 longueurs de 4 m",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "6"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "F. et P. DEP alu gris anthracite Ø80, sans dauphin",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "7"
+    ],
+    "attend": [
+     "a-preciser:7"
+    ],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere-pvc-alu/talon",
+    "label": "Talons de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/angle",
+    "label": "Angles de gouttière"
+   },
+   {
+    "key": "gouttiere-pvc-alu/naissance",
+    "label": "Naissances de gouttière"
+   }
+  ],
+  "sansFourniture": [
+   "Install. chantier, échaf. de pied 2 façades, protections",
+   "Dépose couv. existante tuiles, évac. gravats en déchetterie",
+   "Dépose anc. tôles ondulées, évac.",
+   "Nettoyage fin de chantier, repli échaf."
+  ],
+  "questions": []
+ }
+}

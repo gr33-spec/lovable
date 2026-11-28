@@ -8,7 +8,7 @@ import { readQuoteComplet } from "./support/complet.js";
  * LOT COUVERTURE, POINT 1 : noues et arêtiers (§3, §5, §7, §25.2). Noue zinc commandée façonnée en longueurs de 2 m
  * (longueur utile 1,85 m), ou façonnée sur place (feuilles 2 × 1 m, bobineau au-delà de 6 ml), au développé du devis
  * (noue préformée de 50 sinon). Arêtier en tuiles (arêtières, closoir de 23 cm, crochets, abouts) ou en bande zinc
- * (longueurs de 3 m, pattes 3/ml) : lu dans la ligne ou sur la couverture du devis, sinon demandé avec les mots du
+ * (longueurs de 2 m depuis le 2026-11-19, avant 3 m ; pattes 3/ml) : lu dans la ligne ou sur la couverture du devis, sinon demandé avec les mots du
  * comptoir. Compte rendu : `docs/lot-couverture/point-1.md`, tableau de Brest compris.
  */
 const CAS: Metier[] = [
@@ -21,7 +21,7 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Arêtiers, toit à 4 pans", quantity: "24", unit: "ml" },
       { ref: "3", designation: "Noue zinc", quantity: "8", unit: "ml" },
     ],
-    questions: ["Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?", "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?"],
+    questions: ["Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "J'ai identifié : Tuiles HP10. C'est bien ce modèle ?"],
     couleurs: { vert: 1, orange: 2, gris: 0 },
   },
   {
@@ -33,8 +33,18 @@ const CAS: Metier[] = [
       { ref: "2", designation: "Arêtier zinc dév. 33", quantity: "10", unit: "ml" },
       { ref: "3", designation: "Noue encaissée zinc", quantity: "4", unit: "ml" },
     ],
-    questions: ["Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?", "Noue zinc : tu la façonnes toi-même ou tu la commandes façonnée ?"],
-    couleurs: { vert: 0, orange: 3, gris: 1 },
+    // Dans l'ordre du calcul (Greg, 20 novembre 2026 : les questions sont décidées par le code).
+    // Règle changée (Greg, 21 novembre 2026) : avant, deux questions → l'égout se demande quand aucune gouttière n'est écrite.
+    // Tant qu'elle attend, les ardoises n'ont pas de chiffre et la ligne des crochets (un par ardoise) n'est pas encore là :
+    // 2 lignes orange au lieu de 3. Répondu « Oui » : 150 m² + 10 m d'arêtier × 0,50 + 4 m de noue × 0,50 = 157 m² ;
+    // × 42,5 = 6 672,5 ; + 5 % = 7 006,1 → 7 007 ardoises.
+    // Règle changée (Greg, 22 novembre 2026) : l'arêtier en bande zinc (« Arêtier zinc dév. 33 ») compte 0,50 m² d'ardoise par
+    // mètre (avant 0,66, gardé pour un arêtier fermé en ardoises) ; avant (hier) 7 078 → 7 007 ardoises.
+    // Règle changée (Greg, 22 novembre 2026) : sans type de crochet écrit, « Agrafe ou pointe ? » (avant : aucune question, un
+    // crochet par ardoise). Répondu « À agrafe » (premier bouton) : 7 007 × 0,8 = 5 605,6 → 5 606 agrafes, / 500 = 11,2 → 12
+    // boîtes ; 7 007 × 0,2 = 1 401,4 → 1 402 pointes, / 700 = 2,003 → 3 boîtes (avant : 7 007 crochets, 15 boîtes de 500).
+    questions: ["Tes m² d'ardoise comprennent déjà l'égout et les coupes ?", "Tes crochets d'ardoise : à agrafe ou à pointe ?", "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?", "Quelle ardoise : Espagne 1er choix, ou ardoise NF (type Cupa) ?"],
+    couleurs: { vert: 0, orange: 2, gris: 1 },
   },
 ];
 
@@ -69,7 +79,7 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     expect(long.toBuy.map((b) => [b.label, b.quantity])).toEqual([["Feuilles zinc naturel 2 × 1 m, 0,65 mm", "3 pièces"]]);
   });
 
-  it("arêtier sur un toit de tuiles : arêtières 2,9/ml, closoir de 23 cm, un crochet par arêtière, un about par arêtier", () => {
+  it("arêtier sur un toit de tuiles : arêtières 3/ml, closoir de 23 cm, un crochet par arêtière, un about par arêtier", () => {
     const v = readQuoteComplet(
       [
         { ref: "1", designation: "Couverture tuiles HP10 terre cuite", quantity: "120", unit: "m²" },
@@ -79,17 +89,21 @@ describe("noues et arêtiers : les règles du fondateur", () => {
     );
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:aretier_matiere");
     const got = Object.fromEntries(v.toBuy.map((b) => [b.label, b.quantity]));
-    expect(got).toMatchObject({ Arêtiers: "35 pièces", "Crochets d'arêtier": "35 pièces", "Abouts d'arêtier": "2 pièces" }); // 12 × 2,9 = 34,8
+    expect(got).toMatchObject({ Arêtiers: "36 pièces", "Crochets d'arêtier": "36 pièces", "Abouts d'arêtier": "2 pièces" }); // 12 × 3 = 36 (fiche couverture, 2026-11-19 ; avant 2,9 : 35)
     expect(v.toBuy.find((b) => b.label === "Closoir d'arêtier")!.quantity).toBe("3 rouleaux de 5 m"); // 12 ml en rouleaux de 5 m
   });
 
   it("arêtier seul : le comptoir demande tuiles ou zinc ; en zinc, la bande de 25 ou de 33 et 3 pattes par mètre", () => {
     const before = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }]);
     expect(before.questions.map((q) => q.question?.text)).toContain("Arêtier en tuiles (arêtières) ou en bande zinc ?");
-    const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm") });
+    // Banc du calcul (21 novembre 2026) : un arêtier en bande zinc est une pièce pliée ; la réponse « je plie » du devis vaut
+    // pour lui. Commandé façonné : des bandes de 2 m (comme avant). Plié sur place : des feuilles 2 × 1 m.
+    const plie = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm"), "param:faconnage@pieces-pliees": u("1") });
+    expect(plie.toBuy.find((b) => b.label.startsWith("Feuilles"))!.quantity).toBe("2 pièces"); // 9 ml ÷ (2 m × 3 bandes de 33 dans 1 m) = 1,5 → 2
+    const v = readQuoteComplet([{ ref: "1", designation: "Arêtier", quantity: "9", unit: "ml" }], { "param:aretier_matiere": u("2"), "param:developpe_aretier": u("330", "mm"), "param:faconnage@pieces-pliees": u("2") });
     expect(v.questions).toEqual([]);
     expect(labels(v)).toEqual(expect.arrayContaining([expect.stringMatching(/^Arêtier zinc naturel 0,65 mm, bande dév\. 33/), expect.stringMatching(/^Pattes de fixation/)]));
-    expect(v.toBuy.find((b) => b.label.startsWith("Arêtier zinc"))!.quantity).toBe("4 longueurs de 3 m"); // 9 × 1,05 = 9,45 ml en longueurs de 3 m
+    expect(v.toBuy.find((b) => b.label.startsWith("Arêtier zinc"))!.quantity).toBe("5 longueurs de 2 m"); // 9 × 1,05 = 9,45 ml en longueurs de 2 m (fiche couverture, 2026-11-19 ; avant 3 m)
     expect(v.toBuy.find((b) => b.label.startsWith("Pattes"))!.quantity).toBe("27 pièces");
   });
 });

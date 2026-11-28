@@ -1,0 +1,28 @@
+{
+  "accords": [
+    {"article": "Bande porte-solin zinc naturel 0,65 mm, développé 100 mm, longueur 3 m", "quantite": 2, "unite": "bandes de 3 m"},
+    {"article": "Gouttière demi-ronde zinc naturel 0,65 mm, développé 250 (de 25), longueur 4 m", "quantite": 4, "unite": "longueurs de 4 m"},
+    {"article": "Tuyau de descente zinc Ø80", "quantite": 3, "unite": "tubes de 2 m (pièces)"},
+    {"article": "Dauphin fonte Ø80", "quantite": 1, "unite": "pièces"}
+  ],
+  "desaccords": [
+    {
+      "article": "Bande de rive zinc naturel 0,65 mm, façonnée, développé 250 mm",
+      "controleur": "8 bandes de 2 m",
+      "reference": "7 longueurs de 2 m",
+      "ecart": "Même article et même unité, mais 8 côté contrôleur contre 7 côté référence (une longueur de 2 m de plus)."
+    },
+    {
+      "article": "Naissance zinc pour gouttière demi-ronde de 25, sortie Ø80",
+      "controleur": "1 pièce",
+      "reference": "absent",
+      "ecart": "Article présent dans la liste du contrôleur, absent de la liste de référence."
+    },
+    {
+      "article": "Abergement de cheminée zinc naturel 0,65 mm, façonné",
+      "controleur": "à chiffrer",
+      "reference": "1 pièce",
+      "ecart": "Le contrôleur ne chiffre pas l'article (cotes de la souche inconnues), la référence donne 1 pièce."
+    }
+  ]
+}

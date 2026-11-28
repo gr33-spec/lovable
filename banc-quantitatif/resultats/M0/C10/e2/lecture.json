@@ -1,0 +1,645 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "couverture, zinguerie et évacuation des eaux pluviales d'un pavillon neuf",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "en-tête : « Objet : couverture en ardoises fibres-ciment, zinguerie et évacuation des eaux pluviales d'un pavillon neuf »"
+  },
+  {
+   "donnee": "neuf ou rénovation",
+   "valeur": "neuf",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "en-tête : « Construction d'un pavillon »"
+  },
+  {
+   "donnee": "matériau",
+   "valeur": "ardoises fibres-ciment 40×24 noires",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « ardoises fibres-ciment 40×24 noires »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "110 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « M2 110 » ; ligne 2 : « M2 110 »"
+  },
+  {
+   "donnee": "surface de liteaux",
+   "valeur": "100 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « M2 100 », contre 110 m² de couverture à la ligne 4"
+  },
+  {
+   "donnee": "pente",
+   "valeur": "35°",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Pente 35° »"
+  },
+  {
+   "donnee": "écran sous-toiture",
+   "valeur": "HPV, 110 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « écran sous-toiture HPV », « M2 110 »"
+  },
+  {
+   "donnee": "liteaux",
+   "valeur": "sapin traité",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « liteaux sapin traité »"
+  },
+  {
+   "donnee": "nombre de pans",
+   "valeur": "2",
+   "origine": "deduite",
+   "regle": "4 rives (deux pignons), un faîtage de 10 m et 2 gouttières de 10 m : toit à deux pans",
+   "preuve": ""
+  },
+  {
+   "donnee": "rampant",
+   "valeur": "5,50 m",
+   "origine": "deduite",
+   "regle": "une rive court de l'égout au faîtage : sa longueur est celle du rampant",
+   "preuve": ""
+  },
+  {
+   "donnee": "longueur de faîtage",
+   "valeur": "10 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « ML 10 »"
+  },
+  {
+   "donnee": "longueur de rives",
+   "valeur": "22 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « ML 22 », « 4 rives de 5,50 m »"
+  },
+  {
+   "donnee": "développé des rives",
+   "valeur": "250 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « développé 250 »"
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "longueur de gouttière",
+   "valeur": "20 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « ML 20 »"
+  },
+  {
+   "donnee": "matière et teinte de gouttière",
+   "valeur": "PVC sable",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « gouttières PVC sable »"
+  },
+  {
+   "donnee": "lignes de gouttière",
+   "valeur": "2 lignes de 10 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 7 : « 2 longueurs de 10 m »"
+  },
+  {
+   "donnee": "angles de gouttière",
+   "valeur": "0",
+   "origine": "deduite",
+   "regle": "deux égouts droits de 10 m sur un toit à deux pans : aucun angle",
+   "preuve": ""
+  },
+  {
+   "donnee": "développé de gouttière",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "pose des crochets de gouttière",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "nombre de descentes",
+   "valeur": "2",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « U 2 »"
+  },
+  {
+   "donnee": "diamètre des descentes",
+   "valeur": "Ø80",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « descentes PVC Ø80 »"
+  },
+  {
+   "donnee": "hauteur d'une descente",
+   "valeur": "5 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 8 : « hauteur 5 m »"
+  },
+  {
+   "donnee": "dauphin",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "sorties de toit",
+   "valeur": "1, Ø100",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 9 : « U 1 », « sortie de toit Ø100 »"
+  },
+  {
+   "donnee": "usage de la sortie de toit",
+   "valeur": "ventilation (évent)",
+   "origine": "deduite",
+   "regle": "un évent est une ventilation, pas un conduit de fumée",
+   "preuve": ""
+  },
+  {
+   "donnee": "couverture autour de la sortie",
+   "valeur": "ardoise",
+   "origine": "deduite",
+   "regle": "la couverture du devis est en ardoises fibres-ciment (ligne 4)",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Couverture neuve d'un pavillon en ardoises fibres-ciment, toit à deux pans, pente 35°.",
+  "Écran sous-toiture 110 m², HPV.",
+  "Liteaux sapin traité : 100 m² écrits, contre 110 m² de couverture.",
+  "Ardoises fibres-ciment 110 m², 40×24, noires.",
+  "Faîtières 10 m.",
+  "Bandes de rive zinc 22 m, développé 250 : 4 rives de 5,50 m.",
+  "Gouttières 20 m, PVC sable, en 2 longueurs de 10 m.",
+  "Descentes 2 u, PVC Ø80, hauteur 5 m.",
+  "Sortie de toit 1 u, Ø100, pour évent.",
+  "Rampant de 5,50 m, d'après les rives."
+ ],
+ "questions": [
+  {
+   "cle": "surface_liteaux",
+   "texte": "Tes liteaux, je les compte sur 100 m² comme écrit, ou sur les 110 m² de la couverture ?",
+   "boutons": [
+    {
+     "label": "100 m²",
+     "valeur": "100"
+    },
+    {
+     "label": "110 m²",
+     "valeur": "110"
+    }
+   ],
+   "unite": "m²",
+   "donnee": "surface de liteaux",
+   "ligne": "3"
+  },
+  {
+   "cle": "faconnage",
+   "texte": "Tes pièces pliées (rive, bandes, noue, faîtage…) : tu les plies toi-même, ou tu les achètes toutes faites ?",
+   "boutons": [
+    {
+     "label": "Je façonne (feuilles ou bobineau)",
+     "valeur": "1"
+    },
+    {
+     "label": "Je commande façonné",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "façonnage",
+   "ligne": ""
+  },
+  {
+   "cle": "developpe_gouttiere",
+   "texte": "Tes gouttières PVC, tu les prends de 25, de 28, de 33 ou de 40 ?",
+   "boutons": [
+    {
+     "label": "De 25",
+     "valeur": "25"
+    },
+    {
+     "label": "De 28",
+     "valeur": "28"
+    },
+    {
+     "label": "De 33",
+     "valeur": "33"
+    },
+    {
+     "label": "De 40",
+     "valeur": "40"
+    }
+   ],
+   "unite": "cm",
+   "donnee": "développé de gouttière",
+   "ligne": "7"
+  },
+  {
+   "cle": "fixation_crochet",
+   "texte": "Tes crochets de gouttière, tu les poses sur les chevrons ou en façade sur bandeau ?",
+   "boutons": [
+    {
+     "label": "Sur les chevrons",
+     "valeur": "1"
+    },
+    {
+     "label": "En façade (bandeau)",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "pose des crochets de gouttière",
+   "ligne": "7"
+  },
+  {
+   "cle": "dauphin",
+   "texte": "Tu mets un dauphin en pied de chaque descente ?",
+   "boutons": [
+    {
+     "label": "Oui",
+     "valeur": "1"
+    },
+    {
+     "label": "Non",
+     "valeur": "0"
+    }
+   ],
+   "unite": "",
+   "donnee": "dauphin",
+   "ligne": "8"
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Installation de chantier : mise en place, location et repli de l'échafaudage de pied et des protections de bas de pente.",
+   "quantite": "1",
+   "unite": "U",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Écran sous-toiture : fourniture et pose d'un écran sous-toiture HPV.",
+   "quantite": "110",
+   "unite": "M2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Écran sous-toiture HPV",
+     "quantite": "110",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "ecran",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "110"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "marque",
+      "rouleau"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Liteaux : fourniture et pose de liteaux sapin traité.",
+   "quantite": "100",
+   "unite": "M2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Liteaux sapin traité",
+     "quantite": "100",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "liteau",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "100"
+      }
+     ],
+     "attend": [
+      "surface_liteaux"
+     ],
+     "a_preciser": [
+      "section"
+     ],
+     "precision": "pour couverture en ardoises fibres-ciment"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture ardoises fibres-ciment : fourniture et pose d'ardoises fibres-ciment 40×24 noires. Pente 35°.",
+   "quantite": "110",
+   "unite": "M2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises fibres-ciment 40×24 noires",
+     "quantite": "110",
+     "unite": "m²",
+     "ouvrage": "couverture-ardoises-fibres-ciment",
+     "emplacement": "ardoise",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "110"
+      },
+      {
+       "cle": "teinte_fc",
+       "valeur": "2"
+      },
+      {
+       "cle": "pente",
+       "valeur": "35"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "marque",
+      "modèle"
+     ],
+     "precision": "pente 35°"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faîtage : fourniture et pose de faîtières.",
+   "quantite": "10",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faîtières",
+     "quantite": "10",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "10"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": "pour couverture en ardoises fibres-ciment"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Rives : fourniture et pose de bandes de rive en zinc, développé 250. 4 rives de 5,50 m.",
+   "quantite": "22",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Bandes de rive zinc, développé 250",
+     "quantite": "22",
+     "unite": "ml",
+     "ouvrage": "bandes-zinc",
+     "emplacement": "bande",
+     "donnees": [
+      {
+       "cle": "longueur_bande",
+       "valeur": "22"
+      },
+      {
+       "cle": "developpe",
+       "valeur": "250"
+      }
+     ],
+     "attend": [
+      "faconnage"
+     ],
+     "a_preciser": [
+      "épaisseur du zinc",
+      "aspect du zinc"
+     ],
+     "precision": "4 rives de 5,50 m"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Gouttières : fourniture et pose de gouttières PVC sable. 2 longueurs de 10 m.",
+   "quantite": "20",
+   "unite": "ML",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Gouttières PVC sable",
+     "quantite": "20",
+     "unite": "ml",
+     "ouvrage": "gouttiere-pvc-alu",
+     "emplacement": "profil",
+     "donnees": [
+      {
+       "cle": "longueur_gouttiere",
+       "valeur": "20"
+      },
+      {
+       "cle": "matiere_gouttiere",
+       "valeur": "1"
+      },
+      {
+       "cle": "teinte_gouttiere",
+       "valeur": "3"
+      },
+      {
+       "cle": "nb_lignes",
+       "valeur": "2"
+      },
+      {
+       "cle": "nb_angles",
+       "valeur": "0"
+      },
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      }
+     ],
+     "attend": [
+      "developpe_gouttiere",
+      "fixation_crochet"
+     ],
+     "a_preciser": [
+      "profil"
+     ],
+     "precision": "2 longueurs de 10 m"
+    }
+   ]
+  },
+  {
+   "ref": "8",
+   "designation": "Descentes : fourniture et pose de descentes PVC Ø80, hauteur 5 m.",
+   "quantite": "2",
+   "unite": "U",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Descentes PVC Ø80",
+     "quantite": "2",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "2"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      },
+      {
+       "cle": "hauteur_descente",
+       "valeur": "5"
+      }
+     ],
+     "attend": [
+      "dauphin"
+     ],
+     "a_preciser": [
+      "teinte"
+     ],
+     "precision": "hauteur 5 m"
+    }
+   ]
+  },
+  {
+   "ref": "9",
+   "designation": "Sortie de toit : fourniture et pose d'une sortie de toit Ø100 pour évent.",
+   "quantite": "1",
+   "unite": "U",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Sortie de toit Ø100 pour évent",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "sortie-de-toit",
+     "emplacement": "sortie",
+     "donnees": [
+      {
+       "cle": "nb_sorties",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_sortie",
+       "valeur": "100"
+      },
+      {
+       "cle": "usage_sortie",
+       "valeur": "2"
+      },
+      {
+       "cle": "support_sortie",
+       "valeur": "1"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": "sur couverture en ardoises fibres-ciment"
+    }
+   ]
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "entreprise",
+   "valeur": "EURL Toitures Riaud"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "DV-2026-187"
+  },
+  {
+   "cle": "date",
+   "valeur": "09/11/2026"
+  },
+  {
+   "cle": "validité",
+   "valeur": "2 mois"
+  },
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Loïc Hamon"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "27, allée des Noisetiers"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Rennes"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "35000"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "neuf (construction d'un pavillon)"
+  },
+  {
+   "cle": "objet",
+   "valeur": "couverture en ardoises fibres-ciment, zinguerie et évacuation des eaux pluviales d'un pavillon neuf"
+  },
+  {
+   "cle": "délai",
+   "valeur": "intervention sous 6 semaines après accord, durée prévue 2 semaines hors intempéries"
+  }
+ ],
+ "notes": []
+}

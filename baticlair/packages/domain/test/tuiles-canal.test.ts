@@ -44,10 +44,12 @@ describe("la tuile canal est reconnue, même quand la ligne commence par « Tuil
 });
 
 describe("le calcul canal (§35.3)", () => {
-  it("Canal Gironde 50 à R 150 sur 100 m² : 2 540 tuiles (12,7 × 2), 307 ml de liteaux 27×40 (2,92 + 5 %), 54 bardelis (20 m × 2,7)", () => {
+  // + 3 % de casse et de coupe (fiche couverture, 2026-11-20, tuile.perte_canal ; avant 0 %).
+  it("Canal Gironde 50 à R 150 sur 100 m² : 2 617 tuiles (12,7 × 2 + 3 %), 322 ml de liteaux 27×40 (2,92 + 10 % de chute), 54 bardelis (20 m × 2,7)", () => {
+    // Règle changée (Greg, 22 novembre 2026) : 10 % de chute au total sur les liteaux, contre-liteaux 5 % ; avant (hier) 338 → 322 ml (100 × 2,92 × 1,10 = 321,2 → 322).
     const v = readQuote(DEVIS, A({ "product:tuile": "edilians-canal-gironde-50", "param:recouvrement_canal": { value: "150", unit: "mm" } }));
     const q = Object.fromEntries(v.toBuy.map((b) => [b.needIds[0], b.quantity]));
-    expect(q).toMatchObject({ "tuiles-canal": "2 540 pièces", "liteaux-canal": "307 ml", bardelis: "54 pièces" });
+    expect(q).toMatchObject({ "tuiles-canal-courants": "1 309 pièces", "tuiles-canal-couverts": "1 309 pièces", "liteaux-canal": "322 ml", "bardelis-gauches": "27 pièces", "bardelis-droits": "27 pièces" }); // deux lignes, gauches et droites (Greg, 21 novembre 2026 ; avant une ligne de 54)
     expect(v.toQuote).toEqual([]);
     expect(v.questions).toEqual([]);
   });
@@ -55,7 +57,9 @@ describe("le calcul canal (§35.3)", () => {
   it("tuile à blocage : le recouvrement est fixe (150 mm), la question ne change rien et n'est pas posée", () => {
     const v = readQuote(DEVIS, A({ "product:tuile": "edilians-canal-gironde-blocage" }));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("param:recouvrement_canal");
-    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))?.quantity).toBe("2 540 pièces");
+    // Deux lignes, courants et couverts (Greg, 21 novembre 2026) : 1 309 de chaque (avant : une ligne de 2 617).
+    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal-courants"))?.quantity).toBe("1 309 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal-couverts"))?.quantity).toBe("1 309 pièces");
   });
 
   it("le devis nomme le modèle (« Canal Charentaise ») : une simple confirmation, pas un choix parmi six", () => {
@@ -66,7 +70,9 @@ describe("le calcul canal (§35.3)", () => {
     const v = readQuote([{ ref: "1", designation: "Tuiles canal Charentaise", quantity: "100", unit: "m²" }], A({ "product:tuile": "edilians-canal-charentaise", "param:recouvrement_canal": { value: "160", unit: "mm" } }));
     expect(v.questions.map((q) => q.question?.key)).not.toContain("product:tuile");
     // 100 × 18,1 × 2 = 3 620.
-    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal"))?.quantity).toBe("3 620 pièces");
+    // 1 810 + 3 % = 1 864,3 → 1 865 de chaque (deux lignes, Greg, 21 novembre 2026 ; avant : une ligne de 3 729).
+    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal-courants"))?.quantity).toBe("1 865 pièces");
+    expect(v.toBuy.find((b) => b.needIds.includes("tuiles-canal-couverts"))?.quantity).toBe("1 865 pièces");
   });
 });
 

@@ -1,0 +1,166 @@
+{
+ "posees": [
+  {
+   "key": "param:hauteur_descente",
+   "text": "Hauteur d'une descente ?",
+   "options": [],
+   "reponse": "6 m"
+  }
+ ],
+ "ouverture": {
+  "liste": [
+   {
+    "label": "Gouttière demi-ronde zinc naturel dév. 33",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": "sur 3 façades",
+    "lignes": [
+     "2.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Angles de gouttière demi-ronde zinc naturel dév. 33",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2.2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Descente zinc Ø100 d'eau pluviale, diamètre descentes mm",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "3"
+    ],
+    "attend": [
+     "param:hauteur_descente"
+    ],
+    "genre": "direct"
+   },
+   {
+    "label": "Dauphins fonte Ø100",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   }
+  ],
+  "sansFourniture": [
+   "Dépose anc. gout. + DEP, évac. déchetterie",
+   "Echaf. roulant + protections, mise en place et repli"
+  ],
+  "questions": [
+   "param:hauteur_descente"
+  ]
+ },
+ "final": {
+  "liste": [
+   {
+    "label": "Gouttière demi-ronde zinc naturel dév. 33",
+    "quantite": "7",
+    "unite": "longueurs de 4 m",
+    "affiche": "7 longueurs de 4 m",
+    "etat": "ready",
+    "precision": "sur 3 façades",
+    "lignes": [
+     "2.1"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Angles de gouttière demi-ronde zinc naturel dév. 33",
+    "quantite": "2",
+    "unite": "pièces",
+    "affiche": "2 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "2.2"
+    ],
+    "attend": [],
+    "genre": "direct"
+   },
+   {
+    "label": "Descente zinc Ø100",
+    "quantite": "9",
+    "unite": "pièces",
+    "affiche": "9 pièces",
+    "etat": "ready",
+    "precision": "3 descentes × 6 m",
+    "lignes": [
+     "3"
+    ],
+    "attend": [],
+    "genre": "computed"
+   },
+   {
+    "label": "Dauphins fonte Ø100",
+    "quantite": "3",
+    "unite": "pièces",
+    "affiche": "3 pièces",
+    "etat": "ready",
+    "precision": null,
+    "lignes": [
+     "4"
+    ],
+    "attend": [],
+    "genre": "direct"
+   }
+  ],
+  "aChiffrer": [],
+  "suggestions": [
+   {
+    "key": "gouttiere/crochet",
+    "label": "Crochets de gouttière"
+   },
+   {
+    "key": "gouttiere/naissance",
+    "label": "Naissances de gouttière"
+   },
+   {
+    "key": "gouttiere/talon",
+    "label": "Talons de gouttière (si tu ne les fabriques pas)"
+   }
+  ],
+  "sansFourniture": [
+   "Dépose anc. gout. + DEP, évac. déchetterie",
+   "Echaf. roulant + protections, mise en place et repli"
+  ],
+  "questions": []
+ }
+}

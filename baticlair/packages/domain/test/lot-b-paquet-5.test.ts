@@ -13,7 +13,7 @@ const PAQUET: Metier[] = [
     ref: TERRASSE_BOIS_REFERENTIAL,
     metier: "terrasse-bois",
     bench: [{ ref: "1", designation: "Terrasse bois pin classe 4 sur lambourdes et plots réglables", quantity: "32", unit: "m²" }],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 0, orange: 1, gris: 0 },
   },
   {
@@ -59,7 +59,7 @@ const PAQUET: Metier[] = [
       { ref: "5", designation: "Carrelage sol grès cérame 60x60 rectifié, pose droite", quantity: "75", unit: "m²" },
       { ref: "6", designation: "Peinture murs et plafonds mate, 2 couches", quantity: "260", unit: "m²" },
     ],
-    questions: ["Consommables de pose (pointes, vis, pattes, étain, silicone) : je les ajoute à la liste ?"],
+    questions: [],
     couleurs: { vert: 2, orange: 4, gris: 0 },
   },
 ];

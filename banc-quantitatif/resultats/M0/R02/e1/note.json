@@ -1,0 +1,46 @@
+{
+ "m": "M0",
+ "c": "R02",
+ "e": 1,
+ "nRef": 18,
+ "justes": 16,
+ "quantite": 0,
+ "manquantes": 2,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 5,
+ "questionsRef": 1,
+ "questionsHorsRef": 4,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Tubes de descente Ø80, longueur 2 m (4 pièces)",
+   "Coudes descente Ø80 (4 pièces)"
+  ],
+  "inventees": [
+   "Collerette d'étanchéité (1 pièce)"
+  ],
+  "doutes": [],
+  "horsRef": [
+   {
+    "key": "param:coudes_par_descente",
+    "text": "Tes « 2 jeux de coudes » par descente, ça fait combien de coudes ?"
+   },
+   {
+    "key": "param:diametre_sortie",
+    "text": "Sortie de toit : quel diamètre ?"
+   },
+   {
+    "key": "param:pente",
+    "text": "Pente du toit ?"
+   },
+   {
+    "key": "param:usage_sortie",
+    "text": "Sortie de toit : conduit de fumée ou ventilation ?"
+   }
+  ]
+ }
+}

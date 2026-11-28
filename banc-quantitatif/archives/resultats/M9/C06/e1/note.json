@@ -1,0 +1,28 @@
+{
+ "m": "M9",
+ "c": "C06",
+ "e": 1,
+ "nRef": 4,
+ "justes": 3,
+ "quantite": 0,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 1,
+ "questionsRef": 1,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Faîtières (27 pièces)"
+  ],
+  "inventees": [
+   "Faitage (27 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

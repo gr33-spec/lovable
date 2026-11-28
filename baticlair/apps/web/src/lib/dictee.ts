@@ -1,0 +1,170 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+
+/**
+ * LA DICTÉE (assistant Mobiiz, Greg, 31 octobre 2026, point 4) : la reconnaissance vocale du navigateur (Web Speech API),
+ * zéro coût, zéro dépendance. Le texte dicté va dans la case, JAMAIS envoyé seul : l'artisan relit puis envoie. Micro
+ * refusé, navigateur sans dictée, rien entendu : une phrase claire, et le clavier reste là.
+ */
+type Reconnaissance = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult: ((e: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
+  onend: (() => void) | null;
+};
+
+function fabrique(): (new () => Reconnaissance) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { SpeechRecognition?: new () => Reconnaissance; webkitSpeechRecognition?: new () => Reconnaissance };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** Le navigateur sait-il dicter ? (L'accès « Dicter » de l'accueil ne se montre que s'il marche vraiment.) */
+export const dicteeDisponible = (): boolean => fabrique() !== null;
+
+export const PHRASES_DICTEE = {
+  indisponible: "La dictée n'est pas disponible sur ce navigateur. Utilise le micro de ton clavier, ou écris ta réponse.",
+  refuse: "Le micro est bloqué. Autorise-le dans les réglages du navigateur, ou écris ta réponse.",
+  rien: "Je n'ai rien entendu. Réessaie, ou écris ta réponse.",
+  erreur: "La dictée s'est arrêtée. Réessaie, ou écris ta réponse.",
+};
+
+/**
+ * MICRO BLOQUÉ (Greg, 7 novembre 2026 : « un accès directement vers les réglages du téléphone ») : une page web ne peut
+ * pas ouvrir les Réglages du téléphone (seule une application installée le peut). On donne donc le chemin exact pour CE
+ * téléphone et CE navigateur, en étapes courtes, puis « Réessayer ».
+ */
+export type AideMicro = { titre: string; etapes: string[] };
+export function aideMicro(ua: string): AideMicro {
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && /Mobile/i.test(ua));
+  if (ios && /CriOS/i.test(ua)) return { titre: "Autoriser le micro (Chrome sur iPhone)", etapes: ["Ouvre l'app Réglages de ton iPhone.", "Descends jusqu'à « Chrome ».", "Active « Micro ».", "Reviens ici et touche « Réessayer »."] };
+  if (ios) return { titre: "Autoriser le micro (Safari sur iPhone)", etapes: ["Touche « aA » (ou l'icône à gauche de l'adresse test.mobiiz.fr).", "Touche « Réglages du site web ».", "Micro : choisis « Autoriser ».", "Touche « Réessayer » ci-dessous."] };
+  if (/Android/i.test(ua)) return { titre: "Autoriser le micro (Android)", etapes: ["Touche l'icône à gauche de l'adresse (cadenas ou réglages).", "Touche « Autorisations » puis « Micro ».", "Choisis « Autoriser ».", "Touche « Réessayer » ci-dessous."] };
+  return { titre: "Autoriser le micro", etapes: ["Clique sur le cadenas à gauche de l'adresse.", "Micro : choisis « Autoriser ».", "Clique sur « Réessayer » ci-dessous."] };
+}
+
+/**
+ * `continu` (dictée du quantitatif, Greg, 22 novembre 2026) : l'écoute ne s'arrête pas à la première pause, seulement sur
+ * « Arrêter » ; le texte rendu est TOUT ce qui a été dit depuis le début.
+ */
+export function useDictee(surTexte: (texte: string, final: boolean) => void, options: { continu?: boolean } = {}) {
+  const continu = options.continu === true;
+  const [ecoute, setEcoute] = useState(false);
+  const [probleme, setProbleme] = useState<string | null>(null);
+  const rec = useRef<Reconnaissance | null>(null);
+  const rappel = useRef(surTexte);
+  useEffect(() => {
+    rappel.current = surTexte;
+  }, [surTexte]);
+  useEffect(() => () => rec.current?.abort(), []);
+
+  /**
+   * ÉCOUTE CONTINUE QUI TIENT (Greg, 27 novembre 2026 : « gère la coupure de Safari après un silence ») : Safari arrête la
+   * reconnaissance tout seul après un silence. Tant que l'artisan n'a pas touché « Arrêter » ou « Annuler » (`voulu`), une
+   * nouvelle écoute repart aussitôt, et ce qui a déjà été dit est GARDÉ (`base`) : rien n'est perdu, rien n'est envoyé seul.
+   */
+  const voulu = useRef(false);
+  const base = useRef("");
+  const derniere = useRef("");
+  const relances = useRef(0);
+  const [activite, setActivite] = useState(0);
+  /** La relance passe par une référence (une fonction ne s'appelle pas elle-même dans un rappel de React). */
+  const relancer = useRef<() => void>(() => undefined);
+
+  const arreter = useCallback(() => {
+    voulu.current = false;
+    rec.current?.stop();
+  }, []);
+
+  const lancer = useCallback((): void => {
+    const F = fabrique();
+    if (!F) {
+      setProbleme(PHRASES_DICTEE.indisponible);
+      setEcoute(false);
+      return;
+    }
+    try {
+      const r = new F();
+      r.lang = "fr-FR";
+      r.interimResults = true;
+      r.continuous = continu;
+      r.onresult = (e) => {
+        let texte = "";
+        let final = false;
+        for (let i = continu ? 0 : e.resultIndex; i < e.results.length; i++) {
+          const morceau = e.results[i]![0]!.transcript;
+          final = e.results[i]!.isFinal;
+          if (!continu) {
+            texte += morceau;
+            continue;
+          }
+          // Chrome sur Android, en écoute continue, redonne parfois TOUT ce qui a été dit dans chaque résultat : un
+          // morceau qui reprend le début déjà entendu le remplace au lieu de s'ajouter (jamais une phrase en double).
+          const t = morceau.trim();
+          const deja = texte.trim();
+          texte = deja && t.toLowerCase().startsWith(deja.toLowerCase()) ? t : deja ? `${deja} ${t}` : t;
+        }
+        if (continu) {
+          texte = [base.current, texte].filter((x) => x.trim()).join(" ").trim();
+          derniere.current = texte;
+        }
+        // Chaque résultat qui arrive fait bouger l'onde (la voix est là), même sans accès au son du micro.
+        setActivite((n) => n + 1);
+        rappel.current(texte, final);
+      };
+      r.onerror = (e) => {
+        // En écoute continue, le silence n'est pas une fin : la reconnaissance repart (onend) avec ce qui a été dit.
+        if (continu && voulu.current && (e.error === "no-speech" || e.error === "aborted")) return;
+        // Refus, silence ou panne : la dictée est finie, « Je t'écoute » ne reste jamais affiché (capture iPhone de Greg).
+        voulu.current = false;
+        setEcoute(false);
+        setProbleme(e.error === "not-allowed" || e.error === "service-not-allowed" ? PHRASES_DICTEE.refuse : e.error === "no-speech" ? PHRASES_DICTEE.rien : e.error === "aborted" ? null : PHRASES_DICTEE.erreur);
+      };
+      r.onend = () => {
+        if (continu && voulu.current && relances.current < 60) {
+          relances.current += 1;
+          base.current = derniere.current;
+          relancer.current();
+          return;
+        }
+        voulu.current = false;
+        setEcoute(false);
+      };
+      rec.current = r;
+      r.start();
+      setEcoute(true);
+    } catch {
+      voulu.current = false;
+      setProbleme(PHRASES_DICTEE.erreur);
+      setEcoute(false);
+    }
+  }, [continu]);
+
+  useEffect(() => {
+    relancer.current = lancer;
+  }, [lancer]);
+
+  const demarrer = useCallback(() => {
+    setProbleme(null);
+    voulu.current = true;
+    base.current = "";
+    derniere.current = "";
+    relances.current = 0;
+    lancer();
+  }, [lancer]);
+
+  /** Annuler : la dictée s'arrête et ce qu'elle avait écrit est retiré par l'appelant (il garde le texte d'avant). */
+  const annuler = useCallback(() => {
+    voulu.current = false;
+    rec.current?.abort();
+    setEcoute(false);
+  }, []);
+
+  return { ecoute, probleme, activite, demarrer, arreter, annuler, effacerProbleme: () => setProbleme(null) };
+}

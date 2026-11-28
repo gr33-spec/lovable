@@ -1,0 +1,387 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "réparation de toiture suite fuite",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "en-tête : « réparation toiture suite fuite »"
+  },
+  {
+   "donnee": "neuf ou rénovation",
+   "valeur": "existant (réparation)",
+   "origine": "deduite",
+   "regle": "une réparation porte sur une toiture existante",
+   "preuve": ""
+  },
+  {
+   "donnee": "matériau de couverture",
+   "valeur": "ardoise",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « Remaniage ardoises autour noue »"
+  },
+  {
+   "donnee": "noue",
+   "valeur": "zinc",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « Remplact noue zinc »"
+  },
+  {
+   "donnee": "longueur de noue",
+   "valeur": "6 ml",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 1 : « 6 ml »"
+  },
+  {
+   "donnee": "façonnage",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "développé de la noue",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "surface de remaniage",
+   "valeur": "12 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « 12 m2 »"
+  },
+  {
+   "donnee": "ardoises de remplacement",
+   "valeur": "identiques à l'existant",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « ardoises identiques à l'existant »"
+  },
+  {
+   "donnee": "modèle et teinte de l'ardoise",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "longueur de solin",
+   "valeur": "3 ml",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Reprise solin au mortier 3 ml »"
+  },
+  {
+   "donnee": "solin",
+   "valeur": "au mortier",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « Reprise solin au mortier »"
+  },
+  {
+   "donnee": "nombre de descentes",
+   "valeur": "1 u",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Remplact DEP Ø80 1 u »"
+  },
+  {
+   "donnee": "diamètre de descente",
+   "valeur": "Ø 80 mm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « DEP Ø80 »"
+  },
+  {
+   "donnee": "hauteur de descente",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "dauphin",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  },
+  {
+   "donnee": "accès",
+   "valeur": "échelle de toit",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « Echelle de toit »"
+  },
+  {
+   "donnee": "évacuation des gravats",
+   "valeur": "oui, au forfait",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « évac gravats forfait »"
+  }
+ ],
+ "bref": [
+  "Réparation d'une toiture en ardoise existante suite fuite, pas de couverture neuve.",
+  "Noue zinc 6 ml, en remplacement.",
+  "Ardoises identiques à l'existant, pour remaniage de 12 m² autour de la noue.",
+  "Mortier pour reprise de solin sur 3 ml.",
+  "Descente Ø80, 1 u, en remplacement.",
+  "Échelle de toit et évacuation des gravats au forfait, sans fourniture."
+ ],
+ "questions": [
+  {
+   "cle": "faconnage",
+   "texte": "Ta noue : tu la plies toi-même, ou tu l'achètes toute faite ?",
+   "boutons": [
+    {
+     "label": "Je façonne (feuilles ou bobineau)",
+     "valeur": "1"
+    },
+    {
+     "label": "Je commande façonné",
+     "valeur": "2"
+    }
+   ],
+   "unite": "",
+   "donnee": "façonnage",
+   "ligne": "1"
+  },
+  {
+   "cle": "developpe_noue",
+   "texte": "Ta noue, de 50 ou de 66 ?",
+   "boutons": [
+    {
+     "label": "De 50",
+     "valeur": "500"
+    },
+    {
+     "label": "De 66",
+     "valeur": "660"
+    }
+   ],
+   "unite": "",
+   "donnee": "développé de la noue",
+   "ligne": "1"
+  },
+  {
+   "cle": "modele_ardoise",
+   "texte": "Quelle ardoise ?",
+   "boutons": [],
+   "unite": "",
+   "donnee": "modèle et teinte",
+   "ligne": "2"
+  },
+  {
+   "cle": "hauteur_descente",
+   "texte": "Hauteur de la descente, en mètres (ex. 6) ?",
+   "boutons": [],
+   "unite": "m",
+   "donnee": "hauteur de descente",
+   "ligne": "4"
+  },
+  {
+   "cle": "dauphin",
+   "texte": "Un dauphin en pied de la descente ?",
+   "boutons": [
+    {
+     "label": "Oui",
+     "valeur": "1"
+    },
+    {
+     "label": "Non",
+     "valeur": "0"
+    }
+   ],
+   "unite": "",
+   "donnee": "dauphin",
+   "ligne": "4"
+  }
+ ],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Remplact noue zinc",
+   "quantite": "6",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Noue zinc",
+     "quantite": "6",
+     "unite": "ml",
+     "ouvrage": "noue",
+     "emplacement": "noue",
+     "donnees": [
+      {
+       "cle": "longueur_noue",
+       "valeur": "6"
+      }
+     ],
+     "attend": [
+      "faconnage",
+      "developpe_noue"
+     ],
+     "a_preciser": [
+      "épaisseur",
+      "aspect du zinc"
+     ],
+     "precision": "remplacement de la noue existante"
+    }
+   ]
+  },
+  {
+   "ref": "2",
+   "designation": "Remaniage ardoises autour noue, ardoises identiques à l'existant",
+   "quantite": "12",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Ardoises identiques à l'existant",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "12"
+      }
+     ],
+     "attend": [
+      "modele_ardoise"
+     ],
+     "a_preciser": [
+      "quantité d'ardoises de remplacement"
+     ],
+     "precision": "pour remaniage de 12 m² autour de la noue"
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Reprise solin au mortier",
+   "quantite": "3",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Mortier",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [
+      "quantité",
+      "conditionnement"
+     ],
+     "precision": "pour reprise de solin sur 3 ml"
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Remplact DEP Ø80",
+   "quantite": "1",
+   "unite": "u",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Descente Ø80",
+     "quantite": "1",
+     "unite": "u",
+     "ouvrage": "descente",
+     "emplacement": "tube",
+     "donnees": [
+      {
+       "cle": "nb_descentes",
+       "valeur": "1"
+      },
+      {
+       "cle": "diametre_descente",
+       "valeur": "80"
+      }
+     ],
+     "attend": [
+      "hauteur_descente",
+      "dauphin"
+     ],
+     "a_preciser": [
+      "matière"
+     ],
+     "precision": "remplacement de la descente existante"
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Echelle de toit + évac gravats",
+   "quantite": "",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "entreprise",
+   "valeur": "SARL RIOU COUVERTURE"
+  },
+  {
+   "cle": "client",
+   "valeur": "Mme LE BIHAN Monique"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "21 rue des Salles"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "22200"
+  },
+  {
+   "cle": "ville",
+   "valeur": "GUINGAMP"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "2026-214"
+  },
+  {
+   "cle": "date",
+   "valeur": "17/11/26"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "rénovation (réparation toiture suite fuite)"
+  },
+  {
+   "cle": "tva",
+   "valeur": "10%"
+  },
+  {
+   "cle": "validité",
+   "valeur": "1 mois"
+  },
+  {
+   "cle": "acompte",
+   "valeur": "30% à la commande"
+  },
+  {
+   "cle": "délai",
+   "valeur": "travaux sous 15 jours selon temps"
+  }
+ ],
+ "notes": []
+}

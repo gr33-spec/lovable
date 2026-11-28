@@ -1,0 +1,27 @@
+{
+  "accords": [
+    {"article": "Feuille de zinc quartz 0,70 mm 2 × 1 m", "quantite": 1, "unite": "feuille"},
+    {"article": "Bobineau zinc quartz 0,70 mm, 650 mm × 17 m", "quantite": 1, "unite": "bobineau de 17 m"},
+    {"article": "Tuyau de descente zinc Ø100, longueur 2 m", "quantite": 2, "unite": "tubes de 2 m"}
+  ],
+  "desaccords": [
+    {
+      "article": "Bobine zinc quartz 0,70 mm, largeur 650 mm",
+      "controleur": "79 ml (2 bobineaux de 31 m + 1 de 17 m)",
+      "reference": "78 ml",
+      "ecart": "Même article et même unité, 1 ml de plus côté contrôleur (79 contre 78)."
+    },
+    {
+      "article": "Tasseaux bois trapézoïdaux 50 mm",
+      "controleur": "79 ml",
+      "reference": "75 ml",
+      "ecart": "4 ml de plus côté contrôleur, qui ajoute 5 % de perte (75 × 1,05) alors que la référence reste à 75 ml sans perte."
+    },
+    {
+      "article": "Couvre-joints zinc quartz 0,70 mm pour tasseaux de 50 mm",
+      "controleur": "45 longueurs de 2 m (soit 90 ml)",
+      "reference": "75 ml",
+      "ecart": "Le contrôleur compte en longueurs de 2 m avec recouvrements (90 ml équivalents), la référence en ml bruts (75 ml) : 15 ml d'écart, et unités différentes."
+    }
+  ]
+}

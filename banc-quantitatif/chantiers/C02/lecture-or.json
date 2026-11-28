@@ -1,0 +1,326 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [
+  {
+   "donnee": "ouvrage",
+   "valeur": "couverture en tuiles terre cuite à emboîtement, maison neuve",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "objet : « couverture en tuiles terre cuite d'une maison neuve » ; chantier : « Construction neuve »"
+  },
+  {
+   "donnee": "tuile",
+   "valeur": "HP10 Huguenot Fenal, coloris rouge",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « tuiles terre cuite HP10 Huguenot Fenal, coloris rouge »"
+  },
+  {
+   "donnee": "surface",
+   "valeur": "120 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "lignes 2 et 4 : « Surface : 120 m² »"
+  },
+  {
+   "donnee": "pente",
+   "valeur": "30°",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « Pente 30° »"
+  },
+  {
+   "donnee": "rampant",
+   "valeur": "7,50 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 4 : « rampant 7,50 m »"
+  },
+  {
+   "donnee": "support",
+   "valeur": "fermettes, entraxe 60 cm",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « sur fermettes, entraxe 60 cm »"
+  },
+  {
+   "donnee": "écran sous-toiture",
+   "valeur": "HPV, 120 m²",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 2 : « écran sous-toiture HPV […] Surface : 120 m² »"
+  },
+  {
+   "donnee": "contre-liteaux",
+   "valeur": "sapin traité 27×40",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « contre-liteaux sapin traité 27×40 sur fermettes »"
+  },
+  {
+   "donnee": "liteaux",
+   "valeur": "sapin traité 27×40",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 3 : « liteaux sapin traité 27×40 »"
+  },
+  {
+   "donnee": "longueur de rives",
+   "valeur": "30 m",
+   "origine": "deduite",
+   "regle": "4 rives × 7,50 m = 30 m",
+   "preuve": "ligne 5 : « 4 rives de 7,50 m »"
+  },
+  {
+   "donnee": "tuiles de rive",
+   "valeur": "HP 10 rouge",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 5 : « tuiles de rive HP 10 rouge »"
+  },
+  {
+   "donnee": "longueur de faîtage",
+   "valeur": "8,00 m",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « Longueur : 8,00 m »"
+  },
+  {
+   "donnee": "faîtage",
+   "valeur": "à sec, faîtières terre cuite rouge sur closoir ventilé",
+   "origine": "lue",
+   "regle": "",
+   "preuve": "ligne 6 : « faîtières terre cuite rouge posées à sec sur closoir ventilé »"
+  },
+  {
+   "donnee": "pureau",
+   "valeur": "",
+   "origine": "manquante",
+   "regle": "",
+   "preuve": ""
+  }
+ ],
+ "bref": [
+  "Couverture neuve en tuiles terre cuite, maison individuelle.",
+  "120 m² d'écran sous-toiture HPV, sur fermettes entraxe 60 cm.",
+  "Contre-liteaux sapin traité 27×40 sur fermettes et liteaux sapin traité 27×40.",
+  "120 m² de tuiles terre cuite HP10 Huguenot Fenal, coloris rouge, pente 30°, rampant 7,50 m.",
+  "Tuiles de rive HP 10 rouge : 4 rives de 7,50 m, soit 30 m.",
+  "Faîtage à sec de 8,00 m : faîtières terre cuite rouge sur closoir ventilé.",
+  "Échafaudage et main-d'œuvre : rien à acheter."
+ ],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Échafaudage. Installation, location pendant la durée du chantier et repli d'un échafaudage de pied.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Écran sous-toiture. Fourniture et pose d'un écran sous-toiture HPV sur fermettes, entraxe 60 cm. Surface : 120 m².",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Écran sous-toiture HPV",
+     "quantite": "120",
+     "unite": "m²",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "ecran",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "120"
+      },
+      {
+       "cle": "entraxe_supports",
+       "valeur": "60"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Contre-liteaux et liteaux. Fourniture et pose de contre-liteaux sapin traité 27×40 sur fermettes et de liteaux sapin traité 27×40.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Contre-liteaux sapin traité 27×40",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "contre_liteau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    },
+    {
+     "nom": "Liteaux sapin traité 27×40",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "liteau",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Couverture tuiles. Fourniture de tuiles terre cuite HP10 Huguenot Fenal, coloris rouge. Surface : 120 m². Pente 30°, rampant 7,50 m.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge",
+     "quantite": "120",
+     "unite": "m²",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "120"
+      },
+      {
+       "cle": "pente",
+       "valeur": "30"
+      },
+      {
+       "cle": "longueur_rampant",
+       "valeur": "7.5"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Rives. Fourniture de tuiles de rive HP 10 rouge. 4 rives de 7,50 m.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Tuiles de rive HP 10 rouge",
+     "quantite": "30",
+     "unite": "ml",
+     "ouvrage": "couverture-tuiles-emboitement",
+     "emplacement": "rive",
+     "donnees": [
+      {
+       "cle": "longueur_rives",
+       "valeur": "30"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "rives gauches et droites"
+     ],
+     "precision": "4 rives de 7,50 m"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Faîtage à sec. Fourniture de faîtières terre cuite rouge posées à sec sur closoir ventilé. Longueur : 8,00 m.",
+   "quantite": "1",
+   "unite": "ens",
+   "role": "fourniture",
+   "fournitures": [
+    {
+     "nom": "Faîtières terre cuite rouge",
+     "quantite": "8",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "8"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle de faîtière"
+     ],
+     "precision": "faîtage à sec"
+    },
+    {
+     "nom": "Closoir ventilé",
+     "quantite": "8",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "closoir",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "8"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "faîtage à sec"
+    }
+   ]
+  },
+  {
+   "ref": "7",
+   "designation": "Main-d'œuvre. Main-d'œuvre de pose de la couverture, des rives et du faîtage.",
+   "quantite": "1",
+   "unite": "forfait",
+   "role": "pose",
+   "fournitures": []
+  }
+ ],
+ "contexte": [
+  {
+   "cle": "client",
+   "valeur": "M. et Mme Hervé Tanguy"
+  },
+  {
+   "cle": "adresse",
+   "valeur": "Lot n° 7, lotissement du Clos des Mésanges"
+  },
+  {
+   "cle": "ville",
+   "valeur": "Lamballe"
+  },
+  {
+   "cle": "code postal",
+   "valeur": "22400"
+  },
+  {
+   "cle": "numéro du devis",
+   "valeur": "D-2026-0412"
+  },
+  {
+   "cle": "date",
+   "valeur": "12/10/2026"
+  },
+  {
+   "cle": "neuf ou rénovation",
+   "valeur": "neuf"
+  }
+ ],
+ "notes": []
+}

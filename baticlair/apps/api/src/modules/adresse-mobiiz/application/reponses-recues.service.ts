@@ -1,0 +1,537 @@
+import { adresseNue, etiquetteDansObjet, lireAdresseMobiiz, NOM_APP, nomExpediteur, objetAvecRepere } from "@baticlair/domain";
+import type { TransactionalEmailSender } from "../../../platform/email/email.port.js";
+import { alertePropositionNegoce, BANDEAU_EXTERNE, liensDesactives, objetExterne } from "@baticlair/domain";
+import { expediteurExterne, ligneExterne, verdictDuRecu } from "../../../platform/email/contact-entrant.js";
+import type { JournalEntrants } from "../../../platform/email/journal-entrants.js";
+import { ecrireAlerte } from "../../../platform/notifications/alertes.js";
+import type { PrismaService } from "../../../platform/database/prisma.service.js";
+import type { EmailRecu, LecteurEmailRecu } from "../../../platform/email/contact-entrant.js";
+import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
+import type { AppLogger } from "../../../platform/logging/logger.js";
+import type { NotificationsGroupeService } from "../../../platform/notifications/notifications-artisan.js";
+import type { PriceRequestsService } from "../../price-requests/index.js";
+import type { TenantContext } from "../../tenancy/index.js";
+import type { AdresseMobiizService } from "./adresse-mobiiz.service.js";
+
+/** Une demande proposée pour classer un e-mail : le quantitatif, le négoce, la date et l'état, avant de confirmer. */
+export interface DemandePartieVue {
+  recipientId: string;
+  projectId: string;
+  chantier: string;
+  negoce: string;
+  envoyeeLe: string | null;
+  recue: boolean;
+  etat: string;
+}
+const DEMANDES_RECENTES_JOURS = 120;
+/** Une adresse de messagerie grand public ne dit rien de la société : jamais de proposition sur ce seul nom de domaine. */
+const MESSAGERIES_PUBLIQUES = new Set(["gmail.com", "googlemail.com", "orange.fr", "wanadoo.fr", "free.fr", "sfr.fr", "neuf.fr", "laposte.net", "hotmail.fr", "hotmail.com", "outlook.fr", "outlook.com", "live.fr", "yahoo.fr", "yahoo.com", "icloud.com", "me.com", "bbox.fr", "aol.com", "gmx.fr", "protonmail.com", "proton.me"]);
+
+/** Au-delà, les pièces jointes d'un e-mail reçu ne sont pas gardées (nommées « trop lourdes »). */
+export const RECU_MAX_OCTETS = 10 * 1024 * 1024;
+
+export interface EmailRecuVue {
+  id: string;
+  de: string;
+  /** Le nom affiché de l'expéditeur (« Négoce Dupont »), sinon son adresse. */
+  expediteur: string;
+  objet: string;
+  texte: string | null;
+  recuLe: string;
+  luLe: string | null;
+  /** La demande à laquelle il est rattaché (le négoce et le chantier), sinon null : il est dans « Reçus ». */
+  demande: { recipientId: string; projectId: string; negoce: string; chantier: string } | null;
+  fichiers: { id: string; nom: string; type: string; taille: number; devisRecu: boolean }[];
+  tropLourdes: string[];
+  /** Rangé dans les Indésirables (Greg, 22 novembre 2026). */
+  indesirable: boolean;
+}
+
+type Evenement = { email_id?: string; from?: string; to?: string[] | string; subject?: string; created_at?: string };
+
+/**
+ * R7 : LES RÉPONSES DES NÉGOCES ARRIVENT DANS MOBIIZ. Un e-mail reçu sur une adresse Mobiiz est gardé (corps et pièces
+ * jointes), rattaché à sa demande quand l'étiquette de réponse ou le repère de l'objet la nomme (un PDF joint devient
+ * alors le devis reçu du négoce, comme déposé à la main), sinon posé dans « Reçus » pour être rattaché d'un tap ; et
+ * l'artisan est prévenu (push et e-mail à son adresse personnelle), jamais à une adresse Mobiiz (pas de boucle).
+ */
+export class ReponsesRecuesService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly adresses: AdresseMobiizService,
+    private readonly priceRequests: PriceRequestsService,
+    private readonly notifications: NotificationsGroupeService,
+    private readonly domaine: string | null,
+    private readonly logger: AppLogger,
+    private readonly now: () => Date = () => new Date(),
+    /** Les adresses d'envoi de l'application (contact@, l'adresse de réponse) : un e-mail parti d'elles n'est jamais repris. */
+    private readonly adressesInternes: readonly string[] = [],
+    /** Le journal des entrants (Greg, 22 novembre 2026) : verdict, liste de l'admin, volume anormal. */
+    private readonly journal: JournalEntrants | null = null,
+    /** L'envoi des réponses écrites dans Mobiiz (Greg, 22 novembre 2026). */
+    private readonly mailer: TransactionalEmailSender | null = null,
+  ) {}
+
+  /** Le webhook : null quand l'e-mail ne vise aucune adresse Mobiiz (la suite du routage décide). */
+  async recevoir(evenement: Evenement, lecteur: LecteurEmailRecu): Promise<{ traite: boolean; raison?: string; id?: string; rattache?: boolean } | null> {
+    if (!this.domaine) return null;
+    const to = Array.isArray(evenement.to) ? evenement.to : evenement.to ? [evenement.to] : [];
+    const cible = lireAdresseMobiiz(to, this.domaine);
+    if (!cible) return null;
+    const companyId = await this.adresses.entrepriseDe(cible.adresse);
+    // Correction après test de Greg (30 octobre 2026) : une adresse que personne n'a ne perd jamais l'e-mail.
+    if (!companyId) return this.mettreDeCote(evenement, to, lecteur);
+    return this.ranger(companyId, cible, evenement, lecteur);
+  }
+
+  /** L'e-mail d'une adresse inconnue, gardé pour l'admin (corps, noms des pièces jointes, identifiant Resend). */
+  private async mettreDeCote(evenement: Evenement, to: string[], lecteur: LecteurEmailRecu) {
+    const lu = evenement.email_id ? await lecteur.lire(evenement.email_id).catch(() => null) : null;
+    const m = await this.prisma.emailMisDeCote.create({
+      data: {
+        adresse: to.map(adresseNue).find((a) => a.endsWith(`@${this.domaine}`)) ?? to.join(", "),
+        de: evenement.from ?? "",
+        objet: lu?.subject ?? evenement.subject ?? "",
+        texte: lu ? (lu.text ?? texteDuHtml(lu.html)) : null,
+        emailId: evenement.email_id ?? null,
+        pieces: lu ? [...lu.attachments.map((p) => p.filename), ...lu.tropLourdes] : [],
+        recuLe: dateLisible(lu?.date ?? evenement.created_at, this.now()),
+      },
+    });
+    this.logger.warn({ id: m.id }, "adresse mobiiz: e-mail mis de côté (adresse inconnue)");
+    return { traite: false, raison: "adresse_inconnue", misDeCote: true, id: m.id };
+  }
+
+  /** Les e-mails mis de côté qui attendent l'admin, du plus récent au plus ancien. */
+  async misDeCote() {
+    const liste = await this.prisma.emailMisDeCote.findMany({ where: { rattacheLe: null }, orderBy: { recuLe: "desc" }, take: 200 });
+    return liste.map((m) => ({ id: m.id, adresse: m.adresse, de: m.de, objet: m.objet, texte: m.texte, pieces: m.pieces, recuLe: m.recuLe.toISOString() }));
+  }
+
+  /** L'admin rattache un e-mail mis de côté à l'entreprise d'une adresse Mobiiz : il rejoint ses reçus, l'artisan est prévenu. */
+  async rattacherMisDeCote(id: string, adresseMobiiz: string, lecteur: LecteurEmailRecu) {
+    const m = await this.prisma.emailMisDeCote.findUnique({ where: { id } });
+    if (!m || m.rattacheLe) throw notFound("E-mail");
+    const nom = adresseMobiiz.trim().toLowerCase().replace(/@.*$/, "");
+    const companyId = await this.adresses.entrepriseDe(nom);
+    if (!companyId) throw validationFailed("Unknown Mobiiz address", { reason: "adresse_inconnue", phrase: "Aucune entreprise n'a cette adresse Mobiiz." });
+    const r = await this.ranger(companyId, { adresse: nom, etiquette: null }, { email_id: m.emailId ?? undefined, from: m.de, to: [m.adresse], subject: m.objet, created_at: m.recuLe.toISOString() }, lecteur, m.texte);
+    await this.prisma.emailMisDeCote.update({ where: { id }, data: { rattacheLe: this.now(), companyId } });
+    return r;
+  }
+
+  /** Range l'e-mail chez l'entreprise : sa demande (étiquette ou repère de l'objet), sinon « Reçus » ; prévient l'artisan. */
+  private async ranger(companyId: string, cible: { adresse: string; etiquette: string | null }, evenement: Evenement, lecteur: LecteurEmailRecu, texteGarde: string | null = null) {
+    const to = Array.isArray(evenement.to) ? evenement.to : evenement.to ? [evenement.to] : [];
+    const from = evenement.from ?? "";
+    // Pas de boucle : un e-mail parti d'une adresse d'envoi de l'application (contact@, réponse) n'est jamais repris ; une
+    // autre adresse du domaine (un vrai négoce ne l'a jamais, mais la recette, si) passe.
+    const expediteur = adresseNue(from);
+    if (this.adressesInternes.includes(expediteur) || expediteur === `${cible.adresse}@${this.domaine}`) {
+      // Rien n'est écarté en silence (saboteur, 22 novembre 2026) : la boucle est notée au journal des entrants.
+      await this.journal?.noter({ adresse: `${cible.adresse}@${this.domaine}`, companyId, recu: { from, subject: evenement.subject ?? "", authentification: null }, verdict: { suspect: true, raisons: ["Expéditeur d'une adresse de Mobiiz (boucle)"], piecesBloquees: [], authentifie: false }, emailId: evenement.email_id ?? null }).catch(() => undefined);
+      return { traite: false, raison: "boucle" };
+    }
+    const lu = evenement.email_id ? await lecteur.lire(evenement.email_id).catch(() => null) : null;
+    // Le corps relu sans expéditeur garde celui de l'enveloppe (jamais « adresse illisible » pour un message ordinaire).
+    const recu: EmailRecu = lu ? { ...lu, from: lu.from || from } : {
+      from,
+      to,
+      subject: evenement.subject ?? "",
+      date: evenement.created_at ?? this.now().toISOString(),
+      text: texteGarde,
+      html: null,
+      attachments: [],
+      tropLourdes: [],
+    };
+    // LE FILTRE (Greg, 22 novembre 2026) : SPF, DKIM et DMARC du serveur de réception, pièces jointes, usurpation de
+    // Mobiiz. Suspect : en Indésirables, jamais rattaché à une demande, aucune alerte ; noté pour l'admin.
+    const verdict = verdictDuRecu(recu, this.domaine);
+    await this.journal?.noter({ adresse: `${cible.adresse}@${this.domaine}`, companyId, recu, verdict, emailId: evenement.email_id ?? null }).catch((err: unknown) => this.logger.warn({ err }, "adresse mobiiz: journal des entrants indisponible"));
+    // Une réponse de négoce ne passe pour telle que si elle se rattache à une vraie demande de CET artisan (étiquette) ET que
+    // l'expéditeur est prouvé être ce négoce (saboteur, 22 novembre 2026 : l'étiquette peut fuiter, par un transfert ou
+    // une copie) : même adresse, ou même domaine privé, et DMARC passé. Sinon l'e-mail attend dans « Réponses à classer ».
+    const visee = verdict.suspect ? null : await this.demandeVisee(companyId, cible.etiquette ?? etiquetteDansObjet(evenement.subject ?? "") ?? etiquetteDansObjet(recu.subject));
+    const memeNegoce = !!visee && memeExpediteur(adresseNue(recu.from || from), visee.supplier.email);
+    const destinataire = visee && memeNegoce && verdict.authentifie ? visee : null;
+    const raisonsNonRattache = visee && !destinataire ? [memeNegoce ? "Expéditeur non authentifié : vérifie avant de classer" : `Expéditeur différent du négoce de la demande (${visee.supplier.name})`] : [];
+    const fichiers: { nom: string; type: string; contenu: Uint8Array }[] = [];
+    const tropLourdes = [...recu.tropLourdes];
+    let total = 0;
+    for (const p of recu.attachments) {
+      if (verdict.piecesBloquees.includes(p.filename)) continue;
+      const contenu = new Uint8Array(Buffer.from(p.contentBase64, "base64"));
+      if (total + contenu.length > RECU_MAX_OCTETS) {
+        tropLourdes.push(p.filename);
+        continue;
+      }
+      total += contenu.length;
+      fichiers.push({ nom: p.filename, type: p.contentType, contenu });
+    }
+    const email = await this.prisma.emailRecuArtisan.create({
+      data: {
+        companyId,
+        adresse: cible.adresse,
+        recipientId: destinataire?.id ?? null,
+        projectId: destinataire?.priceRequest.projectId ?? null,
+        de: from,
+        objet: recu.subject,
+        texte: texteGarde200k(recu.text ?? texteDuHtml(recu.html)),
+        recuLe: dateLisible(recu.date, this.now()),
+        tropLourdes,
+        indesirable: verdict.suspect,
+        indesirablePar: verdict.suspect ? "mobiiz" : null,
+        raisons: [...verdict.raisons, ...raisonsNonRattache],
+        authentifie: verdict.authentifie,
+        etiquetteVisee: visee && !destinataire ? visee.etiquette : null,
+        piecesBloquees: verdict.piecesBloquees,
+        fichiers: { create: fichiers.map((f) => ({ nom: f.nom, type: f.type, taille: f.contenu.length, contenu: new Uint8Array(f.contenu) })) },
+      },
+      include: { fichiers: { select: { id: true, nom: true, type: true } } },
+    });
+    if (verdict.suspect) {
+      this.logger.warn({ adresse: cible.adresse, raisons: verdict.raisons }, "adresse mobiiz: e-mail suspect mis en indésirables");
+      return { traite: true, id: email.id, rattache: false, indesirable: true };
+    }
+    let rattache = false;
+    if (destinataire) rattache = await this.devisDepuisPdf(companyId, destinataire.id, email.id);
+    const negoce = destinataire?.supplier.name ?? nomExpediteur(from);
+    const url = destinataire ? `/chantiers/${destinataire.priceRequest.projectId}#fournisseurs` : "/recus";
+    const copie = liensDesactives((recu.text ?? "").slice(0, 4000)).trim();
+    const pieces = email.fichiers.map((f) => f.nom);
+    // LA CLOCHE (Greg, 10 novembre 2026) : une alerte courte, une seule par e-mail (un webhook rejoué n'en écrit pas deux).
+    // Seule une réponse rattachée à une vraie demande se dit « réponse de négoce » ; le reste est un message reçu.
+    if (destinataire) await ecrireAlerte(this.prisma, companyId, alertePropositionNegoce({ emailId: email.id, negoce, chantier: null })).catch(() => false);
+    await this.notifications
+      .prevenir(
+        companyId,
+        destinataire
+          ? { titre: `${negoce} t'a répondu`, corps: "Sa réponse est sur ton chantier, dans Mobiiz.", url, etiquette: `recu-${email.id}` }
+          : { titre: "Nouveau message reçu", corps: `Un message de ${adresseNue(recu.from || from)} est dans tes reçus, dans Mobiiz.`, url, etiquette: `recu-${email.id}` },
+        // Greg, 14 novembre 2026 : la réponse est COPIÉE sur la vraie adresse de l'artisan (son message, le nom de ses pièces
+        // jointes, le lien). Greg, 22 novembre 2026 : jamais habillée en Mobiiz : bandeau « Message externe », expéditeur
+        // réel, objet « [Externe] », liens non cliquables, aucun logo.
+        {
+          objet: objetExterne(destinataire ? `${negoce} t'a répondu par e-mail` : ligneExterne(recu.subject)),
+          externe: true,
+          texte: [
+            `${BANDEAU_EXTERNE}.`,
+            verdict.authentifie ? "Expéditeur authentifié par son domaine." : "Expéditeur non authentifié : méfie-toi des liens et des demandes de paiement.",
+            "",
+            `De : ${expediteurExterne(recu.from || from)}`,
+            `À : ton adresse ${NOM_APP} (${cible.adresse}@${this.domaine})`,
+            `Objet : ${ligneExterne(recu.subject || "(sans objet)")}`,
+            ...(destinataire ? [`Demande : ${destinataire.supplier.name}`] : []),
+            "",
+            ...(copie ? [copie, ""] : []),
+            ...(pieces.length ? [`Pièce${pieces.length > 1 ? "s" : ""} jointe${pieces.length > 1 ? "s" : ""} (à ouvrir dans ${NOM_APP}) : ${pieces.map(ligneExterne).join(", ")}`, ""] : []),
+            `Lire dans ${NOM_APP} : ${this.notifications.lienVers(url)}`,
+          ].join("\n"),
+        },
+      )
+      .catch((err: unknown) => this.logger.warn({ err }, "adresse mobiiz: artisan non prévenu"));
+    this.logger.info({ adresse: cible.adresse, rattache }, "adresse mobiiz: e-mail reçu");
+    return { traite: true, id: email.id, rattache };
+  }
+
+  /** La demande que l'étiquette nomme, si elle est bien de cette entreprise. */
+  private async demandeVisee(companyId: string, etiquette: string | null) {
+    if (!etiquette) return null;
+    const r = await this.prisma.priceRequestRecipient.findUnique({ where: { etiquette }, include: { priceRequest: { select: { projectId: true, companyId: true } }, supplier: { select: { name: true, email: true } } } });
+    return r && r.priceRequest.companyId === companyId ? r : null;
+  }
+
+  /** Le premier PDF de l'e-mail devient le devis reçu de la demande (sauf si elle en a déjà un). */
+  private async devisDepuisPdf(companyId: string, recipientId: string, emailId: string): Promise<boolean> {
+    const pdf = await this.prisma.emailRecuFichier.findFirst({ where: { emailId, type: "application/pdf", documentId: null }, orderBy: { id: "asc" } });
+    if (!pdf) return false;
+    const tenant = await this.tenantDe(companyId);
+    if (!tenant) return false;
+    try {
+      const vue = await this.priceRequests.attachQuote(tenant, recipientId, { fileName: pdf.nom, bytes: new Uint8Array(pdf.contenu) });
+      const documentId = vue.recipients.find((r) => r.id === recipientId)?.document?.id ?? null;
+      if (documentId) await this.prisma.emailRecuFichier.update({ where: { id: pdf.id }, data: { documentId } });
+      return true;
+    } catch (err) {
+      // Déjà un devis sur cette demande, ou PDF illisible : l'e-mail reste rattaché, le fichier reste à ouvrir.
+      this.logger.info({ err: err instanceof DomainError ? err.code : String(err) }, "adresse mobiiz: PDF non rattaché comme devis");
+      return false;
+    }
+  }
+
+  /** Le propriétaire de l'entreprise agit pour elle (le webhook n'a pas de session). */
+  private async tenantDe(companyId: string): Promise<TenantContext | null> {
+    const m = await this.prisma.membership.findFirst({ where: { companyId, role: "owner" }, include: { company: { select: { trades: true } } } });
+    return m ? { companyId, userId: m.userId, role: "owner", trades: m.company.trades } : null;
+  }
+
+  /**
+   * Les demandes RÉCENTES de l'entreprise (120 jours), pour classer un e-mail reçu sans repère. Avec `emailId`, Mobiiz
+   * propose la plus probable et dit pourquoi en une phrase (Greg, 12 novembre 2026, dossier de corrections UX, point 3).
+   * Ce n'est qu'une proposition : seule l'étiquette sécurisée de l'e-mail rattache toute seule ; ici l'artisan confirme.
+   */
+  async demandesParties(tenant: TenantContext, emailId?: string): Promise<{ items: DemandePartieVue[]; suggestion: { recipientId: string; raison: string } | null }> {
+    const depuis = new Date(this.now().getTime() - DEMANDES_RECENTES_JOURS * 86_400_000);
+    const liste = await this.prisma.priceRequestRecipient.findMany({
+      where: { priceRequest: { companyId: tenant.companyId }, sentAt: { gte: depuis } },
+      orderBy: { sentAt: "desc" },
+      take: 100,
+      include: { supplier: { select: { name: true, email: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } },
+    });
+    const items = liste.map((r) => ({
+      recipientId: r.id,
+      projectId: r.priceRequest.projectId,
+      chantier: r.priceRequest.project.name,
+      negoce: r.supplier.name,
+      envoyeeLe: r.sentAt?.toISOString() ?? null,
+      recue: !!r.documentId || !!r.reponduLe,
+      etat: r.documentId || r.reponduLe ? "Réponse déjà reçue" : "En attente de réponse",
+    }));
+    if (!emailId) return { items, suggestion: null };
+    const e = await this.charger(tenant, emailId);
+    const expediteur = adresseNue(e.de);
+    // Un expéditeur non prouvé (saboteur, 22 novembre 2026) : aucune proposition, sauf la demande que son étiquette visait
+    // quand l'adresse est exactement celle du négoce, dite « à vérifier ».
+    if (!e.authentifie) {
+      const visee = e.etiquetteVisee ? liste.find((r) => r.etiquette === e.etiquetteVisee && r.supplier.email.trim().toLowerCase() === expediteur) : undefined;
+      return { items, suggestion: visee ? { recipientId: visee.id, raison: `L'e-mail répond à ta demande à ${visee.supplier.name}, mais Mobiiz n'a pas pu vérifier l'expéditeur : vérifie avant de classer.` } : null };
+    }
+    const domaine = expediteur.split("@")[1] ?? "";
+    const enAttenteDAbord = [...liste].sort((x, y) => Number(!!(x.documentId || x.reponduLe)) - Number(!!(y.documentId || y.reponduLe)));
+    const memeAdresse = enAttenteDAbord.find((r) => r.supplier.email.trim().toLowerCase() === expediteur);
+    if (memeAdresse) return { items, suggestion: { recipientId: memeAdresse.id, raison: `L'e-mail vient de l'adresse de ${memeAdresse.supplier.name}, à qui tu as envoyé cette demande.` } };
+    const memeDomaine = domaine && !MESSAGERIES_PUBLIQUES.has(domaine) ? enAttenteDAbord.filter((r) => r.supplier.email.trim().toLowerCase().endsWith(`@${domaine}`)) : [];
+    // Un nom de domaine partagé ne suffit que s'il désigne un seul négoce : sinon rien n'est proposé.
+    if (memeDomaine.length && new Set(memeDomaine.map((r) => r.supplierId)).size === 1)
+      return { items, suggestion: { recipientId: memeDomaine[0]!.id, raison: `L'e-mail vient de la même société que ${memeDomaine[0]!.supplier.name} (${domaine}), à qui tu as envoyé cette demande.` } };
+    return { items, suggestion: null };
+  }
+
+  async lister(tenant: TenantContext, projectId?: string): Promise<EmailRecuVue[]> {
+    const liste = await this.prisma.emailRecuArtisan.findMany({
+      where: { companyId: tenant.companyId, indesirable: false, ...(projectId ? { projectId } : {}) },
+      orderBy: [{ recuLe: "desc" }, { createdAt: "desc" }],
+      take: 200,
+      include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } } },
+    });
+    return liste.map((e) => this.vue(e));
+  }
+
+  async un(tenant: TenantContext, id: string): Promise<EmailRecuVue> {
+    const e = await this.charger(tenant, id);
+    if (!e.luLe) await this.prisma.emailRecuArtisan.update({ where: { id }, data: { luLe: this.now() } });
+    return this.vue({ ...e, luLe: e.luLe ?? this.now() });
+  }
+
+  async fichier(tenant: TenantContext, id: string, fichierId: string): Promise<{ nom: string; type: string; contenu: Uint8Array }> {
+    await this.charger(tenant, id);
+    const f = await this.prisma.emailRecuFichier.findFirst({ where: { id: fichierId, emailId: id } });
+    if (!f) throw notFound("Fichier");
+    return { nom: f.nom, type: f.type, contenu: new Uint8Array(f.contenu) };
+  }
+
+  /** « Rattacher à une demande » : l'e-mail rejoint le chantier du négoce et son PDF devient le devis reçu. */
+  async rattacher(tenant: TenantContext, id: string, recipientId: string): Promise<EmailRecuVue> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    const e = await this.charger(tenant, id);
+    if (e.recipientId) throw validationFailed("Already attached", { reason: "deja_rattache", phrase: "Cet e-mail est déjà rattaché à une demande." });
+    const r = await this.prisma.priceRequestRecipient.findFirst({ where: { id: recipientId, priceRequest: { companyId: tenant.companyId } }, include: { priceRequest: { select: { projectId: true } } } });
+    if (!r) throw notFound("Recipient");
+    await this.prisma.emailRecuArtisan.update({ where: { id }, data: { recipientId: r.id, projectId: r.priceRequest.projectId } });
+    await this.devisDepuisPdf(tenant.companyId, r.id, id);
+    return this.un(tenant, id);
+  }
+
+  /**
+   * « Ce n'est pas la bonne demande » : l'e-mail retourne dans « Réponses à classer ». Le devis qu'il avait apporté est
+   * retiré de la demande (elle redevient « envoyée ») ; le document reste rangé dans le quantitatif, rien n'est supprimé.
+   * Reclasser ensuite ne crée jamais un second devis : le même fichier est repris.
+   */
+  async detacher(tenant: TenantContext, id: string): Promise<EmailRecuVue> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    const e = await this.charger(tenant, id);
+    if (!e.recipientId) return this.vue(e);
+    const documents = e.fichiers.map((f) => f.documentId).filter((d): d is string => !!d);
+    await this.prisma.$transaction([
+      ...(documents.length ? [this.prisma.priceRequestRecipient.updateMany({ where: { id: e.recipientId, documentId: { in: documents }, priceRequest: { companyId: tenant.companyId } }, data: { documentId: null, status: "sent" } })] : []),
+      this.prisma.emailRecuFichier.updateMany({ where: { emailId: id }, data: { documentId: null } }),
+      this.prisma.emailRecuArtisan.updateMany({ where: { id, companyId: tenant.companyId }, data: { recipientId: null, projectId: null } }),
+    ]);
+    return this.vue(await this.charger(tenant, id));
+  }
+
+  /**
+   * « RÉPONDRE », COMME GMAIL (Greg, 22 novembre 2026) : sous un message de négoce, l'artisan écrit sa réponse dans Mobiiz.
+   * Elle part de SON adresse Mobiiz, au négoce de la demande (jamais à l'adresse d'un expéditeur inconnu), avec l'étiquette
+   * de la demande : la réponse du négoce revient rangée dans le bon chantier. Elle est notée dans « Envoyés ».
+   */
+  async repondre(tenant: TenantContext, id: string, texte: string): Promise<{ envoye: true }> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    const e = await this.charger(tenant, id);
+    if (!e.recipientId) throw validationFailed("Not attached", { reason: "non_rattache", phrase: "Ce message n'est rattaché à aucune demande : Mobiiz ne sait pas à quel négoce répondre." });
+    if (e.indesirable) throw validationFailed("Spam", { reason: "indesirable", phrase: "Ce message est dans les indésirables : on n'y répond pas." });
+    const corps = texte.replace(/\r\n?/g, "\n").trim();
+    if (!corps) throw validationFailed("Empty", { reason: "vide", phrase: "Écris ta réponse avant d'envoyer." });
+    const r = await this.prisma.priceRequestRecipient.findFirst({
+      where: { id: e.recipientId, priceRequest: { companyId: tenant.companyId } },
+      select: { id: true, etiquette: true, sentAt: true, instantane: true, supplier: { select: { name: true, email: true, archivedAt: true } }, priceRequest: { select: { projectId: true } } },
+    });
+    if (!r) throw notFound("Recipient");
+    // SÉCURITÉ (Greg, 27 novembre 2026) : « Répondre » n'existe que sur une demande DÉJÀ ENVOYÉE, et seulement au négoce de
+    // cette demande, à l'adresse où elle est partie (l'instantané de l'envoi, jamais le carnet d'aujourd'hui). Le message doit
+    // venir de ce négoce, authentifié : sinon « Répondre » servirait à écrire à n'importe qui depuis mobiiz.fr.
+    if (!r.sentAt) throw validationFailed("Not sent", { reason: "demande_non_envoyee", phrase: "Cette demande n'est pas encore partie chez le négoce : on ne peut pas lui répondre." });
+    if (r.supplier.archivedAt) throw validationFailed("Archived supplier", { reason: "negoce_retire", phrase: "Ce négoce est retiré de ton carnet : on ne lui écrit plus." });
+    const figee = (r.instantane as { email?: unknown } | null)?.email;
+    const adresseNegoce = typeof figee === "string" && figee.includes("@") ? figee : r.supplier.email;
+    // Le destinataire est déjà figé (l'adresse de l'envoi) : un petit négoce sans DMARC peut recevoir une réponse. Mais un
+    // message qui ne vient pas de son adresse (ou de son domaine privé) n'ouvre jamais « Répondre » (relecture du 27 novembre).
+    if (!memeExpediteur(adresseNue(e.de), adresseNegoce)) {
+      throw validationFailed("Not from supplier", { reason: "expediteur_pas_le_negoce", phrase: "Ce message ne vient pas du négoce de la demande : Mobiiz n'y répond pas." });
+    }
+    await this.plafondDesReponses(tenant.companyId);
+    const via = await this.adresses.expediteur(tenant.companyId);
+    if (!via || !this.mailer) throw validationFailed("No Mobiiz address", { reason: "adresse_absente", phrase: "Ton adresse Mobiiz n'est pas encore prête : réessaie dans un instant." });
+    let etiquette = r.etiquette;
+    if (!etiquette) {
+      // Deux « Répondre » au même instant (contre-vérification du 27 novembre 2026) : le premier repère posé gagne, l'autre le relit.
+      const neuve = await this.adresses.etiquetteNeuve();
+      await this.prisma.priceRequestRecipient.updateMany({ where: { id: r.id, etiquette: null }, data: { etiquette: neuve } });
+      etiquette = (await this.prisma.priceRequestRecipient.findUnique({ where: { id: r.id }, select: { etiquette: true } }))?.etiquette ?? neuve;
+    }
+    const c = await this.prisma.company.findUnique({ where: { id: tenant.companyId }, select: { name: true } });
+    // L'objet reçu, nettoyé : aucun retour à la ligne, aucun ancien repère (il rangerait la réponse dans un autre chantier).
+    const recu = objetPropre(e.objet);
+    const objet = /^re\s*:/i.test(recu) ? recu : `Re: ${recu || "votre réponse"}`;
+    const cite = (e.texte ?? "").split("\n").slice(0, 60).map((l) => `> ${l}`).join("\n");
+    const quand = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" }).format(e.recuLe);
+    // Un message non authentifié n'est jamais cité sous le nom du négoce : seulement sous son adresse d'expédition.
+    const auteur = e.authentifie ? r.supplier.name : adresseNue(e.de);
+    const text = [corps, "", c?.name ?? "", ...(cite ? ["", `Le ${quand}, ${auteur} a écrit :`, cite] : [])].join("\n");
+    await this.mailer.send({
+      to: adresseNegoce,
+      subject: objetAvecRepere(objet.slice(0, 200), etiquette),
+      text,
+      from: via.from,
+      replyTo: via.replyTo(etiquette),
+      mustDeliver: true,
+      envoi: { companyId: tenant.companyId, sorte: "reponse", projectId: r.priceRequest.projectId, recipientId: r.id, repondA: e.id, destinataire: r.supplier.name },
+    });
+    return { envoye: true };
+  }
+
+  /** Au plus REPONSES_PAR_HEURE réponses par entreprise sur une heure glissante, quelle que soit l'adresse IP. */
+  private async plafondDesReponses(companyId: string): Promise<void> {
+    // Compteur ATOMIQUE (relecture du 27 novembre 2026) : la même table et la même requête que la limite de débit ; trente
+    // réponses lancées au même instant ne voient jamais toutes « 0 ».
+    const rows = await this.prisma.$queryRaw<{ hits: number }[]>`
+      INSERT INTO "api_rate_limit" ("key", "hits", "expiresAt")
+      VALUES (${`repondre:${companyId}`}, 1, now() + interval '1 hour')
+      ON CONFLICT ("key") DO UPDATE SET
+        "hits" = CASE WHEN "api_rate_limit"."expiresAt" <= now() THEN 1 ELSE "api_rate_limit"."hits" + 1 END,
+        "expiresAt" = CASE WHEN "api_rate_limit"."expiresAt" <= now() THEN now() + interval '1 hour' ELSE "api_rate_limit"."expiresAt" END
+      RETURNING "hits"`;
+    if ((rows[0]?.hits ?? 0) > REPONSES_PAR_HEURE) throw new DomainError("too_many_requests", "Too many replies", { reason: "trop_de_reponses", phrase: "Tu as envoyé beaucoup de réponses en une heure : réessaie un peu plus tard." });
+  }
+
+  /**
+   * INDÉSIRABLES, COMME GMAIL (Greg, 22 novembre 2026) : « Signaler comme indésirable » range un message reçu de côté (rien
+   * n'est supprimé) ; « Ce n'est pas un indésirable » le remet dans les Reçus. Une pièce dangereuse reste retenue : elle n'a
+   * jamais été gardée.
+   */
+  async indesirable(tenant: TenantContext, id: string, indesirable: boolean): Promise<EmailRecuVue> {
+    if (tenant.role === "viewer") throw new DomainError("forbidden", "Read-only membership");
+    await this.charger(tenant, id);
+    await this.prisma.emailRecuArtisan.updateMany({ where: { id, companyId: tenant.companyId }, data: indesirable ? { indesirable: true, indesirablePar: "artisan" } : { indesirable: false, indesirablePar: null } });
+    return this.vue(await this.charger(tenant, id));
+  }
+
+  /** Le dossier « Indésirables » : jamais supprimés en silence, avec la raison. */
+  async indesirables(tenant: TenantContext) {
+    const liste = await this.prisma.emailRecuArtisan.findMany({ where: { companyId: tenant.companyId, indesirable: true }, orderBy: { recuLe: "desc" }, take: 200, select: { id: true, de: true, objet: true, texte: true, recuLe: true, raisons: true, indesirablePar: true, piecesBloquees: true } });
+    return liste.map((e) => ({ id: e.id, expediteur: nomExpediteur(e.de), objet: e.objet, extrait: (e.texte ?? "").replace(/\s+/g, " ").trim().slice(0, 140), le: e.recuLe.toISOString(), raison: e.indesirablePar === "artisan" ? "Signalé par toi" : (e.raisons[0] ?? "Mis de côté par Mobiiz"), piecesBloquees: e.piecesBloquees }));
+  }
+
+  private async charger(tenant: TenantContext, id: string) {
+    if (!/^[0-9a-f-]{36}$/i.test(id)) throw notFound("Email");
+    const e = await this.prisma.emailRecuArtisan.findFirst({
+      where: { id, companyId: tenant.companyId },
+      include: { fichiers: { select: { id: true, nom: true, type: true, taille: true, documentId: true } }, recipient: { include: { supplier: { select: { name: true } }, priceRequest: { select: { projectId: true, project: { select: { name: true } } } } } } },
+    });
+    if (!e) throw notFound("Email");
+    return e;
+  }
+
+  private vue(e: {
+    id: string;
+    de: string;
+    objet: string;
+    texte: string | null;
+    recuLe: Date;
+    luLe: Date | null;
+    tropLourdes: string[];
+    indesirable: boolean;
+    fichiers: { id: string; nom: string; type: string; taille: number; documentId: string | null }[];
+    recipient: { id: string; supplier: { name: string }; priceRequest: { projectId: string; project: { name: string } } } | null;
+  }): EmailRecuVue {
+    return {
+      id: e.id,
+      de: e.de,
+      expediteur: nomExpediteur(e.de),
+      objet: e.objet,
+      texte: e.texte,
+      recuLe: e.recuLe.toISOString(),
+      luLe: e.luLe?.toISOString() ?? null,
+      demande: e.recipient ? { recipientId: e.recipient.id, projectId: e.recipient.priceRequest.projectId, negoce: e.recipient.supplier.name, chantier: e.recipient.priceRequest.project.name } : null,
+      fichiers: e.fichiers.map((f) => ({ id: f.id, nom: f.nom, type: f.type, taille: f.taille, devisRecu: !!f.documentId })),
+      tropLourdes: e.tropLourdes,
+      indesirable: e.indesirable,
+    };
+  }
+}
+
+/** Le texte d'un e-mail qui n'a que du HTML. */
+export function texteDuHtml(html: string | null): string | null {
+  if (!html) return null;
+  return html.replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>/gi, "\n\n").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim() || null;
+}
+
+/** Une date d'e-mail illisible ne fait jamais échouer la réception : l'heure d'arrivée la remplace (relecture du 30 octobre 2026). */
+export function dateLisible(texte: string | null | undefined, maintenant: Date): Date {
+  const d = texte ? new Date(texte) : null;
+  return d && !Number.isNaN(d.getTime()) ? d : maintenant;
+}
+
+/**
+ * L'objet d'un e-mail reçu, repris dans une réponse (saboteur, 27 novembre 2026) : une seule ligne (un retour à la ligne
+ * ne devient jamais un en-tête), sans aucun repère « [réf. …] » déjà présent (seul celui de la demande est ajouté ensuite).
+ */
+export function objetPropre(objet: string): string {
+  // Tout caractère de contrôle (C0, DEL, C1 dont U+0085) et tout séparateur de ligne Unicode devient une espace.
+  let propre = [...objet].map((c) => { const n = c.charCodeAt(0); return n < 32 || (n >= 127 && n <= 159) || n === 0x2028 || n === 0x2029 ? " " : c; }).join("");
+  // Les repères s'enlèvent jusqu'au dernier, même imbriqués (« [réf. [réf. aaaaaaaa]bcdefghj] »).
+  for (let avant = ""; avant !== propre; ) {
+    avant = propre;
+    propre = propre.replace(/\[\s*r[ée]f\.?\s*[a-z2-9]{8}\s*\]/gi, " ");
+  }
+  return propre.replace(/\s+/g, " ").trim();
+}
+
+/** Plafond par entreprise des réponses (saboteur, 27 novembre 2026) : en plus de la limite par adresse IP. */
+export const REPONSES_PAR_HEURE = 30;
+
+/** Même expéditeur que le négoce : même adresse, ou même domaine quand il n'est pas une messagerie grand public. */
+export function memeExpediteur(expediteur: string, negoce: string): boolean {
+  const a = expediteur.trim().toLowerCase();
+  const b = negoce.trim().toLowerCase();
+  if (a === b) return true;
+  const da = a.split("@")[1] ?? "";
+  return !!da && da === (b.split("@")[1] ?? "") && !MESSAGERIES_PUBLIQUES.has(da);
+}
+
+/** Un corps énorme n'est jamais gardé en entier (saboteur, 22 novembre 2026) : 200 000 caractères au plus, et il le dit. */
+export const TEXTE_RECU_MAX = 200_000;
+function texteGarde200k(texte: string | null): string | null {
+  if (!texte || texte.length <= TEXTE_RECU_MAX) return texte;
+  return `${texte.slice(0, TEXTE_RECU_MAX - 80)}\n\n[Message coupé : trop long pour être gardé en entier.]`;
+}

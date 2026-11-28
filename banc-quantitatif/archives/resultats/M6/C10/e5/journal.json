@@ -1,0 +1,10 @@
+[
+ "ligne 2 : donnée pente divergente (35 contre rien), retirée : le code la demandera.",
+ "ligne 4 : donnée teinte_fc divergente (noire contre 2), retirée : le code la demandera.",
+ "ligne 6 : donnée developpe divergente (dev 25 contre 250), retirée : le code la demandera.",
+ "ligne 7 : « Gouttières PVC sable » deux quantités (20 contre ), à demander.",
+ "ligne 7 : donnée matiere_gouttiere divergente (pvc contre 1), retirée : le code la demandera.",
+ "ligne 7 : donnée teinte_gouttiere divergente (sable contre 3), retirée : le code la demandera.",
+ "ligne 7 : donnée nb_descentes divergente (2 descentes contre 2), retirée : le code la demandera.",
+ "ligne 9 : « Sortie de toit Ø100 pour évent » deux quantités (1 contre ), à demander."
+]

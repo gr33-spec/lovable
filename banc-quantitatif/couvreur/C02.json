@@ -1,0 +1,39 @@
+{
+ "param:longueur_faitage ¦ Longueur du faîtage ?": {
+  "question": {
+   "id": "param:longueur_faitage ¦ Longueur du faîtage ?",
+   "question": "Longueur du faîtage ?",
+   "boutons": [],
+   "unite": "m",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "8",
+   "unite": "m",
+   "ne_sait_pas": false,
+   "dit": "8 mètres"
+  }
+ },
+ "param:surface ¦ Surface du toit ?": {
+  "question": {
+   "id": "param:surface ¦ Surface du toit ?",
+   "question": "Surface du toit ?",
+   "boutons": [
+    "50 m²",
+    "100 m²",
+    "150 m²",
+    "200 m²"
+   ],
+   "unite": "m2",
+   "aide": null
+  },
+  "reponse": {
+   "bouton": "",
+   "valeur": "120",
+   "unite": "m2",
+   "ne_sait_pas": false,
+   "dit": "120 m²"
+  }
+ }
+}

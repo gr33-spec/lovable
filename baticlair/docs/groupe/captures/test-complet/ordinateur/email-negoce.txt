@@ -1,0 +1,42 @@
+À : ardoises@example.com
+Objet : Regroupement artisans : demande de prix, Tuile romane canal rouge 12,5 u/m² (22)
+Reply-To : lot-77@reponses.example.com
+Pièces : demande-de-prix-regroupement-artisans.pdf
+
+Bonjour,
+Des artisans de votre département regroupent leurs besoins fermes pour vous demander un prix de volume : chacun commande ensuite sur son propre compte chez vous, est livré sur son chantier et vous paie comme d'habitude. Le volume ferme est engagé ; le volume probable vous est donné à titre indicatif.
+
+** EN RÉPONDANT, VOUS ACCEPTEZ DE REVERSER 2 % DU MONTANT HT DU LOT À BATICLAIR SI VOTRE OFFRE EST RETENUE. INTÉGREZ-LES À VOTRE PRIX. **
+
+Lot n° 77 : Tuile romane canal rouge 12,5 u/m²
+Volume ferme : 2 500 pièces (2 chantiers) ; volume probable : 1 250 pièces.
+Livraison entre le 28 octobre 2026 et le 11 novembre 2026, par chantier (adresses dans le PDF joint).
+Déposez votre devis (un ou deux, par palier de quantité) par ce lien, sans compte ni formulaire :
+http://localhost:3000/reponse/OEDZiA5iFg5K_oez9ZtmNfXFdeN_ZVIc
+
+Réponse attendue sous 7 jours. Un seul négoce est retenu par lot, pour tout le volume. Si le lot ne vous concerne pas, un clic sur « pas concerné » suffit ; « stop » pour ne plus rien recevoir.
+Regroupement artisans, par BatiClair
+
+Pas concerné : http://localhost:3000/negoces/lien/eyJhIjoicGFzX2NvbmNlcm5lIiwibiI6IjAxYTE1ZWFjLWMyNWYtNzQ5OS04YjRiLWI2NjljMzNhZmJhMyIsImYiOiJjb3V2ZXJ0dXJlIiwiZSI6MTgwODE0MTc1MX0.uAh38U-o_zAoIWpeSzFDHthaYTviK3NEmPFJE0_OeCY
+Stop : http://localhost:3000/negoces/lien/eyJhIjoic3RvcCIsIm4iOiIwMWExNWVhYy1jMjVmLTc0OTktOGI0Yi1iNjY5YzMzYWZiYTMiLCJlIjoxODA4MTQxNzUxfQ.A7XDiwZqATGat-SHTHGAQRc7fDnALG2aC3TFM9aXI9A
+
+=====
+À : general@example.com
+Objet : Regroupement artisans : demande de prix, Tuile romane canal rouge 12,5 u/m² (22)
+
+Bonjour,
+Des artisans de votre département regroupent leurs besoins fermes pour vous demander un prix de volume : chacun commande ensuite sur son propre compte chez vous, est livré sur son chantier et vous paie comme d'habitude. Le volume ferme est engagé ; le volume probable vous est donné à titre indicatif.
+
+** EN RÉPONDANT, VOUS ACCEPTEZ DE REVERSER 2 % DU MONTANT HT DU LOT À BATICLAIR SI VOTRE OFFRE EST RETENUE. INTÉGREZ-LES À VOTRE PRIX. **
+
+Lot n° 77 : Tuile romane canal rouge 12,5 u/m²
+Volume ferme : 2 500 pièces (2 chantiers) ; volume probable : 1 250 pièces.
+Livraison entre le 28 octobre 2026 et le 11 novembre 2026, par chantier (adresses dans le PDF joint).
+Déposez votre devis (un ou deux, par palier de quantité) par ce lien, sans compte ni formulaire :
+http://localhost:3000/reponse/y4AMufre4Usn24MgbTm21CaE9DGrscrs
+
+Réponse attendue sous 7 jours. Un seul négoce est retenu par lot, pour tout le volume. Si le lot ne vous concerne pas, un clic sur « pas concerné » suffit ; « stop » pour ne plus rien recevoir.
+Regroupement artisans, par BatiClair
+
+Pas concerné : http://localhost:3000/negoces/lien/eyJhIjoicGFzX2NvbmNlcm5lIiwibiI6IjAxYTE1ZWFjLWM0MmYtNzI0OC05YzMwLTA1YjQ2MDZmM2JjMiIsImYiOiJjb3V2ZXJ0dXJlIiwiZSI6MTgwODE0MTc1MX0.Pd0Fen03_U9a0Kaz12gJw6Kz3KBBWLIUhyfdD4-CpoE
+Stop : http://localhost:3000/negoces/lien/eyJhIjoic3RvcCIsIm4iOiIwMWExNWVhYy1jNDJmLTcyNDgtOWMzMC0wNWI0NjA2ZjNiYzIiLCJlIjoxODA4MTQxNzUxfQ.a-F4ndjzaTUyJP5PEV2gArYFKVv0mJ6T8MeJ0bmPKQE

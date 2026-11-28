@@ -1,0 +1,127 @@
+{
+ "metier": "roofing",
+ "lots": [],
+ "fiche": [],
+ "bref": [],
+ "questions": [],
+ "lignes": [
+  {
+   "ref": "1",
+   "designation": "Dépose des anciennes tuiles et des vieux liteaux, évacuation a la décheterie",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  },
+  {
+   "ref": "2",
+   "designation": "Fourniturre et pose de tuilles canal terre cuite, courants et couverts, sur 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Tuiles canal terre cuite, courants et couverts",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "tuile",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "modèle",
+      "teinte"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "3",
+   "designation": "Liteaux neufs sur toute la toiture 85m2",
+   "quantite": "85",
+   "unite": "m2",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Liteaux neufs",
+     "quantite": "",
+     "unite": "",
+     "ouvrage": "couverture-tuiles-canal",
+     "emplacement": "liteau",
+     "donnees": [
+      {
+       "cle": "surface",
+       "valeur": "85"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [
+      "section"
+     ],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "4",
+   "designation": "Les rives 2 x 6ml soit 12ml",
+   "quantite": "12",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Rives",
+     "quantite": "12",
+     "unite": "ml",
+     "ouvrage": "",
+     "emplacement": "",
+     "donnees": [],
+     "attend": [],
+     "a_preciser": [],
+     "precision": ""
+    }
+   ]
+  },
+  {
+   "ref": "5",
+   "designation": "Faitage 9ml scellé au mortier",
+   "quantite": "9",
+   "unite": "ml",
+   "role": "fourniture_et_pose",
+   "fournitures": [
+    {
+     "nom": "Faitage",
+     "quantite": "9",
+     "unite": "ml",
+     "ouvrage": "faitage",
+     "emplacement": "faitiere",
+     "donnees": [
+      {
+       "cle": "longueur_faitage",
+       "valeur": "9"
+      }
+     ],
+     "attend": [],
+     "a_preciser": [],
+     "precision": "scellé au mortier"
+    }
+   ]
+  },
+  {
+   "ref": "6",
+   "designation": "Divers et imprevus",
+   "quantite": "",
+   "unite": "",
+   "role": "hors_quantitatif",
+   "fournitures": []
+  }
+ ],
+ "contexte": [],
+ "notes": []
+}

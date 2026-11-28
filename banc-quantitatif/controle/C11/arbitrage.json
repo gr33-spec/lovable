@@ -1,0 +1,30 @@
+[
+  {
+    "article": "Ardoise naturelle 35×25",
+    "bonne_valeur": "6494 pièces",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "La longueur de l'ardoise est écrite au devis (ligne 3 « ardoise naturelle 35×25 » : H = 35 cm), et avec le pureau de 12 cm du couvreur la fiche donne 1/[0,12 × (0,25 + 0,0027)] = 32,98 u/m² sur 160 + plus-values (égout 0,12×44, doublage faîtage, arêtiers 0,66×30, noues) = 187,5 m², + 5 % = 6494 ; la référence n'aurait jamais dû rester « à chiffrer » ni le faire sans question. Défauts de la fiche à signaler : pas de plus-value pour une noue métallique ni pour le rang de doublage du faîtage, et la perte d'un toit en croupe « après plus-values » n'est pas donnée (5 % = toit simple, 10 % = sans plus-values)."
+  },
+  {
+    "article": "Crochets d'ardoise inox à agrafe Ø 2,7 mm, 11 cm",
+    "bonne_valeur": "11 boîtes de 500",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Le blocage vient seulement des ardoises non calculées : la fiche dit « crochets_par_ardoise 1 u », surplus « 0 à 10 % », « part_crochets_pointe 0.2 » et « conditionnement 500 u/boîte » (agrafe Ø 2,7, 7 à 14 cm), soit 0,8 × 6185 × 1,05 = 5195 → 11 boîtes. Défaut de la fiche : le surplus « 0 à 10 % » (a_confirmer) est trop vague, à 0 % on tomberait à 10 boîtes."
+  },
+  {
+    "article": "Crochets d'ardoise inox à pointe Ø 2,7 mm, 11 cm",
+    "bonne_valeur": "2 boîtes de 700",
+    "qui_a_raison": "controleur",
+    "cause": "lecture de référence fausse",
+    "explication": "Même cause que les ardoises : la fiche donne « part_crochets_pointe 0.2 » (pointes au droit des chevrons et sur l'égout voligé) et « conditionnement 700 u/boîte » (pointe Ø 2,7, 7 à 14 cm). 0,2 × 6494 = 1299 → 2 boîtes, et 2 boîtes quel que soit le surplus entre 0 et 10 %."
+  },
+  {
+    "article": "Gouttière demi-ronde zinc naturel de 25, ép. 0,65 mm, longueur 4 m",
+    "bonne_valeur": "12 longueurs de 4 m",
+    "qui_a_raison": "controleur",
+    "cause": "moteur de calcul ne suit pas la fiche",
+    "explication": "Le devis écrit la gouttière (ligne 7 « Gouttière demi-ronde zinc de 25 sur le pourtour… 44 ml ») et la fiche donne la méthode « ml de gouttière + 30 mm par jonction soudée, arrondi aux longueurs de 4 m ; pas de % en plus » avec « longueur_vendue_standard 4 m » : (44 + 18 × 0,03) / 4 = 11,1 → 12 longueurs. Le moteur a posé les questions des angles et des descentes de cette ligne mais n'a sorti ni la gouttière ni une ligne « à chiffrer »."
+  }
+]

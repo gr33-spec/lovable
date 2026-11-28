@@ -1,0 +1,10 @@
+[
+ "ligne 2 : donnée epaisseur_zinc divergente (0,70 contre 0.7), retirée : le code la demandera.",
+ "ligne 2 : donnée aspect_zinc divergente (quartz contre 2), retirée : le code la demandera.",
+ "ligne 2 : donnée nb_rives_tasseau divergente (1 côté contre 1), retirée : le code la demandera.",
+ "ligne 3 : donnée aspect_zinc divergente (quartz contre 2), retirée : le code la demandera.",
+ "ligne 4 : donnée aspect_zinc divergente (quartz contre 2), retirée : le code la demandera.",
+ "ligne 5 : donnée epaisseur_zinc divergente (0,70 contre 0.7), retirée : le code la demandera.",
+ "ligne 5 : donnée aspect_zinc divergente (quartz contre 2), retirée : le code la demandera.",
+ "ligne 6 : « Descente d'eaux pluviales zinc quartz Ø100 » deux quantités (1 contre ), à demander."
+]

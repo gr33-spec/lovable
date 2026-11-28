@@ -1,0 +1,26 @@
+{
+ "liste": [
+  {
+   "article": "Tuiles canal",
+   "quantite": null,
+   "unite": null,
+   "detail": "85 m² au devis"
+  },
+  {
+   "article": "Rives",
+   "quantite": "33",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Faîtières",
+   "quantite": "27",
+   "unite": "pièces",
+   "detail": null
+  },
+  {
+   "article": "Liteaux 27×40 (Liteaux neufs)",
+   "a_chiffrer": true
+  }
+ ]
+}

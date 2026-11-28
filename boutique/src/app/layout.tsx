@@ -1,0 +1,69 @@
+import type { Metadata, Viewport } from "next";
+import { Geist, Instrument_Serif } from "next/font/google";
+import { connection } from "next/server";
+import { getSettings } from "@/lib/server/cached";
+import { isTestModeInProduction, siteUrl } from "@/lib/server/env";
+import { getTheme, themeCss } from "@/lib/themes";
+import { plainText } from "@/components/ui/sparkle";
+import "./globals.css";
+
+// Polices auto-hébergées au moment de la construction : aucune requête vers
+// Google depuis le navigateur des clientes (confidentialité, rapidité).
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-display", display: "swap" });
+const body = Geist({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+
+async function safeSettings() {
+  try {
+    return await getSettings();
+  } catch (err) {
+    console.error("[layout] paramètres indisponibles", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  const s = await safeSettings();
+  const name = s?.shopName ?? "La Bohème en Paillettes";
+  const tagline = s?.tagline ? plainText(s.tagline) : "";
+  const description = tagline ? `${tagline}. ${s?.introText ?? ""}`.slice(0, 160) : "Bijoux en résine pailletée, faits main.";
+  const favicon = s?.favicon ?? s?.logo;
+  return {
+    metadataBase: new URL(siteUrl()),
+    title: { default: `${name} — ${tagline || "Bijoux faits main"}`, template: `%s — ${name}` },
+    description,
+    applicationName: name,
+    // Image de partage par défaut (accueil, pages sans photo) : la photo d'accueil, sinon le logo.
+    openGraph: { type: "website", locale: "fr_FR", siteName: name, images: (s?.hero ?? s?.logo) ? [{ url: `${(s?.hero ?? s?.logo)!.base}/og.jpg` }] : undefined },
+    icons: favicon ? { icon: `${favicon.base}/${favicon.widths[0]}.webp`, apple: `${favicon.base}/og.jpg` } : { icon: "/icon.svg" },
+    formatDetection: { telephone: false },
+  };
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#FFFFFF",
+};
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  await connection();
+  const s = await safeSettings();
+  const theme = getTheme(s?.themeId, s?.themeCustom);
+  return (
+    <html lang="fr" className={`${display.variable} ${body.variable}`}>
+      <head>
+        <style id="theme">{themeCss(theme)}</style>
+      </head>
+      <body className="min-h-dvh">
+        {isTestModeInProduction() && (
+          <div role="status" className="bg-warning-bg text-warning px-4 py-2 text-center text-sm font-semibold">
+            Boutique en mode test : aucun paiement réel n&apos;est encaissé.
+          </div>
+        )}
+        {children}
+      </body>
+    </html>
+  );
+}

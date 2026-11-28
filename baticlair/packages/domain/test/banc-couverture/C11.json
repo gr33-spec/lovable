@@ -1,0 +1,475 @@
+{
+ "id": "C11",
+ "jeu": "examen",
+ "commune": "Dinan",
+ "code_postal": "22100",
+ "lecture": {
+  "metier": "roofing",
+  "lots": [],
+  "fiche": [
+   {
+    "donnee": "ouvrage",
+    "valeur": "réfection de la couverture en ardoise naturelle au crochet d'une maison à 4 pans",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "objet : « Réfection de la couverture en ardoise, maison à 4 pans »"
+   },
+   {
+    "donnee": "ardoise",
+    "valeur": "naturelle 35×25",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « ardoise naturelle 35×25 »"
+   },
+   {
+    "donnee": "surface",
+    "valeur": "160 m²",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : 160 m²"
+   },
+   {
+    "donnee": "pente",
+    "valeur": "40°",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « pente 40° »"
+   },
+   {
+    "donnee": "rampant",
+    "valeur": "6,50 m",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « rampant 6,50 m »"
+   },
+   {
+    "donnee": "crochets",
+    "valeur": "inox",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 3 : « pose au crochet inox »"
+   },
+   {
+    "donnee": "arêtiers",
+    "valeur": "4 arêtiers de 7,50 m, soit 30 ml, en bande zinc développé 330",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 4 : « Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m) », 30 ml"
+   },
+   {
+    "donnee": "longueur de faîtage",
+    "valeur": "4 ml",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 5 : « Faîtage zinc », 4 ml"
+   },
+   {
+    "donnee": "noues",
+    "valeur": "2 noues de 1,50 m, soit 3 ml, zinc, sur la lucarne",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 6 : « Noues zinc de la lucarne (2 noues de 1,50 m) », 3 ml"
+   },
+   {
+    "donnee": "gouttière",
+    "valeur": "demi-ronde zinc de 25, 44 ml sur le pourtour",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « Gouttière demi-ronde zinc de 25 sur le pourtour », 44 ml"
+   },
+   {
+    "donnee": "angles de gouttière",
+    "valeur": "4",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « 4 angles »"
+   },
+   {
+    "donnee": "nombre de descentes",
+    "valeur": "4",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 7 : « y compris 4 angles et 4 descentes »"
+   },
+   {
+    "donnee": "diamètre des descentes",
+    "valeur": "Ø80",
+    "origine": "lue",
+    "regle": "",
+    "preuve": "ligne 8 : « Descentes zinc Ø80 »"
+   },
+   {
+    "donnee": "hauteur d'une descente",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "développé du faîtage zinc",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "développé des noues",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "façonnage des pièces zinc",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "longueur de crochet",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   },
+   {
+    "donnee": "dauphin en pied de descente",
+    "valeur": "",
+    "origine": "manquante",
+    "regle": "",
+    "preuve": ""
+   }
+  ],
+  "bref": [
+   "Réfection de la couverture en ardoise d'une maison à 4 pans, ancienne couverture déposée.",
+   "160 m² d'ardoise naturelle 35×25, pose au crochet inox, pente 40°, rampant 6,50 m.",
+   "30 ml d'arêtiers en bande zinc développé 330 : 4 arêtiers de 7,50 m.",
+   "4 ml de faîtage zinc.",
+   "3 ml de noues zinc sur la lucarne : 2 noues de 1,50 m.",
+   "44 ml de gouttière demi-ronde zinc de 25 sur le pourtour, 4 angles, 4 descentes.",
+   "Descentes zinc Ø80 : les 4 de la gouttière, hauteur non écrite.",
+   "Échafaudage, dépose et nettoyage : rien à acheter."
+  ],
+  "questions": [],
+  "lignes": [
+   {
+    "ref": "1",
+    "designation": "Installation de chantier : échafaudage de pied sur le pourtour de la maison, filets et protections",
+    "quantite": "1",
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   },
+   {
+    "ref": "2",
+    "designation": "Dépose de la couverture ardoise existante, tri et évacuation en déchetterie",
+    "quantite": "160",
+    "unite": "m²",
+    "role": "pose",
+    "fournitures": []
+   },
+   {
+    "ref": "3",
+    "designation": "Fourniture et pose d'ardoise naturelle 35×25 : pose au crochet inox, pente 40°, rampant 6,50 m",
+    "quantite": "160",
+    "unite": "m²",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Ardoise naturelle 35×25",
+      "quantite": "160",
+      "unite": "m²",
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "ardoise",
+      "donnees": {
+       "produit": "ardoise-35x25",
+       "surface": "160",
+       "pente": "40",
+       "longueur_rampant": "6.5"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Crochets d'ardoise inox",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "couverture-ardoises-crochet",
+      "emplacement": "crochet",
+      "donnees": {},
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "4",
+    "designation": "Arêtiers en bande zinc développé 330 (4 arêtiers de 7,50 m)",
+    "quantite": "30",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Arêtier en bande zinc développé 330",
+      "quantite": "30",
+      "unite": "ml",
+      "ouvrage": "aretier",
+      "emplacement": "bande",
+      "donnees": {
+       "longueur_aretier": "30",
+       "aretier_matiere": "2",
+       "nb_aretiers": "4",
+       "developpe_aretier": "330"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "4 arêtiers de 7,50 m"
+     }
+    ]
+   },
+   {
+    "ref": "5",
+    "designation": "Faîtage zinc",
+    "quantite": "4",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Faîtage zinc",
+      "quantite": "4",
+      "unite": "ml",
+      "ouvrage": "faitage-zinc",
+      "emplacement": "bande",
+      "donnees": {
+       "longueur_faitage": "4"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "6",
+    "designation": "Noues zinc de la lucarne (2 noues de 1,50 m)",
+    "quantite": "3",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Noue zinc",
+      "quantite": "3",
+      "unite": "ml",
+      "ouvrage": "noue",
+      "emplacement": "noue",
+      "donnees": {
+       "longueur_noue": "3"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": "2 noues de 1,50 m, lucarne"
+     }
+    ]
+   },
+   {
+    "ref": "7",
+    "designation": "Gouttière demi-ronde zinc de 25 sur le pourtour, y compris 4 angles et 4 descentes",
+    "quantite": "44",
+    "unite": "ml",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Gouttière demi-ronde zinc de 25",
+      "quantite": "44",
+      "unite": "ml",
+      "ouvrage": "gouttiere",
+      "emplacement": "profil",
+      "donnees": {
+       "longueur_gouttiere": "44",
+       "developpe_gouttiere": "25",
+       "nb_angles": "4",
+       "nb_descentes": "4",
+       "diametre_descente": "80"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     },
+     {
+      "nom": "Angles de gouttière demi-ronde zinc de 25",
+      "quantite": "4",
+      "unite": "u",
+      "ouvrage": "gouttiere",
+      "emplacement": "angle",
+      "donnees": {
+       "nb_angles": "4"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "8",
+    "designation": "Descentes zinc Ø80",
+    "quantite": "1",
+    "unite": "ens",
+    "role": "fourniture_et_pose",
+    "fournitures": [
+     {
+      "nom": "Descente zinc Ø80",
+      "quantite": null,
+      "unite": null,
+      "ouvrage": "descente",
+      "emplacement": "tube",
+      "donnees": {
+       "nb_descentes": "4",
+       "diametre_descente": "80"
+      },
+      "attend": [],
+      "aPreciser": [],
+      "precision": null
+     }
+    ]
+   },
+   {
+    "ref": "9",
+    "designation": "Nettoyage du chantier, repli de l'échafaudage",
+    "quantite": "1",
+    "unite": "forfait",
+    "role": "hors_quantitatif",
+    "fournitures": []
+   }
+  ],
+  "contexte": {
+   "client": "M. et Mme Rouxel",
+   "adresse": "14 rue de la Fontaine des Eaux",
+   "ville": "Dinan",
+   "code postal": "22100",
+   "numéro du devis": "DV-2611-037",
+   "date": "16/11/2026",
+   "neuf ou rénovation": "rénovation"
+  },
+  "notes": []
+ },
+ "reponses": {
+  "param:nb_angles": {
+   "valeur": "4",
+   "unite": "u"
+  },
+  "param:faconnage@pieces-pliees": {
+   "bouton": "Je façonne (feuilles ou bobineau)"
+  },
+  "param:nb_descentes": {
+   "valeur": "4",
+   "unite": "u"
+  },
+  "param:developpe@bandes-zinc": {
+   "bouton": "330 mm"
+  },
+  "param:developpe@faitage-zinc": {
+   "bouton": "330 mm"
+  },
+  "param:hauteur_descente": {
+   "valeur": "5.5",
+   "unite": "m"
+  },
+  "param:developpe_noue": {
+   "bouton": "De 50"
+  },
+  "param:dauphin": {
+   "bouton": "Oui"
+  },
+  "param:longueur_crochet": {
+   "valeur": "11",
+   "unite": "cm"
+  },
+  "param:type_crochet@crochets-ardoise": {
+   "bouton": "À agrafe"
+  },
+  "param:qualite_ardoise": {
+   "bouton": "Espagne 1er choix"
+  },
+  "param:developpe": {
+   "valeur": "330",
+   "unite": "mm"
+  }
+ },
+ "attendu": [
+  {
+   "article": "Ardoises 35×25",
+   "mots": [
+    "ardoise",
+    "!crochet"
+   ],
+   "quantite": 6132,
+   "unite": "n"
+  },
+  {
+   "article": "Crochets à agrafe",
+   "mots": [
+    "crochet",
+    "agrafe",
+    "!gouttiere"
+   ],
+   "quantite": 10,
+   "unite": "bt"
+  },
+  {
+   "article": "Crochets à pointe",
+   "mots": [
+    "crochet",
+    "pointe",
+    "!gouttiere"
+   ],
+   "quantite": 2,
+   "unite": "bt"
+  },
+  {
+   "article": "Feuilles de zinc (arêtiers, faîtage, noues)",
+   "mots": [
+    "feuille",
+    "zinc"
+   ],
+   "quantite": 7,
+   "unite": "n"
+  },
+  {
+   "article": "Gouttière de 25",
+   "mots": [
+    "gouttiere",
+    "!crochet",
+    "!naissance",
+    "!talon",
+    "!angle",
+    "!equerre"
+   ],
+   "quantite": 12,
+   "unite": "n"
+  },
+  {
+   "article": "Angles de gouttière",
+   "mots": [
+    "angle|equerre"
+   ],
+   "quantite": 4,
+   "unite": "n"
+  },
+  {
+   "article": "Tubes de descente Ø80",
+   "mots": [
+    "tube|tuyau|descente",
+    "!dauphin",
+    "!coude",
+    "!collier"
+   ],
+   "quantite": 12,
+   "unite": "n"
+  }
+ ],
+ "suggestions": []
+}

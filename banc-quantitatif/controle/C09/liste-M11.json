@@ -1,0 +1,40 @@
+{
+ "liste": [
+  {
+   "article": "Voliges sapin 18 mm",
+   "quantite": "63",
+   "unite": "m²",
+   "detail": null
+  },
+  {
+   "article": "Bacs joint debout zinc naturel 0,70 mm, longueur 5,15 m",
+   "quantite": "28",
+   "unite": "bacs",
+   "detail": null
+  },
+  {
+   "article": "Bande d'égout en zinc naturel, zinc naturel 0,70 mm",
+   "quantite": "6",
+   "unite": "longueurs de 2 m",
+   "detail": "12 ml à couvrir, développé 33 cm"
+  },
+  {
+   "article": "Faîtage zinc naturel 0,70 mm, bande dév. 33 cm",
+   "quantite": "4",
+   "unite": "longueurs de 2 m",
+   "detail": "6 ml de faîtage à couvrir"
+  },
+  {
+   "article": "Gouttière dév. 33",
+   "quantite": "3",
+   "unite": "longueurs de 4 m",
+   "detail": null
+  },
+  {
+   "article": "Tubes de descente Ø100, longueur 2 m",
+   "quantite": "6",
+   "unite": "pièces",
+   "detail": "2 descentes × 5 m"
+  }
+ ]
+}

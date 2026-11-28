@@ -1,0 +1,109 @@
+{
+ "id": "C04",
+ "commune": "Saint-Brieuc",
+ "code_postal": "22000",
+ "nature": "neuf",
+ "batiment": "Extension neuve à toit monopente accolée à la maison : pan de 9 m de large (le long de l'égout) × 5 m de rampant = 45 m². Côté gauche : rive libre. Côté droit : mur de la maison (relevé et bande de solin sur 5 m). Bas de pente : chéneau encaissé sur toute la largeur (9 m).",
+ "ouvrages": [
+  {
+   "ouvrage": "couverture-zinc-tasseaux",
+   "description": "Couverture zinc à tasseaux sur voligeage existant (posé par le charpentier), un seul pan",
+   "surface": 45,
+   "nb_pans": 1,
+   "largeur_pan": 9,
+   "longueur_rampant": 5,
+   "longueur_bac": "bacs de 5 m d'une seule longueur (5,15 m coupés, relevés compris)",
+   "pente": "10° (environ 18 %)",
+   "materiau": "zinc prépatiné clair (quartz)",
+   "aspect_zinc": 2,
+   "epaisseur_zinc": 0.7,
+   "largeur_bobine_tasseaux": 650,
+   "bobine": "bobine de 650 mm, zinc quartz 0,70 mm ; entraxe des tasseaux 620 mm, soit 15 bacs",
+   "nb_bacs": 15,
+   "nb_rives_tasseau": 1,
+   "rives": "une rive sur tasseau côté gauche ; côté droit, le dernier bac se relève contre le mur de la maison, sans tasseau",
+   "tasseaux": "tasseaux bois trapézoïdaux de 50 mm, 15 rangs de 5 m (14 entre bacs + 1 de rive) = 75 m",
+   "couvre_joints": "couvre-joints zinc quartz 0,70 mm pour tasseaux de 50 mm, 15 rangs de 5 m = 75 m",
+   "pattes": "pattes à tasseaux zinc, une tous les 50 cm sous chaque tasseau",
+   "support": "voligeage sapin existant, non compris",
+   "ecran": "aucun (voligeage ventilé en sous-face)",
+   "faitage": "aucun : le haut du pan se relève sous le bardage de la maison (bande de tête comprise dans les bacs)",
+   "noues": "aucune",
+   "particularites": "pas de fenêtre de toit ni de sortie de toit"
+  },
+  {
+   "ouvrage": "bandes-zinc",
+   "piece": "bande de solin contre le mur de la maison",
+   "longueur_bande": 5,
+   "developpe": 200,
+   "aspect_zinc": 2,
+   "epaisseur_zinc": 0.7,
+   "faconnage": 1,
+   "fixation": "engravée dans le mur, mastic en tête, vis inox"
+  },
+  {
+   "ouvrage": "cheneau-encaisse",
+   "description": "Chéneau encaissé zinc en bas de pente, façonné et soudé sur place dans un encaissement bois existant",
+   "longueur_cheneau": 9,
+   "developpe_cheneau": 650,
+   "aspect_zinc": 2,
+   "epaisseur_zinc": 0.7,
+   "forme_achat": "bobineau zinc quartz 0,70 mm, largeur 650 mm",
+   "talons": "2 talons soudés",
+   "naissance": "1 moignon Ø100 soudé en fond de chéneau",
+   "nb_descentes": 1
+  },
+  {
+   "ouvrage": "descente",
+   "matiere": "zinc quartz",
+   "nb_descentes": 1,
+   "diametre_descente": 100,
+   "hauteur_descente": 3,
+   "longueur_tube": 2,
+   "dauphin": 0,
+   "pied": "raccordée directement sur un regard d'eaux pluviales, sans dauphin",
+   "coudes_par_descente": 2,
+   "colliers": "un collier tous les 2 m, plus un, soit 3"
+  }
+ ],
+ "faconnage": 1,
+ "faconnage_texte": "Il plie lui-même : bande de solin dans des feuilles de zinc quartz 2 × 1 m, chéneau dans du bobineau de 650, bacs dans la bobine de 650. Tasseaux, couvre-joints et tubes de descente achetés tout faits.",
+ "ne_sait_pas": [
+  "de quel côté du chéneau sortira la descente (angle gauche ou angle droit) : à caler avec le maçon, sans effet sur les quantités"
+ ],
+ "ecrit_au_devis": [
+  "neuf : couverture zinc de l'extension, à Saint-Brieuc (22000)",
+  "installation de chantier, échafaudage de pied et protections (1 forfait)",
+  "couverture zinc à tasseaux sur voligeage existant, 45 m2",
+  "zinc quartz, épaisseur 0,70 mm",
+  "un pan",
+  "bacs de 5 m",
+  "rive sur tasseau 1 côté, l'autre côté contre le mur de la maison",
+  "fourniture des tasseaux bois et des couvre-joints zinc quartz (1 ens)",
+  "bande de solin zinc quartz contre le mur de la maison, développé 200 mm, 5 ml",
+  "chéneau encaissé zinc quartz épaisseur 0,70 mm, 9 ml",
+  "1 descente d'eaux pluviales zinc quartz Ø100, hauteur 3 m",
+  "nettoyage du chantier et évacuation des déchets (1 forfait)"
+ ],
+ "tu_au_devis": [
+  "largeur de la bobine : 650 mm (largeur_bobine_tasseaux: 650)",
+  "développé du chéneau : 650 mm (developpe_cheneau: 650)",
+  "façonnage : il plie lui-même (faconnage: 1)",
+  "épaisseur du zinc de la bande de solin : 0,70 mm",
+  "pente du toit : 10°",
+  "largeur du pan : 9 m, 15 bacs",
+  "tubes de descente en longueurs de 2 m",
+  "2 coudes sur la descente",
+  "pas de dauphin (dauphin: 0)",
+  "quantité de tasseaux et de couvre-joints : 75 m de chaque"
+ ],
+ "oublis": [
+  "pattes à tasseaux (fixation des bacs)",
+  "moignon / naissance Ø100 du chéneau",
+  "talons du chéneau (2)",
+  "coudes de descente Ø100 (2)",
+  "colliers de descente Ø100 (3)",
+  "mastic et vis inox pour la bande de solin",
+  "étain et décapant pour les soudures du chéneau"
+ ]
+}

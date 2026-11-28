@@ -1,0 +1,28 @@
+{
+ "m": "M12",
+ "c": "C02",
+ "e": 1,
+ "nRef": 7,
+ "justes": 6,
+ "quantite": 0,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 0,
+ "questionsRef": 0,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [],
+  "manquantes": [
+   "Tuiles terre cuite HP10 Huguenot Fenal, coloris rouge (à chiffrer )"
+  ],
+  "inventees": [
+   "Tuiles (1 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}

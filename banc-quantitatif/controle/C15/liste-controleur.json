@@ -1,0 +1,34 @@
+[
+  {
+    "article": "Tuile terre cuite à emboîtement grand moule Terreal Volnay PV, rouge vieilli",
+    "quantite": 945,
+    "unite": "pièces",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? perte 'tuiles à emboîtement' donnée en fourchette 3 à 5 % (a_confirmer), 5 % retenu. Modèle donné par le couvreur : Volnay PV = 10 u/m2 (fiche, 'grand moule d'aspect plat' ; contrôle par la 'règle générale' 1/(0,251 × 0,400) = 9,96 avec pureau 400 = 6 m ÷ 15 rangs et 4 m ÷ 10 rangs, dans la plage 340-408) ; 90 m2 × 10 = 900 ; + 5 % casse et coupes ('Pertes', toit simple à deux pans, rives comptées à part) = 945 tuiles (soit 3,94 palettes de 240, aucune règle d'arrondi à la palette dans la fiche). Rives, faîtières, closoir et liteaux non écrits au devis : non sortis.",
+    "ligne_devis": "3 — F. et P. couv. tuile mécanique grand moule terre cuite, pente 35°, rampant 6 m — 90 m²"
+  },
+  {
+    "article": "Plaque bac acier nervuré simple peau 63/100, RAL 8012, sans feutre anti-condensation, longueur 4,05 m (largeur utile 1,00 m)",
+    "quantite": 7,
+    "unite": "plaques de 4,05 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? aucune section bac acier dans la fiche couverture (ni plaques, ni longueur, ni largeur utile, ni vis ou closoirs). Au mieux avec les données du couvreur : 1 pan, largeur 6,25 m ÷ largeur utile 1,00 m = 6,25 → 7 plaques, une par rampant, longueur = rampant 4 m + 5 cm = 4,05 m. Le profil exact (hauteur de nervure) n'est pas connu du couvreur : à préciser au comptoir, il ne change pas le nombre tant que la largeur utile reste 1,00 m. Vis, closoirs, solin non écrits au devis : non sortis.",
+    "ligne_devis": "5 — F. et P. couv. bac acier RAL 8012, sans feutre, 1 pan, rampant 4 m — 25 m2"
+  },
+  {
+    "article": "Gouttière pendante demi-ronde aluminium laqué gris anthracite (RAL 7016), développé 25, longueur 4 m",
+    "quantite": 8,
+    "unite": "longueurs de 4 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? la fiche ne donne pas les longueurs vendues de la gouttière aluminium (seulement crochets à 0,5 m et tronçon continu 15 m) ; longueur de 4 m prise du couvreur et de la gouttière zinc/PVC de la fiche. Par ligne : 9 m → 3 longueurs (12 m), 9 m → 3, 6 m → 2 ; total 8 longueurs de 4 m (jonctions à joint, pas de recouvrement soudé à ajouter). La fiche ne déclare aucun accessoire indissociable (naissances, crochets, talons, jonctions non écrits au devis : non sortis).",
+    "ligne_devis": "6 — F. et P. goutt. alu gris anthracite, 2 x 9 m + 1 x 6 m — 24 ML"
+  },
+  {
+    "article": "Tuyau de descente aluminium laqué gris anthracite Ø80, longueur 2 m",
+    "quantite": 6,
+    "unite": "tubes de 2 m",
+    "a_chiffrer": false,
+    "calcul": "FICHE ? longueurs vendues données pour le zinc (2, 3, 4 m ; 2 m standard en Bretagne) et le PVC, rien pour l'aluminium ; tube de 2 m pris du couvreur. 3 descentes × hauteur 4 m ÷ 2 m = 2 tubes par descente → 6 tubes de 2 m. Sans dauphin (écrit). Coudes (2 par descente, +1 en pied sans dauphin selon la fiche) et colliers (1 tous les 2 m + 1) non écrits au devis : non sortis.",
+    "ligne_devis": "7 — F. et P. DEP alu gris anthracite Ø80, sans dauphin — 3 U"
+  }
+]

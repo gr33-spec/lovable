@@ -1,0 +1,31 @@
+{
+ "m": "M4",
+ "c": "C05",
+ "e": 3,
+ "nRef": 9,
+ "justes": 6,
+ "quantite": 2,
+ "manquantes": 1,
+ "inventees": 1,
+ "doutes": 0,
+ "questions": 4,
+ "questionsRef": 4,
+ "questionsHorsRef": 0,
+ "questionsInutiles": 0,
+ "questionsNonJugees": 0,
+ "questionsOubliees": 0,
+ "detail": {
+  "quantite": [
+   "Ardoises naturelles Espagne 1er choix 30×20 : 161 pièces attendu, 157 pièces lu",
+   "Crochets d'ardoise inox standard, longueur 10 cm : 161 pièces attendu, 157 pièces lu"
+  ],
+  "manquantes": [
+   "Fenêtres de toit. de fenêtres de toit Velux GGL MK04 78×98, avec raccords d'étanchéité pour ardoise. (2 pièces)"
+  ],
+  "inventees": [
+   "Raccords d'étanchéité pour ardoises, fenêtre 78 × 98 (2 pièces)"
+  ],
+  "doutes": [],
+  "horsRef": []
+ }
+}
