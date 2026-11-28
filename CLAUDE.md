@@ -2,7 +2,7 @@
 
 # Mobiiz — contexte
 
-> **PRENDS LES INITIATIVES QUI ONT DU SENS (Greg, 28 novembre 2026, pour toutes les discussions).** Pense chaque fonctionnalité de bout en bout, comme un artisan qui l'utilise pour la première fois. Si quelque chose est évidemment nécessaire pour qu'elle soit trouvable, compréhensible et utilisable (un onglet, un bouton, un message, un état vide, un retour en arrière), fais-le sans attendre qu'on le demande, et signale-le dans le compte rendu. Ne demande que pour ce qui change une décision produit, coûte de l'argent ou touche la prod.
+> **PRENDS LES INITIATIVES QUI ONT DU SENS (Greg, 28 novembre 2026, pour toutes les discussions).** Pense chaque fonctionnalité de bout en bout, comme un vrai produit : si quelque chose manque pour qu'un artisan s'y retrouve (un onglet, un bouton, un retour en arrière, un message clair), ajoute-le sans attendre que Greg le demande, puis signale-le dans ton compte rendu. Exemple : un choix de modèle de site doit avoir son propre onglet « Modèles », pas être caché dans « Couleurs ». Limites : pas d'initiative sur les prix, les tarifs, les règles de calcul du quantitatif, la sécurité, la prod ou les dépenses. Là, tu proposes et Greg arbitre.
 
 > **Toute nouvelle discussion crée sa branche depuis `claude/saas-achat-artisans-prompt-1lyihx`, jamais depuis `main`, même si `main` est la branche par défaut.** (Greg, 27 novembre 2026)
 >

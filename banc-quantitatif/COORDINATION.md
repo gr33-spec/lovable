@@ -4,6 +4,14 @@
 
 Chaque discussion écrit ici ce qu'elle touche, et lit ce que les autres touchent, avant de modifier un écran partagé.
 
+
+> **RÈGLE POUR TOUTES LES DISCUSSIONS (Greg, 28 novembre 2026) : PRENDS LES INITIATIVES QUI ONT DU SENS.** Pense chaque
+> fonctionnalité de bout en bout, comme un vrai produit : si quelque chose manque pour qu'un artisan s'y retrouve (un onglet,
+> un bouton, un retour en arrière, un message clair), ajoute-le sans attendre que Greg le demande, puis signale-le dans ton
+> compte rendu. Exemple : un choix de modèle de site doit avoir son propre onglet « Modèles », pas être caché dans
+> « Couleurs ». Limites : pas d'initiative sur les prix, les tarifs, les règles de calcul du quantitatif, la sécurité, la prod
+> ou les dépenses. Là, tu proposes et Greg arbitre. (Aussi en tête de CLAUDE.md.)
+
 ## Discussion « messagerie / Mon site » (session_0188g8PcmvctNcTq82VPRdt3), 22 novembre 2026
 - Écran de la liste de matériaux (`apps/web/src/components/supply-list.tsx`, écran « Fournitures ») : JE N'Y TOUCHE PAS.
   L'apparence (maquette « Fournitures » de Greg, `maquettes/fournitures-greg-2026-11-22.png`), la flèche du calcul et
