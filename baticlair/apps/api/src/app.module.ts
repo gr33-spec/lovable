@@ -19,6 +19,7 @@ import { AchatGroupeModule } from "./modules/achat-groupe/index.js";
 import { AchatsGroupesV1Module } from "./modules/achats-groupes-v1/index.js";
 import { MissionsModule } from "./modules/missions/missions.module.js";
 import { SignalementsModule } from "./modules/signalements/index.js";
+import { SauvegardeModule } from "./modules/sauvegarde/index.js";
 import { PriceRequestsModule } from "./modules/price-requests/index.js";
 import { PrivacyModule } from "./modules/privacy/index.js";
 import { ProjectsModule } from "./modules/projects/index.js";
@@ -76,6 +77,7 @@ import { PagesRegionalesModule } from "./modules/pages-regionales/pages-regional
     AchatsGroupesV1Module,
     MissionsModule,
     SignalementsModule,
+    SauvegardeModule,
     ReprisesModule,
     BrouillonsModule,
     CatalogueModule,

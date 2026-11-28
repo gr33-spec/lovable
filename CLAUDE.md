@@ -495,3 +495,9 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - Pas de page Côtes-d'Armor avant d'avoir de vrais couvreurs. Pas de pages villes en série. Chaque texte de page publique : brouillon dans `baticlair/docs/referencement/brouillons/`, relu par Greg, aucune affirmation commerciale sans son accord.
 - Titre des sites des artisans : on garde « Couvreur à Saint-Brieuc – Dupont Couverture ».
 - Search Console (propriété « Domaine ») : feu vert, Greg pose la ligne TXT dans Vercel (DNS de mobiiz.fr chez Vercel) : `baticlair/docs/referencement/search-console-bing.md`.
+
+## Décisions du 28 novembre 2026 : la sauvegarde prévient elle-même
+
+- RÈGLE CHANGÉE (Greg : « je ne veux pas dépendre des notifications de mon compte GitHub ») : avant, seul GitHub prévenait d'un échec de la sauvegarde nocturne → à la fin de chaque exécution, le workflow envoie son résultat à l'API (`POST /v1/internal/sauvegarde`, jeton signé de GitHub OIDC, aucun secret) ; un échec, test de restauration compris, part par les alertes de Mobiiz (« SAUVEGARDE ÉCHOUÉE », adresse d'Admin › Réglages), avec l'étape et le lien de l'exécution ; la réussite qui suit un échec dit « rétablie » ; la veille quotidienne de l'API prévient après 36 h sans réussite (une fois le workflow branché).
+- Essai de l'alerte : le fichier du workflow modifié sur une autre branche que `main` se lance seul et échoue exprès ; l'e-mail dit « ESSAI de l'alerte », jamais compté comme une sauvegarde.
+- Carte « Santé » de l'admin (à faire) : lire `GET /v1/admin/sauvegarde` (dernière nuit, dernière réussite, retard, dernier essai). Code : `baticlair/apps/api/src/modules/sauvegarde/`, test `apps/api/test/sauvegarde-alerte.test.ts`.
