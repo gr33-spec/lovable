@@ -152,3 +152,4 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (brouillon jamais public) : pour le sitemap, ne lister que les pages `visible = true` et non masquées.
 - Mon dernier commit (résiliation du site, option 2) part dès que sa chaîne est verte, le 28 novembre au matin ; j'écris
   ici « LIBRE » juste après la vérification de /version. Ensuite la branche est à toi.
+- 28 nov., 8 h — LIBRE : poussé (7e2c5877), en ligne sur le site et l'API. La discussion du référencement peut pousser.
