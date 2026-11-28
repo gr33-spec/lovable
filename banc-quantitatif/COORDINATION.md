@@ -180,3 +180,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   commit : chantier 05, manques évidents (onglet « Modèles » de `page-entreprise/editeur.tsx`, date de retrait dans
   `page-entreprise.service.ts`, Profil « Inviter des artisans ») et achats groupés anonymes par défaut (`achats-groupes-v1`,
   domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.
+- 28 nov., 13 h 30 — LIBRE : poussé (1c885c1b), en ligne sur le site et l'API (chantier 05, manques évidents, achats groupés
+  anonymes par défaut, plus le correctif des alertes du référencement). La branche est libre.
