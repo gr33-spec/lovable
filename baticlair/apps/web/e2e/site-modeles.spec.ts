@@ -47,7 +47,8 @@ async function onglet(page: Page, nom: string) {
   await expect(page.getByRole("tabpanel", { name: nom })).toBeVisible();
 }
 
-const enregistre = (page: Page) => expect(page.getByText("Enregistré dans ton brouillon.")).toBeVisible();
+/** Enregistré : la phrase, ou, sur téléphone quand il reste des changements à mettre en ligne, le bouton « Publier » qui la remplace. */
+const enregistre = (page: Page) => expect(page.getByText("Enregistré dans ton brouillon.").or(page.getByRole("button", { name: "Publier", exact: true })).first()).toBeVisible();
 const apercu = (page: Page) => page.locator("[data-testid=apercu-page]:visible").first();
 
 async function visiteur(browser: Browser, page: Page, telephone: boolean) {

@@ -110,7 +110,7 @@ test("Ma page : réglée depuis le profil, privée par défaut, publiée, vue pa
   await onglet(page, "Couleurs");
   await expect(page.getByRole("radio", { name: "Classique en colonnes" })).toHaveCount(0);
   await expect(page.getByRole("radio", { name: "Fond sombre" })).toHaveCount(0);
-  await page.getByRole("radio", { name: "Bleu nuit" }).click();
+  await page.getByRole("radio", { name: "Bleu nuit", exact: true }).click();
   await enregistre(page);
   // La couleur des boutons se choisit (Greg, 17 novembre 2026) ; le texte du bouton reste lisible.
   await page.getByRole("radiogroup", { name: "Couleur des boutons" }).getByRole("radio", { name: "Bleu", exact: true }).click();
@@ -428,6 +428,8 @@ test.describe("captures du rapport", () => {
       for (const f of fichier(cle)) await envoyer(f, { realisationId: r.realisation.id });
     }
     await expect.poll(async () => ((await (await p.request.get("/v1/ma-page", { headers: { "x-company-id": companyId ?? "" } })).json()) as { photos: { statut: string }[] }).photos.every((x) => x.statut === "prete"), { timeout: 90_000 }).toBe(true);
+    // Brouillon et publié (27 novembre 2026) : les photos ajoutées après la mise en ligne attendent « Publier ».
+    await appel("post", "/v1/ma-page/publication", {});
     await p.request.post("/api/pages-entreprises/rafraichir", { headers: { "x-company-id": companyId ?? "" }, data: {} });
     const adresse = ((await (await p.request.get("/v1/ma-page", { headers: { "x-company-id": companyId ?? "" } })).json()) as { reglages: { adresse: string } }).reglages.adresse;
     for (const [nomAppareil, taille, mobile] of [["telephone", { width: 390, height: 844 }, true], ["ordinateur", { width: 1440, height: 900 }, false]] as const) {
