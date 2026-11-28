@@ -13,6 +13,17 @@ import { METIERS_INSCRIPTION, type MetierInscription } from "@/lib/metiers-inscr
 import { choisirDepartement as retenirDepartement } from "@/lib/regions/departement-choisi";
 import { PHRASE_METIER_EN_RODAGE } from "../../../../../../packages/domain/src/inscription/essai";
 import { portableValide } from "../../../../../../packages/domain/src/groupe/identite-artisan";
+import { codeInvitationValide, CONSENTEMENT_LISTE_ATTENTE, estOuvert, publicDe } from "../../../../../../packages/domain/src/inscription/liste-attente";
+
+/** Chantier 05 : le code du lien d'invitation, gardé le temps de l'inscription (jamais au-delà de l'onglet). */
+const CLE_INVITATION = "mobiiz.invitation";
+const lireInvitation = (): string | null => {
+  try {
+    return sessionStorage.getItem(CLE_INVITATION);
+  } catch {
+    return null;
+  }
+};
 
 /**
  * LE NOUVEL ONBOARDING, « ESSAIE D'ABORD » (Greg, 19 novembre 2026 ; RÈGLE CHANGÉE : avant, « Commencer » menait à un
@@ -54,6 +65,17 @@ export default function Commencer() {
     );
     return () => c.abort();
   }, [router]);
+
+  // Chantier 05 : arrivé par un lien d'invitation (« /commencer?invitation=… ») : le code est gardé pour l'inscription.
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("invitation")?.trim().toLowerCase();
+    if (!code || !codeInvitationValide(code)) return;
+    try {
+      sessionStorage.setItem(CLE_INVITATION, code);
+    } catch {
+      /* navigation privée : l'invitation n'est pas suivie, l'inscription marche */
+    }
+  }, []);
 
   // Chaque étape remonte en haut de l'écran.
   useEffect(() => {
@@ -200,6 +222,9 @@ function EtapeCompte({ departement, metier, onFait }: { departement: string; met
   const [email, setEmail] = useState("");
   const [telephone, setTelephone] = useState("");
   const [cgu, setCgu] = useState(false);
+  // Chantier 05 : la liste d'attente, sur un choix explicite (jamais cochée d'office), seulement si pas encore ouvert.
+  const [prevenir, setPrevenir] = useState(false);
+  const enAttente = !estOuvert(metier, departement);
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<ApiError | null>(null);
@@ -232,6 +257,16 @@ function EtapeCompte({ departement, metier, onFait }: { departement: string; met
       });
       setActiveCompanyId(c.id);
       await api("/v1/me/cgu", { method: "POST", body: { version: VERSION_CGU } });
+      if (enAttente && prevenir) await api("/v1/communaute/liste-attente", { method: "POST", body: { consentement: true } }).catch(() => undefined);
+      const invitation = lireInvitation();
+      if (invitation) {
+        await api("/v1/communaute/invitation", { method: "POST", body: { code: invitation } }).catch(() => undefined);
+        try {
+          sessionStorage.removeItem(CLE_INVITATION);
+        } catch {
+          /* rien à faire */
+        }
+      }
       // Le premier essai d'abord : le guide ne s'ouvre pas par-dessus (il reste dans le menu, « Revoir le guide »).
       await api("/v1/me/guide/vu", { method: "POST" }).catch(() => undefined);
       onFait(email.trim());
@@ -294,6 +329,14 @@ function EtapeCompte({ departement, metier, onFait }: { departement: string; met
             .
           </span>
         </label>
+        {enAttente ? (
+          <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-snug">
+            <input type="checkbox" checked={prevenir} onChange={(e) => setPrevenir(e.target.checked)} className="mt-0.5 size-5 shrink-0 rounded accent-accent" />
+            <span>
+              <strong>Préviens-moi quand Mobiiz ouvre pour {publicDe(metier, departement)}.</strong> {CONSENTEMENT_LISTE_ATTENTE.texte}
+            </span>
+          </label>
+        ) : null}
         <Turnstile onToken={setCaptcha} />
         <Button type="submit" pending={pending} disabled={!cgu || (TURNSTILE_ACTIF && !captcha)}>
           Essayer Mobiiz

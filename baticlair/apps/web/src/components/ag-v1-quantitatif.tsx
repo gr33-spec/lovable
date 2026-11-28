@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CARTE, CaseAnonyme, LigneZone, Note, VerificationEntreprise } from "@/components/ag-v1-commun";
+import { CARTE, LigneZone, Note, VerificationEntreprise } from "@/components/ag-v1-commun";
 import { ChoixCaracteristiques, ConfirmerConditionnement } from "@/components/ag-v1-direct";
 import { Button, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, ApiError, messageErreur, newActionKey } from "@/lib/api";
@@ -103,7 +103,6 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
   const [dateBesoin, setDateBesoin] = useState("");
   const [compat, setCompat] = useState<Record<string, CompatibiliteV1 | "erreur">>({});
   const [coche, setCoche] = useState(false);
-  const [anonyme, setAnonyme] = useState(false);
   const [pending, setPending] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [cleIdempotence] = useState(newActionKey);
@@ -235,7 +234,6 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
         body: {
           confirmation: true,
           cleIdempotence,
-          anonyme,
           besoins: choisies.map((c) => {
             const k = compat[c.ligne.key] as CompatibiliteV1;
             return { type: c.ligne.produit!.type, attributs: c.attributs, quantite: Number(c.quantite.replace(",", ".")), unite: c.unite, parUnite: c.parUnite, conversionConfirmee: c.conversionConfirmee, ...(c.ligne.confirmation && ouiDejaEnvoye.has(c.ligne.key) ? { dejaEnvoyeConfirme: true } : {}), reception, lieu, dateBesoin, achatId: k.compatible?.id ?? null, projectId, articleKey: c.ligne.key };
@@ -501,7 +499,6 @@ export function DepuisQuantitatifV1({ etat: etat0, projectId }: { etat: EtatV1; 
         <input type="checkbox" checked={coche} onChange={(e) => setCoche(e.target.checked)} className="mt-1 size-5 shrink-0 accent-accent" />
         <span className="text-[15px] leading-relaxed">{plusieurs ? CASE_PLUSIEURS_LIGNES : CASE_UNE_LIGNE(dateBesoin ? dateLongue(dateBesoin) : "…")}</span>
       </label>
-      <CaseAnonyme coche={anonyme} onChange={setAnonyme} />
       {erreur ? (
         <p role="alert" className="text-[15px] font-semibold text-danger">
           {erreur}

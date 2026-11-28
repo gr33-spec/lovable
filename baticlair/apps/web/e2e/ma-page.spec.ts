@@ -556,10 +556,10 @@ test("Mon site : la barre du bas (Accueil · Demandes · ＋ · Groupés · Mess
     }
     await p.screenshot({ path: `test-results/mon-site-onglets-${largeur}.png` });
     // L'onglet ouvre l'éditeur (Greg, 17 novembre 2026, « style Lovable ») : le site en haut, toujours visible ; en bas,
-    // les sept onglets des réglages ; un onglet ouvre son tiroir sous le site.
+    // les huit onglets des réglages (« Modèles » depuis le 28 novembre 2026) ; un onglet ouvre son tiroir sous le site.
     await globe.click();
     await expect(globe).toHaveAttribute("aria-current", "page");
-    await expect(p.getByRole("tablist", { name: "Réglages du site" }).getByRole("tab")).toHaveText(["Couleurs", "Photos", "Prestations", "Chantiers", "À propos", "Contact", "Publier"]);
+    await expect(p.getByRole("tablist", { name: "Réglages du site" }).getByRole("tab")).toHaveText(["Modèles", "Couleurs", "Photos", "Prestations", "Chantiers", "À propos", "Contact", "Publier"]);
     await expect(apercu(p)).toBeVisible();
     await onglet(p, "Couleurs");
     await expect(p.getByRole("heading", { name: "Teinte" })).toBeVisible();

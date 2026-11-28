@@ -16,6 +16,7 @@ import {
   phraseGroupe,
 } from "../../../../packages/domain/src/accueil/mon-activite";
 import { InstallHint } from "@/components/install-hint";
+import { CommunauteAccueil } from "@/components/communaute-accueil";
 import { BandeauReprises } from "@/components/reprises";
 import { useGroupeActif } from "@/components/app-nav";
 import { lienAchat } from "@/components/ag-v1-accueil";
@@ -460,6 +461,8 @@ export function AccueilMaquette() {
         {groupe ? <ZoneGroupes ouverts={ouverts} metiers={metiers} /> : null}
       </div>
 
+      {/* Chantier 05 : liste d'attente et invitation, discrètes, sous les actions prioritaires. */}
+      <CommunauteAccueil />
       <InstallHint />
     </div>
   );

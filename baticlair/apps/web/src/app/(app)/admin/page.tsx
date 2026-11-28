@@ -104,6 +104,8 @@ function Accueil() {
             { href: "/admin/signalements", texte: "Signalements" },
             { href: "/admin/pages-publiques", texte: "Pages publiques" },
             { href: "/admin/liste-attente", texte: "Métiers et départements des inscrits" },
+            { href: "/admin/prevenir", texte: "Prévenir les inscrits" },
+            { href: "/admin/invitations", texte: "Invitations" },
             { href: "/admin/supervision", texte: "Supervision" },
             { href: "/admin/promos", texte: "Codes promo" },
             { href: "/admin/corrections", texte: "Corrections les plus fréquentes" },

@@ -4,6 +4,14 @@
 
 Chaque discussion écrit ici ce qu'elle touche, et lit ce que les autres touchent, avant de modifier un écran partagé.
 
+
+> **RÈGLE POUR TOUTES LES DISCUSSIONS (Greg, 28 novembre 2026) : PRENDS LES INITIATIVES QUI ONT DU SENS.** Pense chaque
+> fonctionnalité de bout en bout, comme un vrai produit : si quelque chose manque pour qu'un artisan s'y retrouve (un onglet,
+> un bouton, un retour en arrière, un message clair), ajoute-le sans attendre que Greg le demande, puis signale-le dans ton
+> compte rendu. Exemple : un choix de modèle de site doit avoir son propre onglet « Modèles », pas être caché dans
+> « Couleurs ». Limites : pas d'initiative sur les prix, les tarifs, les règles de calcul du quantitatif, la sécurité, la prod
+> ou les dépenses. Là, tu proposes et Greg arbitre. (Aussi en tête de CLAUDE.md.)
+
 ## Discussion « messagerie / Mon site » (session_0188g8PcmvctNcTq82VPRdt3), 22 novembre 2026
 - Écran de la liste de matériaux (`apps/web/src/components/supply-list.tsx`, écran « Fournitures ») : JE N'Y TOUCHE PAS.
   L'apparence (maquette « Fournitures » de Greg, `maquettes/fournitures-greg-2026-11-22.png`), la flèche du calcul et
@@ -162,6 +170,18 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
   main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
 
+## Discussion « écrans » (lovable-38), 28 novembre 2026 — chantier 05 (liste d'attente, invitations)
+- Fichiers : module API `modules/communaute` (nouveau), `pages-regionales` (consentement), migration
+  `20261128120000_liste_attente_invitations` (après `sauvegarde_rapport`, empreintes refaites), `components/communaute-accueil.tsx`
+  (UNE ligne dans `accueil.tsx`), `/commencer` (case « Préviens-moi », code d'invitation), pages `(entree)/invitation/[code]` et
+  `(entree)/liste-attente/desinscription` (noindex, hors sitemap), admin `prevenir` et `invitations`. Ni « À la voix », ni
+  l'Assistant, ni le moteur.
+- 28 nov., après-midi — branche rendue reçue (6e9f9a14), fusionnée ; JE POUSSE dès que la chaîne complète est verte, en un seul
+  commit : chantier 05, manques évidents (onglet « Modèles » de `page-entreprise/editeur.tsx`, date de retrait dans
+  `page-entreprise.service.ts`, Profil « Inviter des artisans ») et achats groupés anonymes par défaut (`achats-groupes-v1`,
+  domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.
+- 28 nov., 13 h 30 — LIBRE : poussé (1c885c1b), en ligne sur le site et l'API (chantier 05, manques évidents, achats groupés
+  anonymes par défaut, plus le correctif des alertes du référencement). La branche est libre.
 ## Banc du calcul, 28 novembre 2026 : le quantitatif à la voix
 - Touché côté écran (petit, demandé par Greg) : `components/nouveau-quantitatif.tsx`, `ALaVoix` (titre « Décris ton
   chantier », la bulle reçoit le texte remis au propre par le serveur, boutons de doute, « Envoyer » ; une dictée qui nomme
@@ -185,3 +205,5 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
     « Réunit : … » sur une ligne qui rassemble plusieurs lignes du devis. `lib/origine-ligne.ts` : modifié = « Dit par toi ».
   - `assistant-mobiiz.tsx` : « ajoute … » dans l'Assistant passe par le moteur (`POST /v1/quantitatifs/:id/dire`) ; un article
     qui ne nomme aucun ouvrage (10 sacs de colle) entre tel qu'écrit. « Ajouter un article » de la liste reste tel qu'écrit.
+- 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
+  (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.

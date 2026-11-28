@@ -48,7 +48,6 @@ import {
   suiviRetraitsTardifs,
   transitionV1,
   volumesV1,
-  participantsVisiblesV1,
   SEUIL_ENTREPRISES_VOLUMES,
   zoneDuCodePostal,
   type AffichageV1,
@@ -215,9 +214,9 @@ export class AchatsGroupesV1Service {
    * participé (seul l'admin voit l'identité et l'historique).
    */
   private async vuePublique(db: Db, a: AchatRow) {
-    const besoins = await db.besoinGroupeV1.findMany({ where: { achatId: a.id }, select: { companyId: true, statut: true, quantite: true, createdAt: true, updatedAt: true, anonyme: true, company: { select: { name: true } } } });
-    // Qui participe : les entreprises dont un besoin est confirmé ; le nom, jamais la quantité de chacune.
-    const qui = participantsVisiblesV1(besoins.filter((b) => b.statut === "confirme" || b.statut === "reconfirme").map((b) => ({ companyId: b.companyId, nom: b.company.name, anonyme: b.anonyme })));
+    const besoins = await db.besoinGroupeV1.findMany({ where: { achatId: a.id }, select: { companyId: true, statut: true, quantite: true, createdAt: true, updatedAt: true } });
+    // ANONYMES PAR DÉFAUT (Greg, 28 novembre 2026) : jamais un nom d'entreprise entre artisans ; ni le nom ni l'entreprise
+    // ne sont même lus ici.
     const v = volumesV1(besoins.map((b) => ({ companyId: b.companyId, statut: b.statut as EtatBesoinV1, quantite: Number(b.quantite) })), { statut: a.statut as EtatAchatV1 });
     const p = produitV1(a.type)!;
     return {
@@ -240,8 +239,6 @@ export class AchatsGroupesV1Service {
         // Sous 3 entreprises : aucun volume (« En cours de regroupement »).
         volume: v.visibles && v.confirmes > 0 ? quantiteLisible(v.confirmes, p.unite) : null,
         regroupement: v.entreprises > 0 && !v.visibles,
-        noms: qui.noms,
-        anonymes: qui.anonymes,
         // La dernière évolution RÉELLE : le dernier besoin ajouté, modifié ou retiré ; jamais une date fabriquée.
         derniereEvolution: besoins.length ? new Date(Math.max(...besoins.map((b) => b.updatedAt.getTime()))).toISOString() : null,
         // Un besoin n'entre dans un achat qu'après la vérification de l'entreprise (SIRET, e-mail, qualité).
@@ -326,7 +323,7 @@ export class AchatsGroupesV1Service {
    * l'achat compatible (jamais un second achat identique) ou en ouvre un ; une ligne de quantitatif n'entre que si elle
    * est libre (une ligne, un seul circuit) ; la conversion de conditionnement est confirmée ; rien n'est dupliqué.
    */
-  async confirmer(tenant: TenantContext, input: { besoins: BesoinSaisi[]; confirmation: boolean; cleIdempotence: string; anonyme?: boolean }) {
+  async confirmer(tenant: TenantContext, input: { besoins: BesoinSaisi[]; confirmation: boolean; cleIdempotence: string }) {
     this.exigerActif();
     assertCanWrite(tenant);
     if (!input.confirmation) throw validationFailed("Confirmation required", { reason: "case_non_cochee", message: input.besoins.length > 1 ? CASE_PLUSIEURS_LIGNES : CASE_UNE_LIGNE("…") });
@@ -416,7 +413,6 @@ export class AchatsGroupesV1Service {
               reception: b.reception,
               lieu: b.lieu.trim(),
               contraintes: b.contraintes?.trim() || null,
-              anonyme: input.anonyme === true,
               dateBesoin: b.dateBesoin,
               statut: "confirme",
               confirmeLe: maintenant,
@@ -483,7 +479,6 @@ export class AchatsGroupesV1Service {
       reception: b.reception,
       lieu: b.lieu,
       contraintes: b.contraintes,
-      anonyme: b.anonyme,
       dateBesoin: jourIso(b.dateBesoin),
       projectId: b.projectId,
       articleKey: b.articleKey,
@@ -684,22 +679,6 @@ export class AchatsGroupesV1Service {
       if (transmis && b.achat.volumeTransmis !== null) await tx.achatGroupeV1.update({ where: { id: b.achatId }, data: { volumeTransmis: { increment: quantite - avant.quantite } } });
       await tx.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: b.companyId, type: "quantite_modifiee", transmis, detail: { avant: avant.saisie, apres: q.quantite, motif: "quantite" } } });
     });
-  }
-
-  /** « Rester anonyme » (Greg, 16 novembre 2026) : se coche et se décoche à tout moment ; vaut pour tous les besoins de l'entreprise dans cet achat. */
-  async choisirAnonymat(tenant: TenantContext, id: string, anonyme: boolean) {
-    this.exigerActif();
-    assertCanWrite(tenant);
-    if (!isUuid(id)) throw notFound("Besoin");
-    const b = await this.prisma.besoinGroupeV1.findFirst({ where: { id, companyId: tenant.companyId }, select: { id: true, achatId: true, anonyme: true } });
-    if (!b) throw notFound("Besoin");
-    if (b.anonyme !== anonyme) {
-      await this.prisma.$transaction(async (tx) => {
-        await tx.besoinGroupeV1.updateMany({ where: { achatId: b.achatId, companyId: tenant.companyId }, data: { anonyme } });
-        await tx.historiqueBesoinGroupeV1.create({ data: { besoinId: b.id, companyId: tenant.companyId, type: anonyme ? "anonymat_choisi" : "anonymat_leve", transmis: false, detail: {} } });
-      });
-    }
-    return this.vueBesoin(tenant, id);
   }
 
   /** « Mettre à jour la date » (chantier reporté) : le besoin reste dans son achat tant que la date reste dans sa période. */

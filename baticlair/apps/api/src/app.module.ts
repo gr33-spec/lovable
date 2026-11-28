@@ -40,6 +40,7 @@ import { PushModule } from "./platform/push/push.module.js";
 
 import { PageEntrepriseModule } from "./modules/page-entreprise/page-entreprise.module.js";
 import { PagesRegionalesModule } from "./modules/pages-regionales/pages-regionales.module.js";
+import { CommunauteModule } from "./modules/communaute/communaute.module.js";
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { PagesRegionalesModule } from "./modules/pages-regionales/pages-regional
     CatalogueModule,
     PageEntrepriseModule,
     PagesRegionalesModule,
+    CommunauteModule,
   ],
 })
 export class AppModule {}

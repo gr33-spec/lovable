@@ -4,7 +4,7 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
-import { CARTE, CaseAnonyme, ligneRegroupement, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
+import { CARTE, ligneRegroupement, Note, PastilleStatut, Volumes } from "@/components/ag-v1-commun";
 import { Button, ButtonLink, INPUT, PageTitle, Skeleton } from "@/components/ui";
 import { api, messageErreur, newActionKey } from "@/lib/api";
 import { dateCourte, dateLongue, heureCourte, jourDans, zoneLisible, type BesoinV1, type EtatV1 } from "@/lib/ag-v1";
@@ -173,7 +173,6 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
   const params = useSearchParams();
   const fetcher = useCallback((s: AbortSignal) => api<BesoinV1>(`/v1/ag/besoins/${id}`, { signal: s }), [id]);
   const { data: b, setData, error } = useResource(fetcher);
-  const [anonymeChoisi, setAnonymeChoisi] = useState<boolean | null>(null);
   const geste0 = params.get("geste");
   const [motif, setMotif] = useState<string | null>(geste0 === "modifier" ? "quantite" : null);
   const [ouvert, setOuvert] = useState(geste0 === "modifier" || geste0 === "retirer");
@@ -358,20 +357,6 @@ export function BesoinV1Detail({ id, etat }: { id: string; etat: EtatV1 }) {
             {b.depuisPublication.quantite ? `${b.depuisPublication.quantite} depuis ta publication · ` : ""}
             {b.depuisPublication.entreprises} entreprise{b.depuisPublication.entreprises > 1 ? "s" : ""} t&apos;{b.depuisPublication.entreprises > 1 ? "ont" : "a"} rejoint
           </p>
-        ) : null}
-        {/* « Rester anonyme » se coche et se décoche à tout moment (tant que le besoin n'est pas retiré). */}
-        {b.etat !== "retire" ? (
-          <CaseAnonyme
-            coche={anonymeChoisi ?? b.anonyme === true}
-            onChange={(anonyme) => {
-              // La case répond tout de suite au doigt ; si le serveur refuse, elle revient à son état.
-              setAnonymeChoisi(anonyme);
-              void api<BesoinV1>(`/v1/ag/besoins/${b.id}/anonymat`, { method: "POST", body: { anonyme } })
-                .then((maj) => setData(maj))
-                .catch(() => undefined)
-                .finally(() => setAnonymeChoisi(null));
-            }}
-          />
         ) : null}
       </section>
 
