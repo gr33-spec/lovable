@@ -1,4 +1,4 @@
-import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY, dicteeAuPropre, dicteeVaAuMoteur, interpreter } from "@baticlair/domain";
+import { AI_ADDITION, AI_DOUBT, FORBIDDEN, isMandatoryQuestion, METIER_NAMES, MISSING_INFO, RATIO, REFERENTIALS, referentialFor, tradeIdOf, type EngineAnswer, A_PRECISER, UNITE_KEY, SUGGESTIONS_AUCUNE, SUGGESTIONS_KEY, ORTHOGRAPHE_KEY, dicteeAuPropre, dicteeVaAuMoteur, interpreter, ouvrageNomme } from "@baticlair/domain";
 import type { PrismaService } from "../../../platform/database/prisma.service.js";
 import { normalizeText, valeurDuReferentiel } from "@baticlair/domain";
 import { DomainError, notFound, validationFailed } from "../../../platform/errors/domain-error.js";
@@ -217,7 +217,16 @@ export class QuantitatifsService {
         const unite = c.unite ?? reviewed.purchase.toBuy.find((b) => b.key === c.cle)?.order?.unit ?? "u";
         await this.correct(tenant, id, { action: "fixer_quantite", id: c.cle, quantite: c.quantite, unite });
         faits.push(`« ${c.libelle} » passe à ${c.quantite} ${unite}`);
-      } else if (c.type === "ajouter") aAjouter.push([c.quantite, c.unite, c.libelle].filter(Boolean).join(" "));
+      } else if (c.type === "ajouter") {
+        // Un article qui nomme un ouvrage du métier (un Velux, une gouttière) passe par le moteur ; les autres (10 sacs de
+        // colle) entrent tels qu'écrits, avec leur quantité et leur unité dites (rien à calculer).
+        const ref = referentialFor(reviewed.takeoff.trade) ?? referentialFor("roofing")!;
+        if (ouvrageNomme(ref, c.libelle)) aAjouter.push([c.quantite, c.unite, c.libelle].filter(Boolean).join(" "));
+        else {
+          await this.correct(tenant, id, { action: "ajouter", ligne: { libelle: c.libelle, quantite: c.quantite, unite: c.unite, reference: null, prix: null } });
+          faits.push(`ajouté « ${c.libelle} »${c.quantite ? `, ${c.quantite}${c.unite ? ` ${c.unite}` : ""}` : ""}`);
+        }
+      }
       else if (c.type === "incompris") aAjouter.push(c.texte);
       else if (c.type === "ambigu") doutes.push(`« ${c.texte} » : laquelle ? ${c.candidats.map((x) => x.libelle).join(" ou ")}`);
     }
