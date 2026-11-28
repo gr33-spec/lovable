@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ALERT_QUIET_MS, ChannelAlerter, type AlertKind } from "../src/platform/alerts/alerter.js";
 import { ErrorFilter } from "../src/platform/http/error.filter.js";
 import type { AppLogger } from "../src/platform/logging/logger.js";
+import { lieuDesAlertes } from "../src/platform/email/email.module.js";
 
 /** AUDIT DE LANCEMENT, B5 : une panne en production prévient l'équipe, sans noyer sa messagerie. */
 const logger = { warn: () => {}, error: () => {}, info: () => {} } as unknown as AppLogger;
@@ -62,5 +63,18 @@ describe("alertes de production", () => {
     expect(sent).toHaveLength(0);
     filter.catch(new Error("boom"), host("GET"));
     expect(sent).toEqual([{ kind: "server_error", message: expect.stringMatching(/^internal_error sur GET \/v1\/projects\/:id \(code support [A-Z0-9-]+\)\.$/) }]);
+  });
+});
+
+describe("l'e-mail d'une alerte (Greg, 28 novembre 2026 : un essai arrivé dans les indésirables)", () => {
+  it("objet court : le lieu et la sorte d'alerte, jamais le message coupé ; le message entier dans le corps", async () => {
+    const mails: { to: string; subject: string; text: string }[] = [];
+    const a = new ChannelAlerter({ email: "alerte@example.fr", env: lieuDesAlertes("production", "preview") }, { send: async (m) => void mails.push(m) }, logger);
+    const long = "la sauvegarde de cette nuit a échoué à l'étape « Test de restauration ». ".repeat(3);
+    a.alert("sauvegarde_echec", long);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(mails[0]!.subject).toBe("Mobiiz (site de test) · Sauvegarde échouée");
+    expect(mails[0]!.text).toContain(long.trim());
+    expect(lieuDesAlertes("production", "production")).toBe("production");
   });
 });

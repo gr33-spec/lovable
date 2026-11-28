@@ -33,7 +33,7 @@ const TITLES: Record<AlertKind, string> = {
   /** Greg, 22 novembre 2026 : une adresse (contact@ ou une adresse Mobiiz) reçoit un volume anormal d'e-mails. */
   email_entrant: "E-mails entrants à surveiller",
   /** Greg, 28 novembre 2026 : la sauvegarde nocturne a échoué (export, test de restauration, chiffrement), ou ne dit plus rien. */
-  sauvegarde_echec: "SAUVEGARDE ÉCHOUÉE",
+  sauvegarde_echec: "Sauvegarde échouée",
   /** Un essai de l'alerte, ou la sauvegarde rétablie après un échec : une sorte à part, pour ne jamais retarder un vrai échec. */
   sauvegarde_info: "Sauvegarde de la base",
 };
@@ -73,11 +73,14 @@ export class ChannelAlerter implements Alerter {
     this.last.set(kind, at);
     this.skipped.set(kind, 0);
     const text = `${NOM_APP} (${this.channels.env}) — ${TITLES[kind]} : ${message}${silenced > 0 ? ` (+${silenced} autres depuis la dernière alerte)` : ""}`;
+    // L'objet de l'e-mail (Greg, 28 novembre 2026 : l'essai de l'alerte arrivé dans les indésirables Hotmail) : court,
+    // la sorte d'alerte seule, jamais le message coupé en plein mot.
+    const objet = `${NOM_APP} (${this.channels.env}) · ${TITLES[kind]}`;
     // Une alerte qui échoue ne fait jamais tomber la requête : elle est seulement journalisée.
-    void this.send(text).catch((err: unknown) => this.logger.warn({ err }, "alerte non envoyée"));
+    void this.send(text, objet).catch((err: unknown) => this.logger.warn({ err }, "alerte non envoyée"));
   }
 
-  private async send(text: string): Promise<void> {
+  private async send(text: string, objet: string): Promise<void> {
     const jobs: Promise<unknown>[] = [];
     if (this.channels.webhookUrl) {
       // « text » (Slack, ntfy) et « content » (Discord) : un même message pour les trois.
@@ -86,7 +89,7 @@ export class ChannelAlerter implements Alerter {
       );
     }
     const email = this.adresse ? await this.adresse().catch(() => this.channels.email ?? null) : (this.channels.email ?? null);
-    if (email) jobs.push(this.emailSender.send({ to: email, subject: text.slice(0, 120), text }));
+    if (email) jobs.push(this.emailSender.send({ to: email, subject: objet, text }));
     await Promise.all(jobs);
   }
 }
