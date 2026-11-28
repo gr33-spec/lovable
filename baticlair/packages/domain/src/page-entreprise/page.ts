@@ -471,3 +471,20 @@ export function publicationPermise(reglageAllume: boolean, abonnement: { statut:
   if (!abonnement) return false;
   return (abonnement.statut === "actif" || abonnement.statut === "resilie") && !!abonnement.periodeFin && abonnement.periodeFin > maintenant;
 }
+
+/**
+ * LE SITE APRÈS UNE RÉSILIATION (Greg, 28 novembre 2026, option 2), seulement quand la publication est réservée à
+ * l'abonnement : le site reste en ligne 30 jours après la fin de l'abonnement, un e-mail prévient 7 jours avant le
+ * retrait, puis il est retiré de la ligne. Rien n'est effacé (textes, photos, adresse) : réabonné, l'artisan republie en un
+ * toucher. `finAcces` : la fin de la période payée ; sans abonnement, la date où la règle a pris effet (au lancement).
+ */
+export const JOURS_EN_LIGNE_APRES_FIN = 30;
+export const JOURS_PREAVIS_RETRAIT = 7;
+
+export function etatDuSiteApresFin(fin: { allume: boolean; abonne: boolean; finAcces: Date | null }, maintenant: Date): { etat: "en-ligne" | "prevenir" | "retirer"; retraitLe: Date | null } {
+  if (!fin.allume || fin.abonne || !fin.finAcces) return { etat: "en-ligne", retraitLe: null };
+  const retraitLe = new Date(fin.finAcces.getTime() + JOURS_EN_LIGNE_APRES_FIN * 86_400_000);
+  if (maintenant >= retraitLe) return { etat: "retirer", retraitLe };
+  if (maintenant.getTime() >= retraitLe.getTime() - JOURS_PREAVIS_RETRAIT * 86_400_000) return { etat: "prevenir", retraitLe };
+  return { etat: "en-ligne", retraitLe };
+}

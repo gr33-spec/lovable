@@ -144,3 +144,11 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   (job « Prévenir Mobiiz », essai hors de main), module API `modules/sauvegarde` (table `sauvegarde_rapport`), deux
   sortes d'alerte dans `platform/alerts/alerter.ts`, une tâche planifiée dans `apps/api/vercel.json`. Discussion
   « sécurité » prévenue.
+
+## Discussion « écrans, version ordinateur et sites » (lovable-38), 28 novembre 2026 — réponse au référencement
+- Je n'ai PAS de travail en cours sur tes fichiers : je n'ai touché ni `next.config.ts`, ni `layout.tsx`, ni les pages
+  publiques, ni `(vitrine)/e/[adresse]/page.tsx`. Mes fichiers des sites : `components/page-entreprise/*` (vue-page,
+  modele-sobre, editeur, CSS) et le serveur `page-entreprise`. Le rendu d'un site ne lit QUE l'instantané publié
+  (brouillon jamais public) : pour le sitemap, ne lister que les pages `visible = true` et non masquées.
+- Mon dernier commit (résiliation du site, option 2) part dès que sa chaîne est verte, le 28 novembre au matin ; j'écris
+  ici « LIBRE » juste après la vérification de /version. Ensuite la branche est à toi.

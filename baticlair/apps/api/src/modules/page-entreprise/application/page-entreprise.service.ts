@@ -13,6 +13,7 @@ import {
   instantaneLu,
   memeInstantane,
   publicationPermise,
+  etatDuSiteApresFin,
   type InstantanePublie,
   PHOTOS_DEFAUT,
   photoDefautDe,
@@ -341,7 +342,7 @@ export class PageEntrepriseService {
     const page = await this.pageDe(t.companyId);
     if (!(await this.publicationAutorisee(t.companyId))) throw new DomainError("forbidden", "Publishing requires a subscription", { reason: "publication_reservee", phrase: "Mettre ton site en ligne fait partie de l'abonnement Pro." });
     const instantane = await this.instantane(page);
-    const data: Record<string, unknown> = { visible: true, publie: instantane, publieLe: this.now() };
+    const data: Record<string, unknown> = { visible: true, publie: instantane, publieLe: this.now(), retraitPrevenuLe: null };
     await this.prisma.pageEntreprise.update({ where: { companyId: t.companyId }, data });
     return this.maPage(t);
   }
@@ -861,7 +862,58 @@ export class PageEntrepriseService {
    * empreintes d'IP des signalements après 30 jours, signalements après 12 mois ; et les fichiers du stockage dont la photo
    * n'existe plus (compte supprimé : ses lignes partent avec l'entreprise, ses fichiers ici, la nuit suivante).
    */
-  async menage(maintenant = this.now()): Promise<{ contacts: number; signalements: number; empreintes: number; fichiers: number }> {
+  /**
+   * LE SITE APRÈS UNE RÉSILIATION (Greg, 28 novembre 2026, option 2), seulement quand la publication est réservée à
+   * l'abonnement (`SITE_PUBLICATION_PAYANTE`, coupé jusqu'au lancement) : 30 jours en ligne après la fin de la période
+   * payée, un e-mail et une alerte 7 jours avant, puis retiré de la ligne. Rien n'est effacé ; réabonné, l'artisan
+   * republie en un toucher. Sans abonnement, la fin compte depuis `SITE_PUBLICATION_PAYANTE_DEPUIS` (date du lancement).
+   */
+  async sitesApresFinAbonnement(maintenant = this.now()): Promise<{ prevenus: number; retires: number }> {
+    const allume = process.env.SITE_PUBLICATION_PAYANTE === "on";
+    if (!allume) return { prevenus: 0, retires: 0 };
+    const depuis = process.env.SITE_PUBLICATION_PAYANTE_DEPUIS ? new Date(process.env.SITE_PUBLICATION_PAYANTE_DEPUIS) : null;
+    const pages = await this.prisma.pageEntreprise.findMany({ where: { visible: true, masqueeLe: null } });
+    let prevenus = 0;
+    let retires = 0;
+    for (const page of pages) {
+      const a = await this.prisma.abonnement.findUnique({ where: { companyId: page.companyId }, select: { statut: true, periodeFin: true } });
+      const abonne = publicationPermise(true, a, maintenant);
+      const finAcces = a?.periodeFin ?? (depuis && !Number.isNaN(depuis.getTime()) ? depuis : null) ?? page.publieLe ?? page.createdAt;
+      const { etat, retraitLe } = etatDuSiteApresFin({ allume, abonne, finAcces }, maintenant);
+      if (etat === "retirer") {
+        await this.prisma.pageEntreprise.update({ where: { companyId: page.companyId }, data: { visible: false } });
+        await ecrireAlerte(this.prisma, page.companyId, { categorie: "site", genre: "information", titre: "Ton site n'est plus en ligne", detail: "Tes textes et tes photos sont gardés. Réabonne-toi pour le republier.", action: "Voir Mon site", href: "/mon-site", cle: `site-retire:${page.companyId}:${retraitLe!.toISOString().slice(0, 10)}` }).catch(() => false);
+        retires++;
+      } else if (etat === "prevenir" && !page.retraitPrevenuLe) {
+        const date = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long" }).format(retraitLe!);
+        const dest = await this.destinataire(page.companyId);
+        if (dest) {
+          await this.emails
+            .send({
+              to: dest,
+              subject: `Votre site Mobiiz sera retiré le ${date}`,
+              text: [
+                "Bonjour,",
+                "",
+                `Votre abonnement Mobiiz est terminé. Votre site (${this.config.webAppUrl}/e/${page.adresse}) reste en ligne jusqu'au ${date}, puis il sera retiré.`,
+                "",
+                "Vos textes, vos photos et votre adresse sont gardés : en vous réabonnant, vous le republiez d'un toucher depuis « Mon site ».",
+                "",
+                `${this.config.webAppUrl}/mon-site`,
+              ].join("\n"),
+            })
+            .catch(() => undefined);
+        }
+        await ecrireAlerte(this.prisma, page.companyId, { categorie: "site", genre: "action", titre: `Ton site sera retiré le ${date}`, detail: "Réabonne-toi pour le garder en ligne. Rien n'est effacé.", action: "Voir Mon site", href: "/mon-site", cle: `site-retrait:${page.companyId}:${retraitLe!.toISOString().slice(0, 10)}` }).catch(() => false);
+        await this.prisma.pageEntreprise.update({ where: { companyId: page.companyId }, data: { retraitPrevenuLe: maintenant } });
+        prevenus++;
+      }
+    }
+    return { prevenus, retires };
+  }
+
+  async menage(maintenant = this.now()): Promise<{ contacts: number; signalements: number; empreintes: number; fichiers: number; sitesPrevenus: number; sitesRetires: number }> {
+    const { prevenus: sitesPrevenus, retires: sitesRetires } = await this.sitesApresFinAbonnement(maintenant);
     const jours = (n: number) => new Date(maintenant.getTime() - n * 86_400_000);
     const contacts = await this.prisma.contactPage.deleteMany({ where: { createdAt: { lt: jours(30) } } });
     // Les copies des messages du site (Greg, 17 novembre 2026) : 12 mois, puis supprimées.
@@ -877,7 +929,7 @@ export class PageEntrepriseService {
     // Une photo à peine créée peut être en cours de dépôt : on ne touche qu'aux dossiers sans ligne.
     const orphelins = fichiers.filter((f) => !vivantes.has(f.cle.split("/")[2] ?? ""));
     for (let i = 0; i < orphelins.length; i += 500) await this.stockage.supprimer(orphelins.slice(i, i + 500).map((f) => f.url));
-    return { contacts: contacts.count, signalements: signalements.count, empreintes: empreintes.count, fichiers: orphelins.length };
+    return { contacts: contacts.count, signalements: signalements.count, empreintes: empreintes.count, fichiers: orphelins.length, sitesPrevenus, sitesRetires };
   }
 
   async traiterSignalement(id: string) {

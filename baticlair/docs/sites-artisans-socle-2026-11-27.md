@@ -73,7 +73,11 @@ vibrations, « Améliorer mon référencement », pied de page « Site pro cré�
   `publicationPermise`). Vérifié **côté serveur** (403 `publication_reservee`, « Mettre ton site en ligne fait partie de
   l'abonnement Pro. »). Aucun appel à Stripe, aucun prix créé ou changé.
 
-### Ce que devient le site si l'artisan résilie : propositions (Greg décide)
+### Ce que devient le site si l'artisan résilie : DÉCIDÉ (Greg, 28 novembre 2026) = option 2
+
+Codé : `etatDuSiteApresFin` (domaine), `sitesApresFinAbonnement` (lancé chaque nuit par `menage`), colonne additive
+`retrait_prevenu_le` (migration `20261128090000_page_retrait_prevenu`). N'agit que quand `SITE_PUBLICATION_PAYANTE=on`
+(coupé jusqu'au lancement). Écrit pour l'avocat dans `docs/groupe/CGU-candidate-2026-11-16.md`. Les trois propositions :
 
 1. **Il reste en ligne** tel qu'il est, sans pouvoir être modifié ni republié, avec le formulaire de devis actif. Le plus
    simple ; Mobiiz garde un site actif sans revenu.

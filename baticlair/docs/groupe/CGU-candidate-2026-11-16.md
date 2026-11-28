@@ -702,6 +702,8 @@ Chaque point : le risque, puis la question à poser.
     Question : les factures produites sont-elles conformes, et quelles mentions ajouter aux CGU alors que tout est payé
     d'avance par carte ?
 
+- **Le site de l'artisan après une résiliation (décision de Greg, 28 novembre 2026, à écrire dans les CGU).** « Mon site » est réservé à l'abonnement (Pro ou Pro Max) à partir du lancement. Quand l'abonnement prend fin (résiliation, paiement non renouvelé), le site reste en ligne 30 jours après la fin de la période payée ; un e-mail prévient l'artisan 7 jours avant le retrait ; puis le site est retiré de la ligne. Ses textes, ses photos et son adresse sont gardés (pas effacés) : en se réabonnant, il republie en un toucher. Questions à l'avocat : (1) la durée de conservation des photos et textes d'un site retiré (aujourd'hui sans limite tant que le compte existe ; faut-il une durée au registre RGPD ?) ; (2) l'information préalable suffit-elle (e-mail à J-7 et alerte dans l'application) ; (3) le formulaire de contact du site reste actif pendant les 30 jours : rien à ajouter ? (4) l'adresse du site reste réservée à l'artisan pour toujours, même après la suppression de son compte (déjà la règle du 19 novembre 2026) : à mentionner ?
+
 ### Conseillé (avant le lancement commercial)
 
 16. **Masquer le nom du négoce à un compte gratuit.**
