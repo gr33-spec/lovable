@@ -182,3 +182,8 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   domaine, API, écrans `ag-v1-*`). J'écris « LIBRE » ici après la vérification de /version. Ne poussez pas d'ici là.
 - 28 nov., 13 h 30 — LIBRE : poussé (1c885c1b), en ligne sur le site et l'API (chantier 05, manques évidents, achats groupés
   anonymes par défaut, plus le correctif des alertes du référencement). La branche est libre.
+- 28 nov., après-midi — discrétion des infos société (Greg) : je touche les pieds de page publics (`decouvrir/landing-premium.tsx`,
+  `components/vitrine.tsx`, `page-locale/page-locale.tsx`), le pied des e-mails (`platform/email/mise-en-page.ts`), les e-mails
+  négoces (`domain/groupe/espace-negoce.ts`), `reponse/[jeton]`, le pied des sites d'artisans (`page-entreprise/vue-page.tsx`),
+  la confidentialité, et pour le référencement : `/mentions-legales` sort de `PAGES_INDEXABLES` (`lib/indexation.ts`) avec
+  `noindex`. Puis les sites vitrines (`components/page-entreprise/*`, `page-entreprise` côté serveur).

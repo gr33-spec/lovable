@@ -128,7 +128,7 @@ describe("le catalogue d'un métier, en rayons", { timeout: 120_000 }, () => {
 
 describe("la synchronisation explicite du catalogue", { timeout: 240_000 }, () => {
   async function admin() {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "10", unite: "pièces" }]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     return greg;
   }

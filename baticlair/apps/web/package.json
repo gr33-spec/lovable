@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "e2e": "playwright test",
-    "test": "node --test scripts/garde-a-completer.test.mjs scripts/sans-tiers.test.mjs scripts/nom-app.test.mjs scripts/erreurs-precises.test.mjs scripts/landing-coup-de-main.test.mjs scripts/indexation.test.mjs"
+    "test": "node --test scripts/garde-a-completer.test.mjs scripts/sans-tiers.test.mjs scripts/nom-app.test.mjs scripts/erreurs-precises.test.mjs scripts/landing-coup-de-main.test.mjs scripts/indexation.test.mjs scripts/discretion.test.mjs"
   },
   "dependencies": {
     "@baticlair/domain": "workspace:*",

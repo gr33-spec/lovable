@@ -43,7 +43,7 @@ describe("la démo admin", () => {
   });
 
   it("un cycle complet : jeu de test, clôture, réponses, résultats ; fin d'essai et échec de paiement ; tout s'efface", { timeout: 120_000 }, async () => {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: ARDOISE, quantite: "2400", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: ARDOISE, quantite: "2400", unite: "pièces" }]);
     await greg.agent.post(`/v1/projects/${greg.projectId}/commande-du-mois`).send({ articles: greg.articles, nature: "chantier" }).expect(201);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     const sans = (await greg.agent.get("/v1/admin/pilotage").expect(200)).body;

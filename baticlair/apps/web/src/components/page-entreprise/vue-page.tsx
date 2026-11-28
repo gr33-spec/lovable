@@ -382,7 +382,13 @@ export function PiedSite({ c, activite, zone, lien, apercu }: { c: ContenuPage; 
               {c.adressePostale ? `Adresse : ${c.adressePostale}. ` : zone ? `Zone : ${zone}. ` : ""}Contact : le formulaire de cette page{c.telephone ? ` ou le ${c.telephone}` : ""}. Responsable de la publication : le représentant légal de {c.nom}.
             </p>
             <p>
-              Hébergement : {EDITEUR.nom} ({EDITEUR.produit}), {EDITEUR.forme}, {EDITEUR.adresse}, {EDITEUR.contact} ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
+              {/* Discrétion (Greg, 28 novembre 2026) : comme Wix ou Jimdo, l'hébergeur se nomme et renvoie à ses mentions légales
+                  (où sont son adresse et son immatriculation) ; les serveurs sont nommés avec leur adresse. */}
+              Hébergement : {EDITEUR.produit}, {EDITEUR.contact} (coordonnées complètes :{" "}
+              <a href={lien("/mentions-legales")} className="pe-pied-lien">
+                mentions légales de {EDITEUR.produit}
+              </a>
+              ) ; serveurs {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
             </p>
             <p>
               Certifications et assurances : déclarées par l&apos;entreprise, non vérifiées par Mobiiz. « Entreprise vérifiée » : SIRET actif contrôlé à l&apos;INSEE, ce n&apos;est pas un label de qualité.

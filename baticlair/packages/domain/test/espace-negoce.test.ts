@@ -110,7 +110,9 @@ describe("les textes côté négoce : vouvoiement, jamais un nom d'artisan", () 
   it("l'invitation nomme le secteur, jamais l'artisan ; le lien magique ; la clôture sans compte ; la grille prête", () => {
     const inv = mailInvitationNegoce({ lien: "https://b/negoce/rejoindre/x", departement: "22", conditions: "https://b/negoce/conditions", opposition: "https://b/negoce/opposition/o" });
     // RGPD (24 octobre 2026) : qui écrit, pourquoi, et le lien d'opposition.
-    expect(inv.texte).toContain("Ce message vous est envoyé par BATI INVEST (Mobiiz) pour le regroupement.");
+    // Discrétion (Greg, 28 novembre 2026) : « Mobiiz » seul, jamais le nom de la société ni son adresse.
+    expect(inv.texte).toContain("Ce message vous est envoyé par Mobiiz pour le regroupement.");
+    expect(inv.texte).not.toMatch(/BATI INVEST|Ouipoure|SIRET/);
     expect(inv.texte).toContain("Ne plus jamais être contacté : https://b/negoce/opposition/o");
     expect(inv.objet).toBe("Des artisans de votre secteur vous ont ajouté au regroupement : créez votre accès");
     expect(inv.texte).toContain("Un artisan de votre secteur (22) vous a ajouté");

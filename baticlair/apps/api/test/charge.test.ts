@@ -80,11 +80,11 @@ describe.skipIf(!ACTIF)("charge : 200 artisans, 50 lots, 1 000 besoins", { timeo
     // Greg : un vrai compte (admin), dans le 22, avec un besoin dans chaque référence du 22.
     const greg = await signUpWithCompany(ctx.app, "greg@example.fr", "BATI INVEST", ["roofing"]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
-    await p.company.update({ where: { id: greg.companyId }, data: { address: "6 impasse du Ouipoure, 22620 Ploubazlanec", siret: "73282932000074", siretVerifieLe: new Date() } });
+    await p.company.update({ where: { id: greg.companyId }, data: { address: "1 rue des Ardoisiers, 22500 Paimpol", siret: "73282932000074", siretVerifieLe: new Date() } });
     await greg.agent.post("/v1/groupe/negoces").send({ nom: "Mon négoce", email: "negoce-22-0@example.com", familles: ["couverture"] }).expect(201);
-    const projet = await p.project.create({ data: { companyId: greg.companyId, name: "Chantier Greg", address: "6 impasse du Ouipoure, 22620 Ploubazlanec" } });
+    const projet = await p.project.create({ data: { companyId: greg.companyId, name: "Chantier Greg", address: "1 rue des Ardoisiers, 22500 Paimpol" } });
     const takeoff = await p.takeoff.create({ data: { companyId: greg.companyId, projectId: projet.id, source: "lignes", trade: "roofing", status: "validated", promptId: "charge", promptVersion: 1, model: "charge" } });
-    for (let r = 0; r < REFS; r++) await p.besoin.create({ data: { companyId: greg.companyId, projectId: projet.id, takeoffId: takeoff.id, articleKey: `charge:${r}:greg`, designation: `Ardoise charge ${r} 32 × 22`, cle: `charge-ardoise-${r}`, famille: "couverture", quantite: 1200, unite: "pièces", zone: "22", adresseLivraison: "6 impasse du Ouipoure, 22620 Ploubazlanec", fenetreTot: fenetre.tot, fenetreTard: fenetre.tard, statut: "signe", signeLe: new Date() } });
+    for (let r = 0; r < REFS; r++) await p.besoin.create({ data: { companyId: greg.companyId, projectId: projet.id, takeoffId: takeoff.id, articleKey: `charge:${r}:greg`, designation: `Ardoise charge ${r} 32 × 22`, cle: `charge-ardoise-${r}`, famille: "couverture", quantite: 1200, unite: "pièces", zone: "22", adresseLivraison: "1 rue des Ardoisiers, 22500 Paimpol", fenetreTot: fenetre.tot, fenetreTard: fenetre.tard, statut: "signe", signeLe: new Date() } });
 
     // Routes de l'artisan et de l'admin, avant les lots.
     const api = (chemin: string) => mesurer(`GET ${chemin}`, async () => (await greg.agent.get(chemin).expect(200)).body);
