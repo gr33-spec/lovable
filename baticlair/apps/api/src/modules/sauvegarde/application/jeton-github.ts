@@ -66,8 +66,14 @@ export async function verifierJetonGithub(jeton: string, lireCles: LireCles, mai
   return { runId: c.run_id, ref: c.ref, essai: c.ref !== "refs/heads/main" };
 }
 
+/**
+ * Le strict nécessaire de `fetch`, typé ici : le compilateur de Vercel ne voit pas toujours les types web de Node
+ * (`Response.json` absent), comme pour la vérification du SIRET et l'envoi Resend.
+ */
+type HttpGet = (url: string, init: { signal: AbortSignal }) => Promise<{ ok: boolean; json(): Promise<unknown> }>;
+
 /** Les clés publiques de GitHub, gardées une heure (elles changent rarement ; une clé inconnue force une relecture). */
-export function clesGithub(fetchImpl: typeof fetch = fetch, maintenant: () => number = () => Date.now()): LireCles {
+export function clesGithub(fetchImpl: HttpGet = fetch as unknown as HttpGet, maintenant: () => number = () => Date.now()): LireCles {
   let cache: { cles: Cle[]; le: number } | null = null;
   return async (forcer = false) => {
     if (cache && maintenant() - cache.le < (forcer ? 60_000 : 3_600_000)) return cache.cles;
