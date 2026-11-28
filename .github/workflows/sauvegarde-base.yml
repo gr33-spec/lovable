@@ -14,19 +14,52 @@ name: Sauvegarde de la base (chaque nuit)
 # Deux secrets, dans l'ENVIRONNEMENT GitHub « sauvegarde » réservé à `main`, posés par Greg lui-même, jamais écrits ailleurs :
 # - SAUVEGARDE_DATABASE_URL : l'adresse de connexion Neon DIRECTE (sans pooler) d'un rôle en LECTURE SEULE ;
 # - SAUVEGARDE_CLE : la phrase de chiffrement (longue, gardée hors de GitHub par Greg pour pouvoir déchiffrer).
-# Un secret absent fait ÉCHOUER le job : jamais de « vert » sans sauvegarde. GitHub prévient par e-mail à chaque échec.
+# Un secret absent fait ÉCHOUER le job : jamais de « vert » sans sauvegarde.
+#
+# LA SAUVEGARDE PRÉVIENT ELLE-MÊME (Greg, 28 novembre 2026 : « je ne veux pas dépendre des notifications de mon compte
+# GitHub ») : à la fin de chaque exécution, le job « Prévenir Mobiiz » envoie le résultat à l'API de Mobiiz (réussie, ou
+# l'étape en échec, test de restauration compris), authentifié par le jeton signé que GitHub délivre à ce workflow (OIDC :
+# aucun secret de plus). Un échec part par les alertes de Mobiiz (adresse réglée dans Admin › Réglages) ; la carte
+# « Santé » de l'admin lit le dernier résultat ; si plus rien n'arrive pendant 36 heures, l'API prévient d'elle-même.
+# Code : `baticlair/apps/api/src/modules/sauvegarde/`.
+# ESSAI DE L'ALERTE : modifié sur la branche de test, ce fichier se lance seul et ÉCHOUE EXPRÈS (aucune base lue) ;
+# l'API reçoit un « essai », prévient « ESSAI de l'alerte », et ne le compte jamais comme une sauvegarde.
 # Un horaire GitHub ne part que depuis la branche PAR DÉFAUT du dépôt : elle doit être `main`.
 # Restauration à la main : `baticlair/docs/securite-sauvegardes-couts-2026-11-27.md`, partie 4.
 on:
   schedule:
     - cron: "17 2 * * *"
   workflow_dispatch:
+  # Ce fichier modifié : sur `main`, une vraie sauvegarde ; sur la branche de test, l'essai de l'alerte (échec volontaire).
+  push:
+    branches:
+      - main
+      - claude/saas-achat-artisans-prompt-1lyihx
+    paths:
+      - .github/workflows/sauvegarde-base.yml
 
 permissions:
   contents: read
 
+env:
+  # L'API qui reçoit le résultat. Aujourd'hui celle du site de test (la base sauvegardée est celle du site de test) ;
+  # au lancement, l'API de production (`baticlair/docs/groupe/MISE-EN-PROD.md`, section 0).
+  MOBIIZ_API: https://api-test.mobiiz.fr
+
 jobs:
+  essai:
+    # Hors de `main` : jamais la base, un échec volontaire pour éprouver l'alerte de bout en bout.
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Échec volontaire (essai de l'alerte)
+        run: |
+          echo "::error::Essai de l'alerte de la sauvegarde : échec volontaire, aucune base lue."
+          exit 1
+
   sauvegarde:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: sauvegarde
@@ -44,12 +77,18 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 20
+    outputs:
+      etape: ${{ steps.bilan.outputs.etape }}
+      tables: ${{ steps.export.outputs.tables }}
+      octets: ${{ steps.export.outputs.octets }}
+      lignes: ${{ steps.restauration.outputs.lignes }}
     env:
       SAUVEGARDE_DATABASE_URL: ${{ secrets.SAUVEGARDE_DATABASE_URL }}
       SAUVEGARDE_CLE: ${{ secrets.SAUVEGARDE_CLE }}
       RESTAURATION_URL: postgresql://postgres:restauration@localhost:5432/restauration
     steps:
       - name: Secrets posés ?
+        id: secrets
         run: |
           if [ -z "$SAUVEGARDE_DATABASE_URL" ] || [ -z "$SAUVEGARDE_CLE" ]; then
             echo "::error::Secrets absents dans l'environnement « sauvegarde » : AUCUNE sauvegarde faite."
@@ -60,6 +99,7 @@ jobs:
             exit 1
           fi
       - name: Client PostgreSQL 18
+        id: client
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -y postgresql-common >/dev/null
@@ -67,6 +107,7 @@ jobs:
           sudo apt-get -qq install -y postgresql-client-18 >/dev/null
           /usr/lib/postgresql/18/bin/pg_dump --version
       - name: Export et relecture
+        id: export
         run: |
           set -euo pipefail
           PGBIN=/usr/lib/postgresql/18/bin
@@ -79,7 +120,10 @@ jobs:
           if [ "$TABLES" -lt 10 ]; then echo "::error::Export trop petit ($TABLES tables)."; exit 1; fi
           echo "Tables exportées : $TABLES ; taille : $(stat -c %s "$NOM") octets."
           echo "NOM=$NOM" >> "$GITHUB_ENV"
+          echo "tables=$TABLES" >> "$GITHUB_OUTPUT"
+          echo "octets=$(stat -c %s "$NOM")" >> "$GITHUB_OUTPUT"
       - name: Test de restauration (base jetable de GitHub)
+        id: restauration
         run: |
           set -euo pipefail
           PGBIN=/usr/lib/postgresql/18/bin
@@ -100,8 +144,10 @@ jobs:
             echo "::warning::Écart de lignes (activité pendant l'export) :"; diff origine.txt restauree.txt | grep '^[<>]' | head -20 || true
           fi
           rm -f origine.txt restauree.txt requete.sql
+          echo "lignes=$L_R" >> "$GITHUB_OUTPUT"
           echo "Restauration réussie."
       - name: Chiffrement, puis déchiffrement de contrôle
+        id: chiffrement
         run: |
           set -euo pipefail
           EMPREINTE=$(sha256sum "$NOM" | cut -d' ' -f1)
@@ -114,6 +160,7 @@ jobs:
           cat "$NOM.enc.sha256"
           echo "Déchiffrement de contrôle : identique."
       - name: Garder 30 jours
+        id: garder
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.NOM }}.enc
@@ -123,6 +170,7 @@ jobs:
           retention-days: 30
           if-no-files-found: error
       - name: Le 1er du mois, une copie gardée 90 jours
+        id: mensuelle
         if: ${{ endsWith(env.NOM, '-01.dump') }}
         uses: actions/upload-artifact@v4
         with:
@@ -132,3 +180,65 @@ jobs:
             ${{ env.NOM }}.enc.sha256
           retention-days: 90
           if-no-files-found: error
+      - name: Bilan (l'étape en échec, en mots)
+        id: bilan
+        if: always()
+        env:
+          ETAPES: |-
+            ${{ steps.secrets.outcome }}|Secrets posés
+            ${{ steps.client.outcome }}|Client PostgreSQL
+            ${{ steps.export.outcome }}|Export et relecture
+            ${{ steps.restauration.outcome }}|Test de restauration
+            ${{ steps.chiffrement.outcome }}|Chiffrement et déchiffrement de contrôle
+            ${{ steps.garder.outcome }}|Conservation 30 jours
+            ${{ steps.mensuelle.outcome }}|Copie mensuelle 90 jours
+        run: |
+          ETAPE=$(printf '%s\n' "$ETAPES" | awk -F'|' '$1=="failure" {print $2; exit}')
+          echo "etape=${ETAPE}" >> "$GITHUB_OUTPUT"
+          echo "Étape en échec : ${ETAPE:-aucune}"
+
+  prevenir:
+    name: Prévenir Mobiiz
+    needs: [essai, sauvegarde]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # Le jeton signé de GitHub (OIDC) : la seule preuve que l'API accepte, aucun secret.
+      id-token: write
+    steps:
+      - name: Envoyer le résultat à l'API de Mobiiz
+        env:
+          ESSAI: ${{ needs.essai.result }}
+          SAUVEGARDE: ${{ needs.sauvegarde.result }}
+          ETAPE: ${{ needs.sauvegarde.outputs.etape }}
+          TABLES: ${{ needs.sauvegarde.outputs.tables }}
+          LIGNES: ${{ needs.sauvegarde.outputs.lignes }}
+          OCTETS: ${{ needs.sauvegarde.outputs.octets }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            STATUT=echec; ETAPE="Échec volontaire (essai de l'alerte)"
+          elif [ "$SAUVEGARDE" = "success" ]; then
+            STATUT=reussie; ETAPE=""
+          else
+            STATUT=echec
+            if [ "$SAUVEGARDE" = "cancelled" ]; then ETAPE="Arrêtée avant la fin (annulée ou trop longue)"; fi
+            if [ -z "$ETAPE" ]; then ETAPE="Le travail n'a pas pu démarrer ($SAUVEGARDE)"; fi
+          fi
+          JETON=$(curl -sS --fail -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=mobiiz-sauvegarde" | jq -r .value)
+          CORPS=$(jq -cn --arg statut "$STATUT" --arg etape "$ETAPE" --arg tables "$TABLES" --arg lignes "$LIGNES" --arg octets "$OCTETS" \
+            '{statut: $statut} + (if $etape != "" then {etape: $etape} else {} end)
+             + (if ($tables|test("^[0-9]+$")) then {tables: ($tables|tonumber)} else {} end)
+             + (if ($lignes|test("^[0-9]+$")) then {lignes: ($lignes|tonumber)} else {} end)
+             + (if ($octets|test("^[0-9]+$")) then {octets: ($octets|tonumber)} else {} end)')
+          echo "Envoi à $MOBIIZ_API : $CORPS"
+          # Trois essais : un réveil lent de l'API ne doit pas faire perdre l'alerte.
+          for i in 1 2 3; do
+            CODE=$(curl -sS -o reponse.json -w '%{http_code}' -X POST "$MOBIIZ_API/v1/internal/sauvegarde" \
+              -H "Authorization: Bearer $JETON" -H "content-type: application/json" --data "$CORPS" || echo 000)
+            if [ "$CODE" = "200" ]; then cat reponse.json; echo; echo "Mobiiz prévenu."; exit 0; fi
+            echo "Réponse $CODE, nouvel essai dans 20 s." ; sleep 20
+          done
+          echo "::error::Mobiiz n'a pas pu être prévenu (dernière réponse : $CODE)."
+          exit 1
