@@ -8,7 +8,7 @@ import localFont from "next/font/local";
 import { connection } from "next/server";
 import { EnregistrementServiceWorker } from "@/components/service-worker";
 import { ACCROCHE_APP, NOM_APP, SLOGAN_APP } from "@/lib/nom";
-import { origineDuSite } from "@/lib/origine";
+import { origineCanonique } from "@/lib/origine";
 
 // Plan « finition », bloc 5 (Lighthouse, décalage 0,21 sur les pages légales) : la police passe par next/font,
 // qui les précharge et dessine d'abord une police de secours aux mêmes mesures ; le texte ne bouge plus à leur arrivée.
@@ -19,14 +19,6 @@ const jakarta = localFont({
   weight: "200 800",
   display: "swap",
   variable: "--font-jakarta",
-});
-// Direction « chantier haute visibilité » (Greg, 23 octobre au soir : « un truc qui déchire ») : Bricolage Grotesque,
-// déjà dans les dépendances, pour les titres et les grands chiffres ; Plus Jakarta Sans reste le texte.
-const bricolage = localFont({
-  src: "../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2",
-  weight: "200 800",
-  display: "swap",
-  variable: "--font-bricolage",
 });
 
 const METADONNEES: Metadata = {
@@ -58,7 +50,7 @@ const METADONNEES: Metadata = {
  * vers vercel.app au lieu du domaine courant ») ; sans elle, Next prenait l'adresse technique du déploiement.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  return { ...METADONNEES, metadataBase: new URL(await origineDuSite()) };
+  return { ...METADONNEES, metadataBase: new URL(await origineCanonique()) };
 }
 
 export const viewport: Viewport = {
@@ -77,7 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   await connection();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang="fr" className={`${jakarta.variable} ${bricolage.variable}`} suppressHydrationWarning>
+    <html lang="fr" className={jakarta.variable} suppressHydrationWarning>
       <head>
         {/* Greg, 12 novembre 2026 : aucun flash clair ou sombre au chargement. Le thème gardé sur l'appareil est posé sur
             <html> avant le premier affichage (script court, avec le nonce de la requête) ; `src/lib/theme.ts` fait foi ensuite. */}
