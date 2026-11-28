@@ -206,34 +206,28 @@ describe("isolation entre entreprises", () => {
     }
     expect((await b.agent.get("/v1/ag/besoins").expect(200)).body.enCours).toEqual([]);
     expect(Number((await ctx.prisma.besoinGroupeV1.findUniqueOrThrow({ where: { id: ra.id } })).quantiteSaisie)).toBe(7);
-    // Ce que B voit de l'achat : produit, zone, période. RÈGLE CHANGÉE (Greg, 16 novembre 2026) : le NOM de l'entreprise se
-    // voit (elle n'a pas coché « rester anonyme »), jamais sa quantité ; sous 3 entreprises, « En cours de regroupement » à
-    // la place du volume ; toujours aucune adresse, aucun e-mail, aucune contrainte.
+    // Ce que B voit de l'achat : produit, zone, période. ANONYMES PAR DÉFAUT (Greg, 28 novembre 2026 ; RÈGLE CHANGÉE : le
+    // 16 novembre, le nom se voyait sauf case « rester anonyme ») : JAMAIS le nom d'une autre entreprise, ni sa quantité ;
+    // sous 3 entreprises, « En cours de regroupement » ; aucune adresse, aucun e-mail, aucune contrainte.
     const vu = (await b.agent.get("/v1/ag/achats").expect(200)).body;
     const texte = JSON.stringify(vu) + JSON.stringify((await b.agent.post("/v1/ag/compatibilite").send({ ...ARDOISE, reception: "livraison", dateBesoin: jour(40) })).body);
-    expect(texte).not.toMatch(/Lannion|12 rue du Port|Camion|"A"|a@toitures|companyId|"lieu"|3 360|7 palettes/);
+    expect(texte).not.toMatch(/Lannion|12 rue du Port|Camion|"A"|a@toitures|companyId|"lieu"|3 360|7 palettes|Toitures|"noms"|anonyme/);
     expect(vu.achats[0].volumes.principale).toBe("En cours de regroupement");
-    expect(vu.achats[0].resume).toMatchObject({ entreprises: 1, volume: null, regroupement: true, noms: ["Toitures A"], anonymes: 0, verifiees: true });
-    // « Rester anonyme » : le nom disparaît pour les autres, l'entreprise reste comptée ; cela se décoche.
-    expect((await b.agent.post(`/v1/ag/besoins/${ra.id}/anonymat`).send({ anonyme: true })).status).toBe(404);
-    expect((await a.agent.post(`/v1/ag/besoins/${ra.id}/anonymat`).send({ anonyme: true }).expect(200)).body.anonyme).toBe(true);
-    const cache = (await b.agent.get("/v1/ag/achats").expect(200)).body;
-    expect(JSON.stringify(cache)).not.toMatch(/Toitures/);
-    expect(cache.achats[0].resume).toMatchObject({ entreprises: 1, noms: [], anonymes: 1 });
-    await a.agent.post(`/v1/ag/besoins/${ra.id}/anonymat`).send({ anonyme: false }).expect(200);
-    expect((await b.agent.get("/v1/ag/achats").expect(200)).body.achats[0].resume.noms).toEqual(["Toitures A"]);
+    expect(vu.achats[0].resume).toEqual({ entreprises: 1, volume: null, regroupement: true, derniereEvolution: expect.any(String), verifiees: true });
+    // La case « rester anonyme » n'existe plus : sa route non plus.
+    expect((await a.agent.post(`/v1/ag/besoins/${ra.id}/anonymat`).send({ anonyme: false })).status).toBe(404);
+    expect(JSON.stringify((await a.agent.get(`/v1/ag/besoins/${ra.id}`).expect(200)).body)).not.toMatch(/anonyme/);
     // Le lot d'une ligne ne se corrige que dans ses chantiers.
     const { projectId } = await liste(a.agent, [{ libelle: "Liteaux sapin 27x40", quantite: "300", unite: "m" }]);
     expect((await b.agent.get(`/v1/ag/projects/${projectId}/lignes`)).status).toBe(404);
     expect((await b.agent.put(`/v1/ag/projects/${projectId}/lignes/x/lot`).send({ lot: "bois" })).status).toBe(404);
   });
 
-  it("plusieurs entreprises : le total seulement (palettes), les noms sauf ceux qui restent anonymes, jamais la quantité de chacune ; les autres participants sont prévenus dans la cloche", async () => {
+  it("plusieurs entreprises : le total seulement (palettes), jamais un nom ni la quantité de chacune (anonymes par défaut, 28 novembre 2026) ; les autres participants sont prévenus dans la cloche", async () => {
     const agents = [];
     for (const i of [1, 2, 3, 4, 5]) agents.push(await entreprise(`e${i}@toitures.fr`, `Toitures E${i}`));
     const premier = (await confirmer(agents[0]!.agent, [besoin()]).expect(201)).body.besoins[0];
-    // La deuxième entreprise coche « rester anonyme » en confirmant.
-    await agents[1]!.agent.post("/v1/ag/besoins").send({ besoins: [besoin({ quantite: 4, achatId: premier.achat.id })], confirmation: true, cleIdempotence: cle(), anonyme: true }).expect(201);
+    await confirmer(agents[1]!.agent, [besoin({ quantite: 4, achatId: premier.achat.id })]).expect(201);
     // À deux entreprises : toujours « En cours de regroupement », et « depuis ta publication » ne dit aucune quantité.
     const aDeux = (await agents[0]!.agent.get(`/v1/ag/besoins/${premier.id}`).expect(200)).body;
     expect(aDeux.achat.volumes.principale).toBe("En cours de regroupement");
@@ -241,8 +235,8 @@ describe("isolation entre entreprises", () => {
     for (const e of agents.slice(2)) await confirmer(e.agent, [besoin({ quantite: 4, achatId: premier.achat.id })]).expect(201);
     const vu = (await agents[1]!.agent.get("/v1/ag/achats").expect(200)).body.achats[0];
     expect(vu.volumes).toMatchObject({ principale: "26 palettes de besoins confirmés par 5 entreprises", sous: "À reconfirmer avant consultation" });
-    expect(JSON.stringify(vu)).not.toMatch(/"quantite"|companyId|"lieu"|Toitures E2/);
-    expect(vu.resume).toMatchObject({ entreprises: 5, volume: "12 480 pièces", regroupement: false, noms: ["Toitures E1", "Toitures E3", "Toitures E4", "Toitures E5"], anonymes: 1 });
+    expect(JSON.stringify(vu)).not.toMatch(/"quantite"|companyId|"lieu"|Toitures|"noms"/);
+    expect(vu.resume).toMatchObject({ entreprises: 5, volume: "12 480 pièces", regroupement: false });
     // Lot H : « +… depuis ta publication » pour le créateur, et une alerte courte, réelle, sans nom, une seule par tranche.
     const mien = (await agents[0]!.agent.get(`/v1/ag/besoins/${premier.id}`).expect(200)).body;
     expect(mien.depuisPublication).toEqual({ entreprises: 4, quantite: "+7 680 pièces" });

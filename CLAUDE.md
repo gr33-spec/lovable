@@ -152,9 +152,9 @@ Depuis `baticlair/` (avant tout : `service postgresql start`) :
 - Mots simples : « Ton chantier est où ? » (« Bord de mer », « Intérieur des terres », « Montagne », « Entre les deux »), jamais « Zone climatique ». Seuls les mots changent, pas le calcul.
 - FONDATEUR sur le Pro au mois seulement, date de besoin à 7 jours, essence du liteau facultative : confirmés par Greg.
 - Tarifs : « Y a-t-il une limite d'analyses ? » (plus le mot « illimitées »).
-- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication.
+- Achats groupés, visibilité (RÈGLE CHANGÉE par Greg) : les noms des entreprises sont visibles, jamais la quantité de chacune, seulement le total ; chaque artisan peut cocher « rester anonyme » ; à moins de 3 entreprises, « en cours de regroupement » à la place du volume. Avant : jamais de nom, volumes dès la première publication. **REMPLACÉ le 28 novembre 2026 : anonymes par défaut, voir plus bas.**
 
-- Les besoins déjà publiés avant ce changement restent anonymes ; seuls les nouveaux montrent le nom de l'entreprise. « +N depuis ta publication » ne dit une quantité qu'à partir de deux nouvelles entreprises.
+- Les besoins déjà publiés avant ce changement restent anonymes ; seuls les nouveaux montrent le nom de l'entreprise. « +N depuis ta publication » ne dit une quantité qu'à partir de deux nouvelles entreprises. (Remplacé le 28 novembre 2026 : plus aucun nom.)
 - Peinture en achat groupé : deux produits, « Peinture murs et plafonds » et « Peinture façade », tirés du catalogue, sans marque. Comptés en litres ; le pot de 15 L est proposé, l'artisan le confirme. Seuil « recommandé » posé à 150 L : à valider par Greg.
 
 ## Décisions du 16 novembre 2026 (soir) : « Mon site » et « Entre pros »
@@ -522,3 +522,7 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - « Mon site » : un onglet « Modèles », le premier (dessin de chaque modèle aux couleurs choisies, « Choisi », « Revenir au modèle … ») ; avant, le choix était caché dans « Couleurs ». Sur ordinateur, l'éditeur s'ouvre sur « Modèles ».
 - « Mon site » dit la date de retrait d'un site dont l'abonnement est fini (la même que l'e-mail et l'alerte, `publication.retraitLe`) avec « Reprendre l'abonnement » ; « Publier » refusé faute d'abonnement mène à l'abonnement. N'agit que quand `SITE_PUBLICATION_PAYANTE=on`.
 - Profil › « Inviter des artisans » (`/compte/inviter`) : le lien d'invitation et la liste d'attente, pour les retrouver après avoir fermé l'encart de l'accueil (qui le dit). Admin › liste d'attente : lien « Qui a invité qui ».
+
+## Décisions du 28 novembre 2026 : achats groupés, anonymes par défaut
+
+- RÈGLE CHANGÉE (Greg, 28 novembre 2026 ; remplace la règle du 16 novembre) : avant, les noms des entreprises participantes se voyaient, sauf case « rester anonyme » → les participants sont ANONYMES entre eux : jamais un nom d'entreprise, seulement le volume total (à partir de 3 entreprises), le nombre d'artisans et la zone. La case « Rester anonyme » et sa route (`POST /v1/ag/besoins/:id/anonymat`) sont retirées ; l'admin voit toujours qui participe. La colonne `besoin_groupe_v1.anonyme` reste en base, sans usage (rien n'est effacé). Le négoce, lui, reçoit toujours le nom de ses clients pour la commande. Tests : `apps/api/test/achats-groupes-v1.test.ts`, `e2e-ag-v1/achats-groupes-v1.spec.ts`.
