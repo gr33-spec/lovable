@@ -37,7 +37,7 @@ beforeEach(async () => {
 
 const LIGNES = [{ libelle: "Ardoise naturelle 32×22 Espagne 1er choix", quantite: "10", unite: "pièces" }];
 async function admin() {
-  const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", LIGNES);
+  const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", LIGNES);
   await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
   return greg;
 }

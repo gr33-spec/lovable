@@ -104,7 +104,7 @@ describe("la page du négoce : PDF, Excel, trois façons de répondre", { timeou
     expect(JSON.stringify(pageY)).not.toContain("Toitures 1");
 
     // L'admin : X a vu la page (pas encore : le PDF ne compte pas comme une visite), téléchargé le PDF ; Y rien d'autre.
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
     await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
     await publique().get(`/v1/public/achat-groupe/${x}`).expect(200);
     await binaire(x, "demande.xlsx").expect(200);

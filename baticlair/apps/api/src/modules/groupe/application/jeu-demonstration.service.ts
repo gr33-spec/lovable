@@ -168,7 +168,7 @@ export class JeuDemonstrationService {
     if (!user || !membership) return null;
     const company = await this.prisma.company.findUniqueOrThrow({ where: { id: membership.companyId } });
     if (!company.siretVerifieLe) await this.prisma.company.update({ where: { id: company.id }, data: { siret: company.siret ?? "73282932000074", siretVerifieLe: maintenant } });
-    const adresse = company.address && /\b22\d{3}\b/.test(company.address) ? company.address : "6 impasse du Ouipoure, 22620 Ploubazlanec";
+    const adresse = company.address && /\b22\d{3}\b/.test(company.address) ? company.address : "1 rue des Ardoisiers, 22500 Paimpol";
     const chantier = await this.chantier(company.id, user.id, "Démo regroupement – Toiture Ploubazlanec", adresse);
     return { companyId: company.id, email: user.email, adresse, ...chantier };
   }

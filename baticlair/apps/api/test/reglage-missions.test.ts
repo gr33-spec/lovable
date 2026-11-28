@@ -33,7 +33,7 @@ const sante = async () => (await request(ctx.app.getHttpServer()).get("/v1/healt
 
 describe("l'interrupteur des missions dans l'admin", { timeout: 120_000 }, () => {
   it("coupées par défaut (404, « Bientôt ») ; l'admin ouvre d'un clic ; un artisan ne peut pas ; recouper ne supprime rien", async () => {
-    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", LIGNES);
+    const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", LIGNES);
     const artisan = await couvreurAvecListe(ctx, "artisan@example.fr", "Toitures Martin", "8 rue du Port, 22500 Paimpol", LIGNES);
 
     // Coupées : la santé le dit, chaque route répond 404.

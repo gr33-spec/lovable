@@ -2777,7 +2777,7 @@ test("BatiClair Groupé, étape 9 : l'admin (Greg seul) voit les lots, le journa
 test("Pages légales : mentions légales, CGU, conditions négoce et confidentialité, lisibles sans compte ; l'acceptation des CGU est gardée", async ({ page }) => {
   await page.goto("/mentions-legales");
   await expect(page.getByRole("heading", { name: "Mentions légales" })).toBeVisible();
-  await expect(page.getByText(/édité par BATI INVEST, SARL au capital de .* SIRET 910 796 325 00017, dont le siège est situé 6 impasse du Ouipoure, 22620 Ploubazlanec/)).toBeVisible();
+  await expect(page.getByText(/édité par BATI INVEST, SARL au capital de .* SIRET 910 796 325 00017, dont le siège est situé .+, \d{5} /)).toBeVisible();
   await expect(page.getByText(/TVA intracommunautaire FR61910796325/)).toBeVisible();
   await expect(page.getByText(/Vercel Inc\./)).toBeVisible();
   // Greg, 26 octobre 2026 : le Kbis complet, le directeur de la publication, contact@mobiiz.fr, Neon ; plus aucun repère.
@@ -3313,7 +3313,10 @@ test("La page d'accueil publique : un visiteur la voit à la racine, un artisan 
   const pied = page.getByRole("navigation", { name: "Informations et liens légaux" });
   for (const [nom, href] of <[string, string][]>[["Tarifs", "/tarifs"], ["Mentions légales", "/mentions-legales"], ["CGU", "/cgu"], ["Conditions négoces", "/conditions-negoce"], ["Confidentialité", "/confidentialite"], ["Contact", "/mentions-legales#contact"], ["Accès négoce", "/negoce/connexion"]])
     await expect(pied.getByRole("link", { name: nom })).toHaveAttribute("href", href);
-  await expect(page.getByText(/BATI INVEST, SARL au capital de 1 000 €, RCS Saint-Brieuc 910 796 325, SIRET 910 796 325 00017/)).toBeVisible();
+  // DISCRÉTION (Greg, 28 novembre 2026 ; RÈGLE CHANGÉE : avant, le bloc légal complet en pied de la landing) : « Mobiiz »,
+  // le contact et le lien des mentions légales ; ni l'adresse, ni le SIRET, ni le RCS, ni le capital.
+  await expect(page.locator("footer")).toContainText("Mobiiz · contact@mobiiz.fr · Mentions légales");
+  await expect(page.locator("footer")).not.toContainText(/SIRET|RCS|capital|Ouipoure|BATI INVEST/);
   // Sur téléphone : le menu s'ouvre et mène à sa section ; le bouton fixe n'apparaît qu'une fois celui de l'accroche passé,
   // et s'efface devant celui du bas.
   const taille = page.viewportSize();

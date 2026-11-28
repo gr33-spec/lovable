@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 /** La version de cette page (une date, comme les CGU). */
-const VERSION = "17/11/2026";
+const VERSION = "28/11/2026";
 
 /**
  * La politique de confidentialité (RGPD, Greg, 24 octobre 2026) : en tableau, chaque traitement avec ses données, sa base
@@ -150,7 +150,11 @@ export default function ConfidentialitePage() {
       <section className="flex flex-col gap-2">
         <h2 className={s.h2}>Responsable du traitement</h2>
         <p className={s.p}>
-          {EDITEUR.nom}, {EDITEUR.forme}, {EDITEUR.adresse}, SIREN {EDITEUR.siren}. Contact : {EDITEUR.contact}. {EDITEUR.nom} n&apos;a pas de délégué à la protection
+          {EDITEUR.nom} ({EDITEUR.produit}), dont l&apos;adresse et l&apos;immatriculation sont dans les{" "}
+          <Link href="/mentions-legales" className="font-semibold underline">
+            mentions légales
+          </Link>
+          . Contact : {EDITEUR.contact}. {EDITEUR.nom} n&apos;a pas de délégué à la protection
           des données (il n&apos;est pas obligatoire pour cette activité) : le fondateur répond lui-même.
         </p>
       </section>
@@ -253,7 +257,7 @@ export default function ConfidentialitePage() {
           </li>
         </ul>
         <p className={s.p}>
-          Pour tout le reste, écris à {EDITEUR.contact} ou à {EDITEUR.nom}, {EDITEUR.adresse} : réponse dans un délai d&apos;un mois. Tu peux aussi saisir la CNIL
+          Pour tout le reste, écris à {EDITEUR.contact} (ou par courrier, à l&apos;adresse des mentions légales) : réponse dans un délai d&apos;un mois. Tu peux aussi saisir la CNIL
           (cnil.fr, 3 place de Fontenoy, 75007 Paris) si tu estimes que tes droits ne sont pas respectés.
         </p>
       </section>

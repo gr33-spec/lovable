@@ -57,7 +57,7 @@ const engagement = (o: Record<string, unknown> = {}) => ({
 });
 const jetonDe = (email: string) => /\/achat-groupe\/([A-Za-z0-9_-]+)/.exec(mailsVers(ctx, email).filter((m) => / : achat groupé /.test(m.subject)).at(-1)!.text)![1]!;
 async function admin() {
-  const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "6 impasse du Ouipoure, 22620 Ploubazlanec", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
+  const greg = await couvreurAvecListe(ctx, "greg@example.fr", "Bati Invest", "1 rue des Ardoisiers, 22500 Paimpol", [{ libelle: A3222, quantite: "10", unite: "pièces" }]);
   await doubleAuthentification(ctx, greg.agent, "greg@example.fr");
   return greg;
 }

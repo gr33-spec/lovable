@@ -534,3 +534,14 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 ## Décisions du 28 novembre 2026 : achats groupés, anonymes par défaut
 
 - RÈGLE CHANGÉE (Greg, 28 novembre 2026 ; remplace la règle du 16 novembre) : avant, les noms des entreprises participantes se voyaient, sauf case « rester anonyme » → les participants sont ANONYMES entre eux : jamais un nom d'entreprise, seulement le volume total (à partir de 3 entreprises), le nombre d'artisans et la zone. La case « Rester anonyme » et sa route (`POST /v1/ag/besoins/:id/anonymat`) sont retirées ; l'admin voit toujours qui participe. La colonne `besoin_groupe_v1.anonyme` reste en base, sans usage (rien n'est effacé). Le négoce, lui, reçoit toujours le nom de ses clients pour la commande. Tests : `apps/api/test/achats-groupes-v1.test.ts`, `e2e-ag-v1/achats-groupes-v1.spec.ts`.
+
+## Décisions du 28 novembre 2026 : discrétion des infos société (Greg : « décide le plus logique, comme le marché »)
+
+- Mobiiz reste au nom de BATI INVEST. RÈGLE CHANGÉE : avant, le bloc légal complet (adresse du siège, SIRET, RCS, capital, TVA) en pied de la landing, des pages publiques et de chaque e-mail → seulement « Mobiiz · contact@mobiiz.fr » et le lien « Mentions légales » (comme Wix, Malt, Lovable). L'adresse, le SIRET, le RCS et le capital ne sont QUE sur `/mentions-legales` et sur les factures d'abonnement (obligation légale).
+- E-mails aux négoces : « envoyé par Mobiiz » (avant : « par BATI INVEST (Mobiiz) »). Page de réponse d'un négoce : plus « édité par BATI INVEST SARL ».
+- Sites des artisans : « Hébergement : Mobiiz, contact@mobiiz.fr (coordonnées complètes : mentions légales de Mobiiz) ; serveurs Vercel Inc. » (comme Wix ou Jimdo) ; avant, l'adresse du siège. À faire valider par l'avocat (`MISE-EN-PROD.md`, section 0).
+- Politique de confidentialité (version du 28/11/2026) : le responsable du traitement renvoie aux mentions légales pour l'adresse ; contact@mobiiz.fr.
+- RÈGLE CHANGÉE : `/mentions-legales` n'est plus ouverte aux moteurs (retirée de `PAGES_INDEXABLES`, `noindex` en en-tête et en balise). Pas de ligne dans robots.txt, choix assumé : Google doit pouvoir lire le `noindex` ; une page interdite dans robots.txt peut rester dans les résultats sous forme de lien.
+- Les tests n'utilisent plus l'adresse de Greg (adresse fictive « 1 rue des Ardoisiers, 22500 Paimpol »). Test permanent `apps/web/scripts/discretion.test.mjs` : refuse adresse, SIRET, RCS, capital ailleurs que dans les mentions légales.
+- Le seul moyen de ne plus montrer l'adresse personnelle au registre (societe.com, Infogreffe) : domicilier le siège (environ 15 à 30 € par mois et une modification du Kbis) ; à décider par Greg.
+

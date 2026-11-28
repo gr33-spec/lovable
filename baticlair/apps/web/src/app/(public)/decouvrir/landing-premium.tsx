@@ -2,8 +2,8 @@ import Link from "next/link";
 import { CtaFixePremium, EntetePremium, PaliersCollectif } from "@/components/landing-premium";
 import { SiMissions } from "@/components/landing-missions";
 import { PresentationImages } from "@/components/presentation-images";
-import { HEBERGEUR, PAGES_LEGALES } from "@/lib/legal";
-import { ACCROCHE_APP, BLOC_LEGAL } from "@/lib/nom";
+import { PAGES_LEGALES } from "@/lib/legal";
+import { ACCROCHE_APP } from "@/lib/nom";
 import { TARIFS } from "../../../../../../packages/domain/src/groupe/tarifs";
 import { TROIS_QUESTIONS } from "./landing";
 import "./premium.css";
@@ -512,10 +512,11 @@ export function LandingPremium() {
             </nav>
           </div>
           <p className="footer-bottom" style={{ display: "block" }}>
-            Service édité par {BLOC_LEGAL} Hébergeur : {HEBERGEUR.nom}, {HEBERGEUR.adresse}.
+            {/* Discrétion (Greg, 28 novembre 2026) : l'éditeur, son adresse et son immatriculation ne sont que dans les mentions légales. */}
+          Mobiiz · <a href="mailto:contact@mobiiz.fr">contact@mobiiz.fr</a> · <Link href="/mentions-legales">Mentions légales</Link>
           </p>
           <div className="footer-bottom">
-            <span>© Mobiiz · Un service de Bati Invest</span>
+            <span>© Mobiiz</span>
             <span>Les matériaux, c&apos;est mieux ensemble.</span>
           </div>
         </div>

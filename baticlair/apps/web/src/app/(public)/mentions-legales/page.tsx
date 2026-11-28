@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: { absolute: `Mentions légales · ${NOM_APP}` },
   description: `Mentions légales de ${NOM_APP} : éditeur, hébergement et contact.`,
   alternates: { canonical: "/mentions-legales" },
+  // Discrétion (Greg, 28 novembre 2026) : jamais dans les moteurs (l'en-tête `X-Robots-Tag` le dit aussi, `lib/indexation.ts`).
+  robots: { index: false, follow: true },
 };
 
 const s = { h2: "mz-titre mz-legal-h2", p: "mz-legal-p" };

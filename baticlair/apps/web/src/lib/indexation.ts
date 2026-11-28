@@ -19,8 +19,12 @@ type Env = Readonly<Record<string, string | undefined>>;
 export const HOTE_PRODUCTION = "mobiiz.fr";
 export const ORIGINE_PRODUCTION = `https://${HOTE_PRODUCTION}`;
 
-/** Les pages proposées aux moteurs (et au sitemap), sur mobiiz.fr seulement. Ajouter une page ici = la publier aux moteurs. */
-export const PAGES_INDEXABLES: readonly string[] = ["/", "/tarifs", "/mentions-legales", "/cgu", "/confidentialite", "/conditions-negoce"];
+/**
+ * Les pages proposées aux moteurs (et au sitemap), sur mobiiz.fr seulement. Ajouter une page ici = la publier aux moteurs.
+ * RÈGLE CHANGÉE (Greg, 28 novembre 2026, discrétion des infos société) : `/mentions-legales` n'y est plus, elle dit
+ * `noindex` (l'adresse du siège y figure) ; elle reste lisible par le lien en bas de chaque page.
+ */
+export const PAGES_INDEXABLES: readonly string[] = ["/", "/tarifs", "/cgu", "/confidentialite", "/conditions-negoce"];
 
 /** Ce qui accompagne les pages ouvertes et ne doit jamais dire « noindex » : robots, sitemap, logo et images de la landing. */
 const FICHIERS_OUVERTS = ["robots.txt", "sitemap.xml", "favicon.ico", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];

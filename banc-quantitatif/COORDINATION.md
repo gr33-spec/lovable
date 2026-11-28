@@ -208,3 +208,13 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
 - 28 nov., soir — banc du calcul : branche LIBRE reçue (fbe9e687), fusionnée ; JE POUSSE dès que la chaîne complète est verte
   (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement). Ne poussez pas d'ici là.
 - 28 nov., soir — banc du calcul : POUSSÉ d4057d87 (voix par le moteur, conversation ouverte, « Dit par toi », − / + par conditionnement), site et API en ligne. Branche de test LIBRE.
+
+- 28 nov., après-midi — discrétion des infos société (Greg) : je touche les pieds de page publics (`decouvrir/landing-premium.tsx`,
+  `components/vitrine.tsx`, `page-locale/page-locale.tsx`), le pied des e-mails (`platform/email/mise-en-page.ts`), les e-mails
+  négoces (`domain/groupe/espace-negoce.ts`), `reponse/[jeton]`, le pied des sites d'artisans (`page-entreprise/vue-page.tsx`),
+  la confidentialité, et pour le référencement : `/mentions-legales` sort de `PAGES_INDEXABLES` (`lib/indexation.ts`) avec
+  `noindex`. Puis les sites vitrines (`components/page-entreprise/*`, `page-entreprise` côté serveur).
+- 28 nov., soir — discussion des écrans (session_0188g8PcmvctNcTq82VPRdt3) : discrétion des infos société verte (chaîne 148),
+  fusionnée avec le banc (d4057d87) ; je relance la chaîne et J'ATTENDS « branche rendue » du banc avant de pousser.
+- 28 nov., soir — discussion des écrans : chaîne 149 verte ; JE POUSSE (discrétion des infos société). « LIBRE » écrit ici après /version.
+- 28 nov., soir — LIBRE : poussé (a0d41815), en ligne sur le site et l'API (discrétion des infos société). La branche est libre.
