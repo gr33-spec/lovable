@@ -120,6 +120,14 @@ test("invitation, liste d'attente, prévenir les inscrits : de bout en bout, une
   await page.reload();
   await expect(page.getByRole("region", { name: "Tu es sur la liste" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Invite d'autres artisans" })).toHaveCount(0);
+  // Fermé sur l'accueil, le lien se retrouve dans Profil › Inviter des artisans (Greg, 28 novembre 2026 : l'évident).
+  await page.goto("/compte/inviter");
+  const profil = page.getByRole("region", { name: "Invite d'autres artisans" });
+  await expect(profil).toBeVisible();
+  await expect(profil.getByText(/\/invitation\/[23456789a-z]{10}$/)).toBeVisible();
+  await expect(profil.getByRole("button", { name: "Fermer l'invitation" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Tu es sur la liste" })).toBeVisible();
+  await page.goto("/");
 
   // 4. L'admin : qui a invité qui ; puis « Prévenir les inscrits » (aperçu, confirmation, envoi par lots).
   const a = await admin(browser);

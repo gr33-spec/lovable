@@ -135,6 +135,8 @@ describe("Brouillon et site publié", () => {
     // Publié pendant l'abonnement (la ligne d'abonnement est déjà finie : on la pose en ligne directement).
     await ctx.prisma.pageEntreprise.update({ where: { companyId: a.companyId }, data: { visible: true } });
     const le = (j: number) => new Date(fin.getTime() + j * 86_400_000);
+    // « Mon site » dit la date du retrait, la même que l'e-mail (Greg, 28 novembre 2026 : l'évident sans le demander).
+    expect((await a.agent.get("/v1/ma-page").expect(200)).body.publication.retraitLe).toBe(le(30).toISOString());
     // Coupé : rien ne bouge, même longtemps après.
     delete process.env.SITE_PUBLICATION_PAYANTE;
     expect(await service.sitesApresFinAbonnement(le(60))).toEqual({ prevenus: 0, retires: 0 });
@@ -158,6 +160,7 @@ describe("Brouillon et site publié", () => {
     await ctx.prisma.abonnement.update({ where: { companyId: a.companyId }, data: { statut: "actif", periodeFin: new Date(Date.now() + 30 * 86_400_000) } });
     await a.agent.post("/v1/ma-page/publication").expect(201);
     expect((await lire()).accroche).toBe("Chez Martin");
+    expect((await a.agent.get("/v1/ma-page").expect(200)).body.publication.retraitLe).toBeNull();
     delete process.env.SITE_PUBLICATION_PAYANTE;
   });
 

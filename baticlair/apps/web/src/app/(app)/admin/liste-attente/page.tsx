@@ -70,6 +70,9 @@ function Liste() {
       <Link href="/admin/prevenir" className="pressable inline-flex min-h-12 items-center self-start rounded-full bg-accent px-5 text-[16px] font-extrabold text-on-accent">
         Prévenir les inscrits d&apos;un métier
       </Link>
+      <Link href="/admin/invitations" className="flex min-h-11 items-center self-start text-[16px] font-semibold underline underline-offset-4">
+        Qui a invité qui
+      </Link>
       <p className="text-[16px]">
         <strong className="text-[22px] tabular-nums">{i.total}</strong> entreprise{i.total > 1 ? "s" : ""} inscrite{i.total > 1 ? "s" : ""}, dont{" "}
         <strong className="tabular-nums">{i.essai}</strong> par la carte (nouvel onboarding).

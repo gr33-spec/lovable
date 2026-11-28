@@ -1,4 +1,4 @@
-import { AtSign, Bell, Building2, CreditCard, FolderOpen, LifeBuoy, Palette, Plug, ShieldCheck, Sparkles, UserRound, type LucideIcon } from "lucide-react";
+import { AtSign, Bell, Building2, CreditCard, FolderOpen, LifeBuoy, Palette, Plug, ShieldCheck, Sparkles, UserPlus, UserRound, type LucideIcon } from "lucide-react";
 
 /**
  * « PROFIL ET PARAMÈTRES » (Greg, 1er novembre 2026, puis 10 novembre : captures 18 et 19) : le sommaire, en quatre groupes,
@@ -20,7 +20,8 @@ export type RubriqueProfil =
   | "preferences"
   | "donnees"
   | "aide"
-  | "guide";
+  | "guide"
+  | "inviter";
 
 export interface LigneProfil {
   id: RubriqueProfil;
@@ -42,6 +43,8 @@ export const GROUPES_PROFIL: { titre: string; lignes: LigneProfil[] }[] = [
       { id: "entreprise", titre: "Mon entreprise", sousTitre: "Coordonnées, SIRET, métiers et zones", icone: Building2 },
       { id: "profil-public", titre: "Profil public et missions", sousTitre: "Présentation, services et disponibilités", icone: UserRound, missions: true },
       { id: "documents", titre: "Documents et qualifications", sousTitre: "Facultatif : CV, assurances, diplômes, jamais affichés", icone: FolderOpen, missions: true },
+      // Chantier 05 (28 novembre 2026) : le lien d'invitation se retrouve ici après avoir fermé l'encart de l'accueil.
+      { id: "inviter", titre: "Inviter des artisans", sousTitre: "Ton lien à partager et la liste d'attente", icone: UserPlus },
     ],
   },
   {

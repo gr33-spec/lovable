@@ -29,6 +29,7 @@ import {
   Wrench,
   X,
   type LucideIcon,
+  LayoutTemplate,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -86,7 +87,7 @@ interface PhotoGalerie {
 interface MaPage {
   reglages: Reglages;
   /** Brouillon et publié (Greg, 27 novembre 2026) : la dernière publication et ce qui reste à mettre en ligne. */
-  publication?: { publieLe: string | null; changementsAPublier: boolean; autorisee: boolean };
+  publication?: { publieLe: string | null; changementsAPublier: boolean; autorisee: boolean; retraitLe?: string | null };
   profil: { nom: string; metiers: string[]; telephone: string | null; zone: string | null; adressePostale: string | null; siret: string | null; verifiee: boolean; logo: boolean };
   contenu: ContenuPage;
   photos: (PhotoEditeur & { largeur: number; hauteur: number; partage: string | null })[];
@@ -109,8 +110,10 @@ interface MaPage {
 type Etat = "pret" | "enregistrement" | "enregistre" | "erreur";
 const CHAMPS_TEXTE = new Set<keyof Reglages>(["accroche", "presentation", "telephone", "zone", "horaires", "siteWeb", "lienGoogle", "prestations"]);
 
-type Onglet = "couleurs" | "photos" | "prestations" | "chantiers" | "apropos" | "contact" | "publier";
+type Onglet = "modeles" | "couleurs" | "photos" | "prestations" | "chantiers" | "apropos" | "contact" | "publier";
 const ONGLETS: { id: Onglet; libelle: string; Icone: LucideIcon }[] = [
+  // Greg, 28 novembre 2026 : « un onglet Modèles, c'était évident » (avant : le choix caché dans « Couleurs »).
+  { id: "modeles", libelle: "Modèles", Icone: LayoutTemplate },
   { id: "couleurs", libelle: "Couleurs", Icone: Palette },
   { id: "photos", libelle: "Photos", Icone: ImageIcon },
   { id: "prestations", libelle: "Prestations", Icone: Wrench },
@@ -121,7 +124,7 @@ const ONGLETS: { id: Onglet; libelle: string; Icone: LucideIcon }[] = [
 ];
 
 /** La partie du site que règle chaque onglet : le téléphone y défile quand l'onglet s'ouvre. */
-const CIBLE_APERCU: Record<Onglet, string> = { couleurs: ".pe-actions", photos: "haut", prestations: "#prestations", chantiers: "#realisations", apropos: "#a-propos", contact: "#contact", publier: "haut" };
+const CIBLE_APERCU: Record<Onglet, string> = { modeles: "haut", couleurs: ".pe-actions", photos: "haut", prestations: "#prestations", chantiers: "#realisations", apropos: "#a-propos", contact: "#contact", publier: "haut" };
 
 /** Écran d'ordinateur (1024 px et plus) : le panneau à gauche, le site en grand à droite. */
 function useOrdinateur(): boolean {
@@ -851,7 +854,7 @@ export function EditeurMaPage() {
   const couleurActive = r.couleur ?? null;
   const teinteMetier = data.choix.teintes.find((x) => x.id === theme.teinte)!;
   const couvertureEnCours = data.photos.some((p) => p.role === "couverture" && p.statut === "traitement");
-  const actif = ordinateur ? (onglet ?? "couleurs") : onglet;
+  const actif = ordinateur ? (onglet ?? "modeles") : onglet;
   const photosOk = data.choix.stockagePhotos && data.reglages.photosAccord;
   const photoMetier = (() => {
     const p = photoDefautDe(null, data.contenu.metiers);
@@ -873,29 +876,36 @@ export function EditeurMaPage() {
   };
 
   const panneaux: Record<Onglet, React.ReactNode> = {
-    couleurs: (
+    modeles: (
       <>
-        {/* Les modèles de site (Greg, 27 novembre 2026) : même contenu, autre habillage, un clic ; montré dès qu'il y en a deux. */}
-        {(data.choix.modeles?.length ?? 0) > 1 ? (
-          <Bloc titre="Modèle du site" aide="Ton contenu reste le même : seul l'habillage change.">
-            <div role="radiogroup" aria-label="Modèle du site" className="grid grid-cols-1 gap-2">
-              {data.choix.modeles!.map((m, i) => {
-                const choisi = (r.modele ?? data.choix.modeles![0]!.id) === m.id;
-                return (
-                  <button key={m.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("modele", i === 0 ? null : m.id)} className={`pressable flex min-h-14 flex-col items-start gap-0.5 rounded-2xl border-2 px-3 py-2 text-left text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
-                    <span className="text-[15px] font-extrabold">{m.nom}</span>
-                    <span className="text-[13px] text-muted">{m.description}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </Bloc>
-        ) : null}
+        {/* Les modèles de site (Greg, 27 novembre 2026) : même contenu, autre habillage, un toucher. Le site à côté change
+            aussitôt ; rien n'est en ligne avant « Publier ». */}
+        <Bloc titre="Modèle du site" aide="Ton contenu reste le même : seul l'habillage change. Rien ne part en ligne avant « Publier ».">
+          <div role="radiogroup" aria-label="Modèle du site" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {(data.choix.modeles ?? []).map((m, i) => {
+              const choisi = (r.modele ?? data.choix.modeles![0]!.id) === m.id;
+              return (
+                <button key={m.id} type="button" role="radio" aria-checked={choisi} onClick={() => changer("modele", i === 0 ? null : m.id)} className={`pressable flex flex-col items-stretch gap-2 rounded-2xl border-2 p-2 text-left text-ink ${choisi ? "border-accent bg-[color-mix(in_srgb,var(--color-accent)_15%,transparent)]" : "border-line"}`}>
+                  <Miniature modele={m.id} teinte={r.couleur ?? "#1F2A37"} boutons={r.couleurBoutons ?? "#FED206"} />
+                  <span className="px-1 text-[15px] font-extrabold">
+                    {m.nom}
+                    {choisi ? <span className="ml-2 text-[13px] font-bold text-accent-text">Choisi</span> : null}
+                  </span>
+                  <span className="px-1 pb-1 text-[13px] text-muted">{m.description}</span>
+                </button>
+              );
+            })}
+          </div>
+        </Bloc>
         {r.modelePrecedent && (data.choix.modeles?.length ?? 0) > 1 && r.modelePrecedent !== (r.modele ?? data.choix.modeles![0]!.id) ? (
           <Button variant="secondary" onClick={() => changer("modele", r.modelePrecedent === data.choix.modeles![0]!.id ? null : r.modelePrecedent!)}>
             <Undo2 size={18} aria-hidden="true" /> Revenir au modèle {data.choix.modeles!.find((m) => m.id === r.modelePrecedent)?.nom ?? "précédent"}
           </Button>
         ) : null}
+      </>
+    ),
+    couleurs: (
+      <>
         {/* Les palettes (Greg, 27 novembre 2026) : la teinte et les boutons d'un toucher ; le jaune Mobiiz n'est qu'un choix. */}
         <Bloc titre="Palettes" aide="Une teinte et une couleur de boutons qui vont ensemble. Tu peux ensuite changer l'une ou l'autre.">
           <div role="radiogroup" aria-label="Palettes" className="grid grid-cols-2 gap-2">
@@ -1230,7 +1240,14 @@ export function EditeurMaPage() {
             ) : r.visible && data.publication?.publieLe ? (
               <p className="text-[14px] text-muted">En ligne, à jour depuis le {new Date(data.publication.publieLe).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>
             ) : null}
-            {data.publication && !data.publication.autorisee ? <p className="text-[14px] text-muted">Mettre ton site en ligne fait partie de l&apos;abonnement Pro.</p> : null}
+            {data.publication && !data.publication.autorisee ? (
+              <p className="text-[14px] text-muted">
+                Mettre ton site en ligne fait partie de l&apos;abonnement Pro.{" "}
+                <Link href="/abonnement" className="font-bold text-ink underline underline-offset-4">
+                  Voir l&apos;abonnement
+                </Link>
+              </p>
+            ) : null}
             {r.masquee ? <p className="rounded-xl bg-red-500/10 px-3 py-2 text-[14px] font-bold text-red-700 dark:text-red-300">Ton site a été masqué par l&apos;équipe Mobiiz après un signalement. Écris-nous à contact@mobiiz.fr.</p> : null}
             <p className="text-[14px] break-all">
               <span className="text-muted">Adresse : </span>
@@ -1352,6 +1369,7 @@ export function EditeurMaPage() {
               <h1 className="font-display text-[28px] leading-tight font-extrabold tracking-[-0.02em]">Mon site</h1>
               <p className="text-[14px] text-muted">Un vrai site pour ton entreprise. Touche un onglet, ton site change à droite.</p>
             </div>
+            <BandeauRetrait retraitLe={data?.publication?.retraitLe ?? null} />
             {barreOnglets}
             {reglages}
           </aside>
@@ -1384,6 +1402,7 @@ export function EditeurMaPage() {
           {/* Le ＋ de la barre du bas dépasse au milieu : la colonne de droite s'arrête au-dessus de lui. */}
           <div data-colonne-apercu className="flex min-w-0 flex-1 flex-col gap-2 pb-8">
             <h1 className="sr-only">Mon site</h1>
+            <BandeauRetrait retraitLe={data?.publication?.retraitLe ?? null} compact />
             {/* Spécialiste UI/UX (19 novembre 2026) : tiroir ouvert sur un petit iPhone, il ne restait qu'une bande du téléphone.
                 L'aperçu garde au moins 38 % de la colonne, le tiroir défile en dessous ; sa barre « Appeler » s'efface. */}
             <section className={`flex min-h-0 flex-1 flex-col gap-1.5${actif ? " min-h-[38%]" : ""}`} aria-label="Aperçu de mon site">
@@ -1415,5 +1434,60 @@ export function EditeurMaPage() {
       {apercuPlein ? <ApercuPlein contenu={contenu} onFermer={fermerApercu} /> : null}
       {partage ? <Partager url={url} nom={data.profil.nom} onFermer={() => setPartage(false)} /> : null}
     </>
+  );
+}
+
+/**
+ * Le dessin d'un modèle, en blocs, aux couleurs choisies : de quoi reconnaître l'habillage avant de le toucher (le vrai
+ * site, à côté, change aussitôt). « Atelier » : accueil sombre sur photo ; « Sobre » : clair, texte et photo côte à côte.
+ */
+function Miniature({ modele, teinte, boutons }: { modele: string; teinte: string; boutons: string }) {
+  const trait = (w: string, h = 4, c = "rgba(255,255,255,.85)") => <span className="block rounded-full" style={{ width: w, height: h, background: c }} />;
+  if (modele === "sobre")
+    return (
+      <span aria-hidden="true" className="flex h-24 flex-col gap-1.5 overflow-hidden rounded-xl border border-line bg-[#fbf8f3] p-2">
+        <span className="flex items-center justify-between">{trait("30%", 4, "#15120e")}{trait("14%", 6, boutons)}</span>
+        <span className="grid flex-1 grid-cols-2 gap-2">
+          <span className="flex flex-col justify-center gap-1">
+            {trait("80%", 6, "#15120e")}
+            {trait("55%", 6, teinte)}
+            {trait("40%", 6, boutons)}
+          </span>
+          <span className="rounded-lg" style={{ background: `color-mix(in srgb, ${teinte} 45%, #c9c2b6)` }} />
+        </span>
+        <span className="h-2 rounded-sm" style={{ background: teinte }} />
+      </span>
+    );
+  return (
+    <span aria-hidden="true" className="flex h-24 flex-col gap-1.5 overflow-hidden rounded-xl p-2" style={{ background: `linear-gradient(160deg, ${teinte}, color-mix(in srgb, ${teinte} 60%, #000))` }}>
+      <span className="flex items-center justify-between">{trait("30%")}{trait("14%", 6, boutons)}</span>
+      <span className="flex flex-1 flex-col items-start justify-center gap-1">
+        {trait("60%", 7)}
+        {trait("45%", 7, boutons)}
+        {trait("35%", 8, boutons)}
+      </span>
+      <span className="grid grid-cols-3 gap-1">
+        <span className="h-3 rounded-sm bg-white/80" />
+        <span className="h-3 rounded-sm bg-white/80" />
+        <span className="h-3 rounded-sm bg-white/80" />
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Le site d'un abonnement fini (publication réservée allumée) : la date où il sera retiré, la même que l'e-mail et
+ * l'alerte, et le chemin pour le garder (Greg, 28 novembre 2026 : l'alerte menait à « Mon site », qui n'en disait rien).
+ */
+function BandeauRetrait({ retraitLe, compact = false }: { retraitLe: string | null; compact?: boolean }) {
+  if (!retraitLe) return null;
+  const date = new Date(retraitLe).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" });
+  return (
+    <p role="status" className={`rounded-2xl bg-warn-bg px-3 py-2 font-semibold text-ink ${compact ? "text-[13px] leading-snug" : "text-[15px]"}`}>
+      Ton abonnement est fini : ton site sera retiré le {date}. Rien n&apos;est effacé.{" "}
+      <Link href="/abonnement" className="font-extrabold underline underline-offset-4">
+        Reprendre l&apos;abonnement
+      </Link>
+    </p>
   );
 }

@@ -43,8 +43,42 @@ export function CommunauteAccueil() {
   if (!data) return null;
   return (
     <div className="flex flex-col gap-3 lg:grid lg:grid-cols-2 lg:gap-6">
-      {!data.attente.ouvert ? <EncartAttente etat={data} surChange={setData} /> : null}
-      <EncartInviter invitation={data.invitation} />
+      {!data.attente.ouvert ? <EncartAttente etat={data} surChange={setData} fermable /> : null}
+      <EncartInviter invitation={data.invitation} fermable />
+    </div>
+  );
+}
+
+/**
+ * Profil › « Inviter des artisans » : les mêmes encarts, jamais fermables, pour retrouver son lien après avoir fermé
+ * l'encart de l'accueil, et sa place sur la liste d'attente (ou « C'est ouvert »).
+ */
+export function CommunauteProfil() {
+  const charger = useCallback((s: AbortSignal) => api<Communaute>("/v1/communaute", { signal: s }), []);
+  const { data, setData, error, reload } = useResource(charger);
+  if (error)
+    return (
+      <p className="text-[15px]">
+        Ça n&apos;a pas chargé.{" "}
+        <button type="button" className="font-semibold underline" onClick={reload}>
+          Réessayer
+        </button>
+      </p>
+    );
+  if (!data) return null;
+  return (
+    <div className="flex flex-col gap-3">
+      <EncartInviter invitation={data.invitation} fermable={false} />
+      {data.attente.ouvert ? (
+        <section aria-labelledby="t-liste-attente" className="flex flex-col gap-1 rounded-[20px] bg-surface p-4 shadow-card">
+          <h2 id="t-liste-attente" className="text-[15px] font-extrabold">
+            Liste d&apos;attente
+          </h2>
+          <p className="text-[15px] leading-snug">Mobiiz est ouvert pour ton métier dans ton département : tu n&apos;as rien à attendre.</p>
+        </section>
+      ) : (
+        <EncartAttente etat={data} surChange={setData} fermable={false} />
+      )}
     </div>
   );
 }
@@ -57,7 +91,7 @@ function Fermer({ etiquette, onClick }: { etiquette: string; onClick: () => void
   );
 }
 
-function EncartAttente({ etat, surChange }: { etat: Communaute; surChange: (c: Communaute) => void }) {
+function EncartAttente({ etat, surChange, fermable }: { etat: Communaute; surChange: (c: Communaute) => void; fermable: boolean }) {
   const a = etat.attente;
   const ferme = useSyncExternalStore(sansAbonnement, () => lire(CLE_ATTENTE) === "ferme", () => true);
   const [fermeIci, setFermeIci] = useState(false);
@@ -97,7 +131,7 @@ function EncartAttente({ etat, surChange }: { etat: Communaute; surChange: (c: C
       </section>
     );
   }
-  if (ferme || fermeIci) return null;
+  if (fermable && (ferme || fermeIci)) return null;
   return (
     <section aria-labelledby="t-liste-attente" className="accueil-apparait flex flex-col gap-3 rounded-[20px] bg-surface p-4 shadow-card">
       <div className="flex items-start justify-between gap-3">
@@ -105,13 +139,13 @@ function EncartAttente({ etat, surChange }: { etat: Communaute; surChange: (c: C
           <BellRing size={18} aria-hidden="true" />
           {a.question}
         </h2>
-        <Fermer
+        {fermable ? <Fermer
           etiquette="Fermer la liste d'attente"
           onClick={() => {
             ecrire(CLE_ATTENTE, "ferme");
             setFermeIci(true);
           }}
-        />
+        /> : null}
       </div>
       <p className="text-[14px] leading-snug text-muted">{a.disponibilite}</p>
       <label className="flex min-h-11 cursor-pointer items-start gap-3 text-[15px] leading-snug">
@@ -126,12 +160,12 @@ function EncartAttente({ etat, surChange }: { etat: Communaute; surChange: (c: C
   );
 }
 
-function EncartInviter({ invitation }: { invitation: Communaute["invitation"] }) {
+function EncartInviter({ invitation, fermable }: { invitation: Communaute["invitation"]; fermable: boolean }) {
   const ferme = useSyncExternalStore(sansAbonnement, () => lire(CLE_INVITATION) === "ferme", () => true);
   const [fermeIci, setFermeIci] = useState(false);
   const [copie, setCopie] = useState(false);
   const partageNatif = useSyncExternalStore(sansAbonnement, () => typeof navigator !== "undefined" && typeof navigator.share === "function", () => false);
-  if (ferme || fermeIci) return null;
+  if (fermable && (ferme || fermeIci)) return null;
   const texte = encodeURIComponent(invitation.message);
   const lien = "pressable inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[15px] font-semibold";
 
@@ -152,13 +186,15 @@ function EncartInviter({ invitation }: { invitation: Communaute["invitation"] })
           <UserPlus size={18} aria-hidden="true" />
           Invite d&apos;autres artisans
         </h2>
-        <Fermer
-          etiquette="Fermer l'invitation"
-          onClick={() => {
-            ecrire(CLE_INVITATION, "ferme");
-            setFermeIci(true);
-          }}
-        />
+        {fermable ? (
+          <Fermer
+            etiquette="Fermer l'invitation"
+            onClick={() => {
+              ecrire(CLE_INVITATION, "ferme");
+              setFermeIci(true);
+            }}
+          />
+        ) : null}
       </div>
       <p className="text-[15px] leading-snug">{invitation.phrase}</p>
       <div className="flex flex-wrap gap-2" role="group" aria-label="Partager mon lien d'invitation">
@@ -180,6 +216,7 @@ function EncartInviter({ invitation }: { invitation: Communaute["invitation"] })
           {copie ? <Check size={17} aria-hidden="true" /> : <Copy size={17} aria-hidden="true" />} {copie ? "Lien copié" : "Copier le lien"}
         </button>
       </div>
+      {fermable ? <p className="text-[13px] text-muted">Tu retrouves ton lien dans Profil › Inviter des artisans.</p> : <p className="text-[14px] break-all text-muted">{invitation.lien}</p>}
     </section>
   );
 }

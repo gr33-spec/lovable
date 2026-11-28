@@ -95,8 +95,10 @@ test("deux modèles, mêmes données : Atelier → Sobre → Atelier sans rien p
     await v.screenshot({ path: `${CAPTURES}/${info.project.name}-atelier.png`, fullPage: true });
   }
 
-  // Sobre : le modèle change dans le brouillon ; le visiteur voit toujours Atelier.
-  await onglet(page, "Couleurs");
+  // Sobre : le modèle change dans le brouillon ; le visiteur voit toujours Atelier. Les modèles ont leur onglet (Greg,
+  // 28 novembre 2026 : avant, le choix était caché dans « Couleurs »).
+  await onglet(page, "Modèles");
+  await expect(page.getByRole("radiogroup", { name: "Modèle du site" }).getByRole("radio", { name: /Atelier/ })).toHaveAttribute("aria-checked", "true");
   await toucher(page.getByRole("radiogroup", { name: "Modèle du site" }).getByRole("radio", { name: /Sobre/ }));
   await enregistre(page);
   await expect(apercu(page).locator("[data-modele=sobre]")).toHaveCount(1);
@@ -114,7 +116,7 @@ test("deux modèles, mêmes données : Atelier → Sobre → Atelier sans rien p
   if (CAPTURES) await v.screenshot({ path: `${CAPTURES}/${info.project.name}-sobre.png`, fullPage: true });
 
   // Retour au modèle précédent, publié : le site est le même qu'avant, mot pour mot.
-  await onglet(page, "Couleurs");
+  await onglet(page, "Modèles");
   await toucher(page.getByRole("button", { name: "Revenir au modèle Atelier" }));
   await enregistre(page);
   await toucher(page.getByRole("button", { name: "Publier", exact: true }));

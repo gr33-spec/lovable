@@ -2,6 +2,8 @@
 
 # Mobiiz — contexte
 
+> **PRENDS LES INITIATIVES QUI ONT DU SENS (Greg, 28 novembre 2026, pour toutes les discussions).** Pense chaque fonctionnalité de bout en bout, comme un artisan qui l'utilise pour la première fois. Si quelque chose est évidemment nécessaire pour qu'elle soit trouvable, compréhensible et utilisable (un onglet, un bouton, un message, un état vide, un retour en arrière), fais-le sans attendre qu'on le demande, et signale-le dans le compte rendu. Ne demande que pour ce qui change une décision produit, coûte de l'argent ou touche la prod.
+
 > **Toute nouvelle discussion crée sa branche depuis `claude/saas-achat-artisans-prompt-1lyihx`, jamais depuis `main`, même si `main` est la branche par défaut.** (Greg, 27 novembre 2026)
 >
 > **Auteur des commits : le compte GitHub de Greg** (`gr33-spec`, `234254365+gr33-spec@users.noreply.github.com`) ; le committer reste Claude (signature). Posé par le hook de démarrage `.claude/settings.json` (`git config author.name` / `author.email`) ; sans lui, Vercel refuse la mise en ligne quand le dépôt est privé. Vérifier avant le premier commit : `git config author.email`.
@@ -511,3 +513,9 @@ Les sous-agents sont dans `.claude/agents/` (un fichier par agent). Greg ne parl
 - RÈGLE CHANGÉE (Greg : « je ne veux pas dépendre des notifications de mon compte GitHub ») : avant, seul GitHub prévenait d'un échec de la sauvegarde nocturne → à la fin de chaque exécution, le workflow envoie son résultat à l'API (`POST /v1/internal/sauvegarde`, jeton signé de GitHub OIDC, aucun secret) ; un échec, test de restauration compris, part par les alertes de Mobiiz (« SAUVEGARDE ÉCHOUÉE », adresse d'Admin › Réglages), avec l'étape et le lien de l'exécution ; la réussite qui suit un échec dit « rétablie » ; la veille quotidienne de l'API prévient après 36 h sans réussite (une fois le workflow branché).
 - Essai de l'alerte : le fichier du workflow modifié sur une autre branche que `main` se lance seul et échoue exprès ; l'e-mail dit « ESSAI de l'alerte », jamais compté comme une sauvegarde.
 - Carte « Santé » de l'admin (à faire) : lire `GET /v1/admin/sauvegarde` (dernière nuit, dernière réussite, retard, dernier essai). Code : `baticlair/apps/api/src/modules/sauvegarde/`, test `apps/api/test/sauvegarde-alerte.test.ts`.
+
+## Décisions du 28 novembre 2026 : les manques évidents, repris sans attendre
+
+- « Mon site » : un onglet « Modèles », le premier (dessin de chaque modèle aux couleurs choisies, « Choisi », « Revenir au modèle … ») ; avant, le choix était caché dans « Couleurs ». Sur ordinateur, l'éditeur s'ouvre sur « Modèles ».
+- « Mon site » dit la date de retrait d'un site dont l'abonnement est fini (la même que l'e-mail et l'alerte, `publication.retraitLe`) avec « Reprendre l'abonnement » ; « Publier » refusé faute d'abonnement mène à l'abonnement. N'agit que quand `SITE_PUBLICATION_PAYANTE=on`.
+- Profil › « Inviter des artisans » (`/compte/inviter`) : le lien d'invitation et la liste d'attente, pour les retrouver après avoir fermé l'encart de l'accueil (qui le dit). Admin › liste d'attente : lien « Qui a invité qui ».
