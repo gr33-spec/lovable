@@ -36,20 +36,15 @@ en ligne, CLAUDE.md, et le code (vérifications notées dans chaque fichier).
 12. **Correction** : les participants d'un achat groupé restent ANONYMES entre eux (CGU 7.6 et 8.1, confidentialité
     section 6, textes courts section 8).
 
-## Ce qui reste ouvert
+## Ce qui reste ouvert (tranché par Greg le 28 novembre 2026, rien à décider)
 
-1. **ÉCART AVEC LE CODE (bloquant avant de publier) : les noms dans les achats groupés.** L'application affiche
-   aujourd'hui les noms des participants, avec une case « rester anonyme ». C'est la règle du 16 novembre au soir,
-   écrite dans CLAUDE.md et dans `participantsVisiblesV1`. Les textes suivent ta décision du 28 novembre. Il faut donc
-   corriger l'application (une autre discussion, avec ton accord).
-2. **Les quantitatifs après la suppression d'un compte.** Aujourd'hui, le code les efface avec le compte. Seuls restent
-   les prix de l'observatoire (sans nom) et les règles communes de correction. Les textes disent ce que fait le code.
-   Garder aussi les listes, anonymisées, serait un changement de code.
-3. **La boîte Hotmail** est une boîte personnelle gratuite : pas de contrat de sous-traitance possible. Une boîte
-   professionnelle serait plus propre, quand tu pourras.
-4. **Les e-mails aux négoces** : ils vouvoient aujourd'hui. Ils restent ainsi, ou on les passe aussi au tutoiement ?
-5. **Le lien « Mentions légales » des sites** : il est à coder. Il doit rester cohérent avec le travail en cours sur la
-   discrétion des informations société.
+1. **Anonymat des achats groupés** : validé ; le code est corrigé par la discussion « SaaS achat artisans ». Textes
+   inchangés.
+2. **Listes anonymisées après suppression** (métier, département, articles, quantités) : gardées pour l'observatoire,
+   écrites comme « prévu ». Changement de code noté dans `banc-quantitatif/COORDINATION.md`.
+3. **Hotmail** : gardé pour le lancement, boîte pro plus tard.
+4. **E-mails aux négoces** : vouvoiement gardé.
+5. **Lien « Mentions légales » des sites** : codé par « SaaS achat artisans », avec la discrétion des infos société.
 
 ## Points juridiques sensibles à surveiller
 

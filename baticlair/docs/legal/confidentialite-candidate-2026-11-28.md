@@ -207,7 +207,9 @@ son peut être traité par son fabricant (Google, Apple), selon ses propres règ
 - **Restent aussi, parce qu'elles ne disent plus qui vous êtes** :
   - les lignes de prix de l'observatoire, gardées selon leurs durées (section 3 : 12 mois pour l'empreinte de l'origine,
     3 ans pour la ligne) ;
-  - les corrections de lignes déjà validées comme règles communes, sans nom d'entreprise.
+  - les corrections de lignes déjà validées comme règles communes, sans nom d'entreprise ;
+  - (prévu) vos listes de matériaux, anonymisées pour l'observatoire : seulement le métier, le département, les
+    articles et les quantités, sans nom, sans adresse, sans client et sans prix de devis client.
 - **Après 3 ans sans connexion**, le compte est effacé de la même façon.
 
 ## 13. Vos droits
@@ -241,15 +243,14 @@ l'application avant de s'appliquer. La date de version est en haut de la page.
    - la durée des sessions de connexion, à inscrire au registre ;
    - la durée de conservation chez Anthropic (contrat de l'API) ;
    - la durée de conservation des journaux chez Resend et Vercel.
-3. **Boîte des alertes** (Greg, 28 novembre 2026) : Hotmail, chez Microsoft. C'est une boîte personnelle gratuite,
+3. **Boîte des alertes** (Greg, 28 novembre 2026) : Hotmail, chez Microsoft, gardée pour le lancement ; boîte pro plus tard. C'est une boîte personnelle gratuite,
    sans contrat de sous-traitance (DPA) possible. Une boîte professionnelle (Microsoft 365, par exemple) apporterait ce
    contrat. À changer quand ce sera possible ; le registre parlait encore d'une boîte du domaine investisseurdugoelo.fr.
 4. **Registre** : ajouter les lignes « Mon site » (textes, photos, visiteurs, signalement), « Missions » et la connexion
    par lien, avec les durées de cette page.
-5. **Quantitatifs après suppression** : Greg a écrit que « les prix et quantitatifs anonymisés restent pour
-   l'observatoire ». Aujourd'hui, le code efface les listes avec le compte ; seuls les prix de l'observatoire (sans nom)
-   et les règles communes restent. La page dit ce que fait le code. Garder aussi les listes anonymisées serait un
-   changement de code, à décider.
+5. **Listes anonymisées après suppression** (Greg, 28 novembre 2026 : à garder) : écrit comme « prévu ». Aujourd'hui le
+   code les efface avec le compte : changement de code noté dans `banc-quantitatif/COORDINATION.md`, à faire avant de
+   publier cette page. À ajouter aussi au registre (observatoire, ligne 23).
 6. **Achats groupés** : le code affiche aujourd'hui les noms des participants, avec la case « rester anonyme » (règle du
    16 novembre). Cette page suit la décision du 28 novembre (anonymes entre eux) : l'application doit être corrigée
    avant de la publier.

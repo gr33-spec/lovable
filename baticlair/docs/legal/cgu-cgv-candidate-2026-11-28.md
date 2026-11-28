@@ -283,6 +283,8 @@ concurrentes sur leurs prix de vente, leurs marges, leurs clients ou leurs march
 - Il s'en sert pour établir des repères de prix du secteur : des moyennes arrondies, qui ne permettent d'identifier ni
   un artisan, ni un négoce, ni un prix isolé.
 - Le prix de votre devis client n'en fait jamais partie (article 5.9).
+- Il est prévu de garder aussi, après la suppression d'un compte, ses listes de matériaux anonymisées : seulement le
+  métier, le département, les articles et les quantités, sans nom ni adresse.
 - Avant d'afficher un jour ces repères aux artisans, Mobiiz les annoncera selon l'article 21.
 
 ## Article 9. Vos engagements et les usages interdits

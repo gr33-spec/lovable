@@ -161,3 +161,10 @@ calcul ne touchera plus à la mise en page de la liste, seulement au contenu du 
   « enregistre: true »). Le workflow n'est PAS encore sur main (attend l'accord de Greg). Branche rendue.
 - 28 nov., 11 h — référencement : correctif des alertes poussé et en ligne (931300e8) ; workflow de sauvegarde posé sur
   main (accord de Greg), constructions de production annulées ; vraie sauvegarde et nouvel essai vérifiés. Branche rendue.
+
+## Documents légaux (session_01Pqq8eRsWNdQEBSRxcKPpzH), 28 novembre 2026 — changements de code À FAIRE PLUS TARD
+
+Textes candidats dans `baticlair/docs/legal/` (rien de publié). Ils annoncent trois choses que le code ne fait pas encore. Je n'y touche pas :
+- **Anonymat des achats groupés** (Greg, 28 novembre 2026) : jamais le nom d'un participant, plus de case « rester anonyme » (`participantsVisiblesV1`). Pour : « SaaS achat artisans ».
+- **Lien « Mentions légales » en pied de chaque site d'artisan**, avec les infos de l'artisan lues dans son profil, en accord avec la discrétion des infos société. Pour : « SaaS achat artisans ».
+- **Listes anonymisées gardées après la suppression d'un compte** (Greg, 28 novembre 2026), pour l'observatoire : seulement métier, département, articles et quantités, sans nom, adresse, client ni prix de devis client. Aujourd'hui, la suppression du compte les efface. Migration additive, puis registre RGPD (ligne 23). Pour : plus tard, discussion à désigner par Greg.

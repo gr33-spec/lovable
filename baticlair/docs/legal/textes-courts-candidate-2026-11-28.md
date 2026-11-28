@@ -106,8 +106,7 @@ Règles suivies :
 
 **Décision de Greg (28 novembre 2026)** : tutoiement dans l'application et dans tous les e-mails, vouvoiement dans les
 seuls textes juridiques. L'e-mail actuel vouvoie (« Votre site Mobiiz sera retiré ») : à corriger, comme tout e-mail
-qui vouvoie encore. Seuls les e-mails aux négoces restent au vouvoiement (ce ne sont pas nos utilisateurs artisans).
-**[Point à confirmer par Greg : les négoces aussi au tutoiement ?]**
+qui vouvoie encore. Les e-mails aux négoces restent au vouvoiement (Greg, 28 novembre 2026).
 
 ## 5. Dépôt d'un devis ou d'une photo
 
